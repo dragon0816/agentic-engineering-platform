@@ -6443,3 +6443,6 @@ Design `docs/phases/BI_VAULT_ASKING.md`. Code: `src/host_runtime/knowledge_bindi
 - **`host.json` `assistant_bi_query`**, bool, default false. `GET /api/coding-agents` adds `bi_query: {enabled}`; `POST
   /api/coding-agents/bi-query {enabled: bool}` (session token) → `{ok, bi_query}`, 409 on `bi_query_request_invalid` or
   `settings_read_only`. Live at once. While off, `/mcp` `tools/list` omits the tool; the stdio bridge's list does not.
+- **BI K2 from a file.** `POST /api/bi/vaults/<id>/atlas-import` also takes `{file: <text>, apply?, token?}` in place of
+  `{name, port}`. Refusals add `atlas_source_ambiguous` (`file` with `name`); a file that is not strict JSON or not a
+  schemaVersion 2 document is `atlas_invalid`, over 2,000,000 bytes `atlas_too_large`.

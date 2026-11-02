@@ -6046,3 +6046,11 @@ Answers V3 of `docs/phases/BI_VAULT_ASKING.md` (§5).
   host-written source line in the result.
 - **Decision 8 stays (owner):** a never-published vault is answered from its pushed head, labelled.
 - **Accepted (owner):** `propose_change` kind `knowledge_binding`, including unbind.
+
+## 2026-11-02: The Atlas Dashboard import also takes a file (owner, relayed by the BI orchestrator)
+
+The Knowledge page's Atlas import (K2) must also accept a dashboard file the person chooses, so it works without Atlas
+running. Same contract and rules: dry run with a preview and token, confirm, only `meta:dashboard` staged, duplicates and
+unmatched panels listed. Strict JSON, a size limit, never run or stored, the rest of the file ignored and never given to a
+model. Reading from Atlas by name stays. Choice inside it: a confirm sends the text again rather than the server keeping
+a copy between the two requests, so nothing is stored. Rejected: uploading to a temporary file on the server.

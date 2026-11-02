@@ -14,6 +14,7 @@ cited answers. Design `docs/phases/BI_VAULT_ASKING.md`; decision `docs/DECISIONS
 **Done.** `e1084359` design; `cc72c420` V1 (host-written source line, whole-chain test); `faab9904` V2 (`/api/knowledge/
 askable`, `propose_change` kind `knowledge_binding`, page button); `7f255dbf` V4 (runbook, `scripts/r6_precheck.py`);
 V3 `aep_bi_query` behind `assistant_bi_query`, off by default (see `docs/TASKS.md`).
+K2 from a chosen file, with no Atlas running (see `docs/TASKS.md`).
 
 **Verification (on `b8fe7f61`).** `ruff format --check .`, `ruff check .`, `mypy src tests` (916 files) clean. On the V3
 code: `test_assistant_bi_query` (with a headless browser step), `test_assistant_tools`, `test_coding_agents_web`,
@@ -26,10 +27,8 @@ failed (`test_coding_agents_web`'s card count, my switch used its class); after 
 the orchestrator's, on the integrated branches. `r6_precheck` has not been run on the real OneDrive folder, and must not
 be by an agent. No graphify graph in this worktree, so `graphify update` was not run.
 
-**Not done.** V5 live acceptance with real models: not go yet, the model gateway did not answer its health route; the orchestrator sends the go and the credential
-variable's name. Only under `%TEMP%`, its own Agent Web on a free loopback port, never 53583, the owner's workspace or
-OneDrive; do not read the owner's `host.json`. The full suite is the orchestrator's, on the integrated branches: do not
-run it here.
+**V5 done** with real models, every check passed: design §7. **Not done:** the full suite, which is the
+orchestrator's on the integrated branches; do not run it here.
 
 **Known points.**
 - A never-published vault is answered from its pushed head, marked as such (decision 8, kept by the owner 2026-11-02);

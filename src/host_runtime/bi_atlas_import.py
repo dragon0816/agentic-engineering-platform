@@ -8,7 +8,10 @@ server-side, GET only: `GET /dashboards` (names) and `GET /dashboards/{name}`
 Origin header, within a short timeout and Atlas's 2,000,000-byte bound. It
 never writes to Atlas. The import is a dry run first (the preview of
 `capabilities.bi_cards.atlas_import.plan`, with a token); confirming with that
-token stages `meta:dashboard` in the vault's working copy, nothing else.
+token stages `meta:dashboard` in the vault's working copy, nothing else. A file
+the person chooses (owner 2026-11-02) takes the same path with no Atlas running:
+its text is parsed as strict JSON within the same bound, then only `plan` reads
+it. It is never run or stored; a confirm sends the text again.
 """
 
 from __future__ import annotations
@@ -78,11 +81,43 @@ def names(port: int) -> list[str]:
     return found
 
 
+def _unique_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    found = dict(pairs)
+    if len(found) != len(pairs):
+        raise ValueError("a repeated key")
+    return found
+
+
+def _no_constant(name: str) -> Any:
+    raise ValueError(f"{name} is not JSON")
+
+
+def document_from_file(text: Any) -> Any:
+    """A chosen file's text as a document: strict JSON (no repeated key, no
+    `NaN`), within Atlas's bound."""
+    if not isinstance(text, str):
+        raise BiStoreError("atlas_invalid", "這個檔案不是文字")
+    if len(text.encode("utf-8", "surrogatepass")) > MAX_BYTES:
+        raise BiStoreError("atlas_too_large", "這個 Dashboard 檔案太大")
+    try:
+        return json.loads(
+            text.removeprefix("\ufeff"),
+            object_pairs_hook=_unique_keys,
+            parse_constant=_no_constant,
+        )
+    except (ValueError, RecursionError):
+        raise BiStoreError("atlas_invalid", "這個檔案不是有效的 JSON") from None
+
+
 def preview(workspace: Path, vault_id: str, name: Any, port: int) -> dict[str, Any]:
     if not isinstance(name, str) or not name:
         raise BiStoreError("atlas_name_missing", "請選一個 Atlas Dashboard")
     vault.Vault(workspace, vault_id)._require_folder()
     document = _get(port, "/dashboards/" + quote(name, safe=""))
+    return _planned(workspace, vault_id, document)
+
+
+def _planned(workspace: Path, vault_id: str, document: Any) -> dict[str, Any]:
     units = vault.Vault(workspace, vault_id).repo.working_units()
     saved = [item["slug"] for item in analyses.saved(units)]
     return atlas_import.plan(document, vault_id, saved, analyses.dashboard_layout(units))
@@ -90,8 +125,13 @@ def preview(workspace: Path, vault_id: str, name: Any, port: int) -> dict[str, A
 
 def import_order(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
     """The dry run (no `apply`), or the import (`apply` with its token)."""
-    port = port_of(given.get("port"))
-    planned = preview(workspace, vault_id, given.get("name"), port)
+    if "file" in given:
+        if given.get("name"):
+            raise BiStoreError("atlas_source_ambiguous", "只能選 Atlas 的 Dashboard 或檔案其中一個")
+        vault.Vault(workspace, vault_id)._require_folder()
+        planned = _planned(workspace, vault_id, document_from_file(given["file"]))
+    else:
+        planned = preview(workspace, vault_id, given.get("name"), port_of(given.get("port")))
     if given.get("apply") is not True:
         return {"dry_run": True, **planned}
     if given.get("token") != planned["token"]:

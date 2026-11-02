@@ -2955,6 +2955,11 @@ tr:last-child td { border-bottom: none; }
               <select id="bi-b-atl-name" class="bi-input"></select>
               <div class="bi-actions">
                 <button class="bi-btn" id="bi-b-atl-preview" type="button">預覽匯入</button></div>
+              <p class="bi-meta">Atlas 沒有在執行時，可以選一個 Dashboard 檔案（JSON），
+                一樣先預覽再確認；只讀順序，檔案本身不會存下來。</p>
+              <div class="bi-actions">
+                <button class="bi-btn" id="bi-b-atl-pick" type="button">選擇 Dashboard 檔案</button>
+                <input type="file" id="bi-b-atl-file" accept=".json,application/json" hidden></div>
               <div id="bi-b-atl-plan" role="region" aria-live="polite" aria-label="匯入預覽"></div>
             </details>
             <div class="bi-ai" id="bi-b-ana" role="region" aria-labelledby="bi-b-ana-h" hidden>
@@ -13232,6 +13237,16 @@ el("bi-b-atl-load").addEventListener("click", async () => {
 el("bi-b-atl-preview").addEventListener("click", async () => {
   try {
     const asked = biAtlasAsked();
+    biAtlasPlan(asked, await biCall("/api/bi/vaults/" + bi.verVault + "/atlas-import", asked));
+  } catch (failure) { biNotice(false, "沒有預覽：" + failure.message); }
+});
+el("bi-b-atl-pick").addEventListener("click", () => el("bi-b-atl-file").click());
+el("bi-b-atl-file").addEventListener("change", async (event) => {
+  const chosen = event.target.files[0]; event.target.value = "";
+  if (!chosen) return;
+  try {
+    if (chosen.size > 2000000) throw new Error("檔案太大（上限 2 MB）");
+    const asked = {file: await chosen.text()};
     biAtlasPlan(asked, await biCall("/api/bi/vaults/" + bi.verVault + "/atlas-import", asked));
   } catch (failure) { biNotice(false, "沒有預覽：" + failure.message); }
 });

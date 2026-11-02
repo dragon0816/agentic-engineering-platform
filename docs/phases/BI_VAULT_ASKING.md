@@ -176,6 +176,27 @@ configuration mechanism; secrets are referenced by environment-variable name, ne
 key reachable: stop and say what is needed. Never the owner's workspace, the real Agent Web, or OneDrive/SharePoint.
 The orchestrator's go comes first.
 
+**Result (2026-11-02, go from the orchestrator).** Real `gpt-5.5` at `http://127.0.0.1:4000/v1`, alias `company`, key by
+the variable name `LITELLM_MASTER_KEY` through `deploy/windows-preview/gateway-default.json`. The deployed Knowledge
+Skill 1.12.0's procedure, with its namespace set to the host's. Script `.scratch/v5_live.py` (not committed); transcript
+in `%TEMP%\aep-d-v5-ad3x60xl\transcript.json`. A repository was bound through the card, then Agent Web restarted on the
+saved file.
+
+| Turn | Model calls | Answer (fictional data) | Check |
+|---|---|---|---|
+| Wiki, published | 4 | 「Tester X 支援 K42X 選件，出貨時程為 2027 年第一季。[1]」, 來源 `[1] Wiki：tester-x（缺來源連結）`, `資料來源：知識庫 tester-wiki-b6aa00 發佈版本 v1` | Fact and version cited |
+| BI, published | 2 | 「TSN 的 standard_body 是 FICTION-802。」 through `bi__query`, `資料來源：知識庫 vault-market-signals-4a4eb0 發佈版本 v1` | Fact and version cited |
+| Wiki, after a local commit, an uncommitted edit and a push after v1 | 4 | Only K42X, `發佈版本 v1` | K77X, K88X, K99X absent |
+| BI, after an uncommitted edit and a push after v1 | 2 | Only FICTION-802, `發佈版本 v1` | ZZPUSHED, ZZDRAFT absent |
+
+The script looked for the unpublished facts in every model request and reply as well as the answers: none. `aep_bi_query`
+through `/mcp`, no model: `bi_query_off`, then on with `發佈版本 v1` and no unpublished fact, `sql_not_allowed`,
+`bi_query_off` again. `askable` said `not_bound`, then `restart_pending`, then 可以問, each as a turn then behaved.
+
+Seen in the run: `缺來源連結` is the wiki answer's own honest note, since the fictional page links no source for the
+edited line. In one BI answer the model also named the version itself, in other words, so the host's line followed it:
+harmless repetition. A first run stopped after its first turn on a bug in the script (4 calls, wiki turn correct).
+
 ## 8. Risks
 
 - A bad binding can stop the host at start: hence manifest first, atomic write, backup, and a test that a host builds

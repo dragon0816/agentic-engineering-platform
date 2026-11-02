@@ -169,6 +169,11 @@ Contract: Atlas's `docs/AEP_DASHBOARD_READ_CONTRACT.md` (revision 2026-11-01). I
   `meta:dashboard`.
 - **Page**: 「從 Atlas 匯入 Dashboard 順序」 under 「分析與圖表」: port, 「讀取 Atlas 的 Dashboard」, a
   picker, 「預覽匯入」 (the order, what becomes hidden, each panel's fate) and 「確認匯入順序」.
+- **From a file (owner, 2026-11-02)**, so it works without Atlas running: 「選擇 Dashboard 檔案」 sends the file's text
+  as `file` to the same route, with the same dry run, token and confirm, and the same `plan`. Strict JSON (a repeated
+  key or `NaN` is `atlas_invalid`), at most 2,000,000 bytes (`atlas_too_large`), a schemaVersion 2 document. `file`
+  with `name` is `atlas_source_ambiguous`. The file is never run or stored: the page keeps the text in memory and sends it
+  again to confirm. Only `plan` reads it, so its other content goes nowhere, and no model is involved.
 
 ## 5. Tasks and order
 
