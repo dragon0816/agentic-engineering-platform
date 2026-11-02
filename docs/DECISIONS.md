@@ -6083,3 +6083,21 @@ Design: `docs/phases/BI_SOURCES_IN_REPOSITORY.md`. Not built yet.
   Rejected: rebuilding the vault as the only remedy.
 - **O4. Every PC keeps all originals on the device; the page warns on cloud-only files; no lazy read.** Rejected: reading a
   file only when it is needed (more engine work, and a chat question could wait on a download).
+
+## 2026-11-02: R6's decisions and the withdrawal questions (owner: "follow the recommendations", relayed by the BI orchestrator)
+
+Runbook `docs/runbooks/R6_MARKET_BI.md`; design `docs/phases/BI_SOURCES_IN_REPOSITORY.md` §5.
+
+- **D1. The new vault's id is `market-intel`.** Rejected: keeping `market-bi`, which needs removing the old local entry and
+  data by hand first.
+- **D3. Base by base through the page, one commit per base, conflicts settled in review.** Rejected: bringing back the
+  2026-10-29 one-off merge script.
+- **D4. Import `%LOCALAPPDATA%\AEP\rs-k-v1.0.3` as a test copy; do not bind it to the Agent until the owner has compared
+  answers.**
+- **D5. The first tag is `2026q4-r6`.**
+- **Withdrawal Q1. Excerpts and values staying in immutable commits is accepted**; the page names rebuilding the vault
+  without that file as the way to remove everything AEP can reach.
+- **Withdrawal Q2. Candidates not yet written are removed at sync; run records stay with their excerpts blanked.**
+
+Still open with the owner: Q3 (SharePoint's retention, from IT; the page states no period until one is known), the four base
+paths, and the sizes for the per-file limit (O1).

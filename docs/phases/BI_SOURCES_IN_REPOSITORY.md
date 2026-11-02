@@ -68,7 +68,7 @@ by it. The add-source page says that the shared folder has no permission control
 | S6 | Files over about 6 MiB: `/api/bi/sources` takes base64 under an 8 MiB body | medium | O1's number |
 | S7 | Page: folder when adding, per-source state (local, pushed, waiting, only in the cloud), wording | medium | S3, S4 |
 | S8 | Two-PC browser test, contracts, runbook | medium | S3–S7 |
-| S9 | Withdrawal record (§5), engine, BI, page, tests | medium | S3, §5's questions |
+| S9 | Withdrawal record (§5), engine, BI, page, tests | medium | S3 |
 
 Estimate from reading the code, no prototype. S3 and S4 are where it may grow: many callers read `Staging`.
 
@@ -107,14 +107,16 @@ deletion; the source from AEP on each PC, once AEP has synced there; and from th
   change; the older commit still holds the old text.
 - **Its name and hash**: the commit's `files` list and the record itself stay in history.
 
-**Questions the engine cannot answer** (for the owner, through the orchestrator; S9 waits):
-- Q1. Since excerpts and values stay in the immutable commits, is that acceptable for a mistake of this kind? If not, the only
-  remedy today is to rebuild the vault from its sources without that file, on a new folder. Recommendation: accept, and
-  name that rebuild on the page as the way to remove everything AEP can reach.
-- Q2. Runs and candidates on the PC that extracted from the file hold excerpts locally. Remove them at sync too?
-  Recommendation: yes for candidates not yet written; keep run records with the excerpts blanked.
-- Q3. Should the owner check with IT how long SharePoint keeps deleted files and versions on this library, so the page can
-  say it plainly? It depends on the tenant's policy, which AEP cannot read.
+**The owner's answers (2026-11-02).**
+- **Q1. Excerpts and values staying in the immutable commits is accepted.** The page names rebuilding the vault from its
+  sources without that file, in a new folder, as the way to remove everything AEP can reach.
+- **Q2. Candidates not yet written are removed at sync; run records stay with their excerpts blanked.**
+- **Q3. Open**: how long SharePoint keeps deleted files and versions on this library, from IT. It depends on the tenant's
+  policy, which AEP cannot read, and it does not hold up S9. Until a period is known the page states none:
+
+> 共用資料夾的檔案和 AEP 裡的副本會移除。OneDrive／SharePoint 可能還保留版本紀錄和資源回收筒裡的檔案，保留多久由公司的設定決定，AEP 無法移除；需要完全清除時請找管理這個資料夾的人。
+
+The rest of the page's confirmation is §5.2 in plain words, ending with: 卡片、欄位值和引用的摘錄留在版本紀錄裡；要移除 AEP 能觸及的一切，請不帶這個檔案重建知識庫。
 
 ## 6. Risks
 

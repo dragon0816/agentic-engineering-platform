@@ -12,15 +12,15 @@ the old `market-bi` folder (the owner removes it later, by hand).
 `OneDrive - Rohde & Schwarz\BI_Knowledge\market-bi` is in the V4 format (`changes/`, `vault.json`). AEP neither reads
 nor writes it since R2. The repository format needs its sources, schema, skills and cards as commits, so it is rebuilt.
 
-## 2. Decide these first
+## 2. Decisions
 
-| ☐ | Decision | Why it cannot wait | Recommendation |
+| # | Decision | Why it matters | Status |
 |---|---|---|---|
-| D1 | **The new vault's id.** | Creating `market-bi` again is refused on the owner's PC (`vault_exists`): that PC still holds `bi/vault-market-bi` and the registry entry, and there is no route to leave a vault. The id is fixed forever. | A new id, e.g. `market-intel`: nothing local has to be deleted. The alternative, keeping `market-bi`, needs removing the old local entry and data by hand first. |
-| D2 | **Decided (owner, 2026-11-02): the originals go into the shared folder, every classification included; every PC keeps all of them on the device.** | **R6 cannot run until this is built:** today a BI vault's sources stay on the PC that added them. Design: `docs/phases/BI_SOURCES_IN_REPOSITORY.md`. | Measure first (§4): the per-file limit is set from those numbers. |
-| D3 | **How the five bases are merged.** | The 2026-10-29 merge was a one-off script (`--fill-only`: lists joined, first name kept, bodies kept per base), **not in the repository**, and it reported 7 scalar conflicts. | Import base by base through the page, one commit per base, and settle conflicts in the review step. Do not bring the old script back without reading it. |
-| D4 | **Which `rs-k` copy, and is it bound to the Agent?** | Binding a second vault changes how questions route (§8). `KNOWLEDGE_REPO.md` §11: importing a copy of the real `RS_Knowledge` is a separate decision. | Import `%LOCALAPPDATA%\AEP\rs-k-v1.0.3` (already a copy) as a test; do not bind it until the owner has compared answers. |
-| D5 | **The first tag's name.** | Tags never move. | e.g. `2026q4-r6`. |
+| D1 | **The new vault's id is `market-intel`.** | Creating `market-bi` again is refused on the owner's PC (`vault_exists`): that PC still holds `bi/vault-market-bi` and the registry entry, and there is no route to leave a vault. The id is fixed forever. | Decided (owner, 2026-11-02) |
+| D2 | **The originals go into the shared folder, every classification included; every PC keeps all of them on the device.** | **R6 cannot run until this is built:** today a BI vault's sources stay on the PC that added them. Design: `docs/phases/BI_SOURCES_IN_REPOSITORY.md`. | Decided (owner, 2026-11-02). The per-file limit is set from the sizes measured in §4: **open** |
+| D3 | **Base by base through the page, one commit per base, conflicts settled in review.** The 2026-10-29 one-off merge script (`--fill-only`), which is not in the repository, is not brought back. | It reported 7 scalar conflicts last time; a commit per base can be reverted on its own. | Decided (owner, 2026-11-02) |
+| D4 | **Import `%LOCALAPPDATA%\AEP\rs-k-v1.0.3` as a test copy. Do not bind it to the Agent until the owner has compared answers.** | Binding a second vault changes how questions route (§8). The real `RS_Knowledge` is never written. | Decided (owner, 2026-11-02) |
+| D5 | **The first tag is `2026q4-r6`.** | Tags never move. | Decided (owner, 2026-11-02) |
 
 ## 3. Raw sources
 
@@ -45,7 +45,7 @@ python scripts/r6_precheck.py `
   --base "<wireless>" --base "<robotics>" --base "<aerospace>" --base "<module>" --base "<aidc-bi-kb>" `
   --wiki-copy "$env:LOCALAPPDATA\AEP\rs-k-v1.0.3" --real-wiki "<RS_Knowledge>" `
   --wiki-target "<folder for the new wiki repository>" `
-  --workspace "<AEP workspace>" --vault-id "<D1's id>"
+  --workspace "<AEP workspace>" --vault-id market-intel
 ```
 
 | Check | Fails when |
@@ -78,10 +78,10 @@ that flow is changing, so read the current ones on the page.
 
 | # | Step | Checkpoint before going on |
 |---|---|---|
-| 1 | Run §4. Settle D1–D5, write them in `docs/DECISIONS.md`. | Exit code 0; decisions recorded |
+| 1 | Run §4, including the sizes. Still needed from the owner: the four base paths, the per-file limit, and a folder for the new wiki repository. | Exit code 0; each recorded in `docs/DECISIONS.md` |
 | 2 | Restart Agent Web if it predates the build flow (check `/api/tasks` first, AGENTS rule 19). | Page shows the build-flow steps |
 | 3 | Rename the old folder to `market-bi.v4-old` in Explorer. Wait for OneDrive to finish. | Old folder present under the new name on OneDrive's site; nothing deleted |
-| 4 | Knowledge > BI > 建立與匯入 > 建立共用知識庫（vault）: D1's id, in `BI_Knowledge`, schema `bi.schema/v1.1` (2.0.0), author `leo.chi`. | `repo.json` in the folder; `/api/knowledge/askable` lists it with `nothing_pushed` |
+| 4 | Knowledge > BI > 建立與匯入 > 建立共用知識庫（vault）: id `market-intel`, in `BI_Knowledge`, schema `bi.schema/v1.1` (2.0.0), author `leo.chi`. | `repo.json` in the folder; `/api/knowledge/askable` lists it with `nothing_pushed` |
 | 5 | Step 1: add the AIDC base's sources, let them become Markdown. They reach the shared folder with the push (D2). | Each source has Markdown; spot-check two tables |
 | 6 | Step 2: Session A only if the schema must change; Session B for the skills. Move the manager's reading rules there. | The owner reviewed every schema change and skill |
 | 7 | Import the AIDC seeds first: preview, apply, commit with a purpose. | 22 CSVs → 323 cards; §7's AIDC numbers match |
@@ -90,7 +90,7 @@ that flow is changing, so read the current ones on the page.
 | 10 | Step 3: benchmark questions and the Dashboard (the analysis AI, or an Atlas import of the order). | Owner approved each question and the order |
 | 11 | Testing: run the benchmark on the working copy. | No regression the owner did not accept |
 | 12 | Check who can open the SharePoint folder. Then push. | `status`: ahead 0, no conflict; the owner sees the commits and the originals under `sources/` on OneDrive |
-| 13 | Tag (D5), publish with confirmation. | `/api/knowledge/askable` says 可以在對話裡問, `reads.tag` is the tag |
+| 13 | Tag `2026q4-r6`, publish with confirmation. | `/api/knowledge/askable` says 可以在對話裡問, `reads.tag` is the tag |
 | 14 | In a new general chat: ask a cross-domain question and a BI question that needs SQL. | The answer carries `資料來源：知識庫 vault-<id> 發佈版本 <tag>`; numbers match the Dashboard; `bi__query` was on (Skill, capability, grant) |
 | 15 | Atlas: open the panels of the new vault. | Panels show the published analyses (Atlas layouts stay personal) |
 | 16 | A colleague joins the folder (`join`). | Their Agent reads the same tag; they see the originals, with none waiting once OneDrive has delivered them |
@@ -102,11 +102,12 @@ that flow is changing, so read the current ones on the page.
 Page: Knowledge > 知識庫維護 > 新增知識庫 > 匯入既有 wiki 資料夾的副本 (`POST /api/knowledge/repos/import`). The
 folder given is only read. Needs `knowledge_pipeline` in `host.json` for the page to show the card.
 
-1. Source: the copy of D4. Target: D4's folder. Title and purpose: say that it is a test copy.
+1. Source: `%LOCALAPPDATA%\AEP\rs-k-v1.0.3`. Target: the folder the owner names (step 1). Title and purpose: say that
+   it is a test copy.
 2. Checkpoint: `imported` counts match the folder (2,007 wiki pages at K2, 508 Raw, plus later growth); `skipped` read;
    the source folder's digest unchanged.
 3. Push happens with the import. Tag and publish `rs-k-test.1`.
-4. Only if D4 says so: on the Knowledge page 「讓 Agent 可以問這個知識庫」, read the card's effects, Apply, restart
+4. Not during the import (D4). Only after the owner has compared answers: on the Knowledge page 「讓 Agent 可以問這個知識庫」, read the card's effects, Apply, restart
    (check `/api/tasks`). The existing `rs-knowledge` stays the first binding, so `aep_knowledge_ask` keeps using it.
    Compare a few answers, then 「解除 Agent 的綁定」 if it was only a test.
 
@@ -133,7 +134,7 @@ A difference is not a failure; each must be explained.
 | After publishing | Publish the earlier tag again (`KNOWLEDGE_REPO.md` §7); nothing moves | Nothing |
 | Binding of the wiki copy was wrong | 「解除 Agent 的綁定」 and restart; `host.json.bak-<stamp>-knowledge` is the earlier file | Nothing |
 | A file was pushed by mistake | Withdraw it on the page, once that is built. It does not remove OneDrive's version history or what commits hold: `BI_SOURCES_IN_REPOSITORY.md` §5 | The file, for everyone |
-| The rebuild is abandoned | Rename the new folder to `<id>.r6-failed`; rename `market-bi.v4-old` back to `market-bi`. The old vault stays unreadable by this AEP either way (R2). | The session's work stays in the renamed folder |
+| The rebuild is abandoned | Rename the new folder to `market-intel.r6-failed`; rename `market-bi.v4-old` back to `market-bi`. The old vault stays unreadable by this AEP either way (R2). | The session's work stays in the renamed folder |
 | Agent Web will not start after a `host.json` change | Restore the backup; check `assets/knowledge/` holds the manifest of each binding | Nothing |
 
 The owner's copy of the old data is the renamed folder. **Do not remove it during the session.**
