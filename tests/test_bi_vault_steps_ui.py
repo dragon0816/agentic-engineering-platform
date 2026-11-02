@@ -11,6 +11,7 @@ fictional.
 from __future__ import annotations
 
 import shutil
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -77,7 +78,8 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
         lambda _web: bi_bench.BenchRuntime(
             ask_for=lambda _v, _a: lambda q, s: {"ok": True, "answer": ""},
             extract_for=lambda _v, _a: lambda case: [],
-            background=lambda _title, work: work(),
+            # A run writes its first report a moment after the page's first read.
+            background=lambda _title, work: threading.Timer(1.5, work).start(),
             analysis_asker_for=analysis_asker,
         ),
     )
@@ -86,10 +88,10 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
         page.run(f"bi.want = {DATASET!r}; biLoad()")
         page.wait(f"document.getElementById('bi-dataset').value === {DATASET!r}")
         page.click("#bi-views [data-bi-view=build]")
-        page.wait(page.shows("bi-b-target", VAULT))
+        page.see("bi-b-target", VAULT)
         # A vault with no benchmark run yet opens without an error notice.
         page.click("#bi-stepper [data-stage=test]")
-        page.wait(page.shows("bi-b-bench-report", "還沒有跑過測試"))
+        page.see("bi-b-bench-report", "還沒有跑過測試")
         assert "讀不到測試" not in page.text_of("bi-notice")
         page.click("#bi-stepper [data-stage=source]")
 
@@ -103,7 +105,7 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
         page.upload("tech.csv", TECH_CSV, "text/csv")
         page.stage("method")
         page.click("#bi-b-trial")
-        page.wait(page.shows("bi-b-trial-result", "試跑完成"))
+        page.see("bi-b-trial-result", "試跑完成")
         assert "FicTech" in page.text_of("bi-b-trial-result")
         assert len(store.card_rows()) == before
         page.click("[data-stage=method] [data-bi-next=review]")
@@ -111,16 +113,16 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
         page.click("#bi-b-start")
         page.wait("document.querySelectorAll('#bi-b-cands button').length === 1")
         page.click("#bi-b-accept-clean")
-        page.wait(page.shows("bi-b-chips", "已接受 1"))
+        page.see("bi-b-chips", "已接受 1")
         assert len(store.card_rows()) == before
         page.click("#bi-b-next4")
         page.wait("!document.querySelector('#bi-view-build .kp-stage[data-stage=commit]').hidden")
         page.click("#bi-b-commit-go")
-        page.wait(page.shows("bi-b-done", "已寫入"))
+        page.see("bi-b-done", "已寫入")
         assert "FicTech" in [c["name"] for c in store.card_rows()]
         page.click("#bi-stepper [data-stage=test]")
         page.wait("!document.getElementById('bi-b-ver').hidden")
-        page.wait(page.shows("bi-b-ver-pending", "匯入 tech.csv"))
+        page.see("bi-b-ver-pending", "匯入 tech.csv")
         # A local commit, shown as waiting for the push: nothing new in the shared folder.
         assert shared_commits() == commits
 
@@ -130,13 +132,13 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
         page.wait("!document.getElementById('bi-b-ana').hidden")
         page.set_value("bi-b-ana-msg", "幫我排一個 Dashboard")
         page.click("#bi-b-ana-send")
-        page.wait(page.shows("bi-b-ana-log", "套用 Dashboard"))
+        page.see("bi-b-ana-log", "套用 Dashboard")
         assert page.run("!!document.querySelector('#bi-b-ana-log svg.bi-chart')")  # its preview
         assert "by-type" not in _layout(workspace)["order"]  # nothing before the click
         page.click_text("#bi-b-ana-log", "套用 Dashboard")
         page.notice("已套用 Dashboard")
-        page.wait(page.shows("bi-b-an-list", "各類型的卡片數"))
-        page.wait(page.shows("bi-b-ver-pending", "分析"))
+        page.see("bi-b-an-list", "各類型的卡片數")
+        page.see("bi-b-ver-pending", "分析")
         layout = _layout(workspace)
         assert layout["order"] == ["by-type", "tech-updates"]
         assert set(layout["hidden"]) >= {"node-coverage", "accounts-by-region"}
@@ -149,7 +151,7 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
         assert page.run("document.getElementById('bi-b-atl-name').options.length") == 2
         page.set_value("bi-b-atl-name", "Mixed BI layout")
         page.click("#bi-b-atl-preview")
-        page.wait(page.shows("bi-b-atl-plan", "確認匯入順序"))
+        page.see("bi-b-atl-plan", "確認匯入順序")
         plan = page.text_of("bi-b-atl-plan")
         assert "tech-updates" in plan and "重複，略過" in plan and "別的知識庫，略過" in plan
         assert _layout(workspace)["order"] == ["by-type", "tech-updates"]  # a dry run wrote nothing
@@ -160,3 +162,12 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
         assert layout["order"] == ["tech-updates", "node-coverage", "accounts-by-region"]
         assert "by-type" in layout["hidden"]  # hidden, never deleted
         assert "by-type" in {a["slug"] for a in analyses.listing(workspace, VAULT)["analyses"]}
+
+        # -- a bench run the page's first read cannot see yet still reports when it ends ------
+        page.set_value("bi-b-bq-q", "FicTech 是什麼？")
+        page.set_value("bi-b-bq-must", "FicTech")
+        page.click("#bi-b-bq-form button[type=submit]")
+        page.see("bi-b-bq-list", "FicTech 是什麼")
+        page.wait("!document.getElementById('bi-b-bench-run').disabled")
+        page.click("#bi-b-bench-run")
+        page.see("bi-b-bench-report", "完成")

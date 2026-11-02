@@ -105,7 +105,7 @@ def test_the_whole_build_flow(
         )
         page.wait("document.getElementById('bi-dataset').value === 'lab'")
         page.click("#bi-views [data-bi-view=build]")
-        page.wait(page.shows("bi-b-target", "lab"))
+        page.see("bi-b-target", "lab")
 
         # -- step 1: upload → Markdown → convert the dataset to a vault -----------------------
         page.upload("meeting.md", NOTE, "text/markdown")
@@ -125,8 +125,12 @@ def test_the_whole_build_flow(
         dataset = str(page.run("document.getElementById('bi-dataset').value"))
         vault_id = dataset[len("vault-") :]
         page.wait(page.shows("bi-b-sources", "meeting.md"))  # the source came along
-        page.click("#bi-b-sources tbody input")  # the person picks what to work on
-        page.wait("document.querySelectorAll('#bi-b-sources tbody input:checked').length === 1")
+        # The person picks what to work on; the table may still be drawn again as the vault loads.
+        page.wait(
+            "(() => { const pick = document.querySelector('#bi-b-sources tbody input');"
+            " if (pick && !pick.checked) pick.click();"
+            " return pick && pick.checked && bi.build.sourceId; })()"
+        )
         source = str(page.run("bi.build.sourceId"))
         page.shoot("1-converted")
 
@@ -134,7 +138,7 @@ def test_the_whole_build_flow(
         page.stage("schema")
         page.click("#bi-b-draft-new")
         page.wait("!document.getElementById('bi-b-draft').hidden")
-        page.wait(page.shows("bi-b-sa-model", "harness"))
+        page.see("bi-b-sa-model", "harness")
         agent.then(
             {"tools": [("bi_schema__cards", {})]},
             {"tools": [("bi_schema__read_source", {"source_id": source})]},
@@ -156,27 +160,27 @@ def test_the_whole_build_flow(
         page.set_value("bi-b-sa-goal", "追蹤客戶預算")
         page.set_value("bi-b-sa-msg", "訊號卡要記預算級距")
         page.click("#bi-b-sa-send")
-        page.wait(page.shows("bi-b-sa-log", "擴充這份 schema"))
+        page.see("bi-b-sa-log", "擴充這份 schema")
         log = page.text_of("bi-b-sa-log")
         assert "Agent 用了" in log and "試草稿" in log and "budget_band" in log
         page.shoot("2a-session-a")
         page.click_text("#bi-b-sa-log", "套用到草稿")
-        page.wait(page.shows("bi-b-draft-info", "第 2 版"))
+        page.see("bi-b-draft-info", "第 2 版")
         page.click("#bi-b-draft-publish")
         page.notice("bi.schema/v1.1@3.1.0")
-        page.wait(page.shows("bi-b-versions", "3.1.0"))
+        page.see("bi-b-versions", "3.1.0")
         page.run(
             "[...document.querySelectorAll('#bi-b-versions .bi-actions')]"
             ".find(r => r.textContent.includes('@3.1.0')).querySelector('button').click()"
         )
-        page.wait(page.shows("bi-b-upgrade", "套用升級"))
+        page.see("bi-b-upgrade", "套用升級")
         page.click_text("#bi-b-upgrade", "套用升級")
         page.notice("已升級")
         assert BiStore(workspace, dataset).schema_ref() == "bi.schema/v1.1@3.1.0"
         assert schema_versions.drafts(workspace)  # the draft itself stays
 
         # -- step 2a: Session B on the harness: the skill, applied as a new revision ----------
-        page.wait(page.shows("bi-b-sk-list", "classify"))
+        page.see("bi-b-sk-list", "classify")
         agent.then(
             {"tools": [("bi_skill__try", {"source_id": source, "changes": {"body": RULE}})]},
             {
@@ -195,13 +199,13 @@ def test_the_whole_build_flow(
             ".querySelector('button[aria-label*=\"AI\"]').click()"
         )
         page.wait("!document.getElementById('bi-b-ska').hidden")
-        page.wait(page.shows("bi-b-ska-model", "test-model"))
+        page.see("bi-b-ska-model", "test-model")
         page.set_value("bi-b-ska-msg", "會議紀錄裡客戶說在評估的，要建 Signal")
         page.click("#bi-b-ska-send")
-        page.wait(page.shows("bi-b-ska-log", "套用後的變化"))
+        page.see("bi-b-ska-log", "套用後的變化")
         assert "草稿試跑" in page.text_of("bi-b-ska-log")
         page.click("#bi-b-ska-log button.go")
-        page.wait(page.shows("bi-b-ska-log", "已套用為第"))
+        page.see("bi-b-ska-log", "已套用為第")
         page.shoot("2a-session-b")
 
         # -- steps 2b–2e: trial → ingest → review → write --------------------------------------
@@ -209,7 +213,7 @@ def test_the_whole_build_flow(
         before = len(store.card_rows())
         page.stage("method")
         page.click("#bi-b-trial")
-        page.wait(page.shows("bi-b-trial-result", "試跑完成"))
+        page.see("bi-b-trial-result", "試跑完成")
         assert "A 公司評估 TSN" in page.text_of("bi-b-trial-result")
         assert len(store.card_rows()) == before  # a trial writes nothing
         page.click("[data-stage=method] [data-bi-next=review]")
@@ -222,13 +226,13 @@ def test_the_whole_build_flow(
         page.click("#bi-b-next4")
         page.wait("!document.querySelector('#bi-view-build .kp-stage[data-stage=commit]').hidden")
         page.click("#bi-b-commit-go")
-        page.wait(page.shows("bi-b-done", "已寫入"))
+        page.see("bi-b-done", "已寫入")
         assert "A 公司評估 TSN" in {c["name"] for c in store.card_rows()}
 
         # -- step 3: AI benchmark questions, added by the person ------------------------------
         page.click("#bi-stepper [data-stage=test]")
         page.wait("!document.getElementById('bi-b-bench').hidden")
-        page.wait(page.shows("bi-b-ver-pending", "匯入 meeting.md"))
+        page.see("bi-b-ver-pending", "匯入 meeting.md")
         agent.then(
             {"tools": [("bi__query", {"dataset": dataset, "entity_type": "Signal"})]},
             {"tools": [("bi_questions__analyses", {})]},
@@ -249,7 +253,7 @@ def test_the_whole_build_flow(
         page.wait("!document.getElementById('bi-b-qa').hidden")
         page.set_value("bi-b-qa-msg", "出題")
         page.click("#bi-b-qa-send")
-        page.wait(page.shows("bi-b-qa-log", "加入測試題"))
+        page.see("bi-b-qa-log", "加入測試題")
         assert "必須提到：A 公司" in page.text_of("bi-b-qa-log")
         assert vault_checks.listing(workspace, vault_id)["questions"] == []  # not yet
         page.run(
@@ -257,7 +261,7 @@ def test_the_whole_build_flow(
         )
         page.click_text("#bi-b-qa-log", "加入測試題")
         page.notice("已加入 1 題")
-        page.wait(page.shows("bi-b-bq-list", "哪家客戶在評估 TSN"))
+        page.see("bi-b-bq-list", "哪家客戶在評估 TSN")
         assert [q["question"] for q in vault_checks.listing(workspace, vault_id)["questions"]] == [
             QUESTION["question"]
         ]
@@ -288,7 +292,7 @@ def test_the_whole_build_flow(
         page.wait("!document.getElementById('bi-b-ana').hidden")
         page.set_value("bi-b-ana-msg", "幫我排一個 Dashboard")
         page.click("#bi-b-ana-send")
-        page.wait(page.shows("bi-b-ana-log", "套用 Dashboard"))
+        page.see("bi-b-ana-log", "套用 Dashboard")
         page.click_text("#bi-b-ana-log", "套用 Dashboard")
         page.notice("已套用 Dashboard")
         layout = analyses.dashboard_layout(vault.Vault(workspace, vault_id).repo.working_units())
@@ -304,7 +308,7 @@ def test_the_whole_build_flow(
         )
         page.wait("!document.getElementById('bi-b-bench-run').disabled")
         page.click("#bi-b-bench-run")
-        page.wait(page.shows("bi-b-bench-report", "完成"))
+        page.see("bi-b-bench-report", "完成")
         report = page.text_of("bi-b-bench-report")
         assert "工作版本 1/1、發佈版本 0/1" in report and "退步" not in report.replace("退步 0", "")
         page.shoot("3-bench")
@@ -320,7 +324,7 @@ def test_the_whole_build_flow(
         )  # the push's content is exactly what was tested
         page.click("#bi-b-ver-push")
         page.notice("已 push")
-        page.wait(page.shows("bi-b-ver-history", "加入客戶訊號"))
+        page.see("bi-b-ver-history", "加入客戶訊號")
         page.run(
             "[...document.querySelectorAll('#bi-b-ver-history li:first-child button')]"
             ".find((b) => b.textContent === '加 tag').click()"
@@ -337,7 +341,7 @@ def test_the_whole_build_flow(
             "[...document.querySelectorAll('#bi-b-ver-history button')]"
             ".find((b) => b.textContent === '發佈 v1').click()"
         )
-        page.wait(page.shows("bi-b-ver-reads", "發佈版本「v1」"))
+        page.see("bi-b-ver-reads", "發佈版本「v1」")
         page.shoot("3-published")
 
     # -- what users get: the published version has it all ------------------------------------

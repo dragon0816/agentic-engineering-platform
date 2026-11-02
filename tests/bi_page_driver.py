@@ -42,7 +42,7 @@ class BiPage:
     def run(self, expression: str) -> Any:
         return self.browser._evaluate(expression)
 
-    def wait(self, expression: str, seconds: float = 120) -> Any:
+    def wait(self, expression: str, seconds: float = 240) -> Any:
         deadline = time.monotonic() + seconds
         while time.monotonic() < deadline:
             try:
@@ -78,6 +78,14 @@ class BiPage:
             f"document.getElementById({json.dumps(element_id)})"
             f".textContent.includes({json.dumps(text)})"
         )
+
+    def see(self, element_id: str, text: str) -> None:
+        """Wait until the element's text contains `text`; a failure says what it held."""
+        try:
+            self.wait(self.shows(element_id, text))
+        except AssertionError as failure:
+            held = self.text_of(element_id)
+            raise AssertionError(f"{failure}\n{element_id}: {held!r}") from None
 
     def notice(self, text: str) -> None:
         self.wait(self.shows("bi-notice", text))

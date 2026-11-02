@@ -13009,8 +13009,10 @@ function biBenchReport(report) {
 }
 
 async function biBench(vaultId) {
+  // The newest read wins: an older reply arriving late must not cancel the polling of a run.
+  const seq = bi.benchSeq = (bi.benchSeq || 0) + 1;
   const reply = await call("/api/bi/vaults/" + vaultId + "/checks");
-  if (vaultId !== bi.verVault) return;
+  if (seq !== bi.benchSeq || vaultId !== bi.verVault) return;
   el("bi-b-bench").hidden = false;
   const questions = el("bi-b-bq-list"); questions.replaceChildren();
   if (!reply.questions.length) questions.append(bh("p", "bi-meta", "還沒有測試題。"));
@@ -13035,8 +13037,10 @@ async function biBench(vaultId) {
   el("bi-b-bench-run").disabled = !(reply.questions.length || reply.cases.length)
     || (reply.latest && reply.latest.status === "running");
   clearTimeout(bi.benchTimer);
-  if (reply.latest && reply.latest.status === "running") {
-    bi.benchTimer = setTimeout(() => biBench(vaultId).catch(() => {}), 2000);
+  // A run just started may not have written its first report yet: keep reading until it has.
+  const unseen = bi.benchWatch && (!reply.latest || reply.latest.run_id !== bi.benchWatch);
+  if (unseen || (reply.latest && reply.latest.status === "running")) {
+    bi.benchTimer = setTimeout(() => biBench(vaultId).catch(() => {}), unseen ? 300 : 2000);
   } else if (reply.latest && bi.benchWatch === reply.latest.run_id) {
     bi.benchWatch = null;
     biNotice(reply.latest.status === "finished", reply.latest.status === "finished"
