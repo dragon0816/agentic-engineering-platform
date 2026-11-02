@@ -116,6 +116,10 @@ class Chunk:
     line_end: int
 
 
+NOTHING_FOUND = "model_found_nothing"
+MAX_NOTHING_FOUND = 500
+
+
 @dataclass
 class Extraction:
     """Candidates from every chunk that answered, and the chunks that did not."""
@@ -512,6 +516,10 @@ def read_answer(
             )
             continue
         found.append(candidate(reg, entity, raw, chunk, source_id))
+    reason = answer.get("notes")
+    if not found and isinstance(reason, str) and reason.strip():
+        # Why the model made nothing: without it the person sees an empty run and no reason.
+        warnings.append({"code": NOTHING_FOUND, "message": reason.strip()[:MAX_NOTHING_FOUND]})
     return found, warnings
 
 

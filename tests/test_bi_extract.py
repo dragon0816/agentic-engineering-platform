@@ -123,6 +123,22 @@ MEETING_ANSWER = {
 }
 
 
+def test_a_run_that_makes_nothing_keeps_the_models_reason() -> None:
+    reg = registry()
+    piece = extract.chunks(NOTE, extract.CHUNK_CHARS)[0]
+    said = {"candidates": [], "notes": "  這份來源是範例，不建立卡片。  "}
+    _, warnings = extract.read_answer(reg, ["Signal"], said, piece, "s1")
+    assert warnings == [{"code": extract.NOTHING_FOUND, "message": "這份來源是範例，不建立卡片。"}]
+    # A reason beside candidates, or no reason, adds nothing.
+    assert extract.read_answer(reg, ["Signal"], {"candidates": []}, piece, "s1")[1] == []
+    both = {**MEETING_ANSWER, "notes": "補充"}
+    assert not [
+        w
+        for w in extract.read_answer(reg, ["Signal", "Technology"], both, piece, "s1")[1]
+        if w["code"] == extract.NOTHING_FOUND
+    ]
+
+
 def test_chunks_keep_line_numbers_and_cut_at_headings() -> None:
     pieces = extract.chunks(NOTE, limit=60)
     assert [p.line_start for p in pieces][0] == 1

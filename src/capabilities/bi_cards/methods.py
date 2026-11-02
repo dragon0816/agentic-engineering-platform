@@ -589,6 +589,11 @@ def _run_context(staging: Staging, method_id: str, run_ids: Any) -> tuple[str, l
             f"Run {run_id} ({view['method_ref']}, {view['status']}): {counts['candidates']} "
             f"candidates, {counts['warnings']} warnings, {counts['inferences']} inferences"
         )
+        lines.extend(
+            f"The model made nothing from part of the source and said: {w['message']}"
+            for w in view.get("warnings") or []
+            if w.get("code") == extract.NOTHING_FOUND
+        )
         for candidate in found[:30]:
             values = "; ".join(
                 f"{f['field']}={json.dumps(f['value'], ensure_ascii=False)[:80]} [{f['basis']}]"

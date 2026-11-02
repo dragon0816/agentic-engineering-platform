@@ -14346,6 +14346,12 @@ function biRunBody(kind) {
   return body;
 }
 
+function biRunNothing(run) {
+  // Why the AI made no candidate, in its words: an empty run must not look like a broken one.
+  const said = (run.warnings || []).filter((w) => w.code === "model_found_nothing");
+  return said.map((w) => bh("p", "bi-warn", "AI 沒有建立候選卡，它的說明：" + w.message));
+}
+
 function biRunChips(run) {
   const s = run.summary || {};
   return [biBadge("候選 " + (s.candidates || 0), "dim"), biBadge("新建 " + (s.create || 0), "good"),
@@ -14378,7 +14384,8 @@ el("bi-b-trial").addEventListener("click", async () => {
       bh("li", "", biTypeLabel(c.entity_type) + "・" + (c.name || c.canonical_key || "（無名稱）")
         + "・" + (BI_RUN_ACTION[c.action] || c.action)
         + (c.errors.length ? "・錯誤 " + c.errors.length : "")
-        + (c.warnings.length ? "・警告 " + c.warnings.length : "")))));
+        + (c.warnings.length ? "・警告 " + c.warnings.length : "")))),
+      ...biRunNothing(detail.run));
     if (detail.run.method_ref) {
       box.prepend(bh("p", "bi-meta", "擷取 Skill：" + detail.run.method_ref));
     }
@@ -14820,6 +14827,7 @@ function biBuildRenderRun() {
       await biBuildFollow(run.id); await biBuildFetchRun(run.id); biBuildRenderRun();
     }, "bi-btn"));
   }
+  el("bi-b-chips").append(...biRunNothing(run));
   for (const candidate of bi.build.candidates) {
     const decision = BI_DECISION[candidate.review] || [candidate.review, "dim"];
     const button = biButton("", () => biBuildShowCandidate(candidate.id), "bi-card-btn");

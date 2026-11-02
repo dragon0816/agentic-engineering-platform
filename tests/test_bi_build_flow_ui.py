@@ -16,6 +16,7 @@ import os
 import threading
 from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 
 import pytest
 from bi_page_driver import BiPage, browser_missing
@@ -85,7 +86,8 @@ def test_the_whole_build_flow(
     workspace = web.runtime.layout.workspace_root
     shared = tmp_path / "sharepoint"  # stands in for the synced SharePoint folder
     shared.mkdir()
-    extractor = Scripted(lambda _chunk: MEETING_ANSWER)  # the same note in every run
+    answer: dict[str, Any] = {"now": MEETING_ANSWER}
+    extractor = Scripted(lambda _chunk: answer["now"])  # the same note in every run
     monkeypatch.setattr(
         bi_cards_api,
         "web_ai_runtime",
@@ -212,7 +214,13 @@ def test_the_whole_build_flow(
         store = BiStore(workspace, dataset)
         before = len(store.card_rows())
         page.stage("method")
+        # A run that makes nothing says why, in the model's words, not just an empty list.
+        answer["now"] = {"candidates": [], "notes": "這份來源沒有客戶說的話"}
         page.click("#bi-b-trial")
+        page.see("bi-b-trial-result", "AI 沒有建立候選卡，它的說明：這份來源沒有客戶說的話")
+        answer["now"] = MEETING_ANSWER
+        page.click("#bi-b-trial")
+        page.see("bi-b-trial-result", "A 公司評估 TSN")
         page.see("bi-b-trial-result", "試跑完成")
         assert "A 公司評估 TSN" in page.text_of("bi-b-trial-result")
         assert len(store.card_rows()) == before  # a trial writes nothing
