@@ -53,6 +53,20 @@ def test_a_dry_run_then_the_confirmed_import_stages_only_the_order(tmp_path: Pat
     }
 
 
+def test_a_saved_file_is_the_same_document_as_the_get_body_though_not_the_same_bytes(
+    tmp_path: Path,
+) -> None:
+    # Atlas: a file is indented and ends in a newline, so it is compared parsed, never hashed.
+    ws = _joined(tmp_path)
+    saved = json.dumps(json.loads(MIXED), indent=2, sort_keys=True) + "\n"
+    assert saved != MIXED
+    body = _ok(_call(ws, "POST", ROUTE, {"file": MIXED}))
+    file = _ok(_call(ws, "POST", ROUTE, {"file": saved}))
+    assert file["order"] == ORDER and file["token"] == body["token"]
+    done = _ok(_call(ws, "POST", ROUTE, {"file": saved, "apply": True, "token": body["token"]}))
+    assert done["staged"] == "meta:dashboard"
+
+
 def test_the_files_other_content_goes_nowhere(tmp_path: Path) -> None:
     ws = _joined(tmp_path)
     document = json.loads(MIXED)

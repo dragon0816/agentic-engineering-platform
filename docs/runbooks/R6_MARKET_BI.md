@@ -17,7 +17,7 @@ nor writes it since R2. The repository format needs its sources, schema, skills 
 | ☐ | Decision | Why it cannot wait | Recommendation |
 |---|---|---|---|
 | D1 | **The new vault's id.** | Creating `market-bi` again is refused on the owner's PC (`vault_exists`): that PC still holds `bi/vault-market-bi` and the registry entry, and there is no route to leave a vault. The id is fixed forever. | A new id, e.g. `market-intel`: nothing local has to be deleted. The alternative, keeping `market-bi`, needs removing the old local entry and data by hand first. |
-| D2 | **Do the originals go into the shared folder?** | Open since 2026-10-30 (size and confidentiality). `KNOWLEDGE_REPO.md` §11 says they go to `sources/`; today a vault's sources stay on the PC that added them (`BI_BUILD_FLOW.md` §10). Colleagues cannot re-run an extraction without them. | Owner's call; look at the total size first (§4). |
+| D2 | **Decided (owner, 2026-11-02): the originals go into the shared folder.** | **R6 cannot run until this is built:** today a BI vault's sources stay on the PC that added them. Its scope and the owner's open points (per-file limit, confidentiality, removing a file pushed by mistake) are in `docs/DECISIONS.md` 2026-11-02 "A BI vault's originals go into the shared folder". | Look at the total size first (§4). |
 | D3 | **How the five bases are merged.** | The 2026-10-29 merge was a one-off script (`--fill-only`: lists joined, first name kept, bodies kept per base), **not in the repository**, and it reported 7 scalar conflicts. | Import base by base through the page, one commit per base, and settle conflicts in the review step. Do not bring the old script back without reading it. |
 | D4 | **Which `rs-k` copy, and is it bound to the Agent?** | Binding a second vault changes how questions route (§8). `KNOWLEDGE_REPO.md` §11: importing a copy of the real `RS_Knowledge` is a separate decision. | Import `%LOCALAPPDATA%\AEP\rs-k-v1.0.3` (already a copy) as a test; do not bind it until the owner has compared answers. |
 | D5 | **The first tag's name.** | Tags never move. | e.g. `2026q4-r6`. |
@@ -60,7 +60,7 @@ python scripts/r6_precheck.py `
 
 Exit code 0: nothing failed. Do not start on 1.
 
-Also, by hand: total size of the bases and reports (D2); `GET /api/tasks` and `/api/activity` are idle before any
+Also, by hand: total size of the bases and reports, and the largest single file (D2); `GET /api/tasks` and `/api/activity` are idle before any
 restart; a free afternoon, since the extraction uses real models.
 
 ## 5. The session, in order
@@ -74,18 +74,18 @@ that flow is changing, so read the current ones on the page.
 | 2 | Restart Agent Web if it predates the build flow (check `/api/tasks` first, AGENTS rule 19). | Page shows the build-flow steps |
 | 3 | Rename the old folder to `market-bi.v4-old` in Explorer. Wait for OneDrive to finish. | Old folder present under the new name on OneDrive's site; nothing deleted |
 | 4 | Knowledge > BI > 建立與匯入 > 建立共用知識庫（vault）: D1's id, in `BI_Knowledge`, schema `bi.schema/v1.1` (2.0.0), author `leo.chi`. | `repo.json` in the folder; `/api/knowledge/askable` lists it with `nothing_pushed` |
-| 5 | Step 1: add the AIDC base's sources (per D2), let them become Markdown. | Each source has Markdown; spot-check two tables |
+| 5 | Step 1: add the AIDC base's sources, let them become Markdown. They reach the shared folder with the push (D2). | Each source has Markdown; spot-check two tables |
 | 6 | Step 2: Session A only if the schema must change; Session B for the skills. Move the manager's reading rules there. | The owner reviewed every schema change and skill |
 | 7 | Import the AIDC seeds first: preview, apply, commit with a purpose. | 22 CSVs → 323 cards; §7's AIDC numbers match |
 | 8 | Repeat 5–7 for robotics, aerospace, wireless module, wireless example. **One commit per base.** | After each: quality check read; new conflicts settled (D3); no fact without a source |
 | 9 | Fix the links written in another spelling of a merged card (28 last time), as field edits with a reason. | Quality check's unresolved links explained |
 | 10 | Step 3: benchmark questions and the Dashboard (the analysis AI, or an Atlas import of the order). | Owner approved each question and the order |
 | 11 | Testing: run the benchmark on the working copy. | No regression the owner did not accept |
-| 12 | Push. | `status`: ahead 0, no conflict; the owner sees the commits on OneDrive |
+| 12 | Push. | `status`: ahead 0, no conflict; the owner sees the commits and the originals under `sources/` on OneDrive |
 | 13 | Tag (D5), publish with confirmation. | `/api/knowledge/askable` says 可以在對話裡問, `reads.tag` is the tag |
 | 14 | In a new general chat: ask a cross-domain question and a BI question that needs SQL. | The answer carries `資料來源：知識庫 vault-<id> 發佈版本 <tag>`; numbers match the Dashboard; `bi__query` was on (Skill, capability, grant) |
 | 15 | Atlas: open the panels of the new vault. | Panels show the published analyses (Atlas layouts stay personal) |
-| 16 | A colleague joins the folder (`join`). | Their Agent reads the same tag |
+| 16 | A colleague joins the folder (`join`). | Their Agent reads the same tag; they see the originals, with none waiting once OneDrive has delivered them |
 | 17 | `rs-k` copy: §6. | |
 | 18 | Update `docs/TASKS.md`, `HANDOFF.md`; **the owner** deletes the old folder when satisfied, later. | |
 

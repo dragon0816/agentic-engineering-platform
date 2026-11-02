@@ -6054,3 +6054,17 @@ running. Same contract and rules: dry run with a preview and token, confirm, onl
 unmatched panels listed. Strict JSON, a size limit, never run or stored, the rest of the file ignored and never given to a
 model. Reading from Atlas by name stays. Choice inside it: a confirm sends the text again rather than the server keeping
 a copy between the two requests, so nothing is stored. Rejected: uploading to a temporary file on the server.
+
+## 2026-11-02: A BI vault's originals go into the shared folder (owner, relayed by the BI orchestrator)
+
+R6's D2, open since 2026-10-30. The originals go into the repository's `sources/` (`KNOWLEDGE_REPO.md` §11), so a colleague
+who joins can read them. **Not built yet, and R6 waits for it**: today they stay in the local `staging.sqlite` of the PC
+that added them, and `bi-build-flow`'s B2 copies them only into the new vault's local staging. Found in the scope reading,
+for whoever builds it: the engine already carries files (`stage_file`, the commit's `files`, `_copy_in`, "waiting"; the
+wiki type uses them); `_stored_sha` does not catch an `OSError` from reading a file, so an unreadable cloud-only file can
+fail a sync; `/api/bi/sources` takes base64 under an 8 MiB body, about 6 MiB per file; evidence rows hold a `source_id` that
+only means something on the PC that made it; a file deleted from the folder leaves its commit waiting for good. Still the
+owner's: the per-file limit, whether `CONFIDENTIAL` and `RESTRICTED` sources may be pushed (BI vaults have no permission
+control, owner 2026-10-29), and how a file pushed by mistake is removed.
+
+D3 (how the five bases are merged) stays open: the owner is asked to confirm base by base, one commit per base.

@@ -173,7 +173,9 @@ Contract: Atlas's `docs/AEP_DASHBOARD_READ_CONTRACT.md` (revision 2026-11-01). I
   as `file` to the same route, with the same dry run, token and confirm, and the same `plan`. Strict JSON (a repeated
   key or `NaN` is `atlas_invalid`), at most 2,000,000 bytes (`atlas_too_large`), a schemaVersion 2 document. `file`
   with `name` is `atlas_source_ambiguous`. The file is never run or stored: the page keeps the text in memory and sends it
-  again to confirm. Only `plan` reads it, so its other content goes nowhere, and no model is involved.
+  again to confirm. Only `plan` reads it, so its other content goes nowhere, and no model is involved. A saved file is
+  the same document as the GET body but not the same bytes (Atlas: indented, a final newline), so it is compared parsed,
+  never by hash: the token comes from the plan.
 
 ## 5. Tasks and order
 
