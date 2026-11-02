@@ -6068,3 +6068,18 @@ owner's: the per-file limit, whether `CONFIDENTIAL` and `RESTRICTED` sources may
 control, owner 2026-10-29), and how a file pushed by mistake is removed.
 
 D3 (how the five bases are merged) stays open: the owner is asked to confirm base by base, one commit per base.
+
+## 2026-11-02: Owner's answers on a BI vault's originals (relayed by the BI orchestrator)
+
+Design: `docs/phases/BI_SOURCES_IN_REPOSITORY.md`. Not built yet.
+
+- **O1. The per-file limit is set after measuring the real sizes** (R6 pre-check: the total and the largest file). The work
+  on files over about 6 MiB waits for that number.
+- **O2. Every classification may be pushed, `CONFIDENTIAL` and `RESTRICTED` included; no push refusal by classification.**
+  The owner's choice against the worker's recommendation to refuse both. The reason as given: the owner accepts that anyone
+  with folder access can read every original permanently. Rejected: refusing them at push.
+- **O3. A withdrawal record is built**, for a file pushed by mistake. It does not remove OneDrive's or SharePoint's own
+  versions, copies outside AEP, or what commits already hold; the design §5 lists this, and its questions go to the owner.
+  Rejected: rebuilding the vault as the only remedy.
+- **O4. Every PC keeps all originals on the device; the page warns on cloud-only files; no lazy read.** Rejected: reading a
+  file only when it is needed (more engine work, and a chat question could wait on a download).
