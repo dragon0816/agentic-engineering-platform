@@ -81,6 +81,10 @@ def names(port: int) -> list[str]:
     return found
 
 
+def document(name: str, port: int) -> Any:
+    return _get(port, "/dashboards/" + quote(name, safe=""))
+
+
 def _unique_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     found = dict(pairs)
     if len(found) != len(pairs):
@@ -113,14 +117,14 @@ def preview(workspace: Path, vault_id: str, name: Any, port: int) -> dict[str, A
     if not isinstance(name, str) or not name:
         raise BiStoreError("atlas_name_missing", "請選一個 Atlas Dashboard")
     vault.Vault(workspace, vault_id)._require_folder()
-    document = _get(port, "/dashboards/" + quote(name, safe=""))
-    return _planned(workspace, vault_id, document)
+    found = document(name, port)
+    return _planned(workspace, vault_id, found)
 
 
-def _planned(workspace: Path, vault_id: str, document: Any) -> dict[str, Any]:
+def _planned(workspace: Path, vault_id: str, found: Any) -> dict[str, Any]:
     units = vault.Vault(workspace, vault_id).repo.working_units()
     saved = [item["slug"] for item in analyses.saved(units)]
-    return atlas_import.plan(document, vault_id, saved, analyses.dashboard_layout(units))
+    return atlas_import.plan(found, vault_id, saved, analyses.dashboard_layout(units))
 
 
 def import_order(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:

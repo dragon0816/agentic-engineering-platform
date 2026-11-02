@@ -16,12 +16,19 @@ Each answered call also writes one self-contained chart page (the sections
 drawn by the Dashboard tab's renderer, or the cards as a table) and attaches
 it, so Agent Web shows the chart in the conversation (`bi_chart_files`;
 `docs/phases/BI_CHAT_CHARTS_AND_DASHBOARD_SOURCES.md` C2).
+
+`bi__atlas_show` asks to frame a real Atlas panel or dashboard in the answer
+(`docs/phases/BI_CHAT_EMBED_AND_PANEL_EDIT.md` §4): it takes a slug and parameters
+or a dashboard's name, never a URL, and reads through the same invocation as
+`bi__query`. The chart page it also writes is what the answer shows when Atlas is
+not running.
 """
 
 from __future__ import annotations
 
+import asyncio
 import secrets
-from collections.abc import Mapping, Sequence
+from collections.abc import Awaitable, Callable, Mapping, Sequence
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -33,13 +40,15 @@ from capabilities.bi_cards import analyses, vault
 from capabilities.bi_cards.capability import QUERY_SPEC, QueryHandler, QueryRequest, source_note
 from capabilities.bi_cards.manifest import BI_SKILL, bi_question
 from capabilities.bi_cards.packs import SECTIONS as PACK_SECTIONS
+from capabilities.bi_cards.store import VAULT_PREFIX, BiStoreError
 from capabilities.runtime import CapabilityInvocation, CapabilityRefused
 from common.execution import Failure, RequestContext
-from host_runtime import bi_chart_html
+from host_runtime import bi_atlas_embed, bi_atlas_import, bi_chart_html
 from knowledge.repo import repository as repo_engine
 from models.contracts import ModelTool
 
 __all__ = [
+    "atlas_embeds",
     "bi_cards_tools",
     "bi_chart_files",
     "bi_question",
@@ -49,6 +58,13 @@ __all__ = [
 ]
 
 TOOL_NAME = "bi__query"
+ATLAS_TOOL = "bi__atlas_show"
+ATLAS_DOWN = (
+    "Atlas is not running on this PC. Show the analyses with bi__query instead, and tell the "
+    "person that opening Atlas shows the full version."
+)
+#: An answer's embeds, as the stored message allows.
+MAX_EMBEDS = 6
 #: Where the chat's chart pages are written, under the workspace.
 CHARTS_DIR = "bi-chat-charts"
 FAILURE_TEXT = {
@@ -168,7 +184,162 @@ def bi_cards_tools(gateway: Any) -> Sequence[HostTool]:
             failure=failure.model_copy(update={"message": f"{text}（{failure.code}）"}),
         )
 
-    return [HostTool(_model_tool(gateway, found), call)]
+    async def read(context: RequestContext, arguments: dict[str, Any]) -> Any:
+        return await gateway.bridge.execute(
+            CapabilityInvocation(
+                context=context, origin="model", target=QUERY_SPEC.identity, arguments=arguments
+            )
+        )
+
+    async def atlas_show(context: RequestContext, arguments: dict[str, Any]) -> HostToolOutcome:
+        workspace = _workspace(gateway)
+        if context.channel == "telegram" or workspace is None:
+            return _atlas_failed(
+                "embed_unavailable", "Atlas is shown only in Agent Web; use bi__query here."
+            )
+        return await _atlas_show(workspace, read, context, arguments)
+
+    return [
+        HostTool(_model_tool(gateway, found), call),
+        HostTool(
+            ModelTool(
+                name=ATLAS_TOOL,
+                description=(
+                    "Show the person a real Atlas panel or dashboard in this conversation. Use "
+                    "it when they ask to see a saved analysis or an Atlas dashboard; for numbers "
+                    "to state, read its rows from the result. Give dataset and analysis (a slug "
+                    "of a vault's published version) with optional params, or dashboard (a name "
+                    "Atlas has); with neither it lists Atlas's dashboards. You never give a URL. "
+                    "Not for ad-hoc SQL or card searches: bi__query shows those."
+                ),
+                input_contract=f"host.{ATLAS_TOOL}.v1",
+                input_schema=ATLAS_SCHEMA,
+            ),
+            atlas_show,
+        ),
+    ]
+
+
+ATLAS_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "dataset": {"type": "string", "description": "a vault's dataset, vault-<id>"},
+        "analysis": {"type": "string", "description": "a published analysis's slug"},
+        "params": {"type": "object", "description": "the analysis's parameters to start with"},
+        "dashboard": {"type": "string", "description": "the name of an Atlas dashboard"},
+    },
+    "required": [],
+}
+
+
+def _atlas_failed(code: str, message: str) -> HostToolOutcome:
+    return HostToolOutcome(status="failed", failure=Failure(code=code, message=message))
+
+
+def _read_failed(result: Any) -> HostToolOutcome:
+    failure = result.failure or Failure(code=result.status, message="")
+    text = FAILURE_TEXT.get(failure.code, "BI 卡片查詢沒有完成")
+    return _atlas_failed(failure.code, f"{text}（{failure.code}）")
+
+
+async def _atlas_show(
+    workspace: Path,
+    read: Callable[[RequestContext, dict[str, Any]], Awaitable[Any]],
+    context: RequestContext,
+    arguments: dict[str, Any],
+) -> HostToolOutcome:
+    dashboard = arguments.get("dashboard")
+    if dashboard or not arguments.get("analysis"):
+        return await _atlas_dashboard(workspace, read, context, dashboard)
+    dataset = str(arguments.get("dataset") or "")
+    if not dataset.startswith(VAULT_PREFIX):
+        return _atlas_failed(
+            "embed_not_a_vault",
+            "Atlas shows a vault's published analyses; give dataset vault-<id>.",
+        )
+    given = arguments.get("params")
+    params: dict[str, Any] = given if isinstance(given, dict) else {}
+    result = await read(
+        context, {"dataset": dataset, "analysis": arguments["analysis"], "params": params}
+    )
+    if result.status != "succeeded" or not isinstance(result.data, dict):
+        return _read_failed(result)
+    (section, *_rest) = result.data["analysis"]
+    declared = (section.get("definition") or {}).get("params") or {}
+    unknown = sorted(set(params) - set(declared))
+    if unknown:
+        return _atlas_failed("param_invalid", f"No such parameter: {', '.join(unknown)}.")
+    # The values as resolved (an enum's own spelling), only those asked for: the
+    # rest keep the feed's default, also after a republish.
+    chosen = {name: section["params"][name] for name in params}
+    vault_id, slug = dataset[len(VAULT_PREFIX) :], str(section["id"])
+    try:
+        path = bi_atlas_embed.panel_path(vault_id, slug, chosen)
+    except BiStoreError as error:
+        return _atlas_failed(error.code, error.message)
+    written = chart_page(workspace, result.data, arguments)
+    return _shown_in_atlas(
+        {"kind": "panel", "vault": vault_id, "slug": slug, "params": chosen,
+         "path": path, "title": str(section.get("title") or slug)},
+        written,
+        {"columns": section.get("columns"), "rows": section.get("rows")},
+    )  # fmt: skip
+
+
+async def _atlas_dashboard(
+    workspace: Path,
+    read: Callable[[RequestContext, dict[str, Any]], Awaitable[Any]],
+    context: RequestContext,
+    dashboard: Any,
+) -> HostToolOutcome:
+    port = bi_atlas_import.DEFAULT_PORT
+    try:
+        names = await asyncio.to_thread(bi_atlas_import.names, port)
+        if not dashboard:
+            return HostToolOutcome(status="succeeded", data={"dashboards": names})
+        if dashboard not in names:
+            listed = ", ".join(names) or "none"
+            return _atlas_failed(
+                "atlas_not_found", f"Atlas has no such dashboard; it has: {listed}."
+            )
+        document = await asyncio.to_thread(bi_atlas_import.document, str(dashboard), port)
+    except BiStoreError as error:
+        if error.code == "atlas_unreachable":
+            return _atlas_failed(error.code, ATLAS_DOWN)
+        return _atlas_failed(error.code, error.message)
+    sections: list[Any] = []
+    for vault_id, slug in bi_atlas_embed.panels_of(document)[: bi_atlas_embed.FALLBACK_PANELS]:
+        result = await read(
+            context, {"dataset": vault.dataset_name(vault_id), "analysis": slug, "params": {}}
+        )
+        if result.status == "succeeded" and isinstance(result.data, dict):
+            sections.extend(result.data.get("analysis") or ())
+    written = None
+    if sections:
+        written = chart_page(
+            workspace, {"analysis": sections, "dataset": f"Atlas Dashboard「{dashboard}」"}, {}
+        )
+    name = str(dashboard)
+    return _shown_in_atlas(
+        {"kind": "dashboard", "name": name, "path": bi_atlas_embed.dashboard_path(name),
+         "title": name},
+        written,
+        {},
+    )  # fmt: skip
+
+
+def _shown_in_atlas(
+    embed: dict[str, Any], written: dict[str, str] | None, extra: dict[str, Any]
+) -> HostToolOutcome:
+    data: dict[str, Any] = {
+        "note": "The person sees this in the answer: live from Atlas, or AEP's chart if Atlas is "
+        "not running.",
+        **extra,
+    }
+    if written is not None:
+        embed = {**embed, "fallback": written["path"]}
+        data["attach"] = [written]
+    return HostToolOutcome(status="succeeded", data={**data, "atlas_embed": embed})
 
 
 def _workspace(gateway: Any) -> Path | None:
@@ -223,20 +394,49 @@ def _params(sections: list[dict[str, Any]]) -> str:
 
 
 def bi_chart_files(result: Any) -> list[dict[str, str]]:
-    """The chart pages the turn's answered `bi__query` calls wrote, in order,
-    as Agent Web shows files in an answer (an HTML page in a sandboxed frame)."""
+    """The chart pages the turn's answered `bi__query` and `bi__atlas_show` calls
+    wrote, in order, as Agent Web shows files in an answer (an HTML page in a
+    sandboxed frame). A page of an analysis the turn also shows through Atlas is
+    left out: the embed draws it."""
     files: list[dict[str, str]] = []
+    framed = {
+        (embed.get("vault"), embed.get("slug"))
+        for embed in atlas_embeds(result)
+        if embed.get("kind") == "panel"
+    }
     for item in getattr(result, "tools", None) or ():
         host = getattr(item, "host", None)
-        if getattr(item, "name", "") != TOOL_NAME or host is None or host.status != "succeeded":
+        name = getattr(item, "name", "")
+        if name not in (TOOL_NAME, ATLAS_TOOL) or host is None or host.status != "succeeded":
             continue
         data = host.data if isinstance(host.data, dict) else {}
+        sections = [s for s in data.get("analysis") or () if isinstance(s, dict)]
+        dataset = str(data.get("dataset") or "")
+        if (
+            name == TOOL_NAME
+            and len(sections) == 1
+            and (dataset.removeprefix(VAULT_PREFIX), sections[0].get("id")) in framed
+        ):
+            continue
         for entry in data.get("attach") or ():
             path = entry.get("path") if isinstance(entry, dict) else None
             if isinstance(path, str) and Path(path).is_file():
                 files.append({"filename": str(entry.get("filename") or Path(path).name),
                               "kind": "html", "path": path})  # fmt: skip
     return files
+
+
+def atlas_embeds(result: Any) -> list[dict[str, Any]]:
+    """What the turn's answered `bi__atlas_show` calls ask the answer to frame."""
+    embeds: list[dict[str, Any]] = []
+    for item in getattr(result, "tools", None) or ():
+        host = getattr(item, "host", None)
+        if getattr(item, "name", "") != ATLAS_TOOL or host is None or host.status != "succeeded":
+            continue
+        embed = host.data.get("atlas_embed") if isinstance(host.data, dict) else None
+        if isinstance(embed, dict) and embed not in embeds:
+            embeds.append(embed)
+    return embeds[:MAX_EMBEDS]
 
 
 def _model_tool(gateway: Any, found: list[Any]) -> ModelTool:

@@ -73,6 +73,9 @@ class ConversationMessage(Contract):
     # (multi-agent V1, `host_runtime.delegation_record`): profile, status, a
     # short summary, artifacts and tokens per sub-agent; never its full answer.
     delegations: tuple[dict[str, JsonValue], ...] = Field(default=(), max_length=6)
+    # Atlas panels or dashboards an answer frames (BI E2): built by the Host from
+    # a vault, slug and parameters or a dashboard's name, never by the model.
+    atlas_embeds: tuple[dict[str, JsonValue], ...] = Field(default=(), max_length=6)
 
     @model_validator(mode="before")
     @classmethod

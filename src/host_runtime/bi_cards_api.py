@@ -82,7 +82,7 @@ from capabilities.bi_cards.store import (
     datasets,
     is_subscribed,
 )
-from host_runtime import bi_subscriptions, bi_vaults_api
+from host_runtime import bi_atlas_embed, bi_atlas_import, bi_subscriptions, bi_vaults_api
 
 #: A CSV travels in the JSON body; larger than an ordinary request.
 MAX_BI_BODY_BYTES = 8 * 1024 * 1024
@@ -119,6 +119,10 @@ def route(
     subscription routes, `platform`; for AI runs, `ai`; for a vault benchmark,
     `bench`, a `bi_bench.BenchRuntime`)."""
     try:
+        if path == "/api/bi/atlas-embed" and method == "GET":
+            # BI E3: may the page frame Atlas on this port? Asked before it renders the iframe.
+            port = bi_atlas_import.port_of(query.get("port"))
+            return 200, {"ok": True, "port": port, "framable": bi_atlas_embed.framable(port)}
         if path == "/api/bi/subscriptions" or path.startswith("/api/bi/subscriptions/"):
             given = body if isinstance(body, dict) else {}
             return bi_subscriptions.route(workspace, platform, method, path, query, given)

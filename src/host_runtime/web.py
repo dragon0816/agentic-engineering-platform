@@ -129,7 +129,13 @@ from host_runtime.attachments import (
 from host_runtime.attachments import summary as attachment_summary
 from host_runtime.authoring import AuthoringError, AuthoringSession, AuthoringStudio
 from host_runtime.avatars import UserPreferences, UserPreferencesStore, catalog
-from host_runtime.bi_cards_tools import bi_chart_files, bi_question, bi_skill_on, with_bi_sources
+from host_runtime.bi_cards_tools import (
+    atlas_embeds,
+    bi_chart_files,
+    bi_question,
+    bi_skill_on,
+    with_bi_sources,
+)
 from host_runtime.business_cards_tools import chart_files, with_legend
 from host_runtime.change_proposals import ChangeProposals
 from host_runtime.chat_authoring import ChatAuthoringError, approval_text
@@ -518,6 +524,14 @@ def _answer_files(answer: Mapping[str, Any]) -> list[dict[str, Any]]:
     """The files a turn's tools produced for its answer (an org chart)."""
     files = answer.get("files")
     return [item for item in files if isinstance(item, dict)] if isinstance(files, list) else []
+
+
+def _atlas_embeds(answer: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
+    """The Atlas embeds a turn asked for, for its stored answer (BI E2)."""
+    listed = answer.get("atlas_embeds")
+    return (
+        tuple(item for item in listed if isinstance(item, dict)) if isinstance(listed, list) else ()
+    )
 
 
 def _delegations(answer: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
@@ -3316,6 +3330,7 @@ class AgentWeb:
                         **({CARD_KEY: carded} if carded is not None else {}),
                         **({"files": charts} if charts else {}),
                         **({"delegations": delegations} if delegations else {}),
+                        **({"atlas_embeds": embeds} if (embeds := atlas_embeds(result)) else {}),
                         # The person's preferences this turn was given (M3).
                         **(
                             {"preferences_used": list(result.preferences_used)}
@@ -3444,6 +3459,7 @@ class AgentWeb:
                                     else None
                                 ),
                                 delegations=_delegations(answer),
+                                atlas_embeds=_atlas_embeds(answer),
                                 attachments=tuple(
                                     {key: str(item[key]) for key in ("filename", "kind", "path")}
                                     for item in _answer_files(answer)

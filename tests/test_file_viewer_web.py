@@ -206,8 +206,14 @@ def test_the_file_routes_refuse_anything_outside_the_listed_workspace_files(
 
 def test_the_page_frames_html_with_scripts_only_and_never_same_origin() -> None:
     assert 'frame.setAttribute("sandbox", "allow-scripts")' in PAGE
-    # Named only in comments that say it is left out.
-    mentions = [line for line in PAGE.splitlines() if "allow-same-origin" in line]
+    # Named only in comments that say it is left out, and on the one Atlas embed frame
+    # (BI E2): another origin's page, as Atlas's contract requires, never a file served
+    # here, and refused when the address is this page's own origin.
+    atlas = 'frame.setAttribute("sandbox", "allow-scripts allow-same-origin");'
+    assert PAGE.count(atlas) == 1 and "url.origin === location.origin" in PAGE
+    mentions = [
+        line for line in PAGE.splitlines() if "allow-same-origin" in line and atlas not in line
+    ]
     assert mentions and all(line.strip().startswith("//") for line in mentions), mentions
     assert 'frame.setAttribute("referrerpolicy", "no-referrer")' in PAGE
     assert '"/api/conversations/view-link?"' in PAGE

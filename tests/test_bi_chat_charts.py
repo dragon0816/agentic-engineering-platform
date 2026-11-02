@@ -216,7 +216,7 @@ def _context(session: str = "s-1") -> RequestContext:
 def test_the_query_tool_attaches_the_chart_page_of_a_published_analysis(tmp_path: Path) -> None:
     config, layout = _host(tmp_path)
     with build_runtime(config, layout=layout) as runtime:
-        (tool,) = bi_cards_tools(runtime.agent.gateway)
+        (tool, _atlas) = bi_cards_tools(runtime.agent.gateway)
         answer = _call(tool, {"dataset": DATASET, "analysis": "accounts-by-region"})
     data = _data(answer)
     (section,) = data["analysis"]
@@ -228,7 +228,7 @@ def test_the_query_tool_attaches_the_chart_page_of_a_published_analysis(tmp_path
     assert "各地區的客戶數" in page and "發佈版本 v1" in page
     # A search of cards is a table of the cards.
     with build_runtime(config, layout=layout) as runtime:
-        (tool,) = bi_cards_tools(runtime.agent.gateway)
+        (tool, _atlas) = bi_cards_tools(runtime.agent.gateway)
         cards = _call(tool, {"dataset": DATASET, "text": "Robotics"})
     found = _data(cards)
     assert found["cards"]

@@ -117,7 +117,7 @@ def test_the_chat_tool_runs_sql_through_the_bridge_and_attaches_the_chart(
 ) -> None:
     config, layout = _host(tmp_path)
     with build_runtime(config, layout=layout) as runtime:
-        (tool,) = bi_cards_tools(runtime.agent.gateway)
+        (tool, _atlas) = bi_cards_tools(runtime.agent.gateway)
         properties = (tool.tool.input_schema or {}).get("properties")
         assert isinstance(properties, dict) and {"sql", "chart"} <= set(properties)
         answer = _call(tool, {"dataset": DATASET, "sql": BY_REGION})

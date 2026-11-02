@@ -30,7 +30,7 @@ from common.execution import RequestContext, TraceIdentifiers
 from host_runtime import skill_packs
 from host_runtime.assets import shipped
 from host_runtime.bi_cards_api import route
-from host_runtime.bi_cards_tools import TOOL_NAME, bi_cards_tools
+from host_runtime.bi_cards_tools import ATLAS_TOOL, TOOL_NAME, bi_cards_tools
 from host_runtime.contracts import HostLayout
 from host_runtime.host import build_runtime
 from scripts.build_bi_schema_v1_1 import V4, build
@@ -149,6 +149,8 @@ def test_harness_and_storage_code_outside_the_package_do_not_import_bi_types() -
         "host_runtime/bi_chat_save.py",
         # BI K2: the Dashboard order imported from an Atlas dashboard.
         "host_runtime/bi_atlas_import.py",
+        # BI E2: Atlas panels and dashboards framed in the chat.
+        "host_runtime/bi_atlas_embed.py",
         # BI dataset sharing: the platform re-reads every published snapshot.
         "control_plane/bi_datasets.py",
     }
@@ -768,7 +770,7 @@ def test_the_skill_is_installed_switched_on_and_offers_the_tool(tmp_path: Path) 
     }
     assert BI_SKILL in offered
     tools = bi_cards_tools(runtime.agent.gateway)
-    assert [t.tool.name for t in tools] == [TOOL_NAME]
+    assert [t.tool.name for t in tools] == [TOOL_NAME, ATLAS_TOOL]
     assert GAP_RULE in tools[0].tool.description
 
 

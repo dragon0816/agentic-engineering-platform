@@ -1021,6 +1021,7 @@ tr:last-child td { border-bottom: none; }
 .answer-html .frame-wrap { height: 480px; min-height: 200px; resize: vertical;
   overflow: hidden; border-bottom: 1px solid var(--line); }
 .answer-html.tall .frame-wrap { height: 80vh; }
+.atlas-embed-note { margin: 8px 0 4px; font-size: 13px; color: var(--dim); }
 .answer-html iframe, .viewer-preview iframe { display: block; width: 100%; height: 100%;
   border: 0; background: #fff; }
 .answer-html .frame-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
@@ -3617,6 +3618,91 @@ function answerHtml(session, file) {
   return box;
 }
 
+// A real Atlas panel or dashboard on an answer (BI E2, E3): the Host built the path; the
+// address is this browser's Atlas preference. The contract requires referrerpolicy="origin"
+// (Agent Web sends no-referrer, and localhost to 127.0.0.1 is cross-site) and a real origin
+// inside the frame. Asked server-side first, since a frame's load event cannot tell whether
+// Atlas answered; when it cannot be framed, the answer shows AEP's own chart with a note.
+const ATLAS_EMBED_HEIGHT = {min: 160, max: 1200};
+
+function atlasEmbedAddress() {
+  // Only a loopback Atlas can be asked for from this PC, and never this page's own origin:
+  // scripts with the same origin as their parent would be free of the sandbox.
+  try {
+    const url = new URL(biAtlasUrl());
+    if (!["127.0.0.1", "localhost"].includes(url.hostname)) return null;
+    if (url.origin === location.origin) return null;
+    return {origin: url.origin, port: url.port || (url.protocol === "https:" ? "443" : "80")};
+  } catch (e) { return null; }
+}
+
+function answerAtlasEmbed(session, embed, files) {
+  const box = document.createElement("div");
+  box.className = "answer-atlas";
+  const fallBack = () => {
+    const note = document.createElement("p");
+    note.className = "atlas-embed-note";
+    note.append(text("Atlas 沒有執行，這裡顯示 AEP 的圖表；開啟 Atlas 可看到完整版本。"));
+    const file = files.find((item) => item.path === embed.fallback);
+    box.replaceChildren(note, ...(file ? [answerHtml(session, file)] : []));
+  };
+  const path = String(embed.path || "");
+  const address = atlasEmbedAddress();
+  const ours = path.startsWith("/embed/panel?") || path.startsWith("/embed/dashboard/");
+  if (!address || !ours) { fallBack(); return box; }
+  call("/api/bi/atlas-embed?port=" + encodeURIComponent(address.port))
+    .then((reply) => {
+      if (!reply.framable) { fallBack(); return; }
+      box.replaceChildren(atlasEmbedFrame(embed, address.origin + path, address.origin));
+    })
+    .catch(fallBack);
+  return box;
+}
+
+function atlasEmbedFrame(embed, url, origin) {
+  const figure = document.createElement("figure");
+  figure.className = "answer-html";
+  const wrap = document.createElement("div");
+  wrap.className = "frame-wrap";
+  const frame = document.createElement("iframe");
+  frame.setAttribute("sandbox", "allow-scripts allow-same-origin");
+  frame.setAttribute("referrerpolicy", "origin");
+  frame.dataset.atlasOrigin = origin;
+  frame.title = String(embed.title || "Atlas");
+  frame.src = url;
+  wrap.append(frame);
+  const bar = document.createElement("figcaption");
+  bar.className = "frame-bar";
+  const name = document.createElement("span");
+  name.className = "name"; name.append(text(String(embed.title || "") + "（Atlas）"));
+  const expand = viewerButton("放大", () => {
+    const tall = figure.classList.toggle("tall");
+    if (tall) wrap.style.removeProperty("height");
+    expand.textContent = tall ? "縮小" : "放大";
+    expand.setAttribute("aria-pressed", String(tall));
+  });
+  expand.setAttribute("aria-pressed", "false");
+  bar.append(name, expand);
+  figure.append(wrap, bar);
+  return figure;
+}
+
+window.addEventListener("message", (event) => {
+  // The embed's preferred height: only from the frame it came from, at Atlas's origin.
+  const data = event.data;
+  if (!data || data.type !== "atlas-embed-size" || !Number.isInteger(data.height)) return;
+  if (data.height <= 0) return;
+  for (const frame of document.querySelectorAll("iframe[data-atlas-origin]")) {
+    if (frame.contentWindow !== event.source) continue;
+    if (frame.dataset.atlasOrigin !== event.origin) return;
+    const figure = frame.closest("figure");
+    if (figure && figure.classList.contains("tall")) return;
+    const height = Math.min(ATLAS_EMBED_HEIGHT.max, Math.max(ATLAS_EMBED_HEIGHT.min, data.height));
+    frame.parentNode.style.height = height + "px";
+    return;
+  }
+});
+
 function viewerButton(label, action) {
   const button = document.createElement("button");
   button.type = "button"; button.className = "viewer-button";
@@ -3861,7 +3947,13 @@ function renderConversation(record) {
       said.className = "said" + (replied.status === "failed" ? " bad" : "");
       renderAnswer(said, replied.text);
       const answerFiles = replied.attachments || [];
+      const embeds = replied.atlas_embeds || [];
+      for (const embed of embeds) {
+        said.parentNode.append(answerAtlasEmbed(record.session_id, embed, answerFiles));
+      }
+      const fallbacks = new Set(embeds.map((embed) => embed.fallback));
       for (const file of answerFiles) {
+        if (fallbacks.has(file.path)) continue;  // shown by its embed when Atlas is not running
         const kind = fileKind(file);
         if (kind === "image") said.parentNode.append(answerImage(record.session_id, file));
         else if (kind === "html") said.parentNode.append(answerHtml(record.session_id, file));
