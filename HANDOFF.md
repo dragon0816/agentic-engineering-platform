@@ -16,38 +16,23 @@ not merged.
 `analyses.content`/`changes`, `bi__query` `definition`; the analysis AI's `bi_analysis__read`, merge, enforced slug,
 `edit` in the suggestion, stale refusal and page; dashboards with edits.
 
-**Verification.** `ruff format --check .`, `ruff check .`, `mypy src tests` clean. Passed: `test_bi_chat_edit` with
-`test_bi_chat_save` (37, including the real-browser card test), `test_bi_analysis_edit` with
-`test_bi_dashboard_proposal` (17), `test_bi_analyses` (4), `test_ai_proposed_changes`, `test_bi_chat_sql`,
-`test_bi_feed_fixtures`. **One failure, not from this work:** `test_bi_vault_ui::test_vault_panel_and_dashboard_in_a_browser`
-fails at its line 441 (the page overflows at 390 px after a refused vault join). It fails the same way on `a7629341`
-with that commit's code; a shorter `--basetemp` does not help, and the cause is not known. It passed in the
-2026-11-01 full suite. The full suite is not run yet (the orchestrator's go first).
-
 **Known points.**
 - A script proposed from the general chat shows "Not run yet" on the card; it runs on Apply (decision entry says why).
 - The chat reads the published definition and edits the working copy; a never-published analysis is edited with the
   Knowledge page's AI.
 - `_apply_dashboard` stages unit by unit (as K1): a run failing partway leaves earlier units staged, none committed.
 
-**Atlas embedding (E2, E3, E4), built against Atlas `0aff59f`, which is not final.** `bi__atlas_show`,
+**Atlas embedding (E1-E5), against Atlas's final contract at `c7f9468`.** `bi__atlas_show`,
 `host_runtime/bi_atlas_embed.py`, `atlas_embeds` on the answer, `GET /api/bi/atlas-embed`, `answerAtlasEmbed` on the
-page. Design §4; contract `docs/CONTRACTS.md` "BI Atlas embeds in the chat". **Nothing has run against a real Atlas**:
-only a stand-in on a loopback port. Its goldens are not vendored, so `test_bi_atlas_embed` holds the contract's
-examples inline.
+page, goldens in `tests/fixtures/atlas_embed_golden/` with a drift check. Design §4; contract `docs/CONTRACTS.md` "BI
+Atlas embeds in the chat". Live acceptance with a real model and a real Atlas passed: design's E5.
 
-**E verification.** `ruff format --check .`, `ruff check .`, `mypy src tests` (915 files) clean. Passed after the last
-change: `test_bi_atlas_embed`, `test_file_viewer_web`, `test_bi_cards`, `test_bi_chat_charts`, `test_bi_chat_sql`,
-`test_bi_subscriptions`, `test_bi_skill_agent`, `test_bi_schemas`, `test_bi_vault_bench`. `test_bi_query_analyses`,
-`test_bi_atlas_import` and `test_chat_approvals_web` passed in a run before the last test-only fixes. One
-`navigation_failed` in `test_bi_chat_charts`'s browser test under a heavy parallel run did not recur alone or in the
-next run.
+**Verification.** `ruff format --check .`, `ruff check .` and `mypy src tests` clean, and the targeted tests in the
+orchestrator's report pass on the rebased branch. The full suite runs on the integrated result of the BI workers, by
+the orchestrator; do not run it on this branch alone.
 
-**Next actions.** (1) Wait for the orchestrator's final Atlas hash; then vendor the goldens byte for byte from
-`web/tests/fixtures/atlas_embed_golden/` with a drift check, as `scripts/check_atlas_dashboard_golden.py` does, and
-replace the inline examples (E1). (2) Real-model acceptance after its go, only in a temp workspace under `%TEMP%`
-with its own Agent Web on a free loopback port. (3) The orchestrator runs the full suite on the integrated result;
-do not run it on this branch. `test_bi_vault_ui::test_vault_panel_and_dashboard_in_a_browser` is worker A's.
+**Next actions.** (1) Orchestrator: integrate. (2) `test_bi_vault_ui::test_vault_panel_and_dashboard_in_a_browser` is
+worker A's. (3) Optional: refresh the frame's caption after a republish, and hide the fallback chip while framed.
 
 ## Asking a vault from the general chat (2026-11-02, Claude Code, worker D)
 

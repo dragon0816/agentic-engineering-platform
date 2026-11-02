@@ -6343,8 +6343,8 @@ Atlas; the AI edits existing panels; AEP never writes Atlas dashboards".
   `[{"field", "before", "after"}]` in that order; an edit's `base` = `analyses.digest(analyses.content(unit))`.
 - **Chat edit**: `propose_change` kind `bi_analysis_edit` (in `KINDS`, not in `TELEGRAM_KINDS`; Apply in Telegram
   answers `web_only`). Values (alias `dataset` → `vault`): `vault`, `slug` (saved in the working copy), then only
-  what changes: `title`, `question`, `chart`, `sql` or `script` (the whole code; `kind` follows), `params`,
-  `requires` (`{}` clears). Refused back to the model: an unknown slug or vault, both `sql` and `script`, no change,
+  what changes: `title`, `question`, `chart` (only its keys given change), `sql` or `script` (the whole code; `kind`
+  follows), `params`, `requires` (`{}` clears). Refused back to the model: an unknown slug or vault, both `sql` and `script`, no change,
   SQL that the guard denies, a chart naming columns the result lacks. Card rows `Knowledge base`, then each changed
   field (`Title`, `Question`, `Kind`, `SQL` or `Script`, `Chart`, `Parameters`, `Requires`; Now and After, clipped to
   400 characters ending `…`), then `Result on the working copy` (`<n> rows: <first three>`; Now may be `Does not run
@@ -6368,7 +6368,7 @@ Atlas; the AI edits existing panels; AEP never writes Atlas dashboards".
 ## BI Atlas embeds in the chat (E2, E3, E4, 2026-11-02)
 
 Design `docs/phases/BI_CHAT_EMBED_AND_PANEL_EDIT.md` §4; producer contract Atlas `docs/AEP_EMBED_CONTRACT.md`
-(`0aff59f`, not final).
+(final at `c7f9468`; goldens in `tests/fixtures/atlas_embed_golden/`).
 
 - **Tool** `bi__atlas_show {dataset?, analysis?, params?, dashboard?}`, offered with `bi__query`. Succeeded data:
   `{note, atlas_embed, attach?, columns?, rows?}`, or `{dashboards: [name]}` with no arguments. Failure codes:

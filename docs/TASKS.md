@@ -4089,9 +4089,12 @@ s-k-20261011T102952` (not published).
     stored answer's `atlas_embeds`, `GET /api/bi/atlas-embed` (server-side HEAD), the frame sized from its message,
     AEP's chart with a note when Atlas cannot be framed. Tests `test_bi_atlas_embed` (a stand-in Atlas, with a real
     browser). `test_file_viewer_web`'s same-origin guard now names the one Atlas frame exactly.
-  - [ ] BI E1: vendor Atlas's embed goldens byte for byte with a drift check; waits for the final hash from the
-    orchestrator (Atlas's embed pages are not committed and its I1 has not run).
-  - [ ] BI E5 acceptance: a real Atlas and the real model in a temp workspace; waits for Atlas and the orchestrator's go.
+  - [x] 2026-11-02, Claude Code: BI E1, Atlas's embed goldens vendored byte for byte from `c7f9468` with a drift check
+    (`scripts/check_atlas_dashboard_golden.py`), and its changed `dashboard-mixed.json` over K2's copy.
+  - [x] 2026-11-02, Claude Code: BI E5 live acceptance, a real model and a real Atlas in a temp workspace: panel framed
+    with the feed's numbers, fallback when Atlas stopped, an approved edit published into the open frame, a dashboard
+    by name. It found one bug, fixed with a test: a chart edit now changes only the keys given. Evidence in the
+    design's E5.
 
 ## Voice input: Telegram voice and the Agent Web microphone (2026-11-01)
 

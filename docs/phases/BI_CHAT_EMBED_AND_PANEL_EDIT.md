@@ -39,7 +39,7 @@ paths below show this list and neither stages a change when it is empty.
 Web only, like `bi_analysis`; the BI side stays in `host_runtime/bi_chat_save.py`.
 
 Values: `vault`, `slug` (must exist in the vault's working copy), and only what changes: `title`, `question`,
-`chart`, `sql` **or** `script`, `params`, `requires`. Omitted fields keep their value; `params: {}` or
+`chart` (only its keys given), `sql` **or** `script`, `params`, `requires`. Omitted fields keep their value; `params: {}` or
 `requires: {}` clears them. (`sql`/`script`, never a key named `code`: `propose_change` refuses secret-shaped
 names.)
 
@@ -96,10 +96,9 @@ After rows with the SQL and the chart; Apply stages the edit.
 
 ## 4. Part E: embedding Atlas in the chat
 
-Built against Atlas's `docs/AEP_EMBED_CONTRACT.md` at Atlas commit `0aff59f` (branch `atlas-embed`). That contract is
-not final: Atlas's embed pages are not committed and its I1 has not run. **E1 vendors the goldens only when the
-orchestrator confirms the final hash**; until then the path tests hold the contract's examples inline, and nothing
-has run against a real Atlas.
+Built against Atlas's `docs/AEP_EMBED_CONTRACT.md`, final at Atlas commit `c7f9468` (branch `atlas-embed`). Its
+goldens are vendored in `tests/fixtures/atlas_embed_golden/`. A frame left on `waiting` is not a fallback: only a
+failed server-side probe falls back, and the page reads no embed state.
 
 The contract overrides the first brief in two places: `referrerpolicy="origin"` (Agent Web sends `Referrer-Policy:
 no-referrer`, and `localhost:53583` framing `127.0.0.1:8127` is cross-site, so Atlas answers 403 without it), and the
@@ -107,11 +106,11 @@ file viewer's `sandbox="allow-scripts"` cannot be used (an opaque origin cannot 
 
 | ID | Task | Status |
 |---|---|---|
-| E1 | Vendor the contract's goldens byte for byte with a drift check | waits for the final hash |
+| E1 | Vendor the contract's goldens byte for byte with a drift check | done |
 | E2 | The answer part and the tool | built |
 | E3 | The probe and the fallback | built |
 | E4 | The model asks for an embed; dashboards listed by name | built |
-| E5 | Browser test with a stand-in Atlas | built; real-model acceptance waits for Atlas and the orchestrator's go |
+| E5 | Browser test with a stand-in Atlas; real-model acceptance | done, see below |
 
 ### E2 The answer part
 
@@ -153,6 +152,25 @@ dashboards). Agent Web only: on Telegram it says to use `bi__query`.
 - **One chart, not two**: `bi_chart_files` drops `bi__query`'s page for an analysis the same turn also frames.
 
 Ad-hoc SQL and card answers stay C2's HTML: Atlas has no panel for them.
+
+### E5 Live acceptance (2026-11-02)
+
+A real model (`gpt-5.5` through the gateway) and a real Atlas built from `c7f9468` with `VITE_AEP_BI_PORT=53622`, in a
+temp workspace under `%TEMP%` with its own Agent Web on 53622 and Atlas on 8128 with a temp data folder. The driver is
+not committed; it called `bi_feed_api.refresh` after joining the fixture vault and set the server's read port to 8128.
+
+- **Panel**: the model called `bi__atlas_show`; the frame reached `ready` and drew TW 3, DE 1, JP 1, US 1, the feed's
+  rows, sized to 450 px by Atlas's message.
+- **Atlas stopped**: the same answer showed the note and the C2 chart in `sandbox="allow-scripts"`, with no Atlas frame.
+- **Edit**: the first run failed. The model sent `chart: {"type": "line"}`, and replacing the whole chart was refused
+  for lacking x and y. Now a chart changes only the keys given (with a regression test). On the rerun the card showed
+  Title and Chart before and after; Apply staged it. Committed and pushed, the feed's digest and the open frame did not
+  move. Published, only that analysis's digest moved and the open frame turned to the new title and a line chart in 6
+  s without a reload. Its numbers gained EU, the card pushed after v1, as publishing that commit should.
+- **Dashboard**: the model opened `Embed fixture` by name; the frame reached `ready` with its panels' data.
+
+Seen and left: the frame's caption keeps the title stored with the answer after a republish, and the fallback page's
+chip stays under the answer while Atlas is framed.
 
 ## 5. Tasks and order
 
