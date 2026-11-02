@@ -33,6 +33,7 @@ TOOLS = {
     "bi_skill__try",
     "bi_skill__compare",
     "bi_skill__test_cases",
+    "bi_skill__benchmark",
     "bi_skill__suggest",
     "bi__query",
 }

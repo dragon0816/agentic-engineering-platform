@@ -10,6 +10,10 @@ built and on what users get, so it runs as a Host sub-run of
   staged in the vault; nothing becomes a card);
 - `bi_skill__compare`: two trial runs of the same source side by side;
 - `bi_skill__test_cases`: the vault's extraction cases read with the draft;
+- `bi_skill__benchmark`: the effect on what users get: the vault's questions
+  asked on the working cards and on a scratch copy holding the draft's trial
+  candidates (`docs/phases/BI_BUILD_FLOW.md` §6; never a commit, never a T1
+  report, so it never satisfies the push check);
 - `bi__query`: the cards of the working copy, read the way the Agent reads;
 - `bi_skill__suggest`: the final suggestion, checked as a hand-saved skill;
   a problem goes back to the model to fix.
@@ -21,6 +25,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import tempfile
 from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any
@@ -31,6 +36,7 @@ from capabilities.bi_cards import (
     ai_runs,
     benchmark,
     methods,
+    runs,
     sessions,
     skill_session,
     vault,
@@ -41,9 +47,13 @@ from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import VAULT_PREFIX, BiStore, BiStoreError
 from common.execution import RequestContext
 from host_runtime import bi_bench, bi_cards_tools, bi_harness
+from knowledge.questions import Question, grade
 from models.contracts import ModelMessage
 
 MAX_TRIAL_TEXT = 6000
+MAX_BENCH_QUESTIONS = 10
+MAX_BENCH_SOURCES = 3
+MAX_BENCH_ANSWER = 800
 TURN_SECONDS = 15 * 60
 TOOL_CALLS = 40
 
@@ -57,7 +67,9 @@ Work like an engineer who checks the effect before proposing:
 2. Try your draft rule on a source with bi_skill__try (a trial: nothing is saved, no card is
    written) and, when useful, compare with an earlier run (bi_skill__compare). Run the knowledge
    base's extraction cases with your draft (bi_skill__test_cases) when it has any. Use bi__query to
-   see what the cards answer now.
+   see what the cards answer now. Before you finish a rule change, when the knowledge base has
+   questions, see the effect on what users get with bi_skill__benchmark (it asks the model many
+   times, so call it once or twice).
 3. Finish by calling bi_skill__suggest exactly once with your suggestion. If it reports problems,
    fix them and call it again. Then reply in one or two sentences.
 
@@ -199,6 +211,94 @@ def harness_asker(
                 )
             return HostToolOutcome(status="succeeded", data={"cases": scored})
 
+        def bench(args: Mapping[str, Any]) -> dict[str, Any]:
+            skill = draft(args.get("changes") or {})
+            units = vault.Vault(workspace, vault_id).repo.working_units()
+            listed = vault_checks.questions(units)
+            graded = [q for q in listed if q["must"] or q["must_not"]]
+            source_ids = [str(s) for s in args.get("source_ids") or []][:MAX_BENCH_SOURCES]
+            not_tested = []
+            if not graded:
+                not_tested.append("這個知識庫還沒有評分的測試題")
+            if not source_ids:
+                not_tested.append("沒有給 source_ids：草稿只影響之後擷取的卡片，所以只問了工作版本")
+            if len(graded) > MAX_BENCH_QUESTIONS:
+                not_tested.append(f"只問了前 {MAX_BENCH_QUESTIONS} 題，共 {len(graded)} 題")
+            current = (working, "內容來自這台電腦的工作版本")
+
+            def ask(picked: tuple[BiStore, str], item: Mapping[str, Any]) -> dict[str, Any]:
+                question = Question(
+                    set=item["set"],
+                    path=item["unit"],
+                    text=item["question"],
+                    must=tuple(item["must"]),
+                    must_not=tuple(item["must_not"]),
+                )
+                reply = bi_bench.ask_on(
+                    gateway, workspace, dataset, actor, namespace, picked, item["question"]
+                )
+                text = str(reply.get("answer") or "")
+                return {
+                    **grade(question, text).model_dump(mode="json"),
+                    "answer": sessions.fenced("Answer:", text[:MAX_BENCH_ANSWER]),
+                }
+
+            with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as folder:
+                scratch = working.scratch_copy(Path(folder))
+                added = 0
+                for source_id in source_ids:
+                    run = ai_runs.start(
+                        workspace,
+                        dataset,
+                        now_ai,
+                        kind="trial",
+                        source_id=source_id,
+                        instructions=None,
+                        types=None,
+                        actor=f"{actor} via web",
+                        folder=args.get("folder")
+                        or (skill.applies_to[0] if skill.applies_to else None),
+                        skill_draft=skill,
+                    )
+                    rows = runs.clean_rows(Staging(workspace, dataset), run["id"])
+                    if rows:
+                        scratch.apply(
+                            rows, filename=source_id, entity_type="draft", actor=f"{actor} via web"
+                        )
+                        added += len(rows)
+                scratch.read_only = True
+                after = (scratch, "內容來自工作版本加上草稿規則試跑出來的候選卡（只是試算）")
+                results = []
+                for item in graded[:MAX_BENCH_QUESTIONS]:
+                    entry = {"question": item["question"], "before": ask(current, item)}
+                    if source_ids:
+                        entry["after"] = ask(after, item)
+                    results.append(entry)
+            compared = [r for r in results if "after" in r]
+            return {
+                "questions": results,
+                "regressions": [
+                    r["question"]
+                    for r in compared
+                    if r["before"]["passed"] and not r["after"]["passed"]
+                ],
+                "improved": [
+                    r["question"]
+                    for r in compared
+                    if r["after"]["passed"] and not r["before"]["passed"]
+                ],
+                "candidates_added": added,
+                "cases": cases(args),
+                "not_tested": not_tested,
+            }
+
+        async def benchmark_tool(_c: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
+            try:
+                data = await asyncio.to_thread(bench, args)
+            except BiStoreError as error:
+                return _failed(error.code, error.message)
+            return HostToolOutcome(status="succeeded", data=data)
+
         async def suggest(_c: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
             attempts[0] += 1
             answer = {
@@ -261,6 +361,24 @@ def harness_asker(
                     [],
                 ),
                 test_cases,
+            ),
+            HostTool(
+                _tool(
+                    "bi_skill__benchmark",
+                    "See the effect of the skill, or of `changes`, on what users get: reads up to "
+                    "3 `source_ids` with it into a scratch copy of the cards (never saved), asks "
+                    "the knowledge base's graded questions (first 10) on the working cards and on "
+                    "that copy, and scores the extraction cases. Returns each question's grades, "
+                    "`regressions`, `improved` and what it could not test. Slow: it asks the model "
+                    "for every question.",
+                    {
+                        **changes,
+                        "source_ids": strings,
+                        "folder": {"type": "string"},
+                    },
+                    [],
+                ),
+                benchmark_tool,
             ),
             HostTool(
                 _tool(

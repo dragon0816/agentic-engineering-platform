@@ -333,6 +333,22 @@ class BiStore:
     def exists(self) -> bool:
         return self.path.is_file()
 
+    def scratch_copy(self, folder: Path) -> BiStore:
+        """A writable copy of these cards in `folder`, to see the effect of
+        something without keeping it (`BI_BUILD_FLOW.md` §6): writes to it are
+        never commits and never reach this dataset."""
+        folder.mkdir(parents=True, exist_ok=True)
+        with (
+            sqlite3.connect(f"file:{self.path}?mode=ro", uri=True) as source,
+            sqlite3.connect(folder / DB_FILE) as target,
+        ):
+            source.backup(target)
+        source.close()
+        target.close()
+        copy = BiStore(self.workspace, self.dataset, view=folder)
+        copy.read_only = False
+        return copy
+
     def refuse_write(self) -> None:
         if self.read_only:
             raise BiStoreError("dataset_read_only", READ_ONLY_MESSAGE)

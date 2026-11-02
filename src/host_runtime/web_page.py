@@ -14500,6 +14500,7 @@ async function biBuildOpenMethod(id, fill) {
 
 const BI_TOOL_NAME = {bi_skill__sources: "列出來源", bi_skill__read_source: "讀來源",
   bi_skill__try: "草稿試跑", bi_skill__compare: "比較試跑", bi_skill__test_cases: "擷取測試",
+  bi_skill__benchmark: "看對答案的影響",
   bi__query: "查卡片", bi_skill__suggest: "提出建議", bi_analysis__sql: "SQL",
   bi_analysis__python: "Python 腳本", bi_analysis__propose: "提出分析",
   bi_analysis__read: "讀取分析", bi_analysis__propose_dashboard: "提出 Dashboard",

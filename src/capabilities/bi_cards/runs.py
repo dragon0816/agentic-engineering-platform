@@ -742,31 +742,10 @@ def commit(workspace: Path, dataset: str, run_id: str, *, actor: str) -> dict[st
     if not chosen:
         raise BiStoreError("nothing_accepted", "沒有已接受、需要寫入的候選卡")
     names = {s: (staging.source(s) or {}).get("name", "") for s in run["source_ids"]}
-    rows = []
-    for number, candidate in enumerate(chosen, start=1):
-        values = _values(candidate)
-        planned = PlannedRow(
-            row=number,
-            entity_type=candidate["entity_type"],
-            canonical_key=candidate["canonical_key"],
-            name=str(candidate.get("name") or candidate["canonical_key"]),
-            values=values,
-            synthetic=bool(candidate.get("synthetic")),
-            ref=f"run:{run_id}/{candidate['id']}",
-            evidence={
-                f["field"]: [
-                    {
-                        **item,
-                        "source_name": names.get(item["source_id"], ""),
-                        "basis": f["basis"],
-                    }
-                    for item in f["evidence"]
-                ]
-                for f in candidate["fields"]
-                if f["evidence"]
-            },
-        )
-        rows.append((planned, candidate["id"], candidate["base_version"]))
+    rows = [
+        (_planned(candidate, number, run_id, names), candidate["id"], candidate["base_version"])
+        for number, candidate in enumerate(chosen, start=1)
+    ]
     applied = store.commit_run(
         run_id, rows, filename=", ".join(n for n in names.values() if n), actor=actor
     )
@@ -781,6 +760,43 @@ def commit(workspace: Path, dataset: str, run_id: str, *, actor: str) -> dict[st
     }
     staging.set_status(run_id, "committed", commit_result=result)
     return _committed(staging, run_id, result, counts, already=False)
+
+
+def _planned(
+    candidate: dict[str, Any], number: int, run_id: str, names: dict[str, Any]
+) -> PlannedRow:
+    return PlannedRow(
+        row=number,
+        entity_type=candidate["entity_type"],
+        canonical_key=candidate["canonical_key"],
+        name=str(candidate.get("name") or candidate["canonical_key"]),
+        values=_values(candidate),
+        synthetic=bool(candidate.get("synthetic")),
+        ref=f"run:{run_id}/{candidate['id']}",
+        evidence={
+            f["field"]: [
+                {
+                    **item,
+                    "source_name": names.get(item["source_id"], ""),
+                    "basis": f["basis"],
+                }
+                for item in f["evidence"]
+            ]
+            for f in candidate["fields"]
+            if f["evidence"]
+        },
+    )
+
+
+def clean_rows(staging: Staging, run_id: str) -> list[PlannedRow]:
+    """A run's writable candidates without errors, as rows, for a scratch copy
+    of the cards (`bi_skill__benchmark`, `BI_BUILD_FLOW.md` §6); no review."""
+    run = staging.run_row(run_id)
+    if run is None:
+        raise BiStoreError("run_unknown", "找不到這次執行")
+    names = {s: (staging.source(s) or {}).get("name", "") for s in run["source_ids"]}
+    clean = [c for c in staging.candidates(run_id) if c["action"] in WRITABLE and not c["errors"]]
+    return [_planned(c, number, run_id, names) for number, c in enumerate(clean, start=1)]
 
 
 def index_state(store: BiStore) -> dict[str, Any]:

@@ -237,6 +237,33 @@ class BenchRuntime:
     schema_asker_for: Callable[[str, str, str], Any] | None = None
 
 
+def ask_on(
+    gateway: Any,
+    workspace: Path,
+    dataset: str,
+    actor: str,
+    namespace: str,
+    picked: tuple[BiStore, str],
+    question: str,
+) -> Mapping[str, Any]:
+    """Ask through the Agent harness as a Host sub-run, offering only `bi__query`,
+    read for this turn from the store `picked` (with its source note)."""
+    handler = QueryHandler(workspace, store_for=lambda d: picked if d == dataset else None)
+    tool = bi_cards_tools.reading_tool(gateway, handler)
+    if tool is None:
+        raise BiStoreError("bi_skill_off", "BI Skill 沒有開啟：到 Capabilities 開啟後再測試")
+    result = bi_harness.converse(
+        gateway,
+        profile="bi-benchmark",
+        actor=actor,
+        namespace=namespace,
+        history=[ModelMessage(role="user", text=question)],
+        tools=[tool],
+        role=ROLE.format(dataset=dataset),
+    )
+    return {"ok": result.status == "answered", "answer": result.text}
+
+
 def agent_ask(gateway: Any, workspace: Path, vault_id: str, actor: str, namespace: str) -> Ask:
     """Ask through the Agent harness as a Host sub-run (no memory, no session),
     offering only `bi__query`, read for this turn from the chosen version."""
@@ -251,21 +278,7 @@ def agent_ask(gateway: Any, workspace: Path, vault_id: str, actor: str, namespac
         return vault.reading_store(workspace, dataset), note
 
     def ask(question: str, side: Side) -> Mapping[str, Any]:
-        picked = chosen(side)
-        handler = QueryHandler(workspace, store_for=lambda d: picked if d == dataset else None)
-        tool = bi_cards_tools.reading_tool(gateway, handler)
-        if tool is None:
-            raise BiStoreError("bi_skill_off", "BI Skill 沒有開啟：到 Capabilities 開啟後再測試")
-        result = bi_harness.converse(
-            gateway,
-            profile="bi-benchmark",
-            actor=actor,
-            namespace=namespace,
-            history=[ModelMessage(role="user", text=question)],
-            tools=[tool],
-            role=ROLE.format(dataset=dataset),
-        )
-        return {"ok": result.status == "answered", "answer": result.text}
+        return ask_on(gateway, workspace, dataset, actor, namespace, chosen(side), question)
 
     return ask
 
