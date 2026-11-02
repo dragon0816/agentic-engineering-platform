@@ -21,18 +21,21 @@ askable`, `propose_change` kind `knowledge_binding`, page button); `7f255dbf` V4
 `test_assistant_tools`, `test_harness_output_limit_g4` passed on the V1 and V2 states. **The full suite has not run.**
 `r6_precheck` has not been run on the real OneDrive folder, and must not be by an agent.
 
-**Not done.** V5 live acceptance with real models: waits for the orchestrator's go, like the full suite. Only under
-`%TEMP%`, its own Agent Web on a free loopback port, never 53583, the owner's workspace or OneDrive. V3 is stopped for
-the owner (design §5: A leave wiki-only, B a separate `aep_bi_query`, C route through `aep_knowledge_ask`).
+**Not done.** V3: the owner chose a separate `aep_bi_query` (design §5), shipped off behind a per-tool switch; the
+assistant MCP has no such switch, so it is stopped with that question to the orchestrator. V5 live acceptance with real
+models: not go yet, the model gateway did not answer its health route; the orchestrator sends the go and the credential
+variable's name. Only under `%TEMP%`, its own Agent Web on a free loopback port, never 53583, the owner's workspace or
+OneDrive; do not read the owner's `host.json`. The full suite is the orchestrator's, on the integrated branches: do not
+run it here.
 
 **Known points.**
-- A never-published vault is still answered from its pushed head, marked as such (decision 8); only local work and
-  pushes after the tag are refused. If the owner wants those refused too, decision 8 changes.
+- A never-published vault is answered from its pushed head, marked as such (decision 8, kept by the owner 2026-11-02);
+  only local work and pushes after the tag are refused.
 - The conversation offers a Knowledge Skill's tool only when the Skill's namespace is the host's.
 - A host without `knowledge_pipeline` shows no wiki repository card, so no button; the route and the chat proposal work.
 - R6 cannot reuse the id `market-bi` on the owner's PC (`vault_exists`): runbook D1. Other R6 decisions: D2–D5.
 
-**Next action.** After the orchestrator's go: V5 and the full suite, then rebase onto `main`, re-run the checks, report.
+**Next action.** The orchestrator's answer on the switch decides V3; then V5 after its go.
 
 ## BI charts in the chat and the Dashboard's sources (2026-11-01, Claude Code)
 

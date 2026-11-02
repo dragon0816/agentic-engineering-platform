@@ -6028,3 +6028,18 @@ Owner goal relayed by the BI orchestrator; design in `docs/phases/BI_VAULT_ASKIN
 - **Whether `aep_knowledge_ask` covers BI is not decided**: the architecture does not answer it and it widens a data
   boundary the owner set on 2026-10-12. Options in the design §5; nothing implemented.
 - **No V4 migration tool** (owner): `market-bi` is rebuilt from raw sources with the owner present (R6).
+
+## 2026-11-02: External agents ask BI through a separate tool, `aep_bi_query` (owner, relayed by the BI orchestrator)
+
+Answers V3 of `docs/phases/BI_VAULT_ASKING.md` (§5).
+
+- **Option B: a new MCP tool `aep_bi_query`.** The owner widens the 2026-10-12 external-agent data boundary to BI cards
+  for this tool. The widening applies when the tool ships; **it has not shipped**: the defaults require it off until the
+  owner turns it on, and the assistant MCP has no per-tool switch (open question to the orchestrator).
+  Rejected: leaving the assistant tools wiki-only (external agents could not ask BI); routing BI through
+  `aep_knowledge_ask` (breaks what `validated` means, and adds a routing guess inside a tool).
+- **Defaults (orchestrator):** published version only (pushed head, labelled, when never published); saved analyses and
+  built-in queries only, no ad-hoc SQL over MCP in this version; the assistant-MCP token and grant pattern; the same
+  host-written source line in the result.
+- **Decision 8 stays (owner):** a never-published vault is answered from its pushed head, labelled.
+- **Accepted (owner):** `propose_change` kind `knowledge_binding`, including unbind.

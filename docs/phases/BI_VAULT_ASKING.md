@@ -43,7 +43,7 @@ pushed after the published tag are never answered.
 | V2a | `GET /api/knowledge/askable`: for each vault and repository, whether the chat can ask it and each reason why not | — |
 | V2b | `propose_change` kind `knowledge_binding` (bind or unbind a wiki repository; web only) | V2a |
 | V2c | Knowledge page: state, reasons and a button that opens the proposal card | V2a, V2b |
-| V3 | Whether `aep_knowledge_ask` covers BI vaults: the docs do not answer; options in §5, **stopped for the owner** | — |
+| V3 | `aep_bi_query` (owner chose option B, §5): **blocked**, the assistant MCP has no per-tool switch | — |
 | V4 | `docs/runbooks/R6_MARKET_BI.md` and `scripts/r6_precheck.py` (read only) | — |
 | V5 | Live acceptance with real models in a temp workspace, after the orchestrator's go | V1–V2 |
 
@@ -117,7 +117,19 @@ beyond what status already does):
 its reasons with their fixes; a wiki repository not bound has 「讓 Agent 可以問這個知識庫」, which opens the proposal
 through `renderActionCard`. Page changes stay in these sections (other workers edit the chat and the build flow).
 
-## 5. V3: should `aep_knowledge_ask` cover BI vaults? **Not decided; for the owner**
+## 5. V3: should `aep_knowledge_ask` cover BI vaults?
+
+**Decided (owner, 2026-11-02): option B, a separate MCP tool `aep_bi_query`. Not implemented: blocked on a question
+to the orchestrator.** Defaults set by the orchestrator: published version only (pushed head, labelled, when never
+published); saved analyses and built-in queries only, no ad-hoc SQL over MCP in this version; the assistant-MCP token
+and grant pattern; the result carries the same host-written source line; shipped off until the owner turns it on in
+Settings, if the pattern has a per-tool switch, otherwise stop and ask.
+
+**The pattern has no per-tool switch** (read at `a7629341`): the assistant token opens every tool in
+`assistant_tools.TOOLS`; Settings > Coding agents registers or removes the whole `aep-assistant` server; the stdio
+bridge answers `tools/list` from that constant without reaching Agent Web. So the question is open.
+
+The options as they stood before the owner's choice:
 
 The architecture does not answer this. `ARCHITECTURE.md` says only that MCP exposes capabilities and that Knowledge
 queries go through the Bridge. `COPILOT_INTEGRATION.md` §2 defines the tool as "the AEP Knowledge Harness's answer",
@@ -131,7 +143,7 @@ data with named customers), and BI has no harness validating an answer the way t
 | B | A separate read-only tool `aep_bi_query` over the same capability | Clear name; grant and audit as `bi__query`; external agents can chart nothing, read rows | Widens the 2026-10-12 data decision to BI; the answer is not validated |
 | C | `aep_knowledge_ask` routes BI questions too | One tool | Breaks `validated` unless BI gets a harness check; routing guess inside a tool |
 
-No option is implemented. Independent of it: `aep_knowledge_ask` serving only the first binding is existing behaviour,
+Independent of the choice: `aep_knowledge_ask` serving only the first binding is existing behaviour,
 now stated on the proposal card.
 
 ## 6. V4: the R6 runbook
