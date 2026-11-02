@@ -47,8 +47,8 @@ Work like an engineer:
 1. Look at what the knowledge base really holds: bi__query for the cards, bi_questions__analyses for
    the saved analyses.
 2. Draft questions a user would really ask, each about something the cards or analyses answer. Take
-   each must term from what you read, exactly as it is written there. Use must_not for wrong answers
-   the knowledge base could plausibly give.
+   each must term from what you read, exactly as it is written there. Use must_not only for false
+   claims; never a term the cards hold, which a right answer may well mention.
 3. Try a question you are unsure of with bi_questions__try (nothing is saved).
 4. Finish by calling bi_questions__propose exactly once. If it reports problems, fix them and call
    it again. Then reply in one or two sentences.

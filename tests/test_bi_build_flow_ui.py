@@ -236,6 +236,9 @@ def test_the_whole_build_flow(
         page.click("#bi-b-commit-go")
         page.see("bi-b-done", "已寫入")
         assert "A 公司評估 TSN" in {c["name"] for c in store.card_rows()}
+        # Every accepted candidate was written, not only those accepted before moving on.
+        accepted = int(str(page.run("bi.build.run.summary.accepted")))
+        assert accepted >= 2 and len(store.card_rows()) - before == accepted
 
         # -- step 3: AI benchmark questions, added by the person ------------------------------
         page.click("#bi-stepper [data-stage=test]")

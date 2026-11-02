@@ -12782,7 +12782,8 @@ function biBuildAllowed() {
   const open = run && run.kind === "ingest" && ["review", "partial"].includes(run.status);
   const accepted = open && run.summary && run.summary.accepted > 0;
   return {source: true, schema: true, method: has, review: has,
-    commit: !!accepted, result: !!(run && run.status === "committed"), test: true};
+    commit: !!accepted && !bi.build.accepting, result: !!(run && run.status === "committed"),
+    test: true};
 }
 
 function biBuildStepper(stage, allowed) {
@@ -14923,7 +14924,14 @@ function biBuildShowCandidate(candidateId) {
 el("bi-b-accept-clean").addEventListener("click", async () => {
   const todo = bi.build.candidates.filter((c) => c.review === "pending" && !c.errors.length
     && c.action !== "skip");
-  for (const candidate of todo) await biBuildReview(candidate.id, {review: "accepted"});
+  // 「下一步」 waits for all of them: moving on early wrote only the ones accepted so far.
+  bi.build.accepting = true;
+  try {
+    for (const candidate of todo) await biBuildReview(candidate.id, {review: "accepted"});
+  } finally {
+    bi.build.accepting = false;
+    biBuildRenderRun();
+  }
   biNotice(true, "已接受 " + todo.length + " 張沒有錯誤的候選卡。");
 });
 
