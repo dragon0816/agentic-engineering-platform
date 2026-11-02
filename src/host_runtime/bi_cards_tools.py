@@ -282,7 +282,8 @@ async def _atlas_show(
         {"kind": "panel", "vault": vault_id, "slug": slug, "params": chosen,
          "path": path, "title": str(section.get("title") or slug)},
         written,
-        {"columns": section.get("columns"), "rows": section.get("rows")},
+        {"columns": section.get("columns"), "rows": section.get("rows"),
+         "vault": result.data.get("vault")},
     )  # fmt: skip
 
 
@@ -525,12 +526,13 @@ def _cited(answer: str, source: dict[str, Any]) -> bool:
 
 
 def _vault_lines(result: Any) -> list[str]:
-    """The source line of each vault version a succeeded `bi__query` call of
-    this turn read, once each, in the order first used."""
+    """The source line of each vault version a succeeded `bi__query` or
+    `bi__atlas_show` call of this turn read, once each, in the order first used."""
     found: dict[tuple[str, str], str] = {}
     for item in getattr(result, "tools", None) or ():
         host = getattr(item, "host", None)
-        if getattr(item, "name", "") != TOOL_NAME or host is None or host.status != "succeeded":
+        name = getattr(item, "name", "")
+        if name not in (TOOL_NAME, ATLAS_TOOL) or host is None or host.status != "succeeded":
             continue
         read = host.data.get("vault") if isinstance(host.data, dict) else None
         if isinstance(read, dict):

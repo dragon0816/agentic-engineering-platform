@@ -35,6 +35,7 @@ from host_runtime.conversations import ConversationTurnRequest
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
 from host_runtime.web_page import PAGE
+from knowledge.repo import repository
 from scripts import bi_feed_fixtures as fixtures
 from scripts import check_atlas_dashboard_golden as drift
 
@@ -353,6 +354,18 @@ def test_the_answer_stores_the_embed_and_keeps_its_page_once(web: AgentWeb) -> N
     stored = web.conversations(session)["selected"]["messages"][-1]
     assert stored["atlas_embeds"][0]["path"] == embed["path"]
     assert embed["fallback"] in {item["path"] for item in stored["attachments"]}
+
+
+def test_a_framed_panels_answer_cites_the_vault_and_version(web: AgentWeb) -> None:
+    # Asking a vault (BI_VAULT_ASKING.md): an answer from a vault says which version it read.
+    read = _show(web, {"dataset": DATASET, "analysis": SLUG}).data["vault"]
+    line = repository.source_line(DATASET, read)
+    _session, answer = _turn(
+        web,
+        {"tools": [(ATLAS_TOOL, {"dataset": DATASET, "analysis": SLUG})]},
+        {"text": "TW 最多，3 家。"},
+    )
+    assert line in answer["answer"]
 
 
 def test_an_ad_hoc_query_still_shows_its_chart(web: AgentWeb) -> None:

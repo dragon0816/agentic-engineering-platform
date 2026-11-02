@@ -143,7 +143,8 @@ dashboards). Agent Web only: on Telegram it says to use `bi__query`.
 - **Panel**: read through the same `CapabilityInvocation` as `bi__query` (grants and audit unchanged), so an unknown
   slug or a bad value goes back to the model rather than reaching Atlas as `invalid_link`. A parameter the analysis
   does not declare is refused (`bi__query` itself ignores it); only parameters asked for go in the URL, in the enum's
-  own spelling, and the rest keep the feed's default after a republish. The rows return to the model.
+  own spelling, and the rest keep the feed's default after a republish. The rows return to the model, and the
+  answer cites the vault and version as `BI_VAULT_ASKING.md` requires of `bi__query`.
 - **Dashboard**: the names come from `bi_atlas_import.names` (the server-side read of K2), and the name must be one of
   them. Its fallback page draws its AEP panels (at most 12, each slug once, top to bottom) through the same read; a
   panel that cannot be read is left out, as for a dashboard imported from a file with another PC's vault. When none
