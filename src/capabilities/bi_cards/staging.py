@@ -30,6 +30,7 @@ import binascii
 import hashlib
 import json
 import re
+import shutil
 import sqlite3
 import uuid
 from collections.abc import Iterator
@@ -294,6 +295,62 @@ class Staging:
 
             search_index.sync_quietly(self.store)
         return {**(self.source(source_id) or {}), "already": False}
+
+    def copy_sources_from(self, other: Staging) -> dict[str, int]:
+        """Copy `other`'s sources here with their files, Markdown revisions and
+        conversion failures, under the same ids (converting a dataset to a vault,
+        `docs/phases/BI_BUILD_FLOW.md` §4). Runs and sessions stay with `other`. A
+        source whose file is gone is skipped and counted."""
+        if not other.exists:
+            return {"copied": 0, "skipped": 0}
+        with other._db() as db:
+            sources = db.execute("SELECT * FROM sources ORDER BY rowid").fetchall()
+            revisions = (
+                db.execute("SELECT * FROM markdown ORDER BY source_id, rev").fetchall()
+                if _has_table(db, "markdown")
+                else []
+            )
+            failures = (
+                db.execute("SELECT * FROM conversions").fetchall()
+                if _has_table(db, "conversions")
+                else []
+            )
+        copied, skipped = 0, 0
+        with self._db(write=True) as db:
+            for row in sources:
+                files = [row["stored"]] + [
+                    r["stored"] for r in revisions if r["source_id"] == row["id"]
+                ]
+                if not all((other.dir / str(name)).is_file() for name in files):
+                    skipped += 1
+                    continue
+                for name in files:
+                    target = self.dir / str(name)
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(other.dir / str(name), target)
+                db.execute(
+                    f"INSERT INTO sources ({', '.join(row.keys())}) "
+                    f"VALUES ({', '.join('?' for _ in row.keys())})",
+                    tuple(row),
+                )
+                for revision in (r for r in revisions if r["source_id"] == row["id"]):
+                    db.execute(
+                        f"INSERT INTO markdown ({', '.join(revision.keys())}) "
+                        f"VALUES ({', '.join('?' for _ in revision.keys())})",
+                        tuple(revision),
+                    )
+                for failure in (f for f in failures if f["source_id"] == row["id"]):
+                    db.execute(
+                        f"INSERT INTO conversions ({', '.join(failure.keys())}) "
+                        f"VALUES ({', '.join('?' for _ in failure.keys())})",
+                        tuple(failure),
+                    )
+                copied += 1
+        if copied:
+            from capabilities.bi_cards import search_index  # its passages (BI vault V3)
+
+            search_index.sync_quietly(self.store)
+        return {"copied": copied, "skipped": skipped}
 
     def _source_by_digest(self, digest: str) -> dict[str, Any] | None:
         if not self.exists:

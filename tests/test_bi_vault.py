@@ -18,7 +18,8 @@ from typing import Any
 
 import pytest
 
-from capabilities.bi_cards import catalog, vault
+from capabilities.bi_cards import catalog, source_markdown, vault
+from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import BiStore, PlannedRow, datasets
 from host_runtime.bi_cards_api import route
 
@@ -617,6 +618,50 @@ def test_a_dataset_converts_to_a_vault(tmp_path: Path) -> None:
     _sync(a, vault_id)
     assert converted.proposals(copied["id"]) == []
     assert _tables(a, dataset) == _tables(b, dataset)
+
+
+def test_converting_a_dataset_takes_its_sources_along(tmp_path: Path) -> None:
+    drive = _Drive(tmp_path)
+    a = drive.workspace("a")
+    _ok(_call(a, "POST", "/api/bi/datasets", {"name": "lab", "schema": "bi.schema/v1.1"}))
+    staging = Staging(a, "lab")
+    kept = staging.add_source(
+        "visit.md", text="# 拜訪\nA 公司評估 TSN", actor="alice", classification="UNCLASSIFIED"
+    )
+    gone = staging.add_source("gone.md", text="消失的檔案", actor="alice")
+    source_markdown.save(
+        a,
+        "lab",
+        kept["id"],
+        markdown="# 拜訪（改過）\nA 公司評估 TSN",
+        base_rev=1,
+        note="校對",
+        actor="alice",
+    )
+    # The file is gone from disk (the row's stored path is not in the public view).
+    with staging._db() as db:
+        stored = db.execute("SELECT stored FROM sources WHERE id = ?", (gone["id"],)).fetchone()[0]
+    (staging.dir / stored).unlink()
+    before = {r["rev"]: r for r in staging.markdown_revisions(kept["id"])}
+    given = {"dataset": "lab", "path": str(drive.parent("a")), "author": "alice", "purpose": "虛構"}
+    made = _ok(_call(a, "POST", "/api/bi/vaults/convert", given))
+    assert made["sources"] == {"copied": 1, "skipped": 1}
+    target = Staging(a, made["vault"]["dataset"])
+    copied = target.source(kept["id"])
+    assert copied is not None
+    assert copied["name"] == "visit.md" and copied["classification"] == "UNCLASSIFIED"
+    assert target.source(gone["id"]) is None
+    # The original bytes and every Markdown revision come along, the latest still current.
+    assert target.source_bytes(kept["id"]) == staging.source_bytes(kept["id"])
+    assert {r["rev"]: r for r in target.markdown_revisions(kept["id"])} == before
+    assert source_markdown.current(target, kept["id"]) == source_markdown.current(
+        staging, kept["id"]
+    )
+    # A copy on this PC: the dataset keeps them and nothing reaches the shared folder.
+    assert staging.source(kept["id"]) is not None
+    folder = drive.parent("a") / made["vault"]["id"]
+    shared = [p.name for p in folder.rglob("*") if p.is_file()]
+    assert "visit.md" not in shared and not any(kept["sha256"] in name for name in shared)
 
 
 def test_a_plain_dataset_is_written_as_before(tmp_path: Path) -> None:

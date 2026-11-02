@@ -2532,7 +2532,7 @@ tr:last-child td { border-bottom: none; }
         <nav id="bi-stepper" class="kp-stepper" aria-label="建立與匯入步驟">
           <ol>
             <li><button type="button" data-stage="source"><span class="kp-step-n">1</span>
-              <span><strong>資料輸入與轉換</strong><small>知識庫、來源、Markdown</small></span>
+              <span><strong>資料輸入與轉檔</strong><small>知識庫、來源、轉成 Markdown</small></span>
               </button></li>
             <li><button type="button" data-stage="ingest"><span class="kp-step-n">2</span>
               <span><strong>Schema 與 Ingest</strong><small>判讀規則、試跑、審核、寫入</small>
@@ -2559,12 +2559,14 @@ tr:last-child td { border-bottom: none; }
         </div>
         <div class="mem-status" id="bi-status-build" role="status" aria-live="polite" hidden></div>
         <section class="kp-stage card bi-step" data-stage="source" aria-labelledby="bi-b-source">
-          <h3 class="kp-stage-title" id="bi-b-source" tabindex="-1">步驟 1／3・資料輸入與轉換</h3>
+          <h3 class="kp-stage-title" id="bi-b-source" tabindex="-1">步驟 1／3・資料輸入與轉檔</h3>
           <div class="bi-ai" id="bi-b-vault" role="region" aria-labelledby="bi-b-vault-h">
             <h4 id="bi-b-vault-h">知識庫</h4>
             <p class="bi-meta">共用知識庫（vault）放在 SharePoint／OneDrive 同步的資料夾。
               你的改動先留在這台電腦，寫下目的 commit、再 push 才會給大家；Agent 只讀發佈的版本。
-              一般資料集只在這台電腦。</p>
+              一般資料集只在這台電腦。
+              「把這個資料集轉成 vault」會把卡片寫成一個 commit，並把來源複製到這個知識庫
+              （來源仍只在這台電腦）；原本的資料集不變。</p>
             <div class="bi-step-grid">
               <div><label class="bi-label" for="bi-b-ds">寫入哪個知識庫</label>
                 <select id="bi-b-ds"></select></div>
@@ -13807,7 +13809,10 @@ el("bi-b-v-form").addEventListener("submit", async (event) => {
     el("bi-b-v-form").hidden = true;
     biNotice(true, {new: "已建立", join: "已加入", convert: "已轉成"}[mode] + "共用知識庫「"
       + (reply.vault.title || reply.vault.id) + "」：" + reply.vault.path
-      + (mode === "convert" ? "（原本的資料集沒有改動）" : ""));
+      + (mode === "convert" ? "（原本的資料集沒有改動；帶過 " + reply.sources.copied + " 份來源"
+        + (reply.sources.skipped ? "，" + reply.sources.skipped + " 份的檔案不見了、沒有帶過"
+          : "")
+        + (reply.sources.error ? "，來源沒有帶過，請重新加入" : "") + "）" : ""));
     bi.want = reply.vault.dataset; await biLoad();
   } catch (failure) {
     err.append(bh("p", "bi-err", failure.message + "。"));

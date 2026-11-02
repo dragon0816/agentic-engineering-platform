@@ -1110,7 +1110,25 @@ def convert(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any
         pushed = vault.repo.push()
         readme.write_readme(vault.repo)
     report = vault.sync()
-    return {"vault": vault.describe(), "push": pushed["status"], "sync": report, "dataset": name}
+    return {
+        "vault": vault.describe(),
+        "push": pushed["status"],
+        "sync": report,
+        "dataset": name,
+        "sources": _copy_sources(workspace, name, vault.dataset),
+    }
+
+
+def _copy_sources(workspace: Path, dataset: str, target: str) -> dict[str, Any]:
+    """The dataset's sources in the new vault's local staging, on this PC only
+    (`docs/phases/BI_BUILD_FLOW.md` §4). The vault exists by now, so a failure
+    here is reported and the sources can be added again by hand."""
+    from capabilities.bi_cards.staging import Staging
+
+    try:
+        return Staging(workspace, target).copy_sources_from(Staging(workspace, dataset))
+    except (OSError, sqlite3.Error) as failure:
+        return {"copied": 0, "skipped": 0, "error": type(failure).__name__}
 
 
 def listing(workspace: Path) -> list[dict[str, Any]]:
