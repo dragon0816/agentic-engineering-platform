@@ -669,6 +669,12 @@ class KnowledgeCatalog:
         live = self._live.get(identity.key)
         return self._current(live) if live is not None else None
 
+    def live_version(self, identity: AssetIdentity) -> str | None:
+        """What a live entry last read (its source's version text); None for
+        a fixed version or one not read yet."""
+        live = self._live.get(identity.key)
+        return None if live is None else live.built
+
     def manifests(self) -> tuple[KnowledgeManifest, ...]:
         """Every registered version, in a stable order (a live entry by its
         last built manifest, or its template before the first `get`)."""

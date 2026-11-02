@@ -36,6 +36,7 @@ from capabilities.bi_cards.packs import SECTIONS as PACK_SECTIONS
 from capabilities.runtime import CapabilityInvocation, CapabilityRefused
 from common.execution import Failure, RequestContext
 from host_runtime import bi_chart_html
+from knowledge.repo import repository as repo_engine
 from models.contracts import ModelTool
 
 __all__ = [
@@ -323,6 +324,21 @@ def _cited(answer: str, source: dict[str, Any]) -> bool:
     return any(dataset in line and version in line for line in answer.splitlines())
 
 
+def _vault_lines(result: Any) -> list[str]:
+    """The source line of each vault version a succeeded `bi__query` call of
+    this turn read, once each, in the order first used."""
+    found: dict[tuple[str, str], str] = {}
+    for item in getattr(result, "tools", None) or ():
+        host = getattr(item, "host", None)
+        if getattr(item, "name", "") != TOOL_NAME or host is None or host.status != "succeeded":
+            continue
+        read = host.data.get("vault") if isinstance(host.data, dict) else None
+        if isinstance(read, dict):
+            key = (str(read.get("dataset")), str(read.get("commit")))
+            found.setdefault(key, repo_engine.source_line(str(read.get("dataset")), read))
+    return list(found.values())
+
+
 def with_bi_sources(answer: str, result: Any) -> str:
     """The answer with the source line of every subscribed dataset the turn
     queried that the answer does not already name (dataset and version on
@@ -332,6 +348,7 @@ def with_bi_sources(answer: str, result: Any) -> str:
     if getattr(result, "status", None) != "answered" or not answer.strip():
         return answer
     missing = [source_note(item) for item in bi_sources(result) if not _cited(answer, item)]
+    missing += [line for line in _vault_lines(result) if line not in answer]
     if not missing:
         return answer
     lines = "\n".join(missing)

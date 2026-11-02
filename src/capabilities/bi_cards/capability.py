@@ -128,6 +128,8 @@ class QueryResult(Contract):
     analysis: tuple[dict[str, Any], ...] = ()
     #: A subscribed dataset's version and publisher; None for a local one.
     source: dict[str, Any] | None = None
+    #: A vault's answer: the dataset and the version read (`{dataset, tag, commit}`).
+    vault: dict[str, Any] | None = None
 
 
 def source_note(source: dict[str, Any] | None) -> str:
@@ -169,6 +171,7 @@ class QueryHandler:
             if store.read_only and source is None:
                 raise BiStoreError("dataset_unknown")
             published = ""
+            read_version: dict[str, Any] | None = None
             vault_id = store.vault_id
             chosen = self.store_for(request.dataset) if self.store_for is not None else None
             if chosen is not None:
@@ -187,6 +190,7 @@ class QueryHandler:
                 vault_id = store.vault_id
                 store = vault.reading_store(self.workspace_root, request.dataset)
                 reads = vault.Vault(self.workspace_root, vault_id).reads()
+                read_version = {"dataset": request.dataset, **reads}
                 published = (
                     f"內容來自發佈版本 {reads['tag']}"
                     if reads["tag"]
@@ -205,6 +209,7 @@ class QueryHandler:
                     + (f"。{cited}" if cited else ""),
                     analysis=(section,),
                     source=source,
+                    vault=read_version,
                 )
             if request.analysis:
                 given = {**request.params}
@@ -231,6 +236,7 @@ class QueryHandler:
                     + (f"。{cited}" if cited else ""),
                     analysis=tuple(sections),
                     source=source,
+                    vault=read_version,
                 )
             answer = service.query_cards(
                 store,
@@ -248,6 +254,7 @@ class QueryHandler:
                 cards=tuple(answer["cards"]),
                 scope_note=answer["scope_note"] + (cited and f"{cited}。"),
                 source=source,
+                vault=read_version,
             )
 
         try:

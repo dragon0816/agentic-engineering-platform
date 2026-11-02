@@ -37,6 +37,7 @@ from knowledge.evidence import connected_facets, evidence_excerpt
 from knowledge.evolution import KnowledgeAnswerRecord, KnowledgeQueryRequest
 from knowledge.procedure import KnowledgeProcedure
 from knowledge.query import DEFAULT_SYNTHESIS_MAX_OUTPUT_TOKENS, cited_numbers
+from knowledge.repo import repository as repo_engine
 
 # G4 (owner 2026-10-18): characters per synthesis token when the Knowledge
 # domain declares its output limit. An English token averages about 4
@@ -388,6 +389,8 @@ class KnowledgeHarness:
                 visible_answer += "\n\n來源：\n" + "\n".join(knowledge_source_lines(record))
         else:
             visible_answer = "The selected Skill requires evidence this Host cannot yet verify."
+        if base["ok"]:
+            visible_answer += self._repository_line(item.asset)
         synthesized = ((base.get("record") or {}).get("answer") or {}).get("text") or ""
         return {
             **base,
@@ -405,6 +408,16 @@ class KnowledgeHarness:
                 ),
             },
         }
+
+    def _repository_line(self, asset: Any) -> str:
+        """Under an answer from a knowledge repository, the repository and the
+        version read: the asset's own version never moves when one is published."""
+        installed = self.runtime.agent.gateway.bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity)
+        catalog = getattr(getattr(installed, "handler", None), "catalog", None)
+        version = None if catalog is None else catalog.live_version(asset)
+        if version is None:
+            return ""
+        return "\n\n" + repo_engine.source_line(asset.name, json.loads(version))
 
     @staticmethod
     def _knowledge_partial_preview(record: dict[str, Any], assessment: dict[str, Any]) -> str:

@@ -121,6 +121,17 @@ _LOCKS: dict[str, threading.RLock] = {}
 _LOCKS_GUARD = threading.Lock()
 
 
+def source_line(name: str, reads: Mapping[str, Any]) -> str:
+    """The line under an answer naming the repository and the version read
+    (`reads`: `{tag, commit}`, as a repository type's `reads` gives it)."""
+    tag, commit = reads.get("tag"), reads.get("commit")
+    if tag:
+        return f"資料來源：知識庫 {name} 發佈版本 {tag}"
+    if commit:
+        return f"資料來源：知識庫 {name}（尚未發佈，已 push 的最新版本 {str(commit)[:8]}）"
+    return f"資料來源：知識庫 {name}（還沒有已 push 的內容）"
+
+
 class RepoError(Exception):
     """A refused repository operation: a stable `code` and a message for people."""
 
