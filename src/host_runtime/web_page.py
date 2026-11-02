@@ -12810,6 +12810,11 @@ function biBuildStage(name, focus = true) {
   if (stage === "review") biBuildRenderRun();
   if (stage === "commit") biBuildSummary();
   if (stage === "result") biBuildResult();
+  if (stage === "test" && biVaultOf(biDataset())) {
+    // What steps 1 and 2 changed (cards written, skills, schema) waits to be committed here.
+    call("/api/bi/vaults/" + biVaultOf(biDataset()).id + "/status").then(biVaultState)
+      .catch((failure) => biNotice(false, "讀不到知識庫的狀態：" + failure.message));
+  }
   if (focus) {
     const title = document.querySelector('#bi-view-build .kp-stage[data-stage="' + stage
       + '"] .kp-stage-title');
@@ -13030,7 +13035,7 @@ async function biBench(vaultId) {
   clearTimeout(bi.benchTimer);
   if (reply.latest && reply.latest.status === "running") {
     bi.benchTimer = setTimeout(() => biBench(vaultId).catch(() => {}), 2000);
-  } else if (bi.benchWatch === reply.latest?.run_id) {
+  } else if (reply.latest && bi.benchWatch === reply.latest.run_id) {
     bi.benchWatch = null;
     biNotice(reply.latest.status === "finished", reply.latest.status === "finished"
       ? "測試跑完了。" : "測試沒有跑完：" + (reply.latest.error || ""));
