@@ -45,7 +45,7 @@ def test_the_goldens_are_exact_response_bodies_and_say_where_they_came_from() ->
     for name in ("list.json", "dashboard-mixed.json", "dashboard-legacy.json"):
         assert not (GOLDEN / name).read_bytes().endswith(b"\n"), name
     assert _golden("list.json") == ["Legacy overview", "Mixed BI layout"]
-    assert "c7f9468" in (GOLDEN / "SOURCE.md").read_text("utf-8")
+    assert "4104c8d" in (GOLDEN / "SOURCE.md").read_text("utf-8")
 
 
 def test_the_drift_check_finds_a_changed_missing_or_extra_file(tmp_path: Path) -> None:

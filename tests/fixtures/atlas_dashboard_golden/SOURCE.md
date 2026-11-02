@@ -1,7 +1,7 @@
 # Atlas dashboard read goldens (vendored)
 
-Producer: Atlas, `web/tests/fixtures/atlas_dashboard_golden/` at commit `c7f9468` (branch `atlas-embed`;
-`dashboard-mixed.json` changed there, the others are as at `49600737`), contract `docs/AEP_DASHBOARD_READ_CONTRACT.md` revision
+Producer: Atlas, `web/tests/fixtures/atlas_dashboard_golden/` at commit `4104c8d` (branch `atlas-embed`;
+`dashboard-mixed.json` changed at `c7f9468`, the others are as at `49600737`), contract `docs/AEP_DASHBOARD_READ_CONTRACT.md` revision
 2026-11-01. Consumer: AEP's Atlas dashboard import (BI K2,
 `docs/phases/BI_CHAT_CHARTS_AND_DASHBOARD_SOURCES.md`).
 

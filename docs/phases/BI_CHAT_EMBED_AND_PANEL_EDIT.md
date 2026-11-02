@@ -96,7 +96,7 @@ After rows with the SQL and the chart; Apply stages the edit.
 
 ## 4. Part E: embedding Atlas in the chat
 
-Built against Atlas's `docs/AEP_EMBED_CONTRACT.md`, final at Atlas commit `c7f9468` (branch `atlas-embed`). Its
+Built against Atlas's `docs/AEP_EMBED_CONTRACT.md`, final at Atlas commit `4104c8d` (branch `atlas-embed`). Its
 goldens are vendored in `tests/fixtures/atlas_embed_golden/`. A frame left on `waiting` is not a fallback: only a
 failed server-side probe falls back, and the page reads no embed state.
 
@@ -146,7 +146,8 @@ dashboards). Agent Web only: on Telegram it says to use `bi__query`.
   own spelling, and the rest keep the feed's default after a republish. The rows return to the model.
 - **Dashboard**: the names come from `bi_atlas_import.names` (the server-side read of K2), and the name must be one of
   them. Its fallback page draws its AEP panels (at most 12, each slug once, top to bottom) through the same read; a
-  panel that cannot be read is left out.
+  panel that cannot be read is left out, as for a dashboard imported from a file with another PC's vault. When none
+  can be read there is no chart, and the note says only that opening Atlas shows it.
 - **Atlas down when the tool runs** (dashboards only; a panel needs nothing from Atlas): `atlas_unreachable`, with the
   instruction to show the analyses through `bi__query` and say that opening Atlas shows the full version.
 - **One chart, not two**: `bi_chart_files` drops `bi__query`'s page for an analysis the same turn also frames.
@@ -155,7 +156,8 @@ Ad-hoc SQL and card answers stay C2's HTML: Atlas has no panel for them.
 
 ### E5 Live acceptance (2026-11-02)
 
-A real model (`gpt-5.5` through the gateway) and a real Atlas built from `c7f9468` with `VITE_AEP_BI_PORT=53622`, in a
+A real model (`gpt-5.5` through the gateway) and a real Atlas with `VITE_AEP_BI_PORT=53622` (panel, fallback and edit
+built from `ab2635d`, whose contract is `c7f9468`; dashboard rerun on `f75560c`, whose contract is `4104c8d`), in a
 temp workspace under `%TEMP%` with its own Agent Web on 53622 and Atlas on 8128 with a temp data folder. The driver is
 not committed; it called `bi_feed_api.refresh` after joining the fixture vault and set the server's read port to 8128.
 
@@ -168,6 +170,8 @@ not committed; it called `bi_feed_api.refresh` after joining the fixture vault a
   move. Published, only that analysis's digest moved and the open frame turned to the new title and a line chart in 6
   s without a reload. Its numbers gained EU, the card pushed after v1, as publishing that commit should.
 - **Dashboard**: the model opened `Embed fixture` by name; the frame reached `ready` with its panels' data.
+- **Regression found by the targeted run after that fix**: `{"type": "table"}` inherited the old x and y, so a new
+  script's Apply was refused. A table now inherits no axes (with a test).
 
 Seen and left: the frame's caption keeps the title stored with the answer after a republish, and the fallback page's
 chip stays under the answer while Atlas is framed.

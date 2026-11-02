@@ -6368,7 +6368,7 @@ Atlas; the AI edits existing panels; AEP never writes Atlas dashboards".
 ## BI Atlas embeds in the chat (E2, E3, E4, 2026-11-02)
 
 Design `docs/phases/BI_CHAT_EMBED_AND_PANEL_EDIT.md` §4; producer contract Atlas `docs/AEP_EMBED_CONTRACT.md`
-(final at `c7f9468`; goldens in `tests/fixtures/atlas_embed_golden/`).
+(final at `4104c8d`; goldens in `tests/fixtures/atlas_embed_golden/`).
 
 - **Tool** `bi__atlas_show {dataset?, analysis?, params?, dashboard?}`, offered with `bi__query`. Succeeded data:
   `{note, atlas_embed, attach?, columns?, rows?}`, or `{dashboards: [name]}` with no arguments. Failure codes:

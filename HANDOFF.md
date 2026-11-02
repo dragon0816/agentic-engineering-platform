@@ -22,7 +22,7 @@ not merged.
   Knowledge page's AI.
 - `_apply_dashboard` stages unit by unit (as K1): a run failing partway leaves earlier units staged, none committed.
 
-**Atlas embedding (E1-E5), against Atlas's final contract at `c7f9468`.** `bi__atlas_show`,
+**Atlas embedding (E1-E5), against Atlas's final contract at `4104c8d`.** `bi__atlas_show`,
 `host_runtime/bi_atlas_embed.py`, `atlas_embeds` on the answer, `GET /api/bi/atlas-embed`, `answerAtlasEmbed` on the
 page, goldens in `tests/fixtures/atlas_embed_golden/` with a drift check. Design §4; contract `docs/CONTRACTS.md` "BI
 Atlas embeds in the chat". Live acceptance with a real model and a real Atlas passed: design's E5.
