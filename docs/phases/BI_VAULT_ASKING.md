@@ -111,6 +111,8 @@ beyond what status already does):
 | `never_published` | both | no | The pushed head is answered; publish a tag to pin it |
 | `several_vaults` | wiki | no | The note of §1 about the direct route and `aep_knowledge_ask` |
 
+**Skill namespace (found in V1b).** The conversation offers a Skill's tools only when the Skill's namespace is the host's (`SkillRegistry.discover`), so `skill_off` looks there, not at every installed Skill.
+
 **Page.** Inside the 知識庫 card (`kp-repos`) and the BI 「知識庫」 section only. Each entry shows 「可以在對話裡問」 or
 its reasons with their fixes; a wiki repository not bound has 「讓 Agent 可以問這個知識庫」, which opens the proposal
 through `renderActionCard`. Page changes stay in these sections (other workers edit the chat and the build flow).
