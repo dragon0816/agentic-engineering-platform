@@ -11,6 +11,11 @@ from common.execution import TraceIdentifiers
 from host_runtime.conversation_backends import ConversationBackendName
 
 MAX_STORED_MESSAGES = 100
+#: Where a conversation took place. A stored Telegram chat is read-only in
+#: Agent Web (docs/phases/TELEGRAM_HISTORY.md).
+ConversationSource = Literal["agent_web", "telegram"]
+#: What every Telegram record's session id starts with, and nothing else's.
+TELEGRAM_SESSION_PREFIX = "tg-"
 #: A memory item an answer used, by reference only (`<space>:<kind>:<id>`).
 MemoryRef = Annotated[str, StringConstraints(pattern=r"^[a-z][a-z0-9/-]*:[a-z_]+:\S{1,160}$")]
 
@@ -125,6 +130,7 @@ class ConversationRecord(Contract):
     actor: Symbol
     title: Text
     backend: ConversationBackendName = "gateway"
+    source: ConversationSource = "agent_web"
     data_classification: Literal["UNCLASSIFIED", "PUBLIC"] = "UNCLASSIFIED"
     classified_by: Symbol | None = None
     created_at: datetime
@@ -133,6 +139,8 @@ class ConversationRecord(Contract):
 
     @model_validator(mode="after")
     def ordered_history(self) -> Self:
+        if (self.source == "telegram") != self.session_id.startswith(TELEGRAM_SESSION_PREFIX):
+            raise ValueError("a telegram record and its session id prefix go together")
         if (self.data_classification == "PUBLIC") != (self.classified_by is not None):
             raise ValueError("PUBLIC conversation requires an explicit classifier")
         if self.updated_at < self.created_at:

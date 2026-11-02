@@ -6161,3 +6161,30 @@ an open R6 question and is not changed here. The choices below are the implement
 - **Benchmark questions from AI are a session kind `questions`, applied per ticked question**, and a `must` term that
   no working card or saved analysis result contains is refused back to the model. Rejected: staging on proposal
   (nothing changes before the person applies); allowing unsupported terms (a question nothing can pass).
+
+## 2026-11-02 — The owner's own Telegram conversations are stored and readable in Agent Web
+
+Owner decisions of 2026-11-02, relayed by the BI orchestrator. Design: `docs/phases/TELEGRAM_HISTORY.md`. This amends
+the position recorded in the entry of 2026-10-25 "A session remembers what it produced", where Telegram chat history
+was memory only. That history is still what the model receives; the stored record is a separate copy for reading.
+
+- **Stored:** the owner's own Telegram conversations, durably, from now on, with no backfill. The owner is the sender
+  whose mapped actor equals the Host's actor (`device.registered_by`). Messages from other allowed senders are not
+  stored.
+- **`/new` only starts a new conversation.** It does not delete stored records, and for the owner it no longer deletes
+  the chat's attached files, because the records list them. This amends the entry of 2026-10-08 ("`/new` clears that
+  history and deletes those files") for the owner's chat only; other senders' `/new` is unchanged.
+- **Delete happens in Agent Web**, the same way a conversation is deleted today, and it reaches attachments: the files
+  the record lists are removed, as Agent Web's delete removes a conversation's files.
+- **Read-only in Agent Web:** a Telegram conversation cannot be continued there, and `/api/conversations/turn` and the
+  other changing routes refuse it with `conversation_read_only`.
+- **The model does not change:** the in-memory cap of 12 stays and nothing is reloaded after a restart.
+- **Roll-over, not loss:** a new record per local day, at the 100-message cap and on `/new`, so nothing is silently
+  dropped.
+- **Stored records feed nothing else in this version.** Agent Web chats feed experience cases, skill suggestions,
+  preference last-use and the memory overview. Telegram records are left out of all four by the default of
+  `LocalState.conversations`, and rating is refused, so none reaches the feedback upload.
+- **Rejected:** reloading stored messages into the model (changes its behaviour); dropping old messages at the cap as
+  Agent Web does (silent loss in a long-lived chat); SQLite FTS for search (needs a migration and a tokenizer that
+  handles Chinese, where `LIKE` matches any substring); `chat_hash` as the id (its salt is per process); a plain hash
+  of the chat id (few enough ids to try them all), so the id uses a per-host random key.

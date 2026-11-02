@@ -10,6 +10,7 @@ as a `LocalStateError` with a code and nothing else; no path, record or SQLite
 message is echoed.
 """
 
+import secrets
 import sqlite3
 import threading
 from collections.abc import Iterator, Mapping
@@ -36,7 +37,13 @@ from common.distribution import (
 from common.enrollment import BridgeDevice
 from common.sync import FeedbackRecord
 from host_runtime.contributions import ContributionDraft
-from host_runtime.conversations import MAX_STORED_MESSAGES, ConversationRecord, MessageFeedback
+from host_runtime.conversations import (
+    MAX_STORED_MESSAGES,
+    TELEGRAM_SESSION_PREFIX,
+    ConversationRecord,
+    ConversationSource,
+    MessageFeedback,
+)
 from host_runtime.feedback_sync import feedback_record
 
 # Version 5 adds portable task-run evidence; version 6 the feedback outbox
@@ -615,16 +622,63 @@ class SqliteLocalState:
             )
         return deleted.rowcount == 1
 
-    def conversations(self, actor: Symbol, *, limit: int = 50) -> tuple[ConversationRecord, ...]:
+    def conversations(
+        self, actor: Symbol, *, limit: int = 50, source: ConversationSource = "agent_web"
+    ) -> tuple[ConversationRecord, ...]:
+        """The latest of one source. Agent Web by default: a stored Telegram
+        chat feeds no memory, learning or suggestion reader, and its daily
+        records push nothing out of their latest 100."""
         if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1 or limit > 100:
             raise ValueError("conversation limit is between 1 and 100")
+        match = "LIKE" if source == "telegram" else "NOT LIKE"
         with self._read() as conn:
             rows = conn.execute(
-                "SELECT record FROM conversations WHERE actor = ?"
+                f"SELECT record FROM conversations WHERE actor = ? AND session_id {match} ?"
                 " ORDER BY updated_at DESC, session_id LIMIT ?",
-                (actor, limit),
+                (actor, f"{TELEGRAM_SESSION_PREFIX}%", limit),
             ).fetchall()
             return tuple(ConversationRecord.model_validate_json(row[0]) for row in rows)
+
+    def latest_conversation(self, actor: Symbol, prefix: str) -> ConversationRecord | None:
+        """This actor's newest conversation whose session id starts so; the
+        prefix is the Host's own, made of symbol characters."""
+        with self._read() as conn:
+            row = conn.execute(
+                "SELECT record FROM conversations WHERE actor = ? AND session_id LIKE ?"
+                " ORDER BY updated_at DESC, session_id DESC LIMIT 1",
+                (actor, f"{prefix}%"),
+            ).fetchone()
+            return None if row is None else ConversationRecord.model_validate_json(row[0])
+
+    def search_conversations(
+        self, actor: Symbol, query: str, *, limit: int = 30
+    ) -> tuple[ConversationRecord, ...]:
+        """This actor's conversations, of every source, with the words in the
+        title or a message's text, newest first. Plain `LIKE`: any Chinese
+        substring matches; only ASCII ignores case."""
+        escaped = query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        pattern = f"%{escaped}%"
+        with self._read() as conn:
+            rows = conn.execute(
+                "SELECT c.record FROM conversations c WHERE c.actor = ? AND ("
+                "json_extract(c.record, '$.title') LIKE ? ESCAPE '\\' OR EXISTS ("
+                "SELECT 1 FROM json_each(c.record, '$.messages') m"
+                " WHERE json_extract(m.value, '$.text') LIKE ? ESCAPE '\\'))"
+                " ORDER BY c.updated_at DESC, c.session_id LIMIT ?",
+                (actor, pattern, pattern, limit),
+            ).fetchall()
+            return tuple(ConversationRecord.model_validate_json(row[0]) for row in rows)
+
+    def host_key(self, name: str) -> str:
+        """A random key of this host, made once and kept with its state."""
+        mark = f"host_key:{name}"
+        with self._write() as conn:
+            conn.execute(
+                "INSERT OR IGNORE INTO local_meta (key, value) VALUES (?, ?)",
+                (mark, secrets.token_hex(16)),
+            )
+            row = conn.execute("SELECT value FROM local_meta WHERE key = ?", (mark,)).fetchone()
+        return str(row[0])
 
     def create_contribution_draft(self, draft: ContributionDraft) -> ContributionDraft:
         item = ContributionDraft.model_validate(draft)
