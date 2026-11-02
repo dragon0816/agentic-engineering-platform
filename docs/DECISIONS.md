@@ -6101,3 +6101,27 @@ Runbook `docs/runbooks/R6_MARKET_BI.md`; design `docs/phases/BI_SOURCES_IN_REPOS
 
 Still open with the owner: Q3 (SharePoint's retention, from IT; the page states no period until one is known), the four base
 paths, and the sizes for the per-file limit (O1).
+
+## 2026-11-02: BI: the chat embeds Atlas; the AI edits existing panels; AEP never writes Atlas dashboards (owner, Claude Code)
+
+Owner decisions relayed by the BI orchestrator; design in `docs/phases/BI_CHAT_EMBED_AND_PANEL_EDIT.md`. Amends
+2026-11-01 "BI: charts inline in the chat; Dashboards from the analysis AI or an Atlas import"; that entry stands
+as the record of its day.
+
+- **A general AI chat embeds real Atlas panels or dashboards (iframe)**, and falls back to the AEP chart (C2 HTML)
+  with a note when Atlas is not running. This reverses "not an Atlas link" for the case where Atlas answers; Atlas's
+  new embed routes replace the 2026-11-01 obstacle (`X-Frame-Options: DENY`). Rejected: the C2 HTML only.
+- **The AI may change an existing analysis's content directly**: data source, computation rules (SQL, or a guarded
+  script where analyses allow it), parameters and display. On the Knowledge page a "dashboard" is a single panel, so
+  no layout is involved. Changes are staged after the owner's approval in Agent Web; push and publish stay manual.
+  This lifts C3's and K1's refusal of existing slugs for edits. Rejected: new analyses only.
+- **AEP never writes Atlas dashboards**; Atlas layouts stay personal (unchanged).
+- **Chat edits are a new `propose_change` kind, `bi_analysis_edit`, web only** (Claude Code): the fields that change,
+  a Now/After card with the whole code, the working unit as the fingerprint. Rejected: a flag on `bi_analysis`.
+- **A script proposed from the general chat runs only after Apply** (Claude Code, within the owner's decision): the
+  chat reads untrusted text and `run_python` is not a boundary against a determined attacker, so the card shows the
+  script unrun. Rejected: running it to fill the card (no approval before code runs); keeping scripts out of chat
+  edits (the owner's decision covers scripts). C1b ("never a script") stands for ad-hoc queries and C3 for new
+  analyses.
+- **The analysis AI's edits are checked against a base digest** at apply: a change meanwhile is refused rather than
+  overwritten, and a proposal on a saved slug is always shown as an edit. Rejected: last write wins (T3 until now).
