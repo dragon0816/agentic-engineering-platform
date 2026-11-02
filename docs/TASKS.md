@@ -4084,7 +4084,14 @@ s-k-20261011T102952` (not published).
     `test_bi_analysis_edit` (9).
   - [x] 2026-11-02, Claude Code: BI P5, a real-browser test of the approval card (and the Knowledge page's changes
     drawn without markup injection), in `test_bi_chat_edit`.
-  - [ ] BI E1-E5: Atlas embedded in the chat; waits for the Atlas embed contract (branch `atlas-embed`).
+  - [x] 2026-11-02, Claude Code: BI E2, E3, E4, Atlas framed in the chat, against Atlas's contract at `0aff59f` (not
+    final): `bi__atlas_show` (a slug or a name, never a URL; Agent Web only), `host_runtime/bi_atlas_embed.py`, the
+    stored answer's `atlas_embeds`, `GET /api/bi/atlas-embed` (server-side HEAD), the frame sized from its message,
+    AEP's chart with a note when Atlas cannot be framed. Tests `test_bi_atlas_embed` (a stand-in Atlas, with a real
+    browser). `test_file_viewer_web`'s same-origin guard now names the one Atlas frame exactly.
+  - [ ] BI E1: vendor Atlas's embed goldens byte for byte with a drift check; waits for the final hash from the
+    orchestrator (Atlas's embed pages are not committed and its I1 has not run).
+  - [ ] BI E5 acceptance: a real Atlas and the real model in a temp workspace; waits for Atlas and the orchestrator's go.
 
 ## Voice input: Telegram voice and the Agent Web microphone (2026-11-01)
 

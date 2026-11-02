@@ -6365,6 +6365,20 @@ Atlas; the AI edits existing panels; AEP never writes Atlas dashboards".
   analysis is no longer `base`, or is gone), `analysis_exists` (400, the suggestion said new and the slug is saved
   now), `analysis_unchanged` (400, one analysis with no changes).
 
+## BI Atlas embeds in the chat (E2, E3, E4, 2026-11-02)
+
+Design `docs/phases/BI_CHAT_EMBED_AND_PANEL_EDIT.md` §4; producer contract Atlas `docs/AEP_EMBED_CONTRACT.md`
+(`0aff59f`, not final).
+
+- **Tool** `bi__atlas_show {dataset?, analysis?, params?, dashboard?}`, offered with `bi__query`. Succeeded data:
+  `{note, atlas_embed, attach?, columns?, rows?}`, or `{dashboards: [name]}` with no arguments. Failure codes:
+  `embed_unavailable` (Telegram), `embed_not_a_vault`, `analysis_unknown`, `param_invalid`, `atlas_not_found`,
+  `atlas_unreachable`, and `bi__query`'s others.
+- **Answer and stored message**: `atlas_embeds`, at most 6, each `{"kind": "panel", "vault", "slug", "params", "path",
+  "title", "fallback"?}` or `{"kind": "dashboard", "name", "path", "title", "fallback"?}`; `fallback` is the `path` of
+  one of the message's `attachments` (kind `html`).
+- **Route** `GET /api/bi/atlas-embed?port=` → `{"ok": true, "port", "framable"}`; `atlas_port_invalid` (400).
+
 ## Voice input: Telegram voice and the Agent Web microphone (owner 2026-11-01)
 
 Design `docs/phases/VOICE_INPUT.md`; decisions `docs/DECISIONS.md` 2026-11-01. Voice is an input adapter: a

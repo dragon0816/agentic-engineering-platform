@@ -96,16 +96,63 @@ After rows with the SQL and the chart; Apply stages the edit.
 
 ## 4. Part E: embedding Atlas in the chat
 
-Waits for the Atlas embed contract (Atlas worker, branch `atlas-embed`). This section gets the URL format and the
-goldens from that commit; nothing here guesses them.
+Built against Atlas's `docs/AEP_EMBED_CONTRACT.md` at Atlas commit `0aff59f` (branch `atlas-embed`). That contract is
+not final: Atlas's embed pages are not committed and its I1 has not run. **E1 vendors the goldens only when the
+orchestrator confirms the final hash**; until then the path tests hold the contract's examples inline, and nothing
+has run against a real Atlas.
 
-| ID | Task |
-|---|---|
-| E1 | Vendor the contract's goldens byte for byte, with a drift check |
-| E2 | A chat answer part: an iframe to Atlas's embed route. The host builds the URL from vault, slug and parameters or a dashboard name; the model never supplies a URL. The Atlas address is the existing per-browser preference (default `http://127.0.0.1:8127`). `sandbox="allow-scripts allow-same-origin"`, `referrerpolicy="no-referrer"`; the frame is sized from the contract's postMessage, accepted only from the Atlas origin |
-| E3 | Fall back to the C2 HTML with a note when Atlas does not answer |
-| E4 | A tool or `bi__query` option for the model to ask for an embed; listing dashboards by name through the server-side read `bi_atlas_import` already does |
-| E5 | Browser test with a stub Atlas on a loopback port; real-model live acceptance in a temp workspace |
+The contract overrides the first brief in two places: `referrerpolicy="origin"` (Agent Web sends `Referrer-Policy:
+no-referrer`, and `localhost:53583` framing `127.0.0.1:8127` is cross-site, so Atlas answers 403 without it), and the
+file viewer's `sandbox="allow-scripts"` cannot be used (an opaque origin cannot load Atlas's scripts).
+
+| ID | Task | Status |
+|---|---|---|
+| E1 | Vendor the contract's goldens byte for byte with a drift check | waits for the final hash |
+| E2 | The answer part and the tool | built |
+| E3 | The probe and the fallback | built |
+| E4 | The model asks for an embed; dashboards listed by name | built |
+| E5 | Browser test with a stand-in Atlas | built; real-model acceptance waits for Atlas and the orchestrator's go |
+
+### E2 The answer part
+
+`bi__atlas_show` writes `atlas_embed` into its tool data; the stored answer gains `atlas_embeds` (at most 6), each
+`{kind: panel, vault, slug, params, path, title, fallback?}` or `{kind: dashboard, name, path, title, fallback?}`.
+**The Host builds `path`** (`host_runtime/bi_atlas_embed.py`): `/embed/panel?vault=&slug=&<param>=` with form
+encoding, or `/embed/dashboard/<name as one encoded segment>`. The tool's input has no URL. The page puts the
+browser's Atlas address (the existing `bi-atlas-url` preference, default `127.0.0.1:8127`) in front of it, and frames
+only a path starting with one of those two prefixes.
+
+The iframe has `sandbox="allow-scripts allow-same-origin"`, `referrerpolicy="origin"` and a title. The page refuses
+to frame an address that is its own origin (`allow-scripts allow-same-origin` on a same-origin frame would undo the
+sandbox) or that is not loopback. Height: the default of `.frame-wrap`, then `atlas-embed-size` messages, accepted
+only when `event.source` is that frame and `event.origin` is its Atlas origin, clamped to 160–1200 px.
+
+### E3 Probe and fallback
+
+The page asks before framing, on every render (Atlas may have stopped since the answer): `GET
+/api/bi/atlas-embed?port=` → `{ok, port, framable}`, which sends `HEAD http://127.0.0.1:<port>/embed/panel` without
+Origin, 2 s, no proxy. Only 200 is framable. Otherwise the answer shows the note 「Atlas 沒有執行，這裡顯示 AEP 的圖表；
+開啟 Atlas 可看到完整版本。」 and the `fallback` chart page through the existing sandboxed viewer. That page is written
+when the tool runs and is one of the answer's files, so it is served like any other; the page shows it only through
+its embed.
+
+### E4 The tool: `bi__atlas_show`
+
+Offered with `bi__query`. Input `dataset` + `analysis` + `params`, or `dashboard`, or nothing (lists Atlas's
+dashboards). Agent Web only: on Telegram it says to use `bi__query`.
+
+- **Panel**: read through the same `CapabilityInvocation` as `bi__query` (grants and audit unchanged), so an unknown
+  slug or a bad value goes back to the model rather than reaching Atlas as `invalid_link`. A parameter the analysis
+  does not declare is refused (`bi__query` itself ignores it); only parameters asked for go in the URL, in the enum's
+  own spelling, and the rest keep the feed's default after a republish. The rows return to the model.
+- **Dashboard**: the names come from `bi_atlas_import.names` (the server-side read of K2), and the name must be one of
+  them. Its fallback page draws its AEP panels (at most 12, each slug once, top to bottom) through the same read; a
+  panel that cannot be read is left out.
+- **Atlas down when the tool runs** (dashboards only; a panel needs nothing from Atlas): `atlas_unreachable`, with the
+  instruction to show the analyses through `bi__query` and say that opening Atlas shows the full version.
+- **One chart, not two**: `bi_chart_files` drops `bi__query`'s page for an analysis the same turn also frames.
+
+Ad-hoc SQL and card answers stay C2's HTML: Atlas has no panel for them.
 
 ## 5. Tasks and order
 
@@ -130,5 +177,8 @@ goldens from that commit; nothing here guesses them.
 
 - `_apply_dashboard` stages unit by unit: a run failing partway leaves the earlier units staged (as K1 today; they
   are visible in the working copy and nothing is committed).
+- The tool reads Atlas's dashboard list on the default port (8127), while the frame uses the browser's address
+  preference, which the server cannot see. An Atlas on another port is framed correctly once named, but its list
+  is not read: a dashboard answer on such a PC says Atlas is not running.
 - From the chat the model reads the published definition and edits the working copy; when they differ, the card's
   Now column shows what really changes, and the person decides.

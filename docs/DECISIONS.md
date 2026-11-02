@@ -6125,3 +6125,18 @@ as the record of its day.
   analyses.
 - **The analysis AI's edits are checked against a base digest** at apply: a change meanwhile is refused rather than
   overwritten, and a proposal on a saved slug is always shown as an edit. Rejected: last write wins (T3 until now).
+
+## 2026-11-02: BI: how the chat frames Atlas (Claude Code, within the owner's decision; contract `0aff59f`)
+
+Addendum to the same day's "BI: the chat embeds Atlas". Follows Atlas's `docs/AEP_EMBED_CONTRACT.md`.
+
+- **`referrerpolicy="origin"` and `sandbox="allow-scripts allow-same-origin"`**, as the contract requires. Rejected:
+  `no-referrer` (Atlas answers 403 on `localhost`) and the file viewer's `allow-scripts` alone (an opaque origin cannot
+  load Atlas). The Referer carries only the origin, so Agent Web's token in its address does not reach Atlas (tested).
+- **A separate tool, `bi__atlas_show`**, taking a slug or a name and never a URL. Rejected: a `bi__query` option (it
+  would mix a Host-only effect into a capability's input, and Telegram and the benchmark's reading tool share that
+  input).
+- **Asked server-side on every render**, since a frame's load event cannot tell a refused frame from a loaded one and
+  a stored answer can outlive Atlas. Rejected: asking once when the tool runs.
+- **The page frames loopback addresses only, and never its own origin.** Rejected: any address the preference holds
+  (a same-origin frame with these sandbox flags could remove its sandbox).
