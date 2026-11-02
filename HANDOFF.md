@@ -29,6 +29,8 @@ in `LITELLM_MASTER_KEY`. The variable is set, but nothing listens on that port. 
 - `test_bi_vault_ui::test_vault_panel_and_dashboard_in_a_browser` overflowed only for a `--basetemp` with no hyphen near
   the end: the notice's path had nowhere to break. Page fixed (`2db5a22b`); the test now uses such a folder name itself.
 
+**Found by repeating the browser tests, all fixed** (`docs/phases/BI_BUILD_FLOW.md` §11): a bench run dying when Windows refused to replace a report being read; a bench report that stopped polling; the question AI's slow read of every analysis. After them, the vault-steps and whole-flow tests passed 4 repeats together.
+
 **Next actions.** (1) Orchestrator: say where a real model is reachable, then "go" for B8. (2) Integrate and run the full
 suite. (3) Record the live evidence in `docs/TASKS.md`.
 

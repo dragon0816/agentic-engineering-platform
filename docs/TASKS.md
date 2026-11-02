@@ -4197,4 +4197,6 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [x] 2026-11-02, Claude Code: the overflow in `test_bi_vault_ui` (`2db5a22b`). Cause: the notice with the folder path
   had nowhere to break, so the page passed or failed on the spelling of `--basetemp` (a hyphen near the end gave a break).
   The page now wraps it, and the test uses a folder name with no breaks, so it no longer depends on the temp path.
+- [x] 2026-11-02, Claude Code: a bench report stuck after a finished run, found by repeating the flow test, fixed in the page (`biBench`), with a test in `test_bi_vault_steps_ui`. Nine flow runs in a row pass after it; two earlier failures before the fix were not captured in detail.
+- [x] 2026-11-02, Claude Code: a bench run dying for good when Windows refused to replace a report being read (a T1 bug), fixed with a test in `test_bi_vault_bench`; the question AI's read of every analysis cut from about 51 s to about 12 s, kept until something changes.
 - [ ] B8 live acceptance with real models: blocked, nothing listens on the template's `127.0.0.1:4000` gateway.

@@ -108,6 +108,9 @@ term that nothing supports would be a question nothing can pass). The page lists
 「加入測試題」 stages the ticked ones as `check:question:<set>/<slug>` units. They reach others by commit and push,
 like every unit. Nothing is staged before that click.
 
+A vault with the default pack has 31 Python analyses at about 2 s each, read once for the model and once for the
+check. `saved_results` runs four at a time and keeps the last results until the analyses or the data change.
+
 ## 8. B7: the whole flow in one browser test
 
 `tests/test_bi_build_flow_ui.py`, real Agent Web server and routes, temp workspace, a temp folder as the shared
@@ -133,6 +136,13 @@ OneDrive/SharePoint folders. Evidence goes into `docs/TASKS.md`; no secret is pr
   `bi.benchWatch` and the missing run id were both undefined. Fixed in B6.
 - Step 3's 「還沒給大家的改動」 was not read again on entering the step, so after an ingest it still said there was
   nothing to push. Entering step 3 now reads the vault's status. Fixed in B6.
+- A bench report could stay on 「還沒有跑過測試」 after a run finished: the page's read right after starting a run can
+  come before the run's first report, and that read stopped the polling; an older read arriving late could also cancel
+  it. The page now keeps reading until it sees the run it started, and only the newest read counts.
+- A bench run could die for good: Windows refuses to replace a report the page's polling has open, the run's thread
+  ended, the report stayed `running` and every later run was refused as `bench_running`. A T1 bug. `_save` now waits it
+  out (`schema_versions.replace`).
+- The question AI read all 31 Python analyses of the default pack twice per turn, about 100 s. See §7.
 
 ## 12. Status
 
