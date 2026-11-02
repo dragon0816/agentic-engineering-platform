@@ -6007,3 +6007,24 @@ Owner decisions relayed by the BI orchestrator; design in `docs/phases/BI_CHAT_C
   data), guarded by the existing `analyses.run_sql` (read-only copy, read-only authorizer, deadline), with the
   analyses' 10 s limit and a 200-row cap marked `truncated`, charted like C1; nothing is saved (saving is C3,
   with approval). Rejected: a second SQL guard; running on the working copy; scripts from the chat.
+
+## 2026-11-02: Asking a vault from the general chat (owner goal, Claude Code)
+
+Owner goal relayed by the BI orchestrator; design in `docs/phases/BI_VAULT_ASKING.md`. Choices inside it:
+
+- **The host writes the citation for a vault's answer** (vault and version, one line, only when the answer does not
+  already name them), as it already does for subscribed datasets. Rejected: relying on the model to repeat
+  `scope_note`, since then a cited answer depends on the model.
+- **Binding a wiki repository to the Agent is a `propose_change` kind, `knowledge_binding`, web only**; the page's
+  button and the chat's model reach the same card, and the person's Apply is the approval. Apply writes the manifest
+  first and then the binding, after a backup, and takes effect at the next restart. Rejected: a direct write from the
+  button (no before/after, no stale check); registering into the running catalog (the query capability may not exist
+  until a restart when the host started with no binding).
+- **A second vault is allowed and is not reported as "not askable"**: the conversation's tool route offers every
+  vault; the card and the page state what changes (the direct route, `/wiki-query`, `aep_knowledge_ask` staying on the
+  first binding). Rejected: blocking a second binding.
+- **A never-published vault keeps being answered from the pushed head**, marked as such (`KNOWLEDGE_REPO.md`
+  decision 8). "Unpublished" here means local work and anything pushed after the published tag.
+- **Whether `aep_knowledge_ask` covers BI is not decided**: the architecture does not answer it and it widens a data
+  boundary the owner set on 2026-10-12. Options in the design §5; nothing implemented.
+- **No V4 migration tool** (owner): `market-bi` is rebuilt from raw sources with the owner present (R6).
