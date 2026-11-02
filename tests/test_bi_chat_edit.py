@@ -9,19 +9,24 @@ feed's digest. All data is fictional.
 
 from __future__ import annotations
 
+import json
+import threading
+import time
 from pathlib import Path
 from typing import Any
 
 import pytest
 from test_ai_proposed_changes import _card, _propose
-from test_bi_chat_charts import DATASET, _host
+from test_bi_chat_charts import DATASET, _browser_missing, _host
+from test_chat_workflow_forms_telegram import _Scripted
 from test_host_wiring import host_json
 
 from capabilities.bi_cards import analyses, board, feed, vault
-from common.change_proposal import KINDS, PROPOSE_GUIDANCE, TELEGRAM_KINDS
+from common.change_proposal import KINDS, PROPOSE_GUIDANCE, PROPOSE_TOOL, TELEGRAM_KINDS
 from host_runtime import bi_chat_save
+from host_runtime.conversations import ConversationTurnRequest
 from host_runtime.host import build_runtime
-from host_runtime.web import AgentWeb
+from host_runtime.web import AgentWeb, AgentWebServer
 from scripts import bi_feed_fixtures as fixtures
 
 SLUG = "accounts-by-region"
@@ -254,3 +259,97 @@ def test_a_published_edit_changes_only_that_analysiss_feed_digest(web: AgentWeb)
     published = feed.listing(workspace, fixtures.VAULT_ID)
     shown = next(a for a in published["analyses"] if a["slug"] == SLUG)
     assert shown["chart"] == chart
+
+
+@pytest.mark.skipif(_browser_missing(), reason="no Chromium browser is installed")
+def test_the_approval_card_shows_the_diff_and_apply_stages_it(tmp_path: Path) -> None:
+    """P5, in a real browser: a scripted turn proposes the edit; the card in the
+    conversation shows Now and After with the SQL and the chart, and the button
+    stages it. The Knowledge page's suggestion draws its changes the same turn."""
+    from integrations.browser import Browser
+
+    config, layout = _host(tmp_path)
+    path = host_json(tmp_path, config)
+    with build_runtime(config, layout=layout) as runtime:
+        web = AgentWeb(runtime, config_path=path)
+        web.start_laya_tunnel = lambda settings=None: None  # type: ignore[method-assign]
+        server = AgentWebServer(web)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        browser = Browser(tmp_path / "browser", timeout_s=60)
+        try:
+            session = web.create_conversation()["conversation"]["session_id"]
+            chart = {"type": "line", "x": "domain", "y": "accounts"}
+            values = _edit(title="各領域的客戶數", sql=BY_DOMAIN, chart=chart, params={})
+            runtime.agent.gateway.router.model = _Scripted(
+                {"tools": [(PROPOSE_TOOL, {"kind": "bi_analysis_edit", "values": values,
+                                           "reason": "by domain"})]},
+                {"text": "請看卡片。"},
+            )  # fmt: skip
+            web.conversation_turn(
+                ConversationTurnRequest(session_id=session, message="改成看各領域")
+            )
+            before = _working(web)
+
+            browser.start()
+            browser.navigate(server.address)
+
+            def wait(expression: str, seconds: float = 30) -> Any:
+                deadline = time.monotonic() + seconds
+                while time.monotonic() < deadline:
+                    value = browser._evaluate(expression)
+                    if value:
+                        return value
+                    time.sleep(0.2)
+                raise AssertionError(expression)
+
+            wait('!document.getElementById("send").disabled')
+            browser._evaluate(f"loadConversations({json.dumps(session)})")
+            wait("!!document.querySelector('.action-card button[data-action=apply]')")
+            card = browser._evaluate(
+                "(() => { const c = document.querySelector('.action-card');"
+                " const rows = {};"
+                " for (const r of c.querySelectorAll('.card-diff tbody tr')) {"
+                "   rows[r.querySelector('th').textContent] ="
+                "     [r.cells[1].textContent, r.cells[2].textContent]; }"
+                " return {rows, preview: c.querySelector('.card-preview').textContent}; })()"
+            )
+            unit = before[f"analysis:{SLUG}"]
+            assert card["rows"]["SQL"] == [unit["code"], BY_DOMAIN]
+            assert card["rows"]["Chart"][1] == json.dumps(chart)
+            assert card["rows"]["Title"] == [unit["title"], "各領域的客戶數"]
+            assert f"+{BY_DOMAIN}" in card["preview"]
+            assert _working(web) == before
+
+            browser._evaluate(
+                "document.querySelector('.action-card button[data-action=apply]').click()"
+            )
+            wait("document.querySelector('.action-card .card-status.good') !== null")
+            assert _working(web)[f"analysis:{SLUG}"]["code"] == BY_DOMAIN
+
+            # The analysis AI's suggestion on the Knowledge page (P2).
+            turn = {
+                "suggestion": {
+                    "reply": "改好了", "preview": None,
+                    "analysis": {"slug": "x", "title": "<b>新</b>", "kind": "sql",
+                                 "code": "SELECT 2", "chart": {"type": "table"}},
+                    "edit": {"before": {"chart": {"type": "table"}}, "base": "b", "preview": None,
+                             "changes": [{"field": "code", "before": "SELECT 1",
+                                          "after": "SELECT 2"}]},
+                }
+            }  # fmt: skip
+            drawn = browser._evaluate(
+                f"(() => {{ const parts = biAnalysisSuggestion({{id: 's'}}, {json.dumps(turn)}, 1);"
+                " const box = document.createElement('div'); box.append(...parts);"
+                " return {pre: [...box.querySelectorAll('.bi-analysis-changes pre')]"
+                ".map((p) => p.textContent),"
+                " button: box.querySelector('.bi-actions button').textContent,"
+                " injected: box.querySelector('b') !== null}; })()"
+            )
+            assert drawn["pre"] == ["SELECT 1", "SELECT 2"]
+            assert drawn["button"] == "套用修改" and drawn["injected"] is False
+        finally:
+            browser.close()
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
