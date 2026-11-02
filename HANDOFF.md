@@ -1,8 +1,40 @@
 # Handoff
 
-Updated: 2026-11-01 (Asia/Taipei), by Claude Code (BI charts in the chat and the Dashboard's sources: C1, C2, C1b, C3, K1, K2; earlier: voice input for Telegram and Agent Web: V1–V8; earlier: BI analysis dashboard: F1, F2, F3, P1, P2, P3, P4, D1, D2, D3, chains and coverage as analyses, golden answers, P5, D4; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-11-02 (Asia/Taipei), by Claude Code (asking a vault from the general chat; earlier: BI charts in the chat and the Dashboard's sources: C1, C2, C1b, C3, K1, K2; earlier: voice input for Telegram and Agent Web: V1–V8; earlier: BI analysis dashboard: F1, F2, F3, P1, P2, P3, P4, D1, D2, D3, chains and coverage as analyses, golden answers, P5, D4; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## BI charts in the chat and the Dashboard's sources (2026-11-01, Claude Code) — latest
+## Asking a vault from the general chat (2026-11-02, Claude Code, worker D) — latest
+
+**Goal.** Owner 2026-11-02: a knowledge vault (BI or wiki) imported into AEP can be asked from a general AI chat, with
+cited answers. Design `docs/phases/BI_VAULT_ASKING.md`; decision `docs/DECISIONS.md` 2026-11-02; contract
+`docs/CONTRACTS.md` "Asking a vault from the general chat"; runbook `docs/runbooks/R6_MARKET_BI.md`.
+
+**Where.** Branch `bi-vault-asking` in Paseo worktree `2qnenase/bi-vault-asking` (own `.venv`, dev+office), from `main`
+`a7629341`; `main` had not moved at this writing. Nothing pushed or merged; the BI orchestrator merges.
+
+**Done.** `e1084359` design; `cc72c420` V1 (host-written source line, whole-chain test); `faab9904` V2 (`/api/knowledge/
+askable`, `propose_change` kind `knowledge_binding`, page button); `7f255dbf` V4 (runbook, `scripts/r6_precheck.py`).
+
+**Verification (last run on `7f255dbf`).** `ruff format --check .`, `ruff check .`, `mypy src tests` (915 files) clean.
+`test_vault_asking_e2e`, `test_vault_asking_binding` (incl. a headless browser step), `test_knowledge_repo_ui`,
+`test_r6_precheck` pass; `test_ai_proposed_changes`, `test_bi_chat_save`, `test_bi_chat_charts`, `test_bi_chat_sql`,
+`test_bi_query_analyses`, `test_bi_vault_published`, `test_knowledge_repo_agent`, `test_knowledge_unified`,
+`test_assistant_tools`, `test_harness_output_limit_g4` passed on the V1 and V2 states. **The full suite has not run.**
+`r6_precheck` has not been run on the real OneDrive folder, and must not be by an agent.
+
+**Not done.** V5 live acceptance with real models: waits for the orchestrator's go, like the full suite. Only under
+`%TEMP%`, its own Agent Web on a free loopback port, never 53583, the owner's workspace or OneDrive. V3 is stopped for
+the owner (design §5: A leave wiki-only, B a separate `aep_bi_query`, C route through `aep_knowledge_ask`).
+
+**Known points.**
+- A never-published vault is still answered from its pushed head, marked as such (decision 8); only local work and
+  pushes after the tag are refused. If the owner wants those refused too, decision 8 changes.
+- The conversation offers a Knowledge Skill's tool only when the Skill's namespace is the host's.
+- A host without `knowledge_pipeline` shows no wiki repository card, so no button; the route and the chat proposal work.
+- R6 cannot reuse the id `market-bi` on the owner's PC (`vault_exists`): runbook D1. Other R6 decisions: D2–D5.
+
+**Next action.** After the orchestrator's go: V5 and the full suite, then rebase onto `main`, re-run the checks, report.
+
+## BI charts in the chat and the Dashboard's sources (2026-11-01, Claude Code)
 
 **Goal.** Owner decisions 2026-11-01, relayed by the BI orchestrator: (a) charts in the general AI chat inline
 as a self-contained HTML in the chat file viewer; (b) a chat chart saved as a vault analysis with the owner's
