@@ -104,7 +104,7 @@ def harness_asker(
             )
             found: dict[str, Any] = {}
             for side in ("working", "published"):
-                reply = ask(value["question"], side)  # type: ignore[arg-type]
+                reply = ask(value["question"], side)
                 text = str(reply.get("answer") or "")
                 found[side] = {
                     **grade(question, text).model_dump(mode="json"),
