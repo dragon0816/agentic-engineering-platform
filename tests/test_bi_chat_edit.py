@@ -127,6 +127,11 @@ def test_a_chart_changes_only_the_keys_given(web: AgentWeb) -> None:
     assert chart == {"type": "line", "x": "region", "y": "accounts"}
 
 
+def test_a_table_inherits_no_axes(web: AgentWeb) -> None:
+    card = _card(_propose(web, "bi_analysis_edit", _edit(chart={"type": "table"})))
+    assert _rows(card)["Chart"]["after"] == '{"type": "table"}'
+
+
 def test_long_code_is_clipped_in_its_cell_and_whole_in_the_preview(web: AgentWeb) -> None:
     long_sql = (
         "SELECT json_extract(value, '$') AS domain, count(*) AS accounts FROM card_values "

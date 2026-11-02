@@ -233,9 +233,11 @@ def plan_edit(workspace: Path, given: Mapping[str, Any], snapshot: Mapping[str, 
         if given.get(key) is not None:
             edited[key] = given[key]
     # Only what changes, also inside the chart: `{"type": "line"}` keeps its x and y.
+    # A table has no axes, so it inherits none.
     chart = given.get("chart")
     if isinstance(chart, Mapping):
-        edited["chart"] = {**(unit.get("chart") or {}), **chart}
+        merged = {**(unit.get("chart") or {}), **chart}
+        edited["chart"] = dict(chart) if merged.get("type") == "table" else merged
     elif chart is not None:
         edited["chart"] = chart
     if sql:
