@@ -55,6 +55,24 @@ def _vault(ws: Path, tmp_path: Path) -> tuple[str, str]:
     return dataset, vault_id
 
 
+def _add_card(ws: Path, dataset: str) -> None:
+    BiStore(ws, dataset).apply(
+        [
+            PlannedRow(
+                row=1,
+                entity_type="Technology",
+                canonical_key="ethercat",
+                name="EtherCAT",
+                values={"name": "EtherCAT"},
+                synthetic=False,
+            )
+        ],
+        filename="u.csv",
+        entity_type="Technology",
+        actor="alice",
+    )
+
+
 def _propose(*questions: Any) -> dict[str, Any]:
     args = {
         "reply": "這幾題涵蓋目前的卡片。",
@@ -169,6 +187,41 @@ def test_a_term_may_come_from_a_saved_analysis_result(tmp_path: Path) -> None:
         "code": "SELECT 'only-in-analysis' AS word", "chart": {"type": "table"}})  # fmt: skip
     text = questions_session._corpus(ws, dataset)
     assert "only-in-analysis" in text and "ieee 802.1" in text
+
+
+def test_results_are_run_again_only_when_something_changed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _config, layout = ready(tmp_path)
+    ws = layout.workspace_root
+    dataset, vault_id = _vault(ws, tmp_path)
+    analyses.save(ws, vault_id, {
+        "title": "類型", "slug": "types", "kind": "sql",
+        "code": "SELECT 'one' AS word", "chart": {"type": "table"}})  # fmt: skip
+    ran: list[Any] = []
+    real = analyses.run_saved
+
+    def counted(*args: Any, **kwargs: Any) -> Any:
+        ran.append(args[2])
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(analyses, "run_saved", counted)
+    first = questions_session.saved_results(ws, vault_id)
+    count = len(ran)
+    assert count == len(first) > 0
+    first[0]["table"]["rows"] = "changed by a caller"  # a caller's copy, not the kept one
+    second = questions_session.saved_results(ws, vault_id)
+    assert len(ran) == count and second[0]["table"]["rows"] != "changed by a caller"
+    # A new analysis or new cards run them again.
+    analyses.save(ws, vault_id, {
+        "title": "另一個", "slug": "other", "kind": "sql",
+        "code": "SELECT 'two' AS word", "chart": {"type": "table"}})  # fmt: skip
+    assert "other" in {e["slug"] for e in questions_session.saved_results(ws, vault_id)}
+    assert len(ran) > count
+    count = len(ran)
+    _add_card(ws, dataset)
+    questions_session.saved_results(ws, vault_id)
+    assert len(ran) > count
 
 
 def test_outside_agent_web_or_a_vault_there_is_no_turn(tmp_path: Path) -> None:

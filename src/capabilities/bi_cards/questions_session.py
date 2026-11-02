@@ -13,8 +13,10 @@ they reach others only by commit and push.
 
 from __future__ import annotations
 
+import copy
 import json
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +26,8 @@ from capabilities.bi_cards.store import VAULT_PREFIX, BiStore, BiStoreError, now
 
 TARGET_PREFIX = "questions:"
 MAX_QUESTIONS = 20
+#: The default pack's 31 Python analyses take about 2 s each, one process each.
+RUN_WORKERS = 4
 #: (context, turns so far, check of a proposal) -> (what came back, model alias,
 #: tool calls made); supplied by Agent Web.
 Asker = Callable[
@@ -48,17 +52,34 @@ def create_session(workspace: Path, dataset: str, target: str, actor: str) -> di
     )
 
 
+#: The last results per vault with what they were read from: a turn reads them for the
+#: model and again for the check of its proposal.
+_LAST_RESULTS: dict[tuple[str, str], tuple[Any, list[dict[str, Any]]]] = {}
+
+
 def saved_results(workspace: Path, vault_id: str) -> list[dict[str, Any]]:
     """The saved analyses with their results on the working data; one that cannot
-    run reports why and is left out of what supports a term."""
-    found = []
-    for item in analyses.listing(workspace, vault_id)["analyses"]:
+    run reports why and is left out of what supports a term. Run again only when
+    the analyses or the data changed."""
+    saved = analyses.listing(workspace, vault_id)["analyses"]
+    data = analyses._db(workspace, vault_id).stat()
+    stamp = (data.st_mtime_ns, data.st_size, json.dumps(saved, sort_keys=True, default=str))
+    place = (str(workspace), vault_id)
+    known = _LAST_RESULTS.get(place)
+    if known is not None and known[0] == stamp:
+        return copy.deepcopy(known[1])
+
+    def one(item: dict[str, Any]) -> dict[str, Any]:
         entry = {key: item.get(key) for key in ("slug", "title", "question")}
         try:
             entry["table"] = analyses.run_saved(workspace, vault_id, item["slug"])["table"]
         except BiStoreError as error:
             entry["error"] = error.message
-        found.append(entry)
+        return entry
+
+    with ThreadPoolExecutor(max_workers=RUN_WORKERS) as pool:
+        found = list(pool.map(one, saved))
+    _LAST_RESULTS[place] = (stamp, copy.deepcopy(found))
     return found
 
 
