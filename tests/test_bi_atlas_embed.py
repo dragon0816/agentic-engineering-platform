@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
+import shutil
 import threading
 import time
 from collections.abc import Iterator
@@ -32,9 +34,12 @@ from host_runtime.bi_cards_tools import ATLAS_TOOL, TOOL_NAME
 from host_runtime.conversations import ConversationTurnRequest
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
+from host_runtime.web_page import PAGE
 from scripts import bi_feed_fixtures as fixtures
+from scripts import check_atlas_dashboard_golden as drift
 
 SLUG = "accounts-by-region"
+GOLDEN = Path(__file__).resolve().parent / "fixtures" / "atlas_embed_golden"
 EMBED_PAGE = """<!doctype html><title>stand-in</title><div data-embed-state="ready">Atlas</div>
 <script>
 const parent_ = location.ancestorOrigins[0];
@@ -52,6 +57,11 @@ DOCUMENT = {
         {"id": "c", "layout": {"y": 1, "x": 0}, "datasource": {"id": "other"}, "query": {}},
     ],
 }  # fmt: skip
+
+
+def _golden(name: str) -> dict[str, Any]:
+    found: dict[str, Any] = json.loads((GOLDEN / name).read_text("utf-8"))
+    return found
 
 
 class _Atlas(ThreadingHTTPServer):
@@ -161,29 +171,60 @@ def _route(path: str) -> dict[str, Any]:
     return {"kind": "dashboard", "name": unquote(segment)}
 
 
-@pytest.mark.parametrize(
-    ("name", "path"),
-    [
-        ("Mixed BI layout", "/embed/dashboard/Mixed%20BI%20layout"),
-        ("儀表板", "/embed/dashboard/%E5%84%80%E8%A1%A8%E6%9D%BF"),
-        ("v1.2 layout", "/embed/dashboard/v1.2%20layout"),
-        ("a/b?c#d", "/embed/dashboard/a%2Fb%3Fc%23d"),
-    ],
-)
-def test_a_dashboards_name_is_one_encoded_segment(name: str, path: str) -> None:
-    assert bi_atlas_embed.dashboard_path(name) == path
-    assert _route(path) == {"kind": "dashboard", "name": name}
+def _urls() -> list[dict[str, Any]]:
+    examples: list[dict[str, Any]] = _golden("example-urls.json")["urls"]
+    return examples
 
 
-def test_a_panels_path_reads_back_as_what_it_names() -> None:
-    path = bi_atlas_embed.panel_path(
-        "feed-fixture", SLUG, {"domain": "A&B =c", "samples": True, "note": "空 白"}
-    )
-    assert _route(path) == {
-        "kind": "panel", "vault": "feed-fixture", "slug": SLUG,
-        "params": {"domain": "A&B =c", "samples": "true", "note": "空 白"},
-    }  # fmt: skip
-    assert bi_atlas_embed.panel_path("v", "s") == "/embed/panel?vault=v&slug=s"
+@pytest.mark.parametrize("example", _urls(), ids=lambda e: str(e["name"]))
+def test_every_path_the_contract_accepts_is_one_we_can_build(example: dict[str, Any]) -> None:
+    wanted = example["route"]
+    if wanted["kind"] == "invalid":
+        return
+    assert _route(example["url"]) == wanted  # the test's reader agrees with Atlas's parser
+    if wanted["kind"] == "dashboard":
+        assert bi_atlas_embed.dashboard_path(wanted["name"]) == example["url"]
+    else:
+        built = bi_atlas_embed.panel_path(wanted["vault"], wanted["slug"], wanted["params"])
+        assert _route(built) == wanted
+
+
+def test_a_name_with_url_characters_stays_one_segment() -> None:
+    path = bi_atlas_embed.dashboard_path("a/b?c#d")
+    assert path == "/embed/dashboard/a%2Fb%3Fc%23d"
+    assert _route(path) == {"kind": "dashboard", "name": "a/b?c#d"}
+
+
+def test_the_contracts_decisions_match_how_the_page_asks() -> None:
+    cases = {c["name"]: c for c in _golden("access-decisions.json")["cases"]}
+    probe = cases["server-side availability probe"]
+    assert probe["method"] == "HEAD" and probe["headers"] == {} and probe["status"] == 200
+    # No Referer is refused cross-site: why the frame sets referrerpolicy="origin".
+    refused = cases[
+        "framed cross-site with no Referer (Agent Web's no-referrer, no iframe attribute)"
+    ]
+    assert refused["status"] == 403
+    assert 'frame.setAttribute("referrerpolicy", "origin")' in PAGE
+    headers = _golden("response-headers.json")
+    assert "X-Frame-Options" not in headers["embed"]["headers"]
+    assert headers["other"]["headers"]["X-Frame-Options"] == "DENY"
+
+
+def test_the_drift_check_covers_the_embed_goldens(tmp_path: Path) -> None:
+    atlas = tmp_path / "atlas"
+    upstream = atlas / drift.EMBED_UPSTREAM
+    upstream.mkdir(parents=True)
+    for path in GOLDEN.glob("*.json"):
+        shutil.copyfile(path, upstream / path.name)
+    assert drift.check_embed(atlas) == 3
+    (upstream / "example-urls.json").write_bytes(b"{}")
+    with pytest.raises(drift.Drift, match="embed golden differs: example-urls.json"):
+        drift.check_embed(atlas)
+
+
+@pytest.mark.skipif(not os.environ.get("AEP_ATLAS_REPO"), reason="AEP_ATLAS_REPO not set")
+def test_the_vendored_embed_goldens_match_the_atlas_checkout() -> None:
+    assert drift.check_embed(Path(os.environ["AEP_ATLAS_REPO"])) == 3
 
 
 @pytest.mark.parametrize("reserved", ["vault", "slug"])
@@ -198,6 +239,9 @@ def test_a_dashboards_panels_are_read_top_to_bottom_each_once() -> None:
         (fixtures.VAULT_ID, "tech-updates"),
     ]
     assert bi_atlas_embed.panels_of({"panels": "nope"}) == []
+    mixed = Path(__file__).resolve().parent / "fixtures" / "atlas_dashboard_golden"
+    document = json.loads((mixed / "dashboard-mixed.json").read_text("utf-8"))
+    assert bi_atlas_embed.panels_of(document)  # the contract's own mixed dashboard
     assert bi_atlas_embed.panels_of(None) == []
 
 
