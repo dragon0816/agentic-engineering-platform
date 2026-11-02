@@ -6492,3 +6492,34 @@ Design `docs/phases/BI_VAULT_ASKING.md`. Code: `src/host_runtime/knowledge_bindi
 - **BI K2 from a file.** `POST /api/bi/vaults/<id>/atlas-import` also takes `{file: <text>, apply?, token?}` in place of
   `{name, port}`. Refusals add `atlas_source_ambiguous` (`file` with `name`); a file that is not strict JSON or not a
   schemaVersion 2 document is `atlas_invalid`, over 2,000,000 bytes `atlas_too_large`.
+
+
+## The BI build flow: harness sessions and convert's sources (2026-11-02)
+
+Design `docs/phases/BI_BUILD_FLOW.md`. Every tool below exists for one turn only (`turn_host_tools`), reads or tries,
+and writes no card, draft or unit; a person's click applies a suggestion.
+
+- **`POST /api/bi/vaults/convert`** answers also `sources: {copied, skipped, error?}`. Sources are copied with the same
+  ids, files, Markdown revisions and conversion failures into the vault's local `staging.sqlite`; never to the shared
+  folder. `skipped`: the source's file is gone. `error` (the exception's class name): the vault exists, the sources did
+  not come along; the person adds them again.
+- **Session A** (`aep.bi.schema_suggestion/v1`). `BenchRuntime.schema_asker_for(dataset, draft_id, actor)`; without it
+  the turn stays one model call. New verdict `answer` (changes must be empty). `sent` gains `harness: true` and `tools:
+  [{name, ok}]`. Tools: `bi_schema__sources`, `bi_schema__read_source`, `bi_schema__cards {type?, limit?}`,
+  `bi_schema__try {changes?, samples?, source_id?, folder?, types?}`, `bi_schema__suggest`, `bi__query` (working copy).
+  `bi_schema__try` answers `{diff, errors, problems, valid}`, and when valid `impact` (`schema_versions.impact`, when the
+  dataset has a `bi.sqlite`), `samples: [{entity_type, name, problems}]` and, with `source_id`, `trial: {run_id, result}`.
+  A trial's run keeps the tried schema in its layout as `trial_schema`, under the ref `draft:<id>@rev<base>`.
+- **`bi_skill__benchmark {changes?, source_ids?, folder?}`** answers `{questions: [{question, before, after?}], regressions,
+  improved, candidates_added, cases, not_tested}`; `before`/`after` are grades with a fenced `answer`. At most 3 sources
+  and the first 10 graded questions. `after` reads `BiStore.scratch_copy`: the working cards plus the draft's clean trial
+  candidates, in a temporary folder. It is not an `aep.bi.bench_report/v1` and never satisfies the push check.
+- **Session kind `questions`**, target `questions:<set>`, vault datasets only (`not_a_vault`); no harness:
+  `harness_unavailable`. `BenchRuntime.questions_asker_for(dataset, actor)`. Tools: `bi__query` (working copy),
+  `bi_questions__analyses`, `bi_questions__try {question, must?, must_not?}` (grades on working and published),
+  `bi_questions__propose {reply, questions?, reasons?}`. Suggestion `aep.bi.questions_suggestion/v1`: `{reply, questions:
+  [{unit, question, must, must_not}], reasons, result}`. A proposal is refused back to the model unless it has at most 20
+  questions, each valid, graded, not a repeat, and every `must` term found (case-insensitive) in a working card's name or
+  field value or a saved analysis's result rows.
+- **`POST /api/bi/sessions/<id>/apply`** on a `questions` session takes `{dataset, turn, picks: [index]}`: stages those
+  questions, answers `{session, units, questions, cases}`; `picks_invalid`, `picks_empty`, `suggestion_applied`.

@@ -4172,3 +4172,25 @@ Design `docs/phases/VOICE_INPUT.md` (owner decisions 2026-11-01 in `docs/DECISIO
 - [x] 2026-11-02, Claude Code (worker D): K2 from a file (owner). The Knowledge page's Atlas import also takes a chosen dashboard file, with no Atlas running: same dry run, token and confirm, stages only `meta:dashboard`; strict JSON, 2,000,000 bytes, never run or stored. `tests/test_bi_atlas_file_import.py`, with a browser test that ends on the Dashboard tab showing the order.
 - [x] 2026-11-02, Claude Code (worker D): S1, design of a BI vault's originals in the shared folder (`docs/phases/BI_SOURCES_IN_REPOSITORY.md`), the owner's O1–O4 recorded, runbook updated. No code.
 - [ ] S2–S9 of that design: start on the integrated `bi-build-flow`, `bi-chat-embed-edit` and `bi-vault-asking`, when the orchestrator names the base. S6 waits for the per-file limit (O1). R6 waits for these, for the four base paths and for the folder of the wiki copy.
+
+
+## The BI build flow, end to end (2026-11-02)
+
+Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; branch `bi-build-flow`; Claude Code
+(worker A) under the BI orchestrator.
+
+- [x] 2026-11-02, Claude Code: B1 design and decision (`103d937c`).
+- [x] 2026-11-02, Claude Code: B2 (`d8861b5d`): converting a dataset to a vault copies its sources to the vault's local
+  staging (a gap found here); step 1 says 轉檔 and 轉成 vault apart. `test_bi_vault` convert tests.
+- [x] 2026-11-02, Claude Code: B3 (`866db953`): Session A on the Agent harness with read-only tools, trying an unsaved
+  draft (`trial_schema`). `test_bi_schema_agent` (4); `test_bi_sessions_ui` now names the one-call path it tests.
+- [x] 2026-11-02, Claude Code: B4 (`dd6deb2c`): `bi_skill__benchmark`, working vs a scratch copy with the draft's trial
+  candidates. `test_bi_skill_benchmark` (2).
+- [x] 2026-11-02, Claude Code: B5 (`5559c9f4`, `fe6a5c02`): session kind `questions`, proposals checked against the cards
+  and analyses, ticked questions staged. `test_bi_questions_session` (4). `5559c9f4` was committed with one mypy error
+  (an unused ignore), fixed in `fe6a5c02`.
+- [x] 2026-11-02, Claude Code: B6 (`41157891`): browser test of ingest into a vault, K1 and K2,
+  `test_bi_vault_steps_ui`. It found two page bugs, both fixed: an error notice on a vault with no benchmark run, and
+  step 3 not reading the vault again after an ingest.
+- [x] 2026-11-02, Claude Code: B7 (`947e78a1`): the whole flow in one browser run with scripted models,
+  `test_bi_build_flow_ui`.

@@ -13076,7 +13076,8 @@ function biQuestionsSuggestion(session, turn, index) {
   if (!s.questions.length) return parts;
   const ticks = s.questions.map((q) => {
     const tick = document.createElement("input");
-    tick.type = "checkbox"; tick.checked = true; tick.disabled = !!turn.applied;
+    tick.type = "checkbox"; tick.disabled = !!turn.applied;
+    tick.checked = turn.applied ? turn.applied.units.includes(q.unit) : true;
     tick.setAttribute("aria-label", "加入：" + q.question);
     return tick;
   });

@@ -1,6 +1,6 @@
 # The BI knowledge-base build flow, end to end
 
-Status: design (2026-11-02), slices below in progress. Owner goal 2026-11-02: the BI build flow works end to
+Status: B1–B7 done (2026-11-02); §12 has the commits and §9's live acceptance. Owner goal 2026-11-02: the BI build flow works end to
 end in Agent Web, with an AI session in each step that calls for one:
 
 ```text
@@ -126,3 +126,25 @@ OneDrive/SharePoint folders. Evidence goes into `docs/TASKS.md`; no secret is pr
 
 - **R6, sources on one PC.** A vault's sources stay on the PC that added them; they are not shared through the
   folder. This is an open owner decision for R6 (rebuilding `market-bi`). B2 keeps to it.
+
+## 11. Two page bugs the browser tests found
+
+- Opening a vault with no benchmark run yet raised 「讀不到測試：Cannot read properties of null」, because
+  `bi.benchWatch` and the missing run id were both undefined. Fixed in B6.
+- Step 3's 「還沒給大家的改動」 was not read again on entering the step, so after an ingest it still said there was
+  nothing to push. Entering step 3 now reads the vault's status. Fixed in B6.
+
+## 12. Status
+
+| Task | Commit | Test |
+|---|---|---|
+| B1 | `103d937c` | |
+| B2 | `d8861b5d` | `test_bi_vault.py::test_converting_a_dataset_takes_its_sources_along` |
+| B3 | `866db953` | `test_bi_schema_agent.py` |
+| B4 | `dd6deb2c` | `test_bi_skill_benchmark.py` |
+| B5 | `5559c9f4`, `fe6a5c02` | `test_bi_questions_session.py` |
+| B6 | `41157891` | `test_bi_vault_steps_ui.py` |
+| B7 | `947e78a1` | `test_bi_build_flow_ui.py` |
+
+A dataset still needs its `bi.sqlite` before it can be converted (`vault.convert` refuses `dataset_unknown`
+otherwise, and the page hides the button): someone starting from nothing creates the dataset or the vault first.

@@ -261,6 +261,14 @@ def test_the_whole_build_flow(
         assert [q["question"] for q in vault_checks.listing(workspace, vault_id)["questions"]] == [
             QUESTION["question"]
         ]
+        # The log shows what was added, not what was offered.
+        assert (
+            page.run(
+                "[...document.querySelectorAll('#bi-b-qa-log input[type=checkbox]')]"
+                ".map((t) => t.checked).join()"
+            )
+            == "true,false"
+        )
         page.shoot("3-questions")
 
         # -- step 3: AI dashboard, applied in one step (K1) -----------------------------------
