@@ -15,12 +15,16 @@ cited answers. Design `docs/phases/BI_VAULT_ASKING.md`; decision `docs/DECISIONS
 askable`, `propose_change` kind `knowledge_binding`, page button); `7f255dbf` V4 (runbook, `scripts/r6_precheck.py`);
 V3 `aep_bi_query` behind `assistant_bi_query`, off by default (see `docs/TASKS.md`).
 
-**Verification (last run on `7f255dbf`).** `ruff format --check .`, `ruff check .`, `mypy src tests` (915 files) clean.
-`test_vault_asking_e2e`, `test_vault_asking_binding` (incl. a headless browser step), `test_knowledge_repo_ui`,
-`test_r6_precheck` pass; `test_ai_proposed_changes`, `test_bi_chat_save`, `test_bi_chat_charts`, `test_bi_chat_sql`,
-`test_bi_query_analyses`, `test_bi_vault_published`, `test_knowledge_repo_agent`, `test_knowledge_unified`,
-`test_assistant_tools`, `test_harness_output_limit_g4` passed on the V1 and V2 states. **The full suite has not run.**
-`r6_precheck` has not been run on the real OneDrive folder, and must not be by an agent.
+**Verification (on `b8fe7f61`).** `ruff format --check .`, `ruff check .`, `mypy src tests` (916 files) clean. On the V3
+code: `test_assistant_bi_query` (with a headless browser step), `test_assistant_tools`, `test_coding_agents_web`,
+`test_coding_agent_setup`, `test_conversation_backends`, `test_host_wiring`, `test_host_models`,
+`test_ai_proposed_changes`, `test_vault_asking_e2e`, `test_vault_asking_binding`, `test_r6_precheck`: 177 passed, 1
+failed (`test_coding_agents_web`'s card count, my switch used its class); after the fix that file and
+`test_assistant_bi_query` passed, 18. Earlier slices also ran `test_bi_chat_save`, `test_bi_chat_charts`,
+`test_bi_chat_sql`, `test_bi_query_analyses`, `test_bi_vault_published`, `test_knowledge_repo_agent`,
+`test_knowledge_repo_ui`, `test_knowledge_unified`, `test_harness_output_limit_g4`. **The full suite has not run**: it is
+the orchestrator's, on the integrated branches. `r6_precheck` has not been run on the real OneDrive folder, and must not
+be by an agent. No graphify graph in this worktree, so `graphify update` was not run.
 
 **Not done.** V5 live acceptance with real models: not go yet, the model gateway did not answer its health route; the orchestrator sends the go and the credential
 variable's name. Only under `%TEMP%`, its own Agent Web on a free loopback port, never 53583, the owner's workspace or
