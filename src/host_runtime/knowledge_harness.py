@@ -11,6 +11,7 @@ rewrite of the Bridge record.
 from __future__ import annotations
 
 import json
+import logging
 import re
 import uuid
 from pathlib import Path
@@ -42,6 +43,7 @@ from knowledge.repo import repository as repo_engine
 # G4 (owner 2026-10-18): characters per synthesis token when the Knowledge
 # domain declares its output limit. An English token averages about 4
 # characters and a Chinese one 1-2, so 4 bounds both.
+_LOG = logging.getLogger(__name__)
 OUTPUT_CHARS_PER_TOKEN = 4
 FULL_RESULT_HINT = (
     "完整答案保留在這次工具紀錄的 record 中；也可以在 Agent Web 的 Knowledge 頁直接問同一個問題，"
@@ -424,6 +426,7 @@ class KnowledgeHarness:
                 return ""
             return "\n\n" + repo_engine.source_line(asset.name, json.loads(version))
         except Exception:  # noqa: BLE001 - a citation line never fails a validated answer
+            _LOG.warning("left out the repository line for %s", asset.key, exc_info=True)
             return ""
 
     @staticmethod

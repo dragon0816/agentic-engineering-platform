@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from types import SimpleNamespace
@@ -707,7 +708,9 @@ def _with_catalog(harness: KnowledgeHarness, version: Any) -> KnowledgeHarness:
     return harness
 
 
-def test_the_repository_line_is_added_only_when_it_can_be_read() -> None:
+def test_the_repository_line_is_added_only_when_it_can_be_read(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     good = record("The CMP180 supports the 5G NR standard [1].")
 
     def answer(harness: KnowledgeHarness) -> dict[str, Any]:
@@ -717,7 +720,8 @@ def test_the_repository_line_is_added_only_when_it_can_be_read() -> None:
         assert "5G NR" in result["answer"]
         return result
 
-    # A harness with no Bridge in reach, and one with nothing installed, still answer.
+    caplog.set_level(logging.WARNING, logger="host_runtime.knowledge_harness")
+    # A harness with no Bridge in reach, and one with nothing installed, still answer, quietly.
     bare = answer(knowledge_harness(FakeBridge(good)))
     assert "資料來源：知識庫" not in bare["answer"]
     empty = knowledge_harness(FakeBridge(good))
@@ -725,10 +729,16 @@ def test_the_repository_line_is_added_only_when_it_can_be_read() -> None:
         installed=SimpleNamespace(get=lambda _identity: None)
     )
     assert "資料來源：知識庫" not in answer(empty)["answer"]
-    # An unreadable version adds nothing and fails nothing.
+    assert caplog.records == []
+    # An unreadable version adds nothing and fails nothing, and it is logged without the answer.
     for broken in (OSError("gone"), "not json", '["not", "an object"]', 7):
         result = answer(_with_catalog(knowledge_harness(FakeBridge(good)), broken))
         assert "資料來源：知識庫" not in result["answer"], broken
+        (logged,) = caplog.records
+        assert logged.levelno == logging.WARNING and logged.exc_info is not None, broken
+        assert RS.name in logged.getMessage()
+        assert "5G NR" not in caplog.text
+        caplog.clear()
     # A fixed version has no line; a live one names what was read.
     fixed = answer(_with_catalog(knowledge_harness(FakeBridge(good)), None))
     assert "資料來源：知識庫" not in fixed["answer"]
@@ -736,6 +746,7 @@ def test_the_repository_line_is_added_only_when_it_can_be_read() -> None:
         _with_catalog(knowledge_harness(FakeBridge(good)), '{"tag": "v1", "commit": "abc"}')
     )
     assert f"資料來源：知識庫 {RS.name} 發佈版本 v1" in live["answer"]
+    assert caplog.records == []
 
 
 def test_g2_knowledge_answers_the_persons_sentence_not_the_models() -> None:
