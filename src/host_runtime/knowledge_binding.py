@@ -21,13 +21,9 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import ParseResult
 
-from capabilities.bi_cards import vault as bi_vault
-from capabilities.bi_cards.capability import QUERY_SPEC
-from capabilities.bi_cards.store import DB_FILE, BiStoreError, vault_registry
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from common.assets import AssetIdentity
 from common.execution import RequestContext, TraceIdentifiers
-from host_runtime.bi_cards_tools import bi_skill_on
 from host_runtime.contracts import CompanyHostConfiguration
 from host_runtime.profiles import ProfileError, load_active_profile
 from host_runtime.workspace import write_atomically
@@ -369,51 +365,16 @@ def _wiki_entry(web: Any, item: Mapping[str, Any], bindings: list[Any]) -> dict[
     return _entry("wiki", repo_id, title, reads, codes)
 
 
-def _bi_entry(web: Any, item: Mapping[str, Any]) -> dict[str, Any]:
-    gateway = web.runtime.agent.gateway
-    workspace = Path(web.runtime.layout.workspace_root)
-    vault_id = str(item["id"])
-    codes: list[str] = []
-    if gateway.bridge.installed.get(QUERY_SPEC.identity) is None:
-        codes.append("capability_missing")
-    else:
-        if not bi_skill_on(gateway):
-            codes.append("skill_off")
-        if not _granted(web, QUERY_SPEC):
-            codes.append("not_granted")
-    folder = Path(str(item.get("path") or ""))
-    try:
-        vault = bi_vault.Vault(workspace, vault_id)
-    except (BiStoreError, RepoError):
-        vault = None
-    if vault is None or not vault.reachable:
-        built = vault is not None and (vault.local / bi_vault.PUBLISHED_DIR / DB_FILE).is_file()
-        if built:
-            return _entry("bi", vault_id, vault_id, None, codes)
-        code = "unreadable_format" if folder.is_dir() else "unreachable"
-        return _entry("bi", vault_id, vault_id, None, [*codes, code])
-    try:
-        vault.repo.sync()
-        reads = vault.reads()
-        store = bi_vault.reading_store(workspace, vault.dataset)
-        cards = len(store.card_rows())
-    except (BiStoreError, RepoError):
-        return _entry("bi", vault_id, vault_id, None, [*codes, "unreachable"])
-    if not reads["commit"] or not cards:
-        codes.append("nothing_pushed")
-    elif not reads["tag"]:
-        codes.append("never_published")
-    return _entry("bi", vault_id, str(vault.repo.document["title"]), reads, codes)
-
-
 def askable(web: Any) -> dict[str, Any]:
     """Each vault on this PC and whether the general chat can ask it."""
+    from host_runtime import bi_vaults_api
+
     workspace = Path(web.runtime.layout.workspace_root)
     bindings = _bindings(web)
     notes = [_reason("several_vaults")] if len(bindings) > 1 else []
     return {
         "repos": [_wiki_entry(web, item, bindings) for item in wiki_repos.listing(workspace)],
-        "vaults": [_bi_entry(web, item) for item in vault_registry(workspace)],
+        "vaults": bi_vaults_api.askable_vaults(web, _granted, _entry),
         "notes": notes,
     }
 

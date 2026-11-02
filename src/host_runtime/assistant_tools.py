@@ -14,7 +14,6 @@ the owner approved sending all data to Copilot (2026-10-12).
 
 from __future__ import annotations
 
-import asyncio
 import json
 import secrets
 import uuid
@@ -27,19 +26,6 @@ from knowledge.query import RetrievalSnapshot
 from knowledge.vault import normalize
 
 TOKEN_FILE = "assistant-mcp-token"
-#: What `aep_bi_query` passes on to `bi-cards/query`; never `sql` or `chart`.
-BI_QUERY_FIELDS = (
-    "dataset",
-    "analysis",
-    "params",
-    "entity_type",
-    "text",
-    "field",
-    "value",
-    "domain",
-    "follow_links",
-    "limit",
-)
 MAX_PAGE_CHARS = 40_000
 PROTOCOL_VERSIONS = ("2025-06-18", "2025-03-26", "2024-11-05")
 INSTRUCTIONS = (
@@ -225,73 +211,11 @@ class AssistantTools:
         return tuple(n for n in TOOLS if n != "aep_bi_query" or self.bi_query_on())
 
     def bi_query(self, args: dict[str, Any]) -> dict[str, Any]:
-        """A vault's published version through the Bridge and its grant, as
-        `bi__query`, without SQL (`docs/phases/BI_VAULT_ASKING.md` §5)."""
-        from capabilities.bi_cards import vault
-        from capabilities.bi_cards.capability import QUERY_SPEC
-        from capabilities.bi_cards.store import VAULT_PREFIX
-        from common.local_agent import LocalCapabilityRequest
-        from host_runtime.bi_cards_tools import bi_skill_on
-        from knowledge.repo.repository import source_line
+        from host_runtime import bi_assistant_query
 
-        if not self.bi_query_on():
-            return {
-                "ok": False,
-                "code": "bi_query_off",
-                "message": "The owner has not turned this on (Agent Web, Settings > Coding "
-                "agents). Say so; do not guess an answer.",
-            }
-        if "sql" in args:
-            return {"ok": False, "code": "sql_not_allowed"}
-        runtime = self.web.runtime
-        if not bi_skill_on(runtime.agent.gateway):
-            return {"ok": False, "code": "bi_unavailable"}
-        workspace = Path(runtime.layout.workspace_root)
-        vaults = [
-            {
-                "dataset": vault.dataset_name(str(item["id"])),
-                "title": item.get("title"),
-                "purpose": item.get("purpose"),
-            }
-            for item in vault.listing(workspace)
-        ]
-        dataset = str(args.get("dataset") or "")
-        if not dataset:
-            return {"ok": False, "code": "dataset_missing", "vaults": vaults}
-        known = dataset.startswith(VAULT_PREFIX) and vault.registry_entry(
-            workspace, dataset[len(VAULT_PREFIX) :]
+        return bi_assistant_query.answer(
+            self.web.runtime, args, enabled=self.bi_query_on(), trace=_trace()
         )
-        if not known:
-            return {"ok": False, "code": "not_a_vault", "vaults": vaults}
-        outcome = asyncio.run(
-            runtime.agent.execute_capability(
-                LocalCapabilityRequest(
-                    ingress="local",
-                    actor=runtime.actor,
-                    bridge_id=runtime.config.device.bridge_id,
-                    target=QUERY_SPEC.identity,
-                    arguments={k: args[k] for k in BI_QUERY_FIELDS if k in args},
-                    trace=_trace(),
-                )
-            )
-        )
-        result = outcome.capability
-        if result is None or result.status != "succeeded":
-            failure = None if result is None else result.failure
-            code = failure.code if failure is not None else str(outcome.refusal or "failed")
-            return {"ok": False, "code": code}
-        data = dict(result.data or {})
-        read = data.get("vault") or {}
-        return {
-            "ok": True,
-            "dataset": data.get("dataset"),
-            "total": data.get("total"),
-            "cards": data.get("cards") or [],
-            "analysis": data.get("analysis") or [],
-            "scope_note": data.get("scope_note"),
-            "source": source_line(dataset, read),
-            "reads": {"tag": read.get("tag"), "commit": read.get("commit")},
-        }
 
     # -- workflows ---------------------------------------------------------
 

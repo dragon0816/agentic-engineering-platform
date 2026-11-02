@@ -12,13 +12,16 @@ call. Errors are raised as `BiStoreError` and answered by `bi_cards_api.route`.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any
 
 from capabilities.bi_cards import analyses, migrate, packs, vault, vault_checks
-from capabilities.bi_cards.store import BiStoreError
+from capabilities.bi_cards.capability import QUERY_SPEC
+from capabilities.bi_cards.store import DB_FILE, BiStoreError, vault_registry
 from host_runtime import bi_atlas_import, bi_bench, bi_feed_api
+from host_runtime.bi_cards_tools import bi_skill_on
+from knowledge.repo.repository import RepoError
 
 Answer = tuple[int, dict[str, Any]]
 
@@ -169,3 +172,59 @@ def route(
         bi_feed_api.refresh(workspace, vault_id)
         return 200, {"ok": True, **ran}
     return _error(404, "route_unknown", "沒有這個 BI 路徑")
+
+
+# -- whether the chat can ask a vault (BI_VAULT_ASKING.md V2) ------------------------------
+
+
+def askable_vaults(
+    web: Any,
+    granted: Callable[[Any, Any], bool],
+    entry: Callable[[str, str, str, Any, list[str]], dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Each BI vault on this PC, for `host_runtime.knowledge_binding`, which names no
+    BI type (ADR-K10) and supplies its grant check and the entry's shape."""
+    workspace = Path(web.runtime.layout.workspace_root)
+    return [_askable(web, item, granted, entry) for item in vault_registry(workspace)]
+
+
+def _askable(
+    web: Any,
+    item: Mapping[str, Any],
+    granted: Callable[[Any, Any], bool],
+    entry: Callable[[str, str, str, Any, list[str]], dict[str, Any]],
+) -> dict[str, Any]:
+    gateway = web.runtime.agent.gateway
+    workspace = Path(web.runtime.layout.workspace_root)
+    vault_id = str(item["id"])
+    codes: list[str] = []
+    if gateway.bridge.installed.get(QUERY_SPEC.identity) is None:
+        codes.append("capability_missing")
+    else:
+        if not bi_skill_on(gateway):
+            codes.append("skill_off")
+        if not granted(web, QUERY_SPEC):
+            codes.append("not_granted")
+    folder = Path(str(item.get("path") or ""))
+    try:
+        target = vault.Vault(workspace, vault_id)
+    except (BiStoreError, RepoError):
+        target = None
+    if target is None or not target.reachable:
+        built = target is not None and (target.local / vault.PUBLISHED_DIR / DB_FILE).is_file()
+        if built:
+            return entry("bi", vault_id, vault_id, None, codes)
+        code = "unreadable_format" if folder.is_dir() else "unreachable"
+        return entry("bi", vault_id, vault_id, None, [*codes, code])
+    try:
+        target.repo.sync()
+        reads = target.reads()
+        store = vault.reading_store(workspace, target.dataset)
+        cards = len(store.card_rows())
+    except (BiStoreError, RepoError):
+        return entry("bi", vault_id, vault_id, None, [*codes, "unreachable"])
+    if not reads["commit"] or not cards:
+        codes.append("nothing_pushed")
+    elif not reads["tag"]:
+        codes.append("never_published")
+    return entry("bi", vault_id, str(target.repo.document["title"]), reads, codes)

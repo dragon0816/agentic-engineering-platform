@@ -31,6 +31,11 @@ Atlas embeds in the chat". Live acceptance with a real model and a real Atlas pa
 orchestrator's report pass on the rebased branch. The full suite runs on the integrated result of the BI workers, by
 the orchestrator; do not run it on this branch alone.
 
+**Integration.** Rebased onto the vault asking work (`f6a43664`). `test_bi_cards`'s ADR-K10 guard failed there on that
+work's `assistant_tools.py` and `knowledge_binding.py`; fixed on this branch by moving their BI parts to
+`bi_assistant_query.py` and `bi_vaults_api.askable_vaults`, with no behaviour change. A framed panel's answer now
+cites the vault and version too.
+
 **Next actions.** (1) Orchestrator: integrate. (2) `test_bi_vault_ui::test_vault_panel_and_dashboard_in_a_browser` is
 worker A's. (3) Optional: refresh the frame's caption after a republish, and hide the fallback chip while framed.
 

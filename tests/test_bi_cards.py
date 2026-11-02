@@ -147,6 +147,8 @@ def test_harness_and_storage_code_outside_the_package_do_not_import_bi_types() -
         "host_runtime/bi_feed_api.py",
         # BI C3: a chat chart saved as a vault analysis (propose_change).
         "host_runtime/bi_chat_save.py",
+        # Asking a vault: `aep_bi_query`, the BI side of the assistant tools.
+        "host_runtime/bi_assistant_query.py",
         # BI K2: the Dashboard order imported from an Atlas dashboard.
         "host_runtime/bi_atlas_import.py",
         # BI E2: Atlas panels and dashboards framed in the chat.
@@ -154,11 +156,14 @@ def test_harness_and_storage_code_outside_the_package_do_not_import_bi_types() -
         # BI dataset sharing: the platform re-reads every published snapshot.
         "control_plane/bi_datasets.py",
     }
+    offenders = []
     for path in (REPO / "src").rglob("*.py"):
         relative = path.relative_to(REPO / "src").as_posix()
         if relative.startswith("capabilities/bi_cards/") or relative in allowed:
             continue
-        assert "capabilities.bi_cards" not in path.read_text(encoding="utf-8"), relative
+        if "capabilities.bi_cards" in path.read_text(encoding="utf-8"):
+            offenders.append(relative)
+    assert offenders == []
 
 
 def test_values_normalise_like_the_fixture_ingest() -> None:
