@@ -72,6 +72,11 @@ def check(store: BiStore, reg: Registry) -> dict[str, Any]:
     for card in rows:
         for key in {card["canonical_key"].lower(), card["name"].lower()}:
             by_name.setdefault(key, []).append(card)
+    # A link through an alias or a former name does resolve (`BI_CARD_MODEL.md` §3.2).
+    known = {card["id"]: card for card in rows}
+    for card_id, name in store.other_names():
+        if card_id in known and known[card_id] not in by_name.setdefault(name.lower(), []):
+            by_name[name.lower()].append(known[card_id])
     seen_names: dict[str, set[str]] = {}
     for card in rows:
         seen_names.setdefault(card["name"].lower(), set()).add(card["entity_type"])

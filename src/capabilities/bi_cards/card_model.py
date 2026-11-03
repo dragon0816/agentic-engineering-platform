@@ -96,7 +96,8 @@ def link_item(card_id: str, name: str) -> dict[str, str]:
 
 
 def is_link_item(value: Any) -> bool:
-    return isinstance(value, dict) and isinstance(value.get("card"), str)
+    """Exactly these keys: other units hold a `card` too (`proposal:`)."""
+    return isinstance(value, dict) and set(value) == {"card", "name"}
 
 
 def render_link(value: Any, names: Mapping[str, str]) -> Any:
@@ -107,6 +108,26 @@ def render_link(value: Any, names: Mapping[str, str]) -> Any:
     if is_link_item(value):
         return names.get(value["card"], value.get("name") or value["card"])
     return value
+
+
+def render_links_within(value: Any, names: Mapping[str, str]) -> Any:
+    """A unit, or anything holding one, for a person: every link inside as a name."""
+    if is_link_item(value):
+        return render_link(value, names)
+    if isinstance(value, list):
+        return [render_links_within(item, names) for item in value]
+    if isinstance(value, dict):
+        return {k: render_links_within(v, names) for k, v in value.items()}
+    return value
+
+
+def card_names_of(units: Mapping[str, Any]) -> dict[str, str]:
+    """Each card's current name, from `card:` units."""
+    return {
+        key[5:]: str(value["name"])
+        for key, value in units.items()
+        if key.startswith("card:") and isinstance(value, dict)
+    }
 
 
 def _text(value: Mapping[str, Any], *keys: str) -> bool:

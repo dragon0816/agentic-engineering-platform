@@ -93,6 +93,7 @@ Stored by id; shown as names, so `fields` and `card_values`, the 31 analyses and
 
 - **At capture**, a link value that changed goes name → `{"card", "name"}` if exactly one card of its `link_to` types answers it, by name, alias or former key. Otherwise it stays text, as today. An unchanged value keeps its unit, so a capture never makes a false diff.
 - **At materialize**, `{"card"}` renders the card's current name, or the stored `name` if the card is gone. Text renders as written, even when it resolves through an alias: a resolved rendering would change feed goldens and old analyses.
+- **Only under a schema of this model** (one with `relation_types`, 5.0.0 and later). A vault on an older schema keeps writing text: the feed's fixture vault, pinned to 2.0.0, must rebuild byte for byte. An upgrade starts it, for values that change.
 - So a rename touches one card's units and no other's, and creates no conflicts on cards linking to it.
 - History, proposals and the conflict page must render these items too. This is the likeliest place for a bug, so it has its own tests.
 

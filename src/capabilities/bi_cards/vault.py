@@ -57,7 +57,7 @@ from capabilities.bi_cards import (
     vault_skills,
     vault_sources,
 )
-from capabilities.bi_cards.schema import Registry
+from capabilities.bi_cards.schema import Registry, norm_key
 from capabilities.bi_cards.store import (
     DATASET_RE,
     DB_FILE,
@@ -195,6 +195,44 @@ def _repo_errors() -> Iterator[None]:
 
 
 # -- the BI type -------------------------------------------------------------------
+
+
+class _LinkTargets:
+    """Which card a link's text means: a name or key first, then an alias or a
+    former name. Only a single answer among the field's `link_to` types counts."""
+
+    def __init__(self, db: sqlite3.Connection) -> None:
+        self.kinds: dict[str, str] = {}
+        self.names: dict[str, str] = {}
+        self.named: dict[str, set[str]] = {}
+        self.others: dict[str, set[str]] = {}
+        for r in db.execute("SELECT id, entity_type, canonical_key, name FROM cards"):
+            self.kinds[r["id"]] = r["entity_type"]
+            self.names[r["id"]] = r["name"]
+            for text in (r["name"], r["canonical_key"]):
+                self.named.setdefault(norm_key(text), set()).add(r["id"])
+        for r in db.execute("SELECT card_id, name FROM card_names"):
+            self.others.setdefault(norm_key(r["name"]), set()).add(r["card_id"])
+
+    def find(self, text: str, link_to: tuple[str, ...]) -> str | None:
+        for table in (self.named, self.others):
+            hits = {
+                card
+                for card in table.get(norm_key(text), ())
+                if card in self.kinds and (not link_to or self.kinds[card] in link_to)
+            }
+            if hits:
+                return next(iter(hits)) if len(hits) == 1 else None
+        return None
+
+    def stored(self, value: Any, link_to: tuple[str, ...]) -> Any:
+        """A link value as its unit holds it: by id, or text when no single card answers."""
+        if isinstance(value, list):
+            return [self.stored(item, link_to) for item in value]
+        if not isinstance(value, str):
+            return value
+        card = self.find(value, link_to)
+        return value if card is None else card_model.link_item(card, self.names[card])
 
 
 def _same_keys(units: Mapping[str, Any]) -> set[tuple[str, str]]:
@@ -507,6 +545,7 @@ def materialize(
                 )
         stamp = now()
         card_keys = _card_keys(units, info)
+        shown = card_model.card_names_of(units)
         for key, value in sorted(units.items()):
             if not key.startswith("card:"):
                 continue
@@ -553,7 +592,7 @@ def materialize(
                     (
                         cid,
                         name,
-                        _dump(value["value"]),
+                        _dump(card_model.render_link(value["value"], shown)),
                         source.get("kind") or "edit",
                         source.get("ref") or "",
                         source.get("by") or "",
@@ -594,8 +633,12 @@ def materialize(
                 (
                     row["card_id"],
                     row["field"],
-                    None if row["old"] is None else _dump(row["old"]),
-                    None if row["new"] is None else _dump(row["new"]),
+                    None
+                    if row["old"] is None
+                    else _dump(card_model.render_link(row["old"], shown)),
+                    None
+                    if row["new"] is None
+                    else _dump(card_model.render_link(row["new"], shown)),
                     row["kind"],
                     row["ref"],
                     row["by"],
@@ -643,7 +686,7 @@ def materialize(
                 (
                     cid,
                     name,
-                    _dump(lost.get("value")),
+                    _dump(card_model.render_link(lost.get("value"), shown)),
                     conflict["commit"],
                     (lost.get("history") or {}).get("at") or stamp,
                     decided["status"] if decided else "pending",
@@ -908,6 +951,7 @@ class Vault:
                 before = units_from_db(connection, keep_ids=True)
                 yield connection
                 after = units_from_db(connection, keep_ids=True)
+                targets = _LinkTargets(connection)
             finally:
                 connection.rollback()
                 connection.close()
@@ -918,6 +962,7 @@ class Vault:
             }
             if not changed:
                 return
+            self._links_by_id(changed, after, targets)
             with _repo_errors():
                 self.repo.stage_many(dict(sorted(changed.items())))
                 if changed.get(repo_engine.SCHEMA_UNIT):
@@ -940,6 +985,26 @@ class Vault:
                         self.repo, _PURPOSE.get() or _draft(imports, changed)
                     )
             self.rebuild()
+
+    def _links_by_id(
+        self, changed: dict[str, Any], after: Mapping[str, Any], targets: _LinkTargets
+    ) -> None:
+        """Store the link fields that changed by card id. An unchanged one is not
+        here, so it keeps its unit, text or id, and a capture makes no false diff."""
+        try:
+            reg = self._registry(str(after.get(repo_engine.SCHEMA_UNIT) or ""))
+        except BiStoreError:
+            return  # a schema this PC has not got: the links stay text, as written
+        if "relation_types" not in reg.document:
+            return  # a schema from before the card model keeps its commits as they were
+        for key, value in changed.items():
+            if not key.startswith("field:") or not value or value.get("value") is None:
+                continue
+            _, cid, name = key.split(":", 2)
+            entity = reg.types.get(str((after.get(f"card:{cid}") or {}).get("type")))
+            item = None if entity is None else entity.get(name)
+            if item is not None and item.is_link:
+                changed[key] = {**value, "value": targets.stored(value["value"], item.link_to)}
 
     def _registry(self, ref: str | None = None) -> Registry:
         """The schema `ref`, by default the working copy's."""
@@ -1323,9 +1388,15 @@ def pending(workspace: Path, vault_id: str) -> dict[str, Any]:
     with vault.lock:
         head = vault.repo.units()
         work = vault.repo._pending()
-        names = {**head, **work["sets"]}
+        units = {**head, **work["sets"]}
+        shown = card_model.card_names_of(units)
         changes = [
-            {"unit": k, "label": unit_label(names, k), "before": head.get(k), "after": v}
+            {
+                "unit": k,
+                "label": unit_label(units, k),
+                "before": card_model.render_links_within(head.get(k), shown),
+                "after": card_model.render_links_within(v, shown),
+            }
             for k, v in sorted(work["sets"].items())
         ]
         return {
@@ -1360,9 +1431,15 @@ def push(workspace: Path, vault_id: str) -> dict[str, Any]:
             if result["status"] == "pushed":
                 readme.write_readme(vault.repo)
         if result["status"] == "conflicts":
-            names = vault.repo.working_units()
-            for item in result["conflicts"]:
-                item["label"] = unit_label(names, item["unit"])
+            units = vault.repo.working_units()
+            shown = card_model.card_names_of(units)
+            result["conflicts"] = [
+                {
+                    **card_model.render_links_within(item, shown),
+                    "label": unit_label(units, item["unit"]),
+                }
+                for item in result["conflicts"]
+            ]
         vault.rebuild()
         return result
 
@@ -1391,8 +1468,14 @@ def diff(workspace: Path, vault_id: str, commit_id: str) -> dict[str, Any]:
     with _repo_errors():
         target = vault.repo.resolve_version(commit_id)
         changes = vault.repo.diff(target)
-        names = {**vault.repo.units(), **vault.repo.state_at(target)}
-    return {"changes": [{**c, "label": unit_label(names, c["unit"])} for c in changes]}
+        units = {**vault.repo.units(), **vault.repo.state_at(target)}
+    shown = card_model.card_names_of(units)
+    return {
+        "changes": [
+            {**card_model.render_links_within(c, shown), "label": unit_label(units, c["unit"])}
+            for c in changes
+        ]
+    }
 
 
 def revert(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:

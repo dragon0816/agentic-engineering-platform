@@ -507,6 +507,18 @@ class BiStore:
         with self._db() as db:
             return list(db.execute("SELECT * FROM cards ORDER BY entity_type, canonical_key"))
 
+    def other_names(self) -> list[tuple[str, str]]:
+        """(card id, name) of every alias and former name in `card_names`."""
+        if not self.exists:
+            return []
+        with self._db() as db:
+            if not db.execute("SELECT 1 FROM sqlite_master WHERE name = 'card_names'").fetchone():
+                return []  # a dataset not written since the card model
+            return [
+                (str(r["card_id"]), str(r["name"]))
+                for r in db.execute("SELECT card_id, name FROM card_names")
+            ]
+
     def find(self, entity_type: str, canonical_key: str) -> sqlite3.Row | None:
         if not self.exists:
             return None
