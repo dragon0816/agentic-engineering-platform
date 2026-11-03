@@ -964,6 +964,7 @@ class BiPublisher(Protocol):
 PUBLISH_MESSAGES = {
     "dataset_read_only": "這是訂閱的資料集，不能發佈；只有你自己的資料集可以發佈",
     "dataset_unknown": "找不到這個資料集",
+    "dataset_is_vault": "這是知識庫，不能用資料集的方式發佈：快照會帶上還沒 push 的內容",
     "dataset_empty": "資料集還沒有卡片，沒有東西可以發佈",
     "note_required": "請寫版本說明",
     "readers_invalid": "讀者只能是「我的團隊」或「全公司」",
@@ -992,6 +993,7 @@ PUBLISH_MESSAGES = {
 PUBLISH_STATUS = {
     "dataset_read_only": 409,
     "dataset_unknown": 404,
+    "dataset_is_vault": 409,
     "artifact_too_large": 413,
     "version_superseded": 409,
     "review_pending": 409,
@@ -1132,6 +1134,10 @@ def _publish(
     from host_runtime.platform_publish import PublishError
 
     dataset = str(given.get("dataset") or "")
+    if dataset.lower().startswith(VAULT_PREFIX):
+        # Its working database holds commits nobody has pushed. The page hides
+        # the button; this is the route's own answer to a direct request.
+        return _publish_error("dataset_is_vault")
     store, refused = _own_dataset(workspace, dataset)
     if refused is not None:
         return refused
