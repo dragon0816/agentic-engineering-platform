@@ -9,6 +9,35 @@ from typing import Any
 
 from integrations.browser import Browser, BrowserError, browser_path
 
+#: Keeps what a failed wait reports: requests under way or failed, and page errors.
+_WATCH = """
+(() => {
+  const watch = window.__aepWatch = {open: [], failed: [], errors: []};
+  const keep = (list, item) => { list.push(item); if (list.length > 40) list.shift(); };
+  window.addEventListener("error", (e) => keep(watch.errors, String(e.message)));
+  window.addEventListener("unhandledrejection", (e) => keep(watch.errors, String(e.reason)));
+  const original = window.fetch;
+  window.fetch = async (...args) => {
+    const name = String(args[0]).split("?")[0];
+    watch.open.push(name);
+    try {
+      const reply = await original(...args);
+      if (!reply.ok) keep(watch.failed, name + " " + reply.status);
+      return reply;
+    } catch (failure) {
+      keep(watch.failed, name + " " + failure);
+      throw failure;
+    } finally { watch.open.splice(watch.open.indexOf(name), 1); }
+  };
+})();
+"""
+_NOTICE = "(document.getElementById('bi-notice') || {}).textContent"
+_PAGE_STATE = (
+    "({url: location.pathname, ready: document.readyState, "
+    "send: (document.getElementById('send') || {disabled: 'absent'}).disabled, "
+    "text: document.body ? document.body.innerText.slice(0, 300) : ''})"
+)
+
 
 def browser_missing() -> bool:
     return browser_path() is None
@@ -29,6 +58,8 @@ class BiPage:
             deviceScaleFactor=1,
             mobile=False,
         )
+        self.browser.page().call("Page.enable")
+        self.browser.page().call("Page.addScriptToEvaluateOnNewDocument", source=_WATCH)
         self.browser.navigate(self.address)
         self.wait('!document.getElementById("send").disabled')
         self.click("#nav-knowledge")
@@ -52,9 +83,25 @@ class BiPage:
             if value:
                 return value
             time.sleep(0.1)
-        raise AssertionError(
-            f"{expression}\nnotice: {self.text_of('bi-notice')!r}\n"
-            f"visible stage: {self.run(_VISIBLE_STAGE)!r}"
+        raise AssertionError(f"{expression}\n{self.diagnosis()}")
+
+    def diagnosis(self) -> str:
+        """What the page was doing, for a failed wait to explain itself. It must not
+        replace the failure with its own: each part that cannot be read says so."""
+
+        def read(expression: str) -> Any:
+            try:
+                return self.run(expression)
+            except Exception as failure:  # noqa: BLE001 - see above
+                return f"<unreadable: {type(failure).__name__}>"
+
+        return (
+            f"notice: {read(_NOTICE)!r}\n"
+            f"visible stage: {read(_VISIBLE_STAGE)!r}\n"
+            f"page: {read(_PAGE_STATE)!r}\n"
+            f"requests still open: {read('window.__aepWatch && window.__aepWatch.open')!r}\n"
+            f"requests failed: {read('window.__aepWatch && window.__aepWatch.failed')!r}\n"
+            f"page errors: {read('window.__aepWatch && window.__aepWatch.errors')!r}"
         )
 
     def click(self, selector: str) -> None:
