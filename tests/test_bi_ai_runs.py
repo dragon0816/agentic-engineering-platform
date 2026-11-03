@@ -242,3 +242,32 @@ def test_a_source_goes_to_the_model_only_in_an_approved_data_class(tmp_path: Pat
     run = _start(tmp_path, ai, public, kind="trial")
     jobs.run_all()
     assert _detail(tmp_path, run["id"])["run"]["status"] == "review"
+
+
+def test_a_retry_is_refused_when_the_source_s_data_class_is_no_longer_approved(
+    tmp_path: Path,
+) -> None:
+    """The check is made on every send: an administrator may have narrowed the
+    approval since the run began."""
+    jobs = Jobs()
+    allowed = ["UNCLASSIFIED", "INTERNAL"]
+    model = Scripted(Failure(code="model_unavailable", message="down"), MEETING_ANSWER)
+    ai = AiRuntime(
+        model=lambda: (model, "test-model"), background=jobs, approved=lambda: tuple(allowed)
+    )
+    run = _start(tmp_path, ai, _note(tmp_path))
+    jobs.run_all()
+    assert _detail(tmp_path, run["id"])["run"]["status"] == "failed"
+    asked = len(model.requests)
+
+    allowed.remove("INTERNAL")
+    path = f"/api/bi/runs/{run['id']}/retry"
+    status, payload = _call(tmp_path, "POST", path, {"dataset": "demo"}, ai)
+    assert (status, payload["code"]) == (400, "classification_not_approved")
+    assert jobs.pending == [] and len(model.requests) == asked
+    assert _detail(tmp_path, run["id"])["run"]["status"] == "failed"
+
+    allowed.append("INTERNAL")
+    _ok(_call(tmp_path, "POST", path, {"dataset": "demo"}, ai))
+    jobs.run_all()
+    assert _detail(tmp_path, run["id"])["run"]["status"] == "review"

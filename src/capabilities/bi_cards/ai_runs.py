@@ -199,6 +199,11 @@ def retry(workspace: Path, dataset: str, ai: AiRuntime | None, run_id: str) -> d
     failed = [int(f["chunk"]) for f in layout.get("failures") or []]
     if not failed:
         raise BiStoreError("run_closed", "這次執行沒有可以重試的段落")
+    # Checked on every send: the approval may have narrowed since the run began.
+    for source_id in run["source_ids"]:
+        source = staging.source(source_id)
+        if source is not None:
+            check_classification(ai, source["classification"])
     chosen = ai.model() if ai is not None else None
     if chosen is None:
         raise BiStoreError("model_unavailable", "沒有可用的模型：到 Settings 設定後再試")
