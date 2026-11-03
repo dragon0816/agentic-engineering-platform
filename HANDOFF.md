@@ -1,8 +1,55 @@
 # Handoff
 
-Updated: 2026-11-03 (Asia/Taipei), by Claude Code (BI on a host with no wiki Knowledge asset; earlier: Telegram conversations in Agent Web: T1–T6; earlier: the BI build flow: B1–B7; earlier: BI chat embedding and AI panel edits: P1-P5; earlier: asking a vault from the general chat; earlier: BI charts in the chat and the Dashboard's sources: C1, C2, C1b, C3, K1, K2; earlier: voice input for Telegram and Agent Web: V1–V8; earlier: BI analysis dashboard: F1, F2, F3, P1, P2, P3, P4, D1, D2, D3, chains and coverage as analyses, golden answers, P5, D4; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-11-03 (Asia/Taipei), by Claude Code (the Windows installer's Python and venv checks; earlier: BI on a host with no wiki Knowledge asset; earlier: Telegram conversations in Agent Web: T1–T6; earlier: the BI build flow: B1–B7; earlier: BI chat embedding and AI panel edits: P1-P5; earlier: asking a vault from the general chat; earlier: BI charts in the chat and the Dashboard's sources: C1, C2, C1b, C3, K1, K2; earlier: voice input for Telegram and Agent Web: V1–V8; earlier: BI analysis dashboard: F1, F2, F3, P1, P2, P3, P4, D1, D2, D3, chains and coverage as analyses, golden answers, P5, D4; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## BI on a host with no wiki Knowledge asset (2026-11-03, Claude Code) — latest
+## The Windows installer's Python and venv checks (2026-11-03, Claude Code) — latest
+
+**Goal.** A colleague reported that installing AEP fails on a Python version problem. The owner approved the smallest fix
+on 2026-11-02. The colleague's exact error text is still not known, so this fixes the gaps found by testing, not a
+confirmed cause.
+
+**Where.** Branch `installer-python-check` on `bi-model-fallback` `1b369159`; not pushed, not merged, no release built. Colleagues
+get the fix only with a new release.
+
+**Done.** In `deploy/windows-preview/install.ps1`:
+- A 32-bit Python is unusable (`struct.calcsize('P')*8`, because `platform.machine()` says AMD64 on it), so the py launcher
+  fallback and the clear message apply. `-PythonExe` pointing at one is refused too.
+- `.venv` and `gateway-venv` are reused only if they run, are 64-bit 3.12 and have pip; otherwise they are rebuilt and the
+  installer says so. A working one is not touched.
+- `Remove-InstallVenv` removes only exactly `<install root>\<name>`, a real folder with a `pyvenv.cfg`, and refuses a link.
+  A junction inside a venv makes the delete fail with an error in Windows PowerShell; its target is left alone.
+- `INSTALL.zh-TW.md` troubleshooting corrected. New tests: `tests/test_windows_preview_python.py`.
+
+**Verified on `8994e44e` plus this change.** `ruff format --check .`, `ruff check .`, `mypy src tests` (932 files) clean;
+`pytest tests/test_windows_preview_python.py tests/test_windows_preview_bundle.py` 33 passed. **The full suite was not run.**
+Real `install.cmd` / `update.cmd` from a bundle built in temp, cleaned PATH, redirected profile folders:
+
+| Case | Exit | Result |
+|---|---|---|
+| 32-bit 3.12, no `py` | 1 | Refused, names 32-bit, install root not created |
+| 32-bit 3.12 with real `py` | 0 | Falls back to 64-bit 3.12.10 |
+| 3.12 without `ensurepip` | 1 | `could not make a virtual environment`, says to repair with pip |
+| Retry after that, good 3.12 | 0 | `.venv` rebuilt |
+| Retry after 32-bit (`PATH`; `-PythonExe`) | 0, 0 | `.venv` rebuilt; `verify.cmd` 0 on the first |
+| Leftover 3.14 `.venv` | 0 | Rebuilt |
+| Removed base Python (install; update) | 0, 0 | Rebuilt |
+| Healthy install, then update with 3.14 plus `py` | 0, 0 | `.venv` kept (marker file survived); `verify.cmd` 0 |
+| Gateway: first install; healthy rerun | 0, 0 | `gateway-venv` kept on the rerun (marker survived) |
+| Gateway: 32-bit `gateway-venv` | 0 | Rebuilt; `.venv` kept |
+
+Gateway cases used `-GatewayInstallOnly` and a dummy `LITELLM_MASTER_KEY` in the child, so no HKCU write happens;
+`HKCU\Environment`, the Run key and `HKCU\Software\Python` had the same digest before and after every case.
+
+**Limits.**
+- 32-bit in CI: fake `.cmd` Pythons, because CI has no 32-bit Python. The real one was used only in the temp cases above.
+- Token renewal, gateway autostart and start, shortcuts and coding-agent setup were not run: they write outside temp.
+- `update.ps1` has no `-GatewayInstallOnly`, so gateway rebuilds were run through `install.cmd`, not `update.cmd`.
+- `deploy/shared-platform-preview/install.ps1` has the same `platform.machine()` check and no venv check. Not changed.
+
+**Next actions.** (1) Orchestrator: review and merge. (2) Owner: decide when to release. (3) If the colleague still
+fails, get the zip name, the first error lines, `python --version` and `py -0p`.
+
+## BI on a host with no wiki Knowledge asset (2026-11-03, Claude Code)
 
 **Goal.** Owner 2026-11-03: anyone with access to a vault can use it, and not everyone binds a wiki knowledge base, so BI
 must work on a host with a model and no wiki Knowledge asset. Decision `docs/DECISIONS.md` 2026-11-03; rows in `docs/TASKS.md`.
@@ -55,7 +102,7 @@ seen on the owner's host.
 **Next actions.** (1) Orchestrator: merge. (2) After a restart of Agent Web with this code, the owner
 sends one Telegram message and sees it in the session list.
 
-## The BI build flow, end to end (2026-11-02, Claude Code) — latest
+## The BI build flow, end to end (2026-11-02, Claude Code)
 
 **Goal.** Owner goal 2026-11-02: the BI knowledge-base build flow works end to end in Agent Web, with an AI session in
 each step that calls for one: data import + convert → schema and skills (AI) + ingest → benchmark and dashboard (AI) →

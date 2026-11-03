@@ -89,20 +89,27 @@ foreach ($File in $Manifest.files) {
 # newer default python cannot use them (2026-10-21: a colleague's 3.14). When
 # -PythonExe was not given and the default python is not that version, the
 # py launcher's copy of the right version is used, and the installer says so.
+# A 32-bit Python counts as the wrong one: it cannot use the win_amd64 wheels,
+# and on 64-bit Windows its platform.machine() still says AMD64, so only the
+# size of a pointer tells them apart.
 function Get-PythonIdentity([string]$Exe) {
     $Previous = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
     try {
-        $Lines = @(& $Exe -c "import sys, platform; print(f'{sys.version_info.major}.{sys.version_info.minor}'); print(sys.executable); print(platform.machine().lower())" 2>$null)
-        if ($LASTEXITCODE -ne 0 -or $Lines.Count -lt 3) { return $null }
+        $Lines = @(& $Exe -c "import sys, platform, struct; print(f'{sys.version_info.major}.{sys.version_info.minor}'); print(sys.executable); print(platform.machine().lower()); print(struct.calcsize('P') * 8)" 2>$null)
+        if ($LASTEXITCODE -ne 0 -or $Lines.Count -lt 4) { return $null }
         return [pscustomobject]@{
             Version = ([string]$Lines[0]).Trim()
             Path = ([string]$Lines[1]).Trim()
             Machine = ([string]$Lines[2]).Trim()
+            Bits = ([string]$Lines[3]).Trim()
         }
     }
     catch { return $null }
     finally { $ErrorActionPreference = $Previous }
+}
+function Test-PythonUsable($Identity, [string]$Minor) {
+    return ($null -ne $Identity -and $Identity.Version -eq $Minor -and $Identity.Bits -eq "64")
 }
 function Get-LauncherPython([string]$Minor) {
     # `py -0p` lists " -V:3.12 *   C:\...\python.exe" (launcher 3.11 and
@@ -126,13 +133,16 @@ function Get-LauncherPython([string]$Minor) {
 }
 $Wanted = [string]$Manifest.python_minor
 $Python = Get-PythonIdentity $PythonExe
-if (($null -eq $Python -or $Python.Version -ne $Wanted) -and -not $PSBoundParameters.ContainsKey("PythonExe")) {
+if (-not (Test-PythonUsable $Python $Wanted) -and -not $PSBoundParameters.ContainsKey("PythonExe")) {
     foreach ($Candidate in @(Get-LauncherPython $Wanted)) {
         $Other = Get-PythonIdentity $Candidate
-        if ($null -ne $Other -and $Other.Version -eq $Wanted -and $Other.Machine -in @("amd64", "x86_64")) {
-            $Default = if ($null -eq $Python) { "No usable '$PythonExe' was found" } else { "'$PythonExe' is Python $($Python.Version) ($($Python.Path))" }
+        if ((Test-PythonUsable $Other $Wanted) -and $Other.Machine -in @("amd64", "x86_64")) {
+            $Default = if ($null -eq $Python) { "No usable '$PythonExe' was found" }
+            elseif ($Python.Bits -ne "64") { "'$PythonExe' is 32-bit Python $($Python.Version) ($($Python.Path))" }
+            else { "'$PythonExe' is Python $($Python.Version) ($($Python.Path))" }
             Write-Host "$Default; using Python $Wanted from the py launcher instead: $($Other.Path)"
-            Write-Host ((ConvertFrom-Escaped "\u9810\u8a2d\u7684 python \u4e0d\u662f ") + $Wanted +
+            $NotWanted = if ($null -ne $Python -and $Python.Bits -ne "64") { "64 " + (ConvertFrom-Escaped "\u4f4d\u5143\u7684 ") + $Wanted } else { $Wanted }
+            Write-Host ((ConvertFrom-Escaped "\u9810\u8a2d\u7684 python \u4e0d\u662f ") + $NotWanted +
                 (ConvertFrom-Escaped "\uff0c\u6539\u7528 py \u555f\u52d5\u5668\u627e\u5230\u7684 Python ") + $Wanted +
                 (ConvertFrom-Escaped "\uff1a") + $Other.Path)
             $PythonExe = $Other.Path
@@ -141,12 +151,16 @@ if (($null -eq $Python -or $Python.Version -ne $Wanted) -and -not $PSBoundParame
         }
     }
 }
-if ($null -eq $Python -or $Python.Version -ne $Wanted) {
+if (-not (Test-PythonUsable $Python $Wanted)) {
     $Launcher = @(Get-LauncherPython $Wanted)
     $Lines = @("This bundle requires 64-bit Python $Wanted (its packages are built for $Wanted only).")
     if ($null -eq $Python) {
         $Lines += "'$PythonExe' did not run as Python."
         $FoundText = "'$PythonExe' ?"
+    }
+    elseif ($Python.Bits -ne "64") {
+        $Lines += "Found 32-bit Python $($Python.Version) at $($Python.Path) (from '$PythonExe'); the bundle's packages need 64-bit."
+        $FoundText = "32 " + (ConvertFrom-Escaped "\u4f4d\u5143\u7684 ") + "$($Python.Version) ($($Python.Path))"
     }
     else {
         $Lines += "Found Python $($Python.Version) at $($Python.Path) (from '$PythonExe')."
@@ -173,6 +187,68 @@ if ($Python.Machine -notin @("amd64", "x86_64")) {
     throw "This bundle requires 64-bit x86 Windows Python; $($Python.Path) reports $($Python.Machine)."
 }
 
+# VENV-CHECK-BEGIN
+# A venv left by an earlier attempt or install is reused only if it still
+# works: one made by a 32-bit Python, one whose Python was removed and one a
+# failed attempt left without pip would otherwise fail every retry at pip,
+# whatever Python is on this computer now. They hold only installed packages,
+# which are installed again; host.json, the workspace and the gateway's
+# settings are elsewhere. A working one is left exactly as it is.
+function Get-VenvProblem([string]$VenvPath, [string]$Minor) {
+    $Exe = Join-Path $VenvPath "Scripts\python.exe"
+    $Previous = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $Lines = @(& $Exe -c "import struct, sys; print(f'{sys.version_info.major}.{sys.version_info.minor}'); print(struct.calcsize('P') * 8)" 2>$null)
+        if ($LASTEXITCODE -ne 0 -or $Lines.Count -lt 2) {
+            return "its Python does not run (the Python it was made from may have been removed)"
+        }
+        $Version = ([string]$Lines[0]).Trim()
+        $Bits = ([string]$Lines[1]).Trim()
+        if ($Version -ne $Minor -or $Bits -ne "64") { return "it is $Bits-bit Python $Version, not 64-bit Python $Minor" }
+        & $Exe -m pip --version 2>$null | Out-Null
+        if ($LASTEXITCODE -ne 0) { return "it has no working pip" }
+        return $null
+    }
+    catch { return "its Python does not run (the Python it was made from may have been removed)" }
+    finally { $ErrorActionPreference = $Previous }
+}
+# Removes only the venv this installer owns: exactly <install root>\<name>, a
+# real folder and not a link to one elsewhere, with a venv's pyvenv.cfg in it.
+# Directory.Delete does not follow a link found inside: in Windows PowerShell
+# it stops with an error there, and what the link points to is left alone.
+function Remove-InstallVenv([string]$VenvPath, [string]$Root, [string]$Name) {
+    $Full = [IO.Path]::GetFullPath($VenvPath).TrimEnd('\')
+    $Expected = [IO.Path]::GetFullPath((Join-Path $Root $Name)).TrimEnd('\')
+    if (-not [string]::Equals($Full, $Expected, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing to remove $Full`: the venv to replace is $Expected."
+    }
+    if (([IO.File]::GetAttributes($Full) -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "Refusing to remove $Full`: it is a link to another folder. Remove the link yourself and run install.cmd again."
+    }
+    if (-not (Test-Path -LiteralPath (Join-Path $Full "pyvenv.cfg") -PathType Leaf)) {
+        throw "Refusing to remove $Full`: it has no pyvenv.cfg, so it may not be a venv. Move it aside and run install.cmd again."
+    }
+    try { [IO.Directory]::Delete($Full, $true) }
+    catch {
+        throw ("Could not remove the unusable venv at $Full`: $($_.Exception.Message) " +
+            "Close Agent Web and anything else using it, then run install.cmd again; if it still fails, delete that folder yourself.")
+    }
+}
+function Repair-InstallVenv([string]$VenvPath, [string]$Root, [string]$Name, [string]$Minor) {
+    if (-not (Test-Path -LiteralPath (Join-Path $VenvPath "Scripts\python.exe"))) { return }
+    $Problem = Get-VenvProblem $VenvPath $Minor
+    if ($null -eq $Problem) { return }
+    Write-Host "The existing virtual environment at $VenvPath cannot be used: $Problem. Rebuilding it; your settings and workspace are kept."
+    Write-Host ((ConvertFrom-Escaped "\u73fe\u6709\u7684 Python \u74b0\u5883\u4e0d\u80fd\u7528\uff0c\u6703\u91cd\u5efa\uff08\u8a2d\u5b9a\u548c workspace \u90fd\u6703\u4fdd\u7559\uff09\uff1a") + $VenvPath)
+    Remove-InstallVenv $VenvPath $Root $Name
+}
+# VENV-CHECK-END
+function Get-VenvCreationHelp([string]$Exe) {
+    return ("$Exe could not make a virtual environment, usually because it was installed without pip. " +
+        "Repair or reinstall that Python with pip selected, then run install.cmd again.")
+}
+
 New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
 $Workspace = Join-Path $InstallRoot "workspace"
 New-Item -ItemType Directory -Force -Path $Workspace | Out-Null
@@ -182,9 +258,10 @@ New-Item -ItemType Directory -Force -Path (Join-Path $Workspace "assets\skills")
 New-Item -ItemType Directory -Force -Path (Join-Path $Workspace "assets\workflows") | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $Workspace "assets\knowledge") | Out-Null
 $Venv = Join-Path $InstallRoot ".venv"
+Repair-InstallVenv $Venv $InstallRoot ".venv" $Wanted
 if (-not (Test-Path -LiteralPath (Join-Path $Venv "Scripts\python.exe"))) {
     & $PythonExe -m venv $Venv
-    if ($LASTEXITCODE -ne 0) { throw "Could not create the preview virtual environment." }
+    if ($LASTEXITCODE -ne 0) { throw "Could not create the preview virtual environment. $(Get-VenvCreationHelp $PythonExe)" }
 }
 $VenvPython = Join-Path $Venv "Scripts\python.exe"
 $PlatformWheels = @(Get-ChildItem -LiteralPath (Join-Path $BundleRoot "wheels") -Filter "agentic_engineering_platform-*.whl")
@@ -347,10 +424,11 @@ else {
         # A running gateway holds the files this replaces. Only the one AEP
         # started is stopped; one run outside AEP is left alone.
         & $HostExecutable gateway stop | Out-Null
+        Repair-InstallVenv $GatewayVenv $InstallRoot "gateway-venv" $Wanted
     }
-    else {
+    if (-not (Test-Path -LiteralPath $GatewayPython)) {
         & $PythonExe -m venv $GatewayVenv
-        if ($LASTEXITCODE -ne 0) { throw "Could not create the LLM gateway's virtual environment." }
+        if ($LASTEXITCODE -ne 0) { throw "Could not create the LLM gateway's virtual environment. $(Get-VenvCreationHelp $PythonExe)" }
     }
     Write-Host "Installing the LLM gateway (LiteLLM, offline; this takes a few minutes)..."
     & $GatewayPython -m pip install --disable-pip-version-check --no-index --no-deps --find-links (Join-Path $BundleRoot "wheels-gateway") -r (Join-Path $BundleRoot "gateway\requirements.txt")

@@ -218,7 +218,10 @@ Agent Web 仍用舊的程式和設定，要先停止它，再點捷徑才會用�
 | `This bundle requires 64-bit Python 3.12`（這個安裝包需要 64 位元的 Python 3.12） | 預設的 `python` 是別的版本（例如 3.14）；安裝包的套件只適用 3.12 | 訊息會顯示找到的版本和 `python.exe` 路徑。若列出「Python 3.12 is installed here」，照訊息加 `-PythonExe "<那個路徑>"` 重新執行；沒有列出時，從 python.org 安裝 64 位元 Python 3.12（可以和其他版本並存）再執行。沒加 `-PythonExe` 時，安裝程式會先自動試 `py -3.12` |
 | `The term 'Get-FileHash' is not recognized` | 舊版安裝包從 PowerShell 7 視窗執行時，Windows PowerShell 找不到自己的模組 | 新版已修正。舊版請改從「Windows PowerShell」視窗或檔案總管雙擊 `install.cmd` 執行 |
 | 安裝完顯示「Agent Web 正在執行：請重新啟動才會用到新的設定」 | Agent Web 在安裝前就在執行，仍用舊的程式和設定 | 確認 **Tasks** 沒有工作在跑，照第 4 節「停止／重新啟動 Agent Web」停止後再點捷徑 |
-| `Offline wheel installation failed` | 檔案被占用或防毒軟體攔截 | 關閉 Agent Web 後重試；仍失敗時附上畫面截圖回報 |
+| `Found 32-bit Python 3.12`（找到的是 32 位元的 Python 3.12） | `python` 是 32 位元版；安裝包的套件只適用 64 位元 | 從 python.org 安裝「Windows installer (64-bit)」的 3.12（可以和 32 位元版並存）再執行；`py` 啟動器找得到 64 位元的 3.12 時，安裝程式會自動改用它 |
+| `The existing virtual environment ... cannot be used`（現有的 Python 環境不能用，會重建） | 之前留下的環境不能用：它的 Python 已移除、是 32 位元或別的版本，或沒有 pip | 不用處理，安裝程式會自動重建，設定和 workspace 都會保留 |
+| `could not make a virtual environment` | 這個 Python 安裝時多半沒有包含 pip | 用 Python 安裝程式的 Modify 或 Repair 勾選 **pip**，或重新安裝後再執行 |
+| `Offline wheel installation failed` | 檔案被占用或防毒軟體攔截。上方若有 `No matching distribution found`，多半是 Python 環境和安裝包不合 | 關閉 Agent Web 後重試；出現 `No matching distribution found` 時，先用 `python --version` 確認是 3.12，再用 `python -c "import struct; print(struct.calcsize('P') * 8)"` 確認顯示 64。仍失敗時附上畫面截圖回報 |
 | `The LLM gateway's token could not be renewed now` | 安裝時沒有網域登入 | 不影響安裝。連上公司網路或 VPN 後，到 Settings → LLM gateway 按 **Refresh token** |
 | `AEP is not installed ... yet`（update.cmd） | 這台電腦還沒安裝過 | 改用 `install.cmd` |
 | 捷徑點了沒反應，或啟動頁顯示 `AEP Agent did not start` | Agent Web 啟動失敗 | 看 `workspace\logs` 最新的 `agent-web-*.err.log` 並回報 |
