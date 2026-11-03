@@ -3996,15 +3996,7 @@ Skill), `src/host_runtime/bi_cards_api.py` (routes), `src/host_runtime/bi_cards_
     [{"field", "label", "value", "class", "source": {"kind", "ref", "at", "by"}, "history":
     int}], "links": [{"field", "target_id": str | null, "target_key", "missing"}],
     "proposals": [{"field", "value", "source": {"kind", "ref", "at"}}]}`.
-  - `POST /api/bi/cards/<id>/field {"dataset", "field", "value", "base_version", "reason"}` →
-    `{"ok": true, "version"}`, or `{"ok": true, "version": <unchanged>, "unchanged": true}` when
-    the field already has that value (2026-10-24: compared as normalised stored JSON, as an
-    import compares; nothing is written, no history entry, the version stays), or 409
-    `{"ok": false, "code": "stale_edit", "message",
-    "current", "by", "at", "version"}`. 400 codes: `field_unknown`, `field_derived`,
-    `base_version_missing`, `reason_required` (a `judgement` field needs `reason`),
-    `value_invalid`. `value` is normalised like an import cell (a list is accepted for a list
-    field; empty clears the field). The edit closes the field's pending proposals.
+  - A person changes a value with a correction note: see "BI card model: editing". `POST /api/bi/cards/<id>/field` is gone (2026-11-04, 404 `route_unknown`).
   - `GET /api/bi/cards/<id>/history?dataset=` → `{"history": [{"field", "old", "new",
     "source": {"kind", "ref"}, "at", "by", "reason"}]}`.
   - Unknown dataset (2026-10-24): `GET /api/bi/cards`, `cards/<id>`, `cards/<id>/history`,
@@ -4170,7 +4162,7 @@ runs, candidates), `src/capabilities/bi_cards/runs.py` (rule-path run, review, c
   "source_name", "locator", "excerpt", "basis", "at"}]` (newest first) and an `"id"` on each proposal.
 - **Proposals.** `POST /api/bi/cards/<id>/proposals/<pid> {"dataset", "action": "accept" | "reject",
   "base_version", "reason"}` → `{"ok": true, "version"}`. Accept writes the proposed value as the
-  person's edit (as `/field`, `stale_edit` 409 when the card moved on, `reason_required` for a
+  person's (`stale_edit` 409 when the card moved on, `reason_required` for a
   `judgement` field) and closes the field's pending proposals; reject marks only that proposal
   `rejected` and does not change the card version. Unknown or closed: 404 `proposal_unknown`.
 
@@ -6641,3 +6633,13 @@ A **home** is an application or a library entry. Its short form, `<application>`
 **Old vaults.** A BI commit may still add `skills/…` and `sources/…`, and a source folder may still be `sources`, `sources/<anything>`. New code writes skills to `library/skills/` or a home's folder, also in an old vault. **A source added with no folder still goes to `sources/`**, in no home, in a new vault too: choose an application for what should be in one.
 
 **API.** `GET /api/bi/vaults/<id>/skills` lists a home's skill as `<short>/<name>` and adds `tools`, with `folders` holding each home's `sources`. `POST …/skills` takes that long name, or `name` with `home`; a home's skill with no `applies_to` applies to that home's sources. `POST …/tools` `{home, name, suffix, text}` stages a tool's next revision (`tool_invalid`, 400, when any is bad).
+## BI card model: editing (2026-11-04)
+
+Design: `docs/phases/BI_CARD_MODEL.md` §5. Every change to a card goes through ingest. `store.set_field` stays as an internal method for proposal accept and a confirmed migration; no route reaches it directly.
+
+**Correction note.** Markdown with frontmatter `card` (id), `field`, `value`, `reason`, and optional `author`, `at`. Read deterministically by `correction.read` with the card page reader, no model. Text with no such frontmatter is an ordinary source, for a normal AI ingest.
+
+- `POST /api/bi/corrections/preview {"dataset", "base_version", "card", "field", "value", "reason", "author"?}`, or `{"dataset", "base_version", "text"}` for a written note → `{"ok": true, "card", "name", "field", "label", "current", "value", "reason", "author", "unchanged", "base_version", "folder", "text"}`. Writes nothing.
+- `POST /api/bi/corrections/apply {"dataset", "base_version", "text"}` → `{"ok": true, "version", "source", "import_id"}`, or `{"ok": true, "version", "unchanged": true}` when the field already has that value: no source, no version, no history. The value is written as `human`, its evidence is the note's `value` line with `basis: human`, and `reason` goes in `history`. It is an import of one value, so a vault commits it at once, the note in a source commit of its own, and `POST /api/bi/import/undo` undoes it.
+- `value` is normalised like an import cell; a list is accepted for a list field; empty clears the field. 400: `note_invalid`, `field_unknown`, `field_derived`, `base_version_missing`, `reason_required` (every note), `value_invalid`. 404 `card_unknown`. 409 `stale_edit` with `current`, `by`, `at`, `version`; 409 `dataset_read_only`.
+- A note is kept in the `sources/` of the card's first home, else `library/corrections/sources`.

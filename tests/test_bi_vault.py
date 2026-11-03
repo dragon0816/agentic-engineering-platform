@@ -155,13 +155,42 @@ def _card(ws: Path, dataset: str, key: str, entity_type: str = "Technology") -> 
 
 
 def _edit(ws: Path, dataset: str, key: str, field: str, value: Any, actor: str) -> Any:
+    """A person's value staged in the working copy, for testing commit, push and
+    conflict. Set-up only: a person changes a value with a correction note."""
     card = _card(ws, dataset, key)
-    return _call(
-        ws,
-        "POST",
-        f"/api/bi/cards/{card['id']}/field",
-        {"dataset": dataset, "field": field, "value": value, "base_version": card["version"]},
-        actor=actor,
+    version = BiStore(ws, dataset).set_field(
+        card["id"], field, value, base_version=card["version"], actor=f"{actor} via web"
+    )
+    return 200, {"ok": True, "version": version}
+
+
+def _note(ws: Path, dataset: str, key: str, field: str, value: Any, actor: str) -> dict[str, Any]:
+    """A correction note, previewed and confirmed; a vault commits it at once."""
+    card = _card(ws, dataset, key)
+    note = _ok(
+        _call(
+            ws,
+            "POST",
+            "/api/bi/corrections/preview",
+            {
+                "dataset": dataset,
+                "card": card["id"],
+                "field": field,
+                "value": value,
+                "base_version": card["version"],
+                "reason": f"{actor} 的更正",
+            },
+            actor=actor,
+        )
+    )
+    return _ok(
+        _call(
+            ws,
+            "POST",
+            "/api/bi/corrections/apply",
+            {"dataset": dataset, "text": note["text"], "base_version": note["base_version"]},
+            actor=actor,
+        )
     )
 
 

@@ -2429,7 +2429,7 @@ tr:last-child td { border-bottom: none; }
         </div>
         <p class="bi-meta">建立後只能升級到同一個 schema 的新版本，不能換成別的 schema。
           Dashboard 與對話查詢只支援 BI schema（bi.schema/*）；
-          其他 schema 的資料集可以匯入、瀏覽與編輯卡片。</p>
+          其他 schema 的資料集可以匯入、瀏覽卡片，並用更正單改值。</p>
         <p class="bi-err" id="bi-new-err" role="alert"></p>
         <div class="bi-actions">
           <button class="go" id="bi-new-go" type="submit">建立</button>
@@ -11987,7 +11987,7 @@ function biRenderSchema() {
   if (!schema.ref) return;
   note.append(text("Schema："), bh("strong", "", schema.title || schema.ref),
     text("（" + schema.ref + "）"));
-  if (!isBi) note.append(text(" · 沒有 Dashboard 與對話查詢；卡片、匯入與編輯照常可用"));
+  if (!isBi) note.append(text(" · 沒有 Dashboard 與對話查詢；卡片、匯入與更正單照常可用"));
 }
 
 // Which dataset the page opens on (live test 2026-10-24: always `demo`, even
@@ -12250,7 +12250,7 @@ function biRenderDashboard(reply) {
     holder.append(bh("div", "bi-none", bh("h3", "", reply.message || "這個 schema 沒有 Dashboard"),
       bh("p", "", "資料集「" + biDataset() + "」使用「" + biSchemaTitle(reply.schema || "")
         + "」。Dashboard 與對話查詢只支援 BI schema（bi.schema/*）；這個資料集的卡片可以在"
-        + "「卡片」瀏覽與編輯，也可以在「建立與匯入」加入資料。"),
+        + "「卡片」瀏覽並提更正單，也可以在「建立與匯入」加入資料。"),
       bh("div", "bi-actions", biButton("看卡片", () => biShowView("cards"), "go"),
         biButton("建立與匯入", () => biShowView("build"), "bi-btn"))));
     return;
@@ -12663,9 +12663,9 @@ function biFieldRow(card, item) {
   row.append(head, bh("div", "bi-field-value", biValue(item.value)));
   const foot = bh("div", "bi-field-foot", bh("span", "bi-meta", biSource(item.source)
     + (item.history ? " · 歷史 " + item.history + " 筆" : "")));
-  if (!biReadOnly()) {  // a subscribed copy is read-only: no editor at all
-    foot.append(biButton("編輯", () => biEditField(card, item, row), "bi-btn",
-      "編輯「" + (item.label || item.field) + "」"));
+  if (!biReadOnly()) {  // a subscribed copy is read-only: no note form at all
+    foot.append(biButton("提更正單", () => biEditField(card, item, row), "bi-btn",
+      "提「" + (item.label || item.field) + "」的更正單"));
   }
   row.append(foot);
   return row;
@@ -12677,6 +12677,7 @@ function biEditField(card, item, row) {
   const spec = biSchemaField(card.entity_type, item.field) || {};
   const form = bh("form", "bi-edit"); form.noValidate = true;
   const valueId = "bi-edit-" + item.field, reasonId = "bi-reason-" + item.field;
+  const authorId = "bi-author-" + item.field;
   let input;
   if (spec.enum && spec.enum.length && !spec.list) {
     input = document.createElement("select");
@@ -12693,15 +12694,47 @@ function biEditField(card, item, row) {
   input.id = valueId;
   const reason = document.createElement("textarea"); reason.id = reasonId; reason.required = true;
   reason.placeholder = "為什麼改？例如：依據哪個訊號、客戶產品或商機";
+  const author = document.createElement("input"); author.className = "bi-input";
+  author.id = authorId;
+  author.placeholder = "留空就用你的帳號";
   const error = bh("div", "bi-err"); error.setAttribute("role", "alert");
   const label = (text_, target) => { const node = bh("label", "bi-label", text_);
     node.htmlFor = target; return node; };
-  const save = bh("button", "go", "儲存"); save.type = "submit";
+  const review = bh("div", "bi-note-review");
+  const save = bh("button", "go", "預覽更正"); save.type = "submit";
   form.append(label("新值" + (spec.list ? "（多個值用「、」或逗號分隔）" : ""), valueId), input,
-    label("理由（必填）", reasonId), reason, error,
+    label("理由（必填）", reasonId), reason, label("作者", authorId), author, review, error,
     bh("div", "bi-actions", save, biButton("取消", () => form.remove())));
+  const failed = (failure) => {
+    if (failure.code === "stale_edit") {
+      const payload = failure.payload || {};
+      const stale = bh("div", "bi-stale",
+        bh("p", "", "這張卡片已經被 " + (payload.by || "別人") + " 在 " + biTime(payload.at)
+          + " 改過，目前的值是「" + biValue(payload.current) + "」。你的更正單還沒有寫入。"),
+        biButton("重新載入卡片", () => biLoadDetail(true), "go"));
+      stale.dataset.stale = "true";
+      error.replaceChildren(stale);
+    } else {
+      error.textContent = "沒有寫入：" + failure.message;
+    }
+  };
+  const confirmNote = async (note, button) => {
+    error.textContent = ""; button.disabled = true; button.setAttribute("aria-busy", "true");
+    try {
+      const reply = await biCall("/api/bi/corrections/apply",
+        {dataset: biDataset(), text: note.text, base_version: note.base_version});
+      // The value it already had: no new version, nothing in the history.
+      biNotice(true, reply.unchanged
+        ? "沒有變更：「" + (item.label || item.field) + "」本來就是這個值（版本 "
+          + reply.version + "）。"
+        : "已寫入更正單「" + (item.label || item.field) + "」（版本 " + reply.version + "）。");
+      await biLoadDetail(false);
+      biLoadCards();
+    } catch (failure) { failed(failure); }
+    finally { button.disabled = false; button.removeAttribute("aria-busy"); }
+  };
   form.addEventListener("submit", async (event) => {
-    event.preventDefault(); error.textContent = "";
+    event.preventDefault(); error.textContent = ""; review.replaceChildren();
     if (!reason.value.trim()) { error.textContent = "請寫下理由。"; reason.focus(); return; }
     let value = input.value.trim();
     if (spec.list) {
@@ -12711,29 +12744,17 @@ function biEditField(card, item, row) {
       && !isNaN(Number(value))) value = Number(value);
     save.disabled = true; save.setAttribute("aria-busy", "true");
     try {
-      const reply = await biCall("/api/bi/cards/" + encodeURIComponent(card.id) + "/field",
-        {dataset: biDataset(), field: item.field, value, base_version: card.version,
-         reason: reason.value.trim()});
-      // The value it already had: no new version, nothing in the history.
-      biNotice(true, reply.unchanged
-        ? "沒有變更：「" + (item.label || item.field) + "」本來就是這個值（版本 "
-          + reply.version + "）。"
-        : "已儲存「" + (item.label || item.field) + "」（版本 " + reply.version + "）。");
-      await biLoadDetail(false);
-      biLoadCards();
-    } catch (failure) {
-      if (failure.code === "stale_edit") {
-        const payload = failure.payload || {};
-        const stale = bh("div", "bi-stale",
-          bh("p", "", "這張卡片已經被 " + (payload.by || "別人") + " 在 " + biTime(payload.at)
-            + " 改過，目前的值是「" + biValue(payload.current) + "」。你的修改還沒有儲存。"),
-          biButton("重新載入卡片", () => biLoadDetail(true), "go"));
-        stale.dataset.stale = "true";
-        error.replaceChildren(stale);
-      } else {
-        error.textContent = "沒有儲存：" + failure.message;
-      }
-    } finally { save.disabled = false; save.removeAttribute("aria-busy"); }
+      const note = await biCall("/api/bi/corrections/preview",
+        {dataset: biDataset(), card: card.id, field: item.field, value,
+         base_version: card.version, reason: reason.value.trim(), author: author.value.trim()});
+      const go = biButton("確認寫入", () => confirmNote(note, go), "go");
+      go.dataset.noteConfirm = "true";
+      review.append(bh("p", "", note.unchanged
+        ? "「" + (note.label || note.field) + "」本來就是這個值，確認後不會有變更。"
+        : "「" + (note.label || note.field) + "」：「" + biValue(note.current) + "」→「"
+          + biValue(note.value) + "」。更正單會存成來源（" + note.folder + "），確認後寫入。"), go);
+    } catch (failure) { failed(failure); }
+    finally { save.disabled = false; save.removeAttribute("aria-busy"); }
   });
   row.append(form); input.focus();
 }
@@ -15266,7 +15287,7 @@ function biRenderReadOnly() {
   const status = biSubField(info, sub, "status");
   const when = biSubField(info, sub, "published_at");
   let note = ((sub && sub.name) || biSubField(info, sub, "identity") || info.name)
-    + (when ? " · 發佈於 " + biTime(when) : "") + " · 不能匯入或編輯";
+    + (when ? " · 發佈於 " + biTime(when) : "") + " · 不能匯入或提更正單";
   if (status === "stopped_no_access") {
     banner.classList.add("stopped");
     note = "已停止更新（無權限）：你仍可讀這一版，但不會再收到新版本。 · " + note;

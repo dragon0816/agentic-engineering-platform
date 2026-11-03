@@ -6,7 +6,7 @@ every other request to the real server. Covered: the demo load refreshing the
 counts; the Dashboard (gaps first, red flag badges, matrix, funnel, card links,
 collapse, the domain switch); the 「在 Atlas 開啟」 button; the card browser
 (filter, search, sources, links, following a link);
-a field edit and a 409 `stale_edit`; loading and error states; dark mode at
+a correction note and a 409 `stale_edit`; loading and error states; dark mode at
 390 px. Screenshots in `.scratch/bi-ui/`.
 """
 
@@ -334,29 +334,41 @@ class Stub:
                 return 404, {"ok": False, "code": "not_found", "message": "沒有這張卡片"}
             if len(parts) == 6 and parts[5] == "history":
                 return 200, {"history": item["history"]}
-            if len(parts) == 6 and parts[5] == "field":
-                card = item["card"]
-                if body["base_version"] != card["version"]:
-                    return 409, {
-                        "ok": False,
-                        "code": "stale_edit",
-                        "current": 5,
-                        "by": "陳主任",
-                        "at": NOW,
-                    }
-                if any(
-                    entry["field"] == body["field"] and entry["value"] == body["value"]
-                    for entry in item["fields"]
-                ):
-                    # The value it already has: no change (owner 2026-10-24).
-                    return 200, {"ok": True, "version": card["version"], "unchanged": True}
-                card["version"] += 1
-                for entry in item["fields"]:
-                    if entry["field"] == body["field"]:
-                        entry["value"] = body["value"]
-                        entry["source"] = {"kind": "human", "ref": "", "at": NOW, "by": "你"}
-                return 200, {"ok": True, "version": card["version"]}
             return 200, {k: item[k] for k in ("card", "fields", "links", "proposals")}
+        if route in ("/api/bi/corrections/preview", "/api/bi/corrections/apply"):
+            preview = route.endswith("preview")
+            given = body if preview else json.loads(body["text"])
+            item = self.cards[given["card"]]
+            card = item["card"]
+            if body["base_version"] != card["version"]:
+                return 409, {
+                    "ok": False,
+                    "code": "stale_edit",
+                    "current": 5,
+                    "by": "陳主任",
+                    "at": NOW,
+                }
+            entry = next(e for e in item["fields"] if e["field"] == given["field"])
+            same = entry["value"] == given["value"]
+            if preview:
+                return 200, {
+                    "ok": True,
+                    "field": given["field"],
+                    "label": entry.get("label"),
+                    "current": entry["value"],
+                    "value": given["value"],
+                    "unchanged": same,
+                    "base_version": body["base_version"],
+                    "folder": "library/corrections/sources",
+                    "text": json.dumps(given),
+                }
+            if same:
+                # The value it already has: no change (owner 2026-10-24).
+                return 200, {"ok": True, "version": card["version"], "unchanged": True}
+            card["version"] += 1
+            entry["value"] = given["value"]
+            entry["source"] = {"kind": "human", "ref": "", "at": NOW, "by": "你"}
+            return 200, {"ok": True, "version": card["version"]}
         return 404, {"ok": False, "code": "not_found", "message": route}
 
     def preview(self) -> dict[str, Any]:
@@ -738,21 +750,32 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
         click_text("#bi-detail-body .bi-link", "WiFi7-MLO互通與吞吐量驗證")
         wait("(document.getElementById('bi-detail-title')?.textContent || '').includes('WiFi7')")
         wait(f"{detail}.includes('王經理')")
-        # -- field edit: success, then a stale edit ----------------------------------------
+        # -- correction note: success, then a stale one ------------------------------------
         open_priority_editor()
         run(
             "document.getElementById('bi-edit-priority').value = '3';"
             "document.getElementById('bi-reason-priority').value = '依 Q4 訊號調整';"
         )
         run("document.querySelector('[data-field=priority] form button[type=submit]').click()")
+        # Nothing is written until the person has seen the difference and confirmed.
+        confirm = "[data-field=priority] [data-note-confirm=true]"
+        wait(f"!!document.querySelector('{confirm}')")
+        review = str(
+            run("document.querySelector('[data-field=priority] .bi-note-review').textContent")
+        )
+        assert "→「3」" in review
+        assert not [route for _m, route, _b in stub.calls if route.endswith("/apply")]
+        run(f"document.querySelector('{confirm}').click()")
         wait("document.getElementById('bi-notice').textContent.includes('版本 4')")
-        edit = [body for _m, route, body in stub.calls if route.endswith("/field")][-1]
-        assert edit == {
+        note = [body for _m, route, body in stub.calls if route.endswith("corrections/preview")][-1]
+        assert note == {
             "dataset": "demo",
+            "card": APP,
             "field": "priority",
             "value": 3,
             "base_version": 3,
             "reason": "依 Q4 訊號調整",
+            "author": "",
         }
         wait("document.querySelector('[data-field=priority] .bi-field-value').textContent === '3'")
         # the same value again is no change: no new version (owner 2026-10-24)
@@ -762,6 +785,8 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
             "document.getElementById('bi-reason-priority').value = '再存一次';"
         )
         run("document.querySelector('[data-field=priority] form button[type=submit]').click()")
+        wait(f"!!document.querySelector('{confirm}')")
+        run(f"document.querySelector('{confirm}').click()")
         wait("document.getElementById('bi-notice').textContent.includes('沒有變更')")
         notice = str(run("document.getElementById('bi-notice').textContent"))
         assert "版本 4" in notice and "已儲存" not in notice

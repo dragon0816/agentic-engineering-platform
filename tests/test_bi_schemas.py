@@ -428,10 +428,18 @@ def test_card_detail_edits_and_history_follow_the_dataset_schema(tmp_path: Path)
         "base_version": detail["card"]["version"],
         "reason": "已量產",
     }
-    status, saved = _call(tmp_path, "POST", f"/api/bi/cards/{product['id']}/field", edit)
+    note = {**edit, "card": product["id"]}
+    status, previewed = _call(tmp_path, "POST", "/api/bi/corrections/preview", note)
+    assert status == 200 and previewed["value"] == "mass_production"
+    status, saved = _call(
+        tmp_path,
+        "POST",
+        "/api/bi/corrections/apply",
+        {"dataset": "spec", "text": previewed["text"], "base_version": detail["card"]["version"]},
+    )
     assert status == 200 and saved["ok"] is True
-    bad = {**edit, "value": "unknown", "base_version": saved["version"]}
-    status, refused = _call(tmp_path, "POST", f"/api/bi/cards/{product['id']}/field", bad)
+    bad = {**note, "value": "unknown", "base_version": saved["version"]}
+    status, refused = _call(tmp_path, "POST", "/api/bi/corrections/preview", bad)
     assert status == 400 and refused["code"] == "value_invalid" and "狀態" in refused["message"]
     status, history = _call(
         tmp_path, "GET", f"/api/bi/cards/{product['id']}/history", dataset="spec"

@@ -459,7 +459,7 @@ def test_bi_sharing_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None
         wait("document.querySelectorAll('#bi-detail-body .bi-field').length > 0")
         assert run(
             "[...document.querySelectorAll('#bi-detail-body button')]"
-            ".every(b => b.textContent.trim() !== '編輯')"
+            ".every(b => b.textContent.trim() !== '提更正單')"
         )
         shoot("read-only")
 

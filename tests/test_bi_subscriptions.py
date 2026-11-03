@@ -123,9 +123,17 @@ def test_every_write_to_a_subscribed_copy_is_refused_409(tmp_path: Path) -> None
         ("/api/bi/import/undo", {"dataset": DATASET, "import_id": "abc"}),
         ("/api/bi/demo/load", {"dataset": DATASET}),
         (
-            f"/api/bi/cards/{card['id']}/field",
-            {"dataset": DATASET, "field": "name", "value": "x", "base_version": 1},
+            "/api/bi/corrections/preview",
+            {
+                "dataset": DATASET,
+                "card": card["id"],
+                "field": "name",
+                "value": "x",
+                "base_version": 1,
+                "reason": "r",
+            },
         ),
+        ("/api/bi/corrections/apply", {"dataset": DATASET, "text": "", "base_version": 1}),
     ]
     for path, body in writes:
         status, reply = _call(reader, "POST", path, body)
