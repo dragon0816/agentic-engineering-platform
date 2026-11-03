@@ -16,7 +16,15 @@ from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import analyses, migrate, packs, vault, vault_checks, vault_sources
+from capabilities.bi_cards import (
+    analyses,
+    migrate,
+    packs,
+    profile_merge,
+    vault,
+    vault_checks,
+    vault_sources,
+)
 from capabilities.bi_cards.capability import QUERY_SPEC
 from capabilities.bi_cards.store import DB_FILE, BiStoreError, vault_registry
 from host_runtime import bi_atlas_import, bi_bench, bi_feed_api
@@ -148,6 +156,8 @@ def route(
         return 200, {"ok": True, **vault.save_skill(workspace, vault_id, given)}
     if action == "profiles":
         return 200, {"ok": True, **vault.save_profile(workspace, vault_id, given)}
+    if action == "profile-proposals":
+        return 200, {"ok": True, **profile_merge.decide(workspace, vault_id, given, actor)}
     if action == "tools":
         return 200, {"ok": True, **vault.save_tool(workspace, vault_id, given)}
     if action == "publish":
