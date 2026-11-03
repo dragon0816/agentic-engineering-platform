@@ -15251,7 +15251,9 @@ function biEvidence(item) {
   if (!item.evidence.length) return bh("span", "bi-meta", "—");
   return bh("span", "", ...item.evidence.map((e) => {
     const place = Object.entries(e.locator || {}).map(([k, v]) => k + " " + v).join("・");
-    return bh("span", "bi-meta", "「" + e.excerpt + "」（" + place + "） ");
+    const stance = {refutes: "反駁", context_only: "僅背景"}[e.stance];
+    return bh("span", "bi-meta", "「" + e.excerpt + "」（" + place + "）"
+      + (stance ? "〔" + stance + "〕" : "") + " ");
   }));
 }
 

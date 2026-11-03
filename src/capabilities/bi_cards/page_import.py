@@ -21,7 +21,7 @@ from typing import Any
 
 from capabilities.bi_cards import importer
 from capabilities.bi_cards.catalog import for_store
-from capabilities.bi_cards.schema import Registry, norm_key
+from capabilities.bi_cards.schema import Registry, norm_key, parse_date
 from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import BiStore, BiStoreError, PlannedRow, new_states
 
@@ -33,6 +33,8 @@ _ITEM = re.compile(r"^\s*-\s*(.*)$")
 _LINK = re.compile(r"^\[\[([^\]|]+)(?:\|[^\]]*)?\]\]$")
 
 
+#: A page's own date, best first: what a reference to it is dated by.
+REFERENCE_DATES = ("source_date", "date", "updated")
 #: What a field did in a merge, as the preview counts it.
 MERGES = ("fill", "join", "proposal", "bookkeeping", "human_kept", "same", "state")
 
@@ -490,6 +492,11 @@ def _evidence(
     prepared: PagePreview, path: str, planned: PlannedRow, source: dict[str, Any], number: int
 ) -> dict[str, list[dict[str, Any]]]:
     page = prepared.parsed.get(path)
+    known = {**planned.values, **(page.values if page is not None else {})}
+    dated = next(
+        (when for when in (parse_date(str(known.get(k) or "")) for k in REFERENCE_DATES) if when),
+        None,
+    )
     found: dict[str, list[dict[str, Any]]] = {}
     for name in planned.values:
         if page is None:  # a table: the row is the locator
@@ -500,7 +507,8 @@ def _evidence(
             locator = {"line": page.lines.get(key), "key": key}
             excerpt = page.raw.get(key, "")[:MAX_EXCERPT]
         found[name] = [{"source_id": source["id"], "source_name": source["name"],
-                        "locator": locator, "excerpt": excerpt, "basis": "fact"}]  # fmt: skip
+                        "locator": locator, "excerpt": excerpt, "basis": "fact",
+                        "reference_at": dated}]  # fmt: skip
     return found
 
 

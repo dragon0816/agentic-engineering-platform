@@ -56,7 +56,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards.schema import widen_value
+from capabilities.bi_cards import card_model
+from capabilities.bi_cards.schema import parse_date, widen_value
 
 DEFAULT_DATASET = "demo"
 DATASET_RE = re.compile(r"^[A-Za-z0-9_-]{1,40}$")
@@ -390,6 +391,37 @@ def new_states(
             or stored.get(name, {}).get("origin") != "unit"
         )
     }
+
+
+def _reference_view(row: Mapping[str, Any]) -> dict[str, Any]:
+    """An evidence row's reference as read: a row from before the card model has
+    no time of its own, and a plain dataset's old row no id."""
+    dated = row.get("reference_at")
+    return {
+        "reference_id": row.get("reference_id")
+        or card_model.reference_id(row["source_id"], _load(row["locator"])),
+        "stance": row.get("stance") or card_model.SUPPORTS,
+        "reference_at": dated or row["at"],
+        "reference_time_basis": row.get("reference_time_basis")
+        or (None if dated else card_model.SUBMISSION_FALLBACK),
+    }
+
+
+def reference_parts(
+    item: Mapping[str, Any], values: Mapping[str, Any], at: str
+) -> tuple[str, str, str, str | None]:
+    """An evidence row's (reference id, stance, reference time, its basis): the
+    time is the source's date if known, a card's own date if it has one, else `at`."""
+    stance = item.get("stance")
+    dated = item.get("reference_at") or parse_date(
+        str(values.get("source_date") or values.get("date") or "")
+    )
+    return (
+        card_model.reference_id(str(item.get("source_id") or ""), item.get("locator") or {}),
+        stance if stance in card_model.STANCES else card_model.SUPPORTS,
+        str(dated or at),
+        None if dated else card_model.SUBMISSION_FALLBACK,
+    )
 
 
 class CardsChanged(BiStoreError):
@@ -788,8 +820,9 @@ class BiStore:
                     for item in items:
                         db.execute(
                             "INSERT INTO evidence (card_id, field, run_id, source_id, "
-                            "source_name, locator, excerpt, basis, at) "
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            "source_name, locator, excerpt, basis, at, reference_id, stance, "
+                            "reference_at, reference_time_basis) "
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                             (
                                 card["id"],
                                 name,
@@ -800,6 +833,7 @@ class BiStore:
                                 str(item.get("excerpt") or ""),
                                 str(item.get("basis") or "fact"),
                                 at,
+                                *reference_parts(item, planned.values, at),
                             ),
                         )
         return result
@@ -1039,6 +1073,7 @@ class BiStore:
                 "excerpt": r["excerpt"],
                 "basis": r["basis"],
                 "at": r["at"],
+                **_reference_view(dict(r)),
             }
             for r in rows
         ]

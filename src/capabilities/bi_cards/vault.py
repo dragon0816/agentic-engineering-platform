@@ -347,6 +347,16 @@ def _history_value(row: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _reference_of(row: sqlite3.Row) -> dict[str, Any]:
+    """The reference parts an evidence unit's row holds. A row written before the
+    card model holds none and has no `reference_at`: its id is computed at each
+    rebuild, so its unit stays as it was and a capture does not diff it."""
+    if "reference_at" not in row.keys() or row["reference_at"] is None:
+        return {}
+    parts = ("reference_id", "stance", "reference_at", "reference_time_basis")
+    return {k: row[k] for k in parts if row[k] is not None}
+
+
 def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str, Any]:
     """The units a BI database holds. A vault's database keeps its card ids
     (`keep_ids`); a dataset becoming a vault gets them from `card_id_for`."""
@@ -419,6 +429,7 @@ def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str
                     "excerpt": r["excerpt"],
                     "basis": r["basis"],
                     "at": r["at"],
+                    **_reference_of(r),
                 }
             )
     if "field_states" in tables:
@@ -762,7 +773,8 @@ def materialize(
                 for item in value:
                     db.execute(
                         "INSERT INTO evidence (card_id, field, run_id, source_id, source_name, "
-                        "locator, excerpt, basis, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        "locator, excerpt, basis, at, reference_id, stance, reference_at, "
+                        "reference_time_basis) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         (
                             cid,
                             name,
@@ -773,6 +785,11 @@ def materialize(
                             item["excerpt"],
                             item["basis"],
                             item["at"],
+                            item.get("reference_id")
+                            or card_model.reference_id(item["source_id"], item["locator"]),
+                            item.get("stance") or card_model.SUPPORTS,
+                            item.get("reference_at"),
+                            item.get("reference_time_basis"),
                         ),
                     )
             elif key.startswith(card_model.STATE_PREFIX):
