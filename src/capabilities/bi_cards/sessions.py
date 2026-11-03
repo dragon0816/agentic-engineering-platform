@@ -44,7 +44,7 @@ MAX_GOAL = 1000
 MAX_TURNS_SENT = 12
 MAX_SOURCES = 5
 MAX_ATTEMPTS = 3
-UNAVAILABLE = "沒有可用的模型：到 Settings 設定 Knowledge 使用的模型後再試；不用 AI 也可以直接編輯"
+UNAVAILABLE = "沒有可用的模型：到 Settings 設定模型後再試；不用 AI 也可以直接編輯"
 
 
 @dataclass
@@ -67,7 +67,7 @@ def trace() -> TraceIdentifiers:
 
 
 def model_or_refuse(ai: Any) -> tuple[ModelClient, str]:
-    """The Knowledge model and alias, or `model_unavailable` (nothing stored)."""
+    """The host's model and alias, or `model_unavailable` (nothing stored)."""
     chosen = ai.model() if ai is not None else None
     if chosen is None:
         raise BiStoreError("model_unavailable", UNAVAILABLE)

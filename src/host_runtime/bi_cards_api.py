@@ -86,6 +86,7 @@ from capabilities.bi_cards.store import (
     is_subscribed,
 )
 from host_runtime import bi_atlas_embed, bi_atlas_import, bi_subscriptions, bi_vaults_api
+from models.approved import ApprovedModelClient
 
 #: A CSV travels in the JSON body; larger than an ordinary request.
 MAX_BI_BODY_BYTES = 8 * 1024 * 1024
@@ -1257,16 +1258,26 @@ def publish_route(web: Any, method: str, path: str, query: Mapping[str, str], bo
 
 
 def web_ai_runtime(web: Any) -> ai_runs.AiRuntime:
-    """The Knowledge model (Settings, with its data approval) and the task
-    log for AI runs: a run is a background task, so `/api/activity` shows it
-    before an Agent Web restart."""
+    """This host's model (Settings, with its data approval) and the task log
+    for AI runs: a run is a background task, so `/api/activity` shows it before
+    an Agent Web restart."""
     from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 
     def model() -> Any:
-        installed = web.runtime.agent.gateway.bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity)
+        gateway = web.runtime.agent.gateway
+        installed = gateway.bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity)
         handler = getattr(installed, "handler", None)
         client, alias = getattr(handler, "model", None), getattr(handler, "alias", None)
-        return None if client is None or alias is None else (client, str(alias))
+        if client is not None and alias is not None:
+            return client, str(alias)
+        # Not every host binds a wiki Knowledge asset (owner 2026-11-03). The
+        # conversation's client then, and only behind the host's data approval.
+        router = gateway.router
+        return (
+            (router.model, router.model_alias)
+            if isinstance(router.model, ApprovedModelClient)
+            else None
+        )
 
     def background(title: str, work: Any) -> None:
         def tracked() -> tuple[str, str]:
@@ -1289,7 +1300,7 @@ def web_ai_runtime(web: Any) -> ai_runs.AiRuntime:
 
 def web_bench_runtime(web: Any) -> Any:
     """How a vault benchmark asks (the Agent with `bi__query`) and extracts (a
-    trial run with the Knowledge model) in Agent Web, as a background task."""
+    trial run with this host's model) in Agent Web, as a background task."""
     from host_runtime import bi_bench
 
     workspace = web.runtime.layout.workspace_root

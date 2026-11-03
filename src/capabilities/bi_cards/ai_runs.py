@@ -7,7 +7,7 @@ chunks failed: the rest can be reviewed, the failed ones retried) or
 `failed`. The candidates are the same as the rule path's, evaluated against
 the cards with `runs.evaluate`, reviewed and committed the same way.
 
-The model is the one the Knowledge features use (Settings, with its data
+The model is this host's (Settings, with its data
 approval); without one the run is refused with `model_unavailable` and the
 rule path keeps working. The run records the model alias, the method
 (`llm:default` for the shipped instructions, `llm:inline` for edited ones)
@@ -38,8 +38,8 @@ MAX_INSTRUCTIONS = 8000
 
 @dataclass(frozen=True)
 class AiRuntime:
-    """What an AI run needs from the Host: the Knowledge model (None when
-    none is set up) and a way to run work in the background."""
+    """What an AI run needs from the Host: its model (None when none is set
+    up) and a way to run work in the background."""
 
     model: Callable[[], tuple[ModelClient, str] | None]
     background: Callable[[str, Callable[[], None]], None]
@@ -128,7 +128,7 @@ def start(
     if chosen is None:
         raise BiStoreError(
             "model_unavailable",
-            "沒有可用的模型：到 Settings 設定 Knowledge 使用的模型後再試；表格來源仍可用規則轉換",
+            "沒有可用的模型：到 Settings 設定模型後再試；表格來源仍可用規則轉換",
         )
     model, alias = chosen
     rev, _ = source_markdown.current(staging, source_id)

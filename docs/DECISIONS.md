@@ -6254,3 +6254,16 @@ Design `docs/phases/BI_CARD_PAGE_IMPORT.md`.
 - **Feed goldens and Atlas are untouched:** the goldens are pinned to `bi.schema/v1.1@2.0.0`; `test_bi_feed_fixtures` still rebuilds them byte for byte.
 - **What the combined dry run showed:** the 12 `domain` proposals were not cards in two domains. Those seeds name no domain, so the old default met the page's value. They are now fills. So the
   default was the cause, more than the shape.
+
+## 2026-11-03 — BI works on a host with a model and no wiki Knowledge asset
+
+Owner, 2026-11-03: anyone with access to a vault can use it, and not everyone binds a wiki knowledge base.
+
+- **Decision:** when no Knowledge query handler is installed, BI takes the host's routing client and alias
+  (`gateway.router.model`, `model_alias`) in `web_ai_runtime`. AI ingest, retry, Session A and B, the skill assistant and
+  bench extraction all follow, and `/api/bi/ai` opens the page's gates. Where a handler is installed it is still used, so
+  nothing changes on a host that binds a wiki asset.
+- **Approval:** the fallback accepts only an `ApprovedModelClient`, the wrapper `build_router` makes with
+  `binding.data_approval`; an unwrapped client gives `model_unavailable`. `check_classification` is unchanged.
+- **Rejected:** building a second client for BI from `ModelClients` (a second place that must remember the wrapper);
+  binding an empty Knowledge asset on install (it would turn on Knowledge features with nothing behind them).
