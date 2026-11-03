@@ -91,12 +91,12 @@ review, never an overwrite; a value a person set stays theirs (`docs/phases/BI_C
 | Wireless example pages | 79 | 13 | 8 | 14 | 11 | `Ecosystem.node` 5, `Ecosystem.role` 4, `Concept.category` 1, `Concept.one_liner` 1 |
 | Wireless example samples | 8 | 1 | 2 | 5 | 1 | `Competitor.pricing_position` 1 |
 
-**641 cards** (10/29: 639), 85 marked as samples, 78 named `SAMPLE-`, **31 proposals** (10/29: 7 scalar conflicts). 192 fills and 41 joins with nothing
+**641 cards** (10/29: 639), 85 marked as samples, 78 named `SAMPLE-`, **31 proposals** (10/29: 7 scalar conflicts). 191 fills and 41 joins with nothing
 lost. No card and row disagreed about being a sample. It took about 5 minutes. For the session:
 
 - **12 of the 31 proposals are `domain`**: `Application`, `Trend` and `CustomerProduct` hold one domain each in schema 2.0.0, so a card in two bases asks which. A
   widening of those fields to lists would settle them all (Session A); that is the owner's call, not an import setting.
-- 10/29's 7 counted differently: its script kept the first name and joined lists, and it was over the old merged pages. So 31 and 7 are not the same measure.
+- 10/29's 7 came from a one-off script with its own rule (lists joined, first name kept), which is not in the repository, so 31 and 7 may not measure the same thing.
 - The 2 cards more than 10/29's 639 have not been traced.
 
 The 7 pages with no name (4 robotics, 3 example) are listed in the preview and not imported; name them or leave them.
