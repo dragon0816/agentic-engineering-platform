@@ -359,6 +359,7 @@ class Stub:
                     "label": entry.get("label"),
                     "current": entry["value"],
                     "value": given["value"],
+                    "state": None,
                     "unchanged": same,
                     "base_version": body["base_version"],
                     "folder": "library/corrections/sources",

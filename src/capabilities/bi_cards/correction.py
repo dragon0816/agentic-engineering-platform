@@ -13,7 +13,7 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
-from capabilities.bi_cards import vault, vault_skills
+from capabilities.bi_cards import card_model, vault
 from capabilities.bi_cards.catalog import for_store
 from capabilities.bi_cards.page_import import MAX_EXCERPT, Page, parse_page
 from capabilities.bi_cards.schema import FieldDef, Registry
@@ -34,8 +34,21 @@ BAD_NOTE = frozenset(
         "base_version_missing",
         "reason_required",
         "value_invalid",
+        "state_invalid",
     }
 )
+#: What a note may say instead of a value. `unknown` is no row at all, and only a
+#: note can say `confirmed_none`, so that it has evidence (design §3.4).
+NOTE_STATES = (
+    card_model.NOT_APPLICABLE,
+    card_model.PENDING_CONFIRMATION,
+    card_model.CONFIRMED_NONE,
+)
+STATE_WORDS = {
+    card_model.NOT_APPLICABLE: "不適用",
+    card_model.PENDING_CONFIRMATION: "待確認",
+    card_model.CONFIRMED_NONE: "確認沒有",
+}
 
 
 @dataclass(frozen=True)
@@ -43,6 +56,8 @@ class Note:
     card_id: str
     field: str
     value: Any
+    #: A state instead of a value; then `value` is None.
+    state: str | None
     reason: str
     author: str
     page: Page
@@ -57,14 +72,16 @@ def _line(key: str, value: Any) -> str:
     return f"{key}: {text}"
 
 
-def render(card: Any, field: str, value: Any, reason: str, author: str, at: str) -> str:
+def render(
+    card: Any, field: str, value: Any, reason: str, author: str, at: str, state: str | None = None
+) -> str:
     """The note `read` reads back."""
     return "\n".join(
         [
             "---",
             _line("card", card["id"]),
             _line("field", field),
-            _line("value", value),
+            _line("state", state) if state else _line("value", value),
             _line("reason", reason),
             _line("author", author),
             _line("at", at),
@@ -98,12 +115,16 @@ def read(text: Any) -> Note:
     card_id, field = _given(page, "card"), _given(page, "field")
     if not isinstance(card_id, str) or not card_id or not isinstance(field, str) or not field:
         raise BiStoreError("note_invalid", "更正單的 frontmatter 要有 card 和 field")
-    if "value" not in page.raw:
-        raise BiStoreError("note_invalid", "更正單要寫 value")
+    if ("value" in page.raw) == ("state" in page.raw):
+        raise BiStoreError("note_invalid", "更正單要寫 value 或 state，只寫其中一個")
+    state = _given(page, "state")
+    if "state" in page.raw and state not in NOTE_STATES:
+        raise BiStoreError("state_invalid", f"state 只能是 {'、'.join(NOTE_STATES)}")
     return Note(
         card_id=card_id,
         field=field,
         value=_given(page, "value"),
+        state=state,
         reason=str(_given(page, "reason") or "").strip(),
         author=str(_given(page, "author") or "").strip(),
         page=page,
@@ -183,12 +204,25 @@ def _current(store: BiStore, card_id: str, field: str) -> Any:
     return None if stored is None else stored["value"]
 
 
+def _unchanged(store: BiStore, note: Note, card_id: str, value: Any) -> bool:
+    """Whether the card already says what the note says."""
+    current = _current(store, card_id, note.field)
+    if note.state is None:
+        return bool(current == value)
+    stated = store.field_states(card_id).get(note.field)
+    return current is None and stated is not None and stated["state"] == note.state
+
+
 def note_folder(store: BiStore, card_id: str) -> str:
     """The `sources/` of the card's first home, or the shared one for a card with none."""
     home = store.first_home(card_id)
     if home is None:
         return NO_HOME_FOLDER
     return f"{home}/sources" if home.startswith("library/") else f"applications/{home}/sources"
+
+
+def _proof_key(note: Note) -> str:
+    return "value" if note.state is None else "state"
 
 
 def preview(store: BiStore, given: dict[str, Any], *, actor: str) -> dict[str, Any]:
@@ -207,6 +241,7 @@ def preview(store: BiStore, given: dict[str, Any], *, actor: str) -> dict[str, A
             str(given.get("reason") or "").strip(),
             str(given.get("author") or "").strip() or actor,
             now(),
+            str(given["state"]) if given.get("state") else None,
         )
     note = read(text)
     card, item, value, base = _checked(store, note, given.get("base_version"))
@@ -219,9 +254,11 @@ def preview(store: BiStore, given: dict[str, Any], *, actor: str) -> dict[str, A
         "label": item.label,
         "current": current,
         "value": value,
+        "state": note.state,
+        "state_label": STATE_WORDS.get(note.state or ""),
         "reason": note.reason,
         "author": note.author,
-        "unchanged": current == value,
+        "unchanged": _unchanged(store, note, card["id"], value),
         "base_version": base,
         "folder": note_folder(store, card["id"]),
         "text": text,
@@ -236,7 +273,7 @@ def apply(store: BiStore, given: dict[str, Any], *, actor: str) -> dict[str, Any
     note = read(text)
     card, _, value, base = _checked(store, note, given.get("base_version"))
     store.refuse_moved(card["id"], note.field, base)
-    if _current(store, card["id"], note.field) == value:
+    if _unchanged(store, note, card["id"], value):
         # The value it already has (owner 2026-10-24): no source, no version, no history.
         return {"version": base, "unchanged": True}
     staging = Staging(store.workspace, store.dataset)
@@ -244,7 +281,7 @@ def apply(store: BiStore, given: dict[str, Any], *, actor: str) -> dict[str, Any
     source = staging.add_source(
         f"correction-{card['id']}-{note.field}-{stamp}.md",
         text=text,
-        folder=_stored_folder(store, card["id"]),
+        folder=note_folder(store, card["id"]) if store.vault_id is not None else None,
         media_type="text/markdown",
         actor=actor,
     )
@@ -259,8 +296,8 @@ def apply(store: BiStore, given: dict[str, Any], *, actor: str) -> dict[str, Any
     evidence = {
         "source_id": source["id"],
         "source_name": source["name"],
-        "locator": {"line": note.page.lines.get("value"), "key": "value"},
-        "excerpt": note.page.raw.get("value", "")[:MAX_EXCERPT],
+        "locator": {"line": note.page.lines.get(_proof_key(note)), "key": _proof_key(note)},
+        "excerpt": note.page.raw.get(_proof_key(note), "")[:MAX_EXCERPT],
         "basis": "human",
     }
     purpose = f"更正 {card['entity_type']}「{card['name']}」的 {note.field}：{note.reason}"
@@ -269,6 +306,7 @@ def apply(store: BiStore, given: dict[str, Any], *, actor: str) -> dict[str, Any
             card["id"],
             note.field,
             value,
+            state=note.state,
             base_version=base,
             actor=actor,
             reason=note.reason,
@@ -282,12 +320,3 @@ def apply(store: BiStore, given: dict[str, Any], *, actor: str) -> dict[str, Any
         commit_result={"import_id": import_id, "created": 0, "updated": 1},
     )
     return {"version": version, "source": source["id"], "import_id": import_id}
-
-
-def _stored_folder(store: BiStore, card_id: str) -> str | None:
-    """Where the note goes in a vault. The default `sources/` until this PC's engine
-    takes the folder layout (design §4)."""
-    try:
-        return vault_skills.checked_folder(note_folder(store, card_id))
-    except BiStoreError:
-        return None

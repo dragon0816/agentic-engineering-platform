@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pytest
 from test_bi_vault import _push, _row, _sync, _two_pcs
 
-from capabilities.bi_cards import correction, service, vault
+from capabilities.bi_cards import correction, service, vault, vault_skills
 from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import BiStore, BiStoreError, PlannedRow
 from host_runtime.bi_cards_api import route
@@ -203,6 +203,17 @@ def test_a_card_that_moved_after_the_preview_refuses_the_note(tmp_path: Path) ->
     assert Staging(tmp_path, "demo").sources() == []
 
 
+def test_a_note_says_a_value_or_a_state_not_both() -> None:
+    both = "---\ncard: c1\nfield: body\nvalue: x\nstate: confirmed_none\nreason: r\n---\n"
+    with pytest.raises(BiStoreError) as refused:
+        correction.read(both)
+    assert refused.value.code == "note_invalid"
+    bad = "---\ncard: c1\nfield: body\nstate: maybe\nreason: r\n---\n"
+    with pytest.raises(BiStoreError) as refused:
+        correction.read(bad)
+    assert refused.value.code == "state_invalid"
+
+
 # -- in a vault ----------------------------------------------------------------------------
 
 
@@ -281,3 +292,93 @@ def test_notes_on_different_fields_merge(tmp_path: Path) -> None:
     # The note reaches the other PC as evidence.
     proof = store.evidence(_vault_card(a, dataset)["id"])
     assert {p["basis"] for p in proof if p["field"] == "body"} == {"human"}
+
+
+def _state_note(ws: Path, dataset: str, field: str, state: str, actor: str) -> dict[str, Any]:
+    card = _vault_card(ws, dataset)
+    body = {
+        "dataset": dataset,
+        "card": card["id"],
+        "field": field,
+        "state": state,
+        "base_version": card["version"],
+        "reason": "查過規格書，沒有這項",
+    }
+    note = _ok(_call(ws, "/api/bi/corrections/preview", body, actor=actor))
+    assert note["state"] == state and note["unchanged"] is False
+    return _ok(_apply(ws, BiStore(ws, dataset), note, actor=actor))
+
+
+def test_only_a_note_says_confirmed_none_and_it_travels_with_its_evidence(tmp_path: Path) -> None:
+    drive, vault_id, dataset, a, b = _shared(tmp_path)
+    version = _vault_card(a, dataset)["version"]
+    done = _state_note(a, dataset, "body", "confirmed_none", "alice")
+    assert done["version"] == version + 1
+    _push(a, vault_id)
+    drive.deliver("a", "b", vault_id)
+    _sync(b, vault_id)
+    store = BiStore(b, dataset)
+    card = _vault_card(b, dataset)
+    stated = store.field_states(card["id"])["body"]
+    assert (stated["state"], stated["reason"]) == ("confirmed_none", "查過規格書，沒有這項")
+    assert "body" not in store.fields(card["id"])
+    proof = [e for e in store.evidence(card["id"]) if e["field"] == "body"]
+    assert proof[0]["basis"] == "human" and proof[0]["excerpt"] == 'state: "confirmed_none"'
+
+
+def test_the_same_state_again_is_no_change_and_a_value_clears_it(tmp_path: Path) -> None:
+    _, _, dataset, a, _ = _shared(tmp_path)
+    _state_note(a, dataset, "body", "not_applicable", "alice")
+    card = _vault_card(a, dataset)
+    body = {
+        "dataset": dataset,
+        "card": card["id"],
+        "field": "body",
+        "state": "not_applicable",
+        "base_version": card["version"],
+        "reason": "再說一次",
+    }
+    note = _ok(_call(a, "/api/bi/corrections/preview", body))
+    assert note["unchanged"] is True
+    assert _ok(_apply(a, BiStore(a, dataset), note))["unchanged"] is True
+    _note(a, dataset, "body", "其實有", "alice")
+    assert "body" not in BiStore(a, dataset).field_states(card["id"])
+
+
+def test_a_state_on_a_field_with_a_value_replaces_the_value(tmp_path: Path) -> None:
+    _, _, dataset, a, _ = _shared(tmp_path)
+    _state_note(a, dataset, "standard_body", "pending_confirmation", "alice")
+    store = BiStore(a, dataset)
+    card = _vault_card(a, dataset)
+    assert "standard_body" not in store.fields(card["id"])
+    assert store.field_states(card["id"])["standard_body"]["state"] == "pending_confirmation"
+
+
+def test_a_note_lands_in_its_home_or_the_shared_corrections_folder(tmp_path: Path) -> None:
+    _, vault_id, dataset, a, _ = _shared(tmp_path)
+    _note(a, dataset, "standard_body", "IEEE 802.1", "alice")
+    units = vault.Vault(a, vault_id).repo.working_units()
+    (kept,) = [v for k, v in units.items() if k.startswith("source:")]
+    assert kept["folder"] == correction.NO_HOME_FOLDER
+    assert kept["file"].startswith("library/corrections/sources/")
+
+
+class _Homed:
+    def __init__(self, home: str | None) -> None:
+        self.home = home
+
+    def first_home(self, card_id: str) -> str | None:
+        return self.home
+
+
+@pytest.mark.parametrize(
+    ("home", "folder"),
+    [
+        ("aidc", "applications/aidc/sources"),
+        ("library/products", "library/products/sources"),
+        (None, "library/corrections/sources"),
+    ],
+)
+def test_the_notes_folder_is_a_valid_one_of_its_home(home: str | None, folder: str) -> None:
+    found = correction.note_folder(cast(BiStore, _Homed(home)), "c1")
+    assert found == folder and vault_skills.checked_folder(found) == folder

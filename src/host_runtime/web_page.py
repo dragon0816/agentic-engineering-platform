@@ -12703,6 +12703,13 @@ function biEditField(card, item, row) {
       : item.value == null ? "" : String(item.value);
   }
   input.id = valueId;
+  const stateId = "bi-state-" + item.field;
+  const state = document.createElement("select"); state.id = stateId;
+  for (const [code, words] of [["", "寫新值"], ["not_applicable", "不適用"],
+    ["pending_confirmation", "待確認"], ["confirmed_none", "確認沒有"]]) {
+    const option = document.createElement("option"); option.value = code;
+    option.textContent = words; state.append(option);
+  }
   const reason = document.createElement("textarea"); reason.id = reasonId; reason.required = true;
   reason.placeholder = "為什麼改？例如：依據哪個訊號、客戶產品或商機";
   const author = document.createElement("input"); author.className = "bi-input";
@@ -12713,7 +12720,8 @@ function biEditField(card, item, row) {
     node.htmlFor = target; return node; };
   const review = bh("div", "bi-note-review");
   const save = bh("button", "go", "預覽更正"); save.type = "submit";
-  form.append(label("新值" + (spec.list ? "（多個值用「、」或逗號分隔）" : ""), valueId), input,
+  form.append(label("要更正成", stateId), state,
+    label("新值" + (spec.list ? "（多個值用「、」或逗號分隔）" : ""), valueId), input,
     label("理由（必填）", reasonId), reason, label("作者", authorId), author, review, error,
     bh("div", "bi-actions", save, biButton("取消", () => form.remove())));
   const failed = (failure) => {
@@ -12756,14 +12764,16 @@ function biEditField(card, item, row) {
     save.disabled = true; save.setAttribute("aria-busy", "true");
     try {
       const note = await biCall("/api/bi/corrections/preview",
-        {dataset: biDataset(), card: card.id, field: item.field, value,
+        {dataset: biDataset(), card: card.id, field: item.field,
+         ...(state.value ? {state: state.value} : {value}),
          base_version: card.version, reason: reason.value.trim(), author: author.value.trim()});
       const go = biButton("確認寫入", () => confirmNote(note, go), "go");
       go.dataset.noteConfirm = "true";
       review.append(bh("p", "", note.unchanged
         ? "「" + (note.label || note.field) + "」本來就是這個值，確認後不會有變更。"
         : "「" + (note.label || note.field) + "」：「" + biValue(note.current) + "」→「"
-          + biValue(note.value) + "」。更正單會存成來源（" + note.folder + "），確認後寫入。"), go);
+          + (note.state_label || biValue(note.value)) + "」。更正單會存成來源（"
+          + note.folder + "），確認後寫入。"), go);
     } catch (failure) { failed(failure); }
     finally { save.disabled = false; save.removeAttribute("aria-busy"); }
   });
