@@ -46,7 +46,7 @@ Two AIDC reports: `C:\Users\Chi_L\OneDrive - Rohde & Schwarz\BI_Knowledge\market
 `aidc-power_cooling.md`. Read only; copy out, never move. Compare them with `aidc-bi-kb/sources/compute.md` and
 `power_cooling.md` first, by content: add one copy of each.
 
-Schema: built in, `bi.schema/v1.1@2.0.0` (21 types; `segment` already has the 11 market segments). The old folder
+Schema: built in, `bi.schema/v1.1@4.0.0`, the newest (21 types; `segment` already has the 11 market segments; `domain` is a list on the types a card may share). The old folder
 `market-bi` is a reference for a person only: nothing is converted from it by a tool.
 
 **Card pages go through the built-in importer** (owner, 2026-11-03: `docs/phases/BI_CARD_PAGE_IMPORT.md`), 「匯入卡片頁（Obsidian）」 in
@@ -85,18 +85,18 @@ review, never an overwrite; a value a person set stays theirs (`docs/phases/BI_C
 | AIDC seeds | 323 | 0 | 0 | 0 | 0 | |
 | AIDC pages | 0 | 90 | 90 | 0 | 0 | |
 | Aerospace seeds | 86 | 5 | 7 | 3 | 5 | `Ecosystem.role` 2, `Ecosystem.body` 2, `Competitor.body` 1 |
-| Aerospace pages | 0 | 44 | 62 | 2 | 12 | `Application.domain` 6, `Trend.domain` 4, `CustomerProduct.domain` 2 |
+| Aerospace pages | 0 | 44 | 74 | 2 | 0 | |
 | Robotics pages | 94 | 6 | 19 | 13 | 2 | `Ecosystem.node` 2 |
 | Wireless module pages | 51 | 4 | 3 | 4 | 0 | |
 | Wireless example pages | 79 | 13 | 8 | 14 | 11 | `Ecosystem.node` 5, `Ecosystem.role` 4, `Concept.category` 1, `Concept.one_liner` 1 |
 | Wireless example samples | 8 | 1 | 2 | 5 | 1 | `Competitor.pricing_position` 1 |
 
-**641 cards** (10/29: 639), 85 marked as samples, 78 named `SAMPLE-`, **31 proposals** (10/29: 7 scalar conflicts). 191 fills and 41 joins with nothing
-lost. No card and row disagreed about being a sample. It took about 5 minutes. For the session:
+**641 cards** (10/29: 639), 85 marked as samples, 78 named `SAMPLE-`, **19 proposals** (10/29: 7 scalar conflicts), on schema 4.0.0. 203 fills and 41 joins with nothing
+lost. No card and row disagreed about being a sample. It took about 4 minutes. For the session:
 
-- **12 of the 31 proposals are `domain`**: `Application`, `Trend` and `CustomerProduct` hold one domain each in schema 2.0.0, so a card in two bases asks which. A
-  widening of those fields to lists would settle them all (Session A); that is the owner's call, not an import setting.
-- 10/29's 7 came from a one-off script with its own rule (lists joined, first name kept), which is not in the repository, so 31 and 7 may not measure the same thing.
+- Before schema 4.0.0 this run had 31 proposals, 12 of them `domain`. They were not cards in two domains: those seeds name no domain, so the old default `wireless` met the
+  page's `aerospace`. In 4.0.0 `Application`, `Trend` and `CustomerProduct` hold a list with no default, and those 12 are fills.
+- 10/29's 7 came from a one-off script with its own rule (lists joined, first name kept), which is not in the repository, so 19 and 7 may not measure the same thing.
 - The 2 cards more than 10/29's 639 have not been traced.
 
 The 7 pages with no name (4 robotics, 3 example) are listed in the preview and not imported; name them or leave them.
@@ -145,7 +145,7 @@ that flow is changing, so read the current ones on the page.
 | 1 | Run §4. Settle the open points of §3 with the owner and record them in `docs/DECISIONS.md`. | Exit code 0; each recorded |
 | 2 | Restart Agent Web if it predates the build flow (check `/api/tasks` first, AGENTS rule 19). | Page shows the build-flow steps |
 | 3 | Rename the old folder to `market-bi.v4-old` in Explorer. Wait for OneDrive to finish. | Old folder present under the new name on OneDrive's site; nothing deleted |
-| 4 | Knowledge > BI > 建立與匯入 > 建立共用知識庫（vault）: id `market-intel`, in `BI_Knowledge`, schema `bi.schema/v1.1` (2.0.0), author `leo.chi`. | `repo.json` in the folder; `/api/knowledge/askable` lists it with `nothing_pushed` |
+| 4 | Knowledge > BI > 建立與匯入 > 建立共用知識庫（vault）: id `market-intel`, in `BI_Knowledge`, schema `bi.schema/v1.1` (4.0.0), author `leo.chi`. | `repo.json` in the folder; `/api/knowledge/askable` lists it with `nothing_pushed` |
 | 5 | Step 1: add the AIDC base's sources (§3's list), let them become Markdown. They reach the shared folder with the push (D2). | Each source has Markdown; spot-check two tables |
 | 6 | Step 2: Session A only if the schema must change; Session B for the skills. Move the manager's reading rules there. | The owner reviewed every schema change and skill |
 | 7 | Import the AIDC seeds first (`seed/`, the 22 card CSVs): preview, apply. Then its pages through the card-page importer (§3). | 22 CSVs → 323 cards; §7's AIDC numbers match |

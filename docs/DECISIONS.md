@@ -6242,3 +6242,15 @@ Design `docs/phases/BI_CARD_PAGE_IMPORT.md`.
   a proposal, and a derived field (`updated`) raises none. A card keeps its sample mark; a row marked differently only proposes. Rejected: the same rule for every
   import (changes the existing CSV and run paths); keeping the overwrite. The combined run then gave 641 cards and 31 proposals, runbook §3.
 - **Q3 is closed** (owner): the page states no retention period.
+
+## 2026-11-03: A list of domains on three more types: schema 4.0.0 (owner, relayed by the BI orchestrator)
+
+`Application.domain`, `Trend.domain` and `CustomerProduct.domain` become lists in a new shipped schema, so a card can belong to several domains. Before R6.
+
+- **4.0.0**, not 3.1.0: a Session A version made from 3.0.0 is 3.1.0 (as decision 2026-11-01, D1). A bare `bi.schema/v1.1` now means 4.0.0 for new datasets and vaults.
+- **The allowed values stay**, so the default pack's `values_from: Application.domain` does not move. **The default `wireless` goes**, as on `Node.domain` since 2.0.0: readers already
+  take a missing domain as wireless. Rejected: dropping the allowed values as `Node.domain` did (the pack's parameter would then read the schema's domains, and a mistyped value would go in).
+- **Existing data:** an enum becoming a list is a listed widening, so a dataset or vault upgrades through the existing upgrade path, by a person, each value a one-item list. Nothing upgrades by itself.
+- **Feed goldens and Atlas are untouched:** the goldens are pinned to `bi.schema/v1.1@2.0.0`; `test_bi_feed_fixtures` still rebuilds them byte for byte.
+- **What the combined dry run showed:** the 12 `domain` proposals were not cards in two domains. Those seeds name no domain, so the old default met the page's value. They are now fills. So the
+  default was the cause, more than the shape.

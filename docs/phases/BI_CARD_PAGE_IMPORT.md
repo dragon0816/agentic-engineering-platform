@@ -58,7 +58,7 @@ An unknown field is a column with status `unknown`; an invalid value is a row wa
    | A list, or the row has one | Other items | Joined, old items first, nothing lost | `join` |
    | A different scalar | | **A proposal for review; never overwritten** | `proposal` |
    | A value a person set | Anything else | Theirs stays; a proposal, as for any import | `human_kept` |
-   | A derived field | Another value | No proposal; the later value stays. In schema 2.0.0 that is only `updated` | `bookkeeping` |
+   | A derived field | Another value | No proposal; the later value stays. In the shipped schemas that is only `updated` | `bookkeeping` |
 
    Rows of one request merge with each other the same way. Apply does what the preview said: a card that moved since then refuses the whole
    request (`cards_changed`).

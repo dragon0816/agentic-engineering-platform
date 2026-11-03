@@ -194,14 +194,14 @@ def test_create_lays_out_the_folder_and_join_checks_it(tmp_path: Path) -> None:
     ):
         assert (folder / name).is_dir()
     # The vault holds the schema it uses, built in or not (decision 1).
-    assert (folder / "schemas" / "bi.schema__v1.1@3.0.0.json").is_file()
+    assert (folder / "schemas" / "bi.schema__v1.1@4.0.0.json").is_file()
     assert _commits(drive, "a", vault_id) == ["alice/1.json"]
     first = json.loads((folder / "commits/alice/1.json").read_text(encoding="utf-8"))
-    assert first["kind"] == "schema" and "bi.schema/v1.1@3.0.0" in first["purpose"]
+    assert first["kind"] == "schema" and "bi.schema/v1.1@4.0.0" in first["purpose"]
     # No database is ever in the shared folder.
     assert not [p for p in folder.rglob("*") if p.suffix in (".sqlite", ".db")]
     assert dataset in datasets(a) and dataset in datasets(b)
-    assert BiStore(b, dataset).schema_ref() == "bi.schema/v1.1@3.0.0"
+    assert BiStore(b, dataset).schema_ref() == "bi.schema/v1.1@4.0.0"
     listed = _ok(_call(b, "GET", "/api/bi/vaults"))["vaults"]
     assert [(v["id"], v["author"], v["title"]) for v in listed] == [
         (vault_id, "bob", "Market Signals")
@@ -511,14 +511,14 @@ def test_undo_and_a_schema_upgrade_travel_as_commits(tmp_path: Path) -> None:
 
 def test_the_vaults_schema_file_is_authoritative(tmp_path: Path) -> None:
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
-    path = drive.parent("b") / vault_id / "schemas" / "bi.schema__v1.1@3.0.0.json"
+    path = drive.parent("b") / vault_id / "schemas" / "bi.schema__v1.1@4.0.0.json"
     document = json.loads(path.read_text(encoding="utf-8"))
     document["title"] = "changed elsewhere"
     path.write_text(json.dumps(document), encoding="utf-8")
     refused = _refused(
         _call(b, "POST", f"/api/bi/vaults/{vault_id}/sync", {}), 409, "schema_mismatch"
     )
-    assert refused["file"] == "schemas/bi.schema__v1.1@3.0.0.json"
+    assert refused["file"] == "schemas/bi.schema__v1.1@4.0.0.json"
 
 
 def test_revert_tag_and_publish(tmp_path: Path) -> None:

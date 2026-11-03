@@ -111,8 +111,8 @@ def _publish_example_v2(tmp_path: Path, change: Any) -> str:
 
 def test_a_draft_starts_from_its_base_with_the_next_version(tmp_path: Path) -> None:
     draft = _draft(tmp_path, "bi.schema/v1.1")
-    assert draft["draft"]["base_ref"] == "bi.schema/v1.1@3.0.0"  # the newest shipped
-    assert draft["document"]["version"] == "3.1.0" and draft["revision"] == 1
+    assert draft["draft"]["base_ref"] == "bi.schema/v1.1@4.0.0"  # the newest shipped
+    assert draft["document"]["version"] == "4.1.0" and draft["revision"] == 1
     assert draft["errors"] == [] and draft["diff"] == []
     listed = _ok(_call(tmp_path, "GET", "/api/bi/schema-drafts"))["drafts"]
     assert [d["id"] for d in listed] == [draft["draft"]["id"]] and listed[0]["valid"]
@@ -181,15 +181,15 @@ def test_a_compatible_local_bi_version_installs_and_keeps_the_dashboard(tmp_path
     )
     _ok(_save(tmp_path, draft_id, document))
     published = _ok(_call(tmp_path, "POST", f"/api/bi/schema-drafts/{draft_id}/publish", {}))
-    assert published["ref"] == "bi.schema/v1.1@3.1.0" and published["already"] is False
+    assert published["ref"] == "bi.schema/v1.1@4.1.0" and published["already"] is False
     again = _ok(_call(tmp_path, "POST", f"/api/bi/schema-drafts/{draft_id}/publish", {}))
     assert again["already"] is True
     listed = {s["ref"]: s for s in _ok(_call(tmp_path, "GET", "/api/bi/schemas"))["schemas"]}
-    assert listed["bi.schema/v1.1@3.1.0"]["dashboard"] is True
+    assert listed["bi.schema/v1.1@4.1.0"]["dashboard"] is True
     service.load_demo(BiStore(tmp_path))
     preview = _ok(
         _call(
-            tmp_path, "POST", "/api/bi/datasets/demo/schema/preview", {"to": "bi.schema/v1.1@3.1.0"}
+            tmp_path, "POST", "/api/bi/datasets/demo/schema/preview", {"to": "bi.schema/v1.1@4.1.0"}
         )
     )
     assert preview["blocked"] == [] and preview["from"] == "bi.schema/v1.1@1.1.0"
@@ -198,10 +198,10 @@ def test_a_compatible_local_bi_version_installs_and_keeps_the_dashboard(tmp_path
             tmp_path,
             "POST",
             "/api/bi/datasets/demo/schema/apply",
-            {"to": "bi.schema/v1.1@3.1.0", "preview_token": preview["preview_token"]},
+            {"to": "bi.schema/v1.1@4.1.0", "preview_token": preview["preview_token"]},
         )
     )
-    assert BiStore(tmp_path).schema_ref() == "bi.schema/v1.1@3.1.0"
+    assert BiStore(tmp_path).schema_ref() == "bi.schema/v1.1@4.1.0"
     board = _ok(_call(tmp_path, "GET", "/api/bi/dashboard", dataset="demo"))
     assert board["sections"]
     schema = _ok(_call(tmp_path, "GET", "/api/bi/schema", dataset="demo"))

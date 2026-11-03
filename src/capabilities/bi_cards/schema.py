@@ -35,6 +35,7 @@ SHIPPED_FILES = (
     SCHEMA_FILE,
     Path(__file__).with_name("bi_schema_v2.json"),
     Path(__file__).with_name("bi_schema_v3.json"),
+    Path(__file__).with_name("bi_schema_v4.json"),
 )
 SCHEMA_ID = "bi.schema/v1.1"
 #: Kind changes that keep every stored value meaningful (BI vault V9): a value

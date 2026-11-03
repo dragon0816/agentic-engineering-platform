@@ -107,13 +107,15 @@ def _cards(root: Path, dataset: str, **query: str) -> list[dict[str, Any]]:
 def test_the_shipped_schema_is_listed_and_the_example_is_not_installed(tmp_path: Path) -> None:
     status, listed = _call(tmp_path, "GET", "/api/bi/schemas")
     assert status == 200
-    # Three shipped versions: v4's 1.1.0, v8's 2.0.0 (BI vault V9), 3.0.0 (BI D1).
-    shipped, v8, v3 = listed["schemas"]
+    # Four shipped versions: v4's 1.1.0, v8's 2.0.0 (BI vault V9), 3.0.0 (BI D1) and
+    # 4.0.0 (a list of domains on three more types).
+    shipped, v8, v3, v4 = listed["schemas"]
     assert shipped["id"] == "bi.schema/v1.1" and shipped["version"] == "1.1.0"
     assert shipped["source"] == "shipped" and shipped["ref"] == LEGACY_SCHEMA
     assert len(shipped["types"]) == 12 and {"name", "label"} == set(shipped["types"][0])
     assert (v8["ref"], v8["source"], len(v8["types"])) == ("bi.schema/v1.1@2.0.0", "shipped", 21)
     assert (v3["ref"], v3["source"], len(v3["types"])) == ("bi.schema/v1.1@3.0.0", "shipped", 21)
+    assert (v4["ref"], v4["source"], len(v4["types"])) == ("bi.schema/v1.1@4.0.0", "shipped", 21)
     assert {"id", "version", "title", "types", "source"} <= set(shipped)
     assert not (tmp_path / "bi").exists()  # listing writes nothing
 
@@ -230,7 +232,7 @@ def test_a_dataset_is_created_with_a_schema_and_keeps_it(tmp_path: Path) -> None
     status, bi = _call(
         tmp_path, "POST", "/api/bi/datasets", {"name": "market", "schema": "bi.schema/v1.1"}
     )
-    assert status == 200 and bi["dataset"]["schema"] == "bi.schema/v1.1@3.0.0"
+    assert status == 200 and bi["dataset"]["schema"] == "bi.schema/v1.1@4.0.0"
     assert bi["dataset"]["dashboard"] is True
 
 

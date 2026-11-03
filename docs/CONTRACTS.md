@@ -6581,3 +6581,8 @@ Design `docs/phases/BI_CARD_PAGE_IMPORT.md`. Code `src/capabilities/bi_cards/pag
 - **Ticked rows** (`samples: true`) get the `SAMPLE-` name, never twice; links between them follow (`importer.preview` `links_renamed`).
 - **`importer.preview`** gains `rows` and `samples`; **`Registry.normalize`** takes a list as its items, without splitting them again.
 - **`QueryResult.sample_note`**: the host's line about example data, added under a chat answer by `with_bi_sources`, returned by `aep_bi_query`.
+
+## BI schema 4.0.0 (2026-11-03)
+
+`bi.schema/v1.1@4.0.0` = 3.0.0 with `domain` a list, allowed values kept and no default, on `Application`, `Trend`, `CustomerProduct`; a widening, upgraded in place. A bare `bi.schema/v1.1` means 4.0.0. A
+`bi__query` card of those types returns `domain` as a list. The feed's goldens stay pinned to 2.0.0.

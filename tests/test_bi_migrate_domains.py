@@ -49,7 +49,7 @@ def _cards(store: BiStore) -> None:
 
 
 def _vault_with_config(tmp_path: Path) -> tuple[Any, str, str, Path, Path]:
-    drive, vault_id, dataset, a, b = _two_pcs(tmp_path)  # schema 3.0.0 (bare)
+    drive, vault_id, dataset, a, b = _two_pcs(tmp_path)  # the newest schema (bare)
     _cards(BiStore(a, dataset))
     target = vault.Vault(a, vault_id)
     with target.lock:  # as 「領域設定」 kept it before BI D4
@@ -77,7 +77,7 @@ def test_a_dry_run_lists_the_changes_and_writes_nothing(tmp_path: Path) -> None:
     drive, vault_id, dataset, a, b = _vault_with_config(tmp_path)
     url = f"/api/bi/vaults/{vault_id}/migrate-domains"
     plan = _ok(_call(a, "POST", url, {}))
-    assert plan["dry_run"] is True and plan["schema"] is None  # 3.0.0 already
+    assert plan["dry_run"] is True and plan["schema"] is None  # the newest already
     assert plan["writes"] == "commit" and plan["notes_to"] == "skills"
     _common(plan)
     assert _ok(_call(a, "GET", f"/api/bi/vaults/{vault_id}/pending"))["uncommitted"] == []
@@ -105,7 +105,7 @@ def test_applying_makes_one_commit_that_reaches_the_other_pc(tmp_path: Path) -> 
     assert store.fields(harbor["id"])["aliases"]["value"] == ["港灣"]
     assert store.fields(gpu["id"])["chain"]["value"] == ["CMP"]
     registry = catalog.for_store(store)  # the new local version reached the other PC
-    assert registry.version == "3.1.0" and registry.types["Node"].name_pattern == r"^(L\d|X)-"
+    assert registry.version == "4.1.0" and registry.types["Node"].name_pattern == r"^(L\d|X)-"
     assert registry.enum_aliases["role"]["雲端大廠"] == "hyperscaler"
     skills = _ok(_call(b, "GET", f"/api/bi/vaults/{vault_id}/skills"))["skills"]
     assert next(s for s in skills if s["name"] == "aidc-extract")["body"] == "ODM 是 Account。"
@@ -124,12 +124,12 @@ def test_a_dataset_only_on_this_pc_is_written_directly(tmp_path: Path) -> None:
     url = "/api/bi/migrate-domains"
     plan = _ok(_call(tmp_path, "POST", url, {"dataset": "m"}))
     assert plan["writes"] == "direct" and plan["notes_to"] == "method"
-    assert plan["schema"] == {"from": "bi.schema/v1.1@2.0.0", "to": "bi.schema/v1.1@3.0.0"}
+    assert plan["schema"] == {"from": "bi.schema/v1.1@2.0.0", "to": "bi.schema/v1.1@4.0.0"}
     _common(plan)
     _ok(_call(tmp_path, "POST", url, {"dataset": "m", "apply": True, "token": plan["token"]}))
     assert not migrate.has_legacy(store)
     registry = catalog.for_store(store)
-    assert registry.version == "3.1.0" and registry.types["Node"].name_pattern == r"^(L\d|X)-"
+    assert registry.version == "4.1.0" and registry.types["Node"].name_pattern == r"^(L\d|X)-"
     harbor = store.find("Account", "Harbor Co")
     assert harbor is not None and store.fields(harbor["id"])["aliases"]["value"] == ["港灣"]
     (method,) = methods.listing(tmp_path, "m")
