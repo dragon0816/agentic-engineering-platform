@@ -7,9 +7,9 @@ Updated: 2026-11-03 (Asia/Taipei), by Claude Code (BI on a host with no wiki Kno
 **Goal.** Owner 2026-11-03: anyone with access to a vault can use it, and not everyone binds a wiki knowledge base, so BI
 must work on a host with a model and no wiki Knowledge asset. Decision `docs/DECISIONS.md` 2026-11-03; rows in `docs/TASKS.md`.
 
-**Where.** Branch `bi-model-fallback` in the Paseo worktree `bi-build-flow`, on local `main` `15d780c2`; not pushed, not merged.
+**Where.** Branch `bi-model-fallback` in the Paseo worktree `bi-build-flow`, rebased onto `bi-vault-asking` `5b5cfe9c` (worker D); not pushed, not merged.
 
-**Done.** `f28d80ef` fallback to the approved routing client; `1c00cfca` data-class check on retry; `5e772eaa` a direct publish
+**Done.** `d837b7a8` fallback to the approved routing client; `41759cf9` data-class check on retry; `3809bd81` a direct publish
 of a `vault-*` dataset refused with `dataset_is_vault` (it did publish before: reproduced).
 
 **Verified.** `ruff format --check .`, `ruff check .`, `mypy src tests` clean, targeted tests pass on each commit. Full suite

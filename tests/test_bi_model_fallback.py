@@ -293,3 +293,61 @@ def test_higher_classes_are_refused_with_internal_approved(make_host: Any, level
     status, answer = host.call("/api/bi/runs", body)
     assert (status, answer["code"]) == (400, "classification_not_approved")
     assert host.gateway.bodies == []
+
+
+def _vault(host: Host, tmp_path: Path) -> dict[str, Any]:
+    shared = tmp_path / "shared-sources"
+    shared.mkdir()
+    return dict(
+        host.ok(
+            "/api/bi/vaults",
+            {
+                "path": str(shared),
+                "title": "Sources",
+                "purpose": "虛構",
+                "schema": "bi.schema/v1.1",
+                "author": "alice",
+            },
+        )["vault"]
+    )
+
+
+def test_a_vault_source_goes_through_the_fallback_and_a_withdrawn_one_is_not_sent(
+    make_host: Any, tmp_path: Path
+) -> None:
+    host = make_host(failing=10)
+    vault = _vault(host, tmp_path)
+    dataset = vault["dataset"]
+    secret = {"dataset": dataset, "name": "secret.md", "text": NOTE + "\n機密。\n"}
+    source = host.ok("/api/bi/sources", {**secret, "classification": "RESTRICTED"})["source"]
+    status, answer = host.call(
+        "/api/bi/runs", {"dataset": dataset, "kind": "trial", "source_id": source["id"]}
+    )
+    assert (status, answer["code"]) == (400, "classification_not_approved")
+    assert host.gateway.bodies == []
+
+    plain = {"dataset": dataset, "name": "meeting.md", "text": NOTE}
+    source = host.ok("/api/bi/sources", plain)["source"]
+    body = {"dataset": dataset, "kind": "trial", "source_id": source["id"]}
+    run = host.ok("/api/bi/runs", body)["run"]
+    assert host.wait(run["id"], dataset)["status"] in ("partial", "failed")
+
+    host.ok(f"/api/bi/vaults/{vault['id']}/commit", {"purpose": "加入來源"})
+    host.ok(f"/api/bi/vaults/{vault['id']}/push", {})
+    withdrawn = {"source_id": source["id"], "confirm": True}
+    host.ok(f"/api/bi/vaults/{vault['id']}/withdraw-source", withdrawn)
+    host.gateway.failing = 0
+    asked = len(host.gateway.bodies)
+    status, answer = host.call(f"/api/bi/runs/{run['id']}/retry", {"dataset": dataset})
+    assert status != 200 and answer["code"] == "run_closed"
+    assert len(host.gateway.bodies) == asked
+
+
+def test_the_card_page_importer_asks_no_model(make_host: Any, tmp_path: Path) -> None:
+    host = make_host()
+    dataset = _vault(host, tmp_path)["dataset"]
+    page = {"path": "tsn.md", "text": "---\ntype: Technology\nname: TSN\n---\n\n正文。\n"}
+    preview = host.ok("/api/bi/import/pages/preview", {"dataset": dataset, "pages": [page]})
+    host.ok("/api/bi/import/pages/apply", {"preview_id": preview["preview_id"]})
+    assert host.gateway.bodies == []
+    assert host.ok(f"/api/bi/ai?dataset={dataset}")["available"] is True
