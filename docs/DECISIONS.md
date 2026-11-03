@@ -6280,3 +6280,18 @@ Owner, 2026-11-03: anyone with access to a vault can use it, and not everyone bi
   `check_classification` still refuses them.
 - **Rejected:** keeping `UNCLASSIFIED` with a page explaining where to add `INTERNAL` (every colleague would have to find it).
 
+## 2026-11-03: The BI card model (owner, relayed by the BI orchestrator)
+
+Design: `docs/phases/BI_CARD_MODEL.md`; source: `docs/proposals/AEP_BI_Card_Database_Proposal.md` v1.2, which the owner's decisions override where they differ. Phase 1 before R6.
+
+**The owner's decisions:** a card id is the hash at first creation and never changes; a rename op keeps it and makes the old name an alias; links are stored by id. Commit units stay the truth and `bi.sqlite` a rebuilt per-PC index; `cards` and `fields` keep their shape and the Atlas feed contract does not change. Relations and their evidence are units, except that those derived from link fields are rebuilt and default to unreviewed; only AI-inferred ones need per-item review. All card changes go through ingest: re-run a skill revision over a scope and confirm only differing values, or add a correction note as a source; the direct field-edit route is retired. Card Markdown is generated, read-only and never read back. New folder layout with per-application sources, skills, tools and an immutable profile; definitions live only in the merged schema. Per-card summaries and per-category explanations; missing-value states; references with `stance` and `reference_id`. No new permissions.
+
+**Decided in the design, for the owner to overrule:**
+
+- **Card Markdown is written at publish, by the publishing PC, into `cards/`, changed files only.** Rejected: at every push (shows unpublished content, and every author overwrites the same files, so OneDrive conflict copies become routine); per-tag folders (strictly only-add, but about 640 more files per tag, and Obsidian shows every old card). Cost: `cards/` is the one exception to only-add, safe because nothing reads it back, and the next publish repairs it.
+- **A link stored by id renders the target's current name; a link stored as text renders as written,** even when it resolves through an alias. Rejected: rendering resolved text under the canonical name, which would change feed goldens and old analyses.
+- **A former name stays reserved.** A new card with it hashes to the same id, so it is that card. Rejected: a salted id, since two PCs would disagree.
+- **A card's applications are derived from its evidence's source paths,** so no unit and no conflict. A card with none never gets a computed `not_applicable`.
+- **`published/<tag>.sqlite` is only written in Phase 1;** readers keep rebuilding from units. It narrows `BI_VAULT.md`'s no-SQLite rule, which was about files several PCs write.
+- **The direct route goes; `store.set_field` stays internal,** for proposal accept and the domain migration. A correction note writes kind `human`, so a person can still make a card `trusted`, now with evidence.
+- **The generated classify skill goes in `library/skills/`,** since it spans applications and the layout had no home for it.
