@@ -1,6 +1,37 @@
 # Handoff
 
-Updated: 2026-11-02 (Asia/Taipei), by Claude Code (the BI build flow: B1–B7; earlier: BI chat embedding and AI panel edits: P1-P5; earlier: asking a vault from the general chat; earlier: BI charts in the chat and the Dashboard's sources: C1, C2, C1b, C3, K1, K2; earlier: voice input for Telegram and Agent Web: V1–V8; earlier: BI analysis dashboard: F1, F2, F3, P1, P2, P3, P4, D1, D2, D3, chains and coverage as analyses, golden answers, P5, D4; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-11-03 (Asia/Taipei), by Claude Code (Telegram conversations in Agent Web: T1–T6; earlier: the BI build flow: B1–B7; earlier: BI chat embedding and AI panel edits: P1-P5; earlier: asking a vault from the general chat; earlier: BI charts in the chat and the Dashboard's sources: C1, C2, C1b, C3, K1, K2; earlier: voice input for Telegram and Agent Web: V1–V8; earlier: BI analysis dashboard: F1, F2, F3, P1, P2, P3, P4, D1, D2, D3, chains and coverage as analyses, golden answers, P5, D4; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+
+## Telegram conversations in Agent Web (2026-11-03, Claude Code) — latest
+
+**Goal.** Owner decisions 2026-11-02, relayed by the BI orchestrator: the owner's own Telegram conversations are stored
+and can be read and searched in Agent Web; `/new` only starts a new conversation; delete happens in Agent Web; read-only
+there. Design `docs/phases/TELEGRAM_HISTORY.md`; decision `docs/DECISIONS.md` 2026-11-02; contract `docs/CONTRACTS.md`
+"Conversation source and search"; rows in `docs/TASKS.md`.
+
+**Where.** Branch `telegram-history` in the Paseo worktree `bi-build-flow` (own `.venv`), on local `main` `8994e44e`; not
+pushed, not merged. The folder's name is left over from its old branch.
+
+**Done.** T1–T6, and `8994e44e` on `main` (saving Telegram settings lost approvals and the session ledger until a restart,
+failing closed).
+
+**Verified.** Before each code commit: `ruff format --check .`, `ruff check .`, `mypy src tests` clean. Targeted tests pass:
+the Telegram tests (261 passed, on T2 before a one-variable rename, then `test_telegram_history` and
+`test_telegram_reply_context` again), the web tests (134 passed on T3/T4), the page tests including the browser test
+(147 passed on T5). **The full suite has not been run on this branch**; it waits for the orchestrator's go. No real
+Telegram message, bot token or model was used, and the real Agent Web on 53583 was not restarted, so this is not yet
+seen on the owner's host.
+
+**Known points.**
+- Stored records feed no memory, telemetry, learning or platform path, though Agent Web chats feed the first three: the
+  stricter choice, design §8.
+- A code the owner types as plain text is stored unless it looks like a credential (design §3).
+- A failed write logs a warning and leaves a gap in the record; the turn goes on.
+- A restart between `/new` and the next message joins that message to the day's record (design §5).
+- `graphify update .` was not run: this worktree has no `graphify-out/`.
+
+**Next actions.** (1) Orchestrator: the full suite, then merge. (2) After a restart of Agent Web with this code, the owner
+sends one Telegram message and sees it in the session list.
 
 ## The BI build flow, end to end (2026-11-02, Claude Code) — latest
 

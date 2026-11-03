@@ -6523,3 +6523,22 @@ and writes no card, draft or unit; a person's click applies a suggestion.
   field value or a saved analysis's result rows.
 - **`POST /api/bi/sessions/<id>/apply`** on a `questions` session takes `{dataset, turn, picks: [index]}`: stages those
   questions, answers `{session, units, questions, cases}`; `picks_invalid`, `picks_empty`, `suggestion_applied`.
+
+## Conversation source and search (Telegram history, owner 2026-11-02)
+
+Design: `docs/phases/TELEGRAM_HISTORY.md`.
+
+- `ConversationRecord.source`: `agent_web` (the default, so older records read unchanged) or `telegram`. A record is
+  `telegram` exactly when its session id starts with `tg-`: `tg-<16 hex>-<yyyymmdd>-<8 hex>`, where the first part is
+  an opaque id from a per-host key, never the chat id.
+- `SqliteLocalState.conversations(actor, limit=, source="agent_web")`: one source, Agent Web by default, so existing
+  readers take no Telegram record. Also `latest_conversation(actor, prefix)`, `search_conversations(actor, query, limit=30)`
+  and `host_key(name)`.
+- A Telegram record is read-only. Turn, attachment, feedback, backend, model, contribution draft, voice and agent
+  session routes answer `{"ok": false, "code": "conversation_read_only"}`; the turn and voice routes with HTTP 409.
+  Reading, opening a listed file and `/api/conversations/delete` stay available. Delete also removes the files the
+  record lists.
+- `GET /api/conversations` rows gain `source`, and the list holds the latest 50 of each source.
+- `GET /api/conversations/search?q=`: `{"ok": true, "results": [{session_id, title, updated_at, messages, backend,
+  source, snippet}]}`, newest first, at most 30, for this actor. `snippet` is empty for a hit in the title only. Blank
+  words give no results; over 200 characters gives `{"ok": false, "code": "search_query_too_long"}`.
