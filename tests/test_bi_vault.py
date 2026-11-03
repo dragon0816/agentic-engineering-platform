@@ -648,7 +648,7 @@ def test_converting_a_dataset_takes_its_sources_along(tmp_path: Path) -> None:
     before = {r["rev"]: r for r in staging.markdown_revisions(kept["id"])}
     given = {"dataset": "lab", "path": str(drive.parent("a")), "author": "alice", "purpose": "虛構"}
     made = _ok(_call(a, "POST", "/api/bi/vaults/convert", given))
-    assert made["sources"] == {"copied": 1, "skipped": 1}
+    assert made["sources"] == {"copied": 1, "skipped": 1, "staged": 1}
     target = Staging(a, made["vault"]["dataset"])
     copied = target.source(kept["id"])
     assert copied is not None

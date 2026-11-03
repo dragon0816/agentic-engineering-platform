@@ -814,6 +814,7 @@ class Vault:
             self._install_schemas()
             with _repo_errors():
                 report = self.repo.sync()
+            vault_sources.sync_staging(self.repo, self.workspace, self.dataset)
             self.rebuild()
             (self.local / STATE_FILE).write_text(json.dumps({"at": now()}), encoding="utf-8")
             return report
@@ -1141,15 +1142,25 @@ def convert(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any
 
 
 def _copy_sources(workspace: Path, dataset: str, target: str) -> dict[str, Any]:
-    """The dataset's sources in the new vault's local staging, on this PC only
-    (`docs/phases/BI_BUILD_FLOW.md` §4). The vault exists by now, so a failure
-    here is reported and the sources can be added again by hand."""
+    """The dataset's sources in the new vault: copied to its local staging and
+    staged for the shared folder (`docs/phases/BI_SOURCES_IN_REPOSITORY.md` S5);
+    commit and push stay the person's. They keep their ids, which the converted
+    evidence uses. The vault exists by now, so a failure here is reported and the
+    sources can be added again by hand."""
     from capabilities.bi_cards.staging import Staging
 
     try:
-        return Staging(workspace, target).copy_sources_from(Staging(workspace, dataset))
-    except (OSError, sqlite3.Error) as failure:
-        return {"copied": 0, "skipped": 0, "error": type(failure).__name__}
+        staging = Staging(workspace, target)
+        report: dict[str, Any] = dict(staging.copy_sources_from(Staging(workspace, dataset)))
+        staged = 0
+        repo = staging._vault_repo()
+        for source in staging.sources() if repo is not None else ():
+            with repo.lock:
+                vault_sources.stage_source(repo, staging, source["id"])
+            staged += 1
+        return {**report, "staged": staged}
+    except (OSError, sqlite3.Error, BiStoreError, RepoError) as failure:
+        return {"copied": 0, "skipped": 0, "staged": 0, "error": type(failure).__name__}
 
 
 def listing(workspace: Path) -> list[dict[str, Any]]:

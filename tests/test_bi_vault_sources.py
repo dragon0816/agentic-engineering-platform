@@ -10,11 +10,23 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from test_bi_vault import _call, _commit, _edit, _import, _ok, _push, _row, _status, _two_pcs
+from test_bi_vault import (
+    _call,
+    _commit,
+    _Drive,
+    _edit,
+    _import,
+    _ok,
+    _push,
+    _row,
+    _status,
+    _sync,
+    _two_pcs,
+)
 
-from capabilities.bi_cards import vault, vault_sources
+from capabilities.bi_cards import search_index, vault, vault_sources
 from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStoreError
+from capabilities.bi_cards.store import BiStore, BiStoreError
 
 REPORT = "# AIDC 報告\n\n電源模組 FACT-1。\n"
 FOLDER = "sources/library/products"
@@ -174,6 +186,149 @@ def test_a_name_oneDrive_refuses_is_made_safe_in_the_path_and_kept_in_the_unit(
     assert unit["file"].endswith("報告 _Q3__.md")
     _commit(a, vault_id, "加入")
     assert _push(a, vault_id)["status"] == "pushed"
+
+
+# -- a colleague's PC (S4) --------------------------------------------------------------
+
+
+def _shared(tmp_path: Path, **given: Any) -> tuple[Any, str, str, Path, Path, dict[str, Any]]:
+    """PC a pushed one source; PC b has not received it yet."""
+    drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
+    source = _add(a, dataset, **given)
+    _commit(a, vault_id, "加入報告")
+    _push(a, vault_id)
+    return drive, vault_id, dataset, a, b, source
+
+
+def test_a_colleague_reads_a_pushed_source_with_no_second_copy(tmp_path: Path) -> None:
+    drive, vault_id, dataset, _, b, source = _shared(
+        tmp_path, folder=FOLDER, classification="RESTRICTED"
+    )
+    drive.deliver("a", "b", vault_id)
+    assert not Staging(b, dataset).sources()  # until this PC syncs
+    _sync(b, vault_id)
+    staging = Staging(b, dataset)
+    (seen,) = staging.sources()
+    assert seen["id"] == source["id"] and seen["origin"] == "repository"
+    assert seen["classification"] == "RESTRICTED" and seen["markdown_rev"] == 1
+    assert staging.source_bytes(source["id"]) == REPORT.encode()
+    assert staging.markdown_text(source["id"], 1) == REPORT
+    assert staging.stored_file(source["id"]).is_relative_to(drive.parent("b"))
+    assert not (staging.dir / "sources").exists()  # read through, not copied
+    found = search_index.search(BiStore(b, dataset), "FACT-1")
+    assert "FACT-1" in json.dumps(found, ensure_ascii=False)
+    assert _sync(b, vault_id)  # again: nothing doubles
+    assert len(Staging(b, dataset).sources()) == 1
+
+
+def test_a_commit_delivered_before_its_file_waits_then_the_source_appears(tmp_path: Path) -> None:
+    drive, vault_id, dataset, a, b, source = _shared(tmp_path)
+    unit = _unit(a, vault_id, source["sha256"])
+    drive.deliver("a", "b", vault_id)
+    target = drive.parent("b") / vault_id / unit["file"]
+    held = tmp_path / "held"
+    target.rename(held)
+    report = _sync(b, vault_id)
+    assert report["waiting"][0]["files"] == [unit["file"]]
+    assert not Staging(b, dataset).sources()
+    held.rename(target)
+    _sync(b, vault_id)
+    assert Staging(b, dataset).sources()[0]["id"] == source["id"]
+
+
+def test_a_source_that_cannot_be_read_says_so_and_does_not_stop_the_list(tmp_path: Path) -> None:
+    drive, vault_id, dataset, _, b, source = _shared(tmp_path)
+    drive.deliver("a", "b", vault_id)
+    _sync(b, vault_id)
+    staging = Staging(b, dataset)
+    path = staging.stored_file(source["id"])
+    path.unlink()
+    assert staging.sources()[0]["id"] == source["id"]
+    with pytest.raises(BiStoreError) as refused:
+        staging.source_bytes(source["id"])
+    assert refused.value.code == "source_unreadable"
+
+
+def test_a_colleague_can_edit_the_markdown_and_it_travels_back(tmp_path: Path) -> None:
+    drive, vault_id, dataset, a, b, source = _shared(tmp_path)
+    drive.deliver("a", "b", vault_id)
+    _sync(b, vault_id)
+    Staging(b, dataset).add_markdown(
+        source["id"], REPORT + "乙補充\n", origin="edit", note="補", actor="bob", base_rev=1
+    )
+    _commit(b, vault_id, "補 Markdown")
+    _push(b, vault_id)
+    drive.deliver("b", "a", vault_id)
+    _sync(a, vault_id)
+    assert Staging(a, dataset).markdown_text(source["id"], 2).endswith("乙補充\n")
+    assert [r["rev"] for r in _unit(a, vault_id, source["sha256"])["markdown"]] == [1, 2]
+
+
+def test_a_colleague_runs_on_it_and_the_evidence_means_the_same_source(tmp_path: Path) -> None:
+    drive, vault_id, dataset, a, b, source = _shared(
+        tmp_path, name="t.csv", text="技術,標準組織\nTSN,IEEE\n"
+    )
+    drive.deliver("a", "b", vault_id)
+    _sync(b, vault_id)
+    run = _ok(_call(b, "POST", "/api/bi/runs", {"dataset": dataset, "kind": "ingest",
+                                                "source_id": source["id"],
+                                                "entity_type": "Technology"}))["run"]  # fmt: skip
+    detail = _ok(_call(b, "GET", f"/api/bi/runs/{run['id']}", dataset=dataset))
+    (candidate,) = detail["candidates"]
+    proof = candidate["fields"][0]["evidence"][0]
+    assert proof["source_id"] == source["id"]
+    assert Staging(a, dataset).source(proof["source_id"]) is not None
+
+
+def test_a_reverted_source_leaves_a_colleagues_list_but_not_the_adders(tmp_path: Path) -> None:
+    drive, vault_id, dataset, a, b, source = _shared(tmp_path)
+    drive.deliver("a", "b", vault_id)
+    _sync(b, vault_id)
+    repo = vault.Vault(a, vault_id).repo
+    repo.stage(vault_sources.unit_key(source["sha256"]), None)
+    _commit(a, vault_id, "拿掉來源")
+    _push(a, vault_id)
+    drive.deliver("a", "b", vault_id)
+    _sync(b, vault_id)
+    assert Staging(b, dataset).sources() == []
+    _sync(a, vault_id)
+    assert Staging(a, dataset).source(source["id"]) is not None  # still on the adder's PC
+
+
+def test_syncing_writes_nothing_to_the_shared_folder(tmp_path: Path) -> None:
+    drive, vault_id, dataset, _, b, _ = _shared(tmp_path)
+    drive.deliver("a", "b", vault_id)
+    folder = drive.parent("b") / vault_id
+    before = sorted(str(p) for p in folder.rglob("*"))
+    _sync(b, vault_id)
+    assert Staging(b, dataset).sources()
+    assert sorted(str(p) for p in folder.rglob("*")) == before
+
+
+def test_converting_a_dataset_stages_its_sources_with_the_ids_its_evidence_uses(
+    tmp_path: Path,
+) -> None:
+    drive = _Drive(tmp_path)
+    ws = drive.workspace("a")
+    source = _add(ws, "plain", name="t.md", text=REPORT)
+    assert source["id"] != source["sha256"][:12]
+    BiStore(ws, "plain").apply(
+        [_row("TSN", standard_body="IEEE")], filename="t.csv", entity_type="Technology", actor="x"
+    )
+    made = _ok(
+        _call(ws, "POST", "/api/bi/vaults/convert",
+              {"dataset": "plain", "path": str(drive.parent("a")), "title": "Plain",
+               "author": "alice"})
+    )  # fmt: skip
+    vault_id = made["vault"]["id"]
+    assert made["sources"]["copied"] == 1 and made["sources"]["staged"] == 1
+    unit = _unit(ws, vault_id, source["sha256"])
+    assert unit["id"] == source["id"] and unit["folder"] == "sources"
+    folder = drive.parent("a") / vault_id
+    assert not (folder / unit["file"]).exists()  # staged; commit and push stay the person's
+    _commit(ws, vault_id, "加入來源")
+    _push(ws, vault_id)
+    assert (folder / unit["file"]).read_bytes() == REPORT.encode()
 
 
 def test_a_cards_database_ignores_the_source_units(tmp_path: Path) -> None:

@@ -50,8 +50,9 @@ sources along on this PC and leaves the dataset as it was.
 
 `vault.convert` copies the dataset's sources into the new vault's `staging.sqlite` with their stored files,
 Markdown revisions and classification; runs, candidates and sessions stay with the dataset (they refer to its
-cards and drafts). This stays on this PC: nothing goes to the shared folder, so it does not touch the open R6
-question (§10). A copy, not a move: the dataset is left as it was.
+cards and drafts). A copy, not a move: the dataset is left as it was. The owner has since decided originals go into
+the shared folder, so convert also stages them, for the person's commit and push
+(`docs/phases/BI_SOURCES_IN_REPOSITORY.md` S5).
 
 ## 5. B3: Session A on the harness
 
@@ -127,8 +128,8 @@ OneDrive/SharePoint folders. Evidence goes into `docs/TASKS.md`; no secret is pr
 
 ## 10. Open, not decided here
 
-- **R6, sources on one PC.** A vault's sources stay on the PC that added them; they are not shared through the
-  folder. This is an open owner decision for R6 (rebuilding `market-bi`). B2 keeps to it.
+- ~~**R6, sources on one PC.**~~ Decided (owner, 2026-11-02): originals go into the shared folder,
+  `docs/phases/BI_SOURCES_IN_REPOSITORY.md`.
 
 ## 11. Two page bugs the browser tests found
 

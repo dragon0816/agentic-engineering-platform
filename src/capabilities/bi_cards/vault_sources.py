@@ -157,6 +157,19 @@ def stage_revision(repo: Any, staging: Any, source_id: str, rev: int) -> None:
     repo.stage(key, {**value, "markdown": [*value["markdown"], added]})
 
 
+def sync_staging(repo: Any, workspace: Path, dataset: str) -> dict[str, int]:
+    """This PC's source list from the repository (a colleague's sources read
+    through); it writes nothing to the shared folder."""
+    from capabilities.bi_cards.staging import Staging
+
+    units = [
+        value
+        for key, value in repo.working_units().items()
+        if key.startswith(PREFIX) and isinstance(value, dict)
+    ]
+    return dict(Staging(workspace, dataset).sync_from_units(units))
+
+
 def folder_of(units: Mapping[str, Any], sha256: str) -> str | None:
     value = units.get(unit_key(sha256))
     return str(value["folder"]) if isinstance(value, dict) else None

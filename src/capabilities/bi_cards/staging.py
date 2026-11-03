@@ -64,6 +64,9 @@ TEXT_TYPES = {
 }
 MARKDOWN_DIR = "markdown"
 MAX_RUNS_LISTED = 100
+#: A `stored` value naming a file in the vault's repository folder, not here: a
+#: colleague's source is read through, with no second copy.
+REPOSITORY_FILE = "repo:"
 RUN_KINDS = ("trial", "ingest")
 
 SCHEMA = """
@@ -333,12 +336,139 @@ class Staging:
         except RepoError as failure:
             raise BiStoreError(failure.code, failure.message) from None
 
+    def _file(self, stored: str) -> Path:
+        if not stored.startswith(REPOSITORY_FILE):
+            return self.dir / stored
+        repo = self._vault_repo()
+        if repo is None:
+            raise BiStoreError("source_unreachable", "讀不到共用資料夾，這個來源現在不能開")
+        return Path(repo.folder) / stored[len(REPOSITORY_FILE) :]
+
+    def _read(self, stored: str) -> bytes:
+        try:
+            return self._file(stored).read_bytes()
+        except OSError:
+            raise BiStoreError(
+                "source_unreadable",
+                "現在讀不到這個來源；確認 OneDrive 已同步，並設為一律保留在此裝置上",
+            ) from None
+
+    def sync_from_units(self, units: list[dict[str, Any]]) -> dict[str, int]:
+        """Make what the repository says about its sources true here: a source
+        or revision this PC lacks gets a row reading through to the repository
+        file; a source read through that is no longer there goes. What this PC
+        added itself, its runs and its sessions stay as they are."""
+        if not units and not self.exists:
+            return {"added": 0, "removed": 0}
+        if self.exists and self._in_step_with(units):
+            # Every sync comes here: no write lock when there is nothing to write.
+            return {"added": 0, "removed": 0}
+        added, removed = 0, 0
+        changed = False
+        with self._db(write=True) as db:
+            present = {str(r["sha256"]): str(r["id"]) for r in db.execute("SELECT * FROM sources")}
+            for unit in units:
+                source_id = present.get(str(unit["sha256"]))
+                if source_id is None:
+                    source_id = str(unit["id"])
+                    db.execute(
+                        "INSERT INTO sources (id, name, sha256, media_type, size, origin, stored, "
+                        "classification, by, at) VALUES (?, ?, ?, ?, ?, 'repository', ?, ?, ?, ?)",
+                        (
+                            source_id,
+                            unit["name"],
+                            unit["sha256"],
+                            unit.get("media_type") or _media_type(str(unit["name"]), None),
+                            unit["bytes"],
+                            REPOSITORY_FILE + str(unit["file"]),
+                            unit.get("classification") or DEFAULT_CLASSIFICATION,
+                            unit.get("by") or "",
+                            unit.get("at") or now(),
+                        ),
+                    )
+                    added += 1
+                    changed = True
+                changed = self._sync_revisions(db, source_id, unit) or changed
+            kept = {str(unit["sha256"]) for unit in units}
+            for row in db.execute(
+                "SELECT id, sha256 FROM sources WHERE stored LIKE ?", (REPOSITORY_FILE + "%",)
+            ).fetchall():
+                if str(row["sha256"]) not in kept:
+                    db.execute("DELETE FROM markdown WHERE source_id = ?", (row["id"],))
+                    db.execute("DELETE FROM sources WHERE id = ?", (row["id"],))
+                    removed += 1
+                    changed = True
+        if changed:
+            from capabilities.bi_cards import search_index  # its passages (BI vault V3)
+
+            search_index.sync_quietly(self.store)
+        return {"added": added, "removed": removed}
+
+    def _in_step_with(self, units: list[dict[str, Any]]) -> bool:
+        with self._db() as db:
+            if not _has_table(db, "markdown"):
+                return not units
+            present = {str(r["sha256"]): str(r["id"]) for r in db.execute("SELECT * FROM sources")}
+            revisions = {
+                (str(r["source_id"]), int(r["rev"])): str(r["sha256"])
+                for r in db.execute("SELECT source_id, rev, sha256 FROM markdown")
+            }
+            through = {
+                str(r["sha256"])
+                for r in db.execute(
+                    "SELECT sha256 FROM sources WHERE stored LIKE ?", (REPOSITORY_FILE + "%",)
+                )
+            }
+        kept = {str(unit["sha256"]) for unit in units}
+        return (
+            through <= kept
+            and kept <= set(present)
+            and all(
+                revisions.get((present[str(unit["sha256"])], int(item["rev"]))) == item["sha256"]
+                for unit in units
+                for item in unit.get("markdown") or ()
+            )
+        )
+
+    @staticmethod
+    def _sync_revisions(db: sqlite3.Connection, source_id: str, unit: dict[str, Any]) -> bool:
+        """The revisions the unit names, as this source's rows. The unit decides:
+        a revision a conflict settled the other way takes the repository's text."""
+        changed = False
+        for item in unit.get("markdown") or ():
+            rev = int(item["rev"])
+            row = db.execute(
+                "SELECT sha256 FROM markdown WHERE source_id = ? AND rev = ?", (source_id, rev)
+            ).fetchone()
+            if row is not None and row["sha256"] == item["sha256"]:
+                continue
+            db.execute(
+                "INSERT OR REPLACE INTO markdown (source_id, rev, origin, note, converter, sha256, "
+                "chars, lines, stored, by, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    source_id,
+                    rev,
+                    item["origin"],
+                    item["note"],
+                    item.get("converter"),
+                    item["sha256"],
+                    item["chars"],
+                    item["lines"],
+                    REPOSITORY_FILE + str(item["file"]),
+                    item["by"],
+                    item["at"],
+                ),
+            )
+            db.execute("DELETE FROM conversions WHERE source_id = ?", (source_id,))
+            changed = True
+        return changed
+
     def stored_file(self, source_id: str) -> Path:
         with self._db() as db:
             row = db.execute("SELECT stored FROM sources WHERE id = ?", (source_id,)).fetchone()
         if row is None:
             raise BiStoreError("source_unknown", "找不到這個來源")
-        return self.dir / str(row["stored"])
+        return self._file(str(row["stored"]))
 
     def markdown_file(self, source_id: str, rev: int) -> Path:
         with self._db() as db:
@@ -347,7 +477,7 @@ class Staging:
             ).fetchone()
         if row is None:
             raise BiStoreError("markdown_rev_unknown", f"這個來源沒有第 {rev} 版 Markdown")
-        return self.dir / str(row["stored"])
+        return self._file(str(row["stored"]))
 
     def copy_sources_from(self, other: Staging) -> dict[str, int]:
         """Copy `other`'s sources here with their files, Markdown revisions and
@@ -465,7 +595,7 @@ class Staging:
             row = db.execute("SELECT stored FROM sources WHERE id = ?", (source_id,)).fetchone()
         if row is None:
             raise BiStoreError("source_unknown", "找不到這個來源")
-        return (self.dir / str(row["stored"])).read_bytes()
+        return self._read(str(row["stored"]))
 
     # -- Markdown revisions (BI vault V2) -----------------------------------
 
@@ -558,7 +688,7 @@ class Staging:
             )
         if row is None:
             raise BiStoreError("markdown_rev_unknown", f"這個來源沒有第 {rev} 版 Markdown")
-        return (self.dir / str(row["stored"])).read_bytes().decode("utf-8")
+        return self._read(str(row["stored"])).decode("utf-8")
 
     def add_markdown(
         self,
