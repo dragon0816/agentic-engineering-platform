@@ -1416,9 +1416,12 @@ class Repository:
             _write_new(self.folder / TAGS_DIR / f"{name}.json", _pretty(record))
             return record
 
-    def publish(self, tag: str) -> dict[str, Any]:
+    def publish(
+        self, tag: str, extra: Callable[[str, str], Mapping[str, Any]] | None = None
+    ) -> dict[str, Any]:
         """Make tag `tag` the published version. Callers make sure a person
-        confirmed it (design §7: never the model)."""
+        confirmed it (design §7: never the model). `extra(tag, commit)` lets the
+        knowledge type add what it wrote for this version to the record."""
         with self.lock:
             self.sync()
             record = self.tag_record(tag)
@@ -1426,8 +1429,10 @@ class Repository:
                 raise RepoError("tag_unknown", f"沒有 tag「{tag}」")
             if record["commit"] not in {cid for _, cid in self._ordered()}:
                 raise RepoError("commit_unknown", "這個 tag 的版本還沒有套用到這台電腦（先同步）")
+            added = {} if extra is None else dict(extra(tag, record["commit"]))
             seq = self._next_seq(PUBLISH_DIR)
             data = {
+                **added,
                 "format": PUBLISH_FORMAT,
                 "repo": self.id,
                 "author": self.author,

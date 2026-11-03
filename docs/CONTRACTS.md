@@ -6641,11 +6641,11 @@ A **home** is an application or a library entry. Its short form, `<application>`
 
 Design: `docs/phases/BI_CARD_MODEL.md` §5. Every change to a card goes through ingest. `store.set_field` stays as an internal method for proposal accept and a confirmed migration; no route reaches it directly.
 
-**Correction note.** Markdown with frontmatter `card` (id), `field`, `value`, `reason`, and optional `author`, `at`. Read deterministically by `correction.read` with the card page reader, no model. Text with no such frontmatter is an ordinary source, for a normal AI ingest.
+**Correction note.** Markdown with frontmatter `card` (id), `field`, `value` or `state`, `reason`, and optional `author`, `at`. `state` is `not_applicable`, `pending_confirmation` or `confirmed_none`, replaces a value the field has, and is only a note's to give for `confirmed_none`. Read deterministically by `correction.read` with the card page reader, no model. Text with no such frontmatter is an ordinary source, for a normal AI ingest.
 
-- `POST /api/bi/corrections/preview {"dataset", "base_version", "card", "field", "value", "reason", "author"?}`, or `{"dataset", "base_version", "text"}` for a written note → `{"ok": true, "card", "name", "field", "label", "current", "value", "reason", "author", "unchanged", "base_version", "folder", "text"}`. Writes nothing.
+- `POST /api/bi/corrections/preview {"dataset", "base_version", "card", "field", "value" | "state", "reason", "author"?}`, or `{"dataset", "base_version", "text"}` for a written note → `{"ok": true, "card", "name", "field", "label", "current", "value", "state", "state_label", "reason", "author", "unchanged", "base_version", "folder", "text"}`. Writes nothing.
 - `POST /api/bi/corrections/apply {"dataset", "base_version", "text"}` → `{"ok": true, "version", "source", "import_id"}`, or `{"ok": true, "version", "unchanged": true}` when the field already has that value: no source, no version, no history. The value is written as `human`, its evidence is the note's `value` line with `basis: human`, and `reason` goes in `history`. It is an import of one value, so a vault commits it at once, the note in a source commit of its own, and `POST /api/bi/import/undo` undoes it.
-- `value` is normalised like an import cell; a list is accepted for a list field; empty clears the field. 400: `note_invalid`, `field_unknown`, `field_derived`, `base_version_missing`, `reason_required` (every note), `value_invalid`. 404 `card_unknown`. 409 `stale_edit` with `current`, `by`, `at`, `version`; 409 `dataset_read_only`.
+- `value` is normalised like an import cell; a list is accepted for a list field; empty clears the field. 400: `note_invalid`, `state_invalid`, `field_unknown`, `field_derived`, `base_version_missing`, `reason_required` (every note), `value_invalid`. 404 `card_unknown`. 409 `stale_edit` with `current`, `by`, `at`, `version`; 409 `dataset_read_only`.
 - A note is kept in the `sources/` of the card's first home, else `library/corrections/sources`.
 
 ## BI card model: profile (2026-11-04)
@@ -6679,3 +6679,9 @@ Design: `docs/phases/BI_CARD_MODEL.md` §4.3. Code: `capabilities/bi_cards/profi
 - **Reject:** no schema change. A decided proposal is not asked again (`proposal_unknown`, 404). An invalid definition is refused by the schema check and changes nothing. `confirm_required`, `decision_invalid`, 400.
 
 **A written skill bound to the old version needs an update, as after any schema change** (`skills_need_update` lists them); a generated classify skill follows by itself.
+## BI card model: what a publish writes (2026-11-04)
+
+Design: `docs/phases/BI_CARD_MODEL.md` §6. `POST /api/bi/vaults/<id>/publish` also returns `"cards": {"behind": false, "written", "removed", "unchanged", "seconds"}`, or `{"behind": true, "problem"}`: a failed view never undoes the publish, and the next one repairs it. `GET /api/bi/vaults/<id>` status adds `cards_view_behind`.
+
+- `cards/<card id>.md`, with `cards/_manifest.json` `{tag, commit, at, by, hashes}` written last. Generated from the version published now, read-only, never read back. Frontmatter: `id`, `type`, `key`, `aliases`, `sample: true` on a sample, `generated: true`. Only pages whose hash differs are written; a removed card's page is deleted. A withdrawn source's excerpts leave the pages at once.
+- `published/<tag>.sqlite`, written once. The publish record (`repository.publish(tag, extra)`, the engine knows no BI name) gains `snapshot: {path, sha256}`, or `null` when it could not be written. Readers still rebuild from units.

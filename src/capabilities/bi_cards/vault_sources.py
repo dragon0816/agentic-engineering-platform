@@ -241,6 +241,7 @@ def withdraw(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[s
         except RepoError as failure:
             raise BiStoreError(failure.code, failure.message) from None
     target.sync()
+    target.write_cards()  # its excerpts leave the pages now, not at the next publish
     return {"withdrawn": record}
 
 

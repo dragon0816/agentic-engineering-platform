@@ -1443,10 +1443,12 @@ class BiStore:
         ref: str,
         run_id: str,
         evidence: Mapping[str, Any],
+        state: str | None = None,
     ) -> tuple[int, str]:
-        """Write a correction note's value with its evidence, in one transaction. It
-        is an import of one value, so a vault commits it at once and it can be undone.
-        The caller has already turned away a note that changes nothing."""
+        """Write a correction note's value or state with its evidence, in one
+        transaction. It is an import of one value, so a vault commits it at once and
+        it can be undone. A state replaces the field's value: it says why there is
+        none. The caller has already turned away a note that changes nothing."""
         self.refuse_write()
         at = now()
         import_id = uuid.uuid4().hex[:12]
@@ -1471,6 +1473,19 @@ class BiStore:
                 at=at,
                 import_id=import_id,
             )
+            if state is not None:
+                if version == base_version:
+                    # No value to clear: the state is the change.
+                    version += 1
+                    db.execute(
+                        "UPDATE cards SET version = ?, updated = ? WHERE id = ?",
+                        (version, at, card_id),
+                    )
+                db.execute(
+                    "INSERT OR REPLACE INTO field_states (card_id, field, state, reason, raw, "
+                    "origin, ref, by, at) VALUES (?, ?, ?, ?, NULL, 'unit', ?, ?, ?)",
+                    (card_id, field, state, reason, ref, actor, at),
+                )
             db.execute(
                 "INSERT INTO evidence (card_id, field, run_id, source_id, source_name, "
                 "locator, excerpt, basis, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
