@@ -105,7 +105,8 @@ def test_editable_loopback_gateway_default_is_a_valid_non_secret_host_fragment()
     assert config.models.routing_alias == "company"
     assert config.models.data_approval is not None
     assert config.models.data_approval.endpoint_base_url == "http://127.0.0.1:4000/v1"
-    assert config.models.data_approval.approved_classes == ("UNCLASSIFIED",)
+    # New installs approve INTERNAL by default (owner, 2026-11-03).
+    assert config.models.data_approval.approved_classes == ("UNCLASSIFIED", "INTERNAL")
     assert config.credential_environment()["litellm_gateway"] == "LITELLM_MASTER_KEY"
 
 

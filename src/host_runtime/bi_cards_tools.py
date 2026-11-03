@@ -37,7 +37,13 @@ from pydantic import ValidationError
 
 from agent.gateway import HostTool, HostToolOutcome
 from capabilities.bi_cards import analyses, vault
-from capabilities.bi_cards.capability import QUERY_SPEC, QueryHandler, QueryRequest, source_note
+from capabilities.bi_cards.capability import (
+    QUERY_SPEC,
+    QueryHandler,
+    QueryRequest,
+    search_sample_note,
+    source_note,
+)
 from capabilities.bi_cards.manifest import BI_SKILL, bi_question
 from capabilities.bi_cards.packs import SECTIONS as PACK_SECTIONS
 from capabilities.bi_cards.store import VAULT_PREFIX, BiStoreError
@@ -542,14 +548,30 @@ def _vault_lines(result: Any) -> list[str]:
 
 
 def _sample_lines(result: Any) -> list[str]:
-    """The host's note about example data, for each answered `bi__query` of the turn."""
-    found: list[str] = []
+    """The host's note about example data, one per dataset the turn's `bi__query`
+    calls read. One answer carries one note: the sample cards its searches returned,
+    each counted once, or if they returned none, the dataset's general note."""
+    cards: dict[str, set[str]] = {}
+    general: dict[str, str] = {}
     for item in getattr(result, "tools", None) or ():
         host = getattr(item, "host", None)
         if getattr(item, "name", "") != TOOL_NAME or host is None or host.status != "succeeded":
             continue
-        note = host.data.get("sample_note") if isinstance(host.data, dict) else None
-        if isinstance(note, str) and note and note not in found:
+        data = host.data if isinstance(host.data, dict) else {}
+        dataset = str(data.get("dataset") or "")
+        samples = {
+            str(card.get("card_id"))
+            for card in data.get("cards") or ()
+            if isinstance(card, dict) and card.get("synthetic")
+        }
+        cards.setdefault(dataset, set()).update(samples)
+        note = data.get("sample_note")
+        if not samples and isinstance(note, str) and note:
+            general.setdefault(dataset, note)
+    found: list[str] = []
+    for dataset, held in cards.items():
+        note = search_sample_note(len(held)) if held else general.get(dataset, "")
+        if note and note not in found:
             found.append(note)
     return found
 

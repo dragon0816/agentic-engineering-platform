@@ -89,6 +89,7 @@ What each reader does with a sample, read at this branch:
 
 The host line is added like the source line, so the answer says so whatever the model wrote: 「注意：這次查詢含 N 張範例資料，不是事實。」
 A note about an analysis or SQL says the data holds samples that it may include, since rows cannot be traced back to a card.
+An answer carries one note per dataset: the count of sample cards its searches returned, each counted once; the general note only if they returned none.
 
 **Why the default pack does not drop every marked card.** It was tried. Every shipped demo card is `synthetic`, and `FICTIONAL` also matches
 「待查證」, so 90 of robotics' 104 seed cards would vanish from the Dashboard and the tests of the demo Dashboard fail. So a card marked only by

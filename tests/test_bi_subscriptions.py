@@ -718,6 +718,8 @@ def _turn(text: str, *results: Any, status: str = "answered") -> Any:
 
 
 LINE = "資料來源：engineering/robotics-bi v1.0.0（發佈者 leo.chi）"
+#: The demo data these tests share is all marked as samples, and a search for BMS finds 9.
+SAMPLES = "注意：這次查詢含 9 張範例資料，不是事實。"
 
 
 def test_a_missing_source_line_is_appended_once(tmp_path: Path) -> None:
@@ -733,8 +735,29 @@ def test_a_missing_source_line_is_appended_once(tmp_path: Path) -> None:
     second = _ask(reader, dataset=DATASET, analysis="gaps", domain="robotics")
     answer = "BMS 有三張客戶產品卡。\n"
     shown = with_bi_sources(answer, _turn(answer, first, second))
-    assert shown == "BMS 有三張客戶產品卡。\n\n" + LINE
+    assert shown == "BMS 有三張客戶產品卡。\n\n" + LINE + "\n" + SAMPLES
     assert shown.count("資料來源") == 1
+    assert shown.count("注意：") == 1  # the search's note, not the analysis's as well
+
+
+def test_one_answer_carries_one_sample_note_for_a_dataset(tmp_path: Path) -> None:
+    from host_runtime.bi_cards_tools import with_bi_sources
+
+    owner = _owner(tmp_path)
+    reader = tmp_path / "reader"
+    _subscribe(reader, owner)
+    search = _ask(reader, dataset=DATASET, text="BMS")
+    analysis = _ask(reader, dataset=DATASET, analysis="gaps", domain="robotics")
+    # An analysis alone says only what can be said of its rows.
+    alone = with_bi_sources("答案", _turn("答案", analysis))
+    assert alone.count("注意：") == 1 and "這份資料含" in alone and "這次查詢含" not in alone
+    # One card found twice counts once, in either order with an analysis.
+    for results in ((search, search), (analysis, search), (search, analysis)):
+        shown = with_bi_sources("答案", _turn("答案", *results))
+        assert shown == f"答案\n\n{LINE}\n{SAMPLES}"
+    # A note the model already wrote is not repeated, and the source line still comes.
+    written = f"答案\n{SAMPLES}"
+    assert with_bi_sources(written, _turn(written, search)) == f"{written}\n\n{LINE}"
 
 
 def test_a_source_line_the_model_wrote_is_not_repeated(tmp_path: Path) -> None:
@@ -748,10 +771,10 @@ def test_a_source_line_the_model_wrote_is_not_repeated(tmp_path: Path) -> None:
         f"答案。\n\n{LINE}",
         "答案。\n（資料來源 engineering/robotics-bi，版本 1.0.0）",
     ):
-        assert with_bi_sources(written, _turn(written, result)) == written
+        assert with_bi_sources(written, _turn(written, result)) == f"{written}\n\n{SAMPLES}"
     # Another version named does not count as this one.
     other = "答案。\n資料來源：engineering/robotics-bi v0.9.0"
-    assert with_bi_sources(other, _turn(other, result)).endswith(LINE)
+    assert with_bi_sources(other, _turn(other, result)) == f"{other}\n\n{LINE}\n{SAMPLES}"
     # A turn that did not finish, or an empty answer, is left as it is.
     assert with_bi_sources("停了", _turn("停了", result, status="failed")) == "停了"
 
@@ -767,12 +790,12 @@ def test_the_appended_line_carries_the_stopped_or_update_status(tmp_path: Path) 
     )
     newer = _ask(reader, dataset=DATASET, text="BMS")
     assert with_bi_sources("答案", _turn("答案", newer)) == (
-        f"答案\n\n{LINE}；平台上有 v1.1.0，尚未更新"
+        f"答案\n\n{LINE}；平台上有 v1.1.0，尚未更新\n{SAMPLES}"
     )
     subscriptions.observe(reader, [])
     stopped = _ask(reader, dataset=DATASET, text="BMS")
     assert with_bi_sources("答案", _turn("答案", stopped)) == (
-        f"答案\n\n{LINE}；這份副本已停止更新（無權限），內容停在這個版本"
+        f"答案\n\n{LINE}；這份副本已停止更新（無權限），內容停在這個版本\n{SAMPLES}"
     )
 
 
@@ -781,7 +804,7 @@ def test_an_own_dataset_adds_no_source_line(tmp_path: Path) -> None:
 
     owner = _owner(tmp_path)
     local = _ask(owner.workspace, dataset="robotics", text="BMS")
-    assert with_bi_sources("答案", _turn("答案", local)) == "答案"
+    assert with_bi_sources("答案", _turn("答案", local)) == f"答案\n\n{SAMPLES}"
 
 
 def test_agent_web_adds_the_source_line_to_the_stored_answer(
@@ -812,8 +835,8 @@ def test_agent_web_adds_the_source_line_to_the_stored_answer(
         token=token,
         body={"session_id": session["conversation"]["session_id"], "message": "BMS 有哪些？"},
     ).json()
-    assert reply["answer"]["answer"] == "BMS 有三張客戶產品卡。\n\n" + LINE
-    assert reply["conversation"]["messages"][-1]["text"].endswith(LINE)
+    assert reply["answer"]["answer"] == "BMS 有三張客戶產品卡。\n\n" + LINE + "\n" + SAMPLES
+    assert reply["conversation"]["messages"][-1]["text"].endswith(LINE + "\n" + SAMPLES)
 
 
 def test_telegram_adds_the_source_line_to_the_reply(
@@ -839,4 +862,4 @@ def test_telegram_adds_the_source_line_to_the_reply(
     monkeypatch.setattr(agent, "converse", converse)
     delivery = poll(item).deliveries[0]
     assert delivery.disposition == "answered"
-    assert transport.sent() == ["BMS 有三張客戶產品卡。\n\n" + LINE]
+    assert transport.sent() == ["BMS 有三張客戶產品卡。\n\n" + LINE + "\n" + SAMPLES]

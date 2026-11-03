@@ -120,13 +120,18 @@ def _sql_section(store: BiStore, request: QueryRequest) -> dict[str, Any]:
     }
 
 
+def search_sample_note(count: int) -> str:
+    """The host's line about the sample cards a search returned."""
+    return f"注意：這次查詢含 {count} 張範例資料，不是事實。"
+
+
 def sample_note(store: Any, cards: Any = None) -> str:
     """The host's line about example data: how many cards of a search are samples;
     for an analysis or SQL, whose rows cannot be traced to a card, that the data
     holds samples the result may include."""
     if cards is not None:
         count = sum(1 for card in cards if card.get("synthetic"))
-        return f"注意：這次查詢含 {count} 張範例資料，不是事實。" if count else ""
+        return search_sample_note(count) if count else ""
     count = sum(1 for card in store.card_rows() if card["synthetic"])
     if not count:
         return ""
