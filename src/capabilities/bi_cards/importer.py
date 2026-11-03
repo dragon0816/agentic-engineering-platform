@@ -21,6 +21,7 @@ import re
 import threading
 import uuid
 from collections import OrderedDict
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -29,6 +30,8 @@ from capabilities.bi_cards.catalog import for_store
 from capabilities.bi_cards.schema import Registry, TypeDef, norm_key
 from capabilities.bi_cards.store import ApplyResult, BiStore, PlannedRow
 
+#: What a card ticked as a sample is named with, so the default pack leaves it out.
+SAMPLE_PREFIX = "SAMPLE-"
 #: The fixture marks example data in the text (「(虛構範例)」, 「[範例資料,待業務/FAE
 #: 驗證]」); such a card is synthetic and never trusted (DQ-1).
 FICTIONAL = re.compile(r"虛構|範例|示範|待[^,，。]{0,10}驗證|待查證|^SAMPLE-")
@@ -52,6 +55,8 @@ class Preview:
     columns: list[dict[str, Any]]
     rows: list[dict[str, Any]]
     planned: dict[int, PlannedRow] = field(default_factory=dict)
+    #: With `samples`: the name and key each card had before its prefix -> after.
+    renamed: dict[str, str] = field(default_factory=dict)
 
     def summary(self) -> dict[str, int]:
         counts = {"create": 0, "update": 0, "unchanged": 0, "skip": 0}
@@ -145,10 +150,12 @@ def preview(
     schema: Registry | None = None,
     rows: tuple[list[str], list[dict[str, Any]]] | None = None,
     samples: bool = False,
+    links_renamed: Mapping[str, str] | None = None,
 ) -> Preview:
     """Read, map and normalise a CSV (or `rows`, already read: a value may be a
     list) against the store and the dataset's schema; writes nothing. `samples`
-    marks every row as example data."""
+    marks every row as example data and names it `SAMPLE-…` (never twice);
+    `links_renamed` is what such names became, for links between those rows."""
     reg = schema or for_store(store)
     mapping = dict(mapping or {})
     headers, raw_rows = rows if rows is not None else read_rows(csv_text)
@@ -210,6 +217,7 @@ def preview(
 
     # Keys known for link resolution: the store, this file, and callers' extras.
     known: dict[str, set[str]] = {}
+    renamed: dict[str, str] = {}
     for card in store.card_rows():
         known.setdefault(card["entity_type"], set()).add(card["canonical_key"])
     for type_name, keys in (extra_keys or {}).items():
@@ -239,6 +247,22 @@ def preview(
         if entity.get("node") and entity.get("nodes") and values.get("node"):
             merged = [values["node"], *[n for n in values.get("nodes", []) if n != values["node"]]]
             values["nodes"] = merged
+        if samples:
+            before = canonical_key(entity, values)
+            named = values.get(entity.naming_field)
+            if isinstance(named, str) and named and not named.startswith(SAMPLE_PREFIX):
+                values[entity.naming_field] = SAMPLE_PREFIX + named
+                renamed[named] = values[entity.naming_field]
+                if before:
+                    renamed[before] = canonical_key(entity, values)
+        for name, value in list(values.items()):
+            item = entity.get(name)
+            if links_renamed and item is not None and item.is_link:
+                values[name] = (
+                    [links_renamed.get(str(v), v) for v in value]
+                    if isinstance(value, list)
+                    else links_renamed.get(str(value), value)
+                )
         synthetic = (
             samples or kind == "fixture" or any(FICTIONAL.search(str(v)) for v in raw.values())
         )
@@ -259,6 +283,7 @@ def preview(
             known.setdefault(entity.name, set()).add(key)
 
     result = Preview(
+        renamed=renamed,
         preview_id=uuid.uuid4().hex[:12],
         dataset=store.dataset,
         entity_type=entity.name,

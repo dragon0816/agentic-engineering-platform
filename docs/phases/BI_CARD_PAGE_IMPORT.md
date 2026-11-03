@@ -57,7 +57,9 @@ Nothing here reaches a model, and nothing is written before the apply.
 
 **The mark already exists:** a card's `synthetic`. `importer.FICTIONAL` sets it from any value matching `虛構|範例|示範|待…驗證|待查證|^SAMPLE-`,
 and a synthetic card is never `trusted`. Pages get the same rule. `samples: true` marks every row of a request, for files like
-`tools/samples` whose rows do not all say so; the person ticks it on the page.
+`tools/samples` whose rows do not all say so; the person ticks it on the page. **A ticked row also gets the `SAMPLE-` name prefix**, never
+twice (owner, 2026-11-03), so the default pack leaves it out unless `include_sample`. A link from one such row to another follows the
+rename; a link that still does not resolve is listed in the preview. Rows not ticked keep their names.
 
 What each reader does with a sample, read at this branch:
 
@@ -73,9 +75,8 @@ The host line is added like the source line, so the answer says so whatever the 
 A note about an analysis or SQL says the data holds samples that it may include, since rows cannot be traced back to a card.
 
 **Why the default pack does not drop every marked card.** It was tried. Every shipped demo card is `synthetic`, and `FICTIONAL` also matches
-「待查證」, so 90 of robotics' 104 seed cards would vanish from the Dashboard and the tests of the demo Dashboard fail. So a marked card without
-the `SAMPLE-` name, such as a row of `tools/samples`, **still counts in a built-in analysis**, and the host's line says it may. To keep those
-out of analyses, either the marking must be narrower or those rows need the prefix: open for the owner.
+「待查證」, so 90 of robotics' 104 seed cards would vanish from the Dashboard and the tests of the demo Dashboard fail. So a card marked only by
+its wording, with no `SAMPLE-` name, **still counts in a built-in analysis**, and the host's line says it may.
 
 Known consequence, for the owner: `FICTIONAL` also matches 「待查證」 in a value, so a real card whose page says 「(待查證)」 is marked as a
 sample, as it would be from a CSV. The dry run reports how many that is per base.

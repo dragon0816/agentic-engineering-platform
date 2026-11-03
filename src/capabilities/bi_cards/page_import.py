@@ -289,7 +289,9 @@ def preview(store: BiStore, given: Any, *, samples: bool = False) -> PagePreview
         row = {k: v for k, v in page.values.items() if k != "type"}
         by_type.setdefault(chosen, []).append((path, row))
 
-    def previews(known: dict[str, set[str]] | None) -> list[tuple[importer.Preview, list[str]]]:
+    def previews(
+        known: dict[str, set[str]] | None, renamed: dict[str, str] | None = None
+    ) -> list[tuple[importer.Preview, list[str]]]:
         found = []
         for entity_type, rows in sorted(by_type.items()):
             headers = sorted({k for _, row in rows for k in row})
@@ -297,7 +299,7 @@ def preview(store: BiStore, given: Any, *, samples: bool = False) -> PagePreview
                 importer.preview(
                     store, entity_type=entity_type, filename=f"pages:{entity_type}",
                     csv_text="", rows=(headers, [row for _, row in rows]),
-                    extra_keys=known, samples=samples,
+                    extra_keys=known, samples=samples, links_renamed=renamed,
                 ),
                 [path for path, _ in rows],
             ))  # fmt: skip
@@ -305,7 +307,7 @@ def preview(store: BiStore, given: Any, *, samples: bool = False) -> PagePreview
             try:
                 prepared = importer.preview(
                     store, entity_type=None, filename=PurePosixPath(path).name, csv_text=text,
-                    extra_keys=known, samples=samples,
+                    extra_keys=known, samples=samples, links_renamed=renamed,
                 )  # fmt: skip
             except importer.ImportError_ as failure:
                 problems.append(_problem(path, failure.code, failure.message))
@@ -315,11 +317,13 @@ def preview(store: BiStore, given: Any, *, samples: bool = False) -> PagePreview
 
     first = previews(None)
     known: dict[str, set[str]] = {}
+    renamed: dict[str, str] = {}
     for item, _ in first:
+        renamed.update(item.renamed)
         for planned in item.planned.values():
             known.setdefault(planned.entity_type, set()).add(planned.canonical_key)
     problems[:] = [p for p in problems if p["code"] not in _TABLE_CODES]
-    final = previews(known)
+    final = previews(known, renamed)
     result = PagePreview(
         preview_id=uuid.uuid4().hex[:12],
         dataset=store.dataset,

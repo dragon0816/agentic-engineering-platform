@@ -6228,3 +6228,14 @@ Design `docs/phases/BI_CARD_PAGE_IMPORT.md`.
 - **Accepted as stated (owner):** S6's raw-body upload, with the converter still reading a file whole once; withdrawal has no undo;
   withdrawal does not clear AI session conversations; `check_classification` before an AI run stays, because it governs what a model
   may be sent, not file access.
+
+## 2026-11-03: Sample names and the R6 import order (owner, relayed by the BI orchestrator)
+
+- **Rows ticked as samples get the `SAMPLE-` name on import**, never twice, so the default pack leaves them out unless `include_sample`. A link from
+  one such row to another follows the rename; one that cannot resolve is listed in the preview. Rejected: narrowing what `FICTIONAL` marks; leaving them
+  out of analyses by another rule.
+- **R6's order:** AIDC and aerospace, seeds then pages, with same-named cards merging and conflicts settled in review; robotics, pages only (100
+  cards), its seed CSVs not imported; wireless module and wireless example, pages, and the example's 3 sample CSVs ticked.
+
+**Not settled:** a combined dry run found that an import overwrites every value not set by a person. 641 cards, 0 proposals, 49 scalar values overwritten and 42
+lists that lost items. So "conflicts settled in review" does not hold yet; counts in `docs/runbooks/R6_MARKET_BI.md` §3. For the owner.

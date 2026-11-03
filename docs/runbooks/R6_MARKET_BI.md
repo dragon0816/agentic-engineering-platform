@@ -32,14 +32,14 @@ from reading the folders: names and counts, read only.
 |---|---|---|---|
 | `aidc-bi-kb` (AIDC) | 169 files, 1.2 MB | `BI/` (121 pages, 12 named `SAMPLE-`), `seed/` (24: 22 CSV seeds per the record), `sources/compute.md`, `sources/power_cooling.md`, `README.md` | `tools/` (18), `package.json`, `package-lock.json`, `Dashboard-AIDC.md` |
 | `Aerospace-BI-KB` (aerospace) | 101 files, 493 KB | `BI/` without `_Templates/` (51 card pages of 72), `seed/` (22 CSV), `README.md` | `tools/` (5), `BI/_Templates/`, `Dashboard-Aerospace.md` |
-| `robotics_kb_sample` (robotics) | 134 files, 586 KB | `BI/` without `_Templates/` (104 card pages of 116), `tools/samples/robotics/*.csv` (12: its seeds, though under `tools/`), `README.md`, `PATCH-NOTES.md` | the rest of `tools/`, `BI/_Templates/`, `build_sample.py`, `Dashboard-Robotics.md` |
+| `robotics_kb_sample` (robotics) | 134 files, 586 KB | `BI/` without `_Templates/` (104 card pages of 116), `README.md`, `PATCH-NOTES.md` | all of `tools/`, including its 12 seed CSVs (owner, 2026-11-03), `BI/_Templates/`, `build_sample.py`, `Dashboard-Robotics.md` |
 | `Wireless-Module-BI-KB-SAMPLE` (wireless module) | 87 files, 463 KB | `BI/` without `_Templates/` (55 card pages of 77, 47 marked samples), `README.md` | `tools/` (6), `tests/` (3), `BI/_Templates/` |
 | `BI_Vault_Example` (wireless example) | 154 files, 2.3 MB | `BI/` without `_Templates/` (103 card pages of 115), `tools/samples/*.csv` (3, sample data), `README.md` | `.obsidian/` (13), the rest of `tools/` (with `__pycache__`, `prompts`), `BI/_Templates/` |
 
 Largest file under 1.4 MB; no PDFs. Reasons for the stays-out column: build tools and tests are not knowledge,
 `_Templates/` are Templater templates with no data (`<% tp.file.title %>`), and `Dashboard-*.md` are generated Dataview
 pages the vault's Dashboard replaces. `SAMPLE-` pages and `BI_Vault_Example/tools/samples` go in **marked as samples** (owner,
-2026-11-03): tick 「全部標成範例資料」 for `tools/samples`. `tools/name-aliases*.json` (AIDC, aerospace) stay out as files but hold the
+2026-11-03): tick 「全部標成範例資料」 for `tools/samples`, which also names those rows `SAMPLE-`. `tools/name-aliases*.json` (AIDC, aerospace) stay out as files but hold the
 name aliases to carry over.
 
 Two AIDC reports: `C:\Users\Chi_L\OneDrive - Rohde & Schwarz\BI_Knowledge\market-bi\applications\aidc-compute.md` and
@@ -57,7 +57,7 @@ written to `files\`:
 |---|---|---|---|---|---|
 | AIDC | 121 → 121 | — | 12 | 22 card CSVs → 323 | 14 |
 | Aerospace | 51 → 51 | 21 templates | 1 | 22 → 91 | 9 |
-| Robotics | 104 → 100, 4 with no name | 12 templates | 0 | 12 → 104 | **90** |
+| Robotics | 104 → 100, 4 with no name | 12 templates | 0 | 12 → 104 (not imported) | **90** |
 | Wireless module | 55 → 55 | 21 templates, 1 Dashboard | 47 | none | — |
 | Wireless example | 103 → 100, 3 with no name | 11 templates, 7 with no frontmatter | 7 | 3 samples → 9 | 9 (ticked) |
 
@@ -66,13 +66,39 @@ No frontmatter problems in any base. Every base has fields the schema does not h
 are not card files and are listed as such. A full apply of AIDC's 121 pages on a temp vault took 86 s, then 29 s to push: one
 commit of sources and one of cards.
 
-**For the owner at step 7–8, from these numbers:**
-- **Seeds and pages disagree in size.** AIDC's seeds make 323 cards and its pages 121; aerospace 91 and 51. Seeds first, then the
-  pages (they update or add), or seeds alone, is the owner's call per base. Wireless module has only pages.
-- **Robotics' seeds mark 90 of 104 as samples, its pages none.** Marking comes from values matching `虛構|範例|示範|待…驗證|待查證`, and a
-  card once marked stays marked. So importing those seeds after the pages would mark the pages' cards too. Read the seeds' wording
-  before choosing; the pages alone may be the better source there.
-- The 7 pages with no name (4 robotics, 3 example) are listed in the preview and not imported; name them or leave them.
+**The order (owner, 2026-11-03):**
+
+| Base | Goes in | Stays out |
+|---|---|---|
+| AIDC | Seeds, then pages | |
+| Aerospace | Seeds, then pages | |
+| Robotics | Pages only (100 cards) | Its seed CSVs, which mark 90 of 104 as samples |
+| Wireless module | Pages | |
+| Wireless example | Pages, and its 3 `tools/samples` CSVs with 「全部標成範例資料」 ticked: they get the `SAMPLE-` name, never twice | |
+
+The table above ran each base alone, so it cannot show what merging does. **Combined dry run** on a temp vault, in this order, with no model
+and nothing written to `files\` (2026-11-03):
+
+| Step | New | Updated | Existing values overwritten: scalar / lists losing items |
+|---|---|---|---|
+| AIDC seeds | 323 | 0 | 0 / 0 |
+| AIDC pages | 0 | 90 | 0 / 0 |
+| Aerospace seeds | 86 | 5 | 5 / 3 |
+| Aerospace pages | 0 | 44 | 14 / 2 |
+| Robotics pages | 94 | 6 | 5 / 13 |
+| Wireless module pages | 51 | 4 | 0 / 4 |
+| Wireless example pages | 79 | 13 | 24 / 15 |
+| Wireless example samples | 8 | 1 | 1 / 5 |
+
+**641 cards** (10/29's reference: 639), 85 marked as samples, 78 named `SAMPLE-`. It took about 3 minutes.
+
+**Blocker, not settled: same-named cards do not merge yet.** Importing over a card **overwrites** every value not set by a person. It raised 0
+proposals (10/29's script reported 7 scalar conflicts), and overwrote **49 scalar values and 42 lists that lost items**, for example
+`Application.domain` and `Ecosystem.role`: a multi-domain card keeps only the last base's domain. The preview shows each change, but apply writes
+them all, so "conflicts are settled in review" does not hold yet. Do not run steps 7–8 on real data until this is decided (`docs/DECISIONS.md`
+2026-11-03 "Sample names and the R6 import order").
+
+The 7 pages with no name (4 robotics, 3 example) are listed in the preview and not imported; name them or leave them.
 
 ## 4. Pre-checks a script can run beforehand
 
@@ -121,8 +147,8 @@ that flow is changing, so read the current ones on the page.
 | 4 | Knowledge > BI > 建立與匯入 > 建立共用知識庫（vault）: id `market-intel`, in `BI_Knowledge`, schema `bi.schema/v1.1` (2.0.0), author `leo.chi`. | `repo.json` in the folder; `/api/knowledge/askable` lists it with `nothing_pushed` |
 | 5 | Step 1: add the AIDC base's sources (§3's list), let them become Markdown. They reach the shared folder with the push (D2). | Each source has Markdown; spot-check two tables |
 | 6 | Step 2: Session A only if the schema must change; Session B for the skills. Move the manager's reading rules there. | The owner reviewed every schema change and skill |
-| 7 | Import the AIDC seeds first (`seed/`, the 22 card CSVs): preview, apply. Then its pages through the card-page importer, if the owner wants them (§3). | 22 CSVs → 323 cards; §7's AIDC numbers match |
-| 8 | Repeat 5–7 for robotics, aerospace, wireless module, wireless example, seeds or pages as §3 settles. **One commit per base** (with its sources in a commit of their own). | After each: quality check read; new conflicts settled (D3); no fact without a source |
+| 7 | Import the AIDC seeds first (`seed/`, the 22 card CSVs): preview, apply. Then its pages through the card-page importer (§3). **Not before the merge blocker in §3 is decided.** | 22 CSVs → 323 cards; §7's AIDC numbers match |
+| 8 | Repeat 5–7 in §3's order: aerospace, robotics, wireless module, wireless example. **Commits per import**, each with its sources in a commit of their own. | After each: quality check read; new conflicts settled (D3); no fact without a source |
 | 9 | Fix the links written in another spelling of a merged card (28 last time), as field edits with a reason. | Quality check's unresolved links explained |
 | 10 | Step 3: benchmark questions and the Dashboard (the analysis AI, or an Atlas import of the order). | Owner approved each question and the order |
 | 11 | Testing: run the benchmark on the working copy. | No regression the owner did not accept |

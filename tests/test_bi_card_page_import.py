@@ -222,8 +222,51 @@ def test_sample_pages_and_marked_requests_are_imported_as_samples(tmp_path: Path
                       samples=True)  # fmt: skip
     assert marked["summary"]["samples"] == marked["summary"]["create"] == 1
     _apply(ws, marked["preview_id"])
-    found = store.find("Technology", "FAKE-CSV")
-    assert found is not None and found["synthetic"] == 1
+    assert store.find("Technology", "FAKE-CSV") is None
+    found = store.find("Technology", "SAMPLE-FAKE-CSV")
+    assert found is not None and found["synthetic"] == 1 and found["name"] == "SAMPLE-FAKE-CSV"
+
+
+NODE_CSV = "名稱,領域\nSAMPLE-Already,wireless\nFAKE-NODE,wireless\n"
+TECH_LINKS = (
+    "---\ntype: technology\nname: FAKE-LINKED\n"
+    'affects_nodes: ["[[FAKE-NODE]]", "[[SAMPLE-Already]]", "[[NOT-IN-REQUEST]]"]\n---\n'
+)
+
+
+def test_ticked_rows_get_the_prefix_once_and_their_links_follow(tmp_path: Path) -> None:
+    ws, dataset = _dataset(tmp_path)
+    answer = _preview(
+        ws,
+        dataset,
+        [
+            {"path": "tools/samples/node_sample.csv", "text": NODE_CSV},
+            {"path": "tools/samples/tech.md", "text": TECH_LINKS},
+        ],
+        samples=True,
+    )
+    keys = {r["canonical_key"] for t in answer["types"] for r in t["rows"]}
+    assert keys == {"SAMPLE-Already", "SAMPLE-FAKE-NODE", "SAMPLE-FAKE-LINKED"}  # never twice
+    assert answer["summary"]["samples"] == 3
+    linked = _row(answer, "Technology", "SAMPLE-FAKE-LINKED")
+    said = json.dumps(linked["warnings"], ensure_ascii=False)
+    # A link to a row in the request follows the rename; one that cannot resolve is listed.
+    assert "NOT-IN-REQUEST" in said and "FAKE-NODE" not in said and "Already" not in said
+    _apply(ws, answer["preview_id"])
+    store = BiStore(ws, dataset)
+    card = store.find("Technology", "SAMPLE-FAKE-LINKED")
+    assert card is not None
+    assert store.fields(card["id"])["affects_nodes"]["value"] == [
+        "SAMPLE-FAKE-NODE", "SAMPLE-Already", "NOT-IN-REQUEST",
+    ]  # fmt: skip
+
+
+def test_rows_not_ticked_keep_their_names(tmp_path: Path) -> None:
+    ws, dataset = _dataset(tmp_path)
+    answer = _preview(
+        ws, dataset, [{"path": "seed.csv", "text": "名稱,領域\nFAKE-REAL,wireless\n"}]
+    )
+    assert {r["canonical_key"] for t in answer["types"] for r in t["rows"]} == {"FAKE-REAL"}
 
 
 def _bi_query(ws: Path, dataset: str, **given: Any) -> dict[str, Any]:
@@ -246,20 +289,39 @@ def test_bi_query_says_when_samples_are_in_the_answer(tmp_path: Path) -> None:
     assert "含 1 張範例資料" in sql["sample_note"]
 
 
+def test_the_default_pack_leaves_out_ticked_rows_unless_asked(tmp_path: Path) -> None:
+    ws, dataset = _dataset(tmp_path)
+    csv = "節點,領域\nFAKE-TICKED,wireless\n"
+    page = "---\ntype: node\nname: FAKE-REAL-NODE\ndomain: [wireless]\n---\n"
+    ticked = _preview(ws, dataset, [{"path": "x/node_sample.csv", "text": csv}], samples=True)
+    _apply(ws, ticked["preview_id"])
+    _apply(ws, _preview(ws, dataset, [{"path": "n.md", "text": page}])["preview_id"])
+
+    def rows(**given: Any) -> str:
+        found = _bi_query(ws, dataset, analysis="all", domain="wireless", **given)["analysis"]
+        return json.dumps([s["rows"] for s in found], ensure_ascii=False)
+
+    plain = rows()
+    assert "FAKE-REAL-NODE" in plain and "FAKE-TICKED" not in plain
+    assert "SAMPLE-FAKE-TICKED" in rows(params={"include_sample": True})
+
+
 def test_the_default_pack_drops_sample_names_and_says_when_other_samples_may_count(
     tmp_path: Path,
 ) -> None:
     ws, dataset = _dataset(tmp_path)
-    csv = "名稱,標準組織,領域\nFAKE-MARKED,IETF,wireless\n"
-    pages = [*PAGES, {"path": "x/technology_sample.csv", "text": csv}]
-    _apply(ws, _preview(ws, dataset, pages, samples=True)["preview_id"])
+    # Marked by its wording, not ticked: no prefix, so it can count in an analysis.
+    csv = "名稱,標準組織,備註,領域\nFAKE-MARKED,IETF,(待查證),wireless\n"
+    pages = [*PAGES, {"path": "x/technology.csv", "text": csv}]
+    _apply(ws, _preview(ws, dataset, pages)["preview_id"])
     store = BiStore(ws, dataset)
-    assert sum(1 for card in store.card_rows() if card["synthetic"]) == 4
+    assert store.find("Technology", "FAKE-MARKED") is not None
+    assert sum(1 for card in store.card_rows() if card["synthetic"]) == 2
     every = _bi_query(ws, dataset, analysis="all", domain="wireless")
     rows = json.dumps([s["rows"] for s in every["analysis"]], ensure_ascii=False)
     assert "SAMPLE-客戶A" not in rows  # by name, as before
     # A marked card without the prefix is not dropped, so the host says so whatever is drawn.
-    assert "4 張範例資料" in every["sample_note"]
+    assert "2 張範例資料" in every["sample_note"]
     assert "只排除 SAMPLE- 開頭的" in every["sample_note"]
 
 
