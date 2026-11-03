@@ -2068,9 +2068,13 @@ def save_skill(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict
 
 
 def profiles(workspace: Path, vault_id: str) -> dict[str, Any]:
-    """The vault's current profiles (working copy)."""
+    """The vault's current profiles (working copy), and every home that may have one."""
     vault = _vault(workspace, vault_id)
-    return {"profiles": profile.listed(vault.repo, vault.repo.working_units())}
+    units = vault.repo.working_units()
+    return {
+        "profiles": profile.listed(vault.repo, units),
+        "homes": vault_skills.home_list(units),
+    }
 
 
 def save_profile(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
