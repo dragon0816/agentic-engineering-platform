@@ -18,7 +18,8 @@ failing closed).
 **Verified.** Before each code commit: `ruff format --check .`, `ruff check .`, `mypy src tests` clean. Targeted tests pass:
 the Telegram tests (261 passed, on T2 before a one-variable rename, then `test_telegram_history` and
 `test_telegram_reply_context` again), the web tests (134 passed on T3/T4), the page tests including the browser test
-(147 passed on T5). **The full suite has not been run on this branch**; it waits for the orchestrator's go. No real
+(147 passed on T5). **Full suite on `8cc2174b`: 4861 passed, 37 skipped, 0 failed, in 1:40:27**, with `AEP_ATLAS_REPO` set
+to the atlas-embed worktree. No real
 Telegram message, bot token or model was used, and the real Agent Web on 53583 was not restarted, so this is not yet
 seen on the owner's host.
 
@@ -30,7 +31,7 @@ seen on the owner's host.
 - A restart between `/new` and the next message joins that message to the day's record (design §5).
 - `graphify update .` was not run: this worktree has no `graphify-out/`.
 
-**Next actions.** (1) Orchestrator: the full suite, then merge. (2) After a restart of Agent Web with this code, the owner
+**Next actions.** (1) Orchestrator: merge. (2) After a restart of Agent Web with this code, the owner
 sends one Telegram message and sees it in the session list.
 
 ## The BI build flow, end to end (2026-11-02, Claude Code) — latest
