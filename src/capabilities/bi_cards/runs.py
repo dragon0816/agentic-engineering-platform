@@ -523,6 +523,9 @@ def run_view(staging: Staging, run_id: str) -> dict[str, Any]:
             types=layout.get("types") or [],
             relations=layout.get("relations") or [],
         )
+        rules = layout.get("skills")
+        if isinstance(rules, dict):  # a vault's run: what its home's profile said, or none
+            view.update(profile=rules.get("profile"), home=rules.get("home"))
     elif layout is not None:
         # A recipe run: its tables, passes (with counts as reviewed now) and
         # run-level warnings such as `table_unused`.

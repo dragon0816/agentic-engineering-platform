@@ -14597,7 +14597,11 @@ function biRunBody(kind) {
 function biRunNothing(run) {
   // Why the AI made no candidate, in its words: an empty run must not look like a broken one.
   const said = (run.warnings || []).filter((w) => w.code === "model_found_nothing");
-  return said.map((w) => bh("p", "bi-warn", "AI 沒有建立候選卡，它的說明：" + w.message));
+  const notes = said.map((w) => bh("p", "bi-warn", "AI 沒有建立候選卡，它的說明：" + w.message));
+  if ("profile" in run && !run.profile) {
+    notes.push(bh("p", "bi-meta", "這個資料夾沒有 profile，AI 用整份 schema 判讀。"));
+  }
+  return notes;
 }
 
 function biRunRelations(run) {
@@ -15147,6 +15151,15 @@ function biBuildShowCandidate(candidateId) {
   }
   if (candidate.warnings.length) {
     parts.push(bh("ul", "bi-warn", ...candidate.warnings.map((w) => bh("li", "", w.message))));
+  }
+  const profile = bi.build.run && bi.build.run.profile;
+  const view = profile && (profile.types || {})[candidate.entity_type];
+  if (view && view.category) parts.push(bh("p", "bi-meta", "這個應用的說明：" + view.category));
+  if (candidate.outside_profile_type) {
+    parts.push(bh("p", "bi-warn", "這個類型不在這個應用的 profile 裡。"));
+  } else if ((candidate.outside_profile || []).length) {
+    parts.push(bh("p", "bi-warn", "這些欄位不在這個應用的 profile 裡："
+      + candidate.outside_profile.join("、")));
   }
   if (open && candidate.match === "ambiguous") {
     parts.push(bh("div", "bi-actions", biButton("新建", () => biBuildReview(candidate.id,

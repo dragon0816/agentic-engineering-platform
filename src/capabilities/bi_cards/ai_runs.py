@@ -27,7 +27,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog, extract, names, runs, source_markdown, vault_sources
+from capabilities.bi_cards import (
+    catalog,
+    extract,
+    names,
+    profile,
+    runs,
+    source_markdown,
+    vault_sources,
+)
 from capabilities.bi_cards.schema import Registry, norm_key
 from capabilities.bi_cards.staging import Staging, parse_kind
 from capabilities.bi_cards.store import BiStoreError
@@ -116,8 +124,14 @@ def start(
         schema = (reg, reg.ref)
     reg = schema[0]
     rules = _vault_rules(staging, folder or _folder_of(staging, source), skill_draft)
-    if rules is not None and types in (None, []) and rules["card_types"]:
+    chosen_types = types not in (None, [])  # a person's choice stands, marked in the review
+    if rules is not None and not chosen_types and rules["card_types"]:
         types = [t for t in rules["card_types"] if t in reg.types] or None
+    used = (rules.get("profile") or {}).get("types") if rules is not None else None
+    if used and not chosen_types:
+        types = [t for t in (types or used) if t in used and t in reg.types] or [
+            t for t in used if t in reg.types
+        ]
     scope = _types(reg, types)
     edited = isinstance(instructions, str) and instructions.strip()
     text = str(instructions).strip() if edited else extract.DEFAULT_INSTRUCTIONS
@@ -261,9 +275,9 @@ def _extract(
 
     canonical = names.from_store(staging.store)  # the cards' aliases (BI D2)
     # A vault's run reads its skills; elsewhere the method's instructions carry the rules.
-    notes = (
-        str(layout["skills"].get("text") or "") if isinstance(layout.get("skills"), dict) else ""
-    )
+    rules = layout["skills"] if isinstance(layout.get("skills"), dict) else {}
+    notes = str(rules.get("text") or "")
+    used_profile = rules.get("profile")
     result = extract.extract(
         model,
         alias,
@@ -278,6 +292,7 @@ def _extract(
         on_chunk=progress,
         domain_notes=notes,
         infer_relations=staging.store.vault_id is not None,
+        profile=used_profile,
     )
     found = staging.candidates(run_id) if only else []
     by_key = {_key(reg, c): c for c in found}
@@ -292,6 +307,9 @@ def _extract(
             by_key[key] = item
     checked = runs.apply_checks(list(by_key.values()), layout.get("checks"))
     merged = [runs.evaluate(staging.store, reg, c) for c in checked]
+    if used_profile:
+        for item in merged:
+            profile.mark_candidate(reg, item, used_profile)
     staging.put_candidates(run_id, merged)
     retried = set(only or [])
     kept = [f for f in layout.get("failures") or [] if int(f["chunk"]) not in retried]

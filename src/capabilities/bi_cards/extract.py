@@ -22,10 +22,11 @@ from __future__ import annotations
 import json
 import re
 import uuid
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
+from capabilities.bi_cards import profile as profile_rules
 from capabilities.bi_cards.schema import Registry, TypeDef, norm_key
 from common.execution import TraceIdentifiers
 from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequirements
@@ -233,22 +234,34 @@ def locate(quote: Any, chunk: Chunk) -> dict[str, int] | None:
 # -- the request -------------------------------------------------------------
 
 
-def describe_types(reg: Registry, types: Sequence[str]) -> str:
+def describe_types(
+    reg: Registry, types: Sequence[str], profile: Mapping[str, Any] | None = None
+) -> str:
+    """The types in scope and their fields; with a home's `profile`, only the fields
+    it uses, with its explanations (`BI_CARD_MODEL.md` §4.2)."""
     lines = []
     for name in types:
         entity = reg.types.get(name)
         if entity is None:
             continue
         lines.append(f"- {entity.name} ({entity.label}); its name field: {entity.naming_field}")
+        view = (profile.get("types") or {}).get(name) if profile else None
+        used = profile_rules.used_fields(entity, profile) if profile and view else None
+        if view and view.get("category"):
+            lines.append(f"    What this type means here: {view['category']}")
         for item in entity.fields:
-            if item.klass == "derived":
+            if item.klass == "derived" or (used is not None and item.name not in used):
                 continue
+            given = view["fields"].get(item.name) if view else None
             extra = ""
             if item.enum:
                 extra = f"; allowed: {', '.join(item.enum)}"
             elif item.is_link:
                 extra = f"; links to: {', '.join(item.link_to) or 'any type'}"
             many = " (list)" if item.is_list else ""
+            if given:
+                extra += f"; {given['use']} here"
+                extra += f"; {given['note']}" if given.get("note") else ""
             lines.append(f"    {item.name}: {item.label}, {item.kind}{many}{extra}")
     return "\n".join(lines)
 
@@ -318,6 +331,7 @@ def messages(
     problems: Sequence[str] = (),
     domain_notes: str = "",
     infer_relations: bool = False,
+    profile: Mapping[str, Any] | None = None,
 ) -> tuple[ModelMessage, ...]:
     graded = any(
         reg.types[name].get("evidence_grade") is not None for name in types if name in reg.types
@@ -330,7 +344,7 @@ def messages(
         else ""
     )
     system = (
-        SYSTEM.replace("{types}", describe_types(reg, types))
+        SYSTEM.replace("{types}", describe_types(reg, types, profile))
         .replace("{evidence}", evidence)
         .replace("{instructions}", instructions.strip() or "(none)")
         .replace("{domain_notes}", notes)
@@ -563,14 +577,21 @@ def merge(into: dict[str, Any], other: dict[str, Any]) -> None:
 
 
 def read_answer(
-    reg: Registry, types: Sequence[str], answer: dict[str, Any], chunk: Chunk, source_id: str
+    reg: Registry,
+    types: Sequence[str],
+    answer: dict[str, Any],
+    chunk: Chunk,
+    source_id: str,
+    profile: Mapping[str, Any] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
+    """The candidates of an answer. With a `profile`, a type the schema has and the
+    profile does not stays a candidate, marked for review afterwards, not dropped."""
     found: list[dict[str, Any]] = []
     warnings: list[dict[str, str]] = []
     for raw in answer.get("candidates") or []:
         type_name = str(raw.get("entity_type") or "")
         entity = reg.types.get(type_name)
-        if entity is None or type_name not in types:
+        if entity is None or (type_name not in types and profile is None):
             warnings.append(
                 {"code": "model_type_unknown", "message": f"模型提出的類型 {type_name} 不在範圍內"}
             )
@@ -609,6 +630,7 @@ def extract_chunk(
     max_attempts: int = MAX_ATTEMPTS,
     domain_notes: str = "",
     relations: list[dict[str, Any]] | None = None,
+    profile: Mapping[str, Any] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, str]], dict[str, Any] | None]:
     """(candidates, warnings, failure) for one chunk."""
     problems: list[str] = []
@@ -627,6 +649,7 @@ def extract_chunk(
                     problems,
                     domain_notes,
                     infer_relations=relations is not None,
+                    profile=profile,
                 ),
                 requirements=ModelRequirements(structured_output=True, local_only=local_only),
                 output_contract=OUTPUT_CONTRACT,
@@ -652,7 +675,7 @@ def extract_chunk(
         problems = _shape(answer)
         if not problems:
             assert isinstance(answer, dict)
-            found, warnings = read_answer(reg, types, answer, chunk, source_id)
+            found, warnings = read_answer(reg, types, answer, chunk, source_id, profile)
             if relations is not None:
                 inferred, unsupported = read_relations(reg, answer, chunk, source_id)
                 relations.extend(inferred)
@@ -689,6 +712,7 @@ def extract(
     on_chunk: Callable[[int, int], None] | None = None,
     domain_notes: str = "",
     infer_relations: bool = False,
+    profile: Mapping[str, Any] | None = None,
 ) -> Extraction:
     """Every chunk of `text` (or only the chunk indexes in `only`, to retry
     failed ones), merged into candidates."""
@@ -711,6 +735,7 @@ def extract(
             local_only=local_only,
             domain_notes=domain_notes,
             relations=result.relations if infer_relations else None,
+            profile=profile,
         )
         if failure is not None:
             result.failures.append(failure)

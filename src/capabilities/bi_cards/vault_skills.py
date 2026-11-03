@@ -24,7 +24,7 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-from capabilities.bi_cards import homes
+from capabilities.bi_cards import homes, profile
 from capabilities.bi_cards.schema import Registry
 from capabilities.bi_cards.store import BiStoreError
 from knowledge.repo import skills
@@ -297,4 +297,5 @@ def run_rules(repo: Repository, folder: str, draft: skills.Skill | None = None) 
         ],
         "card_types": card_types,
         "schema": _schema_ref(units),
+        **profile.rules_part(repo, folder, units),
     }
