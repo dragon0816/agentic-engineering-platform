@@ -38,6 +38,17 @@ def _ok(answer: Any) -> dict[str, Any]:
     return dict(payload)
 
 
+def _note(tmp_path: Path, card_id: str, body: dict[str, Any]) -> Any:
+    """A correction note: previewed, then confirmed as previewed."""
+    note = _ok(_call(tmp_path, "POST", "/api/bi/corrections/preview", {**body, "card": card_id}))
+    return _call(
+        tmp_path,
+        "POST",
+        "/api/bi/corrections/apply",
+        {"dataset": body["dataset"], "text": note["text"], "base_version": note["base_version"]},
+    )
+
+
 def _source(tmp_path: Path, text: str = TECH_CSV, name: str = "tech.csv") -> str:
     answer = _ok(
         _call(tmp_path, "POST", "/api/bi/sources", {"dataset": "demo", "name": name, "text": text})
@@ -164,10 +175,9 @@ def test_a_card_changed_after_review_stops_the_whole_commit(tmp_path: Path) -> N
     _accept_all(tmp_path, run["id"])
     card = _card(tmp_path, "EtherCAT")
     _ok(
-        _call(
+        _note(
             tmp_path,
-            "POST",
-            f"/api/bi/cards/{card['card']['id']}/field",
+            card["card"]["id"],
             {
                 "dataset": "demo",
                 "field": "maturity",
@@ -360,10 +370,9 @@ def _card_with_proposal(tmp_path: Path) -> dict[str, Any]:
     _ok(_commit(tmp_path, first["id"]))
     card = _card(tmp_path, "EtherCAT")
     _ok(
-        _call(
+        _note(
             tmp_path,
-            "POST",
-            f"/api/bi/cards/{card['card']['id']}/field",
+            card["card"]["id"],
             {
                 "dataset": "demo",
                 "field": "maturity",

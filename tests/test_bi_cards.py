@@ -389,26 +389,52 @@ def test_9_the_procedure_scopes_gaps_cites_cards_and_judges_priority() -> None:
     assert manifest.metadata.identity == BI_SKILL and manifest.instructions == PROCEDURE
 
 
-# -- edits, undo, demo -----------------------------------------------------
+# -- correction notes, undo, demo --------------------------------------------
 
 
-def test_a_stale_edit_is_refused_with_the_current_value(tmp_path: Path) -> None:
+def _note(tmp_path: Path, card_id: str, body: dict[str, Any]) -> Any:
+    """A correction note: previewed, then confirmed as previewed."""
+    status, note = _call(tmp_path, "POST", "/api/bi/corrections/preview", {**body, "card": card_id})
+    if status != 200:
+        return status, note
+    return _call(
+        tmp_path,
+        "POST",
+        "/api/bi/corrections/apply",
+        {"dataset": body["dataset"], "text": note["text"], "base_version": note["base_version"]},
+    )
+
+
+def test_the_field_route_is_gone(tmp_path: Path) -> None:
     store = _loaded(tmp_path)
     card = store.find("Competitor", "Keysight")
     assert card is not None
-    path = f"/api/bi/cards/{card['id']}/field"
-    body = {"dataset": "demo", "field": "ticker", "value": "KEYS2", "base_version": 1}
-    status, answer = _call(tmp_path, "POST", path, {**body, "reason": ""})
-    assert (status, answer) == (200, {"ok": True, "version": 2})
-    status, answer = _call(tmp_path, "POST", path, {**body, "value": "OTHER"})
-    assert status == 409
-    assert answer["ok"] is False and answer["code"] == "stale_edit"
-    assert answer["current"] == "KEYS2" and answer["by"] == f"{ACTOR} via web" and answer["at"]
-    # A judgement field needs a reason (ADR-K11).
+    before = store.fields(card["id"])
     status, answer = _call(
         tmp_path,
         "POST",
-        path,
+        f"/api/bi/cards/{card['id']}/field",
+        {"dataset": "demo", "field": "ticker", "value": "X", "base_version": 1, "reason": "r"},
+    )
+    assert (status, answer["code"]) == (404, "route_unknown")
+    assert store.fields(card["id"]) == before
+
+
+def test_a_stale_note_is_refused_with_the_current_value(tmp_path: Path) -> None:
+    store = _loaded(tmp_path)
+    card = store.find("Competitor", "Keysight")
+    assert card is not None
+    body = {"dataset": "demo", "field": "ticker", "value": "KEYS2", "base_version": 1}
+    status, answer = _note(tmp_path, card["id"], {**body, "reason": "r"})
+    assert status == 200 and answer["ok"] is True and answer["version"] == 2
+    status, answer = _note(tmp_path, card["id"], {**body, "value": "OTHER", "reason": "r"})
+    assert status == 409
+    assert answer["ok"] is False and answer["code"] == "stale_edit"
+    assert answer["current"] == "KEYS2" and answer["by"] == f"{ACTOR} via web" and answer["at"]
+    # A judgement field needs a reason (ADR-K11), and so does every note.
+    status, answer = _note(
+        tmp_path,
+        card["id"],
         {"dataset": "demo", "field": "pricing_position", "value": "par", "base_version": 2},
     )
     assert status == 400 and answer["code"] == "reason_required"
@@ -417,7 +443,7 @@ def test_a_stale_edit_is_refused_with_the_current_value(tmp_path: Path) -> None:
     assert set(history["history"][-1]) >= {"field", "old", "new", "source", "at", "by"}
 
 
-def test_saving_a_field_with_the_value_it_has_is_no_change(tmp_path: Path) -> None:
+def test_a_note_with_the_value_it_has_is_no_change(tmp_path: Path) -> None:
     """Live test 2026-10-24, owner decision: the current value again is no
     edit: 200 with `unchanged: true`, the same version, no history entry, the
     field's source kept and the published snapshot byte for byte the same.
@@ -451,10 +477,9 @@ def test_saving_a_field_with_the_value_it_has_is_no_change(tmp_path: Path) -> No
         (competitor, "recent_moves", []),
     ]
     for card, field, value in same_values:
-        status, answer = _call(
+        status, answer = _note(
             tmp_path,
-            "POST",
-            f"/api/bi/cards/{card['id']}/field",
+            card["id"],
             {
                 "dataset": "demo",
                 "field": field,
@@ -475,11 +500,10 @@ def test_saving_a_field_with_the_value_it_has_is_no_change(tmp_path: Path) -> No
         assert now["version"] == (trend if cid == trend["id"] else competitor)["version"]
     assert build_snapshot(store) == before
 
-    # A different value is still an edit, with a new version and history.
-    status, answer = _call(
+    # A different value is still a change, with a new version and history.
+    status, answer = _note(
         tmp_path,
-        "POST",
-        f"/api/bi/cards/{trend['id']}/field",
+        trend["id"],
         {
             "dataset": "demo",
             "field": "stage",
@@ -488,7 +512,7 @@ def test_saving_a_field_with_the_value_it_has_is_no_change(tmp_path: Path) -> No
             "reason": "moved",
         },
     )
-    assert (status, answer) == (200, {"ok": True, "version": trend["version"] + 1})
+    assert status == 200 and answer["ok"] is True and answer["version"] == trend["version"] + 1
     assert len(store.history(trend["id"])) == len(histories[trend["id"]]) + 1
 
 

@@ -275,9 +275,13 @@ def test_a_value_a_person_set_stays_theirs(tmp_path: Path) -> None:
     _merge(ws, dataset, "a.md", BASE_A)
     card = BiStore(ws, dataset).find("Technology", "FAKE-MERGE")
     assert card is not None
-    _ok(_call(ws, "POST", f"/api/bi/cards/{card['id']}/field",
-              {"dataset": dataset, "field": "standard_body", "value": "PERSON",
-               "base_version": card["version"]}, actor="alice"))  # fmt: skip
+    note = _ok(_call(ws, "POST", "/api/bi/corrections/preview",
+                     {"dataset": dataset, "card": card["id"], "field": "standard_body",
+                      "value": "PERSON", "base_version": card["version"], "reason": "r"},
+                     actor="alice"))  # fmt: skip
+    _ok(_call(ws, "POST", "/api/bi/corrections/apply",
+              {"dataset": dataset, "text": note["text"], "base_version": card["version"]},
+              actor="alice"))  # fmt: skip
     answer, done = _merge(ws, dataset, "b.md", BASE_B)
     assert _row(answer, "Technology", "FAKE-MERGE")["merge"]["human_kept"] == ["standard_body"]
     assert done["applied"]["proposals"] == 1

@@ -49,7 +49,7 @@ import json
 import re
 import sqlite3
 import uuid
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -1156,9 +1156,13 @@ class BiStore:
         actor: str,
         at: str,
         reason: str,
+        *,
+        ref: str | None = None,
+        import_id: str | None = None,
     ) -> None:
         """A person's value, its history row, and the proposals it settles."""
         new = _dump(value)
+        ref = ref or f"agent-web:{actor}"
         old_source = (
             None if stored is None else _dump({k: stored[k] for k in ("kind", "ref", "by", "at")})
         )
@@ -1168,19 +1172,20 @@ class BiStore:
             db.execute(
                 "INSERT OR REPLACE INTO fields (card_id, field, value, kind, ref, by, at) "
                 "VALUES (?, ?, ?, 'human', ?, ?, ?)",
-                (card_id, field, new, f"agent-web:{actor}", actor, at),
+                (card_id, field, new, ref, actor, at),
             )
         db.execute(
-            "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, reason, "
-            "old_source) VALUES (?, ?, ?, ?, 'human', ?, ?, ?, ?, ?)",
+            "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, import_id, "
+            "reason, old_source) VALUES (?, ?, ?, ?, 'human', ?, ?, ?, ?, ?, ?)",
             (
                 card_id,
                 field,
                 None if stored is None else stored["value"],
                 None if value is None else new,
-                f"agent-web:{actor}",
+                ref,
                 actor,
                 at,
+                import_id,
                 reason,
                 old_source,
             ),
@@ -1276,46 +1281,160 @@ class BiStore:
         actor: str,
         reason: str = "",
     ) -> int:
-        """A person's edit; refused as `stale_edit` when the card moved on.
+        """A person's value, internally: accepting a proposal, or a migration they
+        confirmed. Refused as `stale_edit` when the card moved on.
 
         Returns the card's new version. The current value again (compared as
         stored JSON, as an import compares) is no change (owner 2026-10-24):
         nothing is written and the version returned is `base_version`."""
-        at = now()
         self.refuse_write()
         if not self.exists:
             raise BiStoreError("card_unknown", "找不到這張卡片")
         with self._db(write=True) as db:
+            return self._write_field(
+                db,
+                card_id,
+                field,
+                value,
+                base_version=base_version,
+                actor=actor,
+                reason=reason,
+                ref=f"agent-web:{actor}",
+                at=now(),
+            )
+
+    def correct(
+        self,
+        card_id: str,
+        field: str,
+        value: Any,
+        *,
+        base_version: int,
+        actor: str,
+        reason: str,
+        ref: str,
+        run_id: str,
+        evidence: Mapping[str, Any],
+    ) -> tuple[int, str]:
+        """Write a correction note's value with its evidence, in one transaction. It
+        is an import of one value, so a vault commits it at once and it can be undone.
+        The caller has already turned away a note that changes nothing."""
+        self.refuse_write()
+        at = now()
+        import_id = uuid.uuid4().hex[:12]
+        with self._db(write=True) as db:
             card = db.execute("SELECT * FROM cards WHERE id = ?", (card_id,)).fetchone()
             if card is None:
                 raise BiStoreError("card_unknown", "找不到這張卡片")
-            stored = db.execute(
-                "SELECT * FROM fields WHERE card_id = ? AND field = ?", (card_id, field)
-            ).fetchone()
-            if int(card["version"]) != int(base_version):
-                last = db.execute(
-                    "SELECT by, at FROM history WHERE card_id = ? ORDER BY seq DESC LIMIT 1",
-                    (card_id,),
-                ).fetchone()
-                raise BiStoreError(
-                    "stale_edit",
-                    "這張卡片在你開啟後已被修改，請重新載入",
-                    current=None if stored is None else _load(stored["value"]),
-                    by=(stored["by"] if stored is not None else (last["by"] if last else "")),
-                    at=(stored["at"] if stored is not None else (last["at"] if last else "")),
-                    version=int(card["version"]),
-                )
-            new = _dump(value)
-            if (stored is None and value is None) or (
-                stored is not None and value is not None and stored["value"] == new
-            ):
-                return int(card["version"])
-            self._write_person_value(db, card_id, field, value, stored, actor, at, reason)
-            version = int(card["version"]) + 1
             db.execute(
-                "UPDATE cards SET version = ?, updated = ? WHERE id = ?", (version, at, card_id)
+                "INSERT INTO imports (id, filename, entity_type, at, by, run_id) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (import_id, ref, card["entity_type"], at, actor, run_id),
             )
-            return version
+            version = self._write_field(
+                db,
+                card_id,
+                field,
+                value,
+                base_version=base_version,
+                actor=actor,
+                reason=reason,
+                ref=ref,
+                at=at,
+                import_id=import_id,
+            )
+            db.execute(
+                "INSERT INTO evidence (card_id, field, run_id, source_id, source_name, "
+                "locator, excerpt, basis, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    card_id,
+                    field,
+                    run_id,
+                    str(evidence.get("source_id") or ""),
+                    str(evidence.get("source_name") or ""),
+                    _dump(evidence.get("locator") or {}),
+                    str(evidence.get("excerpt") or ""),
+                    str(evidence.get("basis") or "human"),
+                    at,
+                ),
+            )
+            return version, import_id
+
+    def refuse_moved(self, card_id: str, field: str, base_version: int) -> None:
+        """`stale_edit` when the card is no longer at the version the person saw."""
+        with self._db() as db:
+            card = db.execute("SELECT * FROM cards WHERE id = ?", (card_id,)).fetchone()
+            if card is None:
+                raise BiStoreError("card_unknown", "找不到這張卡片")
+            self._refuse_stale(db, card, field, base_version)
+
+    def first_home(self, card_id: str) -> str | None:
+        """The first home a card has evidence from (`card_app_folders`), if any."""
+        with self._db() as db:
+            if not db.execute(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'card_app_folders'"
+            ).fetchone():
+                return None  # a dataset not written since the card model
+            row = db.execute(
+                "SELECT application FROM card_app_folders WHERE card_id = ? "
+                "ORDER BY application LIMIT 1",
+                (card_id,),
+            ).fetchone()
+            return None if row is None else str(row[0])
+
+    def _refuse_stale(
+        self, db: sqlite3.Connection, card: sqlite3.Row, field: str, base_version: int
+    ) -> None:
+        if int(card["version"]) == int(base_version):
+            return
+        stored = db.execute(
+            "SELECT * FROM fields WHERE card_id = ? AND field = ?", (card["id"], field)
+        ).fetchone()
+        last = db.execute(
+            "SELECT by, at FROM history WHERE card_id = ? ORDER BY seq DESC LIMIT 1",
+            (card["id"],),
+        ).fetchone()
+        raise BiStoreError(
+            "stale_edit",
+            "這張卡片在你開啟後已被修改，請重新載入",
+            current=None if stored is None else _load(stored["value"]),
+            by=(stored["by"] if stored is not None else (last["by"] if last else "")),
+            at=(stored["at"] if stored is not None else (last["at"] if last else "")),
+            version=int(card["version"]),
+        )
+
+    def _write_field(
+        self,
+        db: sqlite3.Connection,
+        card_id: str,
+        field: str,
+        value: Any,
+        *,
+        base_version: int,
+        actor: str,
+        reason: str,
+        ref: str,
+        at: str,
+        import_id: str | None = None,
+    ) -> int:
+        card = db.execute("SELECT * FROM cards WHERE id = ?", (card_id,)).fetchone()
+        if card is None:
+            raise BiStoreError("card_unknown", "找不到這張卡片")
+        self._refuse_stale(db, card, field, base_version)
+        stored = db.execute(
+            "SELECT * FROM fields WHERE card_id = ? AND field = ?", (card_id, field)
+        ).fetchone()
+        new = _dump(value)
+        if (stored is None and value is None) or (
+            stored is not None and value is not None and stored["value"] == new
+        ):
+            return int(card["version"])
+        self._write_person_value(
+            db, card_id, field, value, stored, actor, at, reason, ref=ref, import_id=import_id
+        )
+        version = int(card["version"]) + 1
+        db.execute("UPDATE cards SET version = ?, updated = ? WHERE id = ?", (version, at, card_id))
+        return version
 
     def undo_import(self, import_id: str, *, actor: str) -> None:
         """Undo a whole import: restore each field it changed (unless a person

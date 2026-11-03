@@ -137,8 +137,12 @@ def test_edits_proposals_and_undo_keep_the_index_current(
         "field": "new_test_requirements",
         "value": ["封包排程驗證"],
         "base_version": tsn["card"]["version"],
+        "reason": "FAE 確認",
+        "card": tsn["card"]["id"],
     }
-    _ok(_call(tmp_path, "POST", f"/api/bi/cards/{tsn['card']['id']}/field", edit))
+    note = _ok(_call(tmp_path, "POST", "/api/bi/corrections/preview", edit))
+    apply = {"dataset": "demo", "text": note["text"], "base_version": note["base_version"]}
+    _ok(_call(tmp_path, "POST", "/api/bi/corrections/apply", apply))
     assert _names(_search(tmp_path, "封包排程")) == ["TSN"]
     assert _search(tmp_path, "802.1AS")["cards"] == []
     # Searching is unchanged in `service.search` (the cards page).

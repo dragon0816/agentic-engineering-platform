@@ -58,6 +58,7 @@ from capabilities.bi_cards import (
     analysis_session,
     board,
     catalog,
+    correction,
     importer,
     methods,
     migrate,
@@ -385,6 +386,8 @@ def _route(
         done = page_import.apply(store, pending_pages, actor=who, folder=given.get("folder"))
         page_import.forget(pending_pages.preview_id)
         return 200, {"ok": True, **done}
+    if path in ("/api/bi/corrections/preview", "/api/bi/corrections/apply"):
+        return _correction(workspace, who, path.rpartition("/")[2], given)
     if path == "/api/bi/import/undo":
         store = BiStore(workspace, _dataset(given.get("dataset")))
         store.undo_import(str(given.get("import_id") or ""), actor=who)
@@ -453,8 +456,6 @@ def _route(
             return 200, {"ok": True, **done}
     if len(parts) >= 6 and parts[:4] == ["", "api", "bi", "runs"]:
         return _run_action(workspace, who, parts[4], parts[5:], given, ai)
-    if len(parts) == 6 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "field":
-        return _set_field(workspace, who, parts[4], given)
     if len(parts) == 6 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "rename":
         return _rename_card(workspace, who, parts[4], given)
     if len(parts) == 7 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "proposals":
@@ -775,7 +776,7 @@ def _decide_proposal(
         return 200, {"ok": True, "version": int(card["version"]) if card is not None else 0}
     if action != "accept":
         return _error(400, "action_invalid", "action 只能是 accept 或 reject")
-    return _set_field(
+    return _accept_value(
         workspace,
         who,
         card_id,
@@ -906,70 +907,42 @@ def _rename_card(workspace: Path, who: str, card_id: str, given: dict[str, Any])
     return 200, {"ok": True, "version": version, "id": card_id, "name": name}
 
 
-def _set_field(workspace: Path, who: str, card_id: str, given: dict[str, Any]) -> Answer:
+def _correction(workspace: Path, who: str, action: str, given: dict[str, Any]) -> Answer:
+    """A correction note (design §5.2), the only way a person changes a value."""
+    store = BiStore(workspace, _dataset(given.get("dataset")))
+    step = correction.preview if action == "preview" else correction.apply
+    try:
+        return 200, {"ok": True, **step(store, given, actor=who)}
+    except BiStoreError as failure:
+        if failure.code in correction.BAD_NOTE:
+            return _error(400, failure.code, failure.message)
+        raise
+
+
+def _accept_value(workspace: Path, who: str, card_id: str, given: dict[str, Any]) -> Answer:
+    """Accepting a proposal: review confirms a sourced difference, so it writes as
+    the person's, with a stale check and a reason for a judgement field."""
     store = BiStore(workspace, _dataset(given.get("dataset")))
     card = store.card(card_id)
     if card is None:
         return _error(404, "card_unknown", "找不到這張卡片")
     reg = catalog.for_store(store)
-    try:
-        entity = reg.type(card["entity_type"])
-    except KeyError:
-        return _error(400, "type_unknown", f"schema 沒有類型 {card['entity_type']}")
     name = str(given.get("field") or "")
-    item = entity.get(name)
-    if item is None:
-        return _error(400, "field_unknown", f"{entity.name} 沒有欄位 {name}")
-    if item.klass == "derived":
-        return _error(400, "field_derived", f"{item.label} 是推導欄位，不能直接修改")
     base = given.get("base_version")
-    if not isinstance(base, int):
-        return _error(400, "base_version_missing", "需要 base_version")
     reason = str(given.get("reason") or "").strip()
-    if item.klass == "judgement" and not reason:
-        return _error(400, "reason_required", f"{item.label} 是判斷欄位，修改時必須寫理由")
-    raw = given.get("value")
-    value: Any
-    if raw is None or raw == "" or raw == []:
-        value = None
-    elif isinstance(raw, list):
-        if not item.is_list:
-            return _error(400, "value_invalid", f"{item.label} 不是清單欄位")
-        if item.enum:
-            # A list with allowed values (BI vault V9) takes only those values.
-            value, problems = reg.normalize(item, "；".join(str(x) for x in raw))
-            if problems:
-                return _error(400, "value_invalid", problems[0][1])
-        else:
-            value = _list_value(reg, item, raw)
-    else:
-        value, problems = reg.normalize(item, str(raw))
-        if value is None:
-            message = problems[0][1] if problems else f"{item.label} 的值無法採用"
-            return _error(400, "value_invalid", message)
+    try:
+        item = correction.checked_field(reg, card["entity_type"], name)
+        if not isinstance(base, int):
+            raise BiStoreError("base_version_missing", "需要 base_version")
+        if item.klass == "judgement" and not reason:
+            raise BiStoreError("reason_required", f"{item.label} 是判斷欄位，修改時必須寫理由")
+        value = correction.checked_value(reg, item, given.get("value"))
+    except BiStoreError as failure:
+        return _error(400, failure.code, failure.message)
     version = store.set_field(card_id, name, value, base_version=base, actor=who, reason=reason)
     if version == base:
-        # The value it already has (owner 2026-10-24): no new version, no history.
         return 200, {"ok": True, "version": version, "unchanged": True}
     return 200, {"ok": True, "version": version}
-
-
-def _list_value(reg: Any, item: Any, raw: list[Any]) -> list[str] | None:
-    """A list edit's items, stripped; a domain item in its canonical spelling
-    (as an import stores it), so the same domains in other case or an alias
-    compare equal. An item the schema does not know is kept as typed."""
-    values: list[str] = []
-    for given in raw:
-        text = str(given).strip()
-        if not text:
-            continue
-        if item.name == "domain":
-            known, _ = reg.normalize(item, text)
-            if isinstance(known, list) and len(known) == 1:
-                text = str(known[0])
-        if text not in values or item.name != "domain":
-            values.append(text)
-    return values or None
 
 
 # -- publishing to the Shared Platform (BI dataset sharing slice 1) ----------
