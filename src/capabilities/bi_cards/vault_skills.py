@@ -260,11 +260,18 @@ def _runnable(repo: Repository, name: str, units: Mapping[str, Any]) -> skills.S
         raise BiStoreError(failure.code, failure.message, **failure.detail) from None
 
 
-def run_rules(repo: Repository, folder: str, draft: skills.Skill | None = None) -> dict[str, Any]:
+def run_rules(
+    repo: Repository,
+    folder: str,
+    draft: skills.Skill | None = None,
+    reg: Registry | None = None,
+) -> dict[str, Any]:
     """The skills an AI run of a source in `folder` uses: their text for the
     prompt, which revisions they are, and the extract skill's card types.
     `draft` (the skill AI trying a rule, BI T2) stands in for the skill of its
-    name, or is the extract skill of a folder it applies to; nothing is staged."""
+    name, or is the extract skill of a folder it applies to; nothing is staged.
+    Under a profile the model sees only the profile's types, so the generated classify
+    skill, which lists them all, stays out (`reg` tells it from one a person edited)."""
     units = repo.working_units()
     used: list[skills.Skill] = []
     if skills.skill_unit(CLASSIFY) in units:
@@ -281,6 +288,10 @@ def run_rules(repo: Repository, folder: str, draft: skills.Skill | None = None) 
             used = [draft if s.unit_name == draft.unit_name else s for s in used]
         elif applies:
             used = [s for s in used if s.role != "extract"] + [draft]
+    from_profile = profile.rules_part(repo, folder, units)
+    if from_profile.get("profile") and reg is not None:
+        generated = classify_body(reg, _segments(units), _library(units)).strip()
+        used = [s for s in used if s.role != "classify" or s.body.strip() != generated]
     parts = [
         f"{'Classification' if s.role == 'classify' else 'Extraction'} "
         f"(skill {s.unit_name}, revision {s.revision}):\n{s.body.strip()}"
@@ -297,5 +308,5 @@ def run_rules(repo: Repository, folder: str, draft: skills.Skill | None = None) 
         ],
         "card_types": card_types,
         "schema": _schema_ref(units),
-        **profile.rules_part(repo, folder, units),
+        **from_profile,
     }

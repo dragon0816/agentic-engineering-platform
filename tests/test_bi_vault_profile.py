@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -411,3 +412,38 @@ def test_publish_reports_what_a_profile_requires_and_never_blocks(tmp_path: Path
     )
     assert done["profile_required_missing"] == []
     assert done["published"]["tag"] == "v1"
+
+
+def test_under_a_profile_the_generated_classify_skill_stays_out(tmp_path: Path) -> None:
+    """Found on a real model: it lists every type, and says to use only those."""
+    from capabilities.bi_cards import vault_skills
+    from capabilities.bi_cards.store import BiStore
+    from knowledge.repo import skills
+
+    _, vault_id, dataset, a, _ = _two_pcs(tmp_path)
+    repo = vault.Vault(a, vault_id).repo
+    reg = catalog.for_store(BiStore(a, dataset))
+    folder = "applications/aidc/sources"
+    assert "Battlecard" in vault_skills.run_rules(repo, folder, None, reg)["text"]
+
+    document = {
+        "format": "aep.bi.profile/v1",
+        "application": "aidc",
+        "types": {"TestSolution": {"fields": {"name": {"use": "required"}}}},
+    }
+    _ok(
+        _call(
+            a, "POST", f"/api/bi/vaults/{vault_id}/profiles", {"home": "aidc", "profile": document}
+        )
+    )
+    rules = vault_skills.run_rules(repo, folder, None, reg)
+    assert "Battlecard" not in rules["text"]
+    assert [s for s in rules["skills"] if s["role"] == "classify"] == []
+
+    # One a person edited holds their rules, so it stays.
+    current = vault_skills.classify_skill(reg, vault_skills._segments(repo.working_units()),
+                                          vault_skills._library(repo.working_units()))  # fmt: skip
+    edited = replace(current, revision=2, body=current.body + "\n先看來源的日期。")
+    skills.stage_skill(repo, edited)
+    rules = vault_skills.run_rules(repo, folder, None, reg)
+    assert "先看來源的日期" in rules["text"]

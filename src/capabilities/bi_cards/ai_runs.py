@@ -197,6 +197,7 @@ def _vault_rules(staging: Staging, folder: Any, draft: Any = None) -> dict[str, 
         vault.Vault(staging.store.workspace, vault_id).repo,
         vault_skills.checked_folder(folder),
         draft,
+        catalog.for_store(staging.store),
     )
 
 
