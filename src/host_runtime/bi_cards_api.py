@@ -61,6 +61,7 @@ from capabilities.bi_cards import (
     importer,
     methods,
     migrate,
+    names,
     page_import,
     quality,
     questions_session,
@@ -454,6 +455,8 @@ def _route(
         return _run_action(workspace, who, parts[4], parts[5:], given, ai)
     if len(parts) == 6 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "field":
         return _set_field(workspace, who, parts[4], given)
+    if len(parts) == 6 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "rename":
+        return _rename_card(workspace, who, parts[4], given)
     if len(parts) == 7 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "proposals":
         return _decide_proposal(workspace, who, parts[4], parts[6], given)
     return _error(404, "route_unknown", "沒有這個 BI 路徑")
@@ -784,6 +787,7 @@ def _decide_proposal(
 #: Store refusals that are conflicts with the current state (409).
 CONFLICTS = {
     "stale_edit",
+    "name_taken",
     "analysis_stale",
     "cards_changed",
     "run_trial",
@@ -853,6 +857,48 @@ def _create_dataset(workspace: Path, given: dict[str, Any]) -> Answer:
             "read_only": False,
         },
     }
+
+
+def _rename_card(workspace: Path, who: str, card_id: str, given: dict[str, Any]) -> Answer:
+    """Rename a vault's card; its id stays (`docs/phases/BI_CARD_MODEL.md` §3.1)."""
+    store = BiStore(workspace, _dataset(given.get("dataset")))
+    if store.vault_id is None:
+        return _error(400, "rename_vault_only", "只有共用知識庫的卡片能改名")
+    card = store.card(card_id)
+    if card is None:
+        return _error(404, "card_unknown", "找不到這張卡片")
+    entity = catalog.for_store(store).type(card["entity_type"])
+    base = given.get("base_version")
+    if not isinstance(base, int):
+        return _error(400, "base_version_missing", "需要 base_version")
+    reason = str(given.get("reason") or "").strip()
+    if not reason:
+        return _error(400, "reason_required", "改名要寫理由")
+    name = str(given.get("name") or "").strip()
+    if not name:
+        return _error(400, "name_missing", "需要新的名字")
+    fields = store.fields(card_id)
+    raw_values = given.get("values")
+    given_values = raw_values if isinstance(raw_values, dict) else {}
+    values = {
+        part: given_values.get(part, (fields.get(part) or {}).get("value"))
+        for part in entity.naming
+    }
+    values[entity.naming_field] = name
+    key = importer.canonical_key(entity, values)
+    if not key:
+        return _error(400, "name_missing", "命名欄位不能是空的")
+    version = store.rename_card(
+        card_id,
+        key=key,
+        name=name,
+        values=values,
+        alias=entity.get(names.FIELD) is not None,
+        base_version=base,
+        actor=who,
+        reason=reason,
+    )
+    return 200, {"ok": True, "version": version, "id": card_id, "name": name}
 
 
 def _set_field(workspace: Path, who: str, card_id: str, given: dict[str, Any]) -> Answer:

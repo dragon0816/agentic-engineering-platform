@@ -20,7 +20,8 @@ A vault registered on this PC is the dataset `vault-<vault id>` (registry
     import:<import id>           {"filename", "entity_type", "at", "by", "run_id", "undone"}
     decision:<key>               {"status"}: a person's decision on a replay conflict
 
-A card id is `card_id_for(type, key)`, the same on every PC. `bi.sqlite` holds
+A card id is `card_id_for(type, key)` at its creation, the same on every PC, and
+never changes: a rename keeps it (`docs/phases/BI_CARD_MODEL.md` §3.1). `bi.sqlite` holds
 the working state (the head, this PC's local commits and its uncommitted
 changes): every store write runs on it inside a transaction that is always
 rolled back (`capture`), the units it changed are staged in the working copy,
@@ -50,6 +51,7 @@ from capabilities.bi_cards import (
     analyses,
     card_model,
     catalog,
+    names,
     schema_doc,
     vault_checks,
     vault_skills,
@@ -195,6 +197,17 @@ def _repo_errors() -> Iterator[None]:
 # -- the BI type -------------------------------------------------------------------
 
 
+def _same_keys(units: Mapping[str, Any]) -> set[tuple[str, str]]:
+    """The (type, key) held by more than one card."""
+    seen: set[tuple[str, str]] = set()
+    same: set[tuple[str, str]] = set()
+    for key, value in units.items():
+        if key.startswith("card:") and isinstance(value, dict):
+            slot = (str(value.get("type")), str(value.get("key")))
+            (same if slot in seen else seen).add(slot)
+    return same
+
+
 class BiType:
     """The `bi` repository type: card units and their checks."""
 
@@ -245,10 +258,14 @@ class BiType:
             and repo_engine.canonical(before.get(k)) != repo_engine.canonical(after.get(k))
         )
         notes = [f"新增 {added} 張卡、刪除 {removed} 張卡、改了 {changed} 個欄位"]
+        blocking = [
+            f"兩張 {kind} 卡片都叫「{key}」，請先把其中一張改名"
+            for kind, key in sorted(_same_keys(after) - _same_keys(before))
+        ]
         if self.benchmark is None:
-            return CheckReport(blocking=[], notes=notes)
+            return CheckReport(blocking=blocking, notes=notes)
         gate = self.benchmark(before, after)
-        return CheckReport(blocking=list(gate.blocking), notes=[*notes, *gate.notes])
+        return CheckReport(blocking=[*blocking, *gate.blocking], notes=[*notes, *gate.notes])
 
 
 BI_TYPE = BiType()
@@ -280,8 +297,9 @@ def _history_value(row: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
-def units_from_db(db: sqlite3.Connection) -> dict[str, Any]:
-    """The units a BI database holds (card ids normalised to `card_id_for`)."""
+def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str, Any]:
+    """The units a BI database holds. A vault's database keeps its card ids
+    (`keep_ids`); a dataset becoming a vault gets them from `card_id_for`."""
     db.row_factory = sqlite3.Row
     tables = _tables(db)
     units: dict[str, Any] = {}
@@ -298,14 +316,21 @@ def units_from_db(db: sqlite3.Connection) -> dict[str, Any]:
             "undone": bool(r["undone"]),
         }
     ids: dict[str, str] = {}
+    former: dict[str, list[str]] = {}
+    if "card_names" in tables:
+        for r in db.execute("SELECT * FROM card_names WHERE kind = 'former' ORDER BY name"):
+            former.setdefault(r["card_id"], []).append(r["name"])
     for r in db.execute("SELECT * FROM cards"):
-        cid = card_id_for(r["entity_type"], r["canonical_key"])
+        # The key as its unit holds it: a lost key shows with a suffix (`_card_keys`).
+        card_key = str(r["canonical_key"]).removesuffix(f"#{r['id']}")
+        cid = r["id"] if keep_ids else card_id_for(r["entity_type"], card_key)
         ids[r["id"]] = cid
         units[f"card:{cid}"] = {
             "type": r["entity_type"],
-            "key": r["canonical_key"],
+            "key": card_key,
             "name": r["name"],
             "synthetic": bool(r["synthetic"]),
+            **({"former_keys": former[r["id"]]} if r["id"] in former else {}),
         }
     latest = {
         (r["card_id"], r["field"]): _history_value(r)
@@ -427,6 +452,24 @@ def _field_history(
     return rows, cards
 
 
+def _card_keys(units: Mapping[str, Any], info: Mapping[str, Mapping[str, Any]]) -> dict[str, str]:
+    """Each card's key in `cards`. Two PCs can give two cards one key (rename X to
+    Y while the other creates Y). The card created first keeps it, on every PC;
+    the other shows as `<key>#<id>` until a person renames it."""
+    keys: dict[str, str] = {}
+    seen: set[tuple[str, str]] = set()
+    order = sorted(
+        (str(info.get(k[5:], {}).get("created") or ""), k[5:], v)
+        for k, v in units.items()
+        if k.startswith("card:")
+    )
+    for _, cid, value in order:
+        slot = (str(value["type"]), str(value["key"]))
+        keys[cid] = slot[1] if slot not in seen else f"{slot[1]}#{cid}"
+        seen.add(slot)
+    return keys
+
+
 def materialize(
     db: sqlite3.Connection,
     units: Mapping[str, Any],
@@ -463,18 +506,25 @@ def materialize(
                     ),
                 )
         stamp = now()
+        card_keys = _card_keys(units, info)
         for key, value in sorted(units.items()):
             if not key.startswith("card:"):
                 continue
             cid = key[5:]
             card = info.get(cid, {})
+            for name in value.get("former_keys") or ():
+                db.execute(
+                    "INSERT OR IGNORE INTO card_names (card_id, name, kind) "
+                    "VALUES (?, ?, 'former')",
+                    (cid, name),
+                )
             db.execute(
                 "INSERT INTO cards (id, entity_type, canonical_key, name, version, synthetic, "
                 "created, updated, created_by_import) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     cid,
                     value["type"],
-                    value["key"],
+                    card_keys[cid],
                     value["name"],
                     1 + len(card.get("groups", ())),
                     int(bool(value.get("synthetic"))),
@@ -489,6 +539,13 @@ def materialize(
                 _, cid, name = key.split(":", 2)
                 if cid not in present:
                     continue
+                if name == names.FIELD:
+                    held = value["value"] if isinstance(value["value"], list) else [value["value"]]
+                    db.executemany(
+                        "INSERT OR IGNORE INTO card_names (card_id, name, kind) "
+                        "VALUES (?, ?, 'alias')",
+                        [(cid, str(a)) for a in held if str(a).strip()],
+                    )
                 source = value.get("source") or {}
                 db.execute(
                     "INSERT INTO fields (card_id, field, value, kind, ref, by, at) "
@@ -848,9 +905,9 @@ class Vault:
             connection = sqlite3.connect(self.db_path)
             connection.row_factory = sqlite3.Row
             try:
-                before = units_from_db(connection)
+                before = units_from_db(connection, keep_ids=True)
                 yield connection
-                after = units_from_db(connection)
+                after = units_from_db(connection, keep_ids=True)
             finally:
                 connection.rollback()
                 connection.close()

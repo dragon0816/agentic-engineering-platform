@@ -748,6 +748,12 @@ class BiStore:
                     if self.vault_id is not None
                     else uuid.uuid4().hex[:12]
                 )
+                if db.execute("SELECT 1 FROM cards WHERE id = ?", (card_id,)).fetchone():
+                    # A former name hashes to the renamed card's id. Imports resolve
+                    # one first (`names`), so only a caller that did not gets here.
+                    raise BiStoreError(
+                        "name_is_former", f"「{planned.name}」是另一張卡片以前的名字"
+                    )
                 db.execute(
                     "INSERT INTO cards (id, entity_type, canonical_key, name, version, "
                     "synthetic, created, updated, created_by_import) "
@@ -1084,6 +1090,126 @@ class BiStore:
             row = db.execute("SELECT value FROM meta WHERE key = 'schema_history'").fetchone()
         return list(json.loads(row[0])) if row else []
 
+    @staticmethod
+    def _write_person_value(
+        db: sqlite3.Connection,
+        card_id: str,
+        field: str,
+        value: Any,
+        stored: sqlite3.Row | None,
+        actor: str,
+        at: str,
+        reason: str,
+    ) -> None:
+        """A person's value, its history row, and the proposals it settles."""
+        new = _dump(value)
+        old_source = (
+            None if stored is None else _dump({k: stored[k] for k in ("kind", "ref", "by", "at")})
+        )
+        if value is None:
+            db.execute("DELETE FROM fields WHERE card_id = ? AND field = ?", (card_id, field))
+        else:
+            db.execute(
+                "INSERT OR REPLACE INTO fields (card_id, field, value, kind, ref, by, at) "
+                "VALUES (?, ?, ?, 'human', ?, ?, ?)",
+                (card_id, field, new, f"agent-web:{actor}", actor, at),
+            )
+        db.execute(
+            "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, reason, "
+            "old_source) VALUES (?, ?, ?, ?, 'human', ?, ?, ?, ?, ?)",
+            (
+                card_id,
+                field,
+                None if stored is None else stored["value"],
+                None if value is None else new,
+                f"agent-web:{actor}",
+                actor,
+                at,
+                reason,
+                old_source,
+            ),
+        )
+        db.execute(
+            "UPDATE proposals SET status = 'superseded' WHERE card_id = ? AND field = ? "
+            "AND status = 'pending'",
+            (card_id, field),
+        )
+
+    def rename_card(
+        self,
+        card_id: str,
+        *,
+        key: str,
+        name: str,
+        values: dict[str, Any],
+        alias: bool,
+        base_version: int,
+        actor: str,
+        reason: str,
+    ) -> int:
+        """Rename a vault's card: its id stays and the old key stays reserved for
+        it, so an import of the old name lands here (`BI_CARD_MODEL.md` §3.1).
+        `values` are the naming fields; `alias`, whether the type has `aliases`.
+        Returns the new version, or `base_version` when nothing changes."""
+        at = now()
+        with self._db(write=True) as db:
+            card = db.execute("SELECT * FROM cards WHERE id = ?", (card_id,)).fetchone()
+            if card is None:
+                raise BiStoreError("card_unknown", "找不到這張卡片")
+            if int(card["version"]) != int(base_version):
+                raise BiStoreError(
+                    "stale_edit",
+                    "這張卡片在你開啟後已被修改，請重新載入",
+                    version=int(card["version"]),
+                )
+            old_key, old_name = str(card["canonical_key"]), str(card["name"])
+            if key == old_key:
+                return int(card["version"])
+            kind = str(card["entity_type"])
+            taken = db.execute(
+                "SELECT name FROM cards WHERE id != ? AND entity_type = ? AND "
+                "(canonical_key = ? OR id = ? OR id IN (SELECT card_id FROM card_names "
+                "WHERE kind = 'former' AND name = ?))",
+                (card_id, kind, key, card_id_for(kind, key), key),
+            ).fetchone()
+            if taken is not None:
+                raise BiStoreError(
+                    "name_taken",
+                    f"「{name}」已經是另一張卡片「{taken['name']}」的名字",
+                    card=taken["name"],
+                )
+            db.execute(
+                "DELETE FROM card_names WHERE card_id = ? AND name = ? AND kind = 'former'",
+                (card_id, key),
+            )
+            db.execute(
+                "INSERT OR IGNORE INTO card_names (card_id, name, kind) VALUES (?, ?, 'former')",
+                (card_id, old_key),
+            )
+            stored = {
+                r["field"]: r
+                for r in db.execute("SELECT * FROM fields WHERE card_id = ?", (card_id,))
+            }
+            if alias:
+                held = _load(stored["aliases"]["value"]) if "aliases" in stored else []
+                held = held if isinstance(held, list) else [held]
+                kept = [a for a in held if str(a).strip().lower() != name.strip().lower()]
+                if old_name not in kept:
+                    kept.append(old_name)
+                if kept != held:
+                    values = {**values, "aliases": kept}
+            for field, value in values.items():
+                row = stored.get(field)
+                if row is None or row["value"] != _dump(value):
+                    self._write_person_value(db, card_id, field, value, row, actor, at, reason)
+            version = int(card["version"]) + 1
+            db.execute(
+                "UPDATE cards SET canonical_key = ?, name = ?, version = ?, updated = ? "
+                "WHERE id = ?",
+                (key, name, version, at, card_id),
+            )
+            return version
+
     def set_field(
         self,
         card_id: str,
@@ -1128,39 +1254,7 @@ class BiStore:
                 stored is not None and value is not None and stored["value"] == new
             ):
                 return int(card["version"])
-            old_source = (
-                None
-                if stored is None
-                else _dump({k: stored[k] for k in ("kind", "ref", "by", "at")})
-            )
-            if value is None:
-                db.execute("DELETE FROM fields WHERE card_id = ? AND field = ?", (card_id, field))
-            else:
-                db.execute(
-                    "INSERT OR REPLACE INTO fields (card_id, field, value, kind, ref, by, at) "
-                    "VALUES (?, ?, ?, 'human', ?, ?, ?)",
-                    (card_id, field, new, f"agent-web:{actor}", actor, at),
-                )
-            db.execute(
-                "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, reason, "
-                "old_source) VALUES (?, ?, ?, ?, 'human', ?, ?, ?, ?, ?)",
-                (
-                    card_id,
-                    field,
-                    None if stored is None else stored["value"],
-                    None if value is None else new,
-                    f"agent-web:{actor}",
-                    actor,
-                    at,
-                    reason,
-                    old_source,
-                ),
-            )
-            db.execute(
-                "UPDATE proposals SET status = 'superseded' WHERE card_id = ? AND field = ? "
-                "AND status = 'pending'",
-                (card_id, field),
-            )
+            self._write_person_value(db, card_id, field, value, stored, actor, at, reason)
             version = int(card["version"]) + 1
             db.execute(
                 "UPDATE cards SET version = ?, updated = ? WHERE id = ?", (version, at, card_id)

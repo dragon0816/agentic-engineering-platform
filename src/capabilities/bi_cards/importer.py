@@ -394,6 +394,10 @@ def preview(
             }
         )
         name_value = str(values.get(entity.naming[-1]) or key)
+        if (entity.name, key) in canonical.former:
+            # A former name: the card it was renamed to, whose naming fields stay.
+            key, name_value = canonical.former[(entity.name, key)]
+            values = {k: v for k, v in values.items() if k not in entity.naming}
         result.planned[number] = PlannedRow(
             row=number,
             entity_type=entity.name,

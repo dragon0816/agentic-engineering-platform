@@ -22,11 +22,15 @@ FIELD = "aliases"
 class Names:
     """`canon(name)`: the card name an alias (compared loosely) stands for."""
 
-    def __init__(self, table: dict[str, str]) -> None:
+    def __init__(
+        self, table: dict[str, str], former: dict[tuple[str, str], tuple[str, str]] | None = None
+    ) -> None:
         self.table = table
+        #: (type, former key) -> the renamed card's (key, name).
+        self.former = former or {}
 
     def __bool__(self) -> bool:
-        return bool(self.table)
+        return bool(self.table or self.former)
 
     def canon(self, name: Any) -> str:
         text = str(name).strip()
@@ -34,13 +38,22 @@ class Names:
 
 
 def from_store(store: BiStore) -> Names:
-    """Every card's aliases -> its name."""
+    """Every card's aliases and former names -> its name."""
     table: dict[str, str] = {}
+    former: dict[tuple[str, str], tuple[str, str]] = {}
     if not store.exists:
         return Names(table)
-    names = {r["id"]: str(r["name"]) for r in store.card_rows()}
+    cards = store.card_rows()
+    names = {r["id"]: str(r["name"]) for r in cards}
+    by_id = {r["id"]: r for r in cards}
     with store._db() as db:
         rows = db.execute("SELECT card_id, value FROM fields WHERE field = ?", (FIELD,)).fetchall()
+        known = db.execute("SELECT 1 FROM sqlite_master WHERE name = 'card_names'").fetchone()
+        renamed = (
+            db.execute("SELECT card_id, name FROM card_names WHERE kind = 'former'").fetchall()
+            if known
+            else []
+        )
     for row in rows:
         try:
             value = json.loads(row["value"]) if row["value"] is not None else None
@@ -52,4 +65,11 @@ def from_store(store: BiStore) -> Names:
         for alias in value if isinstance(value, list) else [value]:
             if isinstance(alias, str) and alias.strip():
                 table[norm_key(alias)] = name
-    return Names(table)
+    for row in renamed:
+        card = by_id.get(row["card_id"])
+        if card is not None:
+            former[(str(card["entity_type"]), str(row["name"]))] = (
+                str(card["canonical_key"]),
+                str(card["name"]),
+            )
+    return Names(table, former)

@@ -30,6 +30,7 @@ CHECKS = (
     ("link_unresolved", "連結找不到卡片", "issue"),
     ("link_wrong_type", "連結到的卡片類型不對", "issue"),
     ("same_name", "同一個名字出現在兩種類型", "issue"),
+    ("key_conflict", "兩張卡片用了同一個名字", "issue"),
     ("sample_not_marked", "SAMPLE 卡沒有標成示範資料", "issue"),
     ("evidence_source", "A/B 級證據缺來源或來源日期", "issue"),
     ("number_ungrounded", "數字不在引用的原文裡", "issue"),
@@ -77,6 +78,10 @@ def check(store: BiStore, reg: Registry) -> dict[str, Any]:
     for name, types in sorted(seen_names.items()):
         if len(types) > 1:
             add("same_name", None, f"「{name}」同時是 {'、'.join(sorted(types))}；請合併或改名")
+
+    for card in rows:
+        if str(card["canonical_key"]).endswith(f"#{card['id']}"):
+            add("key_conflict", card, f"「{card['name']}」已被另一張卡片使用；請把這張改名")
 
     node_type = reg.types.get("Node")
     node_pattern = node_type.name_pattern if node_type is not None else ""
