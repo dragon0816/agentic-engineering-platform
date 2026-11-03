@@ -11,8 +11,8 @@ for this (`docs/runbooks/R6_MARKET_BI.md`).
 | # | Decision |
 |---|---|
 | D2 | Originals go into the repository's `sources/`, so a colleague who joins can read them |
-| O1 | The per-file limit is set after measuring the real sizes. S6 waits for that number |
-| O2 | **Every classification may be pushed**, `CONFIDENTIAL` and `RESTRICTED` included. No push refusal by classification. The owner accepts that anyone with folder access can read every original permanently |
+| O1 | **No per-file or total size limit** (owner, 2026-11-03; replaces setting one from measured sizes). Files larger than the base64 upload can still be added, and commit, push and sync stream them |
+| O2 | Every classification may be pushed. **No file permission controls in AEP** (owner, 2026-11-03): company IT decides through SharePoint permissions; whoever has access can open files |
 | O3 | Build the withdrawal record (§5) |
 | O4 | Every PC keeps all originals on the device. The page warns on cloud-only files. No lazy read |
 
@@ -38,8 +38,8 @@ for this (`docs/runbooks/R6_MARKET_BI.md`).
   source `convert` brings is re-identified then.
 
 **Commit and push.** In a vault, adding a source stages its files and unit. They go in **their own commit**, because the
-engine makes a whole commit wait for its files: one slow PDF on OneDrive must not hold back a colleague's cards. Size is a
-refusal when adding and a blocking push check (limit: O1). `_copy_in` copies by stream instead of holding the file in memory.
+engine makes a whole commit wait for its files: one slow PDF on OneDrive must not hold back a colleague's cards. There is
+no size check (O1). `_copy_in` copies by stream and hashing reads in chunks, so commit, push and sync never hold a file whole.
 
 **A colleague's PC.** `Staging` gets rows from the `source:` units on sync and reads through to the repository file, with no
 second copy. So the source list, Markdown, the search index, AI runs and quality checks work there. Runs, candidates and
@@ -52,9 +52,14 @@ sessions stay on the PC that made them.
   「一律保留在此裝置上」. It does not avoid the download: reading the file to check it brings it down, as O4 expects.
 - CI cannot make real placeholders: tests simulate the read failure, and one check on the owner's PC covers the rest.
 
-**Classification (O2).** Pushed like any other source, and it stays in the unit. The existing check before an AI run
-(`check_classification` against `approved_classes`) stays as it is, on every PC, so a colleague's model use is still bound
-by it. The add-source page says that the shared folder has no permission control beyond who can open it.
+**Classification (O2).** Pushed like any other source, and it stays in the unit. Nothing new gates it. The existing check
+before an AI run (`check_classification` against `approved_classes`) stays as it is, since that is about what a model may be
+sent, not about who may open a file.
+
+**A large file (S6).** `POST /api/bi/sources/upload?dataset=&name=&classification=&folder=` takes the file as the raw
+request body, written to disk as it arrives and hashed on the way; the page uses it above 4 MiB. Chosen over a local-path
+route: the same file picker, and no new way to name files on this PC. A format that converts to Markdown is still read whole
+once, by the converter; other formats never are.
 
 ## 4. Tasks
 
@@ -62,10 +67,10 @@ by it. The add-source page says that the shared folder has no permission control
 |---|---|---|---|
 | S1 | This design and the decisions | small | — |
 | S2 | Engine: a file that cannot be read is "waiting"; streamed copy; wiki tests stay green | small | base |
-| S3 | `source:` unit, stage on add, own commit, stable id, the size check with its limit configurable | large | S2 |
+| S3 | `source:` unit, stage on add, own commit, stable id | large | S2 |
 | S4 | Sync into a colleague's `Staging`, read through, search index | large | S3 |
 | S5 | Convert stages the sources too (replaces `bi-build-flow`'s local copy; its design §4 and §10 and its page line change) | small | S3 |
-| S6 | Files over about 6 MiB: `/api/bi/sources` takes base64 under an 8 MiB body | medium | O1's number |
+| S6 | Files of any size: a raw-body upload route, streamed; commit, push and sync stream too | medium | S3 |
 | S7 | Page: folder when adding, per-source state (local, pushed, waiting, only in the cloud), wording | medium | S3, S4 |
 | S8 | Two-PC browser test, contracts, runbook | medium | S3–S7 |
 | S9 | Withdrawal record (§5), engine, BI, page, tests | medium | S3 |
@@ -79,8 +84,7 @@ commit waiting for good on every PC.
 
 **The record.** `withdrawn/<author>/<seq>.json`, add-only like every other file: `{files: [{path, sha256}], reason, at}`,
 one record for the original and its Markdown, each `path` under `sources/` only. BI only in this version: the wiki's `materialize` reads `raw/` files back, and would need its
-own answer. The confirmation on the page lists §5.2 before anything happens. Any member can do it, as BI vaults have no
-permission control; the record says who.
+own answer. The confirmation on the page lists §5.2 before anything happens. Anyone working in the vault can do it; the record says who.
 
 **What the engine does.**
 1. Writes the record first, then deletes the file and its Markdown revisions from the folder. If OneDrive delivers the
@@ -111,8 +115,8 @@ deletion; the source from AEP on each PC, once AEP has synced there; and from th
 - **Q1. Excerpts and values staying in the immutable commits is accepted.** The page names rebuilding the vault from its
   sources without that file, in a new folder, as the way to remove everything AEP can reach.
 - **Q2. Candidates not yet written are removed at sync; run records stay with their excerpts blanked.**
-- **Q3. Open**: how long SharePoint keeps deleted files and versions on this library, from IT. It depends on the tenant's
-  policy, which AEP cannot read, and it does not hold up S9. Until a period is known the page states none:
+- **Q3.** The owner's answer (2026-11-03) is that files stay available as long as permission exists; that does not say how
+  long deleted files are kept, so the page states no period:
 
 > 共用資料夾的檔案和 AEP 裡的副本會移除。OneDrive／SharePoint 可能還保留版本紀錄和資源回收筒裡的檔案，保留多久由公司的設定決定，AEP 無法移除；需要完全清除時請找管理這個資料夾的人。
 
@@ -122,5 +126,5 @@ The rest of the page's confirmation is §5.2 in plain words, ending with: 卡片
 
 - OneDrive may treat a delete and a re-add of the same name as a conflict: the record's refusal covers AEP's own writes, not
   a person copying the file back by hand (an unreferenced file does not exist for anyone).
-- Disk use on every PC grows with the vault (O4): the runbook's pre-check gives the total to look at first.
-- Pushing is permanent in the sense of §5.2 from the first push. The runbook has the owner check who can open the folder.
+- Disk use on every PC grows with the vault (O4), with no limit (O1).
+- Pushing is permanent in the sense of §5.2 from the first push.

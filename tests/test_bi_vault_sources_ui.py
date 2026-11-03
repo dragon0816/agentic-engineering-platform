@@ -63,6 +63,16 @@ def test_a_source_added_on_one_pc_is_read_on_another(
             page.set_value("bi-b-src-folder", FOLDER)
             page.upload("report.md", REPORT, "text/markdown")
             page.see("bi-b-sources", "commit、push 後才會放上去")
+            # A file too large for base64 inside JSON goes as the raw body.
+            page.run(
+                "(() => { const dt = new DataTransfer();"
+                " dt.items.add(new File(['report line\\n'.repeat(800000)], 'large.md',"
+                " {type: 'text/markdown'}));"
+                " const f = document.getElementById('bi-b-file'); f.files = dt.files;"
+                " f.dispatchEvent(new Event('change')); })()"
+            )
+            page.click("#bi-b-upload")
+            page.see("bi-b-sources", "large.md")
             assert FOLDER in page.text_of("bi-b-sources")
             assert not list((shared / vault_id).rglob("*-report.md"))
             _commit(alice, vault_id, "加入報告")
@@ -70,6 +80,8 @@ def test_a_source_added_on_one_pc_is_read_on_another(
             page.run("biBuildSources()")
             page.see("bi-b-sources", "已放上去")
     assert list((shared / vault_id / FOLDER).glob("*-report.md"))
+    (large,) = (shared / vault_id / FOLDER).glob("*-large.md")
+    assert large.stat().st_size > 8 * 1024 * 1024
 
     _bi_join(bob, shared / vault_id, "bob")
     monkeypatch.setattr(vault_sources, "cloud_only", lambda _path: True)
@@ -77,17 +89,26 @@ def test_a_source_added_on_one_pc_is_read_on_another(
         with BiPage(tmp_path / "browser-b", server.address) as page:
             _open_build(page, dataset)
             page.see("bi-b-sources", "report.md")
+            page.see("bi-b-sources", "large.md")
             page.see("bi-b-sources", "只在雲端")
             page.see("bi-b-src-cloud", "一律保留在此裝置上")
             monkeypatch.undo()
             page.run("biBuildSources()")
             page.see("bi-b-sources", "已放上去")
             page.wait("document.getElementById('bi-b-src-cloud').hidden")
-            page.click_text("#bi-b-sources", "看／改")
+            page.run(
+                "[...document.querySelectorAll('#bi-b-sources tbody tr')]"
+                ".find((r) => r.textContent.includes('report.md'))"
+                ".querySelector('button').click()"
+            )
             page.wait("!document.getElementById('bi-b-md').hidden")
             page.wait("document.getElementById('bi-b-md-text').value.includes('FACT-TWOPC')")
             # Withdrawing says first what it does not remove, then removes it for everyone.
-            page.click_text("#bi-b-sources", "撤回")
+            page.run(
+                "[...document.querySelectorAll('#bi-b-sources tbody tr')]"
+                ".find((r) => r.textContent.includes('report.md'))"
+                ".querySelector('button[aria-label^=\"撤回\"]').click()"
+            )
             page.see("bi-b-src-withdraw", "版本紀錄和資源回收筒")
             page.see("bi-b-src-withdraw", "不帶這個檔案重建知識庫")
             assert "93" not in page.text_of("bi-b-src-withdraw")  # no retention period is stated

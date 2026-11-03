@@ -6542,3 +6542,25 @@ Design: `docs/phases/TELEGRAM_HISTORY.md`.
 - `GET /api/conversations/search?q=`: `{"ok": true, "results": [{session_id, title, updated_at, messages, backend,
   source, snippet}]}`, newest first, at most 30, for this actor. `snippet` is empty for a hit in the title only. Blank
   words give no results; over 200 characters gives `{"ok": false, "code": "search_query_too_long"}`.
+## A BI vault's originals in the repository (2026-11-03)
+
+Design `docs/phases/BI_SOURCES_IN_REPOSITORY.md`. Code `src/capabilities/bi_cards/vault_sources.py`, `staging.py`,
+`src/knowledge/repo/repository.py`. Tests `tests/test_bi_vault_sources.py`, `tests/test_bi_vault_sources_ui.py`.
+
+- **Unit `source:<sha256>`**: `{id, name, folder, file, sha256, bytes, media_type, classification, by, at, markdown: [{rev, file,
+  sha256, origin, note, converter, chars, lines, by, at}]}`. Files: `<folder>/<sha8>-<name>`, characters OneDrive refuses replaced
+  in the path only; `<folder>/markdown/<sha8>/rev-<n>-<author>.md`. A new vault source's id is the first 12 hex of its sha; a
+  converted source keeps its id. Staged on add (`POST /api/bi/sources` takes `folder`); commit puts sources in a commit of their own
+  when anything else is staged. Every classification pushes; no size limit.
+- **`GET /api/bi/sources`** in a vault adds to each source `shared: local|staged|pushed|cloud_only` and `folder`, and to the reply
+  `waiting: [path]`, `withdrawn: [{file, sha256, by, at, reason}]`. On sync a colleague's `Staging` gets rows with `origin: repository`
+  reading through to the repository file; reading one that cannot be read is `source_unreadable`.
+- **`POST /api/bi/sources/upload?dataset=&name=&classification=&folder=&media_type=`**, raw body: a file of any size, written to disk
+  as it arrives → `{ok, source}`. `source_incomplete` when the body is cut short.
+- **`POST /api/bi/vaults/<id>/share-source`** `{source_id, folder?}`: stage a source only on this PC.
+- **`POST /api/bi/vaults/<id>/withdraw-source`** `{source_id, reason?, confirm: true}` (`confirm_required`, `source_not_pushed`) →
+  `{ok, withdrawn: {files, reason, at, left}}`. Record `withdrawn/<author>/<seq>.json`, format `aep.knowledge.withdrawn/v1`,
+  `sources/` only. A withdrawn file's commit stays applied; `stage_file` and a push naming it, and adding the same bytes, are
+  `source_withdrawn`. Each PC drops its copies at sync, removes open candidates and blanks a written run's excerpts.
+- **Engine.** A repository file that cannot be read makes its commit wait, and `file_unreadable` when something relies on it.
+  `Repository.commit(..., only=)` commits just the units and files it picks.

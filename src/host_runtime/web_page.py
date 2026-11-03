@@ -2632,8 +2632,8 @@ tr:last-child td { border-bottom: none; }
               <select id="bi-b-src-folder"></select></div>
             <div><button class="go" id="bi-b-upload" type="button" disabled>加入來源</button></div>
           </div>
-          <p class="bi-warn" id="bi-b-src-shared" hidden>共用知識庫的來源原檔，push
-            後會放進共用資料夾：能開這個資料夾的人都讀得到，任何機密等級都一樣，而且會一直留著。</p>
+          <p class="bi-meta" id="bi-b-src-shared" hidden>共用知識庫的來源原檔，commit、push
+            後會放進共用資料夾。</p>
           <p class="bi-warn" id="bi-b-src-cloud" role="status" hidden></p>
           <p class="bi-meta">AEP 保留一份來源副本（同樣內容只存一次），不會移動或修改你的原始檔，
             並把每份來源轉成 Markdown：之後的擷取都讀這份 Markdown，
@@ -14040,9 +14040,12 @@ function biWithdrawForm(source) {
 }
 
 async function biBuildSources() {
+  // Newest call only: an older list arriving late must not drop the source just added.
+  const seq = bi.sourcesSeq = (bi.sourcesSeq || 0) + 1;
   const reply = await call("/api/bi/sources?dataset=" + encodeURIComponent(biDataset()));
-  bi.build.sources = reply.sources || [];
   await biSourceFolders().catch(() => {});
+  if (seq !== bi.sourcesSeq) return;
+  bi.build.sources = reply.sources || [];
   const cloud = bi.build.sources.filter((s) => s.shared === "cloud_only").length;
   const waiting = (reply.waiting || []).length;
   const warn = el("bi-b-src-cloud");
@@ -14156,11 +14159,32 @@ function biReadFile(file, binary) {
 el("bi-b-file").addEventListener("change", () => {
   el("bi-b-upload").disabled = !el("bi-b-file").files.length;
 });
+// A large file goes as the raw request body, read by the browser as it is sent;
+// base64 inside JSON cannot carry it (BI_SOURCES_IN_REPOSITORY S6).
+const BI_STREAM_FROM = 4 * 1024 * 1024;
+
+async function biUploadFile(file) {
+  const query = new URLSearchParams({dataset: biDataset(), name: file.name,
+    classification: el("bi-b-class").value});
+  if (biVaultOf(biDataset())) query.set("folder", el("bi-b-src-folder").value);
+  const reply = await fetch("/api/bi/sources/upload?" + query.toString(),
+    {method: "POST", headers: {"Authorization": "Bearer " + TOKEN}, body: file});
+  const answer = await reply.json().catch(() => ({}));
+  if (!reply.ok || answer.ok === false) {
+    throw new Error(answer.message || answer.code || ("主機回應 " + reply.status));
+  }
+  return answer;
+}
+
 el("bi-b-upload").addEventListener("click", async () => {
   const button = el("bi-b-upload"); button.disabled = true;
   biStatus("bi-status-build", "loading", "正在加入來源…");
   try {
     for (const file of el("bi-b-file").files) {
+      if (file.size > BI_STREAM_FROM) {
+        bi.build.sourceId = (await biUploadFile(file)).source.id;
+        continue;
+      }
       const binary = /\.(xlsx|xlsm|pdf|docx|pptx)$/i.test(file.name);
       const content = await biReadFile(file, binary);
       const body = {dataset: biDataset(), name: file.name,

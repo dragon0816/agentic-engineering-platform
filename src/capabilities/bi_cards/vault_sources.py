@@ -27,9 +27,6 @@ from knowledge.repo.repository import RepoError
 PREFIX = "source:"
 FILES_ROOT = "sources"
 MARKDOWN_DIR = "markdown"
-#: The per-file limit in bytes, when one is set; the owner sets the number from
-#: the measured sizes, and without it nothing is refused for its size.
-LIMIT_UNIT = "meta:source_max_bytes"
 #: Windows: a file's content is not on this PC (a OneDrive placeholder).
 _CLOUD_ONLY = 0x00400000 | 0x00040000 | stat.FILE_ATTRIBUTE_OFFLINE
 _UNSAFE = re.compile(r'[\\/:*?"<>|\x00-\x1f]')
@@ -66,18 +63,6 @@ def markdown_path(folder: str, sha256: str, rev: int, author: str) -> str:
     return f"{folder}/{MARKDOWN_DIR}/{sha256[:8]}/rev-{rev}-{author}.md"
 
 
-def limit_of(units: Mapping[str, Any]) -> int | None:
-    value = units.get(LIMIT_UNIT)
-    return int(value) if isinstance(value, str) and value.isdigit() else None
-
-
-def too_large(size: int, limit: int) -> BiStoreError:
-    return BiStoreError(
-        "source_too_large",
-        f"這個檔案有 {size:,} bytes，超過這個知識庫每個檔案的上限 {limit:,} bytes",
-    )
-
-
 def withdrawn_shas(repo: Any) -> set[str]:
     return {str(item["sha256"]) for item in repo.withdrawn().values()}
 
@@ -85,27 +70,6 @@ def withdrawn_shas(repo: Any) -> set[str]:
 def refuse_withdrawn(repo: Any, sha256: str) -> None:
     if sha256 in withdrawn_shas(repo):
         raise BiStoreError("source_withdrawn", "這份檔案已經撤回，不能再放回這個知識庫")
-
-
-def refuse_over_limit(units: Mapping[str, Any], size: int) -> None:
-    limit = limit_of(units)
-    if limit is not None and size > limit:
-        raise too_large(size, limit)
-
-
-def over_limit(before: Mapping[str, Any], after: Mapping[str, Any]) -> list[str]:
-    """The push check: new sources over the limit, in words."""
-    limit = limit_of(after)
-    if limit is None:
-        return []
-    return [
-        f"來源「{value['name']}」有 {value['bytes']:,} bytes，超過每個檔案的上限 {limit:,} bytes"
-        for key, value in sorted(after.items())
-        if key.startswith(PREFIX)
-        and key not in before
-        and isinstance(value, dict)
-        and value.get("bytes", 0) > limit
-    ]
 
 
 def _revision(repo: Any, staging: Any, source_id: str, folder: str, record: dict[str, Any]) -> Any:
@@ -123,7 +87,6 @@ def stage_source(repo: Any, staging: Any, source_id: str, folder: Any = None) ->
     if source is None:
         raise BiStoreError("source_unknown", "找不到這個來源")
     units = repo.working_units()
-    refuse_over_limit(units, int(source["size"]))
     key = unit_key(source["sha256"])
     known = units.get(key)
     if known is not None:

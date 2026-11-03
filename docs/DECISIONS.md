@@ -6188,3 +6188,25 @@ was memory only. That history is still what the model receives; the stored recor
   Agent Web does (silent loss in a long-lived chat); SQLite FTS for search (needs a migration and a tokenizer that
   handles Chinese, where `LIKE` matches any substring); `chat_hash` as the id (its salt is per process); a plain hash
   of the chat id (few enough ids to try them all), so the id uses a per-host random key.
+## 2026-11-03: A BI vault's originals: no size limit, and access is IT's (owner, relayed by the BI orchestrator)
+
+Replaces O1 and narrows O2 of 2026-11-02; design `docs/phases/BI_SOURCES_IN_REPOSITORY.md`.
+
+- **No per-file or total size limit.** The size check and `meta:source_max_bytes` are removed. Files larger than the base64
+  upload can still be added: a raw-body upload route, written to disk as it arrives (worker's choice). Rejected: a local-path
+  route (a new way to name files on this PC, and the person would type a path instead of picking a file); raising the JSON
+  limit (still holds the whole file in memory, twice with base64).
+- **Access principle, in the owner's words: don't add file permission controls in AEP. Company IT decides through
+  SharePoint permissions; whoever has access can open files. Keep things simple.** So no classification gates and no new
+  access checks. The existing check before an AI run stays: it is about what a model may be sent.
+- **Q3.** The owner says files stay available as long as permission exists. That does not say how long deleted files are kept,
+  so the withdrawal page states no period.
+
+## 2026-11-03: R6's sources (owner, relayed by the BI orchestrator)
+
+The five bases are `files\Aerospace-BI-KB`, `files\BI_Vault_Example`, `files\Wireless-Module-BI-KB-SAMPLE`, `files\aidc-bi-kb` and
+`files\robotics_kb_sample` under the AEP main checkout (git-ignored, never committed), plus the two AIDC reports
+`aidc-compute.md` and `aidc-power_cooling.md` in the old `market-bi\applications`, read only, copied out, never moved. The
+`rs-k` copy is `%LOCALAPPDATA%\AEP\rs-k-v1.0.3`; the wiki target is `OneDrive - Rohde & Schwarz\Wiki_Knowledge`. The old `market-bi`
+folder itself holds only those two reports and 52 change files, not the bases. The per-base list of what goes in is in the
+runbook §3, for the owner to review at the session.

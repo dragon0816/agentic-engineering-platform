@@ -225,11 +225,10 @@ class BiType:
             and repo_engine.canonical(before.get(k)) != repo_engine.canonical(after.get(k))
         )
         notes = [f"新增 {added} 張卡、刪除 {removed} 張卡、改了 {changed} 個欄位"]
-        too_large = vault_sources.over_limit(before, after)
         if self.benchmark is None:
-            return CheckReport(blocking=too_large, notes=notes)
+            return CheckReport(blocking=[], notes=notes)
         gate = self.benchmark(before, after)
-        return CheckReport(blocking=[*too_large, *gate.blocking], notes=[*notes, *gate.notes])
+        return CheckReport(blocking=list(gate.blocking), notes=[*notes, *gate.notes])
 
 
 BI_TYPE = BiType()

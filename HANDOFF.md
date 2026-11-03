@@ -147,8 +147,9 @@ orchestrator's on the integrated branches; do not run it here.
 - A host without `knowledge_pipeline` shows no wiki repository card, so no button; the route and the chat proposal work.
 - R6 cannot reuse the id `market-bi` on the owner's PC (`vault_exists`): runbook D1. Other R6 decisions: D2–D5.
 
-**Next action.** Orchestrator: integrate with A and C and run the one full suite. Then, on the base it names: S2 onward of
-`docs/phases/BI_SOURCES_IN_REPOSITORY.md` (S1 is done; no code yet). R6 waits for that.
+**Later (2026-11-03).** S2–S9 of `docs/phases/BI_SOURCES_IN_REPOSITORY.md` are done on this branch, on `main` `8994e44e`; see
+`docs/TASKS.md`. The full suite has not run on them. **Next action.** Orchestrator: integrate and run the full suite. Owner, before
+R6 step 8: how the two bases without seed CSVs become cards (runbook §3).
 
 ## BI charts in the chat and the Dashboard's sources (2026-11-01, Claude Code)
 

@@ -5,9 +5,14 @@ Two PCs as in `test_bi_vault.py`. All data is fictional.
 
 from __future__ import annotations
 
+import io
 import json
+import os
+import urllib.error
+import urllib.request
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlencode
 
 import pytest
 from test_bi_vault import (
@@ -23,10 +28,12 @@ from test_bi_vault import (
     _sync,
     _two_pcs,
 )
+from test_vault_asking_e2e import _bi_host, _Model, _served
 
 from capabilities.bi_cards import search_index, vault, vault_sources
 from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import BiStore, BiStoreError
+from knowledge.repo.repository import _file_sha
 
 REPORT = "# AIDC 報告\n\n電源模組 FACT-1。\n"
 FOLDER = "sources/library/products"
@@ -126,25 +133,14 @@ def test_a_dataset_only_on_this_pc_is_untouched(tmp_path: Path) -> None:
     assert not list(drive.parent("a").rglob("*-x.md"))
 
 
-def test_the_limit_refuses_on_adding_and_blocks_a_push_with_no_number_invented(
-    tmp_path: Path,
-) -> None:
+def test_no_size_is_refused_on_adding_or_at_a_push(tmp_path: Path) -> None:
+    # Owner 2026-11-03: no per-file or total limit.
     _, vault_id, dataset, a, _ = _two_pcs(tmp_path)
-    # Without a number set by the owner nothing is refused for its size.
-    big = "x" * 5000
-    first = _add(a, dataset, name="big.md", text=big)
+    first = _add(a, dataset, name="big.md", text="x" * 5000)
     assert first["size"] == 5000
-    assert vault_sources.limit_of(vault.Vault(a, vault_id).repo.working_units()) is None
-    repo = vault.Vault(a, vault_id).repo
-    repo.stage(vault_sources.LIMIT_UNIT, "1000")
-    with pytest.raises(BiStoreError) as refused:
-        _add(a, dataset, name="big2.md", text="y" * 5000)
-    assert refused.value.code == "source_too_large"
-    assert not [s for s in Staging(a, dataset).sources() if s["name"] == "big2.md"]
-    # One already staged, or staged by a PC without the limit, is blocked at the push.
     _commit(a, vault_id, "加入大檔")
-    answer = _push(a, vault_id)
-    assert answer["status"] == "blocked" and "big.md" in json.dumps(answer, ensure_ascii=False)
+    assert _push(a, vault_id)["status"] == "pushed"
+    assert not hasattr(vault_sources, "LIMIT_UNIT")
 
 
 def test_a_source_added_while_the_folder_is_out_of_reach_stays_here_until_shared(
@@ -394,6 +390,99 @@ def test_cloud_only_asks_for_attributes_and_reads_nothing(tmp_path: Path) -> Non
     path.write_bytes(b"x")
     assert vault_sources.cloud_only(path) is False
     assert vault_sources.cloud_only(tmp_path / "gone.bin") is False
+
+
+# -- large files (S6) --------------------------------------------------------------------
+
+
+def _send(server: Any, body: Any, length: int, **query: str) -> tuple[int, dict[str, Any]]:
+    """The page's raw upload: a file object, sent as it is read."""
+    url = f"http://127.0.0.1:{server.server_address[1]}/api/bi/sources/upload?{urlencode(query)}"
+    request = urllib.request.Request(url, data=body, method="POST")
+    request.add_header("Authorization", f"Bearer {server.token}")
+    request.add_header("Content-Length", str(length))
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    try:
+        with opener.open(request, timeout=120) as answer:
+            return answer.status, json.loads(answer.read())
+    except urllib.error.HTTPError as refused:
+        return refused.code, json.loads(refused.read())
+
+
+def test_a_large_file_is_added_committed_pushed_and_synced_without_being_held_whole(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
+    size = 9 * 1024 * 1024  # over what base64 under the 8 MiB JSON limit can carry
+    original = tmp_path / "large.bin"
+    original.write_bytes(os.urandom(1024) * (size // 1024))
+    real = Path.read_bytes
+
+    def no_whole_file(path: Path) -> bytes:
+        assert path.stat().st_size < size, f"{path.name} read whole into memory"
+        return real(path)
+
+    monkeypatch.setattr(Path, "read_bytes", no_whole_file)
+    config, layout = _bi_host(tmp_path / "host")
+    with _served(config, layout, _Model("none", {})) as server:
+        (workspace, target) = (layout.workspace_root, tmp_path / "shared-host")
+        target.mkdir()
+        made = _ok(_call(workspace, "POST", "/api/bi/vaults",
+                         {"path": str(target), "title": "Large", "schema": "bi.schema/v1.1",
+                          "author": "alice"}))  # fmt: skip
+        vault_id = str(made["vault"]["id"])
+        dataset = f"vault-{vault_id}"
+        with original.open("rb") as body:
+            status, reply = _send(server, body, size, dataset=dataset, name="large.bin",
+                                  folder=FOLDER, classification="RESTRICTED")  # fmt: skip
+        assert status == 200, reply
+        source = reply["source"]
+        assert source["size"] == size and source["already"] is False
+        with original.open("rb") as body:  # the same bytes are kept once
+            assert (
+                _send(server, body, size, dataset=dataset, name="again.bin")[1]["source"]["already"]
+                is True
+            )
+    assert not list(Staging(workspace, dataset).dir.glob(".upload-*"))
+    _commit(workspace, vault_id, "加入大檔")
+    assert _push(workspace, vault_id)["status"] == "pushed"
+    unit = _unit(workspace, vault_id, source["sha256"])
+    delivered = target / vault_id / unit["file"]
+    assert delivered.stat().st_size == size
+    assert _file_sha(delivered) == _file_sha(original)
+    # A colleague's PC hashes and lists it without holding it either.
+    other = tmp_path / "other-ws"
+    other.mkdir()
+    _ok(_call(other, "POST", "/api/bi/vaults/join",
+              {"path": str(target / vault_id), "author": "bob"}))  # fmt: skip
+    (seen,) = Staging(other, dataset).sources()
+    assert seen["size"] == size and seen["origin"] == "repository"
+
+
+def test_an_upload_cut_short_or_badly_named_keeps_nothing(tmp_path: Path) -> None:
+    config, layout = _bi_host(tmp_path / "host")
+    with _served(config, layout, _Model("none", {})) as server:
+        status, reply = _send(server, b"x" * 10, 10, dataset="plain", name="a/b.md")
+        assert status == 400 and reply["code"] == "source_name_invalid"
+        status, reply = _send(server, b"x", 1, dataset="plain", name="a.md", classification="NO")
+        assert status == 400 and reply["code"] == "classification_invalid"
+    staging = Staging(layout.workspace_root, "plain")
+    with pytest.raises(BiStoreError) as refused:
+        staging.add_source_stream("a.bin", "INTERNAL", io.BytesIO(b"xx"), 10, actor="alice")
+    assert refused.value.code == "source_incomplete"
+    assert not list(staging.dir.glob(".upload-*")) and staging.sources() == []
+
+
+def test_a_withdrawn_file_sent_again_as_a_large_upload_is_refused(tmp_path: Path) -> None:
+    _, vault_id, dataset, a, _, source = _shared(tmp_path)
+    _ok(_withdraw(a, vault_id, source))
+    staging = Staging(a, dataset)
+    with pytest.raises(BiStoreError) as refused:
+        staging.add_source_stream(
+            "report.md", "INTERNAL", io.BytesIO(REPORT.encode()), len(REPORT.encode()), actor="a"
+        )
+    assert refused.value.code == "source_withdrawn"
+    assert not list(staging.dir.glob(".upload-*"))
 
 
 # -- withdrawal (S9) ---------------------------------------------------------------------

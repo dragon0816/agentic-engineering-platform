@@ -88,12 +88,46 @@ from host_runtime import bi_atlas_embed, bi_atlas_import, bi_subscriptions, bi_v
 
 #: A CSV travels in the JSON body; larger than an ordinary request.
 MAX_BI_BODY_BYTES = 8 * 1024 * 1024
+#: A source file as the raw body, so its size is not bound by the limit above.
+SOURCE_UPLOAD = "/api/bi/sources/upload"
 
 Answer = tuple[int, dict[str, Any]]
 
 
 def _error(status: int, code: str, message: str) -> Answer:
     return status, {"ok": False, "code": code, "message": message}
+
+
+def _upload_source(handler: Any, parsed: Any) -> None:
+    """A source file sent as the raw request body, of any size: it goes to disk as
+    it arrives (`Staging.add_source_stream`), with no JSON and no base64."""
+    query = {k: v[0] for k, v in parse_qs(parsed.query).items() if v}
+    runtime = handler.server.web.runtime
+    workspace = runtime.layout.workspace_root
+    try:
+        length = int(handler.headers.get("Content-Length") or "0")
+        staging = Staging(workspace, _dataset(query.get("dataset")))
+        label, level = staging.checked_upload(query.get("name"), query.get("classification"))
+    except ValueError:
+        handler._refuse_unread(400, {"ok": False, "code": "length_invalid", "message": "缺少長度"})
+        return
+    except BiStoreError as failure:
+        handler._refuse_unread(400, {"ok": False, "code": failure.code, "message": failure.message})
+        return
+    try:
+        source = staging.add_source_stream(
+            label,
+            level,
+            handler.rfile,
+            length,
+            media_type=query.get("media_type"),
+            folder=query.get("folder"),
+            actor=str(runtime.actor),
+        )
+    except BiStoreError as failure:
+        handler._json(400, {"ok": False, "code": failure.code, "message": failure.message})
+        return
+    handler._json(200, {"ok": True, "source": source})
 
 
 def _dataset(value: Any) -> str:
@@ -1291,6 +1325,9 @@ def handle(handler: Any, method: str, parsed: ParseResult) -> bool:
     False when the path is not ours."""
     if not parsed.path.startswith("/api/bi/"):
         return False
+    if method == "POST" and parsed.path == SOURCE_UPLOAD:
+        _upload_source(handler, parsed)
+        return True
     body: Any = None
     if method == "POST":
         try:

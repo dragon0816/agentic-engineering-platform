@@ -36,7 +36,7 @@ import uuid
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path, PurePath
-from typing import Any
+from typing import Any, BinaryIO
 
 from capabilities.bi_cards import convert, schema_versions, vault_sources
 from capabilities.bi_cards.store import BiStore, BiStoreError, now
@@ -67,6 +67,7 @@ MAX_RUNS_LISTED = 100
 #: A `stored` value naming a file in the vault's repository folder, not here: a
 #: colleague's source is read through, with no second copy.
 REPOSITORY_FILE = "repo:"
+UPLOAD_CHUNK_BYTES = 1 << 20
 RUN_KINDS = ("trial", "ingest")
 
 SCHEMA = """
@@ -221,10 +222,7 @@ class Staging:
     ) -> dict[str, Any]:
         """Keep a copy of an uploaded source; the same bytes are kept once. In a
         vault it is also staged for the shared folder, in `folder`."""
-        self.store.refuse_write()
-        label = str(name or "").strip()
-        if not label or len(label) > 200 or PurePath(label).name != label or "\\" in label:
-            raise BiStoreError("source_name_invalid", "來源檔名必須是 1–200 字、不含資料夾的檔名")
+        label, level = self.checked_upload(name, classification)
         if isinstance(text, str) and text:
             data = text.encode("utf-8")
         elif isinstance(content_base64, str) and content_base64:
@@ -236,21 +234,90 @@ class Staging:
             raise BiStoreError("source_missing", "沒有來源內容")
         if not data:
             raise BiStoreError("source_missing", "來源是空的")
-        level = str(classification or DEFAULT_CLASSIFICATION).upper()
-        if level not in CLASSIFICATIONS:
-            allowed = ", ".join(CLASSIFICATIONS)
-            raise BiStoreError("classification_invalid", f"機密等級只能是 {allowed}")
         digest = hashlib.sha256(data).hexdigest()
         known = self._source_by_digest(digest)
         if known is not None:
             return {**known, "already": True}
-        self._refuse_new(digest, len(data))
+        self._refuse_withdrawn(digest)
+        temporary = self._temporary()
+        try:
+            temporary.write_bytes(data)
+            return self._keep(label, level, digest, temporary, media_type, folder, actor)
+        finally:
+            temporary.unlink(missing_ok=True)
+
+    def checked_upload(self, name: Any, classification: Any) -> tuple[str, str]:
+        """A source's file name and classification, before any of it is read."""
+        self.store.refuse_write()
+        label = str(name or "").strip()
+        if not label or len(label) > 200 or PurePath(label).name != label or "\\" in label:
+            raise BiStoreError("source_name_invalid", "來源檔名必須是 1–200 字、不含資料夾的檔名")
+        level = str(classification or DEFAULT_CLASSIFICATION).upper()
+        if level not in CLASSIFICATIONS:
+            allowed = ", ".join(CLASSIFICATIONS)
+            raise BiStoreError("classification_invalid", f"機密等級只能是 {allowed}")
+        return label, level
+
+    def add_source_stream(
+        self,
+        label: str,
+        level: str,
+        stream: BinaryIO,
+        length: int,
+        *,
+        media_type: Any = None,
+        folder: Any = None,
+        actor: str,
+    ) -> dict[str, Any]:
+        """Like `add_source` for a file of any size (owner 2026-11-03): the bytes go
+        to disk as they arrive and are hashed on the way, never held whole. Only a
+        format that is converted to Markdown is read back whole, by the converter."""
+        if length <= 0:
+            raise BiStoreError("source_missing", "來源是空的")
+        temporary = self._temporary()
+        digest = hashlib.sha256()
+        left = length
+        try:
+            with temporary.open("wb") as handle:
+                while left > 0:
+                    chunk = stream.read(min(UPLOAD_CHUNK_BYTES, left))
+                    if not chunk:
+                        raise BiStoreError("source_incomplete", "檔案沒有傳完，請再加入一次")
+                    handle.write(chunk)
+                    digest.update(chunk)
+                    left -= len(chunk)
+            known = self._source_by_digest(digest.hexdigest())
+            if known is not None:
+                return {**known, "already": True}
+            self._refuse_withdrawn(digest.hexdigest())
+            return self._keep(
+                label, level, digest.hexdigest(), temporary, media_type, folder, actor
+            )
+        finally:
+            temporary.unlink(missing_ok=True)
+
+    def _temporary(self) -> Path:
+        self.dir.mkdir(parents=True, exist_ok=True)
+        return self.dir / f".upload-{uuid.uuid4().hex[:12]}.tmp"
+
+    def _keep(
+        self,
+        label: str,
+        level: str,
+        digest: str,
+        temporary: Path,
+        media_type: Any,
+        folder: Any,
+        actor: str,
+    ) -> dict[str, Any]:
+        """Keep a received file (moved from `temporary`) and its Markdown."""
+        size = temporary.stat().st_size
         # Converted before anything is kept: a PDF without text is refused.
         markdown: str | None = None
         failure: BiStoreError | None = None
         if convert.kind(label) is not None:
             try:
-                markdown = convert.convert(label, data)
+                markdown = convert.convert(label, temporary.read_bytes())
             except BiStoreError as error:
                 if error.code == "source_no_text":
                     raise
@@ -265,8 +332,6 @@ class Staging:
             stored = f"{SOURCES_DIR}/{digest}{suffix}"
             target = self.dir / stored
             target.parent.mkdir(parents=True, exist_ok=True)
-            temporary = target.with_name(f".{target.name}.{uuid.uuid4().hex[:8]}.tmp")
-            temporary.write_bytes(data)
             schema_versions.replace(temporary, target)
             source_id = (
                 vault_sources.stable_id(digest)
@@ -281,7 +346,7 @@ class Staging:
                     label,
                     digest,
                     _media_type(label, media_type),
-                    len(data),
+                    size,
                     stored,
                     level,
                     actor,
@@ -321,11 +386,10 @@ class Staging:
             return None
         return target.repo if target.reachable else None
 
-    def _refuse_new(self, digest: str, size: int) -> None:
+    def _refuse_withdrawn(self, digest: str) -> None:
         repo = self._vault_repo()
         if repo is not None:
             vault_sources.refuse_withdrawn(repo, digest)
-            vault_sources.refuse_over_limit(repo.working_units(), size)
 
     def purge_withdrawn(self, shas: set[str]) -> int:
         """Remove withdrawn sources from this PC (design §5): the row, the stored

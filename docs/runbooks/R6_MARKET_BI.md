@@ -17,21 +17,44 @@ nor writes it since R2. The repository format needs its sources, schema, skills 
 | # | Decision | Why it matters | Status |
 |---|---|---|---|
 | D1 | **The new vault's id is `market-intel`.** | Creating `market-bi` again is refused on the owner's PC (`vault_exists`): that PC still holds `bi/vault-market-bi` and the registry entry, and there is no route to leave a vault. The id is fixed forever. | Decided (owner, 2026-11-02) |
-| D2 | **The originals go into the shared folder, every classification included; every PC keeps all of them on the device.** | **R6 cannot run until this is built:** today a BI vault's sources stay on the PC that added them. Design: `docs/phases/BI_SOURCES_IN_REPOSITORY.md`. | Decided (owner, 2026-11-02). The per-file limit is set from the sizes measured in §4: **open** |
-| D3 | **Base by base through the page, one commit per base, conflicts settled in review.** The 2026-10-29 one-off merge script (`--fill-only`), which is not in the repository, is not brought back. | It reported 7 scalar conflicts last time; a commit per base can be reverted on its own. | Decided (owner, 2026-11-02) |
-| D4 | **Import `%LOCALAPPDATA%\AEP\rs-k-v1.0.3` as a test copy. Do not bind it to the Agent until the owner has compared answers.** | Binding a second vault changes how questions route (§8). The real `RS_Knowledge` is never written. | Decided (owner, 2026-11-02) |
+| D2 | **The originals go into the shared folder; every PC keeps all of them on the device. No size limit.** | **R6 cannot run until this branch is merged and running:** before it, a BI vault's sources stay on the PC that added them. Design: `docs/phases/BI_SOURCES_IN_REPOSITORY.md`. | Decided (owner, 2026-11-02, 2026-11-03) |
+| D3 | **Base by base through the page, one commit per base, conflicts settled in review.** The 2026-10-29 one-off merge script (`--fill-only`), which is not in the repository, is not brought back. | It reported 7 scalar conflicts last time; a commit per base can be reverted on its own. | Decided (owner, 2026-11-02). **Open: how the two bases without seed CSVs become cards, §3** |
+| D4 | **Import `%LOCALAPPDATA%\AEP\rs-k-v1.0.3` (28 MB) as a test copy into `C:\Users\Chi_L\OneDrive - Rohde & Schwarz\Wiki_Knowledge` (exists, empty). Do not bind it to the Agent until the owner has compared answers.** | Binding a second vault changes how questions route (§8). The real `RS_Knowledge` is never written. | Decided (owner, 2026-11-02, 2026-11-03) |
 | D5 | **The first tag is `2026q4-r6`.** | Tags never move. | Decided (owner, 2026-11-02) |
 
 ## 3. Raw sources
 
-| Source | Where | Notes |
-|---|---|---|
-| Manager's five bases: wireless example, robotics (schema v4), aerospace (v7), wireless module (v8), AIDC (v8) | Local, never committed; the AIDC one was `files/aidc-bi-kb`. **The owner names the other four paths.** | Obsidian + Dataview, seed CSVs, `tools/bi_schema.py`, `bi_ingest.py` |
-| Two AIDC reports | Old folder, `applications/aidc-*/sources/` | Read only; copy out, never move |
-| Name aliases (148+4), chains | Old folder's domain configuration | For a person to read. Aliases and chain names are now written on the cards; reading rules move to the vault's skills |
-| Schema | Built in: `bi.schema/v1.1@2.0.0` | 21 types; `segment` already has the 11 market segments |
+All five bases are under the AEP main checkout, `C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\files\`
+(git-ignored, never committed); confirmed by the owner, 2026-11-03. **The owner reviews this list at the session.** It comes
+from reading the folders: names and counts, read only.
 
-The old folder is a reference for a person only. Nothing is converted from it by a tool.
+| Base | Size | Goes in as sources | Stays out |
+|---|---|---|---|
+| `aidc-bi-kb` (AIDC) | 169 files, 1.2 MB | `BI/` (121 pages, 12 named `SAMPLE-`), `seed/` (24: 22 CSV seeds per the record), `sources/compute.md`, `sources/power_cooling.md`, `README.md` | `tools/` (18), `package.json`, `package-lock.json`, `Dashboard-AIDC.md` |
+| `Aerospace-BI-KB` (aerospace) | 101 files, 493 KB | `BI/` without `_Templates/` (53 of 72), `seed/` (22 CSV), `README.md` | `tools/` (5), `BI/_Templates/`, `Dashboard-Aerospace.md` |
+| `robotics_kb_sample` (robotics) | 134 files, 586 KB | `BI/` without `_Templates/` (105 of 116), `tools/samples/robotics/*.csv` (12: its seeds, though under `tools/`), `README.md`, `PATCH-NOTES.md` | the rest of `tools/`, `BI/_Templates/`, `build_sample.py`, `Dashboard-Robotics.md` |
+| `Wireless-Module-BI-KB-SAMPLE` (wireless module) | 87 files, 463 KB | `BI/` without `_Templates/` (58 of 77, 47 named `SAMPLE-`), `README.md` | `tools/` (6), `tests/` (3), `BI/_Templates/` |
+| `BI_Vault_Example` (wireless example) | 154 files, 2.3 MB | `BI/` without `_Templates/` (105 of 115), `tools/samples/*.csv` (3, sample data), `README.md` | `.obsidian/` (13), the rest of `tools/` (with `__pycache__`, `prompts`), `BI/_Templates/` |
+
+Largest file under 1.4 MB; no PDFs. Reasons for the stays-out column: build tools and tests are not knowledge,
+`_Templates/` are Templater templates with no data (`<% tp.file.title %>`), and `Dashboard-*.md` are generated Dataview
+pages the vault's Dashboard replaces. **Points for the owner:** `SAMPLE-` pages are made-up examples, so keep them or leave
+them out; `BI_Vault_Example/tools/samples` likewise; `tools/name-aliases*.json` (AIDC, aerospace) stay out as files but hold
+the name aliases to carry over.
+
+Two AIDC reports: `C:\Users\Chi_L\OneDrive - Rohde & Schwarz\BI_Knowledge\market-bi\applications\aidc-compute.md` and
+`aidc-power_cooling.md`. Read only; copy out, never move. Compare them with `aidc-bi-kb/sources/compute.md` and
+`power_cooling.md` first, by content: add one copy of each.
+
+Schema: built in, `bi.schema/v1.1@2.0.0` (21 types; `segment` already has the 11 market segments). The old folder
+`market-bi` is a reference for a person only: nothing is converted from it by a tool.
+
+**Open, D3: two bases have no way in as cards yet.** The page imports cards from CSV and tables, or extracts them by AI from
+documents; **no route reads an Obsidian card page's frontmatter**, which is what these bases hold. AIDC and aerospace have
+seed CSVs, and robotics has its samples. Wireless module has no CSV at all, and wireless example only three samples. Options:
+(a) AI extraction over those pages (models, cost, and it re-reads what is already structured); (b) a small built-in
+importer for card pages, written and tested first (recommended: deterministic, and the pages stay the evidence); (c) export
+them to CSV by hand, once, outside AEP. The owner chooses before step 8.
 
 ## 4. Pre-checks a script can run beforehand
 
@@ -40,11 +63,13 @@ downloads nothing. **The owner runs it, or asks for it to be run, on the real pa
 workspaces do not.
 
 ```powershell
+$f = "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\files"
 python scripts/r6_precheck.py `
-  --shared "<OneDrive - Rohde & Schwarz>\BI_Knowledge" `
-  --base "<wireless>" --base "<robotics>" --base "<aerospace>" --base "<module>" --base "<aidc-bi-kb>" `
-  --wiki-copy "$env:LOCALAPPDATA\AEP\rs-k-v1.0.3" --real-wiki "<RS_Knowledge>" `
-  --wiki-target "<folder for the new wiki repository>" `
+  --shared "C:\Users\Chi_L\OneDrive - Rohde & Schwarz\BI_Knowledge" `
+  --base "$f\BI_Vault_Example" --base "$f\robotics_kb_sample" --base "$f\Aerospace-BI-KB" `
+  --base "$f\Wireless-Module-BI-KB-SAMPLE" --base "$f\aidc-bi-kb" `
+  --wiki-copy "$env:LOCALAPPDATA\AEP\rs-k-v1.0.3" --real-wiki "<RS_Knowledge, the real folder>" `
+  --wiki-target "C:\Users\Chi_L\OneDrive - Rohde & Schwarz\Wiki_Knowledge" `
   --workspace "<AEP workspace>" --vault-id market-intel
 ```
 
@@ -60,13 +85,7 @@ python scripts/r6_precheck.py `
 
 Exit code 0: nothing failed. Do not start on 1.
 
-**Measure the sizes, which set the per-file limit (read only, the owner runs it on each folder):**
-
-```powershell
-Get-ChildItem -LiteralPath "<folder>" -Recurse -File | Measure-Object Length -Sum -Maximum | Select-Object Count, Sum, Maximum
-```
-
-**Check who can open the SharePoint folder before the first push: everyone with access can read every original, permanently.**
+People with write permission on the SharePoint folder can open what is in it; company IT decides who that is.
 
 Also, by hand: `GET /api/tasks` and `/api/activity` are idle before any
 restart; a free afternoon, since the extraction uses real models.
@@ -78,18 +97,18 @@ that flow is changing, so read the current ones on the page.
 
 | # | Step | Checkpoint before going on |
 |---|---|---|
-| 1 | Run §4, including the sizes. Still needed from the owner: the four base paths, the per-file limit, and a folder for the new wiki repository. | Exit code 0; each recorded in `docs/DECISIONS.md` |
+| 1 | Run §4. Settle the open points of §3 with the owner and record them in `docs/DECISIONS.md`. | Exit code 0; each recorded |
 | 2 | Restart Agent Web if it predates the build flow (check `/api/tasks` first, AGENTS rule 19). | Page shows the build-flow steps |
 | 3 | Rename the old folder to `market-bi.v4-old` in Explorer. Wait for OneDrive to finish. | Old folder present under the new name on OneDrive's site; nothing deleted |
 | 4 | Knowledge > BI > 建立與匯入 > 建立共用知識庫（vault）: id `market-intel`, in `BI_Knowledge`, schema `bi.schema/v1.1` (2.0.0), author `leo.chi`. | `repo.json` in the folder; `/api/knowledge/askable` lists it with `nothing_pushed` |
-| 5 | Step 1: add the AIDC base's sources, let them become Markdown. They reach the shared folder with the push (D2). | Each source has Markdown; spot-check two tables |
+| 5 | Step 1: add the AIDC base's sources (§3's list), let them become Markdown. They reach the shared folder with the push (D2). | Each source has Markdown; spot-check two tables |
 | 6 | Step 2: Session A only if the schema must change; Session B for the skills. Move the manager's reading rules there. | The owner reviewed every schema change and skill |
 | 7 | Import the AIDC seeds first: preview, apply, commit with a purpose. | 22 CSVs → 323 cards; §7's AIDC numbers match |
 | 8 | Repeat 5–7 for robotics, aerospace, wireless module, wireless example. **One commit per base.** | After each: quality check read; new conflicts settled (D3); no fact without a source |
 | 9 | Fix the links written in another spelling of a merged card (28 last time), as field edits with a reason. | Quality check's unresolved links explained |
 | 10 | Step 3: benchmark questions and the Dashboard (the analysis AI, or an Atlas import of the order). | Owner approved each question and the order |
 | 11 | Testing: run the benchmark on the working copy. | No regression the owner did not accept |
-| 12 | Check who can open the SharePoint folder. Then push. | `status`: ahead 0, no conflict; the owner sees the commits and the originals under `sources/` on OneDrive |
+| 12 | Push. | `status`: ahead 0, no conflict; the owner sees the commits and the originals under `sources/` on OneDrive |
 | 13 | Tag `2026q4-r6`, publish with confirmation. | `/api/knowledge/askable` says 可以在對話裡問, `reads.tag` is the tag |
 | 14 | In a new general chat: ask a cross-domain question and a BI question that needs SQL. | The answer carries `資料來源：知識庫 vault-<id> 發佈版本 <tag>`; numbers match the Dashboard; `bi__query` was on (Skill, capability, grant) |
 | 15 | Atlas: open the panels of the new vault. | Panels show the published analyses (Atlas layouts stay personal) |
