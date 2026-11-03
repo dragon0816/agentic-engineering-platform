@@ -48,6 +48,10 @@ MAX_EXCERPT = 500
 WRITABLE = ("create", "update")
 
 
+#: The method of a run started by a re-run (`rerun.py`).
+RERUN_PREFIX = "rerun:"
+
+
 def _table_csv(table: dict[str, Any]) -> tuple[str, list[int]]:
     """A Markdown table as CSV text for the Case A reader, and the Markdown
     line of each data row it will number from 2 (blank rows are skipped, as
@@ -507,6 +511,11 @@ def public(candidate: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in candidate.items() if k not in ("choice", "synthetic", "value_errors")}
 
 
+def listed(run: dict[str, Any]) -> bool:
+    """A re-run's runs are shown by the re-run, not among the runs to review."""
+    return not str(run.get("method_ref") or "").startswith(RERUN_PREFIX)
+
+
 def run_view(staging: Staging, run_id: str) -> dict[str, Any]:
     run = staging.run_row(run_id)
     if run is None:
@@ -540,7 +549,7 @@ def run_view(staging: Staging, run_id: str) -> dict[str, Any]:
 
 def runs(workspace: Path, dataset: str) -> list[dict[str, Any]]:
     staging = Staging(workspace, dataset)
-    return [run_view(staging, run["id"]) for run in staging.run_rows()]
+    return [run_view(staging, run["id"]) for run in staging.run_rows() if listed(run)]
 
 
 def run_detail(workspace: Path, dataset: str, run_id: str) -> dict[str, Any]:

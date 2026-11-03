@@ -2734,6 +2734,17 @@ tr:last-child td { border-bottom: none; }
               會搬到這裡）。AI 判讀時依來源所在的資料夾選用；固定的證據規則一律先套用，
               不能被改掉。</p>
             <div id="bi-b-sk-list"></div>
+            <div class="bi-step" id="bi-b-rerun">
+              <h5>改完規則後重跑</h5>
+              <p class="bi-meta">用現在的規則重讀來源，只列出和卡片不同的值；你確認的才會寫入。
+                模型這次沒讀到的值不會被清掉。</p>
+              <label class="bi-label" for="bi-b-rr-app">應用資料夾</label>
+              <select id="bi-b-rr-app"></select>
+              <div id="bi-b-rr-sources"></div>
+              <div class="bi-actions">
+                <button class="bi-btn" id="bi-b-rr-count" type="button">看要重跑幾份</button></div>
+              <div id="bi-b-rr-out"></div>
+            </div>
             <div class="bi-actions">
               <button class="bi-btn" id="bi-b-sk-new" type="button">新增擷取規則</button></div>
             <form id="bi-b-sk-form" class="bi-step" hidden>
@@ -13794,6 +13805,116 @@ async function biSkills(vaultId) {
     pick.value = chosen.folder;
   }
   el("bi-b-folder-box").hidden = false;
+  biRerunForm(reply.folders || []);
+}
+
+function biRerunApplication(folder) {
+  const parts = folder.split("/");
+  if (parts[0] === "applications" && parts[2] === "sources") return parts[1];
+  if (parts[0] === "library" && parts[2] === "sources") return "library/" + parts[1];
+  if (parts[0] === "sources" && parts[1] === "applications" && parts[2]) return parts[2];
+  return "";
+}
+
+function biRerunForm(folders) {
+  const pick = el("bi-b-rr-app"), kept = pick.value;
+  const names = [...new Set(folders.map(biRerunApplication).filter(Boolean))];
+  pick.replaceChildren(...["", ...names].map((name) => {
+    const option = bh("option", "", name || "（選下面的來源）"); option.value = name;
+    return option;
+  }));
+  if (names.includes(kept)) pick.value = kept;
+  const box = el("bi-b-rr-sources"); box.replaceChildren();
+  for (const source of bi.build.sources || []) {
+    const tick = document.createElement("input"); tick.type = "checkbox"; tick.value = source.id;
+    box.append(bh("label", "bi-meta", tick, " " + source.name), document.createElement("br"));
+  }
+}
+
+function biRerunScope() {
+  const application = el("bi-b-rr-app").value;
+  const scope = {dataset: biDataset()};
+  if (application) return {...scope, application, all: true};
+  const ticked = [...el("bi-b-rr-sources").querySelectorAll("input:checked")];
+  return {...scope, sources: ticked.map((t) => t.value)};
+}
+
+async function biRerunCount() {
+  const out = el("bi-b-rr-out"); out.replaceChildren();
+  const scope = biRerunScope();
+  try {
+    const reply = await biCall("/api/bi/reruns/preview", scope);
+    const go = biButton("開始重跑", () => biRerunStart(scope), "go");
+    go.id = "bi-b-rr-start";
+    out.append(bh("p", "", "共 " + reply.count + " 份來源，每份都會呼叫模型："
+      + reply.sources.map((s) => s.name).join("、")), go);
+  } catch (failure) { out.append(bh("p", "bi-err", failure.message)); }
+}
+
+async function biRerunStart(scope) {
+  const out = el("bi-b-rr-out"); out.replaceChildren(bh("p", "bi-meta", "重跑中…"));
+  try {
+    const reply = await biCall("/api/bi/reruns/preview", {...scope, start: true});
+    await biRerunPoll(reply.rerun.id);
+  } catch (failure) { out.replaceChildren(bh("p", "bi-err", failure.message)); }
+}
+
+async function biRerunPoll(id) {
+  const out = el("bi-b-rr-out");
+  const reply = await call("/api/bi/reruns/" + id + "?dataset=" + encodeURIComponent(biDataset()));
+  const rerun = reply.rerun;
+  if (rerun.status === "running") {
+    out.replaceChildren(bh("p", "bi-meta", "重跑中："
+      + rerun.runs.filter((r) => r.status !== "extracting").length + " / " + rerun.runs.length));
+    setTimeout(() => biRerunPoll(id).catch((failure) =>
+      out.replaceChildren(bh("p", "bi-err", failure.message))), 2000);
+    return;
+  }
+  biRerunList(rerun);
+}
+
+function biRerunList(rerun) {
+  const out = el("bi-b-rr-out"); out.replaceChildren();
+  for (const run of rerun.runs) {
+    if (run.failures || run.error || run.status === "failed") {
+      out.append(bh("p", "bi-warn", run.source + "：沒有全部讀完，這裡只比對讀到的部分。"));
+    }
+  }
+  if (!rerun.items.length) {
+    out.append(bh("p", "", "沒有和卡片不同的值，不需要寫入。")); return;
+  }
+  const list = bh("ul", "bi-log");
+  const ticks = [];
+  for (const item of rerun.items) {
+    const tick = document.createElement("input"); tick.type = "checkbox"; tick.value = item.id;
+    tick.disabled = Boolean(item.problem);
+    ticks.push(tick);
+    const proof = (item.evidence || []).map((e) => e.excerpt).filter(Boolean).join("；");
+    const skills = (item.skills || []).map((s) => s.name + " 第 " + s.revision + " 版").join("、");
+    const row = bh("li", "", bh("label", "", tick, " ", bh("strong", "", item.name), "・"
+      + (item.label || item.field) + "：「" + biValue(item.current) + "」→「"
+      + biValue(item.new) + "」"));
+    if (item.person_set) row.append(" ", biBadge("目前的值是人工設定", "warn"));
+    if (item.new_card) row.append(" ", biBadge("新卡片", "dim"));
+    row.append(bh("p", "bi-meta", item.source + (skills ? "・" + skills : "")
+      + (proof ? "・「" + proof + "」" : "")));
+    if (item.problem) row.append(bh("p", "bi-warn", item.problem));
+    list.append(row);
+  }
+  const done = biButton("確認勾選的差異", async () => {
+    const items = ticks.filter((t) => t.checked).map((t) => t.value);
+    try {
+      const reply = await biCall("/api/bi/reruns/" + rerun.id + "/confirm",
+        {dataset: biDataset(), items});
+      out.replaceChildren(bh("p", "", "已寫入 " + reply.commit.values + " 個值，其他沒有變動。"));
+      biLoadCards();
+    } catch (failure) {
+      out.append(bh("p", "bi-err", failure.code === "cards_changed"
+        ? "有卡片在比對後被修改，沒有寫入任何值；請重跑。" : failure.message));
+    }
+  }, "go");
+  done.id = "bi-b-rr-confirm";
+  out.append(list, bh("div", "bi-actions", done));
 }
 
 function biSkillForm(item) {
@@ -13813,6 +13934,7 @@ function biSkillForm(item) {
 const biList = (text) => text.split(/[,，、\n]/).map((s) => s.trim()).filter(Boolean);
 
 el("bi-b-sk-new").addEventListener("click", () => biSkillForm(null));
+el("bi-b-rr-count").addEventListener("click", biRerunCount);
 
 // Session B on a vault skill (knowledge repositories R3): the AI suggests a new
 // text; 「套用」 stages the next revision, which is committed and pushed in 「版本」.

@@ -335,6 +335,8 @@ class Stub:
             if len(parts) == 6 and parts[5] == "history":
                 return 200, {"history": item["history"]}
             return 200, {k: item[k] for k in ("card", "fields", "links", "proposals")}
+        if route == "/api/bi/reruns/abc/confirm":
+            return 200, {"ok": True, "commit": {"values": len(body["items"])}}
         if route in ("/api/bi/corrections/preview", "/api/bi/corrections/apply"):
             preview = route.endswith("preview")
             given = body if preview else json.loads(body["text"])
@@ -811,6 +813,24 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
             "!document.querySelector('[data-stale=true]')"
             " && document.getElementById('bi-detail-title') !== null"
         )
+        # -- re-run: only the differences, a blocked one cannot be ticked --------------------
+        run(
+            "biRerunList({id: 'abc', runs: [{source: 'a.md', failures: 1, status: 'partial'}],"
+            " items: [{id: 'i1', name: 'TSN', field: 'body', current: '舊', new: '新',"
+            " person_set: true, source: 'a.md', skills: [{name: 'x', revision: 2}],"
+            " evidence: [{excerpt: '原文'}]},"
+            " {id: 'i2', name: 'TSN', field: 'scope', new: '壞', problem: '不能寫入',"
+            " source: 'a.md'}]})"
+        )
+        listed = str(run("document.getElementById('bi-b-rr-out').textContent"))
+        assert "「舊」→「新」" in listed and "目前的值是人工設定" in listed
+        assert "x 第 2 版" in listed and "原文" in listed and "沒有全部讀完" in listed
+        assert run("document.querySelectorAll('#bi-b-rr-out input:disabled').length") == 1
+        run("document.querySelector('#bi-b-rr-out input:not(:disabled)').checked = true")
+        run("document.getElementById('bi-b-rr-confirm').click()")
+        wait("document.getElementById('bi-b-rr-out').textContent.includes('已寫入 1 個值')")
+        confirmed = [body for _m, route, body in stub.calls if route.endswith("/confirm")][-1]
+        assert confirmed == {"dataset": "demo", "items": ["i1"]}
         # -- 在 Atlas 開啟: a stopped Atlas is named, no dead tab ------------------------------
         run("document.querySelector('#bi-views [data-bi-view=dashboard]').click()")
         run("document.getElementById('bi-atlas-set').open = true")
