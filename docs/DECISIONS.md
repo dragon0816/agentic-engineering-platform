@@ -6237,5 +6237,8 @@ Design `docs/phases/BI_CARD_PAGE_IMPORT.md`.
 - **R6's order:** AIDC and aerospace, seeds then pages, with same-named cards merging and conflicts settled in review; robotics, pages only (100
   cards), its seed CSVs not imported; wireless module and wireless example, pages, and the example's 3 sample CSVs ticked.
 
-**Not settled:** a combined dry run found that an import overwrites every value not set by a person. 641 cards, 0 proposals, 49 scalar values overwritten and 42
-lists that lost items. So "conflicts settled in review" does not hold yet; counts in `docs/runbooks/R6_MARKET_BI.md` §3. For the owner.
+- **The card-page import merges** (orchestrator, carrying out D3, 2026-11-03). A combined dry run had found that an import overwrites every value not set by a
+  person: 49 scalars overwritten and 42 lists losing items. In this path, seed CSVs included: an empty value is filled, lists are joined, a differing scalar becomes
+  a proposal, and a derived field (`updated`) raises none. A card keeps its sample mark; a row marked differently only proposes. Rejected: the same rule for every
+  import (changes the existing CSV and run paths); keeping the overwrite. The combined run then gave 641 cards and 31 proposals, runbook §3.
+- **Q3 is closed** (owner): the page states no retention period.

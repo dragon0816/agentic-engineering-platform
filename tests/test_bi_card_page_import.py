@@ -203,6 +203,167 @@ def test_a_vault_gets_one_commit_of_sources_and_one_of_cards(tmp_path: Path) -> 
     assert sum(1 for k in units if k.startswith(vault_sources.PREFIX)) == 3
 
 
+# -- merging onto an existing card --------------------------------------------------------
+
+BASE_A = """---
+type: technology
+name: FAKE-MERGE
+standard_body: IEEE
+maturity: growth
+affects_nodes: ["L1-A", "L2-B"]
+updated: 2026-01-05
+---
+"""
+BASE_B = """---
+type: technology
+name: FAKE-MERGE
+standard_body: IETF
+spec_milestones: ["FICT-2027"]
+affects_nodes: ["L2-B", "L3-C"]
+updated: 2026-03-01
+---
+"""
+
+
+def _merge(ws: Path, dataset: str, name: str, text: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    answer = _preview(ws, dataset, [{"path": name, "text": text}])
+    return answer, _apply(ws, answer["preview_id"])
+
+
+def test_a_second_base_fills_joins_and_proposes_and_apply_does_what_the_preview_said(
+    tmp_path: Path,
+) -> None:
+    ws, dataset = _dataset(tmp_path)
+    _merge(ws, dataset, "a/FAKE-MERGE.md", BASE_A)
+    answer = _preview(ws, dataset, [{"path": "b/FAKE-MERGE-b.md", "text": BASE_B}])
+    row = _row(answer, "Technology", "FAKE-MERGE")
+    assert row["action"] == "update"
+    assert row["merge"]["fill"] == ["spec_milestones"]
+    assert row["merge"]["join"] == ["affects_nodes"]
+    assert row["merge"]["proposal"] == ["standard_body"]
+    assert row["merge"]["bookkeeping"] == ["updated"]  # a derived field raises no proposal
+    merge = answer["summary"]["merge"]
+    assert (merge["fill"], merge["join"], merge["proposal"], merge["bookkeeping"]) == (1, 1, 1, 1)
+    done = _apply(ws, answer["preview_id"])
+    assert done["applied"]["proposals"] == 1
+    store = BiStore(ws, dataset)
+    card = store.find("Technology", "FAKE-MERGE")
+    assert card is not None
+    fields = store.fields(card["id"])
+    assert fields["standard_body"]["value"] == "IEEE"  # never overwritten
+    assert fields["spec_milestones"]["value"] == ["FICT-2027"]
+    assert fields["affects_nodes"]["value"] == ["L1-A", "L2-B", "L3-C"]  # nothing lost
+    assert fields["updated"]["value"] == "2026-03-01"  # the later one
+    assert fields["maturity"]["value"] == "growth"  # the new page does not name it: kept
+    pending = _ok(_call(ws, "GET", f"/api/bi/cards/{card['id']}", dataset=dataset))["proposals"]
+    assert [(p["field"], p["value"]) for p in pending] == [("standard_body", "IETF")]
+
+
+def test_an_older_bookkeeping_date_does_not_move_it_back(tmp_path: Path) -> None:
+    ws, dataset = _dataset(tmp_path)
+    _merge(ws, dataset, "b.md", BASE_B)
+    older = BASE_A.replace("IEEE", "IETF")
+    answer, _ = _merge(ws, dataset, "a.md", older)
+    store = BiStore(ws, dataset)
+    card = store.find("Technology", "FAKE-MERGE")
+    assert card is not None and store.fields(card["id"])["updated"]["value"] == "2026-03-01"
+    assert _row(answer, "Technology", "FAKE-MERGE")["merge"]["bookkeeping"] == ["updated"]
+
+
+def test_a_value_a_person_set_stays_theirs(tmp_path: Path) -> None:
+    ws, dataset = _dataset(tmp_path)
+    _merge(ws, dataset, "a.md", BASE_A)
+    card = BiStore(ws, dataset).find("Technology", "FAKE-MERGE")
+    assert card is not None
+    _ok(_call(ws, "POST", f"/api/bi/cards/{card['id']}/field",
+              {"dataset": dataset, "field": "standard_body", "value": "PERSON",
+               "base_version": card["version"]}, actor="alice"))  # fmt: skip
+    answer, done = _merge(ws, dataset, "b.md", BASE_B)
+    assert _row(answer, "Technology", "FAKE-MERGE")["merge"]["human_kept"] == ["standard_body"]
+    assert done["applied"]["proposals"] == 1
+    store = BiStore(ws, dataset)
+    assert store.fields(card["id"])["standard_body"]["value"] == "PERSON"
+
+
+def test_each_base_keeps_its_evidence_on_the_merged_card(tmp_path: Path) -> None:
+    ws, dataset = _dataset(tmp_path)
+    _merge(ws, dataset, "a/first.md", BASE_A)
+    same = BASE_A.replace("updated: 2026-01-05\n", "")  # another base, same values
+    answer, done = _merge(ws, dataset, "b/second.md", same)
+    assert answer["summary"]["unchanged"] == 1 and done["written"] is True
+    store = BiStore(ws, dataset)
+    card = store.find("Technology", "FAKE-MERGE")
+    assert card is not None
+    named = {e["source_name"] for e in store.evidence(card["id"]) if e["field"] == "standard_body"}
+    assert named == {"first.md", "second.md"}
+    # Importing the same page again adds nothing.
+    assert _merge(ws, dataset, "b/second.md", same)[1]["written"] is False
+    # The proposal's evidence does not sit on the value it did not change.
+    _merge(ws, dataset, "c/third.md", BASE_B)
+    third = {e["field"] for e in store.evidence(card["id"]) if e["source_name"] == "third.md"}
+    assert "standard_body" not in third and "spec_milestones" in third
+
+
+def test_rows_of_one_request_merge_with_each_other(tmp_path: Path) -> None:
+    ws, dataset = _dataset(tmp_path)
+    answer = _preview(
+        ws, dataset, [{"path": "a.md", "text": BASE_A}, {"path": "b.md", "text": BASE_B}]
+    )
+    _apply(ws, answer["preview_id"])
+    store = BiStore(ws, dataset)
+    card = store.find("Technology", "FAKE-MERGE")
+    assert card is not None
+    fields = store.fields(card["id"])
+    assert fields["affects_nodes"]["value"] == ["L1-A", "L2-B", "L3-C"]
+    assert fields["standard_body"]["value"] == "IEEE"
+
+
+def test_a_card_that_moved_since_the_preview_refuses_the_whole_apply(tmp_path: Path) -> None:
+    ws, dataset = _dataset(tmp_path)
+    _merge(ws, dataset, "a.md", BASE_A)
+    answer = _preview(ws, dataset, [{"path": "b.md", "text": BASE_B}])
+    _merge(ws, dataset, "c.md", BASE_A.replace("L1-A", "L9-Z"))
+    status, reply = _call(
+        ws, "POST", "/api/bi/import/pages/apply", {"preview_id": answer["preview_id"]}
+    )
+    assert status != 200 and reply["code"] == "cards_changed"
+
+
+def test_a_sample_row_never_marks_a_real_card_nor_a_real_row_clears_a_sample(
+    tmp_path: Path,
+) -> None:
+    ws, dataset = _dataset(tmp_path)
+    _merge(ws, dataset, "real.md", BASE_A)
+    worded = "---\ntype: technology\nname: FAKE-MERGE\nspec_milestones: [待查證]\n---\n"
+    answer, _ = _merge(ws, dataset, "worded.md", worded)
+    (conflict,) = answer["mark_conflicts"]
+    assert conflict["card_is_sample"] is False and conflict["row_is_sample"] is True
+    store = BiStore(ws, dataset)
+    card = store.find("Technology", "FAKE-MERGE")
+    assert card is not None and card["synthetic"] == 0  # a real card stays real
+    assert "spec_milestones" not in store.fields(card["id"])  # its value only proposes
+    # The other way: a real page's value does not make a sample into fact.
+    _merge(ws, dataset, "sample.md", "---\ntype: technology\nname: FAKE-S\nmaturity: (範例)\n---\n")
+    real = "---\ntype: technology\nname: FAKE-S\nstandard_body: IEEE\n---\n"
+    answer, _ = _merge(ws, dataset, "realer.md", real)
+    assert answer["summary"]["mark_conflicts"] == 1
+    sample = store.find("Technology", "FAKE-S")
+    assert sample is not None and sample["synthetic"] == 1
+    assert "standard_body" not in store.fields(sample["id"])
+
+
+def test_a_seed_csv_merges_the_same_way_in_this_path(tmp_path: Path) -> None:
+    ws, dataset = _dataset(tmp_path)
+    _merge(ws, dataset, "a.md", BASE_A)
+    csv = "名稱,標準組織\nFAKE-MERGE,IETF\n"
+    answer, done = _merge(ws, dataset, "seed/technology.csv", csv)
+    assert _row(answer, "Technology", "FAKE-MERGE")["merge"]["proposal"] == ["standard_body"]
+    assert done["applied"]["proposals"] == 1
+    card = BiStore(ws, dataset).find("Technology", "FAKE-MERGE")
+    assert card is not None
+    assert BiStore(ws, dataset).fields(card["id"])["standard_body"]["value"] == "IEEE"
+
+
 # -- samples ------------------------------------------------------------------------------
 
 

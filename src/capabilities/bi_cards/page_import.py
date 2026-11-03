@@ -9,6 +9,7 @@ their evidence, and the rows are written in one transaction through `commit_run`
 
 from __future__ import annotations
 
+import hashlib
 import re
 import threading
 import uuid
@@ -29,6 +30,10 @@ MAX_PREVIEWS = 10
 _KEY = re.compile(r"^([A-Za-z_][\w-]*)\s*:\s*(.*)$")
 _ITEM = re.compile(r"^\s*-\s*(.*)$")
 _LINK = re.compile(r"^\[\[([^\]|]+)(?:\|[^\]]*)?\]\]$")
+
+
+#: What a field did in a merge, as the preview counts it.
+MERGES = ("fill", "join", "proposal", "bookkeeping", "human_kept", "same")
 
 
 def _problem(path: str, code: str, message: str, line: int | None = None) -> dict[str, Any]:
@@ -180,6 +185,9 @@ class PagePreview:
     parsed: dict[str, Page]
     problems: list[dict[str, Any]]
     skipped: list[dict[str, str]]
+    #: For each preview, row number -> the card version the merge was planned on.
+    versions: list[dict[int, int | None]] = field(default_factory=list)
+    mark_conflicts: list[dict[str, Any]] = field(default_factory=list)
 
     def to_api(self) -> dict[str, Any]:
         counts = {"create": 0, "update": 0, "unchanged": 0, "skip": 0, "warnings": 0}
@@ -187,6 +195,11 @@ class PagePreview:
             for key, value in item.summary().items():
                 counts[key] = counts.get(key, 0) + value
         planned = [p for item in self.previews for p in item.planned.values()]
+        merged = dict.fromkeys(MERGES, 0)
+        for item in self.previews:
+            for row in item.rows:
+                for name, fields in (row.get("merge") or {}).items():
+                    merged[name] += len(fields)
         return {
             "preview_id": self.preview_id,
             "summary": {
@@ -195,7 +208,10 @@ class PagePreview:
                 "samples": sum(1 for p in planned if p.synthetic),
                 "problems": len(self.problems),
                 "skipped": len(self.skipped),
+                "merge": merged,
+                "mark_conflicts": len(self.mark_conflicts),
             },
+            "mark_conflicts": self.mark_conflicts,
             "types": [
                 {
                     "entity_type": item.entity_type,
@@ -243,7 +259,116 @@ def _checked_pages(given: Any) -> list[tuple[str, str]]:
         if not isinstance(path, str) or not path or not isinstance(text, str):
             raise BiStoreError("pages_invalid", "每個檔案都要有 path 和 text")
         pages.append((path.replace("\\", "/"), text))
-    return pages
+    return sorted(pages)
+
+
+def _later(new: Any, old: Any) -> bool:
+    return str(new) > str(old)
+
+
+def _joined(old: Any, new: Any) -> list[Any]:
+    """The old items, then the new ones not there yet: nothing is lost."""
+    joined = list(old) if isinstance(old, list) else [old]
+    seen = {str(value) for value in joined}
+    for value in new if isinstance(new, list) else [new]:
+        if str(value) not in seen:
+            seen.add(str(value))
+            joined.append(value)
+    return joined
+
+
+def merge_rows(
+    store: BiStore, reg: Registry, previews: list[tuple[importer.Preview, list[str]]]
+) -> tuple[list[dict[int, int | None]], list[dict[str, Any]]]:
+    """Plan each row as a merge onto what its card holds, in place (design §4): an
+    empty value is filled, a list joined, a differing scalar becomes a proposal, and a
+    derived field (`updated`…) raises none. A value a person set stays theirs. A card
+    keeps its sample mark, and a row marked differently only proposes, so a real
+    card never turns into a sample, nor a sample into fact, without a person."""
+    state: dict[tuple[str, str], dict[str, Any]] = {}
+    versions: list[dict[int, int | None]] = []
+    conflicts: list[dict[str, Any]] = []
+    for item, paths in previews:
+        planned_versions: dict[int, int | None] = {}
+        entity = reg.type(item.entity_type) if item.entity_type in reg.types else None
+        rows = {row["row"]: row for row in item.rows}
+        for number, planned in sorted(item.planned.items()):
+            if not planned.canonical_key:
+                continue
+            definition = entity if entity is not None else reg.type(planned.entity_type)
+            key = (planned.entity_type, planned.canonical_key)
+            known = state.get(key)
+            if known is None:
+                card = store.find(*key)
+                known = state[key] = {
+                    "fields": {} if card is None else store.fields(card["id"]),
+                    "version": None if card is None else int(card["version"]),
+                    "synthetic": None if card is None else bool(card["synthetic"]),
+                }
+            planned_versions[number] = known["version"]
+            row = rows[number]
+            if known["synthetic"] is None:  # new with this request: all of it is written
+                known["synthetic"] = bool(planned.synthetic)
+                for name, value in planned.values.items():
+                    known["fields"][name] = {"value": value, "kind": "import"}
+                continue
+            mismatch = known["synthetic"] != bool(planned.synthetic)
+            if mismatch:
+                conflicts.append({
+                    "entity_type": planned.entity_type, "key": planned.canonical_key,
+                    "path": paths[number - 2], "card_is_sample": known["synthetic"],
+                    "row_is_sample": bool(planned.synthetic),
+                })  # fmt: skip
+            values: dict[str, Any] = {}
+            propose: set[str] = set()
+            merged: dict[str, list[str]] = {name: [] for name in MERGES}
+            for name, value in planned.values.items():
+                stored = known["fields"].get(name)
+                item_def = definition.get(name)
+                if stored is None:
+                    if mismatch:
+                        values[name] = value
+                        propose.add(name)
+                        merged["proposal"].append(name)
+                    else:
+                        values[name] = value
+                        known["fields"][name] = {"value": value, "kind": "import"}
+                        merged["fill"].append(name)
+                elif stored["value"] == value:
+                    values[name] = value  # kept for its evidence
+                    merged["same"].append(name)
+                elif stored["kind"] == "human":
+                    values[name] = value  # the store proposes it, as for any import
+                    merged["human_kept"].append(name)
+                elif item_def is not None and item_def.klass == "derived":
+                    if _later(value, stored["value"]):
+                        values[name] = value
+                        known["fields"][name] = {"value": value, "kind": "import"}
+                    merged["bookkeeping"].append(name)
+                elif mismatch:
+                    values[name] = value
+                    propose.add(name)
+                    merged["proposal"].append(name)
+                elif isinstance(value, list) or isinstance(stored["value"], list):
+                    union = _joined(stored["value"], value)
+                    values[name] = union
+                    known["fields"][name] = {"value": union, "kind": "import"}
+                    merged["same" if len(union) == len(stored["value"]) else "join"].append(name)
+                else:
+                    values[name] = value
+                    propose.add(name)
+                    merged["proposal"].append(name)
+            item.planned[number] = replace(
+                planned,
+                values=values,
+                propose=frozenset(propose),
+                synthetic=bool(known["synthetic"]),
+            )
+            row["merge"] = {name: fields for name, fields in merged.items() if fields}
+            writes = merged["fill"] or merged["join"] or merged["bookkeeping"]
+            row["action"] = "update" if writes or merged["proposal"] else "unchanged"
+        versions.append(planned_versions)
+    return versions, conflicts
 
 
 def preview(store: BiStore, given: Any, *, samples: bool = False) -> PagePreview:
@@ -324,6 +449,7 @@ def preview(store: BiStore, given: Any, *, samples: bool = False) -> PagePreview
             known.setdefault(planned.entity_type, set()).add(planned.canonical_key)
     problems[:] = [p for p in problems if p["code"] not in _TABLE_CODES]
     final = previews(known, renamed)
+    versions, conflicts = merge_rows(store, reg, final)
     result = PagePreview(
         preview_id=uuid.uuid4().hex[:12],
         dataset=store.dataset,
@@ -334,6 +460,8 @@ def preview(store: BiStore, given: Any, *, samples: bool = False) -> PagePreview
         parsed=parsed,
         problems=problems,
         skipped=skipped,
+        versions=versions,
+        mark_conflicts=conflicts,
     )
     _remember(result)
     return result
@@ -361,32 +489,52 @@ def _evidence(
     return found
 
 
+def _new_evidence(
+    store: BiStore, staging: Staging, planned: PlannedRow, text: str
+) -> set[str] | None:
+    """The fields this page has no evidence on yet; None when none of it is known."""
+    card = store.find(planned.entity_type, planned.canonical_key)
+    known = staging._source_by_digest(hashlib.sha256(text.encode("utf-8")).hexdigest())
+    if card is None or known is None:
+        return None
+    cited = {
+        item["field"] for item in store.evidence(card["id"]) if item["source_id"] == known["id"]
+    }
+    return set(planned.values) - cited
+
+
 def apply(
     store: BiStore, prepared: PagePreview, *, actor: str, folder: Any = None
 ) -> dict[str, Any]:
-    """Keep each file as a source and write every row in one transaction."""
+    """Keep each file as a source and write every row in one transaction, as the
+    preview planned: a card that moved since then refuses the whole (`cards_changed`)."""
     staging = Staging(store.workspace, store.dataset)
     rows: list[tuple[PlannedRow, str, int | None]] = []
     sources: dict[str, dict[str, Any]] = {}
-    for item, paths in zip(prepared.previews, prepared.origins, strict=True):
+    for index, (item, paths) in enumerate(zip(prepared.previews, prepared.origins, strict=True)):
         for number, planned in sorted(item.planned.items()):
             path = paths[number - 2]
             if not planned.canonical_key:
                 continue
             action = next((r["action"] for r in item.rows if r.get("row") == number), "create")
-            if action in ("skip", "unchanged"):
+            if action == "skip":
+                continue
+            # An unchanged row still brings this base's evidence to the merged card.
+            fresh = _new_evidence(store, staging, planned, prepared.pages[path])
+            if action == "unchanged" and fresh is not None and not fresh:
                 continue
             if path not in sources:
                 sources[path] = staging.add_source(
                     PurePosixPath(path).name, text=prepared.pages[path], folder=folder, actor=actor
                 )
-            current = store.find(planned.entity_type, planned.canonical_key)
             proof = _evidence(prepared, path, planned, sources[path], number)
+            if fresh is not None:
+                proof = {name: found for name, found in proof.items() if name in fresh}
             rows.append(
                 (
                     replace(planned, ref=path, evidence=proof),
                     f"page-{number}",
-                    None if current is None else int(current["version"]),
+                    prepared.versions[index].get(number),
                 )
             )
     if not rows:

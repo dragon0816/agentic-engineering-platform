@@ -6575,6 +6575,9 @@ Design `docs/phases/BI_CARD_PAGE_IMPORT.md`. Code `src/capabilities/bi_cards/pag
   `frontmatter_repeat`, `type_unknown`, and CSV's own for a `.csv`.
 - **`POST /api/bi/import/pages/apply`** `{preview_id, folder?}` → `{ok, written, sources, import_id?, applied?}`. Each file becomes a source; one run
   and one `commit_run`; one evidence row per value, `locator: {line, key}`, the frontmatter line as `excerpt`.
+- **Merge in this path:** each row of `types[].rows` carries `merge: {fill, join, proposal, bookkeeping, human_kept, same}` (field names), `summary.merge` the counts,
+  `mark_conflicts: [{entity_type, key, path, card_is_sample, row_is_sample}]` the rows whose sample mark differs from their card. `PlannedRow.propose` names the fields that become
+  proposals. Apply answers `cards_changed` when a card moved since the preview.
 - **Ticked rows** (`samples: true`) get the `SAMPLE-` name, never twice; links between them follow (`importer.preview` `links_renamed`).
 - **`importer.preview`** gains `rows` and `samples`; **`Registry.normalize`** takes a list as its items, without splitting them again.
 - **`QueryResult.sample_note`**: the host's line about example data, added under a chat answer by `with_bi_sources`, returned by `aep_bi_query`.

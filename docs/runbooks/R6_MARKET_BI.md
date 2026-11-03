@@ -76,27 +76,28 @@ commit of sources and one of cards.
 | Wireless module | Pages | |
 | Wireless example | Pages, and its 3 `tools/samples` CSVs with 「全部標成範例資料」 ticked: they get the `SAMPLE-` name, never twice | |
 
-The table above ran each base alone, so it cannot show what merging does. **Combined dry run** on a temp vault, in this order, with no model
-and nothing written to `files\` (2026-11-03):
+The table above ran each base alone. **Combined dry run** on a temp vault, in this order, with no model and nothing written to `files\`
+(2026-11-03). Same-named cards merge: an empty value is filled, a list joined with nothing lost, a differing scalar becomes a proposal for
+review, never an overwrite; a value a person set stays theirs (`docs/phases/BI_CARD_PAGE_IMPORT.md` §4):
 
-| Step | New | Updated | Existing values overwritten: scalar / lists losing items |
-|---|---|---|---|
-| AIDC seeds | 323 | 0 | 0 / 0 |
-| AIDC pages | 0 | 90 | 0 / 0 |
-| Aerospace seeds | 86 | 5 | 5 / 3 |
-| Aerospace pages | 0 | 44 | 14 / 2 |
-| Robotics pages | 94 | 6 | 5 / 13 |
-| Wireless module pages | 51 | 4 | 0 / 4 |
-| Wireless example pages | 79 | 13 | 24 / 15 |
-| Wireless example samples | 8 | 1 | 1 / 5 |
+| Step | New | Merged | Fills | Joins | Proposals | Fields of the proposals |
+|---|---|---|---|---|---|---|
+| AIDC seeds | 323 | 0 | 0 | 0 | 0 | |
+| AIDC pages | 0 | 90 | 90 | 0 | 0 | |
+| Aerospace seeds | 86 | 5 | 7 | 3 | 5 | `Ecosystem.role` 2, `Ecosystem.body` 2, `Competitor.body` 1 |
+| Aerospace pages | 0 | 44 | 62 | 2 | 12 | `Application.domain` 6, `Trend.domain` 4, `CustomerProduct.domain` 2 |
+| Robotics pages | 94 | 6 | 19 | 13 | 2 | `Ecosystem.node` 2 |
+| Wireless module pages | 51 | 4 | 3 | 4 | 0 | |
+| Wireless example pages | 79 | 13 | 8 | 14 | 11 | `Ecosystem.node` 5, `Ecosystem.role` 4, `Concept.category` 1, `Concept.one_liner` 1 |
+| Wireless example samples | 8 | 1 | 2 | 5 | 1 | `Competitor.pricing_position` 1 |
 
-**641 cards** (10/29's reference: 639), 85 marked as samples, 78 named `SAMPLE-`. It took about 3 minutes.
+**641 cards** (10/29: 639), 85 marked as samples, 78 named `SAMPLE-`, **31 proposals** (10/29: 7 scalar conflicts). 192 fills and 41 joins with nothing
+lost. No card and row disagreed about being a sample. It took about 5 minutes. For the session:
 
-**Blocker, not settled: same-named cards do not merge yet.** Importing over a card **overwrites** every value not set by a person. It raised 0
-proposals (10/29's script reported 7 scalar conflicts), and overwrote **49 scalar values and 42 lists that lost items**, for example
-`Application.domain` and `Ecosystem.role`: a multi-domain card keeps only the last base's domain. The preview shows each change, but apply writes
-them all, so "conflicts are settled in review" does not hold yet. Do not run steps 7–8 on real data until this is decided (`docs/DECISIONS.md`
-2026-11-03 "Sample names and the R6 import order").
+- **12 of the 31 proposals are `domain`**: `Application`, `Trend` and `CustomerProduct` hold one domain each in schema 2.0.0, so a card in two bases asks which. A
+  widening of those fields to lists would settle them all (Session A); that is the owner's call, not an import setting.
+- 10/29's 7 counted differently: its script kept the first name and joined lists, and it was over the old merged pages. So 31 and 7 are not the same measure.
+- The 2 cards more than 10/29's 639 have not been traced.
 
 The 7 pages with no name (4 robotics, 3 example) are listed in the preview and not imported; name them or leave them.
 
@@ -147,7 +148,7 @@ that flow is changing, so read the current ones on the page.
 | 4 | Knowledge > BI > 建立與匯入 > 建立共用知識庫（vault）: id `market-intel`, in `BI_Knowledge`, schema `bi.schema/v1.1` (2.0.0), author `leo.chi`. | `repo.json` in the folder; `/api/knowledge/askable` lists it with `nothing_pushed` |
 | 5 | Step 1: add the AIDC base's sources (§3's list), let them become Markdown. They reach the shared folder with the push (D2). | Each source has Markdown; spot-check two tables |
 | 6 | Step 2: Session A only if the schema must change; Session B for the skills. Move the manager's reading rules there. | The owner reviewed every schema change and skill |
-| 7 | Import the AIDC seeds first (`seed/`, the 22 card CSVs): preview, apply. Then its pages through the card-page importer (§3). **Not before the merge blocker in §3 is decided.** | 22 CSVs → 323 cards; §7's AIDC numbers match |
+| 7 | Import the AIDC seeds first (`seed/`, the 22 card CSVs): preview, apply. Then its pages through the card-page importer (§3). | 22 CSVs → 323 cards; §7's AIDC numbers match |
 | 8 | Repeat 5–7 in §3's order: aerospace, robotics, wireless module, wireless example. **Commits per import**, each with its sources in a commit of their own. | After each: quality check read; new conflicts settled (D3); no fact without a source |
 | 9 | Fix the links written in another spelling of a merged card (28 last time), as field edits with a reason. | Quality check's unresolved links explained |
 | 10 | Step 3: benchmark questions and the Dashboard (the analysis AI, or an Atlas import of the order). | Owner approved each question and the order |

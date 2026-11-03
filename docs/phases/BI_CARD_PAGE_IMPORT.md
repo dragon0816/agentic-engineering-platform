@@ -49,7 +49,23 @@ An unknown field is a column with status `unknown`; an invalid value is a row wa
 2. A run of kind `ingest` records the sources; `store.commit_run` writes every row in **one transaction and one import commit**,
    with one evidence row per value: the source, `locator: {line, key}`, the frontmatter line as `excerpt`, basis `fact`. So a base
    makes one commit of its sources and one of its cards (D3).
-3. A person's own value on a card is kept, as `store` already does: the page's value becomes a proposal.
+3. **Same-named cards merge** (owner's D3; `merge_rows`, in this path only, seed CSVs through it too; CSV and run paths elsewhere stay as they are):
+
+   | The card holds | This row has | Result | Preview counts it as |
+   |---|---|---|---|
+   | Nothing | A value | Written | `fill` |
+   | The same value | | Nothing changes; the page's evidence is added | `same` |
+   | A list, or the row has one | Other items | Joined, old items first, nothing lost | `join` |
+   | A different scalar | | **A proposal for review; never overwritten** | `proposal` |
+   | A value a person set | Anything else | Theirs stays; a proposal, as for any import | `human_kept` |
+   | A derived field | Another value | No proposal; the later value stays. In schema 2.0.0 that is only `updated` | `bookkeeping` |
+
+   Rows of one request merge with each other the same way. Apply does what the preview said: a card that moved since then refuses the whole
+   request (`cards_changed`).
+4. **Evidence from each base stays on the merged card**, also from a row that changed nothing. A proposal's evidence does not sit on the value it did not change.
+5. **Samples.** A card keeps its mark. A row whose mark differs from its card is listed in `mark_conflicts` and all its new and different values become
+   proposals. So another base's sample row cannot turn a real card into a sample, nor a real page turn a sample into fact, without a person. (`store`'s "once
+   marked stays marked" is not reached in this path, since the row takes its card's mark.) A combined dry run found none of these, so no count to weigh.
 
 Nothing here reaches a model, and nothing is written before the apply.
 

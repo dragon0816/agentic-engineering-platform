@@ -14177,7 +14177,15 @@ function biPagesPlan(plan) {
   const box = el("bi-b-pages-plan"), s = plan.summary;
   const lines = [bh("p", "", bh("strong", "", "新增 " + s.create + "、更新 " + s.update
     + "、不變 " + s.unchanged + "、略過 " + s.skip),
-    "（" + s.pages + " 頁，" + s.samples + " 張標成範例資料）")];
+    "（" + s.pages + " 頁，" + s.samples + " 張標成範例資料）"),
+    bh("p", "bi-meta", "和既有卡片合併：補空值 " + s.merge.fill + "、清單合併 " + s.merge.join
+      + "、不同的值轉成待審提議 " + s.merge.proposal + "（不會覆寫）、人工設定的值保留 "
+      + s.merge.human_kept + "。")];
+  if (plan.mark_conflicts.length) {
+    lines.push(bh("p", "bi-warn", plan.mark_conflicts.length
+      + " 張卡和這次的資料一邊是範例、一邊不是："
+      + "卡片維持原本的標記，值轉成待審提議，不會自動變成範例或事實。"));
+  }
   const unknown = plan.types.flatMap((t) => t.columns
     .filter((c) => c.status === "unknown" || c.status === "ignored")
     .map((c) => t.entity_type + "." + c.source));

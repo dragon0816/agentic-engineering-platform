@@ -149,7 +149,7 @@ orchestrator's on the integrated branches; do not run it here.
 
 **Later (2026-11-03).** S2–S9 of `docs/phases/BI_SOURCES_IN_REPOSITORY.md` are done on this branch, on `main` `8994e44e`; see
 `docs/TASKS.md`. The full suite has not run on them. **Later still (2026-11-03).** The card-page importer and sample marking: `docs/phases/BI_CARD_PAGE_IMPORT.md`. **Next action.** Orchestrator:
-rebase when it says, integrate and run the full suite. Owner before R6 steps 7–8: an import overwrites values not set by a person, so same-named cards do not merge yet (runbook §3).
+rebase when it says, integrate and run the full suite. Owner at R6: the 31 proposals, 12 of them `domain` (runbook §3).
 
 ## BI charts in the chat and the Dashboard's sources (2026-11-01, Claude Code)
 

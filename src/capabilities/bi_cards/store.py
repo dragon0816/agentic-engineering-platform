@@ -288,6 +288,9 @@ class PlannedRow:
     synthetic: bool
     #: The source of every value; `<file>#row<n>` when empty (Case A).
     ref: str = ""
+    #: Fields that become a proposal for review instead of being written (the
+    #: card-page import's merge, `page_import.merge_rows`).
+    propose: frozenset[str] = frozenset()
     #: Evidence per field: `{field: [{"source_id", "source_name", "locator",
     #: "excerpt", "basis"}]}`, recorded for the values written.
     evidence: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
@@ -705,7 +708,7 @@ class BiStore:
                 new = _dump(value)
                 if stored is not None and stored["value"] == new:
                     continue
-                if stored is not None and stored["kind"] == "human":
+                if name in planned.propose or (stored is not None and stored["kind"] == "human"):
                     pending = db.execute(
                         "SELECT 1 FROM proposals WHERE card_id = ? AND field = ? AND "
                         "value = ? AND status = 'pending'",
