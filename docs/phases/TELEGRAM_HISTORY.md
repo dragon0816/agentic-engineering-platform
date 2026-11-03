@@ -168,8 +168,8 @@ Each slice is committed after format, lint, type check and targeted tests.
   `search_conversations`, the per-host key. Tests first.
 - [x] **T2 Storage.** `TelegramHistory`, `_keep_history` at the six sites, `/new`, wiring. Tests with the existing
   stubs: pairs, roll-over, owner only, quote, failure text, credentials, restart, model input unchanged.
-- [ ] **T3 Read-only and delete.** The check on every route, delete reaching attachments, `/api/conversations` rows.
-- [ ] **T4 Search route.**
+- [x] **T3 Read-only and delete.** The check on every route, delete reaching attachments, `/api/conversations` rows.
+- [x] **T4 Search route.**
 - [ ] **T5 Page.** Mark, default selection, read-only view, search.
 - [ ] **T6 Docs.** CONTRACTS, TASKS, HANDOFF; the full suite only on the orchestrator's go.
 

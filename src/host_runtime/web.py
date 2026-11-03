@@ -684,6 +684,28 @@ def _local_day(stamp: str | None, moment: datetime) -> str:
     return parsed.astimezone(moment.tzinfo).date().isoformat()
 
 
+#: The longest conversation search, and how much text is shown on each side of a hit.
+MAX_SEARCH_CHARS = 200
+SNIPPET_CONTEXT_CHARS = 40
+
+
+def _search_snippet(record: ConversationRecord, wanted: str) -> str:
+    """The first message's text around the words, as `LIKE` matched them."""
+    folded = wanted.casefold()
+    for message in record.messages:
+        at = message.text.casefold().find(folded)
+        if at < 0:
+            continue
+        start = max(0, at - SNIPPET_CONTEXT_CHARS)
+        end = at + len(wanted) + SNIPPET_CONTEXT_CHARS
+        return (
+            ("…" if start else "")
+            + message.text[start:end]
+            + ("…" if end < len(message.text) else "")
+        )
+    return ""
+
+
 class AgentWeb:
     """What the pages ask for, with no HTTP in it.
 
@@ -1506,6 +1528,8 @@ class AgentWeb:
         item = ConversationModelSelectRequest.model_validate(request)
         if self.runtime.state.conversation(item.session_id, self.runtime.actor) is None:
             return {"ok": False, "code": "conversation_unknown"}
+        if self._is_read_only(item.session_id):
+            return {"ok": False, "code": "conversation_read_only"}
         return self.conversation_models.choose(self.runtime.actor, item.session_id, item.model)
 
     def _gateway_configured(self) -> bool:
@@ -2400,8 +2424,22 @@ class AgentWeb:
         projection.update({"ok": True, "restart_required": True})
         return projection
 
+    def _is_read_only(self, session_id: str) -> bool:
+        """A stored Telegram conversation: read and deleted here, never changed."""
+        record = self.runtime.state.conversation(session_id, self.runtime.actor)
+        return record is not None and record.source == "telegram"
+
     def conversations(self, session_id: str | None = None) -> dict[str, Any]:
-        records = self.runtime.state.conversations(self.runtime.actor)
+        state = self.runtime.state
+        # The latest of each source, so daily Telegram records push no chat out.
+        records = sorted(
+            (
+                *state.conversations(self.runtime.actor),
+                *state.conversations(self.runtime.actor, source="telegram"),
+            ),
+            key=lambda item: item.updated_at,
+            reverse=True,
+        )
         selected = (
             None
             if session_id is None
@@ -2415,6 +2453,7 @@ class AgentWeb:
                     "updated_at": item.updated_at.isoformat(),
                     "messages": len(item.messages),
                     "backend": item.backend,
+                    "source": item.source,
                 }
                 for item in records
             ],
@@ -2423,6 +2462,31 @@ class AgentWeb:
                 if selected is None
                 else self._fresh_cards(json.loads(selected.model_dump_json()))
             ),
+        }
+
+    def search_conversations(self, query: str) -> dict[str, Any]:
+        """Stored conversations of both sources with these words, each with
+        where they stand in its text; an empty snippet is a hit in the title."""
+        wanted = query.strip()
+        if len(wanted) > MAX_SEARCH_CHARS:
+            return {"ok": False, "code": "search_query_too_long"}
+        if not wanted:
+            return {"ok": True, "results": []}
+        found = self.runtime.state.search_conversations(self.runtime.actor, wanted)
+        return {
+            "ok": True,
+            "results": [
+                {
+                    "session_id": item.session_id,
+                    "title": item.title,
+                    "updated_at": item.updated_at.isoformat(),
+                    "messages": len(item.messages),
+                    "backend": item.backend,
+                    "source": item.source,
+                    "snippet": _search_snippet(item, wanted),
+                }
+                for item in found
+            ],
         }
 
     # -- action cards (owner 2026-10-15): proposals now, agent mode next ------
@@ -2574,9 +2638,17 @@ class AgentWeb:
 
     def delete_conversation(self, request: ConversationDeleteRequest) -> dict[str, Any]:
         item = ConversationDeleteRequest.model_validate(request)
+        record = self.runtime.state.conversation(item.session_id, self.runtime.actor)
         deleted = self.runtime.state.delete_conversation(item.session_id, self.runtime.actor)
         if deleted:
             self.attachments.delete_session(item.session_id)
+            if record is not None and record.source == "telegram":
+                # A chat's files are kept by chat, not by record: only this one's go.
+                self.attachments.delete_files(
+                    str(file.get("path") or "")
+                    for message in record.messages
+                    for file in message.attachments
+                )
             # "For this conversation" ends with it; its working folder stays.
             self.agent_mode.forget(item.session_id)
             self.conversation_models.forget(item.session_id)
@@ -2586,6 +2658,8 @@ class AgentWeb:
         """Keep one file for this person's conversation (owner 2026-10-08)."""
         if self.runtime.state.conversation(session_id, self.runtime.actor) is None:
             return {"ok": False, "code": "conversation_unknown"}
+        if self._is_read_only(session_id):
+            return {"ok": False, "code": "conversation_read_only"}
         try:
             saved = self.attachments.add(session_id, filename, data)
         except AttachmentError as error:
@@ -2615,6 +2689,8 @@ class AgentWeb:
         self, request: ConversationBackendSelectRequest
     ) -> dict[str, Any]:
         item = ConversationBackendSelectRequest.model_validate(request)
+        if self._is_read_only(item.session_id):
+            return {"ok": False, "code": "conversation_read_only"}
         statuses = {
             row.name: row
             for row in self.backends.statuses(
@@ -2678,6 +2754,8 @@ class AgentWeb:
             conversation = self.runtime.state.conversation(item.session_id, self.runtime.actor)
             if conversation is None:
                 return {"ok": False, "code": "conversation_unknown"}
+            if conversation.source == "telegram":
+                return {"ok": False, "code": "conversation_read_only"}
             if not conversation.messages:
                 return {"ok": False, "code": "conversation_evidence_missing"}
 
@@ -2777,6 +2855,8 @@ class AgentWeb:
         """Record the user's rating and reason for one answer."""
         item = ConversationFeedbackRequest.model_validate(request)
         note = (item.note or "").strip() or None
+        if self._is_read_only(item.session_id):
+            return {"ok": False, "code": "conversation_read_only"}
         try:
             with self._record_lock(item.session_id):
                 saved = self.runtime.state.set_message_feedback(
@@ -2892,6 +2972,8 @@ class AgentWeb:
         """One turn, with its live progress readable while it runs."""
         item = ConversationTurnRequest.model_validate(request)
         record = self.runtime.state.conversation(item.session_id, self.runtime.actor)
+        if record is not None and record.source == "telegram":
+            return {"ok": False, "code": "conversation_read_only"}
         backend = record.backend if record is not None else ""
         progress = TurnProgress(
             turn_id=f"turn-{uuid.uuid4().hex[:12]}",
@@ -2946,6 +3028,8 @@ class AgentWeb:
             return 400, {"ok": False, "code": "voice_request_invalid"}
         if self.runtime.state.conversation(request.session_id, self.runtime.actor) is None:
             return 404, {"ok": False, "code": "conversation_unknown"}
+        if self._is_read_only(request.session_id):
+            return 409, {"ok": False, "code": "conversation_read_only"}
         record = self.voice.transcribe(
             data,
             request.mime_type,
@@ -3548,6 +3632,8 @@ class AgentWeb:
         session_id = str(body.get("session_id") or "")
         if self.runtime.state.conversation(session_id, self.runtime.actor) is None:
             return {"ok": False, "code": "conversation_unknown"}
+        if self._is_read_only(session_id):
+            return {"ok": False, "code": "conversation_read_only"}
         folders = body.get("read_folders")
         return self.agent_mode.set_session(
             session_id,
@@ -5303,7 +5389,7 @@ class AgentWeb:
         asked = f"▶ Run {identity.name} from the form" + (f": {shown}" if shown else "")
         with self._record_lock(session_id):
             record = self.runtime.state.conversation(session_id, self.runtime.actor)
-            if record is None:
+            if record is None or record.source == "telegram":
                 return None
             now = max(datetime.now(UTC), record.updated_at)
             said = ConversationMessage(
@@ -6506,6 +6592,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.conversation_model_choices(session_id))
         elif parsed.path == "/api/commands":
             self._json(200, web.slash_commands())
+        elif parsed.path == "/api/conversations/search":
+            self._json(200, web.search_conversations(parse_qs(parsed.query).get("q", [""])[0]))
         elif parsed.path == "/api/conversations":
             session_id = parse_qs(parsed.query).get("session_id", [None])[0]
             self._json(200, web.conversations(session_id))
@@ -6997,7 +7085,9 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(400, {"error": "the request was not a valid conversation turn"})
                 return
             result = self.server.web.conversation_turn(turn)
-            self._json(200 if result.get("code") is None else 404, result)
+            code = result.get("code")
+            status = 200 if code is None else 409 if code == "conversation_read_only" else 404
+            self._json(status, result)
             return
         if path == "/api/conversations/feedback":
             try:

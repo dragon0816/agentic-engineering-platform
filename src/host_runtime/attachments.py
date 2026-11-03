@@ -17,12 +17,14 @@ its attachments.
 from __future__ import annotations
 
 import base64
+import contextlib
 import hashlib
 import io
 import re
 import secrets
 import shutil
 import zipfile
+from collections.abc import Iterable
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 from typing import Literal
@@ -148,6 +150,21 @@ class AttachmentStore:
 
     def delete_session(self, session_id: str) -> None:
         shutil.rmtree(self._folder(session_id), ignore_errors=True)
+
+    def delete_files(self, paths: Iterable[str]) -> None:
+        """Remove these saved files, each with its own folder, when the rest
+        of their session stays. A path not shaped like one of this store's
+        (`<root>/<session>/<file id>/<name>`) is left alone."""
+        root = self.root.resolve()
+        for path in paths:
+            if not path:
+                continue
+            folder = Path(path).resolve().parent
+            if folder.parent.parent != root:
+                continue
+            shutil.rmtree(folder, ignore_errors=True)
+            with contextlib.suppress(OSError):
+                folder.parent.rmdir()  # only when it was the session's last
 
 
 def _unzip(data: bytes, target: Path) -> tuple[Path, tuple[str, ...]]:
