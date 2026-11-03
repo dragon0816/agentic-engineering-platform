@@ -19,7 +19,7 @@ from test_vault_asking_e2e import _bi_host, _bi_join, _Model, _served
 
 from capabilities.bi_cards import vault_sources
 
-FOLDER = "sources/library/products"
+FOLDER = "library/products/sources"
 REPORT = "# 虛構報告\n\n電源模組 FACT-TWOPC。\n"
 
 

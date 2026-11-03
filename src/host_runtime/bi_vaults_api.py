@@ -144,6 +144,8 @@ def route(
         return 200, {"ok": True, **vault_sources.withdraw(workspace, vault_id, given)}
     if action == "skills":
         return 200, {"ok": True, **vault.save_skill(workspace, vault_id, given)}
+    if action == "tools":
+        return 200, {"ok": True, **vault.save_tool(workspace, vault_id, given)}
     if action == "publish":
         published = vault.publish(workspace, vault_id, given)
         bi_feed_api.refresh(workspace, vault_id)

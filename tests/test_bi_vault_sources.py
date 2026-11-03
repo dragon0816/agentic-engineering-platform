@@ -36,7 +36,7 @@ from capabilities.bi_cards.store import BiStore, BiStoreError
 from knowledge.repo.repository import _file_sha
 
 REPORT = "# AIDC 報告\n\n電源模組 FACT-1。\n"
-FOLDER = "sources/library/products"
+FOLDER = "library/products/sources"
 
 
 def _add(ws: Path, dataset: str, name: str = "report.md", text: str = REPORT, **given: Any) -> Any:

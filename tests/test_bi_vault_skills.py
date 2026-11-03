@@ -74,7 +74,7 @@ def test_a_new_vault_holds_a_generated_classify_skill(tmp_path: Path) -> None:
     classify = found["classify"]
     assert classify["role"] == "classify" and classify["schema"] == NEWEST
     assert classify["generated"] and not classify["needs_update"]
-    assert "- SupplyLink：" in classify["body"] and "- aidc-power：AIDC Power" in classify["body"]
+    assert "- SupplyLink：" in classify["body"] and "- aidc：AIDC" in classify["body"]
     # It is a file in the shared folder, listed in REPO.md, and on the other PC.
     folder = drive.parent("a") / vault_id
     assert (folder / classify["path"]).is_file()
@@ -94,12 +94,10 @@ def test_domain_notes_move_into_extract_skills(tmp_path: Path) -> None:
     found = _skills(a, vault_id)
     aidc, aerospace = found["aidc-extract"], found["aerospace-extract"]
     assert aidc["body"] == NOTES and aidc["role"] == "extract"
-    assert aidc["applies_to"] == [
-        "sources/applications/aidc-computing",
-        "sources/applications/aidc-power",
-    ]
-    # A domain whose segments are no vault folder gets a folder of its own.
-    assert aerospace["applies_to"] == ["sources/applications/aerospace"]
+    # A domain whose segments are no application gets an application of its own
+    # (a domain whose segments are: `test_bi_vault_homes`).
+    assert aidc["applies_to"] == ["applications/aidc/sources"]
+    assert aerospace["applies_to"] == ["applications/aerospace/sources"]
     pending = _ok(_call(a, "GET", f"/api/bi/vaults/{vault_id}/pending"))
     labels = {c["label"] for c in pending["uncommitted"]}
     assert {"領域設定", "skill「aidc-extract」", "skill「aerospace-extract」"} <= labels
@@ -114,7 +112,7 @@ def test_an_ai_run_reads_the_skills_of_its_folder(tmp_path: Path) -> None:
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
     _save_domains(a, dataset)
     model = Scripted({"candidates": []})
-    answer, jobs = _ai_run(a, dataset, "sources/applications/aidc-power", model)
+    answer, jobs = _ai_run(a, dataset, "applications/aidc/sources", model)
     run = _ok(answer)["run"]
     jobs.run_all()
     system = model.requests[0].messages[0].text
@@ -130,7 +128,7 @@ def test_an_ai_run_reads_the_skills_of_its_folder(tmp_path: Path) -> None:
     assert detail["run"]["status"] == "review"
     # A library source reads the classify skill only.
     model = Scripted({"candidates": []})
-    answer, jobs = _ai_run(a, dataset, "sources/library/products", model)
+    answer, jobs = _ai_run(a, dataset, "library/products/sources", model)
     jobs.run_all()
     system = model.requests[0].messages[0].text
     assert "skill classify" in system and "Extraction (skill" not in system

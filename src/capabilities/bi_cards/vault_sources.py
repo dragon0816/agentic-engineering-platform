@@ -20,12 +20,12 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from capabilities.bi_cards import homes
 from capabilities.bi_cards.store import BiStoreError
 from knowledge.repo import repository as repo_engine
 from knowledge.repo.repository import RepoError
 
 PREFIX = "source:"
-FILES_ROOT = "sources"
 MARKDOWN_DIR = "markdown"
 #: Windows: a file's content is not on this PC (a OneDrive placeholder).
 _CLOUD_ONLY = 0x00400000 | 0x00040000 | stat.FILE_ATTRIBUTE_OFFLINE
@@ -50,8 +50,8 @@ def unit_problem(value: Any) -> str | None:
         return "source needs id, name, folder and file"
     if not isinstance(value.get("bytes"), int) or value["bytes"] < 0:
         return "source needs bytes"
-    if not str(value["file"]).startswith(FILES_ROOT + "/"):
-        return "source file must be under sources/"
+    if not homes.LAYOUT.is_source_path(str(value["file"])):
+        return "source file must be in a source folder"
     return None if isinstance(value.get("markdown"), list) else "source needs markdown"
 
 
@@ -194,7 +194,7 @@ def folder_of(units: Mapping[str, Any], sha256: str) -> str | None:
 
 def is_source_change(key_or_path: str) -> bool:
     """Whether a staged unit or file belongs to a source."""
-    return key_or_path.startswith((PREFIX, FILES_ROOT + "/"))
+    return key_or_path.startswith(PREFIX) or homes.LAYOUT.is_source_path(key_or_path)
 
 
 def commit_split(repo: Any, purpose: str) -> dict[str, Any]:

@@ -5635,10 +5635,10 @@ V4 vault in use (`market-bi`) is rebuilt as a repository in slice R6 with the ow
   repository `<id>` of type `bi` (R1 registry). Every `/api/bi/*` route takes the dataset unchanged.
 - **Folder** = the R1 folder: `repo.json` (`type: "bi"`), `REPO.md`, `schemas/<schema id with / as
   __>@<version>.json` (every schema version the vault used, built in or installed; an installed one
-  is copied byte for byte, a built-in one as its canonical JSON), `skills/`,
-  `sources/applications/<segment>/` (default the 11 segments of the owner's chart),
-  `sources/library/{products,competitors,technologies}/`, `commits/`, `tags/`, `publish/`. No
-  database file is ever written to the folder.
+  is copied byte for byte, a built-in one as its canonical JSON), the homes (`applications/<application>/`
+  and `library/<entry>/`, "BI card model: folder layout" below), `commits/`, `tags/`, `publish/`. A vault
+  from before the homes keeps `skills/`, `sources/applications/<segment>/` and `sources/library/<entry>/`.
+  No database file is ever written to the folder.
 - **Units.** `schema` = `<id>@<version>`; `meta:<key>` (dataset meta: `vault_segments`,
   `vault_coverage`, the domain configuration, ...); `card:<card id>` = `{"type", "key", "name",
   "synthetic"}`; `field:<card id>:<field>` = `{"value", "source": {kind, ref, by, at} | null,
@@ -5765,18 +5765,20 @@ source folder, and what an AI run reads (R3, Claude Code)". Code: `src/capabilit
 `tests/test_bi_skill_session.py`, `tests/test_bi_vault_ui.py`. Format, binding and 「需要更新」 are the shared
 skills contract above.
 
-- **Classify skill.** Creating or converting a vault stages `skills/classify/rev-1-<author>.md` (role
-  `classify`, no `applies_to`, frontmatter `generated: "true"`): the schema's card types with labels, the
-  vault's segment folders under `sources/applications/`, and `sources/library/`. After a schema change
+- **Classify skill.** Creating or converting a vault stages `library/skills/classify/rev-1-<author>.md`
+  (role `classify`, no `applies_to`, frontmatter `generated: "true"`): the schema's card types with labels,
+  the vault's applications (`applications/<folder>/sources`) and library entries. After a schema change
   staged on the vault, a classify skill whose text is still the one generated for the old schema gets a new
   generated revision for the new one; an edited one is kept and is 「需要更新」.
 - **Domain notes become extract skills.** Whenever `meta:domains` changes in a vault (domain save, convert),
   each domain's non-empty `notes` is staged as skill `<domain id slug>-extract` (role `extract`, `domain`
-  in the frontmatter, `applies_to` the vault folders matching the domain's segment ids or labels, else
-  `sources/applications/<domain id slug>`; an existing skill keeps its folders and card types), and the
+  in the frontmatter, `applies_to` the sources of the applications matching the domain's segment ids or
+  labels, else `applications/<domain id slug>/sources`, plus the same applications' old
+  `sources/applications/<folder>` when the vault has a source there; an existing skill keeps its folders
+  and card types), and the
   configuration is staged with every `notes` empty. A plain dataset keeps its notes (V11 unchanged).
-- **AI run in a vault.** `POST /api/bi/runs` takes `folder` (`sources` by default; anything not under
-  `sources/` is `folder_invalid`, 400). The run uses the classify skill and the extract skill of that folder
+- **AI run in a vault.** `POST /api/bi/runs` takes `folder` (`sources` by default; anything but a home's
+  `sources` folder, or `sources` and what is under it, is `folder_invalid`, 400). The run uses the classify skill and the extract skill of that folder
   (`skill_for`, longest `applies_to` prefix); either one written for another schema version refuses the
   run with `skill_needs_update` (409, `skill`, `skill_schema`, `schema`). Their text follows the fixed
   evidence rules in the system prompt under "The knowledge base's own rules (its domain notes, or in a vault
@@ -6617,3 +6619,24 @@ Design: `docs/phases/BI_CARD_MODEL.md` §3. Values and id functions: `capabiliti
 **AI-inferred relations.** In a vault on a schema with `relation_types`, an AI run asks the model for those types too. One with an unregistered type, no ends, or a quote not in the source is left out with warning `relation_unsupported`. `GET /api/bi/runs/<id>` gains `run.relations: [{id, type, from, to, reason, source_id, locator, excerpt, decision}]`, without any a person already decided. `POST /api/bi/runs/<id>/relations/<rid> {dataset, status}`, status `confirmed` or `rejected`, stages the decision (origin `ai_inferred`, evidence the quote's `reference_id`) for the person's commit. Confirming needs both cards to exist (404 `relation_card_unknown`); not on a trial run (`run_trial`).
 
 **New tables in `bi.sqlite`, rebuilt from units:** `relations`, `relation_evidence`, `field_states`, `card_names`, `card_app_folders`; `evidence` gains four columns. `cards` and `fields` keep their shape. **Compatibility:** an AEP older than this refuses a vault holding these units at sync (`unit_problem`).
+
+## BI card model: folder layout (2026-11-04)
+
+Design: `docs/phases/BI_CARD_MODEL.md` §4. Paths: `capabilities/bi_cards/homes.py`; never spell one elsewhere. **These paths are immutable once a vault holds them.**
+
+```
+applications/<application>/{sources,skills,tools,profile}/
+library/<entry>/{sources,skills,tools,profile}/
+library/skills/<name>/rev-<n>-<author>.md      a skill with no home: it spans every home (classify)
+<home>/skills/<name>/rev-<n>-<author>.md       unit skill:<short>/<name>
+<home>/tools/<name>/rev-<n>-<author>.<ext>     unit tool:<short>/<name>; stored and listed, never run
+<home>/profile/rev-<n>-<author>.json           unit profile:<short>
+```
+
+A **home** is an application or a library entry. Its short form, `<application>` or `library/<entry>`, is what unit keys and `card_app_folders` use. `POST /api/bi/vaults` takes `segments` (default `aidc`, `aerospace`, `robotics`, `wireless`) and `library` (default `products`, `technologies`, `competitors`), kept as `meta:vault_segments` and `meta:vault_library`. `skills` is refused as an entry name (`library_invalid`). Folders are checked by form, not against these lists.
+
+**Engine.** `knowledge.repo.repository.FileLayout` says what a type's files are: `areas`, `new_areas`, `source_hint`, `skill_path_re`, `is_source_path`, `source_folder_problem`, `skill_area`. A type with no `layout` attribute keeps the default, which is exactly the rules from before, so `wiki` is unchanged, including its bare-name `skill:` keys. `path_problem(path, areas=FILE_AREAS)`; `withdraw`, `stage_file`, commit checks and the readme ask the type's layout.
+
+**Old vaults.** A BI commit may still add `skills/…` and `sources/…`, and a source folder may still be `sources`, `sources/<anything>`. New code writes skills to `library/skills/` or a home's folder, also in an old vault. **A source added with no folder still goes to `sources/`**, in no home, in a new vault too: choose an application for what should be in one.
+
+**API.** `GET /api/bi/vaults/<id>/skills` lists a home's skill as `<short>/<name>` and adds `tools`, with `folders` holding each home's `sources`. `POST …/skills` takes that long name, or `name` with `home`; a home's skill with no `applies_to` applies to that home's sources. `POST …/tools` `{home, name, suffix, text}` stages a tool's next revision (`tool_invalid`, 400, when any is bad).

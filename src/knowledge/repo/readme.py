@@ -18,6 +18,7 @@ from knowledge.repo.repository import (
     SCHEMA_UNIT,
     Repository,
     _write_atomic,
+    layout_of,
 )
 from knowledge.repo.skills import current_skills
 
@@ -135,12 +136,13 @@ def readme_text(repo: Repository) -> str:
         lines += ["No commit has been pushed yet.", ""]
 
     lines += ["## How to maintain", ""]
+    layout = layout_of(repo.kind)
     folders = sorted(
         {
             str(PurePosixPath(path).parent)
             for commit in commits
             for path in commit["files"]
-            if path.startswith("sources/")
+            if layout.is_source_path(path)
         }
     )
     readers = [s for s in skills if s["role"] in ("extract", "ingest")]
@@ -150,7 +152,7 @@ def readme_text(repo: Repository) -> str:
             for prefix in item["applies_to"] or ["sources"]:
                 lines.append(f"  - `{prefix}/` → read by `{item['name']}`")
     else:
-        lines.append("- **New sources.** Add them under `sources/<folder>/` through AEP.")
+        lines.append(f"- **New sources.** Add them under `{layout.source_hint}` through AEP.")
     if folders:
         lines.append(f"- Source folders in use: {', '.join(f'`{f}/`' for f in folders)}")
     lines += [

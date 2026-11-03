@@ -7,7 +7,10 @@ head (`name`, `revision`, `schema`, `role`, `applies_to`, optional
 
 A revision becomes current through the unit `skill:<name>`, whose value names
 the revision's path, its schema version, role and folders; so a skill is
-committed, pushed, merged and reverted with everything else. A skill whose
+committed, pushed, merged and reverted with everything else. A type whose layout
+has homes (`FileLayout.skill_area`) also keeps skills in them: the unit is
+`skill:<home>/<name>`, and that longer form is the name `current_skills` lists
+and `read_skill` takes; the file's own `name` stays short. A skill whose
 `schema` is not the repository's current `schema` unit needs an update and is
 not run (owner decision 3).
 
@@ -23,16 +26,18 @@ import re
 import uuid
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from typing import Any
 
 from knowledge.repo.repository import (
     AUTHOR_RE,
+    DEFAULT_LAYOUT,
     SCHEMA_UNIT,
     SKILL_UNIT_PREFIX,
+    FileLayout,
     RepoError,
     Repository,
-    path_problem,
+    layout_of,
 )
 
 SKILLS_DIR = "skills"
@@ -61,14 +66,21 @@ class Skill:
     card_types: tuple[str, ...] = ()
     table_recipes: tuple[dict[str, Any], ...] = ()
     extra: dict[str, str] = field(default_factory=dict)
+    #: Which part of the repository owns it, in a layout with homes; never in the file.
+    home: str = ""
 
-    def path(self, author: str) -> str:
-        return revision_path(self.name, self.revision, author)
+    @property
+    def unit_name(self) -> str:
+        """The name in its unit key: `<home>/<name>`, or `<name>` with no home."""
+        return f"{self.home}/{self.name}" if self.home else self.name
 
-    def unit_value(self, author: str) -> dict[str, Any]:
+    def path(self, author: str, area: str = SKILLS_DIR) -> str:
+        return revision_path(self.name, self.revision, author, area)
+
+    def unit_value(self, author: str, area: str = SKILLS_DIR) -> dict[str, Any]:
         """The value of `skill:<name>` that makes this revision current."""
         return {
-            "path": self.path(author),
+            "path": self.path(author, area),
             "revision": self.revision,
             "schema": self.schema,
             "role": self.role,
@@ -84,7 +96,7 @@ def skill_unit(name: str) -> str:
     return SKILL_UNIT_PREFIX + name
 
 
-def revision_path(name: str, revision: int, author: str) -> str:
+def revision_path(name: str, revision: int, author: str, area: str = SKILLS_DIR) -> str:
     """The repository path of a skill revision."""
     if len(name) > MAX_NAME or not NAME_RE.match(name):
         raise _invalid("skill 名稱只能用小寫英數字與 -（最多 60 個字）")
@@ -92,7 +104,7 @@ def revision_path(name: str, revision: int, author: str) -> str:
         raise _invalid("revision 必須是正整數")
     if not AUTHOR_RE.match(author):
         raise RepoError("author_invalid", "作者名稱無效")
-    return f"{SKILLS_DIR}/{name}/rev-{revision}-{author}.md"
+    return f"{area}/{name}/rev-{revision}-{author}.md"
 
 
 def _scalar(text: str) -> Any:
@@ -141,16 +153,9 @@ def _strings(value: Any, key: str) -> tuple[str, ...]:
     return tuple(v.strip() for v in value)
 
 
-def _folder_problem(prefix: str) -> str | None:
-    parts = PurePosixPath(prefix).parts
-    if not parts or parts[0] != "sources":
-        return "必須在 sources/ 底下"
-    if prefix == "sources":
-        return None
-    return path_problem(prefix)
-
-
-def parse_skill(text: str, *, path: str | None = None) -> Skill:
+def parse_skill(
+    text: str, *, path: str | None = None, layout: FileLayout = DEFAULT_LAYOUT
+) -> Skill:
     """A skill revision from its file text; `skill_invalid` when it is not one.
     With `path`, its name and revision must match the file name."""
     fields, body = _front(text)
@@ -170,7 +175,7 @@ def parse_skill(text: str, *, path: str | None = None) -> Skill:
         raise _invalid(f"role 必須是 {'、'.join(ROLES)} 之一")
     applies_to = tuple(p.rstrip("/") for p in _strings(fields.get("applies_to"), "applies_to"))
     for prefix in applies_to:
-        problem = _folder_problem(prefix)
+        problem = layout.source_folder_problem(prefix)
         if problem:
             raise _invalid(f"applies_to 的 {prefix} {problem}")
     recipes = fields.get("table_recipes") or []
@@ -191,7 +196,7 @@ def parse_skill(text: str, *, path: str | None = None) -> Skill:
         extra=extra,
     )
     if path is not None:
-        matched = REVISION_PATH_RE.match(path)
+        matched = (layout.skill_path_re or REVISION_PATH_RE).match(path)
         if matched is None:
             raise _invalid(f"{path} 不是 skills/<name>/rev-<n>-<author>.md")
         if matched.group("name") != skill.name or int(matched.group("revision")) != skill.revision:
@@ -269,10 +274,12 @@ def read_skill(repo: Repository, name: str, units: Mapping[str, Any] | None = No
     if not isinstance(value, dict) or not isinstance(value.get("path"), str):
         raise RepoError("skill_unknown", f"知識庫裡沒有 skill「{name}」")
     path = value["path"]
+    layout = layout_of(repo.kind)
     for root in (repo.folder, repo.work / "files"):
         candidate = root / path
         if candidate.is_file():
-            return parse_skill(candidate.read_text(encoding="utf-8"), path=path)
+            skill = parse_skill(candidate.read_text(encoding="utf-8"), path=path, layout=layout)
+            return replace(skill, home=name.rpartition("/")[0])
     raise RepoError("skill_missing", f"找不到 {path}（OneDrive 是否還在同步？）")
 
 
@@ -280,12 +287,14 @@ def stage_skill(repo: Repository, skill: Skill) -> dict[str, Any]:
     """Stage a new revision of `skill` (its revision is set to the next one) and
     make it current in the working copy. Returns the unit value."""
     units = repo.working_units()
-    current = units.get(skill_unit(skill.name))
+    layout = layout_of(repo.kind)
+    area = layout.skill_area(skill.home)
+    current = units.get(skill_unit(skill.unit_name))
     revision = int(current.get("revision") or 0) + 1 if isinstance(current, dict) else 1
     revised = replace(skill, revision=revision)
     text = render_skill(revised)
-    parse_skill(text)  # the file reads back as written
-    path = revised.path(repo.author)
+    parse_skill(text, layout=layout)  # the file reads back as written
+    path = revised.path(repo.author, area)
     draft = repo.local / "drafts" / f"{uuid.uuid4().hex[:8]}.md"
     draft.parent.mkdir(parents=True, exist_ok=True)
     draft.write_text(text, encoding="utf-8")
@@ -293,8 +302,8 @@ def stage_skill(repo: Repository, skill: Skill) -> dict[str, Any]:
         repo.stage_file(path, draft)
     finally:
         draft.unlink(missing_ok=True)
-    value = revised.unit_value(repo.author)
-    repo.stage(skill_unit(skill.name), value)
+    value = revised.unit_value(repo.author, area)
+    repo.stage(skill_unit(skill.unit_name), value)
     return value
 
 

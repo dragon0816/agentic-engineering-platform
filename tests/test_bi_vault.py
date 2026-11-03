@@ -187,9 +187,9 @@ def test_create_lays_out_the_folder_and_join_checks_it(tmp_path: Path) -> None:
     )
     assert (folder / "REPO.md").read_text(encoding="utf-8").startswith("# Market Signals")
     for name in (
-        "sources/applications/robotics-amr",
-        "sources/library/competitors",
-        "skills",
+        "applications/robotics/sources",
+        "library/competitors/sources",
+        "library/skills",
         "tags",
     ):
         assert (folder / name).is_dir()

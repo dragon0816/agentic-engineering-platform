@@ -36,7 +36,7 @@ for path in (REPO, REPO / "src"):  # run as a script: neither is importable then
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
-from capabilities.bi_cards import analyses, feed, vault  # noqa: E402
+from capabilities.bi_cards import analyses, feed, vault, vault_skills  # noqa: E402
 from capabilities.bi_cards import store as bi_store  # noqa: E402
 from capabilities.bi_cards.store import BiStore, PlannedRow  # noqa: E402
 from knowledge.repo import repository as repo_engine  # noqa: E402
@@ -281,9 +281,33 @@ def _ok(answer: dict[str, Any]) -> dict[str, Any]:
     return answer
 
 
+@contextmanager
+def old_layout() -> Iterator[None]:
+    """The fixture stays a vault from before the homes (`BI_CARD_MODEL.md` §4), so it
+    also proves an old vault still loads: today's code makes the commits it made."""
+    saved_body, saved_lists = vault_skills.classify_body, vault._home_lists
+    vault.BI_TYPE.layout = repo_engine.DEFAULT_LAYOUT  # type: ignore[assignment]
+
+    def old_body(reg: Any, segments: list[dict[str, str]], library: list[str]) -> str:
+        return vault_skills._old_classify_body(reg, segments)
+
+    def old_lists(segments: list[dict[str, str]], library: list[str]) -> dict[str, str]:
+        return {vault_skills.SEGMENTS_UNIT: vault._segments_meta(segments)}
+
+    vault_skills.classify_body = old_body
+    vault._home_lists = old_lists
+    try:
+        yield
+    finally:
+        del vault.BI_TYPE.layout
+        vault_skills.classify_body = saved_body
+        vault._home_lists = saved_lists
+
+
 def build_vault(workspace: Path, parent: Path) -> Path:
     """Make the fixture vault under `parent`; returns its folder."""
-    with frozen():
+    with frozen(), old_layout():
+        segments = [{"folder": f, "label": label} for f, label in vault.MARKET_SEGMENTS]
         made = vault.create(
             workspace,
             {
@@ -294,6 +318,7 @@ def build_vault(workspace: Path, parent: Path) -> Path:
                 "schema": "bi.schema/v1.1@2.0.0",  # frozen: the golden answers name it
                 "author": "fixture",
                 "default_pack": False,  # the fixture holds its own three analyses
+                "segments": segments,
             },
             "fixture",
         )

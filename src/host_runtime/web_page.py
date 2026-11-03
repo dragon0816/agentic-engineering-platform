@@ -2747,7 +2747,7 @@ tr:last-child td { border-bottom: none; }
                 <div><label class="bi-label" for="bi-b-sk-applies">
                   套用到的資料夾（逗號分隔；留空＝所有來源）</label>
                   <input id="bi-b-sk-applies" class="bi-input" spellcheck="false"
-                    placeholder="sources/applications/aidc-power"></div>
+                    placeholder="applications/aidc/sources"></div>
                 <div><label class="bi-label" for="bi-b-sk-types">
                   只產生這些卡片類型（逗號分隔；留空＝不限）</label>
                   <input id="bi-b-sk-types" class="bi-input" spellcheck="false"></div>
@@ -2952,7 +2952,7 @@ tr:last-child td { border-bottom: none; }
                   <div><label class="bi-label" for="bi-b-bc-folder">
                     來源資料夾（決定用哪條擷取規則；留空＝sources）</label>
                     <input id="bi-b-bc-folder" class="bi-input" maxlength="200" spellcheck="false"
-                      placeholder="sources/applications/aidc-power"></div>
+                      placeholder="applications/aidc/sources"></div>
                 </div>
                 <label class="bi-label" for="bi-b-bc-note">原文</label>
                 <textarea id="bi-b-bc-note" class="bi-input" rows="5" maxlength="20000"></textarea>

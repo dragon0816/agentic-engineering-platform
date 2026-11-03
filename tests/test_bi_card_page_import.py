@@ -187,7 +187,7 @@ def test_a_vault_gets_one_commit_of_sources_and_one_of_cards(tmp_path: Path) -> 
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
     before = _status(a, vault_id)["ahead"]
     answer = _preview(a, dataset, PAGES)
-    done = _apply(a, answer["preview_id"], folder="sources/library/products")
+    done = _apply(a, answer["preview_id"], folder="library/products/sources")
     assert done["written"] is True
     purposes = [c["purpose"] for c in vault.Vault(a, vault_id).repo.local_commits()]
     assert _status(a, vault_id)["ahead"] == before + 2

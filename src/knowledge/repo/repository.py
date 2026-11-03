@@ -5,7 +5,8 @@ local disk for one person, in a OneDrive or SharePoint library for several):
 
     repo.json                     written once: id, title, purpose, type
     REPO.md                       derived, for people
-    schemas/ skills/ sources/     files, written once and never changed
+    schemas/ skills/ sources/     files, written once and never changed (the
+                                  default areas; a type may have its own, `FileLayout`)
     commits/<author>/<seq>.json   pushed commits
     tags/<name>.json              tags, never moved
     publish/<author>/<seq>.json   publish records
@@ -58,7 +59,7 @@ COMMITS_DIR = "commits"
 TAGS_DIR = "tags"
 PUBLISH_DIR = "publish"
 WITHDRAWN_DIR = "withdrawn"
-#: The areas a commit may add files to.
+#: The areas a commit may add files to, for a type with no layout of its own.
 FILE_AREAS = ("schemas", "skills", "sources")
 LOCAL_ROOT = "knowledge-repos"
 REGISTRY_FILE = "registry.json"
@@ -294,16 +295,56 @@ def _checked_purpose(purpose: str) -> str:
     return text
 
 
-def path_problem(path: str) -> str | None:
-    """Why `path` cannot be a repository file; None when it can."""
+def path_problem(path: str, areas: tuple[str, ...] = FILE_AREAS) -> str | None:
+    """Why `path` cannot be a repository file under `areas`; None when it can."""
     if not path or len(path) > MAX_PATH or "\\" in path or ":" in path:
         return "path invalid"
     parts = PurePosixPath(path).parts
-    if len(parts) < 2 or parts[0] not in FILE_AREAS:
-        return f"path must be under {', '.join(a + '/' for a in FILE_AREAS)}"
+    if len(parts) < 2 or parts[0] not in areas:
+        return f"path must be under {', '.join(a + '/' for a in areas)}"
     if any(p in ("", ".", "..") or p.startswith(".") for p in parts):
         return "path invalid"
     return None
+
+
+class FileLayout:
+    """Where a type keeps its files. This is the default; a type with a `layout`
+    attribute supplies its own, one without keeps these rules exactly."""
+
+    #: The top folders a commit may add files to.
+    areas: tuple[str, ...] = FILE_AREAS
+    #: The ones a new repository starts with.
+    new_areas: tuple[str, ...] = FILE_AREAS
+    #: How to tell a person where sources go.
+    source_hint = "sources/<folder>/"
+    #: A skill revision's path, or None for the shared `skills/<name>/rev-…` form.
+    skill_path_re: re.Pattern[str] | None = None
+
+    def is_source_path(self, path: str) -> bool:
+        """Whether a repository file is a source, so it can be withdrawn."""
+        return path.startswith("sources/")
+
+    def source_folder_problem(self, folder: str) -> str | None:
+        """Why `folder` cannot be a folder of sources; None when it can."""
+        parts = PurePosixPath(folder).parts
+        if not parts or parts[0] != "sources":
+            return "必須在 sources/ 底下"
+        return None if folder == "sources" else path_problem(folder, self.areas)
+
+    def skill_area(self, home: str) -> str:
+        """The folder holding the skills of `home` (see `skills.Skill.home`)."""
+        if home:
+            raise RepoError("skill_invalid", f"這種知識庫的 skill 不分「{home}」")
+        return "skills"
+
+
+DEFAULT_LAYOUT = FileLayout()
+
+
+def layout_of(kind: RepoType | None) -> FileLayout:
+    """The file layout of a type: its own, else the default."""
+    found = getattr(kind, "layout", None)
+    return found if isinstance(found, FileLayout) else DEFAULT_LAYOUT
 
 
 def unit_key_problem(key: Any) -> str | None:
@@ -350,8 +391,9 @@ def commit_problem(
     files = data.get("files")
     if not isinstance(files, list):
         return "files missing"
+    areas = layout_of(kind).areas
     for index, item in enumerate(files):
-        if not isinstance(item, dict) or path_problem(str(item.get("path") or "")):
+        if not isinstance(item, dict) or path_problem(str(item.get("path") or ""), areas):
             return f"file {index}: path invalid"
         if not isinstance(item.get("sha256"), str) or not SHA256_RE.match(item["sha256"]):
             return f"file {index}: sha256 invalid"
@@ -486,7 +528,7 @@ def create(
     author: str,
 ) -> Repository:
     """Create a repository folder `<parent>/<repo_id>` and register it here."""
-    get_type(kind)
+    new_areas = layout_of(get_type(kind)).new_areas
     if len(repo_id) > MAX_ID or not ID_RE.match(repo_id):
         raise RepoError("repo_id_invalid", "知識庫 id 只能用小寫英數字與 -（最多 40 個字）")
     if not title.strip():
@@ -508,7 +550,7 @@ def create(
         "created": _now(),
         "created_by": author,
     }
-    for name in (*FILE_AREAS, COMMITS_DIR, TAGS_DIR, PUBLISH_DIR):
+    for name in (*new_areas, COMMITS_DIR, TAGS_DIR, PUBLISH_DIR):
         (folder / name).mkdir(parents=True, exist_ok=True)
     _write_atomic(folder / REPO_FILE, _pretty(document))
     _write_atomic(folder / README_FILE, _readme(document).encode())
@@ -687,8 +729,9 @@ class Repository:
         chosen = [{"path": str(f["path"]), "sha256": str(f["sha256"])} for f in files]
         if not chosen:
             raise RepoError("nothing_to_withdraw", "沒有要撤回的檔案")
+        layout = layout_of(self.kind)
         for item in chosen:
-            if not item["path"].startswith("sources/") or path_problem(item["path"]):
+            if not layout.is_source_path(item["path"]) or path_problem(item["path"], layout.areas):
                 raise RepoError("path_invalid", f"{item['path']} 不能撤回")
         with self.lock:
             seq = self._next_seq(WITHDRAWN_DIR)
@@ -1035,7 +1078,7 @@ class Repository:
 
     def stage_file(self, path: str, source: Path) -> dict[str, Any]:
         """Add a file to the working copy at repository path `path`."""
-        problem = path_problem(path)
+        problem = path_problem(path, layout_of(self.kind).areas)
         if problem:
             raise RepoError("path_invalid", f"{path}: {problem}")
         with self.lock:

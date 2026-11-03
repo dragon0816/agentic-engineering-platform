@@ -288,11 +288,11 @@ def test_vault_panel_and_dashboard_in_a_browser(
         assert not run("document.getElementById('bi-b-folder-box').hidden")
         assert run(
             "[...document.getElementById('bi-b-folder').options]"
-            ".some((o) => o.value === 'sources/applications/aidc-power')"
+            ".some((o) => o.value === 'applications/aidc/sources')"
         )
         click("#bi-b-sk-new")
         set_value("bi-b-sk-name", "power-extract")
-        set_value("bi-b-sk-applies", "sources/applications/aidc-power")
+        set_value("bi-b-sk-applies", "applications/aidc/sources")
         set_value("bi-b-sk-body", "虛構電源廠是 Account。")
         click("#bi-b-sk-form button.go")
         wait("document.getElementById('bi-notice').textContent.includes('存成第 1 版')")

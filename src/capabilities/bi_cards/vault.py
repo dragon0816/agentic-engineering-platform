@@ -44,6 +44,7 @@ import tempfile
 import uuid
 from collections.abc import Callable, Iterator, Mapping
 from contextlib import closing, contextmanager
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -51,11 +52,13 @@ from capabilities.bi_cards import (
     analyses,
     card_model,
     catalog,
+    homes,
     names,
     schema_doc,
     vault_checks,
     vault_skills,
     vault_sources,
+    vault_tools,
 )
 from capabilities.bi_cards.schema import Registry, norm_key
 from capabilities.bi_cards.store import (
@@ -88,9 +91,9 @@ STATE_FILE = "vault_sync.json"
 #: The local copy of the version the Agent reads (design §7), with `version.json`.
 PUBLISHED_DIR = "published"
 
-#: The 11 market segments of the owner's chart (BI_VAULT.md §4, §6.2):
-#: folder name and label. A vault may name its own at creation.
-SEGMENTS: tuple[tuple[str, str], ...] = (
+#: The 11 market segments of the owner's chart (BI_VAULT.md §4, §6.2): id and label.
+#: `segment` values on cards, and no longer folders (BI_CARD_MODEL.md §1).
+MARKET_SEGMENTS: tuple[tuple[str, str], ...] = (
     ("cell-phone", "Cell Phone"),
     ("ap-cpe", "AP/CPE"),
     ("module-iot", "Module/IoT"),
@@ -103,7 +106,14 @@ SEGMENTS: tuple[tuple[str, str], ...] = (
     ("radar-ew", "Radar/EW"),
     ("osat", "OSAT"),
 )
-LIBRARY = ("products", "competitors", "technologies")
+#: The owner's default applications (BI_CARD_MODEL.md §1, 2026-11-04): folder name
+#: and label. A vault may name its own at creation.
+SEGMENTS: tuple[tuple[str, str], ...] = (
+    ("aidc", "AIDC"),
+    ("aerospace", "Aerospace"),
+    ("robotics", "Robotics"),
+    ("wireless", "Wireless"),
+)
 
 #: The vault's own table in the local `bi.sqlite`: which unit each proposal
 #: row stands for (`conflict:<commit id>:<unit>` for a replay conflict).
@@ -250,6 +260,7 @@ class BiType:
     """The `bi` repository type: card units and their checks."""
 
     name = REPO_TYPE
+    layout = homes.LAYOUT
     #: The benchmark push check (`set_benchmark`, BI T1): (units before, units
     #: after) -> a report whose `blocking` lists the questions that regressed.
     benchmark: Callable[[Mapping[str, Any], Mapping[str, Any]], CheckReport] | None = None
@@ -858,6 +869,20 @@ def _segments(value: Any) -> list[dict[str, str]]:
     return found
 
 
+def _library(value: Any) -> list[str]:
+    if value is None:
+        return list(homes.LIBRARY_ENTRIES)
+    if not isinstance(value, list) or not value:
+        raise BiStoreError("library_invalid", "library 必須是非空清單")
+    for entry in value:
+        problem = homes.entry_problem(entry)
+        if problem:
+            raise BiStoreError("library_invalid", f"library 項目「{entry}」{problem}")
+    if len(set(value)) != len(value):
+        raise BiStoreError("library_invalid", "library 項目重複")
+    return list(value)
+
+
 def read_vault_json(folder: Path) -> dict[str, Any]:
     """The folder's `repo.json`, checked to be a BI repository."""
     with _repo_errors():
@@ -1249,7 +1274,7 @@ def _free_name(workspace: Path, vault_id: str) -> None:
 
 def _new_vault(
     workspace: Path, given: dict[str, Any], actor: str
-) -> tuple[Vault, list[dict[str, str]]]:
+) -> tuple[Vault, list[dict[str, str]], list[str]]:
     parent = _folder(given.get("path"), must_exist=True)
     title = str(given.get("title") or "").strip()
     if not title:
@@ -1265,6 +1290,7 @@ def _new_vault(
     _free_name(workspace, vault_id)
     author = _checked_author(given.get("author"), actor)
     segments = _segments(given.get("segments"))
+    library = _library(given.get("library"))
     if (parent / vault_id).exists():
         raise BiStoreError("vault_exists", f"資料夾 {parent / vault_id} 已經存在")
     with _repo_errors():
@@ -1277,16 +1303,14 @@ def _new_vault(
             kind=REPO_TYPE,
             author=author,
         )
-    for item in segments:
-        (repo.folder / "sources" / "applications" / item["folder"]).mkdir(
-            parents=True, exist_ok=True
-        )
-    for name in LIBRARY:
-        (repo.folder / "sources" / "library" / name).mkdir(parents=True, exist_ok=True)
+    (repo.folder / homes.skills_dir("")).mkdir(parents=True, exist_ok=True)
+    for home in (*(s["folder"] for s in segments), *(f"{homes.LIBRARY}/{e}" for e in library)):
+        for name in homes.HOME_FOLDERS:
+            (repo.folder / homes.home_dir(home) / name).mkdir(parents=True, exist_ok=True)
     _register(
         workspace, {"id": vault_id, "path": str(repo.folder), "author": author, "joined": now()}
     )
-    return Vault(workspace, vault_id), segments
+    return Vault(workspace, vault_id), segments, library
 
 
 def _stage_default_pack(vault: Vault, reg: Registry, given: Mapping[str, Any]) -> None:
@@ -1303,13 +1327,21 @@ def _segments_meta(segments: list[dict[str, str]]) -> str:
     return json.dumps(segments, ensure_ascii=False, sort_keys=True)
 
 
+def _home_lists(segments: list[dict[str, str]], library: list[str]) -> dict[str, str]:
+    """The units holding a new vault's applications and library entries."""
+    return {
+        vault_skills.SEGMENTS_UNIT: _segments_meta(segments),
+        vault_skills.LIBRARY_UNIT: json.dumps(library, ensure_ascii=False),
+    }
+
+
 def create(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any]:
     """A new vault folder under `path`, bound to `schema`, and this PC joined."""
     reg = catalog.resolve(workspace, str(given.get("schema") or ""))
-    vault, segments = _new_vault(workspace, given, actor)
+    vault, segments, library = _new_vault(workspace, given, actor)
     with vault.lock, _repo_errors():
         vault.repo.stage(repo_engine.SCHEMA_UNIT, reg.ref)
-        vault.repo.stage("meta:vault_segments", _segments_meta(segments))
+        vault.repo.stage_many(_home_lists(segments, library))
         vault._stage_schema(reg.ref)
         vault_skills.stage_classify(vault.repo, reg)
         _stage_default_pack(vault, reg, given)
@@ -1368,9 +1400,9 @@ def convert(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any
     with closing(sqlite3.connect(f"file:{source.path}?mode=ro", uri=True)) as db:
         units = units_from_db(db)
     units.setdefault(repo_engine.SCHEMA_UNIT, source.schema_ref())
-    vault, segments = _new_vault(workspace, {"title": name, **given}, actor)
+    vault, segments, library = _new_vault(workspace, {"title": name, **given}, actor)
     with vault.lock, _repo_errors():
-        units["meta:vault_segments"] = _segments_meta(segments)
+        units.update(_home_lists(segments, library))
         vault.repo.stage_many(dict(sorted(units.items())))
         vault._stage_schema(str(units[repo_engine.SCHEMA_UNIT]))
         reg = catalog.resolve(workspace, str(units[repo_engine.SCHEMA_UNIT]))
@@ -1738,16 +1770,26 @@ def skills(workspace: Path, vault_id: str) -> dict[str, Any]:
                     "generated": skill.extra.get("generated") == "true",
                 }
             )
+    roots = [
+        *vault.folder.glob(f"{homes.APPLICATIONS}/*/{homes.SOURCES}"),
+        *vault.folder.glob(f"{homes.LIBRARY}/*/{homes.SOURCES}"),
+    ]
     folders = sorted(
-        p.relative_to(vault.folder).as_posix()
-        for p in (vault.folder / "sources").rglob("*")
-        if p.is_dir() and vault_sources.MARKDOWN_DIR not in p.relative_to(vault.folder).parts
+        {
+            p.relative_to(vault.folder).as_posix()
+            for root in (*roots, vault.folder / homes.SOURCES)
+            for p in (root, *root.rglob("*"))
+            if p.is_dir()
+            and vault_sources.MARKDOWN_DIR not in p.relative_to(vault.folder).parts
+            and p != vault.folder / homes.SOURCES
+        }
     )
     return {
         "skills": found,
         "schema": str(units.get(repo_engine.SCHEMA_UNIT) or ""),
         "folders": ["sources", *folders],
         "roles": ["classify", "extract"],
+        "tools": vault_tools.current_tools(units),
     }
 
 
@@ -1758,7 +1800,16 @@ def save_skill(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict
     with vault.lock, _repo_errors():
         skill = _checked_skill(vault, given)
         value = repo_skills.stage_skill(vault.repo, skill)
-    return {"skill": {"name": skill.name, **value}, "status": vault.status()}
+    return {"skill": {"name": skill.unit_name, **value}, "status": vault.status()}
+
+
+def save_tool(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
+    """Stage a new revision of a home's tool. It is only stored and listed, never
+    run; the person commits it."""
+    vault = _vault(workspace, vault_id)
+    with vault.lock, _repo_errors():
+        value = vault_tools.stage_text(vault.repo, given)
+    return {"tool": value, "status": vault.status()}
 
 
 def checked_skill(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> repo_skills.Skill:
@@ -1771,7 +1822,11 @@ def checked_skill(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> r
 
 def _checked_skill(vault: Vault, given: Mapping[str, Any]) -> repo_skills.Skill:
     units = vault.repo.working_units()
-    name = str(given.get("name") or "").strip()
+    # `<home>/<name>` is how the list names one; `home` chooses it for a new one.
+    home, _, name = str(given.get("name") or "").strip().rpartition("/")
+    home = home or str(given.get("home") or "").strip()
+    if home and homes.home_problem(home):
+        raise BiStoreError("skill_invalid", f"home「{home}」{homes.home_problem(home)}")
     role = str(given.get("role") or "extract")
     if role not in ("classify", "extract"):
         raise BiStoreError("skill_invalid", "BI 的 skill 只有 classify 與 extract 兩種")
@@ -1786,14 +1841,17 @@ def _checked_skill(vault: Vault, given: Mapping[str, Any]) -> repo_skills.Skill:
     if unknown:
         raise BiStoreError("skill_invalid", f"schema 沒有這些類型：{'、'.join(unknown)}")
     extra: dict[str, str] = {}
-    if repo_skills.skill_unit(name) in units:
+    unit_name = f"{home}/{name}" if home else name
+    if repo_skills.skill_unit(unit_name) in units:
         extra = {
             k: v
-            for k, v in repo_skills.read_skill(vault.repo, name, units).extra.items()
+            for k, v in repo_skills.read_skill(vault.repo, unit_name, units).extra.items()
             if k != "generated"
         }
+    if home and not applies_to:  # a home's skill reads that home, not every source
+        applies_to = [homes.sources_dir(home)]
     # Parsing the rendered file checks name, role, folders and text.
-    return repo_skills.parse_skill(
+    parsed = repo_skills.parse_skill(
         repo_skills.render_skill(
             repo_skills.Skill(
                 name=name,
@@ -1805,8 +1863,10 @@ def _checked_skill(vault: Vault, given: Mapping[str, Any]) -> repo_skills.Skill:
                 card_types=tuple(card_types),
                 extra=extra,
             )
-        )
+        ),
+        layout=homes.LAYOUT,
     )
+    return replace(parsed, home=home)
 
 
 def reading_store(workspace: Path, dataset: str) -> BiStore:

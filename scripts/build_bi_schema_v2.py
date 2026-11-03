@@ -26,7 +26,7 @@ for path in (REPO, REPO / "src"):  # run as a script: neither is importable then
 
 from typing import Any  # noqa: E402
 
-from capabilities.bi_cards.vault import SEGMENTS  # noqa: E402
+from capabilities.bi_cards.vault import MARKET_SEGMENTS  # noqa: E402
 from scripts import build_bi_schema_v1_1 as base  # noqa: E402
 
 V8 = REPO / "tests" / "fixtures" / "bi_schema_v8" / "bi_schema.py"
@@ -104,13 +104,13 @@ def _add_chart_segments(document: dict[str, Any]) -> None:
     as allowed values of `segment` beside aerospace's own, with their labels
     as aliases (owner 2026-10-29: AIDC and every other domain place cards by
     `segment` too, so no domain needs a schema upgrade for it)."""
-    added = [segment_id for segment_id, _ in SEGMENTS]
+    added = [segment_id for segment_id, _ in MARKET_SEGMENTS]
     for entity in document["types"]:
         for field in entity["fields"]:
             if field["name"] == "segment" and field["enum"]:
                 field["enum"] = [*field["enum"], *(s for s in added if s not in field["enum"])]
     aliases = document["enum_aliases"].setdefault("segment", {})
-    for segment_id, label in SEGMENTS:
+    for segment_id, label in MARKET_SEGMENTS:
         aliases.setdefault(label, segment_id)
 
 
