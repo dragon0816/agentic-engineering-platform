@@ -507,6 +507,50 @@ class BiStore:
         with self._db() as db:
             return list(db.execute("SELECT * FROM cards ORDER BY entity_type, canonical_key"))
 
+    def relations(self, card_id: str) -> list[dict[str, Any]]:
+        """A card's relations both ways, a rejected one left out, with their evidence."""
+        if not self.exists:
+            return []
+        with self._db() as db:
+            if not db.execute("SELECT 1 FROM sqlite_master WHERE name = 'relations'").fetchone():
+                return []  # a dataset not written since the card model
+            rows = db.execute(
+                "SELECT r.*, c.name AS other_name, c.entity_type AS other_type, "
+                "CASE WHEN r.from_card_id = ? THEN 'out' ELSE 'in' END AS direction "
+                "FROM relations r JOIN cards c ON c.id = "
+                "CASE WHEN r.from_card_id = ? THEN r.to_card_id ELSE r.from_card_id END "
+                "WHERE (r.from_card_id = ? OR r.to_card_id = ?) AND r.status != 'rejected' "
+                "ORDER BY r.relation_type, c.name",
+                (card_id, card_id, card_id, card_id),
+            ).fetchall()
+            evidence: dict[str, list[dict[str, Any]]] = {}
+            for r in db.execute(
+                "SELECT relation_id, basis_card_id, reference_id, stance FROM relation_evidence "
+                "WHERE relation_id IN (SELECT relation_id FROM relations "
+                "WHERE from_card_id = ? OR to_card_id = ?)",
+                (card_id, card_id),
+            ):
+                evidence.setdefault(r["relation_id"], []).append(
+                    {k: r[k] for k in ("basis_card_id", "reference_id", "stance")}
+                )
+        return [
+            {
+                "relation_id": r["relation_id"],
+                "type": r["relation_type"],
+                "direction": r["direction"],
+                "other_id": r["to_card_id"] if r["direction"] == "out" else r["from_card_id"],
+                "other_name": r["other_name"],
+                "other_type": r["other_type"],
+                "status": r["status"],
+                "origin": r["origin"],
+                "source_field": r["source_field"],
+                "scope": r["scope"],
+                "note": r["note"],
+                "evidence": evidence.get(r["relation_id"], []),
+            }
+            for r in rows
+        ]
+
     def other_names(self) -> list[tuple[str, str]]:
         """(card id, name) of every alias and former name in `card_names`."""
         if not self.exists:

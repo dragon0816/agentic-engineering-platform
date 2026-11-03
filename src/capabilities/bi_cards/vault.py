@@ -508,13 +508,99 @@ def _card_keys(units: Mapping[str, Any], info: Mapping[str, Mapping[str, Any]]) 
     return keys
 
 
+def _fill_relations(db: sqlite3.Connection, units: Mapping[str, Any], reg: Registry | None) -> None:
+    """`relations` and `relation_evidence`: one row per link that resolves, derived
+    and never a unit, then the relation units, which may set a derived row's status
+    (`docs/phases/BI_CARD_MODEL.md` §3.3)."""
+    targets = _LinkTargets(db)
+    for key, value in sorted(units.items()) if reg is not None else ():
+        if not key.startswith("field:") or value.get("value") is None:
+            continue
+        _, cid, name = key.split(":", 2)
+        entity = reg.types.get(targets.kinds.get(cid, ""))  # type: ignore[union-attr]
+        item = None if entity is None else entity.get(name)
+        if item is None or not item.is_link:
+            continue
+        kind = item.relation_type or card_model.default_relation_type(name)
+        held = value["value"] if isinstance(value["value"], list) else [value["value"]]
+        for one in held:
+            target = (
+                one["card"]
+                if card_model.is_link_item(one)
+                else targets.find(str(one), item.link_to)
+            )
+            if target in targets.kinds:
+                db.execute(
+                    "INSERT OR IGNORE INTO relations (relation_id, from_card_id, relation_type, "
+                    "to_card_id, status, origin, source_field) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        card_model.relation_id(cid, kind, target),
+                        cid,
+                        kind,
+                        target,
+                        card_model.UNREVIEWED,
+                        card_model.SCHEMA_FIELD,
+                        name,
+                    ),
+                )
+    for key, value in sorted(units.items()):
+        if key.startswith(card_model.RELATION_PREFIX):
+            if value["from"] not in targets.kinds or value["to"] not in targets.kinds:
+                continue  # a card it joined is gone
+            relation = key[len(card_model.RELATION_PREFIX) :]
+            derived = db.execute(
+                "SELECT origin, source_field FROM relations WHERE relation_id = ?", (relation,)
+            ).fetchone()
+            db.execute(
+                "INSERT OR REPLACE INTO relations (relation_id, from_card_id, relation_type, "
+                "to_card_id, status, origin, source_field, scope, note, by, at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    relation,
+                    value["from"],
+                    value["type"],
+                    value["to"],
+                    value["status"],
+                    derived["origin"] if derived else value["origin"],
+                    derived["source_field"] if derived else None,
+                    value.get("scope"),
+                    value.get("note"),
+                    value.get("by"),
+                    value.get("at"),
+                ),
+            )
+    for key, value in sorted(units.items()):
+        if key.startswith(card_model.RELATION_EVIDENCE_PREFIX):
+            if not db.execute(
+                "SELECT 1 FROM relations WHERE relation_id = ?", (value["relation"],)
+            ).fetchone():
+                continue
+            db.execute(
+                "INSERT INTO relation_evidence (evidence_link_id, relation_id, basis_card_id, "
+                "reference_id, stance, assessment, by, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    key[len(card_model.RELATION_EVIDENCE_PREFIX) :],
+                    value["relation"],
+                    value["basis_card"],
+                    value["reference_id"],
+                    value["stance"],
+                    None if value.get("assessment") is None else _dump(value["assessment"]),
+                    value.get("by"),
+                    value.get("at"),
+                ),
+            )
+
+
 def materialize(
     db: sqlite3.Connection,
     units: Mapping[str, Any],
     entries: list[dict[str, Any]],
     conflicts: list[dict[str, Any]],
+    reg: Registry | None = None,
 ) -> None:
-    """Rebuild every BI table of `db` from `units` inside one transaction."""
+    """Rebuild every BI table of `db` from `units` inside one transaction.
+    Relations from link fields need `reg`, the schema the units are on."""
+    db.row_factory = sqlite3.Row
     db.executescript(SCHEMA)
     add_missing_columns(db)
     db.executescript(VAULT_SCHEMA)
@@ -693,6 +779,7 @@ def materialize(
                 ),
             )
             db.execute("INSERT INTO vault_keys VALUES (?, ?)", (cursor.lastrowid, key))
+        _fill_relations(db, units, reg)
         db.execute("COMMIT")
     except BaseException:
         db.execute("ROLLBACK")
@@ -883,7 +970,10 @@ class Vault:
             self.local.mkdir(parents=True, exist_ok=True)
             with closing(sqlite3.connect(self.db_path, isolation_level=None)) as db:
                 db.row_factory = sqlite3.Row
-                materialize(db, self.repo.working_units(), self._entries(), self.repo.conflicts())
+                units = self.repo.working_units()
+                materialize(
+                    db, units, self._entries(), self.repo.conflicts(), self._schema_of(units)
+                )
         from capabilities.bi_cards import search_index
 
         search_index.sync_quietly(BiStore(self.workspace, self.dataset))
@@ -918,7 +1008,7 @@ class Vault:
             scratch = folder / f".{DB_FILE}.{uuid.uuid4().hex[:8]}.tmp"
             try:
                 with closing(sqlite3.connect(scratch, isolation_level=None)) as db:
-                    materialize(db, units, entries, [])
+                    materialize(db, units, entries, [], self._schema_of(units))
                 repo_engine.replace_retrying(scratch, folder / DB_FILE)
             finally:
                 scratch.unlink(missing_ok=True)
@@ -991,9 +1081,8 @@ class Vault:
     ) -> None:
         """Store the link fields that changed by card id. An unchanged one is not
         here, so it keeps its unit, text or id, and a capture makes no false diff."""
-        try:
-            reg = self._registry(str(after.get(repo_engine.SCHEMA_UNIT) or ""))
-        except BiStoreError:
+        reg = self._schema_of(after)
+        if reg is None:
             return  # a schema this PC has not got: the links stay text, as written
         if "relation_types" not in reg.document:
             return  # a schema from before the card model keeps its commits as they were
@@ -1005,6 +1094,13 @@ class Vault:
             item = None if entity is None else entity.get(name)
             if item is not None and item.is_link:
                 changed[key] = {**value, "value": targets.stored(value["value"], item.link_to)}
+
+    def _schema_of(self, units: Mapping[str, Any]) -> Registry | None:
+        """The schema these units are on; None when this PC has not got it."""
+        try:
+            return self._registry(str(units.get(repo_engine.SCHEMA_UNIT) or ""))
+        except BiStoreError:
+            return None
 
     def _registry(self, ref: str | None = None) -> Registry:
         """The schema `ref`, by default the working copy's."""
@@ -1404,6 +1500,88 @@ def pending(workspace: Path, vault_id: str) -> dict[str, Any]:
             "files": sorted(work["files"]),
             "commits": vault.repo.local_commits(),
         }
+
+
+def decide_relation(
+    workspace: Path, vault_id: str, given: Mapping[str, Any], actor: str
+) -> dict[str, Any]:
+    """A person's decision on one relation, staged for their commit. A derived
+    relation takes a status; any other needs a type the schema registers, between
+    the types it allows; a confirmed AI-inferred one needs its evidence."""
+    from_id, kind, to_id = (str(given.get(k) or "") for k in ("from", "type", "to"))
+    status = str(given.get("status") or "")
+    origin = str(given.get("origin") or "registered")
+    if status not in ("confirmed", "rejected", "disputed"):
+        raise BiStoreError("relation_status_invalid", "決定只能是確認、否決或有爭議")
+    if origin not in ("ai_inferred", "registered"):
+        raise BiStoreError("relation_origin_invalid", "來源只能是 AI 推論或登記")
+    given_evidence = given.get("evidence") or []
+    if not isinstance(given_evidence, list):
+        raise BiStoreError("relation_evidence_invalid", "evidence 必須是清單")
+    vault = _vault(workspace, vault_id)
+    with vault.lock:
+        units = vault.repo.working_units()
+        ends = [units.get(f"card:{c}") for c in (from_id, to_id)]
+        if not all(ends):
+            raise BiStoreError("card_unknown", "關係的兩端都要是這個知識庫的卡片")
+        relation = card_model.relation_id(from_id, kind, to_id)
+        with closing(sqlite3.connect(vault.db_path)) as db:
+            derived = db.execute(
+                "SELECT 1 FROM relations WHERE relation_id = ? AND origin = ?",
+                (relation, card_model.SCHEMA_FIELD),
+            ).fetchone()
+        if derived is None:
+            reg = vault._schema_of(units)
+            known = next(
+                (r for r in (reg.relation_types if reg else ()) if r["name"] == kind), None
+            )
+            if known is None:
+                raise BiStoreError("relation_type_unknown", f"schema 沒有登記關係「{kind}」")
+            if ends[0]["type"] not in known["from"] or ends[1]["type"] not in known["to"]:  # type: ignore[index]
+                raise BiStoreError(
+                    "relation_type_mismatch",
+                    f"關係「{kind}」只能從 {'/'.join(known['from'])} 到 {'/'.join(known['to'])}",
+                )
+            if origin == "ai_inferred" and status == "confirmed" and not given_evidence:
+                raise BiStoreError("relation_evidence_required", "確認 AI 推論的關係要附依據")
+        at = now()
+        changes: dict[str, Any] = {}
+        current = units.get(f"{card_model.RELATION_PREFIX}{relation}")
+        # The same decision again only adds evidence, so two people adding
+        # evidence to one relation do not conflict.
+        if current is None or current["status"] != status:
+            changes[f"{card_model.RELATION_PREFIX}{relation}"] = {
+                "from": from_id,
+                "type": kind,
+                "to": to_id,
+                "origin": card_model.SCHEMA_FIELD if derived else origin,
+                "status": status,
+                "scope": given.get("scope"),
+                "note": given.get("note"),
+                "by": actor,
+                "at": at,
+            }
+        for item in given_evidence:
+            if not isinstance(item, dict) or not item.get("reference_id"):
+                raise BiStoreError("relation_evidence_invalid", "每筆依據都要有 reference_id")
+            stance = str(item.get("stance") or card_model.SUPPORTS)
+            if stance not in card_model.STANCES:
+                raise BiStoreError("relation_evidence_invalid", f"立場「{stance}」不認得")
+            basis = str(item.get("basis_card") or from_id)
+            reference = str(item["reference_id"])
+            link = card_model.evidence_link_id(relation, basis, reference)
+            changes[f"{card_model.RELATION_EVIDENCE_PREFIX}{link}"] = {
+                "relation": relation,
+                "basis_card": basis,
+                "reference_id": reference,
+                "stance": stance,
+                "by": actor,
+                "at": at,
+            }
+        with _repo_errors():
+            vault.repo.stage_many(changes)
+        vault.rebuild()
+    return {"relation_id": relation, "staged": sorted(changes)}
 
 
 def commit(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:

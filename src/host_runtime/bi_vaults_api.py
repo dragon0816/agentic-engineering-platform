@@ -123,6 +123,8 @@ def route(
         return 200, {"ok": True, **vault.push(workspace, vault_id)}
     if action == "resolve":
         return 200, {"ok": True, **vault.resolve(workspace, vault_id, given)}
+    if action == "relations":
+        return 200, {"ok": True, **vault.decide_relation(workspace, vault_id, given, actor)}
     if action == "discard":
         return 200, {"ok": True, **vault.discard(workspace, vault_id)}
     if action == "revert":
