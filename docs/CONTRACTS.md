@@ -6677,3 +6677,9 @@ Design: `docs/phases/BI_CARD_MODEL.md` §4.3. Code: `capabilities/bi_cards/profi
 - **Reject:** no schema change. A decided proposal is not asked again (`proposal_unknown`, 404). An invalid definition is refused by the schema check and changes nothing. `confirm_required`, `decision_invalid`, 400.
 
 **A written skill bound to the old version needs an update, as after any schema change** (`skills_need_update` lists them); a generated classify skill follows by itself.
+## BI card model: what a publish writes (2026-11-04)
+
+Design: `docs/phases/BI_CARD_MODEL.md` §6. `POST /api/bi/vaults/<id>/publish` also returns `"cards": {"behind": false, "written", "removed", "unchanged", "seconds"}`, or `{"behind": true, "problem"}`: a failed view never undoes the publish, and the next one repairs it. `GET /api/bi/vaults/<id>` status adds `cards_view_behind`.
+
+- `cards/<card id>.md`, with `cards/_manifest.json` `{tag, commit, at, by, hashes}` written last. Generated from the version published now, read-only, never read back. Frontmatter: `id`, `type`, `key`, `aliases`, `sample: true` on a sample, `generated: true`. Only pages whose hash differs are written; a removed card's page is deleted. A withdrawn source's excerpts leave the pages at once.
+- `published/<tag>.sqlite`, written once. The publish record (`repository.publish(tag, extra)`, the engine knows no BI name) gains `snapshot: {path, sha256}`, or `null` when it could not be written. Readers still rebuild from units.

@@ -42,7 +42,7 @@ original file ──convert──▶ Markdown ──schema + extraction Skill─
 
 **Constraint.** No VM can be had. The shared PC 172.25.228.141 is reachable only on the office LAN (its
 Wi-Fi reaches the internet, but company VPN users cannot reach it), so it cannot be the server everyone
-writes to. A SQLite file synced by OneDrive breaks when two machines write it.
+writes to. A SQLite file synced by OneDrive breaks when two machines write it. (Narrowed by the card model: `published/<tag>.sqlite` is written once and never opened in the folder, `BI_CARD_MODEL.md` §6.2.)
 
 **Design.** The truth of a vault is a **shared folder** (a Teams/SharePoint library or a shared OneDrive
 folder, synced by the OneDrive client on each maintainer's PC). Each maintainer only ever **adds new files

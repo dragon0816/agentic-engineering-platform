@@ -13729,7 +13729,8 @@ function biVerHistory(vaultId, history) {
         if (!confirm("發佈 tag「" + tag.name + "」？發佈後 Agent 只讀這個版本的內容；"
           + "要撤回就再發佈另一個 tag。")) return;
         await biVerRun(vaultId, "publish", {tag: tag.name, confirm: true},
-          "已發佈「" + tag.name + "」：Agent 現在讀這個版本。");
+          "已發佈「" + tag.name + "」：Agent 現在讀這個版本。"
+          + "資料夾裡的 cards/ 是給人看的唯讀頁，要改值請提更正單。");
       }, "bi-btn", "發佈 tag " + tag.name));
     }
     row.append(actions, detail); list.append(row);

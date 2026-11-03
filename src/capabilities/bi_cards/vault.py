@@ -39,8 +39,10 @@ import contextvars
 import hashlib
 import json
 import re
+import shutil
 import sqlite3
 import tempfile
+import time
 import uuid
 from collections.abc import Callable, Iterator, Mapping
 from contextlib import closing, contextmanager
@@ -50,6 +52,7 @@ from typing import Any
 
 from capabilities.bi_cards import (
     analyses,
+    card_markdown,
     card_model,
     catalog,
     homes,
@@ -255,6 +258,12 @@ def _same_keys(units: Mapping[str, Any]) -> set[tuple[str, str]]:
             slot = (str(value.get("type")), str(value.get("key")))
             (same if slot in seen else seen).add(slot)
     return same
+
+
+#: Written at publish; `cards/` is generated and never read back (design §6).
+CARDS_DIR = "cards"
+CARDS_MANIFEST = f"{CARDS_DIR}/_manifest.json"
+SNAPSHOT_DIR = "published"
 
 
 class BiType:
@@ -1136,24 +1145,127 @@ class Vault:
                 return folder
             folder.mkdir(parents=True, exist_ok=True)
             commit = target["commit"]
-            units = self.repo.state_at(commit) if commit else {}
-            entries = self._log_entries(until=commit) if commit else []
             scratch = folder / f".{DB_FILE}.{uuid.uuid4().hex[:8]}.tmp"
             try:
-                with closing(sqlite3.connect(scratch, isolation_level=None)) as db:
-                    materialize(
-                        db,
-                        units,
-                        entries,
-                        [],
-                        self._schema_of(units),
-                        profile.load_all(self.repo, units),
-                    )
+                self._build_at(commit, scratch)
                 repo_engine.replace_retrying(scratch, folder / DB_FILE)
             finally:
                 scratch.unlink(missing_ok=True)
             marker.write_text(json.dumps(target), encoding="utf-8")
             return folder
+
+    def _build_at(self, commit: str | None, path: Path) -> None:
+        """A database at `path` as of `commit`, from its units."""
+        units = self.repo.state_at(commit) if commit else {}
+        entries = self._log_entries(until=commit) if commit else []
+        with closing(sqlite3.connect(path, isolation_level=None)) as db:
+            materialize(
+                db,
+                units,
+                entries,
+                [],
+                self._schema_of(units),
+                profile.load_all(self.repo, units),
+            )
+
+    def write_snapshot(self, tag: str, commit: str) -> dict[str, Any]:
+        """`published/<tag>.sqlite` in the shared folder, written once (design §6.2),
+        and its hash for the publish record. A second publish of the tag keeps the
+        first. Nothing reads it yet: readers rebuild from the units, which stay the
+        truth, so a failure here does not stop the publish."""
+        relative = f"{SNAPSHOT_DIR}/{tag}.sqlite"
+        target = self.folder / relative
+        scratch = self.local / f".snapshot-{uuid.uuid4().hex[:8]}.tmp"
+        partial = target.with_name(f".{target.name}.{uuid.uuid4().hex[:8]}.tmp")
+        try:
+            if not target.exists():
+                self._build_at(commit, scratch)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(scratch, partial)
+                if not target.exists():
+                    repo_engine.replace_retrying(partial, target)
+            digest = hashlib.sha256(target.read_bytes()).hexdigest()
+            return {"snapshot": {"path": relative, "sha256": digest}}
+        except (OSError, sqlite3.Error):
+            return {"snapshot": None}
+        finally:
+            scratch.unlink(missing_ok=True)
+            partial.unlink(missing_ok=True)
+
+    def _manifest(self) -> dict[str, Any]:
+        try:
+            found = json.loads((self.folder / CARDS_MANIFEST).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+        return found if isinstance(found, dict) else {}
+
+    def write_cards(self) -> dict[str, Any]:
+        """`cards/<id>.md` of the version published now, whoever published it, so a
+        slower publisher cannot put an older view back (design §6.1). Only pages whose
+        hash differs from the manifest are written, and the manifest goes last. A
+        failure leaves the publish in place: the view is behind until the next one."""
+        started = time.monotonic()
+        with self.lock:
+            target = self.reads()
+            if target["tag"] is None:
+                return {"behind": False, "written": 0, "removed": 0, "unchanged": 0}
+            try:
+                folder = self.refresh_published()
+                withdrawn = {
+                    vault_sources.stable_id(sha) for sha in vault_sources.withdrawn_shas(self.repo)
+                }
+                with closing(sqlite3.connect(f"file:{folder / DB_FILE}?mode=ro", uri=True)) as db:
+                    row = db.execute("SELECT value FROM meta WHERE key = 'schema'").fetchone()
+                    pages = card_markdown.render_all(db, self._registry(str(row[0])), withdrawn)
+                return self._write_pages(pages, target, started)
+            except (OSError, sqlite3.Error, RepoError, BiStoreError) as failure:
+                return {"behind": True, "problem": type(failure).__name__}
+
+    def _write_pages(
+        self, pages: Mapping[str, str], target: Mapping[str, Any], started: float
+    ) -> dict[str, Any]:
+        cards = self.folder / CARDS_DIR
+        cards.mkdir(parents=True, exist_ok=True)
+        manifest = self._manifest()
+        known = manifest.get("hashes") if isinstance(manifest.get("hashes"), dict) else {}
+        assert isinstance(known, dict)
+        present = {p.name for p in cards.iterdir()}
+        hashes: dict[str, str] = {}
+        written = 0
+        for card_id, text in pages.items():
+            data = text.encode("utf-8")
+            hashes[card_id] = hashlib.sha256(data).hexdigest()
+            if known.get(card_id) == hashes[card_id] and f"{card_id}.md" in present:
+                continue
+            repo_engine._write_atomic(cards / f"{card_id}.md", data)
+            written += 1
+        gone = [card_id for card_id in known if card_id not in pages]
+        for card_id in gone:
+            (cards / f"{card_id}.md").unlink(missing_ok=True)
+        if written or gone or manifest.get("commit") != target["commit"]:
+            record = {
+                "tag": target["tag"],
+                "commit": target["commit"],
+                "at": now(),
+                "by": self.repo.author,
+                "hashes": hashes,
+            }
+            repo_engine._write_atomic(
+                self.folder / CARDS_MANIFEST,
+                json.dumps(record, ensure_ascii=False, indent=1, sort_keys=True).encode("utf-8"),
+            )
+        return {
+            "behind": False,
+            "written": written,
+            "removed": len(gone),
+            "unchanged": len(pages) - written,
+            "seconds": round(time.monotonic() - started, 2),
+        }
+
+    def cards_behind(self) -> bool:
+        """Whether the pages in `cards/` are not the published version's."""
+        target = self.reads()
+        return target["tag"] is not None and self._manifest().get("commit") != target["commit"]
 
     def sync(self) -> dict[str, Any]:
         """Apply what the others pushed, then rebuild the local database."""
@@ -1315,6 +1427,7 @@ class Vault:
             "incomplete": [],
             "cards": cards,
             "last_sync": last,
+            "cards_view_behind": self.cards_behind() if reachable else False,
         }
 
     def describe(self) -> dict[str, Any]:
@@ -1870,10 +1983,14 @@ def publish(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[st
         raise BiStoreError("confirm_required", "發佈要由人按確認")
     vault = _vault(workspace, vault_id)
     with _repo_errors():
-        record = vault.repo.publish(str(given.get("tag") or ""))
+        record = vault.repo.publish(str(given.get("tag") or ""), vault.write_snapshot)
         readme.write_readme(vault.repo)
     folder = vault.refresh_published()
-    return {"published": record, **_publish_warnings(vault, folder)}
+    return {
+        "published": record,
+        **_publish_warnings(vault, folder),
+        "cards": vault.write_cards(),
+    }
 
 
 def skills(workspace: Path, vault_id: str) -> dict[str, Any]:

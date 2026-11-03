@@ -286,7 +286,11 @@ def old_layout() -> Iterator[None]:
     """The fixture stays a vault from before the homes (`BI_CARD_MODEL.md` §4), so it
     also proves an old vault still loads: today's code makes the commits it made."""
     saved_body, saved_lists = vault_skills.classify_body, vault._home_lists
+    saved_snapshot, saved_cards = vault.Vault.write_snapshot, vault.Vault.write_cards
     vault.BI_TYPE.layout = repo_engine.DEFAULT_LAYOUT  # type: ignore[assignment]
+    # An old vault's publish wrote neither a snapshot nor card pages.
+    vault.Vault.write_snapshot = lambda self, tag, commit: {}  # type: ignore[method-assign]
+    vault.Vault.write_cards = lambda self: {}  # type: ignore[method-assign]
 
     def old_body(reg: Any, segments: list[dict[str, str]], library: list[str]) -> str:
         return vault_skills._old_classify_body(reg, segments)
@@ -302,6 +306,8 @@ def old_layout() -> Iterator[None]:
         del vault.BI_TYPE.layout
         vault_skills.classify_body = saved_body
         vault._home_lists = saved_lists
+        vault.Vault.write_snapshot = saved_snapshot  # type: ignore[method-assign]
+        vault.Vault.write_cards = saved_cards  # type: ignore[method-assign]
 
 
 def build_vault(workspace: Path, parent: Path) -> Path:
