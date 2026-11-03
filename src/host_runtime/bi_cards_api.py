@@ -71,6 +71,7 @@ from capabilities.bi_cards import (
     sessions,
     skill_session,
     source_markdown,
+    vault_sources,
 )
 from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import (
@@ -211,7 +212,11 @@ def _route(
             # Quality checks (BI vault V13), read only.
             return 200, quality.check(store, catalog.for_store(store))
         if path == "/api/bi/sources":
-            return 200, {"sources": Staging(workspace, store.dataset).sources()}
+            staging = Staging(workspace, store.dataset)
+            repo = staging._vault_repo()
+            if repo is None:
+                return 200, {"sources": staging.sources()}
+            return 200, vault_sources.listed(repo, staging.sources())
         parts = path.split("/")
         if len(parts) in (6, 7) and parts[:4] == ["", "api", "bi", "sources"]:
             if parts[5] == "markdown":

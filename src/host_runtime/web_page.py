@@ -2570,8 +2570,8 @@ tr:last-child td { border-bottom: none; }
             <p class="bi-meta">共用知識庫（vault）放在 SharePoint／OneDrive 同步的資料夾。
               你的改動先留在這台電腦，寫下目的 commit、再 push 才會給大家；Agent 只讀發佈的版本。
               一般資料集只在這台電腦。
-              「把這個資料集轉成 vault」會把卡片寫成一個 commit，並把來源複製到這個知識庫
-              （來源仍只在這台電腦）；原本的資料集不變。</p>
+              「把這個資料集轉成 vault」會把卡片寫成一個 commit，並把來源放進這個知識庫，
+              等你 commit、push 後才進共用資料夾；原本的資料集不變。</p>
             <div class="bi-step-grid">
               <div><label class="bi-label" for="bi-b-ds">寫入哪個知識庫</label>
                 <select id="bi-b-ds"></select></div>
@@ -2627,15 +2627,22 @@ tr:last-child td { border-bottom: none; }
                 <option value="UNCLASSIFIED">UNCLASSIFIED</option>
                 <option value="CONFIDENTIAL">CONFIDENTIAL</option>
                 <option value="RESTRICTED">RESTRICTED</option></select></div>
+            <div id="bi-b-src-folder-box" hidden><label class="bi-label" for="bi-b-src-folder">
+              放在知識庫的哪個資料夾（決定用哪條判讀規則）</label>
+              <select id="bi-b-src-folder"></select></div>
             <div><button class="go" id="bi-b-upload" type="button" disabled>加入來源</button></div>
           </div>
+          <p class="bi-warn" id="bi-b-src-shared" hidden>共用知識庫的來源原檔，push
+            後會放進共用資料夾：能開這個資料夾的人都讀得到，任何機密等級都一樣，而且會一直留著。</p>
+          <p class="bi-warn" id="bi-b-src-cloud" role="status" hidden></p>
           <p class="bi-meta">AEP 保留一份來源副本（同樣內容只存一次），不會移動或修改你的原始檔，
             並把每份來源轉成 Markdown：之後的擷取都讀這份 Markdown，
             你可以修改它（每次修改是新的版次）。
             掃描的 PDF 沒有文字層，不支援。這一步不會寫入任何卡片。</p>
           <div class="bi-scroll"><table class="bi-table bi-stack" id="bi-b-sources">
             <thead><tr><th>使用</th><th>來源</th><th>格式</th><th>Markdown</th><th>大小</th>
-              <th>機密等級</th><th>加入時間</th></tr></thead><tbody></tbody></table></div>
+              <th>機密等級</th><th>共用資料夾</th><th>加入時間</th></tr></thead>
+              <tbody></tbody></table></div>
           <div class="bi-step" id="bi-b-md" role="region" aria-labelledby="bi-b-md-h" hidden>
             <h4 id="bi-b-md-h"></h4>
             <p class="bi-meta" id="bi-b-md-info"></p>
@@ -13748,6 +13755,10 @@ async function biSkills(vaultId) {
     option.value = f; return option;
   }));
   if ((reply.folders || []).includes(kept)) pick.value = kept;
+  const chosen = (bi.build.sources || []).find((s) => s.id === bi.build.sourceId);
+  if (chosen && chosen.folder && (reply.folders || []).includes(chosen.folder)) {
+    pick.value = chosen.folder;
+  }
   el("bi-b-folder-box").hidden = false;
 }
 
@@ -13965,9 +13976,47 @@ el("bi-b-v-form").addEventListener("submit", async (event) => {
 });
 
 // -- step 1: sources ---------------------------------------------------------
+const BI_SHARED = {local: "只在這台電腦", staged: "commit、push 後才會放上去",
+  pushed: "已放上去", cloud_only: "只在雲端"};
+
+async function biSourceFolders() {
+  // A vault's source folders, for the folder a new source goes in.
+  const vault = biVaultOf(biDataset());
+  el("bi-b-src-folder-box").hidden = !vault; el("bi-b-src-shared").hidden = !vault;
+  if (!vault) return;
+  const reply = await call("/api/bi/vaults/" + vault.id + "/skills");
+  const pick = el("bi-b-src-folder"), kept = pick.value;
+  pick.replaceChildren(...(reply.folders || ["sources"]).map((f) => {
+    const option = bh("option", "", f === "sources" ? "（不指定資料夾）" : f);
+    option.value = f; return option;
+  }));
+  if ((reply.folders || []).includes(kept)) pick.value = kept;
+}
+
+function biSharedCell(source) {
+  const vault = biVaultOf(biDataset());
+  if (!vault) return "—";
+  const words = bh("span", source.shared === "cloud_only" ? "bi-warn" : "",
+    (BI_SHARED[source.shared] || "") + (source.folder ? "（" + source.folder + "）" : ""));
+  if (source.shared !== "local") return words;
+  return bh("span", "", words, " ", biButton("放進共用資料夾", async () => {
+    await biCall("/api/bi/vaults/" + vault.id + "/share-source",
+      {source_id: source.id, folder: el("bi-b-src-folder").value});
+    await biBuildSources();
+  }, "bi-btn", "把 " + source.name + " 放進共用資料夾"));
+}
+
 async function biBuildSources() {
   const reply = await call("/api/bi/sources?dataset=" + encodeURIComponent(biDataset()));
   bi.build.sources = reply.sources || [];
+  await biSourceFolders().catch(() => {});
+  const cloud = bi.build.sources.filter((s) => s.shared === "cloud_only").length;
+  const waiting = (reply.waiting || []).length;
+  const warn = el("bi-b-src-cloud");
+  warn.hidden = !cloud && !waiting;
+  warn.textContent = (cloud
+    ? cloud + " 個來源只在雲端：請把共用資料夾設為「一律保留在此裝置上」。" : "")
+    + (waiting ? waiting + " 個檔案還在等 OneDrive 同步，同步好才看得到。" : "");
   if (!bi.build.sources.some((s) => s.id === bi.build.sourceId)) bi.build.sourceId = null;
   const body = el("bi-b-sources").tBodies[0]; body.replaceChildren();
   for (const source of bi.build.sources) {
@@ -13991,7 +14040,8 @@ async function biBuildSources() {
         ? biButton("看／改", () => biBuildMarkdown(source.id), "bi-btn", "看或修改 "
           + source.name + " 的 Markdown") : ""),
       bh("td", "", Math.max(1, Math.round(source.size / 1024)) + " KB"),
-      bh("td", "", source.classification), bh("td", "", biTime(source.at))));
+      bh("td", "", source.classification), bh("td", "", biSharedCell(source)),
+      bh("td", "", biTime(source.at))));
   }
   if (!bi.build.sources.length) {
     body.append(bh("tr", "", bh("td", "bi-empty", "還沒有來源。先選檔案，按「加入來源」。")));
@@ -14082,6 +14132,7 @@ el("bi-b-upload").addEventListener("click", async () => {
       const content = await biReadFile(file, binary);
       const body = {dataset: biDataset(), name: file.name,
         classification: el("bi-b-class").value};
+      if (biVaultOf(biDataset())) body.folder = el("bi-b-src-folder").value;
       if (binary) body.content_base64 = content; else body.text = content;
       const reply = await biCall("/api/bi/sources", body);
       bi.build.sourceId = reply.source.id;

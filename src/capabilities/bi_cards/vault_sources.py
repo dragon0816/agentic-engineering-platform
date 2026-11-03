@@ -15,6 +15,7 @@ stays on this PC until `share` is called.
 from __future__ import annotations
 
 import re
+import stat
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -29,6 +30,8 @@ MARKDOWN_DIR = "markdown"
 #: The per-file limit in bytes, when one is set; the owner sets the number from
 #: the measured sizes, and without it nothing is refused for its size.
 LIMIT_UNIT = "meta:source_max_bytes"
+#: Windows: a file's content is not on this PC (a OneDrive placeholder).
+_CLOUD_ONLY = 0x00400000 | 0x00040000 | stat.FILE_ATTRIBUTE_OFFLINE
 _UNSAFE = re.compile(r'[\\/:*?"<>|\x00-\x1f]')
 
 
@@ -168,6 +171,38 @@ def sync_staging(repo: Any, workspace: Path, dataset: str) -> dict[str, int]:
         if key.startswith(PREFIX) and isinstance(value, dict)
     ]
     return dict(Staging(workspace, dataset).sync_from_units(units))
+
+
+def cloud_only(path: Path) -> bool:
+    """Whether a file's content is only in the cloud; asks for the attributes and
+    does not read the file, so OneDrive downloads nothing."""
+    try:
+        return bool(getattr(path.lstat(), "st_file_attributes", 0) & _CLOUD_ONLY)
+    except OSError:
+        return False
+
+
+def listed(repo: Any, sources: list[dict[str, Any]]) -> dict[str, Any]:
+    """The source list for the page with where each one stands: `local` (only on
+    this PC), `staged` (waits for a commit and push), `pushed` or `cloud_only`,
+    plus the files of commits still waiting for OneDrive."""
+    working, pushed = repo.working_units(), repo.units()
+    found = []
+    for source in sources:
+        key = unit_key(source["sha256"])
+        value = working.get(key)
+        if not isinstance(value, dict):
+            state = "local"
+        elif key not in pushed:
+            state = "staged"
+        elif cloud_only(Path(repo.folder) / str(value["file"])):
+            state = "cloud_only"
+        else:
+            state = "pushed"
+        folder = value.get("folder") if isinstance(value, dict) else None
+        found.append({**source, "shared": state, "folder": folder})
+    waiting = sorted({f for item in repo.status()["waiting"] for f in item["files"]})
+    return {"sources": found, "waiting": waiting}
 
 
 def folder_of(units: Mapping[str, Any], sha256: str) -> str | None:

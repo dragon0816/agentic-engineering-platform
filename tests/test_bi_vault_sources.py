@@ -331,6 +331,70 @@ def test_converting_a_dataset_stages_its_sources_with_the_ids_its_evidence_uses(
     assert (folder / unit["file"]).read_bytes() == REPORT.encode()
 
 
+# -- what the page is told (S7) ---------------------------------------------------------
+
+
+def _states(ws: Path, dataset: str) -> dict[str, Any]:
+    status, reply = _call(ws, "GET", "/api/bi/sources", dataset=dataset)
+    assert status == 200, reply
+    return dict(reply)
+
+
+def test_the_list_says_where_each_source_stands(tmp_path: Path, monkeypatch: Any) -> None:
+    drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
+    source = _add(a, dataset, folder=FOLDER)
+    (seen,) = _states(a, dataset)["sources"]
+    assert seen["shared"] == "staged" and seen["folder"] == FOLDER
+    _commit(a, vault_id, "加入")
+    _push(a, vault_id)
+    assert _states(a, dataset)["sources"][0]["shared"] == "pushed"
+    monkeypatch.setattr(vault_sources, "cloud_only", lambda _path: True)
+    assert _states(a, dataset)["sources"][0]["shared"] == "cloud_only"
+    monkeypatch.undo()
+    # A commit delivered before its file: the file is named, the source not listed yet.
+    unit = _unit(a, vault_id, source["sha256"])
+    drive.deliver("a", "b", vault_id)
+    target = drive.parent("b") / vault_id / unit["file"]
+    held = tmp_path / "held"
+    target.rename(held)
+    _sync(b, vault_id)
+    assert _states(b, dataset) == {"sources": [], "waiting": [unit["file"]]}
+    held.rename(target)
+    _sync(b, vault_id)
+    assert _states(b, dataset)["sources"][0]["shared"] == "pushed"
+
+
+def test_a_source_only_on_this_pc_is_listed_and_shared_through_the_route(tmp_path: Path) -> None:
+    drive, vault_id, dataset, a, _ = _two_pcs(tmp_path)
+    folder = drive.parent("a") / vault_id
+    away = tmp_path / "away"
+    folder.rename(away)
+    source = _add(a, dataset)
+    away.rename(folder)
+    assert _states(a, dataset)["sources"][0]["shared"] == "local"
+    done = _ok(_call(a, "POST", f"/api/bi/vaults/{vault_id}/share-source",
+                     {"source_id": source["id"], "folder": FOLDER}))  # fmt: skip
+    assert done["source"]["folder"] == FOLDER
+    assert _states(a, dataset)["sources"][0]["shared"] == "staged"
+    status, refused = _call(a, "POST", f"/api/bi/vaults/{vault_id}/share-source",
+                            {"source_id": "nope"})  # fmt: skip
+    assert status != 200 and refused["code"] == "source_unknown"
+
+
+def test_a_dataset_only_on_this_pc_lists_no_shared_state(tmp_path: Path) -> None:
+    _, _, _, a, _ = _two_pcs(tmp_path)
+    _add(a, "demo-local", name="x.md", text="# x\n")
+    (seen,) = _states(a, "demo-local")["sources"]
+    assert "shared" not in seen
+
+
+def test_cloud_only_asks_for_attributes_and_reads_nothing(tmp_path: Path) -> None:
+    path = tmp_path / "x.bin"
+    path.write_bytes(b"x")
+    assert vault_sources.cloud_only(path) is False
+    assert vault_sources.cloud_only(tmp_path / "gone.bin") is False
+
+
 def test_a_cards_database_ignores_the_source_units(tmp_path: Path) -> None:
     _, vault_id, dataset, a, _ = _two_pcs(tmp_path)
     _add(a, dataset)

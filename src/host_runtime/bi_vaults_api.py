@@ -16,7 +16,7 @@ from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import analyses, migrate, packs, vault, vault_checks
+from capabilities.bi_cards import analyses, migrate, packs, vault, vault_checks, vault_sources
 from capabilities.bi_cards.capability import QUERY_SPEC
 from capabilities.bi_cards.store import DB_FILE, BiStoreError, vault_registry
 from host_runtime import bi_atlas_import, bi_bench, bi_feed_api
@@ -129,6 +129,14 @@ def route(
         return 200, {"ok": True, **vault.revert(workspace, vault_id, given)}
     if action == "tag":
         return 200, {"ok": True, **vault.tag(workspace, vault_id, given)}
+    if action == "share-source":
+        # A source only on this PC goes to the shared folder at the next push.
+        return 200, {
+            "ok": True,
+            "source": vault_sources.share(
+                workspace, vault_id, str(given.get("source_id") or ""), given.get("folder")
+            ),
+        }
     if action == "skills":
         return 200, {"ok": True, **vault.save_skill(workspace, vault_id, given)}
     if action == "publish":
