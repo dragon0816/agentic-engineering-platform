@@ -23,7 +23,7 @@ Telegram message, bot token or model was used, and the real Agent Web on 53583 w
 seen on the owner's host.
 
 **Known points.**
-- Stored records feed no memory, telemetry, learning or platform path, though Agent Web chats feed the first three: the
+- Stored records feed no memory, learning, suggestion or platform path, though Agent Web chats do feed all four: the
   stricter choice, design §8.
 - A code the owner types as plain text is stored unless it looks like a credential (design §3).
 - A failed write logs a warning and leaves a gap in the record; the turn goes on.
