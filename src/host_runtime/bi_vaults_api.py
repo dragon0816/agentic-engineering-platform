@@ -78,6 +78,8 @@ def route(
             return 200, vault.history(workspace, parts[0], limit)
         if len(parts) == 2 and parts[1] == "skills":
             return 200, vault.skills(workspace, parts[0])
+        if len(parts) == 2 and parts[1] == "profiles":
+            return 200, vault.profiles(workspace, parts[0])
         if len(parts) == 2 and parts[1] == "checks":
             return 200, {
                 **vault_checks.listing(workspace, parts[0]),
@@ -144,6 +146,8 @@ def route(
         return 200, {"ok": True, **vault_sources.withdraw(workspace, vault_id, given)}
     if action == "skills":
         return 200, {"ok": True, **vault.save_skill(workspace, vault_id, given)}
+    if action == "profiles":
+        return 200, {"ok": True, **vault.save_profile(workspace, vault_id, given)}
     if action == "tools":
         return 200, {"ok": True, **vault.save_tool(workspace, vault_id, given)}
     if action == "publish":

@@ -54,6 +54,7 @@ from capabilities.bi_cards import (
     catalog,
     homes,
     names,
+    profile,
     schema_doc,
     vault_checks,
     vault_skills,
@@ -609,15 +610,66 @@ def _fill_relations(db: sqlite3.Connection, units: Mapping[str, Any], reg: Regis
             )
 
 
+def _fill_homes(
+    db: sqlite3.Connection,
+    units: Mapping[str, Any],
+    reg: Registry | None,
+    profiles: Mapping[str, Mapping[str, Any]],
+) -> None:
+    """Derived, after everything else (`BI_CARD_MODEL.md` §1, §3.4): a card belongs to
+    the homes whose sources gave it evidence, and a field is `not_applicable` when
+    the card has a home, every home has a profile, and none uses the field. A state
+    or value already there wins; a card in no home reads `unknown`."""
+    folders = {
+        str(value.get("id")): str(value.get("folder") or "")
+        for key, value in units.items()
+        if key.startswith(vault_sources.PREFIX) and isinstance(value, dict)
+    }
+    belongs: dict[str, set[str]] = {}
+    for row in db.execute("SELECT DISTINCT card_id, source_id FROM evidence").fetchall():
+        home = homes.home_of(folders.get(str(row[1]), ""))
+        if home is not None:
+            belongs.setdefault(str(row[0]), set()).add(home)
+    db.executemany(
+        "INSERT INTO card_app_folders (card_id, application) VALUES (?, ?)",
+        [(card, home) for card, found in sorted(belongs.items()) for home in sorted(found)],
+    )
+    if not profiles or reg is None:
+        return
+    for row in db.execute("SELECT id, entity_type FROM cards").fetchall():
+        card_id, entity = str(row[0]), reg.types.get(str(row[1]))
+        own = belongs.get(card_id)
+        if entity is None or not own or not own <= set(profiles):
+            continue
+        uses = [profile.used_fields(entity, profiles[home]) or set() for home in own]
+        have = {
+            str(item[0])
+            for item in db.execute("SELECT field FROM fields WHERE card_id = ?", (card_id,))
+        }
+        db.executemany(
+            "INSERT OR IGNORE INTO field_states (card_id, field, state, origin) "
+            "VALUES (?, ?, ?, 'profile')",
+            [
+                (card_id, item.name, card_model.NOT_APPLICABLE)
+                for item in entity.fields
+                if item.klass != "derived"
+                and item.name not in have
+                and not any(item.name in used for used in uses)
+            ],
+        )
+
+
 def materialize(
     db: sqlite3.Connection,
     units: Mapping[str, Any],
     entries: list[dict[str, Any]],
     conflicts: list[dict[str, Any]],
     reg: Registry | None = None,
+    profiles: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> None:
     """Rebuild every BI table of `db` from `units` inside one transaction.
-    Relations from link fields need `reg`, the schema the units are on."""
+    Relations from link fields need `reg`, the schema the units are on; what a home
+    does not use also needs its `profiles` (`profile.load_all`)."""
     db.row_factory = sqlite3.Row
     db.executescript(SCHEMA)
     add_missing_columns(db)
@@ -824,6 +876,7 @@ def materialize(
             "WHERE f.card_id = p.card_id AND f.field = p.field) ORDER BY id",
             (card_model.PENDING_CONFIRMATION,),
         )
+        _fill_homes(db, units, reg, profiles or {})
         db.execute("COMMIT")
     except BaseException:
         db.execute("ROLLBACK")
@@ -1030,7 +1083,12 @@ class Vault:
                 db.row_factory = sqlite3.Row
                 units = self.repo.working_units()
                 materialize(
-                    db, units, self._entries(), self.repo.conflicts(), self._schema_of(units)
+                    db,
+                    units,
+                    self._entries(),
+                    self.repo.conflicts(),
+                    self._schema_of(units),
+                    profile.load_all(self.repo, units),
                 )
         from capabilities.bi_cards import search_index
 
@@ -1066,7 +1124,14 @@ class Vault:
             scratch = folder / f".{DB_FILE}.{uuid.uuid4().hex[:8]}.tmp"
             try:
                 with closing(sqlite3.connect(scratch, isolation_level=None)) as db:
-                    materialize(db, units, entries, [], self._schema_of(units))
+                    materialize(
+                        db,
+                        units,
+                        entries,
+                        [],
+                        self._schema_of(units),
+                        profile.load_all(self.repo, units),
+                    )
                 repo_engine.replace_retrying(scratch, folder / DB_FILE)
             finally:
                 scratch.unlink(missing_ok=True)
@@ -1772,6 +1837,16 @@ def tag(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, A
     return {"tag": record}
 
 
+def _publish_warnings(vault: Vault, folder: Path) -> dict[str, Any]:
+    """What a publish tells and never blocks on: what profiles require and cards lack."""
+    commit = vault.reads()["commit"]
+    found = profile.load_all(vault.repo, vault.repo.state_at(commit)) if commit else {}
+    if not found:
+        return {}
+    with closing(sqlite3.connect(folder / DB_FILE)) as db:
+        return {"profile_required_missing": profile.missing_required(db, found)}
+
+
 def publish(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
     """Publish a tag. Only a person's confirm click calls this (design §7)."""
     if given.get("confirm") is not True:
@@ -1780,8 +1855,8 @@ def publish(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[st
     with _repo_errors():
         record = vault.repo.publish(str(given.get("tag") or ""))
         readme.write_readme(vault.repo)
-    vault.refresh_published()
-    return {"published": record}
+    folder = vault.refresh_published()
+    return {"published": record, **_publish_warnings(vault, folder)}
 
 
 def skills(workspace: Path, vault_id: str) -> dict[str, Any]:
@@ -1836,6 +1911,21 @@ def save_skill(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict
         skill = _checked_skill(vault, given)
         value = repo_skills.stage_skill(vault.repo, skill)
     return {"skill": {"name": skill.unit_name, **value}, "status": vault.status()}
+
+
+def profiles(workspace: Path, vault_id: str) -> dict[str, Any]:
+    """The vault's current profiles (working copy)."""
+    vault = _vault(workspace, vault_id)
+    return {"profiles": profile.listed(vault.repo, vault.repo.working_units())}
+
+
+def save_profile(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
+    """Stage a new revision of a home's profile; the person commits it."""
+    vault = _vault(workspace, vault_id)
+    home = str(given.get("home") or "")
+    with vault.lock, _repo_errors():
+        value = profile.stage(vault.repo, home, given.get("profile"), vault._registry())
+    return {"profile": {"home": home, **value}, "status": vault.status()}
 
 
 def save_tool(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
