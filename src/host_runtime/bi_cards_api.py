@@ -61,6 +61,7 @@ from capabilities.bi_cards import (
     importer,
     methods,
     migrate,
+    page_import,
     quality,
     questions_session,
     runs,
@@ -367,6 +368,21 @@ def _route(
                 "proposals": result.proposals,
             },
         }
+    if path == "/api/bi/import/pages/preview":
+        # Obsidian card pages (BI_CARD_PAGE_IMPORT): no model; writes nothing.
+        store = BiStore(workspace, _dataset(given.get("dataset")))
+        prepared_pages = page_import.preview(
+            store, given.get("pages"), samples=given.get("samples") is True
+        )
+        return 200, {"ok": True, **prepared_pages.to_api()}
+    if path == "/api/bi/import/pages/apply":
+        pending_pages = page_import.recall(str(given.get("preview_id") or ""))
+        if pending_pages is None:
+            return _error(404, "preview_unknown", "找不到這份預覽（可能已過期），請重新預覽")
+        store = BiStore(workspace, pending_pages.dataset)
+        done = page_import.apply(store, pending_pages, actor=who, folder=given.get("folder"))
+        page_import.forget(pending_pages.preview_id)
+        return 200, {"ok": True, **done}
     if path == "/api/bi/import/undo":
         store = BiStore(workspace, _dataset(given.get("dataset")))
         store.undo_import(str(given.get("import_id") or ""), actor=who)

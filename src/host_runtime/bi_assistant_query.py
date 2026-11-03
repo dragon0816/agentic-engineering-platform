@@ -92,5 +92,6 @@ def answer(
         "analysis": data.get("analysis") or [],
         "scope_note": data.get("scope_note"),
         "source": source_line(dataset, read),
+        "sample_note": data.get("sample_note") or "",
         "reads": {"tag": read.get("tag"), "commit": read.get("commit")},
     }

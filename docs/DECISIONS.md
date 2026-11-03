@@ -6210,3 +6210,21 @@ The five bases are `files\Aerospace-BI-KB`, `files\BI_Vault_Example`, `files\Wir
 `rs-k` copy is `%LOCALAPPDATA%\AEP\rs-k-v1.0.3`; the wiki target is `OneDrive - Rohde & Schwarz\Wiki_Knowledge`. The old `market-bi`
 folder itself holds only those two reports and 52 change files, not the bases. The per-base list of what goes in is in the
 runbook §3, for the owner to review at the session.
+
+## 2026-11-03: The card-page importer, and samples (owner, relayed by the BI orchestrator)
+
+Design `docs/phases/BI_CARD_PAGE_IMPORT.md`.
+
+- **A built-in importer for Obsidian card pages**: frontmatter maps to schema fields as a CSV's columns do; no model; the same preview,
+  apply and commit path. The page is the evidence, and unknown fields and invalid values are listed, never invented or dropped silently.
+  Rejected: AI extraction over the pages (it re-reads structured data, with cost and guesses); a by-hand export to CSV outside AEP. Choices
+  inside it: a strict small frontmatter reader rather than a YAML dependency; a `.csv` in the same request reads as CSV import does, so
+  `tools/samples` takes the same path; one `commit_run` for a whole request, so a base makes one commit of cards.
+- **`SAMPLE-` pages and `BI_Vault_Example/tools/samples` are imported and marked, not left out.** The mark is the existing card field
+  `synthetic`. The host writes a line under an answer with samples in it, so it does not rest on the model. The default pack still drops
+  only `SAMPLE-` names, so a marked card without that name counts in a built-in analysis, and the line says it may. Rejected: a new field;
+  the default pack dropping every marked card (all demo cards are marked and `FICTIONAL` matches 「待查證」, so it empties the Dashboard: 90 of
+  robotics' 104 seed cards would vanish).
+- **Accepted as stated (owner):** S6's raw-body upload, with the converter still reading a file whole once; withdrawal has no undo;
+  withdrawal does not clear AI session conversations; `check_classification` before an AI run stays, because it governs what a model
+  may be sent, not file access.

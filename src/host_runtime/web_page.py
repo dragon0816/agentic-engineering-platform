@@ -2645,6 +2645,17 @@ tr:last-child td { border-bottom: none; }
             <thead><tr><th>使用</th><th>來源</th><th>格式</th><th>Markdown</th><th>大小</th>
               <th>機密等級</th><th>共用資料夾</th><th>加入時間</th></tr></thead>
               <tbody></tbody></table></div>
+          <details class="bi-manage" id="bi-b-pages">
+            <summary>匯入卡片頁（Obsidian）</summary>
+            <p class="bi-meta">選一個資料夾：讀每頁開頭的欄位，對應到 schema，就像匯入
+              CSV；不用模型，也不會猜。先預覽，看不懂的欄位和值都會列出來，確認後每頁都
+              保留成來源，當作卡片的證據。</p>
+            <input id="bi-b-pages-dir" type="file" webkitdirectory multiple
+              aria-label="選擇卡片頁資料夾">
+            <label><input id="bi-b-pages-samples" type="checkbox"> 全部標成範例資料</label>
+            <div id="bi-b-pages-plan" role="region" aria-live="polite"
+              aria-label="卡片頁匯入預覽"></div>
+          </details>
           <div class="bi-step" id="bi-b-md" role="region" aria-labelledby="bi-b-md-h" hidden>
             <h4 id="bi-b-md-h"></h4>
             <p class="bi-meta" id="bi-b-md-info"></p>
@@ -14159,6 +14170,62 @@ function biReadFile(file, binary) {
 el("bi-b-file").addEventListener("change", () => {
   el("bi-b-upload").disabled = !el("bi-b-file").files.length;
 });
+// -- Obsidian card pages (BI_CARD_PAGE_IMPORT): preview, then apply ---------------
+const BI_PAGES_MAX = 7 * 1024 * 1024;
+
+function biPagesPlan(plan) {
+  const box = el("bi-b-pages-plan"), s = plan.summary;
+  const lines = [bh("p", "", bh("strong", "", "新增 " + s.create + "、更新 " + s.update
+    + "、不變 " + s.unchanged + "、略過 " + s.skip),
+    "（" + s.pages + " 頁，" + s.samples + " 張標成範例資料）")];
+  const unknown = plan.types.flatMap((t) => t.columns
+    .filter((c) => c.status === "unknown" || c.status === "ignored")
+    .map((c) => t.entity_type + "." + c.source));
+  if (unknown.length) {
+    lines.push(bh("p", "bi-warn", "schema 沒有的欄位（不會寫入）：" + unknown.join("、")));
+  }
+  const warned = plan.types.flatMap((t) => t.rows.flatMap((r) => r.warnings.map((w) =>
+    t.entity_type + " " + r.canonical_key + "：" + w.message)));
+  if (warned.length) {
+    lines.push(bh("details", "", bh("summary", "", "值的問題（" + warned.length + "）"),
+      bh("ul", "", ...warned.map((w) => bh("li", "", w)))));
+  }
+  if (plan.problems.length) {
+    lines.push(bh("details", "", bh("summary", "", "看不懂的地方（" + plan.problems.length + "）"),
+      bh("ul", "", ...plan.problems.map((p) => bh("li", "", p.path
+        + (p.line ? " 第 " + p.line + " 行" : "") + "：" + p.message)))));
+  }
+  if (plan.skipped.length) {
+    lines.push(bh("details", "", bh("summary", "", "略過的檔案（" + plan.skipped.length + "）"),
+      bh("ul", "", ...plan.skipped.map((p) => bh("li", "", p.path + "：" + p.reason)))));
+  }
+  lines.push(bh("div", "bi-actions", biButton("確認匯入", async () => {
+    const done = await biCall("/api/bi/import/pages/apply", {preview_id: plan.preview_id,
+      folder: biVaultOf(biDataset()) ? el("bi-b-src-folder").value : undefined});
+    box.replaceChildren();
+    await biBuildSources();
+    biNotice(true, "已匯入卡片頁：新增 " + (done.applied ? done.applied.created : 0) + " 張、更新 "
+      + (done.applied ? done.applied.updated : 0) + " 張。");
+  }, "go", "確認匯入這些卡片頁")));
+  box.replaceChildren(...lines);
+}
+
+el("bi-b-pages-dir").addEventListener("change", async (event) => {
+  const chosen = [...event.target.files].filter((f) => /\.(md|csv)$/i.test(f.name)
+    && !/(^|\/)\./.test(f.webkitRelativePath || f.name));
+  event.target.value = "";
+  try {
+    const size = chosen.reduce((sum, f) => sum + f.size, 0);
+    if (size > BI_PAGES_MAX) {
+      throw new Error("這些檔案有 " + Math.round(size / 1048576) + " MB，請選小一點的資料夾");
+    }
+    const pages = await Promise.all(chosen.map(async (f) =>
+      ({path: f.webkitRelativePath || f.name, text: await f.text()})));
+    biPagesPlan(await biCall("/api/bi/import/pages/preview", {dataset: biDataset(), pages,
+      samples: el("bi-b-pages-samples").checked}));
+  } catch (failure) { biNotice(false, "沒有預覽：" + failure.message); }
+});
+
 // A large file goes as the raw request body, read by the browser as it is sent;
 // base64 inside JSON cannot carry it (BI_SOURCES_IN_REPOSITORY S6).
 const BI_STREAM_FROM = 4 * 1024 * 1024;

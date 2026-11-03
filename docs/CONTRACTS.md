@@ -6564,3 +6564,16 @@ Design `docs/phases/BI_SOURCES_IN_REPOSITORY.md`. Code `src/capabilities/bi_card
   `source_withdrawn`. Each PC drops its copies at sync, removes open candidates and blanks a written run's excerpts.
 - **Engine.** A repository file that cannot be read makes its commit wait, and `file_unreadable` when something relies on it.
   `Repository.commit(..., only=)` commits just the units and files it picks.
+
+## BI card-page import and samples (2026-11-03)
+
+Design `docs/phases/BI_CARD_PAGE_IMPORT.md`. Code `src/capabilities/bi_cards/page_import.py`. Tests `tests/test_bi_card_page_import.py`.
+
+- **`POST /api/bi/import/pages/preview`** `{dataset, pages: [{path, text}], samples?: bool}`, writes nothing → `{ok, preview_id, summary: {create,
+  update, unchanged, skip, warnings, pages, samples, problems, skipped}, types: [{entity_type, filename, columns, rows}], problems: [{path,
+  line?, code, message}], skipped: [{path, reason}]}`. Codes: `frontmatter_open`, `frontmatter_line`, `frontmatter_list`, `frontmatter_map`,
+  `frontmatter_repeat`, `type_unknown`, and CSV's own for a `.csv`.
+- **`POST /api/bi/import/pages/apply`** `{preview_id, folder?}` → `{ok, written, sources, import_id?, applied?}`. Each file becomes a source; one run
+  and one `commit_run`; one evidence row per value, `locator: {line, key}`, the frontmatter line as `excerpt`.
+- **`importer.preview`** gains `rows` and `samples`; **`Registry.normalize`** takes a list as its items, without splitting them again.
+- **`QueryResult.sample_note`**: the host's line about example data, added under a chat answer by `with_bi_sources`, returned by `aep_bi_query`.

@@ -143,12 +143,15 @@ def preview(
     kind: str = "import",
     extra_keys: dict[str, set[str]] | None = None,
     schema: Registry | None = None,
+    rows: tuple[list[str], list[dict[str, Any]]] | None = None,
+    samples: bool = False,
 ) -> Preview:
-    """Read, map and normalise a CSV against the store and the dataset's
-    schema; writes nothing."""
+    """Read, map and normalise a CSV (or `rows`, already read: a value may be a
+    list) against the store and the dataset's schema; writes nothing. `samples`
+    marks every row as example data."""
     reg = schema or for_store(store)
     mapping = dict(mapping or {})
-    headers, raw_rows = read_rows(csv_text)
+    headers, raw_rows = rows if rows is not None else read_rows(csv_text)
     explicit: dict[str, str] = {
         norm_key(k): str(v) for k, v in dict(mapping.get("columns") or {}).items()
     }
@@ -236,7 +239,9 @@ def preview(
         if entity.get("node") and entity.get("nodes") and values.get("node"):
             merged = [values["node"], *[n for n in values.get("nodes", []) if n != values["node"]]]
             values["nodes"] = merged
-        synthetic = kind == "fixture" or any(FICTIONAL.search(str(v)) for v in raw.values())
+        synthetic = (
+            samples or kind == "fixture" or any(FICTIONAL.search(str(v)) for v in raw.values())
+        )
         if values.get("confidence") == "verified" and synthetic:
             values["confidence"] = "assumed"
             warnings.append(
@@ -343,7 +348,7 @@ def preview(
                 }
             )
         for name, cell in raws.items():
-            if name not in values and cell.strip():
+            if name not in values and str(cell).strip():
                 cells.append(
                     {
                         "field": name,

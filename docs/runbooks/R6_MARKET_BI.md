@@ -18,7 +18,7 @@ nor writes it since R2. The repository format needs its sources, schema, skills 
 |---|---|---|---|
 | D1 | **The new vault's id is `market-intel`.** | Creating `market-bi` again is refused on the owner's PC (`vault_exists`): that PC still holds `bi/vault-market-bi` and the registry entry, and there is no route to leave a vault. The id is fixed forever. | Decided (owner, 2026-11-02) |
 | D2 | **The originals go into the shared folder; every PC keeps all of them on the device. No size limit.** | **R6 cannot run until this branch is merged and running:** before it, a BI vault's sources stay on the PC that added them. Design: `docs/phases/BI_SOURCES_IN_REPOSITORY.md`. | Decided (owner, 2026-11-02, 2026-11-03) |
-| D3 | **Base by base through the page, one commit per base, conflicts settled in review.** The 2026-10-29 one-off merge script (`--fill-only`), which is not in the repository, is not brought back. | It reported 7 scalar conflicts last time; a commit per base can be reverted on its own. | Decided (owner, 2026-11-02). **Open: how the two bases without seed CSVs become cards, §3** |
+| D3 | **Base by base through the page, one commit per base, conflicts settled in review.** The 2026-10-29 one-off merge script (`--fill-only`), which is not in the repository, is not brought back. | It reported 7 scalar conflicts last time; a commit per base can be reverted on its own. | Decided (owner, 2026-11-02). The pages go through the card-page importer (`docs/phases/BI_CARD_PAGE_IMPORT.md`): open points in §3 |
 | D4 | **Import `%LOCALAPPDATA%\AEP\rs-k-v1.0.3` (28 MB) as a test copy into `C:\Users\Chi_L\OneDrive - Rohde & Schwarz\Wiki_Knowledge` (exists, empty). Do not bind it to the Agent until the owner has compared answers.** | Binding a second vault changes how questions route (§8). The real `RS_Knowledge` is never written. | Decided (owner, 2026-11-02, 2026-11-03) |
 | D5 | **The first tag is `2026q4-r6`.** | Tags never move. | Decided (owner, 2026-11-02) |
 
@@ -31,16 +31,16 @@ from reading the folders: names and counts, read only.
 | Base | Size | Goes in as sources | Stays out |
 |---|---|---|---|
 | `aidc-bi-kb` (AIDC) | 169 files, 1.2 MB | `BI/` (121 pages, 12 named `SAMPLE-`), `seed/` (24: 22 CSV seeds per the record), `sources/compute.md`, `sources/power_cooling.md`, `README.md` | `tools/` (18), `package.json`, `package-lock.json`, `Dashboard-AIDC.md` |
-| `Aerospace-BI-KB` (aerospace) | 101 files, 493 KB | `BI/` without `_Templates/` (53 of 72), `seed/` (22 CSV), `README.md` | `tools/` (5), `BI/_Templates/`, `Dashboard-Aerospace.md` |
-| `robotics_kb_sample` (robotics) | 134 files, 586 KB | `BI/` without `_Templates/` (105 of 116), `tools/samples/robotics/*.csv` (12: its seeds, though under `tools/`), `README.md`, `PATCH-NOTES.md` | the rest of `tools/`, `BI/_Templates/`, `build_sample.py`, `Dashboard-Robotics.md` |
-| `Wireless-Module-BI-KB-SAMPLE` (wireless module) | 87 files, 463 KB | `BI/` without `_Templates/` (58 of 77, 47 named `SAMPLE-`), `README.md` | `tools/` (6), `tests/` (3), `BI/_Templates/` |
-| `BI_Vault_Example` (wireless example) | 154 files, 2.3 MB | `BI/` without `_Templates/` (105 of 115), `tools/samples/*.csv` (3, sample data), `README.md` | `.obsidian/` (13), the rest of `tools/` (with `__pycache__`, `prompts`), `BI/_Templates/` |
+| `Aerospace-BI-KB` (aerospace) | 101 files, 493 KB | `BI/` without `_Templates/` (51 card pages of 72), `seed/` (22 CSV), `README.md` | `tools/` (5), `BI/_Templates/`, `Dashboard-Aerospace.md` |
+| `robotics_kb_sample` (robotics) | 134 files, 586 KB | `BI/` without `_Templates/` (104 card pages of 116), `tools/samples/robotics/*.csv` (12: its seeds, though under `tools/`), `README.md`, `PATCH-NOTES.md` | the rest of `tools/`, `BI/_Templates/`, `build_sample.py`, `Dashboard-Robotics.md` |
+| `Wireless-Module-BI-KB-SAMPLE` (wireless module) | 87 files, 463 KB | `BI/` without `_Templates/` (55 card pages of 77, 47 marked samples), `README.md` | `tools/` (6), `tests/` (3), `BI/_Templates/` |
+| `BI_Vault_Example` (wireless example) | 154 files, 2.3 MB | `BI/` without `_Templates/` (103 card pages of 115), `tools/samples/*.csv` (3, sample data), `README.md` | `.obsidian/` (13), the rest of `tools/` (with `__pycache__`, `prompts`), `BI/_Templates/` |
 
 Largest file under 1.4 MB; no PDFs. Reasons for the stays-out column: build tools and tests are not knowledge,
 `_Templates/` are Templater templates with no data (`<% tp.file.title %>`), and `Dashboard-*.md` are generated Dataview
-pages the vault's Dashboard replaces. **Points for the owner:** `SAMPLE-` pages are made-up examples, so keep them or leave
-them out; `BI_Vault_Example/tools/samples` likewise; `tools/name-aliases*.json` (AIDC, aerospace) stay out as files but hold
-the name aliases to carry over.
+pages the vault's Dashboard replaces. `SAMPLE-` pages and `BI_Vault_Example/tools/samples` go in **marked as samples** (owner,
+2026-11-03): tick 「全部標成範例資料」 for `tools/samples`. `tools/name-aliases*.json` (AIDC, aerospace) stay out as files but hold the
+name aliases to carry over.
 
 Two AIDC reports: `C:\Users\Chi_L\OneDrive - Rohde & Schwarz\BI_Knowledge\market-bi\applications\aidc-compute.md` and
 `aidc-power_cooling.md`. Read only; copy out, never move. Compare them with `aidc-bi-kb/sources/compute.md` and
@@ -49,12 +49,30 @@ Two AIDC reports: `C:\Users\Chi_L\OneDrive - Rohde & Schwarz\BI_Knowledge\market
 Schema: built in, `bi.schema/v1.1@2.0.0` (21 types; `segment` already has the 11 market segments). The old folder
 `market-bi` is a reference for a person only: nothing is converted from it by a tool.
 
-**Open, D3: two bases have no way in as cards yet.** The page imports cards from CSV and tables, or extracts them by AI from
-documents; **no route reads an Obsidian card page's frontmatter**, which is what these bases hold. AIDC and aerospace have
-seed CSVs, and robotics has its samples. Wireless module has no CSV at all, and wireless example only three samples. Options:
-(a) AI extraction over those pages (models, cost, and it re-reads what is already structured); (b) a small built-in
-importer for card pages, written and tested first (recommended: deterministic, and the pages stay the evidence); (c) export
-them to CSV by hand, once, outside AEP. The owner chooses before step 8.
+**Card pages go through the built-in importer** (owner, 2026-11-03: `docs/phases/BI_CARD_PAGE_IMPORT.md`), 「匯入卡片頁（Obsidian）」 in
+step 1. No model. Read-only dry run over the five folders on 2026-11-03, each base alone on the shipped schema; nothing was
+written to `files\`:
+
+| Base | Pages → new cards | Skipped, why | Sample-marked | Seed CSV → new cards | Sample-marked |
+|---|---|---|---|---|---|
+| AIDC | 121 → 121 | — | 12 | 22 card CSVs → 323 | 14 |
+| Aerospace | 51 → 51 | 21 templates | 1 | 22 → 91 | 9 |
+| Robotics | 104 → 100, 4 with no name | 12 templates | 0 | 12 → 104 | **90** |
+| Wireless module | 55 → 55 | 21 templates, 1 Dashboard | 47 | none | — |
+| Wireless example | 103 → 100, 3 with no name | 11 templates, 7 with no frontmatter | 7 | 3 samples → 9 | 9 (ticked) |
+
+No frontmatter problems in any base. Every base has fields the schema does not hold, listed in the preview and not written:
+`ingested_from` (import bookkeeping) and `Application.priority`. `seed/name_aliases_review.csv` and `seed/unresolved_links.csv` in AIDC
+are not card files and are listed as such. A full apply of AIDC's 121 pages on a temp vault took 86 s, then 29 s to push: one
+commit of sources and one of cards.
+
+**For the owner at step 7–8, from these numbers:**
+- **Seeds and pages disagree in size.** AIDC's seeds make 323 cards and its pages 121; aerospace 91 and 51. Seeds first, then the
+  pages (they update or add), or seeds alone, is the owner's call per base. Wireless module has only pages.
+- **Robotics' seeds mark 90 of 104 as samples, its pages none.** Marking comes from values matching `虛構|範例|示範|待…驗證|待查證`, and a
+  card once marked stays marked. So importing those seeds after the pages would mark the pages' cards too. Read the seeds' wording
+  before choosing; the pages alone may be the better source there.
+- The 7 pages with no name (4 robotics, 3 example) are listed in the preview and not imported; name them or leave them.
 
 ## 4. Pre-checks a script can run beforehand
 
@@ -103,8 +121,8 @@ that flow is changing, so read the current ones on the page.
 | 4 | Knowledge > BI > 建立與匯入 > 建立共用知識庫（vault）: id `market-intel`, in `BI_Knowledge`, schema `bi.schema/v1.1` (2.0.0), author `leo.chi`. | `repo.json` in the folder; `/api/knowledge/askable` lists it with `nothing_pushed` |
 | 5 | Step 1: add the AIDC base's sources (§3's list), let them become Markdown. They reach the shared folder with the push (D2). | Each source has Markdown; spot-check two tables |
 | 6 | Step 2: Session A only if the schema must change; Session B for the skills. Move the manager's reading rules there. | The owner reviewed every schema change and skill |
-| 7 | Import the AIDC seeds first: preview, apply, commit with a purpose. | 22 CSVs → 323 cards; §7's AIDC numbers match |
-| 8 | Repeat 5–7 for robotics, aerospace, wireless module, wireless example. **One commit per base.** | After each: quality check read; new conflicts settled (D3); no fact without a source |
+| 7 | Import the AIDC seeds first (`seed/`, the 22 card CSVs): preview, apply. Then its pages through the card-page importer, if the owner wants them (§3). | 22 CSVs → 323 cards; §7's AIDC numbers match |
+| 8 | Repeat 5–7 for robotics, aerospace, wireless module, wireless example, seeds or pages as §3 settles. **One commit per base** (with its sources in a commit of their own). | After each: quality check read; new conflicts settled (D3); no fact without a source |
 | 9 | Fix the links written in another spelling of a merged card (28 last time), as field edits with a reason. | Quality check's unresolved links explained |
 | 10 | Step 3: benchmark questions and the Dashboard (the analysis AI, or an Atlas import of the order). | Owner approved each question and the order |
 | 11 | Testing: run the benchmark on the working copy. | No regression the owner did not accept |

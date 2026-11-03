@@ -541,6 +541,19 @@ def _vault_lines(result: Any) -> list[str]:
     return list(found.values())
 
 
+def _sample_lines(result: Any) -> list[str]:
+    """The host's note about example data, for each answered `bi__query` of the turn."""
+    found: list[str] = []
+    for item in getattr(result, "tools", None) or ():
+        host = getattr(item, "host", None)
+        if getattr(item, "name", "") != TOOL_NAME or host is None or host.status != "succeeded":
+            continue
+        note = host.data.get("sample_note") if isinstance(host.data, dict) else None
+        if isinstance(note, str) and note and note not in found:
+            found.append(note)
+    return found
+
+
 def with_bi_sources(answer: str, result: Any) -> str:
     """The answer with the source line of every subscribed dataset the turn
     queried that the answer does not already name (dataset and version on
@@ -551,6 +564,7 @@ def with_bi_sources(answer: str, result: Any) -> str:
         return answer
     missing = [source_note(item) for item in bi_sources(result) if not _cited(answer, item)]
     missing += [line for line in _vault_lines(result) if line not in answer]
+    missing += [line for line in _sample_lines(result) if line not in answer]
     if not missing:
         return answer
     lines = "\n".join(missing)

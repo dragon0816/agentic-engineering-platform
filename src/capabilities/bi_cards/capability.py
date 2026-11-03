@@ -120,6 +120,22 @@ def _sql_section(store: BiStore, request: QueryRequest) -> dict[str, Any]:
     }
 
 
+def sample_note(store: Any, cards: Any = None) -> str:
+    """The host's line about example data: how many cards of a search are samples;
+    for an analysis or SQL, whose rows cannot be traced to a card, that the data
+    holds samples the result may include."""
+    if cards is not None:
+        count = sum(1 for card in cards if card.get("synthetic"))
+        return f"注意：這次查詢含 {count} 張範例資料，不是事實。" if count else ""
+    count = sum(1 for card in store.card_rows() if card["synthetic"])
+    if not count:
+        return ""
+    return (
+        f"注意：這份資料含 {count} 張範例資料（不是事實）；"
+        "內建分析預設只排除 SAMPLE- 開頭的，其他的和 SQL、自訂分析都可能算在結果裡。"
+    )
+
+
 class QueryResult(Contract):
     dataset: str
     total: int
@@ -130,6 +146,8 @@ class QueryResult(Contract):
     source: dict[str, Any] | None = None
     #: A vault's answer: the dataset and the version read (`{dataset, tag, commit}`).
     vault: dict[str, Any] | None = None
+    #: Said under the answer whatever the model wrote, when example data is in it.
+    sample_note: str = ""
 
 
 def source_note(source: dict[str, Any] | None) -> str:
@@ -209,6 +227,7 @@ class QueryHandler:
                     + (f"。{cited}" if cited else ""),
                     analysis=(section,),
                     source=source,
+                    sample_note=sample_note(store),
                     vault=read_version,
                 )
             if request.analysis:
@@ -236,6 +255,7 @@ class QueryHandler:
                     + (f"。{cited}" if cited else ""),
                     analysis=tuple(sections),
                     source=source,
+                    sample_note=sample_note(store),
                     vault=read_version,
                 )
             answer = service.query_cards(
@@ -254,6 +274,7 @@ class QueryHandler:
                 cards=tuple(answer["cards"]),
                 scope_note=answer["scope_note"] + (cited and f"{cited}。"),
                 source=source,
+                sample_note=sample_note(store, answer["cards"]),
                 vault=read_version,
             )
 

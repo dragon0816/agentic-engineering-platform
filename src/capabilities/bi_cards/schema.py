@@ -241,16 +241,19 @@ class Registry:
         extra_aliases: dict[str, dict[str, str]] | None = None,
     ) -> tuple[Any, list[tuple[str, str]]]:
         """(value, warnings). None means empty or not adopted (DQ-9: never a
-        silent guess; a lenient reading is a warning and stays empty)."""
-        text = str(raw).strip()
+        silent guess; a lenient reading is a warning and stays empty). A list is
+        taken as its items, never split again: one may hold a separator."""
+        given = [str(part).strip() for part in raw] if isinstance(raw, list) else None
+        text = "；".join(p for p in given if p) if given is not None else str(raw).strip()
         if text.lower() in EMPTY:
             return None, []
+        parts = [p for p in given if p] if given is not None else None
         aliases = {
             **self.enum_aliases.get(item.name, {}),
             **(extra_aliases or {}).get(item.name, {}),
         }
         if item.name == "domain":
-            items = split_list(text) if item.is_list else [text]
+            items = (parts or split_list(text)) if item.is_list else [text]
             values, bad = [], []
             for part in items:
                 hit = next((d for d in self.domains if d.lower() == part.lower()), None)
@@ -274,7 +277,7 @@ class Registry:
             # Allowed values on a list (V9): each part like an enum value; an
             # unknown part is dropped with a warning, never guessed.
             kept, bad = [], []
-            for part in split_list(text):
+            for part in parts or split_list(text):
                 hit = self._option(item.enum, aliases, part)
                 if hit is None:
                     bad.append(part)
@@ -292,8 +295,8 @@ class Registry:
             )
             return (kept or None), warnings
         if item.kind in ("list", "linklist"):
-            parts = split_list(text)
-            return (parts or None), []
+            found = parts or split_list(text)
+            return (found or None), []
         if item.kind in ("str", "virtual", "link"):
             return text, []
         if item.kind == "int":
