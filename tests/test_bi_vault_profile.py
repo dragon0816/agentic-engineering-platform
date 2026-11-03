@@ -370,6 +370,25 @@ def test_a_field_one_of_two_homes_uses_is_not_computed(tmp_path: Path) -> None:
     assert states  # another field neither uses
 
 
+def test_a_stated_state_wins_over_a_computed_one(tmp_path: Path) -> None:
+    db = sqlite3.connect(tmp_path / "bi.sqlite", isolation_level=None)
+    name = _reg().types["Technology"].naming_field
+    state = {"state": card_model.CONFIRMED_NONE, "reason": "虛構"}
+    units = {
+        "schema": SCHEMA,
+        "source:a": _source("aaa", AIDC),
+        "card:one": _card("one"),
+        f"field:one:{name}": _field("one"),
+        f"evidence:one:{name}": _evidence("aaa"),
+        f"state:one:{_unused()}": state,
+    }
+    vault.materialize(db, units, [], [], _reg(), {"aidc": PROFILE})
+    row = db.execute(
+        "SELECT state, origin FROM field_states WHERE card_id = 'one' AND field = ?", (_unused(),)
+    ).fetchone()
+    assert tuple(row) == (card_model.CONFIRMED_NONE, "unit")
+
+
 def test_a_computed_state_is_never_a_unit(tmp_path: Path) -> None:
     db = _rebuilt(tmp_path, {"aidc": PROFILE})
     db.row_factory = sqlite3.Row
