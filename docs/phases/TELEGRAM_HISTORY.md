@@ -154,8 +154,8 @@ already records (telemetry of the run, the ledger, task summaries) is unchanged.
 ## 10. Wiring and failure
 
 - `TelegramHistory` (new, `host_runtime/telegram_history.py`) holds the state, the actor and the roll-over. Created in
-  `build_runtime`, kept on `HostRuntime.telegram_history` and set on the ingress there and in `start_telegram`, so it
-  survives the ingress being rebuilt when the settings change.
+  `build_runtime`, kept on `HostRuntime.telegram_history` and passed through `build_telegram`, the one construction
+  path, so it survives the ingress being rebuilt when the settings change.
 - A storage failure never fails a Telegram turn. The reply and the in-memory history go on, and a warning names the
   error type, never text or chat id. So a record can have gaps; the log says so.
 - The write is synchronous on the poll loop: one short local transaction per pair, like the offset write.
@@ -166,7 +166,7 @@ Each slice is committed after format, lint, type check and targeted tests.
 
 - [x] **T1 Record and state.** `source`, the validator, `conversations(source=)`, `latest_conversation`,
   `search_conversations`, the per-host key. Tests first.
-- [ ] **T2 Storage.** `TelegramHistory`, `_keep_history` at the six sites, `/new`, wiring. Tests with the existing
+- [x] **T2 Storage.** `TelegramHistory`, `_keep_history` at the six sites, `/new`, wiring. Tests with the existing
   stubs: pairs, roll-over, owner only, quote, failure text, credentials, restart, model input unchanged.
 - [ ] **T3 Read-only and delete.** The check on every route, delete reaching attachments, `/api/conversations` rows.
 - [ ] **T4 Search route.**

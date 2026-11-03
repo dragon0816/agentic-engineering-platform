@@ -337,6 +337,7 @@ from host_runtime.state import SqliteLocalState
 from host_runtime.sync import PlatformClient
 from host_runtime.task_artifacts import LocalTaskArtifacts
 from host_runtime.team_membership import TeamMembershipStore
+from host_runtime.telegram_history import TelegramHistory
 from host_runtime.telegram_settings import windows_user_environment
 from host_runtime.workflow_form_tool import workflow_form_tools
 from host_runtime.workflow_settings import SETTINGS_FILE, WorkflowSettingsStore, settings_key
@@ -521,6 +522,8 @@ class HostRuntime:
         self.mcp: McpHub | None = None
         # What each conversation produced (owner 2026-10-25); set by build_runtime.
         self.session_artifacts: SessionArtifacts | None = None
+        # The owner's Telegram conversations, kept for Agent Web; set by build_runtime.
+        self.telegram_history: TelegramHistory | None = None
         # Speech to text for Telegram and Agent Web; None: voice is off.
         self.voice: VoiceService | None = None
         # Which teams this PC's person belongs to (owner 2026-10-19); set by
@@ -1687,6 +1690,7 @@ def build_telegram(
     voice: VoiceService | None = None,
     approvals: ChatAuthoring | None = None,
     session_artifacts: SessionArtifacts | None = None,
+    history: TelegramHistory | None = None,
 ) -> TelegramIngress | None:
     """The Telegram ingress, if this host was given one. The token is never
     in the file: the host maps its name to an environment variable, and an
@@ -1716,6 +1720,7 @@ def build_telegram(
     ingress.explain_failure = lambda failure: explain_model_failure(config, failure)
     ingress.approvals = approvals
     ingress.session_artifacts = session_artifacts
+    ingress.history = history
     return ingress
 
 
@@ -2374,6 +2379,7 @@ def build_runtime(
         # Voice input (docs/phases/VOICE_INPUT.md): one service for Telegram
         # and Agent Web, built only when host.json enables it.
         voice = build_voice(checked.voice, place.workspace_root)
+        telegram_history = TelegramHistory(state, checked.device.registered_by)
         telegram = build_telegram(
             checked,
             place,
@@ -2382,6 +2388,7 @@ def build_runtime(
             voice=voice,
             approvals=chat_authoring,
             session_artifacts=session_artifacts,
+            history=telegram_history,
         )
         platform = build_platform(checked, resolver)
     except BaseException:
@@ -2391,6 +2398,7 @@ def build_runtime(
     runtime.voice = voice
     runtime.mcp = mcp
     runtime.session_artifacts = session_artifacts
+    runtime.telegram_history = telegram_history
     # The Knowledge tool route runs the shared Knowledge Harness (unification U5).
     from host_runtime.knowledge_harness import KnowledgeHarness
 

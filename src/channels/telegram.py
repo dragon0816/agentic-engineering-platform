@@ -81,6 +81,7 @@ from host_runtime.memory_why import NOTHING as WHY_NOTHING
 from host_runtime.memory_why import memory_used_in
 from host_runtime.schedule_policy import target_side_effect
 from host_runtime.session_artifacts import FinishedRun, FinishedTurn, SessionArtifacts
+from host_runtime.telegram_history import StoredTurn, TelegramHistory
 from host_runtime.turn_summary import stop_reply, tool_summary
 from host_runtime.workflow_uploads import (
     MAX_UPLOAD_BYTES,
@@ -1033,6 +1034,9 @@ class TelegramIngress:
         # What each session produced (owner 2026-10-25): runs, files and
         # drafts, kept per chat and actor; set by the host, None keeps nothing.
         self.session_artifacts: SessionArtifacts | None = None
+        # The owner's conversations, stored for reading in Agent Web; set by
+        # the host, None stores nothing. The model never reads them.
+        self.history: TelegramHistory | None = None
         # A plain reason for a failed model turn (e.g. the LLM gateway is not
         # running or still starting); set by the host, None says nothing more.
         self.explain_failure: Callable[[Failure], str | None] | None = None
@@ -1350,12 +1354,17 @@ class TelegramIngress:
             return TelegramDelivery(**base, disposition="answered", reply=HELP)
         if parsed is not None and parsed[0] == "new":
             self._histories.pop(key, None)
+            stored = self._stores(actor)
+            if self.history is not None and stored:
+                self.history.start_new(*key)
             if self.session_artifacts is not None:
                 acting, _ = self._acting(actor)
                 await asyncio.to_thread(
                     self.session_artifacts.clear, _chat_session(update.chat_id), acting
                 )
-            if self.attachments is not None:
+            # The owner's stored records list their files, so those stay until
+            # the record is deleted in Agent Web, as an Agent Web chat's do.
+            if self.attachments is not None and not stored:
                 await asyncio.to_thread(self.attachments.delete_session, _files_session(key))
             return TelegramDelivery(
                 **base, disposition="answered", reply="Started a fresh conversation."
@@ -1672,7 +1681,16 @@ class TelegramIngress:
             f"- {item.filename} ({item.kind}): {item.path}" for item in saved
         )
         return await self._converse(
-            base, key, request, text, (note, images, listing), actor=actor, update=update
+            base,
+            key,
+            request,
+            text,
+            (note, images, listing),
+            actor=actor,
+            update=update,
+            files=tuple(
+                {"filename": item.filename, "kind": item.kind, "path": item.path} for item in saved
+            ),
         )
 
     def _save(self, session_id: str, files: list[_File]) -> list[Attachment]:
@@ -1786,7 +1804,7 @@ class TelegramIngress:
             ModelMessage(role="user", text=said),
             ModelMessage(role="assistant", text=text),
         ]
-        self._histories[key] = history[-MAX_CHAT_HISTORY:]
+        self._keep_history(key, history)
         return TelegramDelivery(**base, disposition="answered", reply=scrub(text))
 
     async def _decide_card(
@@ -1823,7 +1841,7 @@ class TelegramIngress:
                 ModelMessage(role="user", text=f"[{action}] {card['title']}"),
                 ModelMessage(role="assistant", text=drawn),
             ]
-            self._histories[key] = history[-MAX_CHAT_HISTORY:]
+            self._keep_history(key, history)
             return TelegramDelivery(
                 **base,
                 disposition="answered",
@@ -1843,11 +1861,15 @@ class TelegramIngress:
         *,
         actor: str | None = None,
         update: _Update | None = None,
+        files: tuple[dict[str, str], ...] = (),
     ) -> TelegramDelivery:
         """`attached` is the files' note and pictures for the model, and the
         short listing the stored history keeps in their place. A message
         sent as a Reply carries what it replied to (owner 2026-10-25: 「再跑一次」
         answered on an earlier message got "what should I re-run?")."""
+        # The stored record keeps the person's own words: a quote may be
+        # another sender's, which is never stored.
+        said = text
         text = _with_quote(text, update.quoted if update is not None else None)
         history = self._histories.get(key, [])
         if attached is None:
@@ -1875,8 +1897,9 @@ class TelegramIngress:
             await progress.finish(answered)
         if result.refusal is not None:
             # Kept, so 「再跑一次」 knows what was asked (owner 2026-10-25).
-            turn.append(ModelMessage(role="assistant", text=_unfinished(result.refusal)))
-            self._histories[key] = turn[-MAX_CHAT_HISTORY:]
+            note = _unfinished(result.refusal)
+            turn.append(ModelMessage(role="assistant", text=note))
+            self._keep_history(key, turn, StoredTurn(said, note, "failed", files=files))
             return TelegramDelivery(
                 **base, disposition="answered", reply=f"Refused: {result.refusal}."
             )
@@ -1917,19 +1940,21 @@ class TelegramIngress:
                 # A guard stopped the turn (tool_loop_limit, tool_repeat_limit,
                 # turn_time_limit; owner 2026-10-19).
                 reply = stopped
+                kept = reply
                 # Keep what was done so 繼續 can pick it up.
                 turn.append(ModelMessage(role="assistant", text=f"{reply}\n\n[工具紀錄]\n{record}"))
             else:
                 # Any other failure keeps the request and a short note, so
                 # 「再跑一次」 knows what was asked (owner 2026-10-25).
                 note = _unfinished(code)
+                kept = note
                 turn.append(
                     ModelMessage(
                         role="assistant",
                         text=note if record is None else f"{note}\n\n[工具紀錄]\n{record}",
                     )
                 )
-            self._histories[key] = turn[-MAX_CHAT_HISTORY:]
+            self._keep_history(key, turn, StoredTurn(said, kept, "failed", record, files))
             if drafted:
                 return self._carded(base, reply, buttons, drafted)
             return TelegramDelivery(**base, disposition="answered", reply=reply, buttons=buttons)
@@ -1957,7 +1982,8 @@ class TelegramIngress:
         if finished.entries:
             remembered = "\n\n".join([remembered, *finished.entries])
         turn.append(ModelMessage(role="assistant", text=remembered))
-        self._histories[key] = turn[-MAX_CHAT_HISTORY:]
+        visible = "\n\n".join([answer, *finished.entries])
+        self._keep_history(key, turn, StoredTurn(said, visible, tool_summary=record, files=files))
         offer = offer_in(conversation.tools)
         if offer is not None and actor is not None and update is not None:
             # The model handed over a Workflow's form: ask its questions here.
@@ -2177,7 +2203,30 @@ class TelegramIngress:
             ModelMessage(role="user", text=said),
             ModelMessage(role="assistant", text=answer),
         ]
-        self._histories[key] = history[-MAX_CHAT_HISTORY:]
+        self._keep_history(key, history)
+
+    def _stores(self, actor: str | None) -> bool:
+        """Whether this sender's turns are stored: the owner's only."""
+        return self.history is not None and actor == self.history.actor
+
+    def _keep_history(
+        self,
+        key: tuple[int, int],
+        turn: list[ModelMessage],
+        stored: StoredTurn | None = None,
+    ) -> None:
+        """Every write of a chat's history. The model's window is exactly
+        `turn`; the owner's turn, by default `turn`'s last pair, is also stored
+        for reading. Storing it never fails a turn."""
+        self._histories[key] = turn[-MAX_CHAT_HISTORY:]
+        if self.history is None or not self._stores(self.config.actor_for(key[1])):
+            return
+        try:
+            self.history.add_turn(
+                key[0], key[1], stored or StoredTurn(turn[-2].text, turn[-1].text)
+            )
+        except (LocalStateError, ValueError, OSError) as error:
+            _LOG.warning("telegram turn not stored: %s", type(error).__name__)
 
     def _offered_workflow(self, offer: Mapping[str, Any]) -> WorkflowManifest | None:
         try:
