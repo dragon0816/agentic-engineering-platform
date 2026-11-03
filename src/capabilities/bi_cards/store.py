@@ -368,6 +368,9 @@ class PlannedRow:
     #: Why a field has no value: `{field: {"state", "raw", "reason"}}`, the last two
     #: optional. Written only to a vault's card, and never over a value.
     states: dict[str, dict[str, Any]] = field(default_factory=dict)
+    #: Fields a person just confirmed one by one (a re-run, `rerun.py`): the value
+    #: replaces a person's value rather than becoming a proposal beside it.
+    overwrite: frozenset[str] = frozenset()
 
 
 def new_states(
@@ -865,7 +868,8 @@ class BiStore:
                 new = _dump(value)
                 if stored is not None and stored["value"] == new:
                     continue
-                if name in planned.propose or (stored is not None and stored["kind"] == "human"):
+                kept = stored is not None and stored["kind"] == "human"
+                if name in planned.propose or (kept and name not in planned.overwrite):
                     pending = db.execute(
                         "SELECT 1 FROM proposals WHERE card_id = ? AND field = ? AND "
                         "value = ? AND status = 'pending'",

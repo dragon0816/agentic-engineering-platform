@@ -66,6 +66,7 @@ from capabilities.bi_cards import (
     page_import,
     quality,
     questions_session,
+    rerun,
     runs,
     schema_session,
     schema_versions,
@@ -279,6 +280,8 @@ def _route(
             return 200, methods.compare(
                 workspace, store.dataset, query.get("left"), query.get("right")
             )
+        if path.startswith("/api/bi/reruns/") and path.count("/") == 4:
+            return 200, rerun.detail(workspace, store.dataset, path.rsplit("/", 1)[1])
         if path == "/api/bi/ai":
             return 200, sessions.model_state(ai)
         if path == "/api/bi/methods":
@@ -454,6 +457,12 @@ def _route(
                 workspace, parts[4], given.get("to"), given.get("preview_token"), who
             )
             return 200, {"ok": True, **done}
+    if path == "/api/bi/reruns/preview":
+        dataset = _dataset(given.get("dataset"))
+        return 200, {"ok": True, **rerun.preview(workspace, dataset, ai, given, who)}
+    if len(parts) == 6 and parts[:4] == ["", "api", "bi", "reruns"] and parts[5] == "confirm":
+        dataset = _dataset(given.get("dataset"))
+        return 200, {"ok": True, **rerun.confirm(workspace, dataset, parts[4], given, who)}
     if len(parts) >= 6 and parts[:4] == ["", "api", "bi", "runs"]:
         return _run_action(workspace, who, parts[4], parts[5:], given, ai)
     if len(parts) == 6 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "rename":
@@ -793,6 +802,7 @@ def _decide_proposal(
 #: Store refusals that are conflicts with the current state (409).
 CONFLICTS = {
     "stale_edit",
+    "skill_changed",
     "name_taken",
     "analysis_stale",
     "cards_changed",

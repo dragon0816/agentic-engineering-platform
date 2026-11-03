@@ -23,7 +23,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import ai_runs, extract, methods, sessions, vault
+from capabilities.bi_cards import ai_runs, extract, methods, runs, sessions, vault
 from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import VAULT_PREFIX, BiStoreError, now
 
@@ -113,7 +113,7 @@ def _diff(skill: dict[str, Any], changes: dict[str, Any]) -> list[dict[str, Any]
 
 
 def _recent_trials(staging: Staging) -> list[str]:
-    return [r["id"] for r in staging.run_rows() if r["kind"] == "trial"][:2]
+    return [r["id"] for r in staging.run_rows() if r["kind"] == "trial" and runs.listed(r)][:2]
 
 
 def create_session(workspace: Path, dataset: str, name: str, actor: str) -> dict[str, Any]:
