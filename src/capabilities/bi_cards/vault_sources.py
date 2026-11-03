@@ -78,6 +78,15 @@ def too_large(size: int, limit: int) -> BiStoreError:
     )
 
 
+def withdrawn_shas(repo: Any) -> set[str]:
+    return {str(item["sha256"]) for item in repo.withdrawn().values()}
+
+
+def refuse_withdrawn(repo: Any, sha256: str) -> None:
+    if sha256 in withdrawn_shas(repo):
+        raise BiStoreError("source_withdrawn", "這份檔案已經撤回，不能再放回這個知識庫")
+
+
 def refuse_over_limit(units: Mapping[str, Any], size: int) -> None:
     limit = limit_of(units)
     if limit is not None and size > limit:
@@ -165,12 +174,17 @@ def sync_staging(repo: Any, workspace: Path, dataset: str) -> dict[str, int]:
     through); it writes nothing to the shared folder."""
     from capabilities.bi_cards.staging import Staging
 
+    staging = Staging(workspace, dataset)
+    gone = withdrawn_shas(repo)
+    if gone:
+        repo.forget_withdrawn()
+        staging.purge_withdrawn(gone)
     units = [
         value
         for key, value in repo.working_units().items()
-        if key.startswith(PREFIX) and isinstance(value, dict)
+        if key.startswith(PREFIX) and isinstance(value, dict) and value.get("sha256") not in gone
     ]
-    return dict(Staging(workspace, dataset).sync_from_units(units))
+    return dict(staging.sync_from_units(units))
 
 
 def cloud_only(path: Path) -> bool:
@@ -202,7 +216,12 @@ def listed(repo: Any, sources: list[dict[str, Any]]) -> dict[str, Any]:
         folder = value.get("folder") if isinstance(value, dict) else None
         found.append({**source, "shared": state, "folder": folder})
     waiting = sorted({f for item in repo.status()["waiting"] for f in item["files"]})
-    return {"sources": found, "waiting": waiting}
+    withdrawn = [
+        {"file": path, **item}
+        for path, item in sorted(repo.withdrawn().items())
+        if MARKDOWN_DIR not in path.split("/")
+    ]
+    return {"sources": found, "waiting": waiting, "withdrawn": withdrawn}
 
 
 def folder_of(units: Mapping[str, Any], sha256: str) -> str | None:
@@ -230,6 +249,36 @@ def commit_split(repo: Any, purpose: str) -> dict[str, Any]:
 def _sources_purpose(names: list[str]) -> str:
     listed = "、".join(names[:5]) + ("…" if len(names) > 5 else "")
     return f"加入來源：{listed}"[: repo_engine.MAX_PURPOSE] if listed else "更新來源的 Markdown"
+
+
+def withdraw(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
+    """Withdraw a pushed source (design §5). Only a person's confirm calls this. It
+    removes the file and its Markdown from the shared folder and AEP's copies as
+    each PC syncs; not OneDrive's own versions, nor what commits already hold."""
+    from capabilities.bi_cards import vault
+    from capabilities.bi_cards.staging import Staging
+
+    if given.get("confirm") is not True:
+        raise BiStoreError("confirm_required", "撤回要由人按確認")
+    target = vault.Vault(workspace, vault_id)
+    target._require_folder()
+    staging = Staging(workspace, target.dataset)
+    source = staging.source(str(given.get("source_id") or ""))
+    if source is None:
+        raise BiStoreError("source_unknown", "找不到這個來源")
+    with target.lock:
+        value = target.repo.units().get(unit_key(source["sha256"]))
+        if not isinstance(value, dict):
+            raise BiStoreError("source_not_pushed", "這個來源還沒有 push，不用撤回")
+        files = [{"path": value["file"], "sha256": value["sha256"]}] + [
+            {"path": item["file"], "sha256": item["sha256"]} for item in value["markdown"]
+        ]
+        try:
+            record = target.repo.withdraw(files, str(given.get("reason") or ""))
+        except RepoError as failure:
+            raise BiStoreError(failure.code, failure.message) from None
+    target.sync()
+    return {"withdrawn": record}
 
 
 def share(workspace: Path, vault_id: str, source_id: str, folder: Any) -> dict[str, Any]:

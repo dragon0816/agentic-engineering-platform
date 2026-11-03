@@ -86,3 +86,14 @@ def test_a_source_added_on_one_pc_is_read_on_another(
             page.click_text("#bi-b-sources", "看／改")
             page.wait("!document.getElementById('bi-b-md').hidden")
             page.wait("document.getElementById('bi-b-md-text').value.includes('FACT-TWOPC')")
+            # Withdrawing says first what it does not remove, then removes it for everyone.
+            page.click_text("#bi-b-sources", "撤回")
+            page.see("bi-b-src-withdraw", "版本紀錄和資源回收筒")
+            page.see("bi-b-src-withdraw", "不帶這個檔案重建知識庫")
+            assert "93" not in page.text_of("bi-b-src-withdraw")  # no retention period is stated
+            assert list((shared / vault_id / FOLDER).glob("*-report.md"))
+            page.set_value("bi-b-src-withdraw-reason", "放錯了")
+            page.click_text("#bi-b-src-withdraw", "確認撤回")
+            page.notice("已撤回")
+            page.wait("!document.getElementById('bi-b-sources').textContent.includes('report.md')")
+    assert not list((shared / vault_id / FOLDER).glob("*-report.md"))

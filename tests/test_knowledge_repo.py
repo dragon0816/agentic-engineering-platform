@@ -226,6 +226,65 @@ def test_tags_never_move(pcs: tuple[Repository, Repository]) -> None:
     assert failure.value.code == "tag_unknown"
 
 
+def test_a_withdrawn_file_keeps_its_commit_applied_and_cannot_come_back(
+    pcs: tuple[Repository, Repository], tmp_path: Path
+) -> None:
+    alice, bob = pcs
+    source = tmp_path / "mistake.pdf"
+    source.write_bytes(b"fictional mistake")
+    path = "sources/mistake.pdf"
+    made = alice.stage_file(path, source)
+    alice.stage("doc", "1")
+    alice.commit("加入")
+    alice.push()
+    assert bob.sync()["waiting"] == []
+    done = alice.withdraw([{"path": path, "sha256": made["sha256"]}], "放錯了")
+    assert done["left"] == [] and not (alice.folder / path).exists()
+    # Every PC keeps the commit applied, on a rebuild from all commits too.
+    for repo in (alice, bob):
+        assert repo.sync()["waiting"] == []
+        assert repo.status()["waiting"] == []
+        assert repo.units() == {"doc": "1"}
+    assert bob.withdrawn()[path]["reason"] == "放錯了"
+    assert bob.withdrawn()[path]["by"] == "alice"
+    with pytest.raises(RepoError) as refused:
+        bob.stage_file(path, source)
+    assert refused.value.code == "source_withdrawn"
+    with pytest.raises(RepoError) as refused:
+        alice.withdraw([{"path": "schemas/x.md", "sha256": made["sha256"]}], "")
+    assert refused.value.code == "path_invalid"
+
+
+def test_an_unpushed_commit_cannot_bring_a_withdrawn_file_back(
+    pcs: tuple[Repository, Repository], tmp_path: Path
+) -> None:
+    alice, bob = pcs
+    source = tmp_path / "mistake.pdf"
+    source.write_bytes(b"fictional mistake")
+    path = "sources/mistake.pdf"
+    # Bob committed the same file and has not pushed when Alice withdraws hers.
+    bob.stage_file(path, source)
+    bob.stage("bob", "1")
+    bob.commit("乙加入")
+    made = alice.stage_file(path, source)
+    alice.stage("alice", "1")
+    alice.commit("甲加入")
+    alice.push()
+    alice.withdraw([{"path": path, "sha256": made["sha256"]}], "放錯了")
+    with pytest.raises(RepoError) as refused:
+        bob.push()
+    assert refused.value.code == "source_withdrawn"
+    assert not (bob.folder / path).exists()
+    # A staged copy goes too, so it cannot be committed by accident.
+    other = tmp_path / "other.pdf"
+    other.write_bytes(b"other")
+    bob.stage_file("sources/other.pdf", other)
+    assert "sources/other.pdf" in bob._pending()["files"]
+    bob.forget_withdrawn()
+    assert "sources/other.pdf" in bob._pending()["files"]
+    assert not (bob.work / "files" / path).exists()
+
+
 def test_a_file_that_cannot_be_read_waits_and_is_applied_once_it_can(
     pcs: tuple[Repository, Repository], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -57,10 +57,12 @@ README_FILE = "REPO.md"
 COMMITS_DIR = "commits"
 TAGS_DIR = "tags"
 PUBLISH_DIR = "publish"
+WITHDRAWN_DIR = "withdrawn"
 #: The areas a commit may add files to.
 FILE_AREAS = ("schemas", "skills", "sources")
 LOCAL_ROOT = "knowledge-repos"
 REGISTRY_FILE = "registry.json"
+WITHDRAWN_FORMAT = "aep.knowledge.withdrawn/v1"
 DB_FILE = "repo.sqlite"
 WORK_DIR = "work"
 
@@ -657,12 +659,83 @@ class Repository:
         )
         return sha
 
+    # -- withdrawal: a file pushed by mistake -------------------------------------
+
+    def withdrawn(self) -> dict[str, dict[str, Any]]:
+        """Every withdrawn file by path: `{sha256, by, at, reason}`."""
+        found, _ = self._scan_records(WITHDRAWN_DIR)
+        files: dict[str, dict[str, Any]] = {}
+        for author, _seq, _raw, data in found:
+            if not isinstance(data, dict) or not isinstance(data.get("files"), list):
+                continue
+            for item in data["files"]:
+                path = item.get("path") if isinstance(item, dict) else None
+                sha = item.get("sha256") if isinstance(item, dict) else None
+                if isinstance(path, str) and isinstance(sha, str) and SHA256_RE.match(sha):
+                    files[path] = {
+                        "sha256": sha,
+                        "by": author,
+                        "at": data.get("at"),
+                        "reason": data.get("reason") or "",
+                    }
+        return files
+
+    def withdraw(self, files: Iterable[Mapping[str, Any]], reason: str) -> dict[str, Any]:
+        """Withdraw files from the folder: the record first, so a commit naming
+        one never waits for good, then the files. What cannot be deleted now is
+        listed in `left`. Callers make sure a person confirmed it."""
+        chosen = [{"path": str(f["path"]), "sha256": str(f["sha256"])} for f in files]
+        if not chosen:
+            raise RepoError("nothing_to_withdraw", "沒有要撤回的檔案")
+        for item in chosen:
+            if not item["path"].startswith("sources/") or path_problem(item["path"]):
+                raise RepoError("path_invalid", f"{item['path']} 不能撤回")
+        with self.lock:
+            seq = self._next_seq(WITHDRAWN_DIR)
+            record = {
+                "format": WITHDRAWN_FORMAT,
+                "repo": self.id,
+                "author": self.author,
+                "seq": seq,
+                "files": chosen,
+                "reason": reason.strip()[:MAX_PURPOSE],
+                "at": _now(),
+            }
+            _write_new(self.folder / WITHDRAWN_DIR / self.author / f"{seq}.json", _pretty(record))
+            left = []
+            for item in chosen:
+                try:
+                    (self.folder / item["path"]).unlink(missing_ok=True)
+                except OSError:
+                    left.append(item["path"])
+            self.forget_withdrawn()
+            return {**record, "left": left}
+
+    def forget_withdrawn(self) -> None:
+        """Drop this PC's staged copies of withdrawn files."""
+        with self.lock:
+            gone = self.withdrawn()
+            pending = self._pending()
+            for path in gone:
+                (self.work / "files" / path).unlink(missing_ok=True)
+            kept = {k: v for k, v in pending["files"].items() if k not in gone}
+            if len(kept) != len(pending["files"]):
+                self._save_pending({"sets": pending["sets"], "files": kept})
+
+    def _refuse_withdrawn(self, path: str) -> None:
+        if path in self.withdrawn():
+            raise RepoError("source_withdrawn", f"{path} 已經撤回，不能再放回共用資料夾")
+
     def _files_state(
         self, db: sqlite3.Connection, commit: CommitFile
     ) -> tuple[list[str], list[str]]:
-        """A commit's files that are missing, and those whose content differs."""
+        """A commit's files that are missing, and those whose content differs.
+        A withdrawn file is neither: its commit stays applied."""
         missing, changed = [], []
+        gone = self.withdrawn() if commit.data["files"] else {}
         for item in commit.data["files"]:
+            if gone.get(item["path"], {}).get("sha256") == item["sha256"]:
+                continue
             sha = self._stored_sha(db, item["path"])
             if sha is None:
                 missing.append(item["path"])
@@ -966,6 +1039,7 @@ class Repository:
         if problem:
             raise RepoError("path_invalid", f"{path}: {problem}")
         with self.lock:
+            self._refuse_withdrawn(path)
             sha = _file_sha(source)
             existing = self.folder / path
             if existing.is_file() and self._sha_or_refuse(existing, path) != sha:
@@ -1140,7 +1214,9 @@ class Repository:
             return {"status": "pushed", "commits": written, "notes": report.notes, "sync": result}
 
     def _copy_in(self, item: Mapping[str, Any]) -> None:
-        """Copy a staged file into the folder (before any commit names it)."""
+        """Copy a staged file into the folder (before any commit names it). Another
+        PC's unpushed commit must not bring a withdrawn file straight back."""
+        self._refuse_withdrawn(item["path"])
         target = self.folder / item["path"]
         if target.is_file():
             if self._sha_or_refuse(target, item["path"]) != item["sha256"]:

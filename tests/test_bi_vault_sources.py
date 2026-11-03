@@ -358,7 +358,8 @@ def test_the_list_says_where_each_source_stands(tmp_path: Path, monkeypatch: Any
     held = tmp_path / "held"
     target.rename(held)
     _sync(b, vault_id)
-    assert _states(b, dataset) == {"sources": [], "waiting": [unit["file"]]}
+    seen = _states(b, dataset)
+    assert seen["sources"] == [] and seen["waiting"] == [unit["file"]]
     held.rename(target)
     _sync(b, vault_id)
     assert _states(b, dataset)["sources"][0]["shared"] == "pushed"
@@ -393,6 +394,126 @@ def test_cloud_only_asks_for_attributes_and_reads_nothing(tmp_path: Path) -> Non
     path.write_bytes(b"x")
     assert vault_sources.cloud_only(path) is False
     assert vault_sources.cloud_only(tmp_path / "gone.bin") is False
+
+
+# -- withdrawal (S9) ---------------------------------------------------------------------
+
+
+def _withdraw(ws: Path, vault_id: str, source: dict[str, Any], **given: Any) -> Any:
+    return _call(ws, "POST", f"/api/bi/vaults/{vault_id}/withdraw-source",
+                 {"source_id": source["id"], "confirm": True, **given})  # fmt: skip
+
+
+def test_withdrawing_removes_the_files_and_each_pcs_copy_and_the_commit_stays(
+    tmp_path: Path,
+) -> None:
+    drive, vault_id, dataset, a, b, source = _shared(tmp_path, folder=FOLDER)
+    drive.deliver("a", "b", vault_id)
+    _sync(b, vault_id)
+    unit = _unit(a, vault_id, source["sha256"])
+    stored = Staging(a, dataset).stored_file(source["id"])
+    folder = drive.parent("a") / vault_id
+    done = _ok(_withdraw(a, vault_id, source, reason="放錯了"))
+    assert done["withdrawn"]["left"] == []
+    assert not (folder / unit["file"]).exists()
+    assert not (folder / unit["markdown"][0]["file"]).exists()
+    assert not stored.exists() and Staging(a, dataset).source(source["id"]) is None
+    # The commit stays applied on a rebuild: nothing waits for good.
+    repo = vault.Vault(a, vault_id).repo
+    assert repo.sync()["waiting"] == []
+    assert repo.head() is not None
+    # The other PC: the record arrives, OneDrive removes its copy of the files.
+    target = drive.parent("b") / vault_id
+    drive.deliver("a", "b", vault_id)
+    (target / unit["file"]).unlink()
+    (target / unit["markdown"][0]["file"]).unlink()
+    report = _sync(b, vault_id)
+    assert report["waiting"] == [] and Staging(b, dataset).sources() == []
+    listed = _states(b, dataset)
+    assert listed["sources"] == [] and listed["withdrawn"][0]["file"] == unit["file"]
+    assert listed["withdrawn"][0]["reason"] == "放錯了"
+    assert search_index.search(BiStore(b, dataset), "FACT-1")["passages"] == []
+
+
+def test_a_withdrawal_needs_a_person_and_a_pushed_source(tmp_path: Path) -> None:
+    _, vault_id, dataset, a, _ = _two_pcs(tmp_path)
+    source = _add(a, dataset)
+    status, reply = _withdraw(a, vault_id, source, confirm=False)
+    assert status != 200 and reply["code"] == "confirm_required"
+    status, reply = _withdraw(a, vault_id, source)
+    assert status != 200 and reply["code"] == "source_not_pushed"
+    assert Staging(a, dataset).source(source["id"]) is not None
+
+
+def test_a_withdrawn_file_cannot_come_back(tmp_path: Path) -> None:
+    drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
+    # Bob stages the same bytes and commits, unpushed, before Alice withdraws hers.
+    bobs = _add(b, dataset)
+    _commit(b, vault_id, "乙也加入")
+    source = _add(a, dataset)
+    assert bobs["sha256"] == source["sha256"]
+    _commit(a, vault_id, "加入")
+    _push(a, vault_id)
+    _ok(_withdraw(a, vault_id, source))
+    # Adding the same bytes again is refused and nothing is kept.
+    with pytest.raises(BiStoreError) as refused:
+        _add(a, dataset)
+    assert refused.value.code == "source_withdrawn"
+    assert Staging(a, dataset).sources() == []
+    # Bob's unpushed commit does not bring it back, here as a conflict on its unit; the
+    # engine's own refusal is `test_an_unpushed_commit_cannot_bring_a_withdrawn_file_back`.
+    drive.deliver("a", "b", vault_id)
+    target = drive.parent("b") / vault_id
+    gone = _unit(a, vault_id, source["sha256"])["file"]
+    (target / gone).unlink(missing_ok=True)
+    status, reply = _call(b, "POST", f"/api/bi/vaults/{vault_id}/push", {})
+    assert status != 200 or reply["status"] != "pushed"
+    assert not (target / gone).exists()
+
+
+def test_withdrawing_removes_open_candidates_and_blanks_a_written_runs_excerpts(
+    tmp_path: Path,
+) -> None:
+    _, vault_id, dataset, a, _ = _two_pcs(tmp_path)
+    csv = "技術,標準組織\nTSN,IEEE\nPTP,IETF\n"
+    source = _add(a, dataset, name="t.csv", text=csv)
+    body = {"dataset": dataset, "kind": "ingest", "source_id": source["id"],
+            "entity_type": "Technology"}  # fmt: skip
+    written = _ok(_call(a, "POST", "/api/bi/runs", body))["run"]
+    detail = _ok(_call(a, "GET", f"/api/bi/runs/{written['id']}", dataset=dataset))
+    for candidate in detail["candidates"]:
+        _ok(_call(a, "POST", f"/api/bi/runs/{written['id']}/candidates/{candidate['id']}",
+                  {"dataset": dataset, "review": "accepted"}))  # fmt: skip
+    _ok(_call(a, "POST", f"/api/bi/runs/{written['id']}/commit", {"dataset": dataset}))
+    still_open = _ok(_call(a, "POST", "/api/bi/runs", body))["run"]
+    _push(a, vault_id)
+    _ok(_withdraw(a, vault_id, source))
+    staging = Staging(a, dataset)
+    assert staging.candidates(still_open["id"]) == []
+    assert (staging.run_row(still_open["id"]) or {})["status"] == "failed"
+    kept = staging.candidates(written["id"])
+    assert kept and (staging.run_row(written["id"]) or {})["status"] == "committed"
+    excerpts = [p["excerpt"] for c in kept for f in c["fields"] for p in f["evidence"]]
+    assert excerpts and set(excerpts) == {""}
+    # What a commit holds stays, as the page says (owner, Q1).
+    assert "IEEE" in json.dumps(vault.Vault(a, vault_id).repo.units(), ensure_ascii=False)
+
+
+def test_a_record_delivered_after_the_deletion_only_waits_until_it_arrives(tmp_path: Path) -> None:
+    drive, vault_id, dataset, a, b, source = _shared(tmp_path)
+    drive.deliver("a", "b", vault_id)
+    _sync(b, vault_id)
+    unit = _unit(a, vault_id, source["sha256"])
+    _ok(_withdraw(a, vault_id, source))
+    target = drive.parent("b") / vault_id
+    (target / unit["file"]).unlink()
+    # OneDrive delivered the deletion first: the commit waits for now.
+    report = _sync(b, vault_id)
+    assert report["waiting"][0]["files"] == [unit["file"]]
+    drive.deliver("a", "b", vault_id)
+    (target / unit["markdown"][0]["file"]).unlink(missing_ok=True)
+    assert _sync(b, vault_id)["waiting"] == []
+    assert Staging(b, dataset).sources() == []
 
 
 def test_a_cards_database_ignores_the_source_units(tmp_path: Path) -> None:

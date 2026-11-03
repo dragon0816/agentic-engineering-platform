@@ -137,6 +137,9 @@ def route(
                 workspace, vault_id, str(given.get("source_id") or ""), given.get("folder")
             ),
         }
+    if action == "withdraw-source":
+        # A person's confirm only; no capability or model reaches this.
+        return 200, {"ok": True, **vault_sources.withdraw(workspace, vault_id, given)}
     if action == "skills":
         return 200, {"ok": True, **vault.save_skill(workspace, vault_id, given)}
     if action == "publish":

@@ -77,8 +77,8 @@ Estimate from reading the code, no prototype. S3 and S4 are where it may grow: m
 A file pushed by mistake cannot simply be deleted: files are immutable, commits name them, and a missing file leaves its
 commit waiting for good on every PC.
 
-**The record.** `withdrawn/<author>/<seq>.json`, add-only like every other file: `{path, sha256, by, at, clock, reason}`,
-`path` under `sources/` only. BI only in this version: the wiki's `materialize` reads `raw/` files back, and would need its
+**The record.** `withdrawn/<author>/<seq>.json`, add-only like every other file: `{files: [{path, sha256}], reason, at}`,
+one record for the original and its Markdown, each `path` under `sources/` only. BI only in this version: the wiki's `materialize` reads `raw/` files back, and would need its
 own answer. The confirmation on the page lists §5.2 before anything happens. Any member can do it, as BI vaults have no
 permission control; the record says who.
 
@@ -87,11 +87,11 @@ permission control; the record says who.
    deletion first, the commit waits only until the record arrives.
 2. `_files_state` treats a withdrawn path as present, so its commit stays applied and a rebuild still works. The cards
    database does not read source files, so tags and publishing are unaffected.
-3. `source:<sha>` is marked withdrawn. Each PC, at its next sync, removes that source from `Staging`, its stored original,
-   its Markdown, its search passages and any staged copy under `work/files`.
+3. The record decides, with no commit: the `source:<sha>` unit stays in history. Each PC, at its next sync, removes that
+   source from `Staging`, its stored original, its Markdown, its search passages and any staged copy under `work/files`.
 4. `_copy_in` and `stage_file` refuse a withdrawn path (`source_withdrawn`). This matters: another PC's unpushed commit
-   naming the file would otherwise copy it straight back with its push. Adding the same bytes again needs the person to
-   undo the withdrawal explicitly.
+   naming the file would otherwise copy it straight back with its push. The same bytes cannot be added again; there is no
+   undo in this version, since a withdrawal is for a mistake.
 
 **§5.1 What it removes.** The file and its Markdown from the shared folder, for everyone once OneDrive has delivered the
 deletion; the source from AEP on each PC, once AEP has synced there; and from then on it cannot be read or chosen in AEP.

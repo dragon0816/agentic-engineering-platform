@@ -2639,6 +2639,8 @@ tr:last-child td { border-bottom: none; }
             並把每份來源轉成 Markdown：之後的擷取都讀這份 Markdown，
             你可以修改它（每次修改是新的版次）。
             掃描的 PDF 沒有文字層，不支援。這一步不會寫入任何卡片。</p>
+          <div class="bi-step" id="bi-b-src-withdraw" role="region" aria-label="撤回來源"
+            hidden></div>
           <div class="bi-scroll"><table class="bi-table bi-stack" id="bi-b-sources">
             <thead><tr><th>使用</th><th>來源</th><th>格式</th><th>Markdown</th><th>大小</th>
               <th>機密等級</th><th>共用資料夾</th><th>加入時間</th></tr></thead>
@@ -13998,12 +14000,43 @@ function biSharedCell(source) {
   if (!vault) return "—";
   const words = bh("span", source.shared === "cloud_only" ? "bi-warn" : "",
     (BI_SHARED[source.shared] || "") + (source.folder ? "（" + source.folder + "）" : ""));
+  if (source.shared === "pushed" || source.shared === "cloud_only") {
+    return bh("span", "", words, " ", biButton("撤回", () => biWithdrawForm(source),
+      "bi-btn", "撤回 " + source.name));
+  }
   if (source.shared !== "local") return words;
   return bh("span", "", words, " ", biButton("放進共用資料夾", async () => {
     await biCall("/api/bi/vaults/" + vault.id + "/share-source",
       {source_id: source.id, folder: el("bi-b-src-folder").value});
     await biBuildSources();
   }, "bi-btn", "把 " + source.name + " 放進共用資料夾"));
+}
+
+function biWithdrawForm(source) {
+  // What it does not remove is said before the person confirms (BI_SOURCES_IN_REPOSITORY §5).
+  const vault = biVaultOf(biDataset()), box = el("bi-b-src-withdraw");
+  const reason = document.createElement("input");
+  reason.className = "bi-input"; reason.maxLength = 300; reason.id = "bi-b-src-withdraw-reason";
+  reason.setAttribute("aria-label", "撤回的原因");
+  box.hidden = false;
+  box.replaceChildren(bh("h4", "", "撤回「" + source.name + "」"),
+    bh("p", "", "共用資料夾的檔案和它的 Markdown 會移除，各台電腦下次同步時移除 AEP 裡的副本；"
+      + "這份來源還沒寫入的候選資料會移除，已寫入的擷取紀錄留下但清空摘錄。"),
+    bh("p", "bi-warn", "OneDrive／SharePoint 可能還保留版本紀錄和資源回收筒裡的檔案，"
+      + "保留多久由公司的設定決定，AEP 無法移除；需要完全清除時請找管理這個資料夾的人。"),
+    bh("ul", "", bh("li", "", "還沒同步的電腦上的副本，要等那台電腦同步才會移除。"),
+      bh("li", "", "已下載、備份、寄出，或已送給模型的內容，AEP 無法收回。"),
+      bh("li", "", "卡片、欄位值和引用的摘錄留在版本紀錄裡，檔名和雜湊也是。"
+        + "要移除 AEP 能觸及的一切，請不帶這個檔案重建知識庫。")),
+    bh("label", "bi-label", "原因（會留在紀錄裡）"), reason,
+    bh("div", "bi-actions", biButton("確認撤回", async () => {
+      await biCall("/api/bi/vaults/" + vault.id + "/withdraw-source",
+        {source_id: source.id, reason: reason.value, confirm: true});
+      box.hidden = true; box.replaceChildren();
+      await biBuildSources();
+      biNotice(true, "已撤回「" + source.name + "」。");
+    }, "go", "確認撤回 " + source.name),
+    biButton("取消", () => { box.hidden = true; box.replaceChildren(); }, "bi-btn", "取消撤回")));
 }
 
 async function biBuildSources() {

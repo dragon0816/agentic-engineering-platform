@@ -244,7 +244,7 @@ class Staging:
         known = self._source_by_digest(digest)
         if known is not None:
             return {**known, "already": True}
-        self._refuse_size(len(data))
+        self._refuse_new(digest, len(data))
         # Converted before anything is kept: a PDF without text is refused.
         markdown: str | None = None
         failure: BiStoreError | None = None
@@ -321,10 +321,68 @@ class Staging:
             return None
         return target.repo if target.reachable else None
 
-    def _refuse_size(self, size: int) -> None:
+    def _refuse_new(self, digest: str, size: int) -> None:
         repo = self._vault_repo()
         if repo is not None:
+            vault_sources.refuse_withdrawn(repo, digest)
             vault_sources.refuse_over_limit(repo.working_units(), size)
+
+    def purge_withdrawn(self, shas: set[str]) -> int:
+        """Remove withdrawn sources from this PC (design §5): the row, the stored
+        copies and passages; a run's candidates not yet written; a written run
+        stays, with its excerpts blanked."""
+        if not self.exists:
+            return 0
+        with self._db() as db:
+            rows = [
+                row
+                for row in db.execute("SELECT id, sha256, stored FROM sources").fetchall()
+                if str(row["sha256"]) in shas
+            ]
+        if not rows:
+            return 0
+        with self._db(write=True) as db:
+            for row in rows:
+                source_id = str(row["id"])
+                revisions = db.execute(
+                    "SELECT stored FROM markdown WHERE source_id = ?", (source_id,)
+                ).fetchall()
+                for stored in [row["stored"], *(r["stored"] for r in revisions)]:
+                    if not str(stored).startswith(REPOSITORY_FILE):
+                        (self.dir / str(stored)).unlink(missing_ok=True)
+                db.execute("DELETE FROM markdown WHERE source_id = ?", (source_id,))
+                db.execute("DELETE FROM conversions WHERE source_id = ?", (source_id,))
+                db.execute("DELETE FROM sources WHERE id = ?", (source_id,))
+                self._purge_runs(db, source_id)
+        from capabilities.bi_cards import search_index  # its passages (BI vault V3)
+
+        search_index.sync_quietly(self.store)
+        return len(rows)
+
+    @staticmethod
+    def _purge_runs(db: sqlite3.Connection, source_id: str) -> None:
+        for run in db.execute("SELECT id, status, source_ids FROM runs").fetchall():
+            if source_id not in json.loads(run["source_ids"]):
+                continue
+            db.execute("DELETE FROM run_layouts WHERE run_id = ?", (run["id"],))
+            if run["status"] != "committed":
+                db.execute("DELETE FROM candidates WHERE run_id = ?", (run["id"],))
+                db.execute(
+                    "UPDATE runs SET status = 'failed', error = ?, finished = ? WHERE id = ?",
+                    ("來源已撤回", now(), run["id"]),
+                )
+                continue
+            for row in db.execute(
+                "SELECT id, body FROM candidates WHERE run_id = ?", (run["id"],)
+            ).fetchall():
+                body = json.loads(row["body"])
+                for field in body.get("fields") or ():
+                    for proof in field.get("evidence") or ():
+                        proof["excerpt"] = ""
+                db.execute(
+                    "UPDATE candidates SET body = ? WHERE run_id = ? AND id = ?",
+                    (_dump(body), run["id"], row["id"]),
+                )
 
     def _share(self, source_id: str, folder: Any) -> None:
         repo = self._vault_repo()
