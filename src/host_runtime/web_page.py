@@ -14579,6 +14579,27 @@ function biRunNothing(run) {
   return said.map((w) => bh("p", "bi-warn", "AI 沒有建立候選卡，它的說明：" + w.message));
 }
 
+function biRunRelations(run) {
+  // Relations the AI inferred: each decided by a person, on its quote. Confirming needs both
+  // cards to exist, so it works once the run's cards are written.
+  const items = run.relations || [];
+  if (!items.length) return [];
+  const decide = async (item, status) => {
+    await biCall("/api/bi/runs/" + run.id + "/relations/" + item.id,
+      {dataset: biDataset(), status});
+    await biBuildFetchRun(run.id); biBuildRenderRun();
+  };
+  return [bh("h4", "", "AI 推論的關係（逐筆決定，要提交後才會寫入知識庫）"),
+    bh("ul", "bi-relations", ...items.map((item) => bh("li", "",
+      item.from + " → " + item.type + " → " + item.to + "：「" + item.excerpt + "」",
+      item.reason ? bh("span", "bi-meta", "（" + item.reason + "）") : "", " ",
+      item.decision
+        ? biBadge(item.decision === "confirmed" ? "已確認" : "已否決",
+          item.decision === "confirmed" ? "good" : "dim")
+        : bh("span", "", biButton("確認", () => decide(item, "confirmed"), "bi-btn"), " ",
+          biButton("否決", () => decide(item, "rejected"), "bi-btn")))))];
+}
+
 function biRunChips(run) {
   const s = run.summary || {};
   return [biBadge("候選 " + (s.candidates || 0), "dim"), biBadge("新建 " + (s.create || 0), "good"),
@@ -15054,7 +15075,7 @@ function biBuildRenderRun() {
       await biBuildFollow(run.id); await biBuildFetchRun(run.id); biBuildRenderRun();
     }, "bi-btn"));
   }
-  el("bi-b-chips").append(...biRunNothing(run));
+  el("bi-b-chips").append(...biRunNothing(run), ...biRunRelations(run));
   for (const candidate of bi.build.candidates) {
     const decision = BI_DECISION[candidate.review] || [candidate.review, "dim"];
     const button = biButton("", () => biBuildShowCandidate(candidate.id), "bi-card-btn");

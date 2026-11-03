@@ -1502,6 +1502,36 @@ def pending(workspace: Path, vault_id: str) -> dict[str, Any]:
         }
 
 
+def relation_ends(store: BiStore, item: Mapping[str, Any]) -> tuple[str, str] | None:
+    """The two cards an inferred relation names; None unless each is a single
+    card of the types its registered relation allows."""
+    if store.vault_id is None:
+        return None
+    target = Vault(store.workspace, store.vault_id)
+    reg = target._schema_of(target.repo.working_units())
+    known = next(
+        (r for r in (reg.relation_types if reg else ()) if r["name"] == item["type"]), None
+    )
+    if known is None or not store.exists:
+        return None
+    with closing(sqlite3.connect(store.path)) as db:
+        db.row_factory = sqlite3.Row
+        targets = _LinkTargets(db)
+    start = targets.find(str(item["from"]), tuple(known["from"]))
+    end = targets.find(str(item["to"]), tuple(known["to"]))
+    return None if start is None or end is None else (start, end)
+
+
+def relation_decided(store: BiStore, item: Mapping[str, Any]) -> bool:
+    """Whether a person already decided the relation this inferred one means."""
+    ends = relation_ends(store, item)
+    if ends is None or store.vault_id is None:
+        return False
+    relation = card_model.relation_id(ends[0], str(item["type"]), ends[1])
+    units = Vault(store.workspace, store.vault_id).repo.working_units()
+    return f"{card_model.RELATION_PREFIX}{relation}" in units
+
+
 def decide_relation(
     workspace: Path, vault_id: str, given: Mapping[str, Any], actor: str
 ) -> dict[str, Any]:

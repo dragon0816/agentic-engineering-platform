@@ -564,6 +564,11 @@ def _run_action(
             actor=who,
         )
         return 200, {"ok": True, **answer}
+    if len(rest) == 2 and rest[0] == "relations":
+        decided = runs.decide_relation(
+            workspace, dataset, run_id, rest[1], given.get("status"), actor=who
+        )
+        return 200, {"ok": True, **decided}
     if rest == ["recheck"]:
         return 200, {"ok": True, **runs.recheck(workspace, dataset, run_id)}
     if rest == ["commit"]:

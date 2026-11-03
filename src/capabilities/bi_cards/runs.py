@@ -39,6 +39,7 @@ from capabilities.bi_cards import (
     schema_versions,
     source_markdown,
 )
+from capabilities.bi_cards.card_model import reference_id
 from capabilities.bi_cards.schema import FieldDef, Registry, TypeDef, norm_key
 from capabilities.bi_cards.staging import Staging, parse_kind
 from capabilities.bi_cards.store import BiStore, BiStoreError, PlannedRow, now
@@ -511,6 +512,7 @@ def run_view(staging: Staging, run_id: str) -> dict[str, Any]:
             failures=layout.get("failures") or [],
             warnings=layout.get("warnings") or [],
             types=layout.get("types") or [],
+            relations=layout.get("relations") or [],
         )
     elif layout is not None:
         # A recipe run: its tables, passes (with counts as reviewed now) and
@@ -666,6 +668,71 @@ def review(
         candidate["review"] = "pending"
     staging.put_candidates(run_id, [candidate])
     return {"candidate": public(candidate), "run": run_view(staging, run_id)}
+
+
+def merge_relations(
+    store: BiStore, held: list[dict[str, Any]], found: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """A run's inferred relations with these added: one per (type, from, to), and
+    none a person already decided, so a re-run does not ask again."""
+    from capabilities.bi_cards import vault
+
+    seen = {(r["type"], norm_key(r["from"]), norm_key(r["to"])) for r in held}
+    merged = list(held)
+    for item in found:
+        key = (item["type"], norm_key(item["from"]), norm_key(item["to"]))
+        if key in seen or vault.relation_decided(store, item):
+            continue
+        seen.add(key)
+        merged.append({**item, "id": f"r{len(merged) + 1}", "decision": None})
+    return merged
+
+
+def decide_relation(
+    workspace: Path, dataset: str, run_id: str, relation: str, status: Any, *, actor: str
+) -> dict[str, Any]:
+    """A person's decision on one inferred relation. Confirmed needs both cards to
+    exist, so it comes after the run is written. Rejecting one whose cards never
+    came to be needs nothing stored; it stays on the run."""
+    from capabilities.bi_cards import vault
+
+    staging = Staging(workspace, dataset)
+    run = staging.run_row(run_id)
+    if run is None:
+        raise BiStoreError("run_unknown", "找不到這次執行")
+    if run["kind"] == "trial":
+        raise BiStoreError("run_trial", "試跑的結果不能寫入；請用同樣的來源正式匯入")
+    if staging.store.vault_id is None:
+        raise BiStoreError("relation_vault_only", "只有共用知識庫有推論關係")
+    layout = staging.layout(run_id) or {}
+    item = next((r for r in layout.get("relations") or [] if r["id"] == relation), None)
+    if item is None:
+        raise BiStoreError("relation_unknown", "這次執行沒有這筆關係")
+    if status not in ("confirmed", "rejected"):
+        raise BiStoreError("relation_status_invalid", "決定只能是確認或否決")
+    ends = vault.relation_ends(staging.store, item)
+    if ends is None and status == "confirmed":
+        raise BiStoreError(
+            "relation_card_unknown", f"「{item['from']}」或「{item['to']}」還不是唯一一張卡片"
+        )
+    if ends is not None:
+        vault.decide_relation(
+            workspace,
+            staging.store.vault_id,
+            {
+                "from": ends[0],
+                "type": item["type"],
+                "to": ends[1],
+                "status": status,
+                "origin": "ai_inferred",
+                "note": item.get("reason"),
+                "evidence": [{"reference_id": reference_id(item["source_id"], item["locator"])}],
+            },
+            actor,
+        )
+    item["decision"] = status
+    staging.put_layout(run_id, layout)
+    return {"relation": item}
 
 
 def recheck(workspace: Path, dataset: str, run_id: str) -> dict[str, Any]:

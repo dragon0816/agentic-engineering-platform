@@ -102,7 +102,7 @@ Stored by id; shown as names, so `fields` and `card_values`, the 31 analyses and
 - **Derived (`schema_field`):** at materialize, one row per link item that resolves. Type is the field's `relation_type`, default `has_<field>`, so `supplier` → `has_supplier` and the 82 link fields need no listing. Status `unreviewed`; never blocks use. Rebuildable; not a unit.
 - **Units:** `ai_inferred` and `registered`. Types must be in the merged schema's new `relation_types` (from/to types, label). `relation_id` = hash of (from, type, to), so two PCs get the same id. Evidence is a separate unit so that adding evidence never conflicts with a status change.
 - **Status:** `unreviewed` (derived only), `inferred`, `confirmed`, `disputed`, `rejected`, `pending`. A `relation:<id>` with the id of a derived row overrides its status (Phase 2's review UI).
-- **Review, Phase 1:** only AI-inferred relations are reviewed item by item, in the run's existing review. Only a decided one is written: `confirmed` or `rejected`, so a re-run does not ask again. Undecided ones stay with the run.
+- **Review, Phase 1:** only AI-inferred relations are reviewed item by item, in the run's existing review. Only a decided one is written: `confirmed` or `rejected`, so a re-run does not ask again. Undecided ones stay with the run. Confirming needs both cards to exist, so a person decides after the run's cards are written; the decision is staged for their commit.
 
 ### 3.4 Missing values (D9)
 

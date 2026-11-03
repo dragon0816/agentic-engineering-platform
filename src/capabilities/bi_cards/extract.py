@@ -128,6 +128,8 @@ class Extraction:
     failures: list[dict[str, Any]] = field(default_factory=list)
     warnings: list[dict[str, str]] = field(default_factory=list)
     chunks: int = 0
+    #: Relations the model inferred, each with a quote found in the source.
+    relations: list[dict[str, Any]] = field(default_factory=list)
 
 
 # -- chunking ----------------------------------------------------------------
@@ -251,6 +253,61 @@ def describe_types(reg: Registry, types: Sequence[str]) -> str:
     return "\n".join(lines)
 
 
+def relation_rules(reg: Registry) -> str:
+    """What the model may add when it may infer relations: only registered types."""
+    listed = "\n".join(
+        f"- {r['name']}: {r.get('label') or r['name']}, from {'/'.join(r['from'])} "
+        f"to {'/'.join(r['to'])}"
+        for r in reg.relation_types
+    )
+    return (
+        "\n\nRelations between cards that no link field can hold: when the excerpt supports "
+        "one of the types below, also add to your JSON answer\n"
+        '  "relations": [{"type": "...", "from": "<card name>", "to": "<card name>", '
+        '"quote": "...", "reason": "..."}]\n'
+        '"quote" is copied exactly from the excerpt. A person reviews each one. Use only these '
+        "types; leave out any you cannot support with a quote; an empty list is a fine answer.\n"
+        + listed
+    )
+
+
+def read_relations(
+    reg: Registry, answer: dict[str, Any], chunk: Chunk, source_id: str
+) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
+    """The model's relations that can be used. One with no registered type, no
+    ends or a quote not in the source is left out and said, never kept unsupported."""
+    known = {str(r["name"]) for r in reg.relation_types}
+    found: list[dict[str, Any]] = []
+    warnings: list[dict[str, str]] = []
+    raw = answer.get("relations")
+    for item in raw if isinstance(raw, list) else []:
+        if not isinstance(item, dict):
+            continue
+        kind, start, end = (str(item.get(k) or "").strip() for k in ("type", "from", "to"))
+        place = locate(item.get("quote"), chunk)
+        if kind not in known or not start or not end or place is None:
+            warnings.append(
+                {
+                    "code": "relation_unsupported",
+                    "message": f"模型提出的關係「{start} {kind} {end}」"
+                    "沒有登記的類型或原文依據，未採用",
+                }
+            )
+            continue
+        found.append(
+            {
+                "type": kind,
+                "from": start,
+                "to": end,
+                "reason": _text(item.get("reason"))[:500],
+                "source_id": source_id,
+                "locator": place,
+                "excerpt": str(item.get("quote")).strip()[:500],
+            }
+        )
+    return found, warnings
+
+
 def messages(
     reg: Registry,
     types: Sequence[str],
@@ -260,6 +317,7 @@ def messages(
     source_name: str,
     problems: Sequence[str] = (),
     domain_notes: str = "",
+    infer_relations: bool = False,
 ) -> tuple[ModelMessage, ...]:
     graded = any(
         reg.types[name].get("evidence_grade") is not None for name in types if name in reg.types
@@ -277,6 +335,8 @@ def messages(
         .replace("{instructions}", instructions.strip() or "(none)")
         .replace("{domain_notes}", notes)
     )
+    if infer_relations and reg.relation_types:
+        system += relation_rules(reg)
     names = "\n".join(
         f"- {type_name}: {', '.join(values[:MAX_KNOWN_NAMES])}"
         for type_name, values in sorted(known.items())
@@ -548,6 +608,7 @@ def extract_chunk(
     local_only: bool = False,
     max_attempts: int = MAX_ATTEMPTS,
     domain_notes: str = "",
+    relations: list[dict[str, Any]] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, str]], dict[str, Any] | None]:
     """(candidates, warnings, failure) for one chunk."""
     problems: list[str] = []
@@ -557,7 +618,15 @@ def extract_chunk(
                 trace=_trace(),
                 model_alias=alias,
                 messages=messages(
-                    reg, types, instructions, known, chunk, source_name, problems, domain_notes
+                    reg,
+                    types,
+                    instructions,
+                    known,
+                    chunk,
+                    source_name,
+                    problems,
+                    domain_notes,
+                    infer_relations=relations is not None,
                 ),
                 requirements=ModelRequirements(structured_output=True, local_only=local_only),
                 output_contract=OUTPUT_CONTRACT,
@@ -584,6 +653,10 @@ def extract_chunk(
         if not problems:
             assert isinstance(answer, dict)
             found, warnings = read_answer(reg, types, answer, chunk, source_id)
+            if relations is not None:
+                inferred, unsupported = read_relations(reg, answer, chunk, source_id)
+                relations.extend(inferred)
+                warnings.extend(unsupported)
             return found, warnings, None
     return (
         [],
@@ -615,6 +688,7 @@ def extract(
     local_only: bool = False,
     on_chunk: Callable[[int, int], None] | None = None,
     domain_notes: str = "",
+    infer_relations: bool = False,
 ) -> Extraction:
     """Every chunk of `text` (or only the chunk indexes in `only`, to retry
     failed ones), merged into candidates."""
@@ -636,6 +710,7 @@ def extract(
             source_name=source_name,
             local_only=local_only,
             domain_notes=domain_notes,
+            relations=result.relations if infer_relations else None,
         )
         if failure is not None:
             result.failures.append(failure)

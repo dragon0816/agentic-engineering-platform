@@ -277,6 +277,7 @@ def _extract(
         only=only,
         on_chunk=progress,
         domain_notes=notes,
+        infer_relations=staging.store.vault_id is not None,
     )
     found = staging.candidates(run_id) if only else []
     by_key = {_key(reg, c): c for c in found}
@@ -294,6 +295,9 @@ def _extract(
     staging.put_candidates(run_id, merged)
     retried = set(only or [])
     kept = [f for f in layout.get("failures") or [] if int(f["chunk"]) not in retried]
+    layout["relations"] = runs.merge_relations(
+        staging.store, layout.get("relations") or [], result.relations
+    )
     layout.update(
         chunks=result.chunks,
         done=result.chunks,
