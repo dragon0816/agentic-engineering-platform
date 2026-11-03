@@ -42,11 +42,13 @@ pages the vault's Dashboard replaces. `SAMPLE-` pages and `BI_Vault_Example/tool
 2026-11-03): tick 「全部標成範例資料」 for `tools/samples`, which also names those rows `SAMPLE-`. `tools/name-aliases*.json` (AIDC, aerospace) stay out as files but hold the
 name aliases to carry over.
 
+**Where each base goes (owner, 2026-11-04):** `aidc-bi-kb` and the two reports to the application `aidc`, `Aerospace-BI-KB` to `aerospace`, `robotics_kb_sample` to `robotics`, `Wireless-Module-BI-KB-SAMPLE` and `BI_Vault_Example` to `wireless`. No page names a market segment, so nothing is sorted into the 11 segments. The vault's list is these four. Layout: `docs/phases/BI_CARD_MODEL.md` §4.
+
 Two AIDC reports: `C:\Users\Chi_L\OneDrive - Rohde & Schwarz\BI_Knowledge\market-bi\applications\aidc-compute.md` and
 `aidc-power_cooling.md`. Read only; copy out, never move. Compare them with `aidc-bi-kb/sources/compute.md` and
 `power_cooling.md` first, by content: add one copy of each.
 
-Schema: built in, `bi.schema/v1.1@4.0.0`, the newest (21 types; `segment` already has the 11 market segments; `domain` is a list on the types a card may share). The old folder
+Schema: built in, `bi.schema/v1.1@5.0.0`, the newest (21 types; `segment` holds the 11 market segments; `domain` is a list on the types a card may share; the card model's `summary`, `usage`, `scope`, relation types). The old folder
 `market-bi` is a reference for a person only: nothing is converted from it by a tool.
 
 **Card pages go through the built-in importer** (owner, 2026-11-03: `docs/phases/BI_CARD_PAGE_IMPORT.md`), 「匯入卡片頁（Obsidian）」 in
@@ -145,19 +147,19 @@ that flow is changing, so read the current ones on the page.
 | 1 | Run §4. Settle the open points of §3 with the owner and record them in `docs/DECISIONS.md`. | Exit code 0; each recorded |
 | 2 | Restart Agent Web if it predates the build flow (check `/api/tasks` first, AGENTS rule 19). | Page shows the build-flow steps |
 | 3 | Rename the old folder to `market-bi.v4-old` in Explorer. Wait for OneDrive to finish. | Old folder present under the new name on OneDrive's site; nothing deleted |
-| 4 | Knowledge > BI > 建立與匯入 > 建立共用知識庫（vault）: id `market-intel`, in `BI_Knowledge`, schema `bi.schema/v1.1` (4.0.0), author `leo.chi`. | `repo.json` in the folder; `/api/knowledge/askable` lists it with `nothing_pushed` |
-| 5 | Step 1: add the AIDC base's sources (§3's list), let them become Markdown. They reach the shared folder with the push (D2). | Each source has Markdown; spot-check two tables |
-| 6 | Step 2: Session A only if the schema must change; Session B for the skills. Move the manager's reading rules there. | The owner reviewed every schema change and skill |
+| 4 | Knowledge > BI > 建立與匯入 > 建立共用知識庫（vault）: id `market-intel`, in `BI_Knowledge`, schema `bi.schema/v1.1` (5.0.0), author `leo.chi`. | `repo.json` is there; folders `applications/aidc`, `aerospace`, `robotics`, `wireless` and `library/products`, `technologies`, `competitors` |
+| 5 | Step 1: add the AIDC base's sources (§3's list) **to the application `aidc`**, let them become Markdown. They reach the shared folder with the push (D2). | Each source has Markdown under `applications/aidc/sources`; spot-check a few |
+| 6 | Step 2: Session A only if the schema must change; Session B for the skills. Move the manager's reading rules there. **Before any AI extraction, the owner approves a profile for that application** (only `aidc` this session: its two reports; seeds and pages read none). There is no page for a profile yet: an agent writes it from what the owner says and posts it to `POST /api/bi/vaults/market-intel/profiles`, and the owner reads it before the commit. Without one the model sees the whole schema, with a notice. | The owner reviewed every schema change, skill and profile |
 | 7 | Import the AIDC seeds first (`seed/`, the 22 card CSVs): preview, apply. Then its pages through the card-page importer (§3). | 22 CSVs → 323 cards; §7's AIDC numbers match |
 | 8 | Repeat 5–7 in §3's order: aerospace, robotics, wireless module, wireless example. **Commits per import**, each with its sources in a commit of their own. | After each: quality check read; new conflicts settled (D3); no fact without a source |
-| 9 | Fix the links written in another spelling of a merged card (28 last time), as field edits with a reason. | Quality check's unresolved links explained |
+| 9 | Settle the unresolved links in §3's quality check. Field edits are gone: **a correction note** for a wrong link, or a correction note adding the other spelling to the target's `aliases`, which also resolves it for relations. The 28 of 2026-10-29 is out of date; read the count in T14's dry run (§3). | Quality check's unresolved links explained |
 | 10 | Step 3: benchmark questions and the Dashboard (the analysis AI, or an Atlas import of the order). | Owner approved each question and the order |
 | 11 | Testing: run the benchmark on the working copy. | No regression the owner did not accept |
-| 12 | Push. | `status`: ahead 0, no conflict; the owner sees the commits and the originals under `sources/` on OneDrive |
-| 13 | Tag `2026q4-r6`, publish with confirmation. | `/api/knowledge/askable` says 可以在對話裡問, `reads.tag` is the tag |
+| 12 | Push. | `status`: ahead 0, no conflict; the owner sees the commits and the originals under `applications/*/sources` on OneDrive |
+| 13 | Tag `2026q4-r6`, publish with confirmation. **This writes about 640 files to `cards/` and `published/2026q4-r6.sqlite` on OneDrive.** The reply warns about cards with no summary; that does not block. | `/api/knowledge/askable` says 可以在對話裡問, `reads.tag` is the tag; `cards/_manifest.json` names the tag; open a few cards in Obsidian |
 | 14 | In a new general chat: ask a cross-domain question and a BI question that needs SQL. | The answer carries `資料來源：知識庫 vault-<id> 發佈版本 <tag>`; numbers match the Dashboard; `bi__query` was on (Skill, capability, grant) |
 | 15 | Atlas: open the panels of the new vault. | Panels show the published analyses (Atlas layouts stay personal) |
-| 16 | A colleague joins the folder (`join`). | Their Agent reads the same tag; they see the originals, with none waiting once OneDrive has delivered them |
+| 16 | A colleague joins the folder (`join`), **only on the release with the card model**: an older AEP refuses this vault at sync. | Their Agent reads the same tag; they see the originals, with none waiting once OneDrive has delivered them |
 | 17 | `rs-k` copy: §6. | |
 | 18 | Update `docs/TASKS.md`, `HANDOFF.md`; **the owner** deletes the old folder when satisfied, later. | |
 
