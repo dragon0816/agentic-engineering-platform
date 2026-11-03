@@ -170,7 +170,7 @@ Each slice is committed after format, lint, type check and targeted tests.
   stubs: pairs, roll-over, owner only, quote, failure text, credentials, restart, model input unchanged.
 - [x] **T3 Read-only and delete.** The check on every route, delete reaching attachments, `/api/conversations` rows.
 - [x] **T4 Search route.**
-- [ ] **T5 Page.** Mark, default selection, read-only view, search.
+- [x] **T5 Page.** Mark, default selection, read-only view, search.
 - [ ] **T6 Docs.** CONTRACTS, TASKS, HANDOFF; the full suite only on the orchestrator's go.
 
 ## 12. Tests

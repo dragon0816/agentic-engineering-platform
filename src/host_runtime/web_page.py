@@ -461,6 +461,7 @@ pre.kp-removed { background: var(--bad-bg, #fdecea); white-space: pre-wrap; padd
   margin: 8px 8px 7px; color: var(--dim); font-size: 12px; font-weight: 700;
   letter-spacing: .08em; text-transform: uppercase; }
 .session-search { width: 100%; min-height: 38px; margin-bottom: 8px; font: inherit; }
+.session-snippet { display: block; overflow-wrap: anywhere; color: var(--dim); }
 .session-list { flex: 1; overflow-y: auto; min-height: 120px; }
 .session-item { display: block; width: 100%; min-height: 58px; padding: 9px 10px;
   color: var(--ink); background: transparent; border: 0; border-radius: 7px;
@@ -1342,6 +1343,8 @@ tr:last-child td { border-bottom: none; }
     <div id="log"></div>
     <div id="command-palette" class="command-menu" role="listbox" hidden></div>
     <div id="turn-menu" class="turn-menu" role="menu" hidden></div>
+    <p id="read-only-note" class="note" role="status" hidden>
+      這是 Telegram 對話，只能閱讀；要繼續請回到 Telegram。</p>
     <form class="ask" id="ask">
       <div id="reply-chip" class="reply-chip" hidden>
         <span id="reply-chip-text"></span>
@@ -3985,7 +3988,9 @@ function renderConversation(record) {
       if (replied.task_summary_id) {
         said.parentNode.append(summaryNoteButton(replied.task_summary_id));
       }
-      attachTurnControls(said.parentNode, asked.text, replied);
+      // A Telegram conversation is read here: nothing to rate or reply to.
+      if (record.source === "telegram") said.parentNode.dataset.messageId = replied.message_id;
+      else attachTurnControls(said.parentNode, asked.text, replied);
       const installForm = replied.workflow_form
         && replied.workflow_form.origin === "install";
       if (replied.workflow_form && !installForm) {
@@ -4740,10 +4745,31 @@ selectionNote.addEventListener("click", () => {
   if (chosen) chosen.removeAllRanges();
 });
 
+// What the server found in stored messages for the words in the search box:
+// these join the titles the box filters at once.
+let searchHits = [], searchTimer = 0;
+
+async function searchStoredConversations() {
+  const query = el("session-search").value.trim();
+  clearTimeout(searchTimer);
+  if (!query) { searchHits = []; renderSessionList(); return; }
+  searchTimer = setTimeout(async () => {
+    const found = await call("/api/conversations/search?q=" + encodeURIComponent(query))
+      .catch(() => ({results: []}));
+    if (el("session-search").value.trim() !== query) return;  // the words changed meanwhile
+    searchHits = found.results || [];
+    renderSessionList();
+  }, 250);
+}
+
 function renderSessionList() {
   const query = el("session-search").value.trim().toLowerCase();
-  const visible = conversationRows.filter((item) =>
+  const titled = conversationRows.filter((item) =>
     [item.title, item.backend].filter(Boolean).join(" ").toLowerCase().includes(query));
+  const shown = new Set(titled.map((item) => item.session_id));
+  const hits = new Map(searchHits.map((item) => [item.session_id, item]));
+  const visible = [...titled.map((item) => hits.get(item.session_id) || item),
+    ...searchHits.filter((item) => !shown.has(item.session_id))];
   el("session-count").textContent = String(conversationRows.length);
   const buttons = visible.map((item) => {
     const button = document.createElement("button"); button.type = "button";
@@ -4751,9 +4777,15 @@ function renderSessionList() {
     button.setAttribute("aria-selected", String(item.session_id === activeConversation));
     const title = document.createElement("strong"); title.append(text(item.title));
     const detail = document.createElement("small");
-    detail.append(text(item.messages + " messages · " + item.backend
+    detail.append(text(item.messages + " messages · "
+      + (item.source === "telegram" ? "Telegram" : item.backend)
       + (sessionBusy(item.session_id) ? " · 執行中" : "")));
     button.append(title, detail);
+    if (item.snippet) {
+      const found = document.createElement("small");
+      found.className = "session-snippet"; found.append(text(item.snippet));
+      button.append(found);
+    }
     button.addEventListener("click", async () => {
       selectPrimaryTab("ask");
       // Switch at once, so a message typed during the reload goes here.
@@ -4785,6 +4817,7 @@ async function deleteSession(sessionId, title) {
     const deleted = await call("/api/conversations/delete", {session_id: sessionId});
     if (!deleted.ok) throw new Error(deleted.code || "deletion_failed");
     if (sessionId === activeConversation) activeConversation = "";
+    searchHits = searchHits.filter((item) => item.session_id !== sessionId);
     await loadChat(activeConversation || undefined);
   } catch (failure) { showBootError(failure); }
 }
@@ -4792,13 +4825,16 @@ async function deleteSession(sessionId, title) {
 async function loadConversations(selectId) {
   let listed = await call("/api/conversations"
     + (selectId ? "?session_id=" + encodeURIComponent(selectId) : ""));
-  if (!listed.conversations.length) {
+  // Never opens on a Telegram conversation by itself: those are only read.
+  const own = listed.conversations.filter((item) => item.source !== "telegram");
+  if (!listed.conversations.length || (!selectId && !own.length)) {
     const created = await call("/api/conversations", {});
     selectId = created.conversation.session_id;
     listed = await call("/api/conversations?session_id=" + encodeURIComponent(selectId));
   }
   conversationRows = listed.conversations;
-  activeConversation = selectId || listed.conversations[0].session_id;
+  activeConversation = selectId
+    || listed.conversations.find((item) => item.source !== "telegram").session_id;
   if (!listed.selected || listed.selected.session_id !== activeConversation) {
     listed = await call("/api/conversations?session_id="
       + encodeURIComponent(activeConversation));
@@ -4813,6 +4849,10 @@ async function loadConversations(selectId) {
   const requested = [...backend.options].find(option => option.value === selectedBackend);
   activeBackend = requested ? selectedBackend : (backend.options[0] || {}).value || "gateway";
   backend.value = activeBackend; renderBackendState();
+  const readOnly = !!(listed.selected && listed.selected.source === "telegram");
+  el("ask").hidden = readOnly;
+  el("read-only-note").hidden = !readOnly;
+  backend.disabled = readOnly;
   send.disabled = false;
   loadAgentSession().catch(() => {});
   loadConversationModels().catch(() => {});
@@ -4967,7 +5007,10 @@ async function loadChat(selectId) {
   await loadConversations(selectId);
 }
 
-el("session-search").addEventListener("input", renderSessionList);
+el("session-search").addEventListener("input", () => {
+  renderSessionList();
+  searchStoredConversations();
+});
 el("conversation-backend").addEventListener("change", async () => {
   try { await chooseBackend(el("conversation-backend").value); }
   catch (failure) { el("conversation-backend").value = activeBackend; showBootError(failure); }
