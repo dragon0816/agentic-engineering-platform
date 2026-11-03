@@ -2734,6 +2734,25 @@ tr:last-child td { border-bottom: none; }
               會搬到這裡）。AI 判讀時依來源所在的資料夾選用；固定的證據規則一律先套用，
               不能被改掉。</p>
             <div id="bi-b-sk-list"></div>
+            <div class="bi-step" id="bi-b-profile">
+              <h5>應用的 profile</h5>
+              <p class="bi-meta">每個應用用到哪些卡片類型和欄位。AI 判讀這個應用的來源時，
+                只問這裡列的；沒有列的值仍會留下，並在審核時標出來。
+                存成新版本後，commit 並 push 大家才會用到。</p>
+              <label class="bi-label" for="bi-b-pf-home">應用或資料庫項目</label>
+              <select id="bi-b-pf-home"></select>
+              <div id="bi-b-pf-view"></div>
+              <div id="bi-b-pf-proposals"></div>
+              <label class="bi-label" for="bi-b-pf-json">Profile 內容（JSON）</label>
+              <textarea id="bi-b-pf-json" class="bi-input" rows="10" spellcheck="false"></textarea>
+              <p class="bi-meta">格式：{"types": {"類型": {"category": "這個類型在這裡的意思",
+                "fields": {"欄位": {"use": "required 或 optional", "note": "說明"}}}},
+                "proposals": [{"type": "類型", "field": "新欄位", "definition": {"kind": "str",
+                "class": "sourced", "label": "名稱"}, "reason": "為什麼需要"}]}。
+                schema 沒有的欄位只能放在 proposals。</p>
+              <div class="bi-actions">
+                <button class="bi-btn" id="bi-b-pf-save" type="button">存成新版本</button></div>
+            </div>
             <div class="bi-step" id="bi-b-rerun">
               <h5>改完規則後重跑</h5>
               <p class="bi-meta">用現在的規則重讀來源，只列出和卡片不同的值；你確認的才會寫入。
@@ -13690,6 +13709,7 @@ async function biVersions(vaultId) {
   el("bi-b-ver-push").disabled = !commits.length;
   biVerHistory(vaultId, history);
   biSkills(vaultId).catch((failure) => biNotice(false, "讀不到判讀規則：" + failure.message));
+  biProfiles(vaultId).catch((failure) => biNotice(false, "讀不到 profile：" + failure.message));
 }
 
 function biVerHistory(vaultId, history) {
@@ -13820,6 +13840,90 @@ async function biSkills(vaultId) {
   el("bi-b-folder-box").hidden = false;
   biRerunForm(reply.folders || []);
 }
+
+// -- a home's profile and its field proposals (BI_CARD_MODEL.md §4.2, §4.3) --------
+async function biProfiles(vaultId) {
+  bi.profiles = await call("/api/bi/vaults/" + vaultId + "/profiles");
+  const pick = el("bi-b-pf-home"), kept = pick.value, homes = bi.profiles.homes || [];
+  pick.replaceChildren(...homes.map((item) => {
+    const option = bh("option", "", item.label === item.home ? item.home
+      : item.label + "（" + item.home + "）");
+    option.value = item.home; return option;
+  }));
+  if (homes.some((item) => item.home === kept)) pick.value = kept;
+  biProfileShow();
+}
+
+function biProfileShow() {
+  const home = el("bi-b-pf-home").value;
+  const current = ((bi.profiles || {}).profiles || []).find((p) => p.home === home);
+  const view = el("bi-b-pf-view"); view.replaceChildren();
+  if (!current) {
+    view.append(bh("p", "bi-meta", "這裡還沒有 profile：AI 會用整份 schema 判讀。"));
+  } else {
+    view.append(bh("p", "bi-meta", "第 " + current.revision + " 版・schema " + current.schema));
+    const list = bh("ul", "bi-log");
+    for (const [type, used] of Object.entries(current.types || {})) {
+      const row = bh("li", "", bh("strong", "", biTypeLabel(type) + "（" + type + "）"));
+      if (used.category) row.append(bh("p", "bi-meta", used.category));
+      const names = Object.entries(used.fields || {});
+      row.append(names.length ? bh("ul", "", ...names.map(([name, field]) => bh("li", "",
+        name, " ",
+        field.use === "required" ? biBadge("必填", "warn") : biBadge("選填", "dim"),
+        field.note ? bh("span", "bi-meta", " " + field.note) : "")))
+        : bh("p", "bi-meta", "沒有列欄位。"));
+      list.append(row);
+    }
+    view.append(list);
+  }
+  biProfileProposals(home, current);
+  // A refresh keeps what the person is typing; only another version replaces it.
+  const shown = home + "#" + (current ? current.revision : 0);
+  if (bi.profileShown !== shown) {
+    bi.profileShown = shown;
+    el("bi-b-pf-json").value = JSON.stringify(current
+      ? {types: current.types || {}, proposals: current.proposals || []}
+      : {types: {}, proposals: []}, null, 2);
+  }
+}
+
+function biProfileProposals(home, current) {
+  const box = el("bi-b-pf-proposals"); box.replaceChildren();
+  const waiting = ((current || {}).proposals || []).filter((p) => p.status === "proposed");
+  if (!waiting.length) return;
+  const decide = async (item, decision) => {
+    try {
+      const reply = await biVerRun(bi.verVault, "profile-proposals",
+        {home, type: item.type, field: item.field, decision, confirm: true});
+      const behind = reply.skills_need_update || [];
+      biNotice(true, (decision === "merge"
+        ? "已合併「" + item.field + "」，schema 是 " + reply.schema
+        : "已不採用「" + item.field + "」") + "；commit 並 push 後大家才會用到。"
+        + (behind.length ? "這些判讀規則要更新後才會再使用：" + behind.join("、") : ""));
+    } catch (failure) { biNotice(false, "沒有完成：" + failure.message); }
+  };
+  box.append(bh("h5", "", "等待決定的新欄位"), bh("ul", "bi-log", ...waiting.map((item) => {
+    const name = item.type + "." + item.field;
+    return bh("li", "", bh("strong", "", name),
+      bh("p", "bi-meta", (item.reason ? item.reason + "・" : "") + JSON.stringify(item.definition)),
+      bh("div", "bi-actions",
+        biButton("合併進 schema", () => decide(item, "merge"), "bi-btn", "合併進 schema：" + name),
+        biButton("不採用", () => decide(item, "reject"), "bi-btn", "不採用：" + name)));
+  })));
+}
+
+el("bi-b-pf-home").addEventListener("change", biProfileShow);
+el("bi-b-pf-save").addEventListener("click", async () => {
+  const home = el("bi-b-pf-home").value;
+  let document_;
+  try { document_ = JSON.parse(el("bi-b-pf-json").value); }
+  catch (failure) { biNotice(false, "沒有儲存：內容不是有效的 JSON。"); return; }
+  try {
+    const reply = await biVerRun(bi.verVault, "profiles", {home, profile: document_});
+    biNotice(true, "「" + home + "」的 profile 存成第 " + reply.profile.revision
+      + " 版；commit 並 push 後大家才會用到。");
+  } catch (failure) { biNotice(false, "沒有儲存：" + failure.message); }
+});
 
 function biRerunApplication(folder) {
   const parts = folder.split("/");

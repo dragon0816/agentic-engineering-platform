@@ -324,6 +324,57 @@ def test_vault_panel_and_dashboard_in_a_browser(
         wait("document.getElementById('bi-b-ver-pending').textContent.includes('power-extract')")
         shoot("vault-step3")
 
+        # -- a home's profile, in step 2 (BI_CARD_MODEL.md §4.2, §4.3) ----------------------
+        wait("[...document.getElementById('bi-b-pf-home').options].some((o) => o.value === 'aidc')")
+        assert run(
+            "[...document.getElementById('bi-b-pf-home').options]"
+            ".some((o) => o.value === 'library/products')"
+        )
+        set_value("bi-b-pf-home", "aidc")
+        wait("document.getElementById('bi-b-pf-view').textContent.includes('還沒有 profile')")
+        set_value("bi-b-pf-json", "{not json")
+        click("#bi-b-pf-save")
+        wait("document.getElementById('bi-notice').textContent.includes('不是有效的 JSON')")
+        set_value(
+            "bi-b-pf-json",
+            json.dumps(
+                {
+                    "types": {
+                        "Technology": {
+                            "category": "虛構：這裡的技術指液冷",
+                            "fields": {"domain": {"use": "required", "note": "虛構說明"}},
+                        }
+                    },
+                    "proposals": [
+                        {
+                            "type": "Technology",
+                            "field": "cooling",
+                            "definition": {"kind": "str", "class": "sourced", "label": "冷卻"},
+                            "reason": "虛構理由",
+                        }
+                    ],
+                },
+                ensure_ascii=False,
+            ),
+        )
+        click("#bi-b-pf-save")
+        wait(
+            "document.getElementById('bi-b-pf-view').textContent.includes('虛構：這裡的技術指液冷')"
+        )
+        shown = text_of("bi-b-pf-view")
+        assert "必填" in shown and "domain" in shown and "虛構說明" in shown
+        assert "Technology.cooling" in text_of("bi-b-pf-proposals")
+        assert json.loads(run("document.getElementById('bi-b-pf-json').value"))["types"]
+        # Declined here: a merge moves the vault's schema (`test_bi_vault_profile_merge`).
+        run(
+            "[...document.querySelectorAll('#bi-b-pf-proposals button')]"
+            ".find((b) => b.textContent === '不採用').click()"
+        )
+        wait("!document.getElementById('bi-b-pf-proposals').textContent.includes('cooling')")
+        assert "第 2 版" in text_of("bi-b-pf-view")
+        wait("document.getElementById('bi-b-ver-pending').textContent.includes('profile')")
+        shoot("vault-profile")
+
         # -- 題目與擷取測試 in step 3 (BI T1) ---------------------------------------------
         wait("!document.getElementById('bi-b-bench').hidden")
         assert "還沒有跑過測試" in text_of("bi-b-bench-report")

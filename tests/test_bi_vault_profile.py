@@ -110,6 +110,22 @@ def test_a_profile_is_a_file_written_once_with_a_unit(tmp_path: Path) -> None:
     assert [(p["home"], p["revision"]) for p in listed] == [("aidc", 2), ("library/products", 1)]
 
 
+def test_the_list_names_every_home_that_may_have_a_profile(tmp_path: Path) -> None:
+    drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
+    listed = _ok(_call(a, "GET", f"/api/bi/vaults/{vault_id}/profiles"))
+    assert listed["profiles"] == []
+    assert [h["home"] for h in listed["homes"]] == [
+        "aidc",
+        "aerospace",
+        "robotics",
+        "wireless",
+        "library/products",
+        "library/technologies",
+        "library/competitors",
+    ]
+    assert listed["homes"][0]["label"] == "AIDC"
+
+
 def test_a_refused_profile_answers_400(tmp_path: Path) -> None:
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
     bad = {"types": {"Technology": {"fields": {"domain": {"use": "optional", "kind": "x"}}}}}

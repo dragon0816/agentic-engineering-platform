@@ -61,6 +61,14 @@ def _library(units: Mapping[str, Any]) -> list[str]:
     return found if isinstance(found, list) else list(homes.LIBRARY_ENTRIES)
 
 
+def home_list(units: Mapping[str, Any]) -> list[dict[str, str]]:
+    """The vault's applications and library entries, by their short forms."""
+    return [
+        *({"home": s["folder"], "label": s.get("label") or s["folder"]} for s in _segments(units)),
+        *({"home": f"{homes.LIBRARY}/{e}", "label": e} for e in _library(units)),
+    ]
+
+
 def _card_type_lines(reg: Registry) -> list[str]:
     lines = [
         f"這個知識庫用 schema {reg.ref}。判讀來源時，先決定每段內容屬於哪一種卡片，",

@@ -6654,7 +6654,7 @@ Design: `docs/phases/BI_CARD_MODEL.md` §4.2. Code: `capabilities/bi_cards/profi
 
 `<home>/profile/rev-<n>-<author>.json` = `{format: "aep.bi.profile/v1", application: <short form>, revision, schema, types: {<type>: {category?, fields: {<field>: {use: required|optional, note?}}}}, proposals: [{type, field, definition, reason, status: proposed|merged|rejected}]}`, written once; `profile:<short form>` names the current one. A type or field not listed is not used there. A field not in the schema, or any other key on a field such as `kind` or `enum`, is `profile_invalid` (400): a definition lives only in a proposal.
 
-**API.** `GET /api/bi/vaults/<id>/profiles` → `{profiles: [{home, ...document}]}`. `POST …/profiles` `{home, profile}` stages the next revision, on the vault's current schema, for the person to commit.
+**API.** `GET /api/bi/vaults/<id>/profiles` → `{profiles: [{home, ...document}], homes: [{home, label}]}`, `homes` being every application and library entry of the vault. `POST …/profiles` `{home, profile}` stages the next revision, on the vault's current schema, for the person to commit.
 
 **AI run.** A source's folder gives its home (`homes.home_of`), and the run keeps that home's types and notes in `layout.skills.profile`, so a retry reads the same. With no types chosen, the model is asked only for the profile's types; for those, the profile's fields, the type's naming fields, what the schema requires, and `aliases`, `summary`, `usage`, `scope`, with the notes and category explanation. With no profile, the whole schema as before; `GET /api/bi/runs/<id>` then has `run.profile: null` for a vault's run, and the page says so. Validation stays against the merged schema: a schema field or type outside the profile stays a candidate, with `candidate.outside_profile` (field names), `outside_profile_type` and, on the field, `outside_profile: true`. A profile-required field the candidate lacks is a `profile_required_missing` warning on it. An unreadable profile refuses the run (`profile_missing`), so it never silently reads the whole schema.
 
@@ -6669,7 +6669,7 @@ Design: `docs/phases/BI_CARD_MODEL.md` §4.2. Code: `capabilities/bi_cards/profi
 
 ## BI card model: a profile's field proposal (2026-11-04)
 
-Design: `docs/phases/BI_CARD_MODEL.md` §4.3. Code: `capabilities/bi_cards/profile_merge.py`. API only; no page yet.
+Design: `docs/phases/BI_CARD_MODEL.md` §4.3. Code: `capabilities/bi_cards/profile_merge.py`. On the page with the profile (step 2).
 
 `POST /api/bi/vaults/<id>/profile-proposals` `{home, type, field, decision: merge|reject, confirm: true}`, the reviewer's confirmation, answers `{profile, schema, skills_need_update, status}` and stages the profile's next revision with the proposal's `status` set.
 
