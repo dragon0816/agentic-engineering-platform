@@ -96,6 +96,9 @@
 再確認語言模型能用：開啟 AEP Agent（第 4 節）→ 左邊 **Settings** → **LLM gateway**
 卡片，狀態是 `Running`，按 **Test** 看到 `✓` 開頭的結果。不是時，請看使用指南第 1 章的疑難排解。
 
+新安裝預設允許把 `UNCLASSIFIED` 和 `INTERNAL` 的資料送到模型服務；`CONFIDENTIAL` 和 `RESTRICTED` 不會送。
+更新不會改變已安裝電腦的設定。
+
 ## 4. 開啟 AEP Agent
 
 - 雙擊桌面上的 **AEP Agent** 捷徑；或在安裝包資料夾雙擊 `start-web.cmd`。

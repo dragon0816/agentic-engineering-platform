@@ -4229,3 +4229,4 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [ ] Shared Platform plan, permission: downloads follow the platform's existing rules (team default, organisation with confirmation, first version of a name admin-reviewed). No new permission mechanism.
 - [ ] Shared Platform plan, open for design: tag names are not semver; snapshots hard-code classification INTERNAL while O2 allows pushing CONFIDENTIAL and RESTRICTED.
 - [x] 2026-11-03, Claude Code: BI model fallback combined with worker D's branch: a vault source reaches the model through the fallback, RESTRICTED stays refused, a retry after withdrawal sends nothing (`run_closed`), and the card-page importer asks no model; tests in `test_bi_model_fallback`.
+- [x] 2026-11-03, Claude Code: new installs approve INTERNAL for the model by default (owner, directly); `gateway-default.json`, install guide, `test_install_data_approval`. An update keeps an existing host's approval.

@@ -6267,3 +6267,16 @@ Owner, 2026-11-03: anyone with access to a vault can use it, and not everyone bi
   `binding.data_approval`; an unwrapped client gives `model_unavailable`. `check_classification` is unchanged.
 - **Rejected:** building a second client for BI from `ModelClients` (a second place that must remember the wrapper);
   binding an empty Knowledge asset on install (it would turn on Knowledge features with nothing behind them).
+
+## 2026-11-03 — New installs approve INTERNAL for the model by default (owner, directly)
+
+- **Decision:** `deploy/windows-preview/gateway-default.json` approves `UNCLASSIFIED` and `INTERNAL`, so internal data is sent
+  to the model service by default on a new install. The owner confirmed this directly and does not want it asked again;
+  they will raise any change themselves.
+- **Why:** sources default to `INTERNAL`, so a new install refused AI ingest with `classification_not_approved` until someone
+  found the setting. The owner wants a colleague's install to work after setup.
+- **Scope:** new installs only. `install.ps1` merges the file's `models` only when `host.json` has none, and `update.ps1` runs
+  `install.ps1`, so an existing host keeps its approval. `CONFIDENTIAL` and `RESTRICTED` stay unapproved, and
+  `check_classification` still refuses them.
+- **Rejected:** keeping `UNCLASSIFIED` with a page explaining where to add `INTERNAL` (every colleague would have to find it).
+
