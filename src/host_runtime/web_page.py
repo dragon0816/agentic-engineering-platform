@@ -11815,7 +11815,7 @@ const BI_ACTION = {create: ["新增", "good"], update: ["更新", "accent"],
 const BI_MAPPING = {mapped: ["已對應", "good"], alias: ["別名對應", "accent"],
   unknown: ["未知欄位", "warn"], ignored: ["不匯入", "dim"]};
 const BI_CHANGE = {add: ["新增", "good"], change: ["變更", "accent"], same: ["不變", "dim"],
-  human_kept: ["人工值保留，改成提議", "warn"]};
+  human_kept: ["人工值保留，改成提議", "warn"], state: ["記下沒有值的原因", "accent"]};
 
 // Each dataset follows the schema it was created with (owner 2026-10-21): the
 // type filter, import types, card detail and editors read `bi.schema`, loaded

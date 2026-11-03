@@ -14,6 +14,7 @@ import re
 import threading
 import uuid
 from collections import OrderedDict
+from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from pathlib import PurePosixPath
 from typing import Any
@@ -22,7 +23,7 @@ from capabilities.bi_cards import importer
 from capabilities.bi_cards.catalog import for_store
 from capabilities.bi_cards.schema import Registry, norm_key
 from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, BiStoreError, PlannedRow
+from capabilities.bi_cards.store import BiStore, BiStoreError, PlannedRow, new_states
 
 MAX_PAGES = 5000
 MAX_EXCERPT = 500
@@ -33,7 +34,7 @@ _LINK = re.compile(r"^\[\[([^\]|]+)(?:\|[^\]]*)?\]\]$")
 
 
 #: What a field did in a merge, as the preview counts it.
-MERGES = ("fill", "join", "proposal", "bookkeeping", "human_kept", "same")
+MERGES = ("fill", "join", "proposal", "bookkeeping", "human_kept", "same", "state")
 
 
 def _problem(path: str, code: str, message: str, line: int | None = None) -> dict[str, Any]:
@@ -277,6 +278,11 @@ def _joined(old: Any, new: Any) -> list[Any]:
     return joined
 
 
+def _stored_states(states: Mapping[str, Mapping[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Field states as they will read once written, for the rows after them."""
+    return {name: {**given, "origin": "unit"} for name, given in states.items()}
+
+
 def merge_rows(
     store: BiStore, reg: Registry, previews: list[tuple[importer.Preview, list[str]]]
 ) -> tuple[list[dict[int, int | None]], list[dict[str, Any]]]:
@@ -302,6 +308,7 @@ def merge_rows(
                 card = store.find(*key)
                 known = state[key] = {
                     "fields": {} if card is None else store.fields(card["id"]),
+                    "states": {} if card is None else store.field_states(card["id"]),
                     "version": None if card is None else int(card["version"]),
                     "synthetic": None if card is None else bool(card["synthetic"]),
                 }
@@ -311,6 +318,7 @@ def merge_rows(
                 known["synthetic"] = bool(planned.synthetic)
                 for name, value in planned.values.items():
                     known["fields"][name] = {"value": value, "kind": "import"}
+                known["states"].update(_stored_states(planned.states))
                 continue
             mismatch = known["synthetic"] != bool(planned.synthetic)
             if mismatch:
@@ -358,14 +366,21 @@ def merge_rows(
                     values[name] = value
                     propose.add(name)
                     merged["proposal"].append(name)
+            # A row marked differently only proposes, and a state is no proposal.
+            states = (
+                {} if mismatch else new_states(planned.states, known["fields"], known["states"])
+            )
+            known["states"].update(_stored_states(states))
+            merged["state"] = sorted(states)
             item.planned[number] = replace(
                 planned,
                 values=values,
                 propose=frozenset(propose),
                 synthetic=bool(known["synthetic"]),
+                states=states,
             )
             row["merge"] = {name: fields for name, fields in merged.items() if fields}
-            writes = merged["fill"] or merged["join"] or merged["bookkeeping"]
+            writes = merged["fill"] or merged["join"] or merged["bookkeeping"] or merged["state"]
             row["action"] = "update" if writes or merged["proposal"] else "unchanged"
         versions.append(planned_versions)
     return versions, conflicts

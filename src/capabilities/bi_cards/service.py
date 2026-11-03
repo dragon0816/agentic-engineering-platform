@@ -334,6 +334,10 @@ def query_cards(
                 for name, item in fields.items()
                 if name != "body"
             },
+            "field_states": {
+                name: {k: state[k] for k in ("state", "reason", "origin") if state[k] is not None}
+                for name, state in store.field_states(card["id"]).items()
+            },
         }
         if follow_links:
             entry["links"] = [

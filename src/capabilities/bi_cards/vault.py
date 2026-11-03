@@ -420,6 +420,13 @@ def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str
                     "at": r["at"],
                 }
             )
+    if "field_states" in tables:
+        for r in db.execute("SELECT * FROM field_states WHERE origin = 'unit'"):
+            if r["card_id"] not in ids:
+                continue
+            units[f"{card_model.STATE_PREFIX}{ids[r['card_id']]}:{r['field']}"] = {
+                k: r[k] for k in ("state", "reason", "raw", "ref", "by", "at") if r[k] is not None
+            }
     keys = {}
     if "vault_keys" in tables:
         keys = {
@@ -716,6 +723,24 @@ def materialize(
                             item["at"],
                         ),
                     )
+            elif key.startswith(card_model.STATE_PREFIX):
+                _, cid, name = key.split(":", 2)
+                if cid not in present:
+                    continue
+                db.execute(
+                    "INSERT INTO field_states (card_id, field, state, reason, raw, origin, ref, "
+                    "by, at) VALUES (?, ?, ?, ?, ?, 'unit', ?, ?, ?)",
+                    (
+                        cid,
+                        name,
+                        value["state"],
+                        value.get("reason"),
+                        value.get("raw"),
+                        value.get("ref"),
+                        value.get("by"),
+                        value.get("at"),
+                    ),
+                )
         for row in history:
             # Only fields that are units: a field a revert removed keeps no
             # history, or the rows would read back as a cleared field.
@@ -791,6 +816,14 @@ def materialize(
             )
             db.execute("INSERT INTO vault_keys VALUES (?, ?)", (cursor.lastrowid, key))
         _fill_relations(db, units, reg)
+        # A pending proposal's value is the candidate, so the empty field awaits it.
+        db.execute(
+            "INSERT OR IGNORE INTO field_states (card_id, field, state, origin, ref, at) "
+            "SELECT card_id, field, ?, 'proposal', ref, at FROM proposals p "
+            "WHERE status = 'pending' AND value != 'null' AND NOT EXISTS (SELECT 1 FROM fields f "
+            "WHERE f.card_id = p.card_id AND f.field = p.field) ORDER BY id",
+            (card_model.PENDING_CONFIRMATION,),
+        )
         db.execute("COMMIT")
     except BaseException:
         db.execute("ROLLBACK")
@@ -1493,6 +1526,8 @@ def unit_label(units: Mapping[str, Any], key: str) -> str:
         return f"{card()} 的 {field}"
     if kind == "evidence":
         return f"{card()} 的 {field} 證據"
+    if kind == "state":
+        return f"{card()} 的 {field} 狀態"
     if kind == "meta":
         return {"domains": "領域設定", "dashboard": "Dashboard 的順序"}.get(rest, f"設定 {rest}")
     if key == repo_engine.SCHEMA_UNIT:

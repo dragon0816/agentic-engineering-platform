@@ -28,6 +28,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from capabilities.bi_cards import card_model
+
 SCHEMA_FILE = Path(__file__).with_name("bi_schema_v1_1.json")
 #: Every shipped version of the BI schema, oldest first; the first is the base
 #: every installed `bi.schema/*` version must stay compatible with.
@@ -47,6 +49,14 @@ NUMBER_RE = re.compile(r"[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?")
 #: get the Dashboard and the chat's `bi__query` (owner 2026-10-21).
 BI_PREFIX = "bi.schema/"
 EMPTY = {"", "nan", "none", "null", "n/a", "na", "-", "—", "tbd", "待定"}
+#: The `EMPTY` words that say why there is no value (`docs/phases/BI_CARD_MODEL.md`
+#: §3.4). The others say nothing, so such a field reads as unknown.
+MISSING_STATES = {
+    "n/a": card_model.NOT_APPLICABLE,
+    "na": card_model.NOT_APPLICABLE,
+    "tbd": card_model.PENDING_CONFIRMATION,
+    "待定": card_model.PENDING_CONFIRMATION,
+}
 TRUE_SET = {"true", "yes", "y", "1", "是", "有", "t"}
 FALSE_SET = {"false", "no", "n", "0", "否", "無", "f"}
 SEPARATORS = set(";；、|\n")
@@ -359,6 +369,19 @@ class Registry:
             low, high = item.range
             return None, [("type_mismatch", f"{item.label}：{number:g} 超出 {low:g}–{high:g}")]
         return number, []
+
+
+def cell_text(raw: Any) -> str:
+    """A cell as `Registry.normalize` reads it: a list is its items joined."""
+    if isinstance(raw, list):
+        return "；".join(part for part in (str(item).strip() for item in raw) if part)
+    return str(raw).strip()
+
+
+def missing_state(raw: Any) -> str | None:
+    """The field state a cell states, read before `Registry.normalize` drops the
+    cell; None for a value, and for an empty cell that gives no reason."""
+    return MISSING_STATES.get(cell_text(raw).lower())
 
 
 def split_list(text: str) -> list[str]:

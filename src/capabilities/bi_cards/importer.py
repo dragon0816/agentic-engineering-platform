@@ -27,8 +27,8 @@ from typing import Any
 
 from capabilities.bi_cards import names
 from capabilities.bi_cards.catalog import for_store
-from capabilities.bi_cards.schema import Registry, TypeDef, norm_key
-from capabilities.bi_cards.store import ApplyResult, BiStore, PlannedRow
+from capabilities.bi_cards.schema import Registry, TypeDef, cell_text, missing_state, norm_key
+from capabilities.bi_cards.store import ApplyResult, BiStore, PlannedRow, new_states
 
 #: What a card ticked as a sample is named with, so the default pack leaves it out.
 SAMPLE_PREFIX = "SAMPLE-"
@@ -349,8 +349,26 @@ def preview(
                 if item.default not in (None, "today") and item.name not in values:
                     values[item.name] = item.default
                     raws.setdefault(item.name, "")
+        states: dict[str, dict[str, Any]] = {
+            name: {"state": state, "raw": cell_text(cell)}
+            for name, cell in raws.items()
+            if name not in values and (state := missing_state(cell)) is not None
+        }
+        for name in [n for n in states if n in current]:
+            item = entity.get(name)
+            assert item is not None
+            said = states.pop(name)["raw"]
+            warnings.append(
+                {
+                    "code": "state_value_kept",
+                    "message": f"{item.label}：這一列寫「{said}」，保留卡片上的值",
+                }
+            )
+        changing = new_states(
+            states, {}, store.field_states(existing["id"]) if existing is not None else {}
+        )
         cells: list[dict[str, Any]] = []
-        changes = 0
+        changes = len(changing)
         for name, value in values.items():
             stored = current.get(name)
             if stored is None:
@@ -374,13 +392,15 @@ def preview(
             )
         for name, cell in raws.items():
             if name not in values and str(cell).strip():
+                state_view = {"state": states[name]["state"]} if name in states else {}
                 cells.append(
                     {
                         "field": name,
                         "raw": cell,
                         "normalized": None,
                         "current": None if name not in current else current[name]["value"],
-                        "change": "same",
+                        "change": "state" if name in changing else "same",
+                        **state_view,
                     }
                 )
         action = "create" if existing is None else ("update" if changes else "unchanged")
@@ -405,6 +425,7 @@ def preview(
             name=name_value,
             values=values,
             synthetic=synthetic,
+            states=states,
         )
     return result
 

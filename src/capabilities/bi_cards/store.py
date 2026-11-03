@@ -49,7 +49,7 @@ import json
 import re
 import sqlite3
 import uuid
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -365,6 +365,28 @@ class PlannedRow:
     #: Evidence per field: `{field: [{"source_id", "source_name", "locator",
     #: "excerpt", "basis"}]}`, recorded for the values written.
     evidence: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
+    #: Why a field has no value: `{field: {"state", "raw", "reason"}}`, the last two
+    #: optional. Written only to a vault's card, and never over a value.
+    states: dict[str, dict[str, Any]] = field(default_factory=dict)
+
+
+def new_states(
+    states: Mapping[str, dict[str, Any]],
+    values: Mapping[str, Any],
+    stored: Mapping[str, Mapping[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """The `states` a write would change, given the card's `values` and `stored`
+    states: a value stays, and the same state again writes nothing, or every
+    re-import would diff. A computed state is not a stored one."""
+    return {
+        name: given
+        for name, given in states.items()
+        if values.get(name) is None
+        and (
+            stored.get(name, {}).get("state") != given["state"]
+            or stored.get(name, {}).get("origin") != "unit"
+        )
+    }
 
 
 class CardsChanged(BiStoreError):
@@ -883,6 +905,11 @@ class BiStore:
                         old_source,
                     ),
                 )
+                db.execute(
+                    "DELETE FROM field_states WHERE card_id = ? AND field = ?", (card_id, name)
+                )
+                changed = True
+            if self._write_states(db, card_id, planned, ref=ref, actor=actor, at=at):
                 changed = True
             if created:
                 result.created += 1
@@ -894,6 +921,67 @@ class BiStore:
                 result.updated += 1
             else:
                 result.unchanged += 1
+
+    def _write_states(
+        self,
+        db: sqlite3.Connection,
+        card_id: str,
+        planned: PlannedRow,
+        *,
+        ref: str,
+        actor: str,
+        at: str,
+    ) -> bool:
+        """Write a row's field states; whether any changed. A vault's only: the
+        tables of a plain dataset stay empty (`BI_CARD_MODEL.md` §2)."""
+        if self.vault_id is None or not planned.states:
+            return False
+        values = {
+            r["field"]: r["value"]
+            for r in db.execute("SELECT field, value FROM fields WHERE card_id = ?", (card_id,))
+        }
+        stored = {
+            r["field"]: dict(r)
+            for r in db.execute("SELECT * FROM field_states WHERE card_id = ?", (card_id,))
+        }
+        changes = new_states(planned.states, {**planned.values, **values}, stored)
+        for name, given in changes.items():
+            db.execute(
+                "INSERT OR REPLACE INTO field_states (card_id, field, state, reason, raw, origin, "
+                "ref, by, at) VALUES (?, ?, ?, ?, ?, 'unit', ?, ?, ?)",
+                (
+                    card_id,
+                    name,
+                    given["state"],
+                    given.get("reason"),
+                    given.get("raw"),
+                    ref,
+                    actor,
+                    at,
+                ),
+            )
+        return bool(changes)
+
+    def field_states(self, card_id: str) -> dict[str, dict[str, Any]]:
+        """Why each empty field of a card is empty. A field with no row reads as
+        unknown. A value beats a state: two PCs can write one each."""
+        if not self.exists:
+            return {}
+        with self._db() as db:
+            try:
+                rows = list(
+                    db.execute(
+                        "SELECT * FROM field_states s WHERE card_id = ? AND NOT EXISTS (SELECT 1 "
+                        "FROM fields f WHERE f.card_id = s.card_id AND f.field = s.field)",
+                        (card_id,),
+                    )
+                )
+            except sqlite3.OperationalError:  # a dataset from before the card model
+                return {}
+        return {
+            r["field"]: {k: r[k] for k in ("state", "reason", "raw", "origin", "ref", "by", "at")}
+            for r in rows
+        }
 
     def fact_evidence(self) -> set[tuple[str, str]]:
         """Every (card id, field) with evidence marked as fact (coverage)."""
@@ -1170,6 +1258,7 @@ class BiStore:
                 "VALUES (?, ?, ?, 'human', ?, ?, ?)",
                 (card_id, field, new, f"agent-web:{actor}", actor, at),
             )
+            db.execute("DELETE FROM field_states WHERE card_id = ? AND field = ?", (card_id, field))
         db.execute(
             "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, reason, "
             "old_source) VALUES (?, ?, ?, ?, 'human', ?, ?, ?, ?, ?)",
@@ -1380,6 +1469,11 @@ class BiStore:
                         "復原整批匯入",
                     ),
                 )
+            # A state has no import id: it holds the import's time and author.
+            db.execute(
+                "DELETE FROM field_states WHERE origin = 'unit' AND at = ? AND by = ?",
+                (record["at"], record["by"]),
+            )
             db.execute(
                 "UPDATE proposals SET status = 'withdrawn' WHERE import_id = ? AND "
                 "status = 'pending'",

@@ -42,7 +42,7 @@ from capabilities.bi_cards import (
 from capabilities.bi_cards.card_model import reference_id
 from capabilities.bi_cards.schema import FieldDef, Registry, TypeDef, norm_key
 from capabilities.bi_cards.staging import Staging, parse_kind
-from capabilities.bi_cards.store import BiStore, BiStoreError, PlannedRow, now
+from capabilities.bi_cards.store import BiStore, BiStoreError, PlannedRow, new_states, now
 
 MAX_EXCERPT = 500
 WRITABLE = ("create", "update")
@@ -139,6 +139,14 @@ def evaluate(store: BiStore, reg: Registry, candidate: dict[str, Any]) -> dict[s
         else:
             item["change"] = "change"
             changes += 1
+    if card is not None:
+        changes += len(
+            new_states(
+                candidate.get("states") or {},
+                {name: item["value"] for name, item in current.items()},
+                store.field_states(card["id"]),
+            )
+        )
     if choice.get("action") == "skip":
         action = "skip"
         errors = []  # the person chose to leave it out
@@ -233,6 +241,7 @@ def _candidates_from_preview(
                 "choice": {"action": "skip"} if skipped else None,
                 "base_version": None,
                 "fields": fields,
+                "states": dict(planned.states) if planned is not None else {},
                 "errors": [],
                 "warnings": [
                     {"code": w["code"], "message": w["message"]}
@@ -840,6 +849,7 @@ def _planned(
         values=_values(candidate),
         synthetic=bool(candidate.get("synthetic")),
         ref=f"run:{run_id}/{candidate['id']}",
+        states=candidate.get("states") or {},
         evidence={
             f["field"]: [
                 {

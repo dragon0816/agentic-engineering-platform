@@ -728,6 +728,7 @@ def _candidates(step: Pass, prepared: importer.Preview, source_id: str) -> list[
                 "choice": None,
                 "base_version": None,
                 "fields": fields,
+                "states": dict(planned.states) if planned is not None else {},
                 "errors": [],
                 "warnings": warnings,
                 "edits": [],
@@ -773,6 +774,7 @@ def _merge(into: dict[str, Any], other: dict[str, Any]) -> None:
                 mine["evidence"].append(proof)
         if mine["evidence"] and mine["basis"] == "unknown":
             mine["basis"] = "fact"
+    into["states"] = {**other["states"], **into["states"]}
     into["synthetic"] = bool(into["synthetic"] or other["synthetic"])
     for warning in other["warnings"]:
         _add_warning(into, warning)
