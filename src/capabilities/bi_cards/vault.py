@@ -1854,14 +1854,34 @@ def tag(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, A
     return {"tag": record}
 
 
+def _summaries_missing(db: sqlite3.Connection, reg: Registry | None) -> dict[str, int]:
+    """Cards with no summary, per type that has the field (`BI_CARD_MODEL.md` §3.6)."""
+    if reg is None:
+        return {}
+    rows = db.execute(
+        "SELECT entity_type, COUNT(*) FROM cards c WHERE NOT EXISTS (SELECT 1 FROM fields f "
+        "WHERE f.card_id = c.id AND f.field = 'summary') GROUP BY entity_type ORDER BY entity_type"
+    )
+    return {
+        name: int(count)
+        for name, count in rows
+        if name in reg.types and reg.types[name].get("summary") is not None
+    }
+
+
 def _publish_warnings(vault: Vault, folder: Path) -> dict[str, Any]:
     """What a publish tells and never blocks on: what profiles require and cards lack."""
     commit = vault.reads()["commit"]
-    found = profile.load_all(vault.repo, vault.repo.state_at(commit)) if commit else {}
-    if not found:
-        return {}
+    units = vault.repo.state_at(commit) if commit else {}
+    found = profile.load_all(vault.repo, units) if commit else {}
+    warnings: dict[str, Any] = {}
     with closing(sqlite3.connect(folder / DB_FILE)) as db:
-        return {"profile_required_missing": profile.missing_required(db, found)}
+        if found:
+            warnings["profile_required_missing"] = profile.missing_required(db, found)
+        missing = _summaries_missing(db, vault._schema_of(units))
+    if missing:
+        warnings["summary_missing"] = {"total": sum(missing.values()), "by_type": missing}
+    return warnings
 
 
 def publish(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:

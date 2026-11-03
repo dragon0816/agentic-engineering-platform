@@ -9539,8 +9539,10 @@ function kpVerHistory(history) {
       actions.append(kpButton("發佈 " + tag.name, () => kpRun("發佈", async () => {
         if (!confirm("發佈 tag「" + tag.name + "」？發佈後 Agent 只讀這個版本的內容；"
           + "要撤回就再發佈另一個 tag。")) return;
-        await kpRepoCall(kpRepoPath("publish"), {tag: tag.name, confirm: true});
-        kpVerSay("已發佈「" + tag.name + "」：Agent 下一個問題就讀這個版本。");
+        const reply = await kpRepoCall(kpRepoPath("publish"), {tag: tag.name, confirm: true});
+        kpVerSay("已發佈「" + tag.name + "」：Agent 下一個問題就讀這個版本。"
+          + (reply && reply.summary_missing ? "提醒：" + reply.summary_missing.total
+            + " 張卡片還沒有摘要（不影響發佈）。" : ""));
         await kpVerShow();
       })));
     }
