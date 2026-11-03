@@ -62,6 +62,7 @@ TOP_KEYS = {
     "ignored_fields",
     "computed_fields",
     "migrations",
+    "relation_types",
     "types",
 }
 TYPE_KEYS = {
@@ -90,6 +91,8 @@ FIELD_KEYS = {
     "range",
     "link_to",
     "list",
+    "relation_type",
+    "used_by",
 }
 
 
@@ -338,6 +341,16 @@ def validate(document: Any) -> tuple[dict[str, Any] | None, list[dict[str, str]]
                 error(f"{at}.list", f"kind {kind} 的 list 必須是 {str(is_list).lower()}")
             if fname == "domain" and not domains:
                 error(f"{at}.name", "有 domain 欄位時，最上層需要 domains 清單")
+            relation_type = item.get("relation_type")
+            if relation_type is not None and (
+                not _text(relation_type) or kind not in ("link", "linklist")
+            ):
+                error(f"{at}.relation_type", "只有 link / linklist 欄位可以指定關係名稱")
+                relation_type = None
+            used_by = item.get("used_by")
+            if used_by is not None and not _strings(used_by):
+                error(f"{at}.used_by", "必須是 application 名稱的清單")
+                used_by = None
             fields.append(
                 {
                     "name": fname,
@@ -351,6 +364,8 @@ def validate(document: Any) -> tuple[dict[str, Any] | None, list[dict[str, str]]
                     "range": value_range,
                     "link_to": list(link_to or []),
                     "list": is_list,
+                    **({"relation_type": relation_type} if relation_type else {}),
+                    **({"used_by": list(used_by)} if used_by else {}),
                 }
             )
         naming = raw.get("naming", ["name"])
@@ -423,6 +438,25 @@ def validate(document: Any) -> tuple[dict[str, Any] | None, list[dict[str, str]]
             error(f"migrations.renames.{old}", f"新欄位「{new}」不在 {type_name} 的 fields")
         elif old_field in by_type[type_name]:
             error(f"migrations.renames.{old}", f"舊欄位「{old_field}」還在 {type_name} 裡")
+    relation_types = document.get("relation_types", [])
+    if not isinstance(relation_types, list):
+        error("relation_types", "必須是 [{name, label, from, to}] 清單")
+        relation_types = []
+    seen_relations: set[str] = set()
+    for i, item in enumerate(relation_types):
+        at = f"relation_types[{i}]"
+        if not isinstance(item, dict) or not _text(item.get("name")):
+            error(at, "每一項需要 name、label、from、to")
+            continue
+        if item["name"] in seen_relations:
+            error(f"{at}.name", f"關係「{item['name']}」重複")
+        seen_relations.add(item["name"])
+        for end in ("from", "to"):
+            ends = item.get(end)
+            if not _strings(ends) or not ends:
+                error(f"{at}.{end}", "必須是卡片類型的清單")
+            elif set(ends) - seen_types:
+                error(f"{at}.{end}", f"類型「{sorted(set(ends) - seen_types)[0]}」不在 types")
     if bi and not errors:
         errors.extend(bi_problems(document))
     if errors:

@@ -105,7 +105,7 @@ def test_applying_makes_one_commit_that_reaches_the_other_pc(tmp_path: Path) -> 
     assert store.fields(harbor["id"])["aliases"]["value"] == ["港灣"]
     assert store.fields(gpu["id"])["chain"]["value"] == ["CMP"]
     registry = catalog.for_store(store)  # the new local version reached the other PC
-    assert registry.version == "4.1.0" and registry.types["Node"].name_pattern == r"^(L\d|X)-"
+    assert registry.version == "5.1.0" and registry.types["Node"].name_pattern == r"^(L\d|X)-"
     assert registry.enum_aliases["role"]["雲端大廠"] == "hyperscaler"
     skills = _ok(_call(b, "GET", f"/api/bi/vaults/{vault_id}/skills"))["skills"]
     assert next(s for s in skills if s["name"] == "aidc-extract")["body"] == "ODM 是 Account。"
@@ -124,12 +124,12 @@ def test_a_dataset_only_on_this_pc_is_written_directly(tmp_path: Path) -> None:
     url = "/api/bi/migrate-domains"
     plan = _ok(_call(tmp_path, "POST", url, {"dataset": "m"}))
     assert plan["writes"] == "direct" and plan["notes_to"] == "method"
-    assert plan["schema"] == {"from": "bi.schema/v1.1@2.0.0", "to": "bi.schema/v1.1@4.0.0"}
+    assert plan["schema"] == {"from": "bi.schema/v1.1@2.0.0", "to": "bi.schema/v1.1@5.0.0"}
     _common(plan)
     _ok(_call(tmp_path, "POST", url, {"dataset": "m", "apply": True, "token": plan["token"]}))
     assert not migrate.has_legacy(store)
     registry = catalog.for_store(store)
-    assert registry.version == "4.1.0" and registry.types["Node"].name_pattern == r"^(L\d|X)-"
+    assert registry.version == "5.1.0" and registry.types["Node"].name_pattern == r"^(L\d|X)-"
     harbor = store.find("Account", "Harbor Co")
     assert harbor is not None and store.fields(harbor["id"])["aliases"]["value"] == ["港灣"]
     (method,) = methods.listing(tmp_path, "m")

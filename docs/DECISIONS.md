@@ -6295,3 +6295,9 @@ Design: `docs/phases/BI_CARD_MODEL.md`; source: `docs/proposals/AEP_BI_Card_Data
 - **`published/<tag>.sqlite` is only written in Phase 1;** readers keep rebuilding from units. It narrows `BI_VAULT.md`'s no-SQLite rule, which was about files several PCs write.
 - **The direct route goes; `store.set_field` stays internal,** for proposal accept and the domain migration. A correction note writes kind `human`, so a person can still make a card `trusted`, now with evidence.
 - **The generated classify skill goes in `library/skills/`,** since it spans applications and the layout had no home for it.
+
+## 2026-11-04: Application folders are per market (owner, relayed by the BI orchestrator)
+
+`aidc`, `aerospace`, `robotics`, `wireless`; the 11 segments stay as `segment` values on cards. The list stays data, per vault. Rejected: the 11 segments as folders, since none of the 434 card pages names one, so R6 would have sorted them by hand.
+
+Library entries have an application's shape (owner, 2026-11-04): `library/<products|technologies|competitors>/{sources/, skills/, tools/, profile/}`, the list data too. `classify` stays at `library/skills/`, so `skills` cannot be an entry name. Unit keys use `library/<entry>`, so an application of the same name cannot collide.

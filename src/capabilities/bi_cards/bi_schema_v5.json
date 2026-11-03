@@ -1,0 +1,8444 @@
+{
+ "schema_id": "bi.schema/v1.1",
+ "version": "5.0.0",
+ "status": "poc-contract",
+ "title": "BI Knowledge Schema 5.0 (4.0 with card summaries and relation types)",
+ "source": {
+  "primary": "tests/fixtures/bi_schema_v8/bi_schema.py",
+  "primary_sha256": "20ad6fd07d962cd5f21e252849d347ad15f31849bcaf56b2d576c089e5d5f7ad",
+  "read_without_executing": true,
+  "generator": "scripts/build_bi_schema_v5.py",
+  "kept_from": "bi.schema/v1 (id_rules, field_classes)"
+ },
+ "id_rules": {
+  "entity_id": "ent-<lowercase entity_type>-<canonical_key>",
+  "canonical_key": "^[a-z0-9]+(-[a-z0-9]+)*$, unique per entity_type",
+  "relationship_id": "rel-<sha256(subject_entity_id|relationship_type|object_entity_id)[:16]> with the v1 relationship_type; the upcast writes relationship_id_map (v0 id -> v1 id) and old ids are never reused",
+  "claim_id": "clm-<sha256(relationship_id or subject_entity_id|statement)[:16]>",
+  "document_id": "src-<sha256(original bytes)[:16]> (existing source_id, src/knowledge/raw.py source_for)",
+  "evidence_id": "ev-<sha256(document_id|locator|normalized_text)[:20]> (ADR-K4)"
+ },
+ "field_classes": {
+  "sourced": "a fact taken from a document or an import; may be refreshed by a later import unless a person set it",
+  "judgement": "a human assessment (ranking, rating, verification, comparability); keeps who, when and why, and is never overwritten by an import or agent (ADR-K11)",
+  "derived": "computed from other data (updated, is_own_solution, legacy_v0); never edited directly"
+ },
+ "domains": [
+  "wireless",
+  "AIDC",
+  "robotics",
+  "mobile",
+  "aerospace"
+ ],
+ "enum_aliases": {
+  "domain": {
+   "無線": "wireless",
+   "無線通訊": "wireless",
+   "資料中心": "AIDC",
+   "ai資料中心": "AIDC",
+   "機器人": "robotics",
+   "機器人與智慧自動化": "robotics",
+   "智慧自動化": "robotics",
+   "行動通訊": "mobile",
+   "行動終端": "mobile",
+   "手機": "mobile",
+   "航太": "aerospace",
+   "衛星": "aerospace",
+   "太空": "aerospace",
+   "低軌": "aerospace",
+   "航太衛星": "aerospace",
+   "太空與衛星": "aerospace"
+  },
+  "test_type": {
+   "傳導": "conducted",
+   "傳導式": "conducted",
+   "傳導式射頻量測": "conducted",
+   "射頻量測": "conducted",
+   "ota": "OTA",
+   "空中": "OTA",
+   "空中量測": "OTA",
+   "暗室": "OTA",
+   "協定": "protocol",
+   "信令": "protocol",
+   "協定與信令": "protocol",
+   "互通": "protocol",
+   "通道模擬": "channel-emu",
+   "衰落": "channel-emu",
+   "通道": "channel-emu",
+   "網路模擬": "channel-emu",
+   "頻譜": "spectrum",
+   "頻譜監測": "spectrum",
+   "訊號分析": "spectrum",
+   "功耗": "power",
+   "電源": "power",
+   "功耗與電源": "power",
+   "ate": "ATE",
+   "產線": "ATE",
+   "參數化": "ATE",
+   "量產測試": "ATE",
+   "si": "signal-integrity",
+   "訊號完整性": "signal-integrity",
+   "高速電氣": "signal-integrity",
+   "pam4": "signal-integrity",
+   "光學": "optical",
+   "光學量測": "optical",
+   "光電": "optical",
+   "通道特性": "channel-char",
+   "材料": "channel-char",
+   "vna": "channel-char",
+   "tdr": "channel-char",
+   "晶圓": "wafer-probe",
+   "晶圓測試": "wafer-probe",
+   "探針": "wafer-probe",
+   "pi": "power",
+   "電源完整性": "power",
+   "電磁相容": "EMC",
+   "emc": "EMC",
+   "emi": "EMC",
+   "cispr": "EMC",
+   "預相容": "EMC",
+   "環境": "environmental",
+   "環境驗證": "environmental",
+   "熱真空": "environmental",
+   "tvac": "environmental",
+   "振動": "environmental",
+   "輻射": "environmental",
+   "輻射驗證": "environmental"
+  },
+  "tier": {
+   "單機": "instrument",
+   "單機量測": "instrument",
+   "儀器": "instrument",
+   "整合": "integrated",
+   "整合方案": "integrated",
+   "自動化": "automated",
+   "自動化系統": "automated",
+   "系統": "automated",
+   "服務": "service",
+   "服務方案": "service"
+  },
+  "automation": {
+   "手動": "manual",
+   "半自動": "semi",
+   "全自動": "full",
+   "自動": "full"
+  },
+  "price_band": {
+   "入門": "entry",
+   "低": "entry",
+   "低階": "entry",
+   "中階": "mid",
+   "中": "mid",
+   "高階": "high",
+   "高": "high"
+  },
+  "status": {
+   "規劃中": "planning",
+   "規劃": "planning",
+   "可銷售": "available",
+   "可販售": "available",
+   "上市": "available",
+   "停產": "EOL",
+   "即將停產": "EOL"
+  },
+  "confidence": {
+   "已驗證": "verified",
+   "驗證": "verified",
+   "推測": "assumed",
+   "假設": "assumed",
+   "未驗證": "assumed"
+  },
+  "lifecycle": {
+   "研發": "RD",
+   "研發與設計驗證": "RD",
+   "設計驗證": "RD",
+   "認證": "Certification",
+   "標準符合性與認證": "Certification",
+   "量產": "Production",
+   "量產測試": "Production",
+   "產線": "Production",
+   "可靠度": "Reliability",
+   "品質與可靠度": "Reliability",
+   "現場": "Field",
+   "維運": "Field",
+   "現場與維運": "Field"
+  },
+  "test_stage_now": {
+   "研發": "RD",
+   "認證": "cert",
+   "量產": "production"
+  },
+  "volume_tier": {
+   "低": "low",
+   "中": "mid",
+   "高": "high"
+  },
+  "role": {
+   "晶片商": "chipset",
+   "晶片": "chipset",
+   "模組": "module",
+   "模組廠": "module",
+   "代工": "ODM",
+   "品牌": "OEM",
+   "電信商": "carrier",
+   "認證實驗室": "cert-lab",
+   "實驗室": "cert-lab",
+   "整合商": "integrator",
+   "代理": "distributor",
+   "代理商": "distributor",
+   "通路": "distributor",
+   "標準組織": "standards",
+   "協會": "standards",
+   "元件": "component",
+   "零組件": "component",
+   "封測": "osat",
+   "封測廠": "osat",
+   "晶圓代工": "foundry",
+   "代工廠": "foundry",
+   "測試設備": "test-equipment",
+   "測試機台": "test-equipment",
+   "法人": "institute",
+   "研究機構": "institute",
+   "研究法人": "institute",
+   "工業電腦": "ipc",
+   "工控": "ipc",
+   "工控電腦": "ipc",
+   "材料": "material",
+   "材料廠": "material",
+   "磊晶": "material",
+   "基板": "material",
+   "銲料": "material",
+   "營運商": "operator",
+   "衛星營運商": "operator",
+   "星座營運商": "operator",
+   "雲端業者": "hyperscaler",
+   "超大規模雲端": "hyperscaler",
+   "電力系統": "power-system",
+   "電力設備": "power-system",
+   "散熱系統": "thermal-system",
+   "液冷": "thermal-system",
+   "冷卻": "thermal-system"
+  },
+  "relationship_to_us": {
+   "客戶": "customer",
+   "夥伴": "partner",
+   "合作": "partner",
+   "影響者": "influencer",
+   "競爭": "competitor",
+   "競品": "competitor",
+   "無": "none"
+  },
+  "source_type": {
+   "標準": "standard",
+   "法規": "regulator",
+   "報告": "report",
+   "財報": "filing",
+   "法說": "filing",
+   "新聞": "news",
+   "展會": "conference",
+   "研討會": "conference",
+   "客戶": "customer",
+   "競品": "competitor",
+   "內部": "internal"
+  },
+  "category": {
+   "無線電": "radio",
+   "射頻": "radio",
+   "協定": "protocol",
+   "指標": "metric",
+   "量測": "measurement",
+   "量測方法": "measurement",
+   "標準": "standard",
+   "規範": "standard",
+   "設備": "device",
+   "裝置": "device"
+  },
+  "audience": {
+   "業務": "sales",
+   "業務+FAE": "sales+FAE",
+   "工程師": "engineer"
+  },
+  "review_status": {
+   "草稿": "draft",
+   "已審閱": "reviewed",
+   "已確認": "reviewed"
+  },
+  "reliability": {
+   "高": "high",
+   "中": "medium",
+   "低": "low"
+  },
+  "stage": {
+   "觀察": "watch",
+   "萌芽": "emerging",
+   "新興": "emerging",
+   "加速": "accelerating",
+   "高峰": "peak",
+   "衰退": "fading"
+  },
+  "maturity": {
+   "新興": "emerging",
+   "成長": "growth",
+   "成熟": "mature",
+   "衰退": "declining"
+  },
+  "pricing_position": {
+   "低": "low",
+   "同等": "par",
+   "持平": "par",
+   "高": "premium",
+   "高價": "premium"
+  },
+  "deal_stage": {
+   "線索": "lead",
+   "潛在": "lead",
+   "初步接觸": "lead",
+   "合格": "qualified",
+   "已確認需求": "qualified",
+   "提案": "proposal",
+   "報價": "proposal",
+   "評估": "eval",
+   "試用": "eval",
+   "demo": "eval",
+   "議價": "negotiation",
+   "談判": "negotiation",
+   "成交": "won",
+   "贏單": "won",
+   "贏": "won",
+   "失敗": "lost",
+   "輸單": "lost",
+   "輸": "lost",
+   "丟單": "lost"
+  },
+  "size": {
+   "小": "S",
+   "中": "M",
+   "大": "L"
+  },
+  "outcome": {
+   "贏": "won",
+   "成交": "won",
+   "贏單": "won",
+   "得標": "won",
+   "輸": "lost",
+   "丟單": "lost",
+   "輸單": "lost",
+   "失標": "lost",
+   "無決定": "no-decision",
+   "擱置": "no-decision"
+  },
+  "primary_reason": {
+   "價格": "price",
+   "效能": "performance",
+   "功能": "features",
+   "關係": "relationship",
+   "時程": "timing",
+   "既有廠商": "incumbent",
+   "預算": "budget",
+   "其他": "other"
+  },
+  "gap_type": {
+   "功能": "feature",
+   "效能": "performance",
+   "價格": "price",
+   "整合": "integration",
+   "認證": "certification",
+   "服務": "service"
+  },
+  "request_status": {
+   "構想": "idea",
+   "已提出": "submitted",
+   "已接受": "accepted",
+   "排程": "planned",
+   "已上市": "shipped",
+   "婉拒": "declined"
+  },
+  "pitch_audience": {
+   "業務": "sales",
+   "客戶工程師": "customer-engineer",
+   "客戶主管": "customer-manager",
+   "高階主管": "executive"
+  },
+  "content_status": {
+   "草稿": "draft",
+   "已審閱": "reviewed",
+   "使用中": "in-use"
+  },
+  "contact_function": {
+   "採購": "procurement",
+   "研發": "rd",
+   "測試": "test",
+   "品保": "quality",
+   "主管": "management",
+   "業務": "sales",
+   "其他": "other"
+  },
+  "decision_role": {
+   "決策者": "decision",
+   "影響者": "influencer",
+   "使用者": "user",
+   "守門人": "gatekeeper"
+  },
+  "relationship_status": {
+   "擁護者": "champion",
+   "支持": "supporter",
+   "中立": "neutral",
+   "反對": "blocker",
+   "未知": "unknown"
+  },
+  "visit_type": {
+   "拜訪": "visit",
+   "電話": "call",
+   "展示": "demo",
+   "工作坊": "workshop",
+   "展會": "conference",
+   "郵件": "email"
+  },
+  "segment": {
+   "星載": "space",
+   "衛星": "space",
+   "酬載": "space",
+   "地面站": "gateway",
+   "地面": "gateway",
+   "終端": "ut",
+   "使用者終端": "ut",
+   "發射": "launch",
+   "火箭": "launch",
+   "維修": "mro",
+   "航空": "mro",
+   "民航": "mro",
+   "Cell Phone": "cell-phone",
+   "AP/CPE": "ap-cpe",
+   "Module/IoT": "module-iot",
+   "AIDC Computing": "aidc-computing",
+   "AIDC Power": "aidc-power",
+   "Car/eBus electronics": "car-ebus-electronics",
+   "Robotics/AMR": "robotics-amr",
+   "Space Satellite": "space-satellite",
+   "UAV": "uav",
+   "Radar/EW": "radar-ew",
+   "OSAT": "osat"
+  },
+  "evidence_grade": {
+   "原廠確認": "A",
+   "官方": "A",
+   "具名確認": "A",
+   "可信報導": "B",
+   "公司說明": "B",
+   "報導": "B",
+   "產品能力": "C",
+   "能力": "C",
+   "傳聞": "D",
+   "待驗證": "D",
+   "待確認": "D"
+  },
+  "supply_stage": {
+   "展示": "demo",
+   "送樣": "sample",
+   "認證": "cert",
+   "試產": "pilot",
+   "量產": "mass"
+  },
+  "rev_layer": {
+   "公司": "company",
+   "整體": "company",
+   "總營收": "company",
+   "區段": "segment",
+   "衛星": "segment",
+   "產品": "segment",
+   "客戶": "customer"
+  },
+  "basis": {
+   "財報": "reported",
+   "公司揭露": "reported",
+   "已公布": "reported",
+   "報導": "media",
+   "媒體": "media",
+   "報導口徑": "media",
+   "推算": "estimated",
+   "估算": "estimated",
+   "估計": "estimated",
+   "目標": "target",
+   "展望": "target",
+   "預期": "target"
+  },
+  "tech_areas": {
+   "Wireless & Comm.": "wireless-comm",
+   "RF": "rf",
+   "High Speed I/O": "high-speed-io",
+   "Power / Generic IO": "power-generic-io",
+   "EMC": "emc"
+  },
+  "chain": {
+   "運算鏈": "CMP",
+   "電力鏈": "PWR",
+   "散熱鏈": "THM"
+  }
+ },
+ "ignored_fields": {
+  "Application": [
+   {
+    "field": "priority",
+    "aliases": [
+     "優先度",
+     "priority"
+    ],
+    "reason": "優先度由 Skill 依事實判斷，不存資料"
+   }
+  ]
+ },
+ "computed_fields": {
+  "Trend": [
+   {
+    "name": "priority",
+    "label": "優先度",
+    "formula": "measurement_impact * our_fit",
+    "stored": false
+   }
+  ]
+ },
+ "types": [
+  {
+   "name": "Opportunity",
+   "label": "商機",
+   "code_key": "opportunity",
+   "naming": [
+    "name"
+   ],
+   "domain": "one",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "name",
+     "label": "商機名稱",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "商機名稱",
+      "商機",
+      "名稱",
+      "opportunity",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "wireless",
+      "AIDC",
+      "robotics",
+      "mobile",
+      "aerospace"
+     ],
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": "wireless",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "account",
+     "label": "客戶",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "客戶",
+      "account"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Account"
+     ],
+     "list": false
+    },
+    {
+     "name": "customer_product",
+     "label": "客戶產品",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "客戶產品",
+      "產品",
+      "customer product",
+      "customer_product"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "CustomerProduct"
+     ],
+     "list": false
+    },
+    {
+     "name": "applications",
+     "label": "對應應用",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "對應應用",
+      "應用",
+      "applications"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Application"
+     ],
+     "list": true
+    },
+    {
+     "name": "our_solutions",
+     "label": "我方方案",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "我方方案",
+      "提案方案",
+      "our solutions",
+      "our_solutions"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "TestSolution"
+     ],
+     "list": true
+    },
+    {
+     "name": "competitors",
+     "label": "競爭對手",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "競爭對手",
+      "競品公司",
+      "competitors"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Competitor"
+     ],
+     "list": true
+    },
+    {
+     "name": "deal_stage",
+     "label": "商機階段",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "lead",
+      "qualified",
+      "proposal",
+      "eval",
+      "negotiation",
+      "won",
+      "lost"
+     ],
+     "aliases": [
+      "商機階段",
+      "階段",
+      "deal stage",
+      "deal_stage"
+     ],
+     "required": false,
+     "default": "lead",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "expected_close",
+     "label": "預計成交",
+     "kind": "date",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "預計成交",
+      "預計結案日",
+      "expected close",
+      "expected_close"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "size",
+     "label": "規模",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "S",
+      "M",
+      "L"
+     ],
+     "aliases": [
+      "規模",
+      "size"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "lost_to",
+     "label": "敗給",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "敗給",
+      "lost to",
+      "lost_to"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Competitor"
+     ],
+     "list": false
+    },
+    {
+     "name": "owner",
+     "label": "負責人",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "負責人",
+      "owner"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "TestSolution",
+   "label": "測試方案",
+   "code_key": "test_solution",
+   "naming": [
+    "name"
+   ],
+   "domain": "multi",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "name",
+     "label": "方案名稱",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "方案名稱",
+      "方案",
+      "名稱",
+      "solution",
+      "solution name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "vendor",
+     "label": "廠商",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "廠商",
+      "方案廠商",
+      "競品廠商",
+      "vendor"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Competitor"
+     ],
+     "list": false
+    },
+    {
+     "name": "applications",
+     "label": "對應應用",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "對應應用",
+      "應用",
+      "應用場景",
+      "application",
+      "applications"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Application"
+     ],
+     "list": true
+    },
+    {
+     "name": "technologies",
+     "label": "技術",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "技術",
+      "technology",
+      "technologies"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Technology"
+     ],
+     "list": true
+    },
+    {
+     "name": "nodes",
+     "label": "節點",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "節點",
+      "價值鏈節點",
+      "node",
+      "nodes"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Node"
+     ],
+     "list": true
+    },
+    {
+     "name": "test_type",
+     "label": "測試類型",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "conducted",
+      "OTA",
+      "protocol",
+      "channel-emu",
+      "spectrum",
+      "power",
+      "ATE",
+      "signal-integrity",
+      "optical",
+      "channel-char",
+      "wafer-probe",
+      "EMC",
+      "environmental"
+     ],
+     "aliases": [
+      "測試類型",
+      "類型",
+      "test type"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "tier",
+     "label": "方案型態",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "instrument",
+      "integrated",
+      "automated",
+      "service"
+     ],
+     "aliases": [
+      "方案型態",
+      "型態",
+      "tier"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "automation",
+     "label": "自動化程度",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "manual",
+      "semi",
+      "full"
+     ],
+     "aliases": [
+      "自動化程度",
+      "自動化"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "dut",
+     "label": "被測物",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "被測物",
+      "DUT"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "test_items",
+     "label": "測試項目",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "測試項目",
+      "test items"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "standards",
+     "label": "標準",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "標準",
+      "標準法規",
+      "standards"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "instruments",
+     "label": "儀器配置",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "儀器配置",
+      "儀器",
+      "設備",
+      "instruments"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "price_band",
+     "label": "價格帶",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "entry",
+      "mid",
+      "high"
+     ],
+     "aliases": [
+      "價格帶",
+      "價格"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "services",
+     "label": "服務",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "服務",
+      "services"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "competing_solutions",
+     "label": "競品方案",
+     "kind": "linklist",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "競品方案",
+      "競品",
+      "competitors",
+      "competing solutions"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "TestSolution"
+     ],
+     "list": true
+    },
+    {
+     "name": "reference_customers",
+     "label": "參考客戶",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "參考客戶",
+      "客戶",
+      "reference customers"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Account"
+     ],
+     "list": true
+    },
+    {
+     "name": "status",
+     "label": "狀態",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "planning",
+      "available",
+      "EOL"
+     ],
+     "aliases": [
+      "狀態",
+      "status"
+     ],
+     "required": false,
+     "default": "planning",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "owner",
+     "label": "負責人",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "負責人",
+      "owner"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "Application",
+   "label": "應用",
+   "code_key": "application",
+   "naming": [
+    "name"
+   ],
+   "domain": "one",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "name",
+     "label": "應用名稱",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "應用名稱",
+      "名稱",
+      "應用場景",
+      "應用",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": [
+      "wireless",
+      "AIDC",
+      "robotics",
+      "mobile",
+      "aerospace"
+     ],
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "value_chain",
+     "label": "價值鏈",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "L1",
+      "L2",
+      "L3",
+      "L4",
+      "L5",
+      "X"
+     ],
+     "aliases": [
+      "價值鏈",
+      "價值鏈層級",
+      "value chain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "lifecycle",
+     "label": "生命週期",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "RD",
+      "Certification",
+      "Production",
+      "Reliability",
+      "Field"
+     ],
+     "aliases": [
+      "生命週期",
+      "階段",
+      "lifecycle"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "nodes",
+     "label": "節點",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "節點",
+      "nodes"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Node"
+     ],
+     "list": true
+    },
+    {
+     "name": "technologies",
+     "label": "技術",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "技術",
+      "technologies"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Technology"
+     ],
+     "list": true
+    },
+    {
+     "name": "trends",
+     "label": "趨勢",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "趨勢",
+      "trends"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Trend"
+     ],
+     "list": true
+    },
+    {
+     "name": "measurement_topics",
+     "label": "量測主題",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "量測主題",
+      "量測項目",
+      "measurement topics"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "Competitor",
+   "label": "競品",
+   "code_key": "competitor",
+   "naming": [
+    "name"
+   ],
+   "domain": "multi",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "name",
+     "label": "名稱",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "名稱",
+      "公司",
+      "廠商",
+      "競品公司",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "node",
+     "label": "節點",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "節點",
+      "node"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Node"
+     ],
+     "list": false
+    },
+    {
+     "name": "nodes",
+     "label": "涉及節點",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "涉及節點",
+      "節點清單",
+      "nodes"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Node"
+     ],
+     "list": true
+    },
+    {
+     "name": "technologies",
+     "label": "技術",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "技術",
+      "technologies"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Technology"
+     ],
+     "list": true
+    },
+    {
+     "name": "product_lines",
+     "label": "產品線",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "產品線",
+      "主要產品",
+      "product lines"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "strengths",
+     "label": "強項",
+     "kind": "list",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "強項",
+      "優勢",
+      "strengths"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "weaknesses",
+     "label": "弱項",
+     "kind": "list",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "弱項",
+      "劣勢",
+      "weaknesses"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "pricing_position",
+     "label": "價格定位",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "low",
+      "par",
+      "premium"
+     ],
+     "aliases": [
+      "價格定位",
+      "價位",
+      "pricing position"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "recent_moves",
+     "label": "近期動態",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "近期動態",
+      "動態",
+      "recent moves"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "ticker",
+     "label": "代號",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "代號",
+      "股票代號",
+      "ticker"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "CustomerProduct",
+   "label": "客戶產品",
+   "code_key": "customer_product",
+   "naming": [
+    "product_name"
+   ],
+   "domain": "one",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "product_name",
+     "label": "產品名稱",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "產品名稱",
+      "產品",
+      "名稱",
+      "product name",
+      "product"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": [
+      "wireless",
+      "AIDC",
+      "robotics",
+      "mobile",
+      "aerospace"
+     ],
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "account",
+     "label": "客戶",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "客戶",
+      "account"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Account"
+     ],
+     "list": false
+    },
+    {
+     "name": "node",
+     "label": "節點",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "節點",
+      "node"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Node"
+     ],
+     "list": false
+    },
+    {
+     "name": "nodes",
+     "label": "涉及節點",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "涉及節點",
+      "節點清單",
+      "nodes"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Node"
+     ],
+     "list": true
+    },
+    {
+     "name": "technologies",
+     "label": "技術",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "技術",
+      "technologies"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Technology"
+     ],
+     "list": true
+    },
+    {
+     "name": "chipset_modules",
+     "label": "晶片模組",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "晶片模組",
+      "晶片/模組",
+      "晶片商",
+      "chipset modules"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Ecosystem",
+      "Account"
+     ],
+     "list": true
+    },
+    {
+     "name": "ecosystem",
+     "label": "供應鏈成員",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "供應鏈成員",
+      "生態系",
+      "生態系成員",
+      "ecosystem"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Ecosystem",
+      "Account"
+     ],
+     "list": true
+    },
+    {
+     "name": "launch_window",
+     "label": "上市時程",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "上市時程",
+      "上市時間",
+      "上市",
+      "launch window"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "launch_date",
+     "label": "預估上市日",
+     "kind": "date",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "預估上市日",
+      "上市日期",
+      "上市日",
+      "launch date",
+      "launch_date"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "volume_tier",
+     "label": "量級",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "low",
+      "mid",
+      "high"
+     ],
+     "aliases": [
+      "量級",
+      "出貨量級",
+      "volume tier"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "test_stage_now",
+     "label": "目前階段",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "RD",
+      "cert",
+      "production"
+     ],
+     "aliases": [
+      "目前階段",
+      "測試階段",
+      "test stage now"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "inferred_applications",
+     "label": "推論應用",
+     "kind": "linklist",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "推論應用",
+      "對應應用",
+      "inferred applications"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Application"
+     ],
+     "list": true
+    },
+    {
+     "name": "segment",
+     "label": "區段",
+     "kind": "list",
+     "class": "sourced",
+     "enum": [
+      "space",
+      "gateway",
+      "ut",
+      "launch",
+      "mro",
+      "cell-phone",
+      "ap-cpe",
+      "module-iot",
+      "aidc-computing",
+      "aidc-power",
+      "car-ebus-electronics",
+      "robotics-amr",
+      "space-satellite",
+      "uav",
+      "radar-ew",
+      "osat"
+     ],
+     "aliases": [
+      "區段",
+      "segment"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "tech_areas",
+     "label": "技術領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": [
+      "wireless-comm",
+      "rf",
+      "high-speed-io",
+      "power-generic-io",
+      "emc"
+     ],
+     "aliases": [
+      "技術領域",
+      "tech areas",
+      "tech_areas"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "Ecosystem",
+   "label": "生態系",
+   "code_key": "ecosystem",
+   "naming": [
+    "name"
+   ],
+   "domain": "multi",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "name",
+     "label": "名稱",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "名稱",
+      "廠商",
+      "公司",
+      "成員",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "node",
+     "label": "節點",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "節點",
+      "node"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Node"
+     ],
+     "list": false
+    },
+    {
+     "name": "nodes",
+     "label": "涉及節點",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "涉及節點",
+      "節點清單",
+      "nodes"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Node"
+     ],
+     "list": true
+    },
+    {
+     "name": "role",
+     "label": "角色",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "chipset",
+      "module",
+      "ODM",
+      "OEM",
+      "carrier",
+      "cert-lab",
+      "integrator",
+      "distributor",
+      "standards",
+      "component",
+      "osat",
+      "foundry",
+      "test-equipment",
+      "institute",
+      "ipc",
+      "material",
+      "operator",
+      "hyperscaler",
+      "power-system",
+      "thermal-system"
+     ],
+     "aliases": [
+      "角色",
+      "類別",
+      "role"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "segment",
+     "label": "區段",
+     "kind": "list",
+     "class": "sourced",
+     "enum": [
+      "space",
+      "gateway",
+      "ut",
+      "launch",
+      "mro",
+      "cell-phone",
+      "ap-cpe",
+      "module-iot",
+      "aidc-computing",
+      "aidc-power",
+      "car-ebus-electronics",
+      "robotics-amr",
+      "space-satellite",
+      "uav",
+      "radar-ew",
+      "osat"
+     ],
+     "aliases": [
+      "區段",
+      "segment"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "tech_areas",
+     "label": "技術領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": [
+      "wireless-comm",
+      "rf",
+      "high-speed-io",
+      "power-generic-io",
+      "emc"
+     ],
+     "aliases": [
+      "技術領域",
+      "tech areas",
+      "tech_areas"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "technologies",
+     "label": "技術",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "技術",
+      "主要技術",
+      "technologies"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Technology"
+     ],
+     "list": true
+    },
+    {
+     "name": "relationship_to_us",
+     "label": "與我關係",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "customer",
+      "partner",
+      "influencer",
+      "competitor",
+      "none"
+     ],
+     "aliases": [
+      "與我關係",
+      "關係",
+      "relationship to us"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "influence_on",
+     "label": "影響客戶",
+     "kind": "linklist",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "影響客戶",
+      "影響對象",
+      "influence on"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Account"
+     ],
+     "list": true
+    },
+    {
+     "name": "reference_design",
+     "label": "參考設計",
+     "kind": "bool",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "參考設計",
+      "reference design"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "ticker",
+     "label": "代號",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "代號",
+      "股票代號",
+      "ticker"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "Account",
+   "label": "客戶",
+   "code_key": "account",
+   "naming": [
+    "name"
+   ],
+   "domain": "multi",
+   "has_confidence": false,
+   "fields": [
+    {
+     "name": "name",
+     "label": "客戶名稱",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "客戶名稱",
+      "名稱",
+      "客戶",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "node",
+     "label": "節點",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "節點",
+      "node"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Node"
+     ],
+     "list": false
+    },
+    {
+     "name": "nodes",
+     "label": "涉及節點",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "涉及節點",
+      "節點清單",
+      "nodes"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Node"
+     ],
+     "list": true
+    },
+    {
+     "name": "key_suppliers",
+     "label": "主要供應商",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "主要供應商",
+      "供應商",
+      "key suppliers"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Ecosystem",
+      "Account"
+     ],
+     "list": true
+    },
+    {
+     "name": "key_customers",
+     "label": "主要客戶",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "主要客戶",
+      "key customers"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Account",
+      "Ecosystem"
+     ],
+     "list": true
+    },
+    {
+     "name": "region",
+     "label": "地區",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "地區",
+      "region"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "segment",
+     "label": "區段",
+     "kind": "list",
+     "class": "sourced",
+     "enum": [
+      "space",
+      "gateway",
+      "ut",
+      "launch",
+      "mro",
+      "cell-phone",
+      "ap-cpe",
+      "module-iot",
+      "aidc-computing",
+      "aidc-power",
+      "car-ebus-electronics",
+      "robotics-amr",
+      "space-satellite",
+      "uav",
+      "radar-ew",
+      "osat"
+     ],
+     "aliases": [
+      "區段",
+      "segment"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "tech_areas",
+     "label": "技術領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": [
+      "wireless-comm",
+      "rf",
+      "high-speed-io",
+      "power-generic-io",
+      "emc"
+     ],
+     "aliases": [
+      "技術領域",
+      "tech areas",
+      "tech_areas"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "ticker",
+     "label": "代號",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "代號",
+      "股票代號",
+      "ticker"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "Node",
+   "label": "價值鏈節點",
+   "code_key": "node",
+   "naming": [
+    "name"
+   ],
+   "domain": "multi",
+   "has_confidence": false,
+   "fields": [
+    {
+     "name": "name",
+     "label": "節點",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "節點",
+      "名稱",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "layer",
+     "label": "層級",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "L1",
+      "L2",
+      "L3",
+      "L4",
+      "L5",
+      "X"
+     ],
+     "aliases": [
+      "層級",
+      "layer"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "chain",
+     "label": "鏈別",
+     "kind": "list",
+     "class": "sourced",
+     "enum": [
+      "CMP",
+      "PWR",
+      "THM"
+     ],
+     "aliases": [
+      "鏈別",
+      "鏈",
+      "chain",
+      "chains"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "upstream",
+     "label": "上游",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "上游",
+      "upstream"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Node"
+     ],
+     "list": true
+    },
+    {
+     "name": "downstream",
+     "label": "下游",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "下游",
+      "downstream"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Node"
+     ],
+     "list": true
+    },
+    {
+     "name": "typical_test_needs",
+     "label": "典型量測需求",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "典型量測需求",
+      "typical test needs"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "Technology",
+   "label": "技術",
+   "code_key": "technology",
+   "naming": [
+    "name"
+   ],
+   "domain": "multi",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "name",
+     "label": "技術",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "技術",
+      "名稱",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "standard_body",
+     "label": "標準組織",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "標準組織",
+      "standard body"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "spec_milestones",
+     "label": "標準時程",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "標準時程",
+      "里程碑",
+      "spec milestones"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "maturity",
+     "label": "成熟度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "emerging",
+      "growth",
+      "mature",
+      "declining"
+     ],
+     "aliases": [
+      "成熟度",
+      "maturity"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "affects_nodes",
+     "label": "影響節點",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "影響節點",
+      "affects nodes"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Node"
+     ],
+     "list": true
+    },
+    {
+     "name": "new_test_requirements",
+     "label": "新增測試需求",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "新增測試需求",
+      "new test requirements"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "Concept",
+   "label": "概念",
+   "code_key": "concept",
+   "naming": [
+    "name"
+   ],
+   "domain": "multi",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "name",
+     "label": "名詞",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "名詞",
+      "概念",
+      "術語",
+      "名稱",
+      "name",
+      "term"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "英文",
+      "全名",
+      "aliases"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "category",
+     "label": "類別",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "radio",
+      "protocol",
+      "metric",
+      "measurement",
+      "standard",
+      "device"
+     ],
+     "aliases": [
+      "類別",
+      "分類",
+      "category"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "one_liner",
+     "label": "一句話",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "一句話",
+      "一句話定義",
+      "one liner",
+      "one_liner"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "analogy",
+     "label": "比喻",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "比喻",
+      "生活比喻",
+      "analogy"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "technologies",
+     "label": "相關技術",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "相關技術",
+      "技術",
+      "technologies"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Technology"
+     ],
+     "list": true
+    },
+    {
+     "name": "applications",
+     "label": "相關應用",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "相關應用",
+      "應用",
+      "applications"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Application"
+     ],
+     "list": true
+    },
+    {
+     "name": "test_solutions",
+     "label": "相關方案",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "相關方案",
+      "對應方案",
+      "test solutions",
+      "test_solutions"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "TestSolution"
+     ],
+     "list": true
+    },
+    {
+     "name": "related_concepts",
+     "label": "相關概念",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "相關概念",
+      "related concepts"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Concept"
+     ],
+     "list": true
+    },
+    {
+     "name": "audience",
+     "label": "對象",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "sales",
+      "sales+FAE",
+      "engineer"
+     ],
+     "aliases": [
+      "對象",
+      "讀者",
+      "audience"
+     ],
+     "required": false,
+     "default": "sales",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_status",
+     "label": "審閱狀態",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "draft",
+      "reviewed"
+     ],
+     "aliases": [
+      "審閱狀態",
+      "審閱",
+      "review status",
+      "review_status"
+     ],
+     "required": false,
+     "default": "draft",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "reviewer",
+     "label": "審閱者",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "審閱者",
+      "審閱人",
+      "reviewer"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "Trend",
+   "label": "趨勢",
+   "code_key": "trend",
+   "naming": [
+    "name"
+   ],
+   "domain": "one",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "name",
+     "label": "趨勢",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "趨勢",
+      "名稱",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": [
+      "wireless",
+      "AIDC",
+      "robotics",
+      "mobile",
+      "aerospace"
+     ],
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "related_tech",
+     "label": "相關技術",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "相關技術",
+      "技術",
+      "related tech"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Technology"
+     ],
+     "list": true
+    },
+    {
+     "name": "affected_nodes",
+     "label": "影響節點",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "影響節點",
+      "節點",
+      "affected nodes"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Node"
+     ],
+     "list": true
+    },
+    {
+     "name": "related_ecosystem",
+     "label": "相關生態系",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "相關生態系",
+      "受影響供應商",
+      "related ecosystem",
+      "related_ecosystem"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Ecosystem",
+      "Account"
+     ],
+     "list": true
+    },
+    {
+     "name": "related_applications",
+     "label": "相關應用",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "相關應用",
+      "應用",
+      "related applications"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Application"
+     ],
+     "list": true
+    },
+    {
+     "name": "stage",
+     "label": "階段",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "watch",
+      "emerging",
+      "accelerating",
+      "peak",
+      "fading"
+     ],
+     "aliases": [
+      "階段",
+      "stage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "time_to_demand",
+     "label": "需求時間",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "0-6m",
+      "6-18m",
+      "18-36m",
+      "36m+"
+     ],
+     "aliases": [
+      "需求時間",
+      "time to demand"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "market_impact",
+     "label": "市場影響",
+     "kind": "int",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "市場影響",
+      "market impact"
+     ],
+     "required": false,
+     "default": null,
+     "range": [
+      1,
+      5
+     ],
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "measurement_impact",
+     "label": "量測影響",
+     "kind": "int",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "量測影響",
+      "measurement impact"
+     ],
+     "required": false,
+     "default": null,
+     "range": [
+      1,
+      5
+     ],
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "our_fit",
+     "label": "我方契合度",
+     "kind": "int",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "我方契合度",
+      "契合度",
+      "our fit"
+     ],
+     "required": false,
+     "default": null,
+     "range": [
+      1,
+      5
+     ],
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "Signal",
+   "label": "訊號",
+   "code_key": "signal",
+   "naming": [
+    "date",
+    "title"
+   ],
+   "domain": "one",
+   "has_confidence": false,
+   "fields": [
+    {
+     "name": "title",
+     "label": "標題",
+     "kind": "virtual",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "標題",
+      "主題",
+      "名稱",
+      "title"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "wireless",
+      "AIDC",
+      "robotics",
+      "mobile",
+      "aerospace"
+     ],
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": "wireless",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "date",
+     "label": "日期",
+     "kind": "date",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "日期",
+      "時間",
+      "date"
+     ],
+     "required": true,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "source_type",
+     "label": "來源類型",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "standard",
+      "regulator",
+      "report",
+      "filing",
+      "news",
+      "conference",
+      "customer",
+      "competitor",
+      "internal"
+     ],
+     "aliases": [
+      "來源類型",
+      "source type"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "source",
+     "label": "來源",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "來源",
+      "出處",
+      "連結",
+      "source"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "重點",
+      "summary"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "related",
+     "label": "相關",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "相關",
+      "相關卡片",
+      "related"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "so_what",
+     "label": "所以呢",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "所以呢",
+      "意涵",
+      "對我們的意義",
+      "so what",
+      "so_what"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "reliability",
+     "label": "可靠度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "high",
+      "medium",
+      "low"
+     ],
+     "aliases": [
+      "可靠度",
+      "reliability"
+     ],
+     "required": false,
+     "default": "medium",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "WinLoss",
+   "label": "輸贏分析",
+   "code_key": "win_loss",
+   "naming": [
+    "name"
+   ],
+   "domain": "one",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "name",
+     "label": "案例名稱",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "案例名稱",
+      "名稱",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "wireless",
+      "AIDC",
+      "robotics",
+      "mobile",
+      "aerospace"
+     ],
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": "wireless",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "opportunity",
+     "label": "商機",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "商機",
+      "opportunity"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Opportunity"
+     ],
+     "list": false
+    },
+    {
+     "name": "account",
+     "label": "客戶",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "客戶",
+      "account"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Account"
+     ],
+     "list": false
+    },
+    {
+     "name": "outcome",
+     "label": "結果",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "won",
+      "lost",
+      "no-decision"
+     ],
+     "aliases": [
+      "結果",
+      "outcome"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "decided_date",
+     "label": "決定日",
+     "kind": "date",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "決定日",
+      "結案日",
+      "decided date",
+      "decided_date"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "applications",
+     "label": "對應應用",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "對應應用",
+      "應用",
+      "applications"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Application"
+     ],
+     "list": true
+    },
+    {
+     "name": "our_solutions",
+     "label": "我方方案",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "我方方案",
+      "our solutions",
+      "our_solutions"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "TestSolution"
+     ],
+     "list": true
+    },
+    {
+     "name": "competitors",
+     "label": "競爭對手",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "競爭對手",
+      "competitors"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Competitor"
+     ],
+     "list": true
+    },
+    {
+     "name": "winner",
+     "label": "勝出者",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "勝出者",
+      "得標廠商",
+      "winner"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Competitor",
+      "Ecosystem",
+      "Account"
+     ],
+     "list": false
+    },
+    {
+     "name": "primary_reason",
+     "label": "主要原因",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "price",
+      "performance",
+      "features",
+      "relationship",
+      "timing",
+      "incumbent",
+      "budget",
+      "other"
+     ],
+     "aliases": [
+      "主要原因",
+      "原因",
+      "primary reason",
+      "primary_reason"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "gaps",
+     "label": "缺口",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "缺口",
+      "gaps"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "lessons",
+     "label": "心得",
+     "kind": "list",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "心得",
+      "lessons"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "RoadmapRequest",
+   "label": "產品需求",
+   "code_key": "roadmap_request",
+   "naming": [
+    "name"
+   ],
+   "domain": "one",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "name",
+     "label": "需求名稱",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "需求名稱",
+      "名稱",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "wireless",
+      "AIDC",
+      "robotics",
+      "mobile",
+      "aerospace"
+     ],
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": "wireless",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "applications",
+     "label": "對應應用",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "對應應用",
+      "應用",
+      "applications"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Application"
+     ],
+     "list": true
+    },
+    {
+     "name": "our_solutions",
+     "label": "我方方案",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "我方方案",
+      "our solutions",
+      "our_solutions"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "TestSolution"
+     ],
+     "list": true
+    },
+    {
+     "name": "competitors",
+     "label": "相關競品",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "相關競品",
+      "competitors"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Competitor"
+     ],
+     "list": true
+    },
+    {
+     "name": "source_win_loss",
+     "label": "來源案例",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "來源案例",
+      "source win loss",
+      "source_win_loss"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "WinLoss"
+     ],
+     "list": true
+    },
+    {
+     "name": "source_opportunities",
+     "label": "來源商機",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "來源商機",
+      "source opportunities",
+      "source_opportunities"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Opportunity"
+     ],
+     "list": true
+    },
+    {
+     "name": "gap_type",
+     "label": "缺口類型",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "feature",
+      "performance",
+      "price",
+      "integration",
+      "certification",
+      "service"
+     ],
+     "aliases": [
+      "缺口類型",
+      "gap type",
+      "gap_type"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "impact",
+     "label": "影響程度",
+     "kind": "int",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "影響程度",
+      "影響",
+      "impact"
+     ],
+     "required": false,
+     "default": null,
+     "range": [
+      1,
+      5
+     ],
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "customer_count",
+     "label": "受影響客戶數",
+     "kind": "int",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "受影響客戶數",
+      "客戶數",
+      "customer count",
+      "customer_count"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "request_status",
+     "label": "需求狀態",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "idea",
+      "submitted",
+      "accepted",
+      "planned",
+      "shipped",
+      "declined"
+     ],
+     "aliases": [
+      "需求狀態",
+      "request status",
+      "request_status"
+     ],
+     "required": false,
+     "default": "idea",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "target_release",
+     "label": "目標版本",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "目標版本",
+      "target release",
+      "target_release"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "owner",
+     "label": "負責人",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "負責人",
+      "owner"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "Pitch",
+   "label": "簡報",
+   "code_key": "pitch",
+   "naming": [
+    "name"
+   ],
+   "domain": "multi",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "name",
+     "label": "簡報名稱",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "簡報名稱",
+      "名稱",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "pitch_audience",
+     "label": "對象",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "sales",
+      "customer-engineer",
+      "customer-manager",
+      "executive"
+     ],
+     "aliases": [
+      "對象",
+      "pitch audience",
+      "pitch_audience"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "applications",
+     "label": "對應應用",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "對應應用",
+      "應用",
+      "applications"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Application"
+     ],
+     "list": true
+    },
+    {
+     "name": "our_solutions",
+     "label": "我方方案",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "我方方案",
+      "our solutions",
+      "our_solutions"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "TestSolution"
+     ],
+     "list": true
+    },
+    {
+     "name": "technologies",
+     "label": "技術",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "技術",
+      "technologies"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Technology"
+     ],
+     "list": true
+    },
+    {
+     "name": "concepts",
+     "label": "白話概念",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "白話概念",
+      "概念",
+      "concepts"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Concept"
+     ],
+     "list": true
+    },
+    {
+     "name": "accounts",
+     "label": "適用客戶",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "適用客戶",
+      "accounts"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Account"
+     ],
+     "list": true
+    },
+    {
+     "name": "duration_min",
+     "label": "時間(分鐘)",
+     "kind": "int",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "時間(分鐘)",
+      "分鐘",
+      "duration min",
+      "duration_min"
+     ],
+     "required": false,
+     "default": null,
+     "range": [
+      1,
+      180
+     ],
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "content_status",
+     "label": "內容狀態",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "draft",
+      "reviewed",
+      "in-use"
+     ],
+     "aliases": [
+      "內容狀態",
+      "content status",
+      "content_status"
+     ],
+     "required": false,
+     "default": "draft",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "owner",
+     "label": "負責人",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "負責人",
+      "owner"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "DemoScript",
+   "label": "展示腳本",
+   "code_key": "demo_script",
+   "naming": [
+    "name"
+   ],
+   "domain": "multi",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "name",
+     "label": "腳本名稱",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "腳本名稱",
+      "名稱",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "our_solutions",
+     "label": "我方方案",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "我方方案",
+      "our solutions",
+      "our_solutions"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "TestSolution"
+     ],
+     "list": true
+    },
+    {
+     "name": "applications",
+     "label": "對應應用",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "對應應用",
+      "應用",
+      "applications"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Application"
+     ],
+     "list": true
+    },
+    {
+     "name": "duration_min",
+     "label": "時間(分鐘)",
+     "kind": "int",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "時間(分鐘)",
+      "分鐘",
+      "duration min",
+      "duration_min"
+     ],
+     "required": false,
+     "default": null,
+     "range": [
+      1,
+      480
+     ],
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "demo_env",
+     "label": "展示環境",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "展示環境",
+      "環境",
+      "demo env",
+      "demo_env"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "content_status",
+     "label": "內容狀態",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "draft",
+      "reviewed",
+      "in-use"
+     ],
+     "aliases": [
+      "內容狀態",
+      "content status",
+      "content_status"
+     ],
+     "required": false,
+     "default": "draft",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "owner",
+     "label": "負責人",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "負責人",
+      "owner"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "Battlecard",
+   "label": "對戰卡",
+   "code_key": "battlecard",
+   "naming": [
+    "name"
+   ],
+   "domain": "multi",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "name",
+     "label": "名稱",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "名稱",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "competitor",
+     "label": "競爭對手",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "競爭對手",
+      "對手",
+      "competitor"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Competitor"
+     ],
+     "list": false
+    },
+    {
+     "name": "our_solutions",
+     "label": "我方方案",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "我方方案",
+      "our solutions",
+      "our_solutions"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "TestSolution"
+     ],
+     "list": true
+    },
+    {
+     "name": "applications",
+     "label": "對應應用",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "對應應用",
+      "應用",
+      "applications"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Application"
+     ],
+     "list": true
+    },
+    {
+     "name": "competing_solutions",
+     "label": "對手方案",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "對手方案",
+      "競品方案",
+      "competing solutions"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "TestSolution"
+     ],
+     "list": true
+    },
+    {
+     "name": "our_advantages",
+     "label": "我方優勢",
+     "kind": "list",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "我方優勢",
+      "our advantages",
+      "our_advantages"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "our_weaknesses",
+     "label": "我方弱點",
+     "kind": "list",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "我方弱點",
+      "our weaknesses",
+      "our_weaknesses"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "content_status",
+     "label": "內容狀態",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "draft",
+      "reviewed",
+      "in-use"
+     ],
+     "aliases": [
+      "內容狀態",
+      "content status",
+      "content_status"
+     ],
+     "required": false,
+     "default": "draft",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "owner",
+     "label": "負責人",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "負責人",
+      "owner"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "Contact",
+   "label": "聯絡人",
+   "code_key": "contact",
+   "naming": [
+    "name"
+   ],
+   "domain": "multi",
+   "has_confidence": false,
+   "fields": [
+    {
+     "name": "name",
+     "label": "姓名",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "姓名",
+      "名稱",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "account",
+     "label": "客戶",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "客戶",
+      "公司",
+      "account"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Account"
+     ],
+     "list": false
+    },
+    {
+     "name": "job_title",
+     "label": "職稱",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "職稱",
+      "job title",
+      "job_title"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "contact_function",
+     "label": "職能",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "procurement",
+      "rd",
+      "test",
+      "quality",
+      "management",
+      "sales",
+      "other"
+     ],
+     "aliases": [
+      "職能",
+      "部門",
+      "contact function",
+      "contact_function"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "decision_role",
+     "label": "決策角色",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "decision",
+      "influencer",
+      "user",
+      "gatekeeper"
+     ],
+     "aliases": [
+      "決策角色",
+      "decision role",
+      "decision_role"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "relationship_status",
+     "label": "關係",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "champion",
+      "supporter",
+      "neutral",
+      "blocker",
+      "unknown"
+     ],
+     "aliases": [
+      "關係",
+      "relationship status",
+      "relationship_status"
+     ],
+     "required": false,
+     "default": "unknown",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "reports_to",
+     "label": "主管",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "主管",
+      "reports to",
+      "reports_to"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Contact"
+     ],
+     "list": false
+    },
+    {
+     "name": "applications",
+     "label": "關注應用",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "關注應用",
+      "應用",
+      "applications"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Application"
+     ],
+     "list": true
+    },
+    {
+     "name": "last_contact",
+     "label": "最近聯絡",
+     "kind": "date",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "最近聯絡",
+      "last contact",
+      "last_contact"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "VisitLog",
+   "label": "拜訪紀錄",
+   "code_key": "visit_log",
+   "naming": [
+    "date",
+    "title"
+   ],
+   "domain": "one",
+   "has_confidence": false,
+   "fields": [
+    {
+     "name": "title",
+     "label": "標題",
+     "kind": "virtual",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "標題",
+      "主題",
+      "title"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "wireless",
+      "AIDC",
+      "robotics",
+      "mobile",
+      "aerospace"
+     ],
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": "wireless",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "date",
+     "label": "日期",
+     "kind": "date",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "日期",
+      "date"
+     ],
+     "required": true,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "account",
+     "label": "客戶",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "客戶",
+      "account"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Account"
+     ],
+     "list": false
+    },
+    {
+     "name": "contacts",
+     "label": "對象",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "對象",
+      "聯絡人",
+      "contacts"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Contact"
+     ],
+     "list": true
+    },
+    {
+     "name": "opportunity",
+     "label": "商機",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "商機",
+      "opportunity"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Opportunity"
+     ],
+     "list": false
+    },
+    {
+     "name": "applications",
+     "label": "討論應用",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "討論應用",
+      "應用",
+      "applications"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Application"
+     ],
+     "list": true
+    },
+    {
+     "name": "our_solutions",
+     "label": "討論方案",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "討論方案",
+      "our solutions",
+      "our_solutions"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "TestSolution"
+     ],
+     "list": true
+    },
+    {
+     "name": "visit_type",
+     "label": "類型",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "visit",
+      "call",
+      "demo",
+      "workshop",
+      "conference",
+      "email"
+     ],
+     "aliases": [
+      "類型",
+      "visit type",
+      "visit_type"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "重點",
+      "summary"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "next_steps",
+     "label": "下一步",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "下一步",
+      "next steps",
+      "next_steps"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "follow_up_date",
+     "label": "跟進日",
+     "kind": "date",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "跟進日",
+      "follow up date",
+      "follow_up_date"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "SupplyLink",
+   "label": "供貨關係",
+   "code_key": "supply_link",
+   "naming": [
+    "name"
+   ],
+   "domain": "multi",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "name",
+     "label": "供貨關係",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "供貨關係",
+      "名稱",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "supplier",
+     "label": "供應商",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "供應商",
+      "supplier"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Ecosystem",
+      "Account"
+     ],
+     "list": false
+    },
+    {
+     "name": "customer",
+     "label": "客戶",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "客戶",
+      "品牌",
+      "營運商",
+      "customer"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Account",
+      "Ecosystem"
+     ],
+     "list": false
+    },
+    {
+     "name": "product",
+     "label": "交付品",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "交付品",
+      "產品",
+      "product"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "platform",
+     "label": "平台",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "平台",
+      "專案",
+      "platform"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "segment",
+     "label": "區段",
+     "kind": "list",
+     "class": "sourced",
+     "enum": [
+      "space",
+      "gateway",
+      "ut",
+      "launch",
+      "mro",
+      "cell-phone",
+      "ap-cpe",
+      "module-iot",
+      "aidc-computing",
+      "aidc-power",
+      "car-ebus-electronics",
+      "robotics-amr",
+      "space-satellite",
+      "uav",
+      "radar-ew",
+      "osat"
+     ],
+     "aliases": [
+      "區段",
+      "segment"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "tech_areas",
+     "label": "技術領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": [
+      "wireless-comm",
+      "rf",
+      "high-speed-io",
+      "power-generic-io",
+      "emc"
+     ],
+     "aliases": [
+      "技術領域",
+      "tech areas",
+      "tech_areas"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "nodes",
+     "label": "涉及節點",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "涉及節點",
+      "節點清單",
+      "nodes"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Node"
+     ],
+     "list": true
+    },
+    {
+     "name": "technologies",
+     "label": "技術",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "技術",
+      "technologies"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Technology"
+     ],
+     "list": true
+    },
+    {
+     "name": "customer_products",
+     "label": "客戶產品",
+     "kind": "linklist",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "客戶產品",
+      "對應客戶產品",
+      "customer products",
+      "customer_products"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "CustomerProduct"
+     ],
+     "list": true
+    },
+    {
+     "name": "evidence_grade",
+     "label": "證據等級",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "aliases": [
+      "證據等級",
+      "等級",
+      "evidence grade",
+      "evidence_grade"
+     ],
+     "required": false,
+     "default": "D",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "supply_stage",
+     "label": "供貨階段",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "demo",
+      "sample",
+      "cert",
+      "pilot",
+      "mass"
+     ],
+     "aliases": [
+      "供貨階段",
+      "商業化階段",
+      "supply stage",
+      "supply_stage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "source",
+     "label": "來源",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "來源",
+      "出處",
+      "連結",
+      "source"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "source_date",
+     "label": "來源日期",
+     "kind": "date",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "來源日期",
+      "報導日期",
+      "source date",
+      "source_date"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "not_confirmed",
+     "label": "尚待確認",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "尚待確認",
+      "待確認",
+      "not confirmed",
+      "not_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  },
+  {
+   "name": "RevenueFact",
+   "label": "收入事實",
+   "code_key": "revenue_fact",
+   "naming": [
+    "name"
+   ],
+   "domain": "multi",
+   "has_confidence": true,
+   "fields": [
+    {
+     "name": "name",
+     "label": "名稱",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "名稱",
+      "name"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "aliases",
+     "label": "別名",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "別名",
+      "其他名稱",
+      "aliases",
+      "aka"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "domain",
+     "label": "領域",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "領域",
+      "domain"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "company",
+     "label": "公司",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "公司",
+      "company"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Account",
+      "Ecosystem",
+      "Competitor"
+     ],
+     "list": false
+    },
+    {
+     "name": "period",
+     "label": "期間",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "期間",
+      "period"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "rev_layer",
+     "label": "收入層級",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "company",
+      "segment",
+      "customer"
+     ],
+     "aliases": [
+      "收入層級",
+      "層級",
+      "rev layer",
+      "rev_layer"
+     ],
+     "required": true,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "customer",
+     "label": "客戶",
+     "kind": "link",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "客戶",
+      "customer"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [
+      "Account",
+      "Ecosystem"
+     ],
+     "list": false
+    },
+    {
+     "name": "segment_name",
+     "label": "區段名稱",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "區段名稱",
+      "產品別",
+      "segment name",
+      "segment_name"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "amount",
+     "label": "金額",
+     "kind": "float",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "金額",
+      "amount"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "share_pct",
+     "label": "占比",
+     "kind": "float",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "占比",
+      "占上層比例",
+      "share pct",
+      "share_pct"
+     ],
+     "required": false,
+     "default": null,
+     "range": [
+      0,
+      100
+     ],
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "yoy_pct",
+     "label": "年增",
+     "kind": "float",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "年增",
+      "年增率",
+      "yoy",
+      "yoy pct",
+      "yoy_pct"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "unit",
+     "label": "單位",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "單位",
+      "unit"
+     ],
+     "required": false,
+     "default": "億TWD",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "basis",
+     "label": "口徑",
+     "kind": "enum",
+     "class": "sourced",
+     "enum": [
+      "reported",
+      "media",
+      "estimated",
+      "target"
+     ],
+     "aliases": [
+      "口徑",
+      "basis"
+     ],
+     "required": false,
+     "default": "estimated",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "source",
+     "label": "來源",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "來源",
+      "出處",
+      "連結",
+      "source"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "source_date",
+     "label": "來源日期",
+     "kind": "date",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "來源日期",
+      "source date",
+      "source_date"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "not_confirmed",
+     "label": "不可比較",
+     "kind": "list",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "不可比較",
+      "未確認",
+      "not confirmed",
+      "not_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": true
+    },
+    {
+     "name": "confidence",
+     "label": "信心度",
+     "kind": "enum",
+     "class": "judgement",
+     "enum": [
+      "verified",
+      "assumed"
+     ],
+     "aliases": [
+      "信心度",
+      "可信度"
+     ],
+     "required": false,
+     "default": "assumed",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "updated",
+     "label": "更新日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "更新日期",
+      "更新",
+      "最後更新"
+     ],
+     "required": false,
+     "default": "today",
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "body",
+     "label": "備註",
+     "kind": "str",
+     "class": "sourced",
+     "enum": null,
+     "aliases": [
+      "body",
+      "內文",
+      "備註",
+      "說明",
+      "notes",
+      "note",
+      "description",
+      "描述"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "summary",
+     "label": "摘要",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "摘要",
+      "summary"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "usage",
+     "label": "用途",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "用途",
+      "usage"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "scope",
+     "label": "適用範圍",
+     "kind": "str",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "適用範圍",
+      "範圍",
+      "scope"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "last_confirmed",
+     "label": "最後確認日期",
+     "kind": "date",
+     "class": "derived",
+     "enum": null,
+     "aliases": [
+      "最後確認",
+      "last_confirmed"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    },
+    {
+     "name": "review_due",
+     "label": "複查期限",
+     "kind": "date",
+     "class": "judgement",
+     "enum": null,
+     "aliases": [
+      "複查期限",
+      "review_due"
+     ],
+     "required": false,
+     "default": null,
+     "range": null,
+     "link_to": [],
+     "list": false
+    }
+   ]
+  }
+ ],
+ "relation_types": [
+  {
+   "name": "requires_test",
+   "label": "需要測試",
+   "from": [
+    "CustomerProduct",
+    "Application"
+   ],
+   "to": [
+    "TestSolution"
+   ]
+  }
+ ]
+}

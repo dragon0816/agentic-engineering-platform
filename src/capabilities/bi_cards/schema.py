@@ -36,6 +36,7 @@ SHIPPED_FILES = (
     Path(__file__).with_name("bi_schema_v2.json"),
     Path(__file__).with_name("bi_schema_v3.json"),
     Path(__file__).with_name("bi_schema_v4.json"),
+    Path(__file__).with_name("bi_schema_v5.json"),
 )
 SCHEMA_ID = "bi.schema/v1.1"
 #: Kind changes that keep every stored value meaningful (BI vault V9): a value
@@ -86,6 +87,10 @@ class FieldDef:
     range: tuple[float, float] | None
     link_to: tuple[str, ...]
     is_list: bool
+    #: The relation this link field makes; empty means `has_<field>`.
+    relation_type: str = ""
+    #: The applications using it, written when a profile's proposal merges.
+    used_by: tuple[str, ...] = ()
 
     @property
     def is_link(self) -> bool:
@@ -124,6 +129,10 @@ class Registry:
         self.title = str(document.get("title") or self.schema_id)
         self.domains: tuple[str, ...] = tuple(document.get("domains") or ())
         self.enum_aliases: dict[str, dict[str, str]] = dict(document.get("enum_aliases") or {})
+        #: The registered relations: `{"name", "label", "from", "to"}`.
+        self.relation_types: tuple[dict[str, Any], ...] = tuple(
+            document.get("relation_types") or ()
+        )
         ignored = document.get("ignored_fields", {})
         types = []
         for raw in document["types"]:
@@ -140,6 +149,8 @@ class Registry:
                     range=tuple(f["range"]) if f["range"] else None,
                     link_to=tuple(f["link_to"]),
                     is_list=bool(f["list"]),
+                    relation_type=str(f.get("relation_type") or ""),
+                    used_by=tuple(f.get("used_by") or ()),
                 )
                 for f in raw["fields"]
             )

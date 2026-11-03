@@ -150,9 +150,80 @@ CREATE TABLE IF NOT EXISTS evidence (
   locator TEXT NOT NULL,
   excerpt TEXT NOT NULL,
   basis TEXT NOT NULL,
-  at TEXT NOT NULL
+  at TEXT NOT NULL,
+  reference_id TEXT NOT NULL DEFAULT '',
+  stance TEXT NOT NULL DEFAULT 'supports',
+  reference_at TEXT,
+  reference_time_basis TEXT
+);
+CREATE TABLE IF NOT EXISTS relations (
+  relation_id TEXT PRIMARY KEY,
+  from_card_id TEXT NOT NULL,
+  relation_type TEXT NOT NULL,
+  to_card_id TEXT NOT NULL,
+  status TEXT NOT NULL,
+  origin TEXT NOT NULL,
+  source_field TEXT,
+  scope TEXT,
+  note TEXT,
+  by TEXT,
+  at TEXT
+);
+CREATE INDEX IF NOT EXISTS relations_from ON relations (from_card_id, relation_type);
+CREATE INDEX IF NOT EXISTS relations_to ON relations (to_card_id, relation_type);
+CREATE TABLE IF NOT EXISTS relation_evidence (
+  evidence_link_id TEXT PRIMARY KEY,
+  relation_id TEXT NOT NULL,
+  basis_card_id TEXT NOT NULL,
+  reference_id TEXT NOT NULL,
+  stance TEXT NOT NULL,
+  assessment TEXT,
+  by TEXT,
+  at TEXT
+);
+CREATE INDEX IF NOT EXISTS relation_evidence_relation ON relation_evidence (relation_id);
+CREATE TABLE IF NOT EXISTS field_states (
+  card_id TEXT NOT NULL,
+  field TEXT NOT NULL,
+  state TEXT NOT NULL,
+  reason TEXT,
+  raw TEXT,
+  origin TEXT NOT NULL,
+  ref TEXT,
+  by TEXT,
+  at TEXT,
+  PRIMARY KEY (card_id, field)
+);
+CREATE TABLE IF NOT EXISTS card_names (
+  card_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  PRIMARY KEY (card_id, name, kind)
+);
+CREATE TABLE IF NOT EXISTS card_app_folders (
+  card_id TEXT NOT NULL,
+  application TEXT NOT NULL,
+  PRIMARY KEY (card_id, application)
 );
 """
+#: Evidence columns added by the card model, for a database older than `SCHEMA`.
+EVIDENCE_COLUMNS = {
+    "reference_id": "TEXT NOT NULL DEFAULT ''",
+    "stance": "TEXT NOT NULL DEFAULT 'supports'",
+    "reference_at": "TEXT",
+    "reference_time_basis": "TEXT",
+}
+
+
+def add_missing_columns(connection: sqlite3.Connection) -> None:
+    """Bring an older database's tables up to `SCHEMA`, which only adds tables."""
+    columns = {r[1] for r in connection.execute("PRAGMA table_info(imports)")}
+    if "run_id" not in columns:  # a dataset from before ingest runs
+        connection.execute("ALTER TABLE imports ADD COLUMN run_id TEXT")
+    columns = {r[1] for r in connection.execute("PRAGMA table_info(evidence)")}
+    for name, definition in EVIDENCE_COLUMNS.items():
+        if name not in columns:
+            connection.execute(f"ALTER TABLE evidence ADD COLUMN {name} {definition}")
 
 
 class BiStoreError(Exception):
@@ -331,6 +402,10 @@ class BiStore:
         self.read_only = is_subscribed(dataset) or view is not None
         #: A vault's id: its writes become commits (`vault.capture`).
         self.vault_id = None if self.read_only else vault_of(workspace, dataset)
+        if self.vault_id is not None:
+            from capabilities.bi_cards import vault
+
+            vault.ensure_current(self)
 
     @property
     def exists(self) -> bool:
@@ -376,9 +451,7 @@ class BiStore:
         try:
             if write:
                 connection.executescript(SCHEMA)
-                columns = {r[1] for r in connection.execute("PRAGMA table_info(imports)")}
-                if "run_id" not in columns:  # a dataset from before ingest runs
-                    connection.execute("ALTER TABLE imports ADD COLUMN run_id TEXT")
+                add_missing_columns(connection)
                 # A dataset written before the binding existed keeps v1.1.
                 connection.execute(
                     "INSERT OR IGNORE INTO meta (key, value) VALUES ('schema', ?)",

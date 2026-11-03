@@ -45,7 +45,6 @@ def test_the_shipped_4_0_0_is_generated_and_only_widens_those_fields(tmp_path: P
     assert sorted((c["type"], c["field"], c["change"]) for c in changes) == sorted(
         (name, "domain", "widened") for name in WIDENED
     )
-    assert catalog.resolve(tmp_path, "bi.schema/v1.1").version == "4.0.0"
     for name in WIDENED:
         field = new.types[name].get("domain")
         assert field is not None and field.is_list and field.default is None

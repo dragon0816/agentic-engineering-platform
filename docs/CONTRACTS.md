@@ -6588,3 +6588,26 @@ Design `docs/phases/BI_CARD_PAGE_IMPORT.md`. Code `src/capabilities/bi_cards/pag
 
 `bi.schema/v1.1@4.0.0` = 3.0.0 with `domain` a list, allowed values kept and no default, on `Application`, `Trend`, `CustomerProduct`; a widening, upgraded in place. A bare `bi.schema/v1.1` means 4.0.0. A
 `bi__query` card of those types returns `domain` as a list. The feed's goldens stay pinned to 2.0.0.
+
+## BI card model: storage shape (2026-11-04)
+
+Design: `docs/phases/BI_CARD_MODEL.md` §3. Values and id functions: `capabilities/bi_cards/card_model.py`. Old units stay valid and are never rewritten.
+
+**Schema.** `bi.schema/v1.1@5.0.0` = 4.0.0 plus `summary` (19 types), `usage`, `scope`, `last_confirmed` (derived), `review_due` on all 21, and top-level `relation_types` `[{name, label, from, to}]`. A field may hold `relation_type` (links only; default `has_<field>`) and `used_by`. A bare `bi.schema/v1.1` means 5.0.0. Additions only, so an upgrade is in place. The feed's goldens stay pinned to 2.0.0.
+
+**New units:**
+
+| Unit | Value |
+|---|---|
+| `state:<card>:<field>` | `{state, reason?, raw?, ref?, by?, at?}`; state is `unknown`, `not_applicable`, `pending_confirmation` or `confirmed_none` |
+| `relation:<id>` | `{from, type, to, origin, status, scope?, note?, by?, at?}`; id = `relation_id(from, type, to)`; origin `schema_field`, `ai_inferred`, `registered`; status `unreviewed`, `pending`, `inferred`, `confirmed`, `disputed`, `rejected` |
+| `relation_evidence:<id>` | `{relation, basis_card, reference_id, stance, assessment?, by?, at?}`; id = `evidence_link_id(relation, basis_card, reference_id)`; stance `supports`, `refutes`, `context_only` |
+| `profile:<application>` | `{revision, author, path, sha256, schema?}` |
+| `tool:<application>/<name>` | `{revision, author, path, sha256}` |
+| `skill:<application>/<name>` | As `skill:<name>`, which stays readable |
+
+`<application>` in a key is a home's short form: `<id>`, or `library/<entry>` for a library entry, which has an application's shape. `skills` is not a valid entry name: `library/skills/` holds the skill that spans everything.
+
+**Changed units, by added optional parts:** `card:` may hold `former_keys`. A `field:` value, or an item of a list value, may be `{"card": <id>, "name": <name at write>}`, a link by id; `fields.value` always shows it as the card's current name. An `evidence:` row may hold `reference_id`, `stance`, `reference_at`, `reference_time_basis`.
+
+**New tables in `bi.sqlite`, rebuilt from units:** `relations`, `relation_evidence`, `field_states`, `card_names`, `card_app_folders`; `evidence` gains four columns. `cards` and `fields` keep their shape. **Compatibility:** an AEP older than this refuses a vault holding these units at sync (`unit_problem`).

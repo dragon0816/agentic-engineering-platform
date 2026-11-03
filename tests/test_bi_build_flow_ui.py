@@ -169,16 +169,16 @@ def test_the_whole_build_flow(
         page.click_text("#bi-b-sa-log", "套用到草稿")
         page.see("bi-b-draft-info", "第 2 版")
         page.click("#bi-b-draft-publish")
-        page.notice("bi.schema/v1.1@4.1.0")
-        page.see("bi-b-versions", "4.1.0")
+        page.notice("bi.schema/v1.1@5.1.0")
+        page.see("bi-b-versions", "5.1.0")
         page.run(
             "[...document.querySelectorAll('#bi-b-versions .bi-actions')]"
-            ".find(r => r.textContent.includes('@4.1.0')).querySelector('button').click()"
+            ".find(r => r.textContent.includes('@5.1.0')).querySelector('button').click()"
         )
         page.see("bi-b-upgrade", "套用升級")
         page.click_text("#bi-b-upgrade", "套用升級")
         page.notice("已升級")
-        assert BiStore(workspace, dataset).schema_ref() == "bi.schema/v1.1@4.1.0"
+        assert BiStore(workspace, dataset).schema_ref() == "bi.schema/v1.1@5.1.0"
         assert schema_versions.drafts(workspace)  # the draft itself stays
 
         # -- step 2a: Session B on the harness: the skill, applied as a new revision ----------
@@ -361,6 +361,6 @@ def test_the_whole_build_flow(
     assert target.reads()["tag"] == "v1"
     published = vault.reading_store(workspace, dataset)
     assert "A 公司評估 TSN" in {c["name"] for c in published.card_rows()}
-    assert published.schema_ref() == "bi.schema/v1.1@4.1.0"
+    assert published.schema_ref() == "bi.schema/v1.1@5.1.0"
     # Nothing is left to commit or push.
     assert target.status()["ahead"] == 0 and target.status()["uncommitted"] == 0

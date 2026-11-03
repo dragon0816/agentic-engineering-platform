@@ -15,7 +15,7 @@ Deadline: Phase 1 merged **Wed 2026-11-04 about noon**, R6 that afternoon, relea
 | **`Application` (card type)** | A finer-grained use case, as a card. **Not a folder.** Always written with the capital and backticks | One of the 21 types. The link field `applications` points at these cards, not at folders |
 | **`segment` (field)** | A fact about an entity. Its enum holds 5 chain values and the 11 market segments, on 4 types | A list field. Not used to place a card in a folder |
 
-A vault names its own application list at creation; the default is the 11 segments. Nothing below depends on which list is used, except R6 (§10, the one question).
+A vault names its own application list at creation, so **the list is data**. **Owner, 2026-11-04: the default is `aidc`, `aerospace`, `robotics`, `wireless`** (wireless module and wireless example both go in `wireless`); the 11 segments stay as `segment` values on cards. No card page names one of the 11, so sorting pages into them would have been by hand.
 
 A card belongs to the applications whose sources gave it evidence. This is **derived** at rebuild (evidence → `source:` unit → path) into `card_app_folders`, so it needs no unit and cannot conflict. A card with no evidence belongs to none.
 
@@ -73,7 +73,9 @@ card_app_folders(card_id, application, PK(card_id, application))
 -- evidence gains: reference_id, stance, reference_at, reference_time_basis
 ```
 
-The rebuild starts from nothing and a marker in `meta` makes an older `bi.sqlite` rebuild once, so no SQL migration.
+The rebuild starts from nothing, so no SQL migration. `PRAGMA user_version` (`card_model.MODEL_VERSION`) makes an older `bi.sqlite` of a vault rebuild once when a `BiStore` opens it, and the published copy's marker holds it too. Not in `meta`: every `meta` row is a unit. **A lane that changes what a rebuild produces raises `MODEL_VERSION`.** A non-vault dataset that was never written since keeps its old tables, so a reader of a new table on one uses `_tables`-style guarding.
+
+`capabilities/bi_cards/card_model.py` holds the prefixes, allowed values and id functions; use them, never compute these ids elsewhere. `tests/test_bi_card_model_shape.py` pins the hashes.
 
 ### 3.1 Stable id and rename (D1)
 
@@ -141,15 +143,19 @@ A missing summary is a warning with counts at publish, never a block.
   cards/<stable-id>.md, cards/_manifest.json        generated, §6.1; not in any commit
   applications/<application>/sources/, skills/<name>/rev-<n>-<author>.md,
                              tools/<name>/rev-<n>-<author>.<ext>, profile/rev-<n>-<author>.json
-  library/<products|competitors|technologies>/      sources of no one application
-  library/skills/<name>/rev-<n>-<author>.md         generated classify skill: it serves every application
+  library/<products|technologies|competitors>/{sources/, skills/, tools/, profile/}   same shape as an application
+  library/skills/<name>/rev-<n>-<author>.md         generated classify skill: it spans everything
   commits/, tags/, publish/, published/<tag>.sqlite
 ```
 
-Filling a gap: D6 has no home for `classify`, which spans applications, hence `library/skills/`.
+**Library entries have an application's shape (owner, 2026-11-04):** product specs and options under `products`, technology knowledge under `technologies`. The entry list is data, like the application list. Cards still go only in `cards/<stable-id>.md`, wherever their source lies.
+
+`classify` spans everything, so it stays at `library/skills/`. No path collides, because an entry's skills are one level deeper, provided **`skills` is refused as an entry name**.
+
+**A "home"** is `applications/<id>` or `library/<entry>`; the code handles both alike. Unit keys and `card_app_folders.application` use its **short form, `<id>` or `library/<entry>`**, so an application that happens to be called `products` cannot collide with the entry: `profile:library/products`, `skill:library/products/<name>`, `tool:library/products/<name>`. `not_applicable` is computed from a card's homes' profiles the same way.
 
 - The engine's areas become per type: `path_problem` takes the type's areas, `withdraw` and `readme` ask it what a source path is. **The wiki type keeps `schemas`, `skills`, `sources`, and nothing else in it changes.**
-- Old paths stay readable: commits are immutable and name their paths. New writes use the new layout; `checked_folder` accepts `applications/<id>/sources` and `library/<name>`. The feed's fixture vault proves old vaults still load.
+- Old paths stay readable: commits are immutable and name their paths. New writes use the new layout; `checked_folder` accepts `applications/<id>/sources` and `library/<entry>/sources`. The feed's fixture vault proves old vaults still load.
 - Tools in Phase 1: stored by the existing file mechanics, listed, **never run**.
 
 ### 4.2 Profile (D7)
@@ -198,7 +204,7 @@ The route goes (404 `route_unknown`). **`store.set_field` stays as an internal m
 
 ### 5.2 Correction note (更正單)
 
-The button opens a form: field, new value or state, reason (required), author. It writes a small Markdown source with frontmatter (`card`, `field`, `value` or `state`, `reason`) into the card's application, or `library/corrections/`, and goes through source → preview → confirm → commit. **Read deterministically, no model** (same reader as `page_import`), so it works with no gateway. Evidence: locator = the key, excerpt = the line, kind `human`. A free-form note with no such frontmatter is an ordinary source for a normal AI ingest.
+The button opens a form: field, new value or state, reason (required), author. It writes a small Markdown source with frontmatter (`card`, `field`, `value` or `state`, `reason`) into the `sources/` of the card's first home, or `library/corrections/sources/` for a card with none, and goes through source → preview → confirm → commit. **Read deterministically, no model** (same reader as `page_import`), so it works with no gateway. Evidence: locator = the key, excerpt = the line, kind `human`. A free-form note with no such frontmatter is an ordinary source for a normal AI ingest.
 
 ### 5.3 Re-run and diff
 
@@ -272,6 +278,26 @@ Sizes are estimates, not measured: **S** about 1 h, **M** 2–3 h, **L** 4 h or 
 | P3-b | Benchmark error classes | Independent |
 
 They merge after R6.
+
+### 8.1 Lane briefs
+
+Every lane: base is T1's commit on `bi-card-model`; own worktree and `.venv` (dev,office); own `--basetemp`; targeted tests only, the full suite is the orchestrator's; verify like CI (`ruff format --check .`, `ruff check .`, `mypy src tests`); no push; fixtures fictional, nothing from `files\` in a commit; nothing written under OneDrive. `git diff --stat tests/fixtures/bi_feed` stays empty: run `test_bi_feed_api`, `test_bi_feed_fixtures` before each hand-in. Tests that pin behaviour move, they are not weakened. Add a `docs/TASKS.md` row per task. **A storage shape question goes to lane A, not around it.** If a read of §3 and a read of the code disagree, say so.
+
+- **Lane A (worker D): T2, T3, T4.** `vault.py` `units_from_db` and `materialize` for ids, links and relations; `names.py`; rename route; `service` reads.
+- **Lane B: T5, T6, T7.** Read §3.4, §3.5, §3.6.
+  - T5: `schema.missing_state`, called in `importer`, `page_import`, `recipes`; `PlannedRow.states`; `store` writes `field_states` with `origin: unit`; `units_from_db` and `materialize` round-trip `state:` units, and compute `origin: proposal`; `bi__query`'s `field_states`. Computing `origin: profile` is T9's.
+  - T6: `reference_id`, `stance`, `reference_at`, `reference_time_basis` on evidence rows in `store`, `runs`, `page_import`, and through `units_from_db` and `materialize`; a row with none gets its `reference_id` computed at rebuild. The evidence unit stays unchanged when nothing changed, or every capture diffs.
+  - T7: `extract`'s prompt asks for `summary`, `usage`, `scope` with `basis`; `unknown` writes nothing; `vault.publish` returns a warning with per-type counts of cards with no summary; it never blocks.
+  - In `vault.py`, touch only the state and evidence branches; lane A owns the card, field and relation ones.
+- **Lane C: T8, T9, T10.** Read §1, §4.
+  - T8: homes as in §4, library entries included; `repository.path_problem` and `RepoType` get per-type areas; **the wiki type's behaviour is unchanged** (run `test_knowledge_repo*`, and the wiki tests); `withdraw` (`repository.py:691`) and `readme.py:143` ask the type what a source path is. BI: `vault_skills.APPLICATIONS`, `LIBRARY`, `checked_folder`, `domain_folders`, classify text; `skills.py`'s path pattern and `skill:<application>/<name>`; `vault.SEGMENTS` default becomes the owner's four, still data; `_new_vault` folders; the `web_page.py` placeholders at 2750, 2955; tools stored by `stage_file` and a `tool:` unit, never run. Old paths stay readable: `tests/fixtures/bi_feed/vault` is the proof.
+  - T9: `profile.py`, file format §4.2, `profile:` units; `extract` filters by it and marks `outside_profile`; `card_app_folders` and `origin: profile` states in `materialize`.
+  - T10: §4.3 on `schema_versions`.
+  - ADR-K10: the engine and other generic modules must not name BI types; run `test_bi_cards`'s guard and `test_harness_cross_domain`.
+- **Lane D: T11, T12, T13.** Read §5, §6.
+  - T11: remove the route; `_decide_proposal` accept keeps its checks on a private helper; correction note reader, form and button; move the tests listed in §5.1.
+  - T12: §5.3.
+  - T13: `card_markdown.py`, pure; hook in `vault.publish`; `published/<tag>.sqlite` and the publish record's hash. Reads `relations`, so an empty table is fine until T4: render with what is there. `repo.publish` lives in the generic engine, so the snapshot's record goes through the type, not a BI name in the engine. Tests write only temp folders.
 
 ## 9. Cut first if it runs long
 

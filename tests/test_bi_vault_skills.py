@@ -25,7 +25,7 @@ from host_runtime.bi_cards_api import route
 
 V1 = "bi.schema/v1.1@1.1.0"
 V2 = "bi.schema/v1.1@2.0.0"
-NEWEST = "bi.schema/v1.1@4.0.0"  # a new vault's (the newest shipped)
+NEWEST = "bi.schema/v1.1@5.0.0"  # a new vault's (the newest shipped)
 NOTES = "ODM 是 Account；晶片廠是 Ecosystem。"
 CONFIG: dict[str, Any] = {
     "domains": [

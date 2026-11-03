@@ -33,6 +33,7 @@ kind `conflict`.
 
 from __future__ import annotations
 
+import contextlib
 import contextvars
 import hashlib
 import json
@@ -47,6 +48,7 @@ from typing import Any
 
 from capabilities.bi_cards import (
     analyses,
+    card_model,
     catalog,
     schema_doc,
     vault_checks,
@@ -64,6 +66,7 @@ from capabilities.bi_cards.store import (
     VAULTS_DIR,
     BiStore,
     BiStoreError,
+    add_missing_columns,
     card_id_for,
     is_subscribed,
     now,
@@ -108,7 +111,21 @@ CREATE TABLE IF NOT EXISTS vault_keys (
   key TEXT NOT NULL
 );
 """
-TABLES = ("cards", "fields", "history", "proposals", "meta", "imports", "evidence", "vault_keys")
+TABLES = (
+    "cards",
+    "fields",
+    "history",
+    "proposals",
+    "meta",
+    "imports",
+    "evidence",
+    "vault_keys",
+    "relations",
+    "relation_evidence",
+    "field_states",
+    "card_names",
+    "card_app_folders",
+)
 UNIT_PREFIXES = (
     "meta:",
     "card:",
@@ -118,6 +135,7 @@ UNIT_PREFIXES = (
     "import:",
     "decision:",
     vault_sources.PREFIX,
+    *card_model.UNIT_PREFIXES,
 )
 
 #: The purpose of the next commit made by a capture (「確認匯入」), when the
@@ -200,6 +218,8 @@ class BiType:
             return "not a BI unit"
         if key.startswith(vault_sources.PREFIX):
             return vault_sources.unit_problem(value)
+        if key.startswith(card_model.UNIT_PREFIXES):
+            return card_model.unit_problem(key, value)
         if key.startswith("meta:"):
             return None if isinstance(value, str) else "meta value must be text"
         if key.startswith("evidence:"):
@@ -415,9 +435,7 @@ def materialize(
 ) -> None:
     """Rebuild every BI table of `db` from `units` inside one transaction."""
     db.executescript(SCHEMA)
-    columns = {r[1] for r in db.execute("PRAGMA table_info(imports)")}
-    if "run_id" not in columns:
-        db.execute("ALTER TABLE imports ADD COLUMN run_id TEXT")
+    add_missing_columns(db)
     db.executescript(VAULT_SCHEMA)
     history, info = _field_history(entries)
     db.execute("BEGIN IMMEDIATE")
@@ -579,6 +597,7 @@ def materialize(
     except BaseException:
         db.execute("ROLLBACK")
         raise
+    db.execute(f"PRAGMA user_version = {card_model.MODEL_VERSION}")
 
 
 # -- the local registry -----------------------------------------------------------------
@@ -785,7 +804,7 @@ class Vault:
         folder = self.local / PUBLISHED_DIR
         marker = folder / "version.json"
         with self.lock:
-            target = self.reads()
+            target = {**self.reads(), "model": card_model.MODEL_VERSION}
             try:
                 built = json.loads(marker.read_text(encoding="utf-8"))
             except (OSError, ValueError):
@@ -972,6 +991,19 @@ def _draft(imports: list[dict[str, Any]], changed: Mapping[str, Any]) -> str:
     cards = sum(1 for k, v in changed.items() if k.startswith("card:") and v is not None)
     fields = sum(1 for k in changed if k.startswith("field:"))
     return f"匯入 {names}：{cards} 張卡、{fields} 個欄位"[: repo_engine.MAX_PURPOSE]
+
+
+def ensure_current(store: BiStore) -> None:
+    """Rebuild a vault's local database once when an older AEP built it, so a
+    reader finds the current tables. No rebuild is possible without the
+    repository; the next one that is possible does it."""
+    if not store.exists or store.vault_id is None:
+        return
+    with contextlib.suppress(OSError, sqlite3.Error, BiStoreError, RepoError):
+        with closing(sqlite3.connect(f"file:{store.path}?mode=ro", uri=True)) as db:
+            built = int(db.execute("PRAGMA user_version").fetchone()[0])
+        if built < card_model.MODEL_VERSION:
+            Vault(store.workspace, store.vault_id).rebuild()
 
 
 @contextmanager
