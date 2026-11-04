@@ -71,7 +71,8 @@ def test_a_folder_in_another_home_is_refused_and_none_means_the_sources_own(tmp_
     def start(**extra: Any) -> tuple[Any, Scripted, Jobs]:
         jobs = Jobs()
         model = Scripted({"candidates": []})
-        body = {"dataset": dataset, "kind": "trial", "source_id": source, **extra}
+        # `fresh`: the second run is the same request, and this reads the request sent.
+        body = {"dataset": dataset, "kind": "trial", "source_id": source, "fresh": True, **extra}
         return _post(a, "/api/bi/runs", body, _runtime(model, jobs)), model, jobs
 
     # What the page used to send: the profile would silently not apply.

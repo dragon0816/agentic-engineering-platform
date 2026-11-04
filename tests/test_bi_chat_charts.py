@@ -286,7 +286,13 @@ def test_a_bi_answer_shows_its_chart_inline_in_the_file_viewer(tmp_path: Path) -
                 raise AssertionError(expression)
 
             wait('!document.getElementById("send").disabled')
-            browser._evaluate(f"loadConversations({json.dumps(session)})")
+            # This load draws the answer again: the page's first frame goes at once and the
+            # next comes only after its address is fetched. Look after the load has finished.
+            browser._evaluate(
+                f"window.loaded = false; loadConversations({json.dumps(session)})"
+                ".then(() => { window.loaded = true; })"
+            )
+            wait("window.loaded")
             wait("!!document.querySelector('.answer-html iframe')")
             frame = browser._evaluate(
                 "(() => { const f = document.querySelector('.answer-html iframe');"
