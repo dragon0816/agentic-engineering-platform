@@ -20,6 +20,7 @@ import json
 import re
 import threading
 import uuid
+from collections import OrderedDict
 from collections.abc import Callable, Mapping
 from datetime import datetime
 from pathlib import Path
@@ -86,7 +87,28 @@ def _published(target: Any) -> tuple[dict[str, Any], dict[str, Any]]:
     commit = reads.get("commit")
     if not commit:
         raise FeedError(409, "not_published", "the vault has no pushed version yet")
-    return {"tag": reads.get("tag"), "commit": commit}, target.repo.state_at(commit)
+    return {"tag": reads.get("tag"), "commit": commit}, _units_at(target, commit)
+
+
+#: The units of recent published versions, shared and never changed by a reader. One
+#: `state_at` replays every commit, and each analysis of a listing asks for the same one.
+_UNITS: OrderedDict[tuple[str, str, int], dict[str, Any]] = OrderedDict()
+_UNITS_LOCK = threading.Lock()
+MAX_UNITS = 4
+
+
+def _units_at(target: Any, commit: str) -> dict[str, Any]:
+    key = (str(target.folder), commit, len(target.repo.applied_ids()))
+    with _UNITS_LOCK:
+        if key in _UNITS:
+            _UNITS.move_to_end(key)
+            return _UNITS[key]
+    units: dict[str, Any] = target.repo.state_at(commit)
+    with _UNITS_LOCK:
+        _UNITS[key] = units
+        while len(_UNITS) > MAX_UNITS:
+            _UNITS.popitem(last=False)
+    return units
 
 
 def _registry(units: Mapping[str, Any], workspace: Path) -> Any | None:

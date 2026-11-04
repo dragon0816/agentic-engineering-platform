@@ -431,10 +431,14 @@ def test_vault_panel_and_dashboard_in_a_browser(
             workspace, vault_id, {"order": ["by-type", "one-type"], "hidden": []}
         )
         click("#bi-views [data-bi-view=build]")
+        # Opening the view loads the panel behind the page, its analysis list included.
+        wait("document.getElementById('bi-b-v-state').dataset.settled === String(bi.vaultSeq)")
         run("biAnalyses(bi.verVault)")
         wait("!!document.querySelector('#bi-b-an-list select[data-param=t]')")
         click("#bi-b-an-list button[aria-label='執行分析 某類型的卡片數']")
-        wait("document.getElementById('bi-b-an-list').textContent.includes('Technology')")
+        # In a result cell: the word is also among the options of the select.
+        wait("[...document.querySelectorAll('#bi-b-an-list td')]"
+             ".some((td) => td.textContent === 'Technology')")  # fmt: skip
         run(
             "(() => { const s = document.querySelector('#bi-b-an-list select[data-param=t]');"
             " s.value = 'TestSolution'; s.dispatchEvent(new Event('change')); })()"
@@ -488,6 +492,8 @@ def test_vault_panel_and_dashboard_in_a_browser(
         # -- joining a folder that is not a vault ------------------------------------------
         click("#bi-b-v-join")
         set_value("bi-b-v-path", str(tmp_path))
+        # The state now shows before the page has finished loading the new vault.
+        wait("!document.getElementById('bi-b-v-go').disabled")
         click("#bi-b-v-go")
         wait("document.getElementById('bi-b-v-err').textContent.includes('repo.json')")
         size(390, 844, True)

@@ -42,7 +42,7 @@ import sqlite3
 import threading
 import time
 import uuid
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from contextlib import closing
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -56,6 +56,7 @@ PUBLISH_FORMAT = "aep.knowledge.publish/v1"
 REPO_FILE = "repo.json"
 README_FILE = "REPO.md"
 COMMITS_DIR = "commits"
+SYNC_STAMP_FILE = "sync_stamp.json"
 TAGS_DIR = "tags"
 PUBLISH_DIR = "publish"
 WITHDRAWN_DIR = "withdrawn"
@@ -818,12 +819,16 @@ class Repository:
             raise RepoError("source_withdrawn", f"{path} 已經撤回，不能再放回共用資料夾")
 
     def _files_state(
-        self, db: sqlite3.Connection, commit: CommitFile
+        self,
+        db: sqlite3.Connection,
+        commit: CommitFile,
+        gone: Mapping[str, Mapping[str, Any]] | None = None,
     ) -> tuple[list[str], list[str]]:
         """A commit's files that are missing, and those whose content differs.
         A withdrawn file is neither: its commit stays applied."""
         missing, changed = [], []
-        gone = self.withdrawn() if commit.data["files"] else {}
+        if gone is None:
+            gone = self.withdrawn() if commit.data["files"] else {}
         for item in commit.data["files"]:
             if gone.get(item["path"], {}).get("sha256") == item["sha256"]:
                 continue
@@ -836,16 +841,112 @@ class Repository:
 
     # -- sync -----------------------------------------------------------------
 
+    def _commits_stamp(self) -> str:
+        """A digest of the commit files' names, sizes and times; reads none of them."""
+        seen: list[tuple[str, str, int, int]] = []
+        root = self.folder / COMMITS_DIR
+        try:
+            authors = sorted(os.scandir(root), key=lambda e: e.name)
+        except OSError:
+            return ""
+        for author in authors:
+            if not author.is_dir():
+                seen.append((author.name, "", 0, 0))
+                continue
+            with os.scandir(author.path) as files:
+                for item in files:
+                    info = item.stat()
+                    seen.append((author.name, item.name, info.st_size, info.st_mtime_ns))
+        return hashlib.sha256(canonical(sorted(seen)).encode("utf-8")).hexdigest()
+
+    def _stamp_path(self) -> Path:
+        return self.local / SYNC_STAMP_FILE
+
+    def _remember_stamp(self, stamp: str, ready: Sequence[CommitFile], clean: bool) -> None:
+        """What `_nothing_arrived` compares with; only a sync with nothing waiting,
+        changed or unreadable may be skipped next time."""
+        if not clean or not stamp:
+            self._stamp_path().unlink(missing_ok=True)
+            return
+        files = {f["path"]: f["sha256"] for c in ready for f in c.data["files"]}
+        record = {"stamp": stamp, "applied": len(ready), "files": files}
+        # Local and under the lock: a fixed scratch name draws no random id.
+        scratch = self._stamp_path().with_suffix(".tmp")
+        scratch.write_text(json.dumps(record), encoding="utf-8")
+        replace_retrying(scratch, self._stamp_path())
+
+    def _nothing_arrived(self, db: sqlite3.Connection, stamp: str) -> bool:
+        """The commit files are what the last clean sync applied, and every file they
+        name is still there and the same (`_stored_sha` hashes only a changed one)."""
+        try:
+            record = json.loads(self._stamp_path().read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return False
+        if not stamp or record.get("stamp") != stamp:
+            return False
+        count = int(db.execute("SELECT COUNT(*) FROM applied").fetchone()[0])
+        if count != record.get("applied"):
+            return False
+        gone = self.withdrawn() if record["files"] else {}
+        return all(
+            gone.get(path, {}).get("sha256") == sha or self._stored_sha(db, path) == sha
+            for path, sha in record["files"].items()
+        )
+
+    def fingerprint(self) -> str:
+        """A digest of what a build from this repository reads: the applied commits,
+        this PC's local commits and uncommitted changes, open conflicts and withdrawals.
+        The same digest means the same build, whoever made the change."""
+        local = []
+        root = self.work / COMMITS_DIR
+        if root.is_dir():
+            for item in sorted(root.iterdir()):
+                info = item.stat()
+                local.append((item.name, info.st_size, info.st_mtime_ns))
+        try:
+            pending = hashlib.sha256(self._pending_path().read_bytes()).hexdigest()
+        except OSError:
+            pending = ""
+        with closing(self._connect()) as db:
+            applied = [
+                (r["file"], r["sha256"], r["commit_id"])
+                for r in db.execute("SELECT * FROM applied ORDER BY position")
+            ]
+            conflicts = [
+                (r["id"], r["status"], r["unit"], r["value"])
+                for r in db.execute("SELECT * FROM conflicts ORDER BY id")
+            ]
+        withdrawn = sorted((k, v["sha256"]) for k, v in self.withdrawn().items())
+        state = [applied, local, pending, conflicts, withdrawn]
+        return hashlib.sha256(canonical(state).encode("utf-8")).hexdigest()
+
+    def applied_ids(self) -> set[str]:
+        return {cid for _, cid in self._ordered()}
+
     def sync(self) -> dict[str, Any]:
         """Apply every pushed commit not applied yet, in order; rebuild from all
         commits when one arrived late with an earlier key or an applied one
-        changed or vanished."""
+        changed or vanished. Nothing arrived is told from the commit files' names,
+        sizes and times, with none of them read."""
         with self.lock:
+            stamp = self._commits_stamp()
+            with closing(self._connect()) as db:
+                if self._nothing_arrived(db, stamp):
+                    return {
+                        "applied": 0,
+                        "rebuilt": False,
+                        "conflicts": 0,
+                        "waiting": [],
+                        "changed": [],
+                        "bad": [],
+                        "incomplete": [],
+                    }
             scan = self.scan()
             with closing(self._connect()) as db:
                 waiting, changed, ready = [], [], []
+                gone = self.withdrawn()
                 for commit in scan.commits:
-                    missing, differs = self._files_state(db, commit)
+                    missing, differs = self._files_state(db, commit, gone)
                     if differs:
                         changed.append({"commit": commit.name, "files": differs})
                     elif missing:
@@ -865,6 +966,18 @@ class Repository:
                 if new and applied and not rebuild:
                     rebuild = min(c.key for c in new) < max(key for key, _ in applied.values())
                 todo = ready if rebuild else new
+                clean = not (waiting or changed or scan.bad or scan.incomplete)
+                if not todo and not rebuild:
+                    self._remember_stamp(stamp, ready, clean)
+                    return {
+                        "applied": 0,
+                        "rebuilt": False,
+                        "conflicts": 0,
+                        "waiting": waiting,
+                        "changed": changed,
+                        "bad": scan.bad,
+                        "incomplete": scan.incomplete,
+                    }
                 db.execute("BEGIN IMMEDIATE")
                 try:
                     if rebuild:
@@ -926,6 +1039,7 @@ class Repository:
                 except BaseException:
                     db.execute("ROLLBACK")
                     raise
+                self._remember_stamp(stamp, ready, clean)
             return {
                 "applied": len(todo),
                 "rebuilt": rebuild,

@@ -13254,12 +13254,28 @@ async function biBuildVault() {
       + "或把它轉成 vault。"));
     return;
   }
-  try { await biCall("/api/bi/vaults/" + vault.id + "/sync", {}); }
-  catch (failure) { box.append(bh("p", "bi-warn", "沒有同步：" + failure.message + "。")); }
+  // Show the local copy now; a sync that brought something updates the page after it.
   const state = await call("/api/bi/vaults/" + vault.id + "/status");
   if (seq !== bi.vaultSeq) return;
   biVaultState(state);
   askableLoad().catch((failure) => { el("bi-b-askable").textContent = failure.message; });
+  const synced = biCall("/api/bi/vaults/" + vault.id + "/sync", {}).then(async (reply) => {
+    if (seq !== bi.vaultSeq || !(reply.sync || {}).moved) return;
+    const newer = await call("/api/bi/vaults/" + vault.id + "/status");
+    // Redrawing resets what the person has open, so only for what came from outside:
+    // what they did here is already drawn by the action that did it.
+    const came = reply.sync.applied || reply.sync.rebuilt
+      || JSON.stringify(newer.reads) !== JSON.stringify(state.reads);
+    if (seq !== bi.vaultSeq || !came) return;
+    biVaultState(newer);
+    bi.loaded = {}; biRefreshCounts();
+  }).catch((failure) => {
+    if (seq === bi.vaultSeq) box.append(bh("p", "bi-warn", "沒有同步：" + failure.message + "。"));
+  });
+  // Says the panel has stopped changing by itself.
+  Promise.allSettled([synced, bi.analysesLoad]).then(() => {
+    if (seq === bi.vaultSeq) box.dataset.settled = String(seq);
+  });
 }
 
 async function biProposals() {
@@ -13408,7 +13424,8 @@ function biVaultState(state) {
     : "還沒有發佈過：Agent 讀的是大家已 push 的最新內容（不含你還沒 push 的改動）。";
   el("bi-b-ver").hidden = false; el("bi-b-skills").hidden = false;
   bi.verVault = v.id;
-  biAnalyses(v.id).catch((failure) => biNotice(false, "讀不到分析：" + failure.message));
+  bi.analysesLoad = biAnalyses(v.id)
+    .catch((failure) => biNotice(false, "讀不到分析：" + failure.message));
   biBench(v.id).catch((failure) => biNotice(false, "讀不到測試：" + failure.message));
   biVersions(v.id).catch((failure) => biNotice(false, "讀不到版本資訊：" + failure.message));
 }
