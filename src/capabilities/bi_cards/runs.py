@@ -92,7 +92,17 @@ def _similar(store: BiStore, entity_type: str, key: str) -> list[Any]:
 #: An AI run never settles these on a card that exists: a person does, on the proposal.
 PROTECTED_FIELDS = ("confidence", "evidence_grade")
 VERIFIED = "verified"
-MERGES = ("fill", "join", "proposal", "same", "human_kept", "bookkeeping", "take")
+MERGES = ("fill", "join", "proposal", "same", "human_kept", "bookkeeping", "take", "capped")
+
+
+def _fill(definition: Any, item: dict[str, Any]) -> None:
+    """An empty value is filled, but an AI run never writes `verified`: the highest level
+    below it is stored, and the model's claim is a proposal for a person."""
+    item["merge"] = "fill"
+    if item["field"] == "confidence" and item["value"] == VERIFIED:
+        lower = [v for v in (definition.enum or ()) if v != VERIFIED] if definition else []
+        item["capped"] = lower[0] if lower else None
+        item["merge"] = "capped"
 
 
 def _merge_field(definition: Any, item: dict[str, Any], stored: Any) -> None:
@@ -105,10 +115,10 @@ def _merge_field(definition: Any, item: dict[str, Any], stored: Any) -> None:
     protected = name in PROTECTED_FIELDS
     item["protected"] = protected
     item.pop("merged", None)
+    item.pop("capped", None)
     chosen = (item.get("take_new") or item.get("basis") == "human") and not protected
     if stored is None:
-        raises = name == "confidence" and value == VERIFIED
-        item["merge"] = "proposal" if raises else "fill"
+        _fill(definition, item)
     elif stored["value"] == value:
         item["merge"] = "same"
     elif chosen:
@@ -135,7 +145,10 @@ def merge_counts(candidates: list[dict[str, Any]]) -> dict[str, int]:
         if candidate.get("review") == "rejected" or candidate.get("action") == "skip":
             continue
         for item in candidate["fields"]:
-            if candidate.get("match") == "existing" and item.get("merge") in counts:
+            if item.get("merge") == "capped":
+                counts["capped"] += 1
+                counts["proposal"] += 1  # the model's claim, wherever the card is new or not
+            elif candidate.get("match") == "existing" and item.get("merge") in counts:
                 counts[item["merge"]] += 1
             counts["proposal"] += len(item.get("alternatives") or ())
     return counts
@@ -185,7 +198,8 @@ def evaluate(store: BiStore, reg: Registry, candidate: dict[str, Any]) -> dict[s
         stored = current.get(item["field"])
         item["current"] = None if stored is None else stored["value"]
         if card is None:
-            item["merge"], item["protected"] = "fill", False
+            item["protected"], _ = False, item.pop("capped", None)
+            _fill(entity.get(item["field"]), item)
         else:
             _merge_field(entity.get(item["field"]), item, stored)
         if stored is None:
@@ -942,11 +956,20 @@ def _planned(
             propose.add(name)
         elif how == "join":
             values[name] = item["merged"]
+        elif how == "capped":
+            # What is written is not what the evidence said: that goes with the proposal.
+            if item.get("capped") is None:
+                values.pop(name, None)
+            else:
+                values[name] = item["capped"]
+            alternatives[name] = [
+                {"value": item["value"], "basis": item["basis"], "evidence": item["evidence"]}
+            ]
         elif how == "take":
             overwrite.add(name)
         elif how == "bookkeeping" and not item.get("later"):
             values.pop(name, None)
-        if item.get("alternatives"):
+        if item.get("alternatives") or name in alternatives:
             alternatives[name] = [
                 {
                     **other,
@@ -959,7 +982,7 @@ def _planned(
                         for e in other.get("evidence") or ()
                     ],
                 }
-                for other in item["alternatives"]
+                for other in [*alternatives.get(name, ()), *(item.get("alternatives") or ())]
             ]
     return PlannedRow(
         row=number,
@@ -983,7 +1006,7 @@ def _planned(
                 for item in f["evidence"]
             ]
             for f in candidate["fields"]
-            if f["evidence"]
+            if f["evidence"] and not (merge and f.get("merge") == "capped")
         },
     )
 

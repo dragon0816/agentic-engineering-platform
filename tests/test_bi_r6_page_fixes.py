@@ -219,5 +219,56 @@ def test_the_page_follows_the_source_and_decides_proposals(served: Any, tmp_path
             raise AssertionError(said) from None
         assert BiStore(workspace, dataset).fields(CARD)["summary"]["value"] == "新的一句"
         assert "commit" in run("document.getElementById('bi-notice').textContent")
+
+        # -- many at once: filter, one reason, a confirmation with the count ------------------
+        store = BiStore(workspace, dataset)
+        for key in ("FAKE-B1", "FAKE-B2"):
+            for values, propose in (
+                ({"body": "舊", "confidence": "assumed"}, frozenset()),
+                ({"body": "新", "confidence": "verified"}, frozenset({"body", "confidence"})),
+            ):
+                store.apply(
+                    [
+                        PlannedRow(
+                            row=1,
+                            entity_type="Technology",
+                            canonical_key=key,
+                            name=key,
+                            values={"name": key, **values},
+                            synthetic=False,
+                            ref="bulk-page.md#1",
+                            propose=propose,
+                        )
+                    ],
+                    filename="c.csv",
+                    entity_type="Technology",
+                    actor="alice",
+                )
+        click("#bi-b-v-sync")
+        wait("document.getElementById('bi-b-props-h').textContent.includes('4 筆')")
+        # All shown, but `confidence` is left out until the filter names it.
+        wait("document.getElementById('bi-b-props-accept').textContent.includes('2 筆')")
+        click("#bi-b-props-accept")
+        wait("document.getElementById('bi-b-props-confirm').textContent.includes('請寫下理由')")
+        put("bi-b-props-reason", "這批看過了")
+        click("#bi-b-props-accept")
+        wait("document.getElementById('bi-b-props-confirm').textContent.includes('另有 2 筆')")
+        assert len(BiStore(workspace, dataset).pending_proposals()) == 4  # nothing yet
+        click("#bi-b-props-confirm .go")
+        wait("document.getElementById('bi-b-props-h').textContent.includes('2 筆')")
+        for key in ("FAKE-B1", "FAKE-B2"):
+            card = card_id_for("Technology", key)
+            assert BiStore(workspace, dataset).fields(card)["body"]["value"] == "新"
+            assert BiStore(workspace, dataset).fields(card)["confidence"]["value"] == "assumed"
+
+        run(
+            "(() => { const s = document.getElementById('bi-b-props-field');"
+            " s.value = 'confidence'; s.dispatchEvent(new Event('change')); })()"
+        )
+        wait("document.getElementById('bi-b-props-reject').textContent.includes('2 筆')")
+        put("bi-b-props-reason", "沒有依據")
+        click("#bi-b-props-reject")
+        click("#bi-b-props-confirm .go")
+        wait("document.getElementById('bi-b-props').hidden === true")
     finally:
         browser.close()

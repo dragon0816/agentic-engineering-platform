@@ -459,6 +459,8 @@ def _route(
                 workspace, parts[4], given.get("to"), given.get("preview_token"), who
             )
             return 200, {"ok": True, **done}
+    if path == "/api/bi/proposals/decide":
+        return _decide_shown_proposals(workspace, who, given)
     if path == "/api/bi/reruns/preview":
         dataset = _dataset(given.get("dataset"))
         return 200, {"ok": True, **rerun.preview(workspace, dataset, ai, given, who)}
@@ -805,6 +807,7 @@ def _decide_proposal(
 #: Store refusals that are conflicts with the current state (409).
 CONFLICTS = {
     "stale_edit",
+    "proposals_changed",
     "skill_changed",
     "name_taken",
     "analysis_stale",
@@ -879,6 +882,42 @@ def _create_dataset(workspace: Path, given: dict[str, Any]) -> Answer:
     }
 
 
+def _proposal_origin(item: dict[str, Any]) -> str:
+    """Where a proposal came from, for filtering: its source file, else its reference."""
+    for found in item.get("evidence") or ():
+        if found.get("source_name"):
+            return str(found["source_name"])
+    ref = str(item["source"].get("ref") or item["source"].get("kind") or "")
+    return ref.split("#", 1)[0].split("/", 1)[0]
+
+
+def _decide_shown_proposals(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
+    """Accept or reject every proposal a filter shows. `count` is what the person saw, so
+    a list that moved refuses. A field a run may not settle (`runs.PROTECTED_FIELDS`) is
+    only included when the filter names that field."""
+    store = BiStore(workspace, _dataset(given.get("dataset")))
+    action = given.get("action")
+    if action not in ("accept", "reject"):
+        return _error(400, "action_invalid", "action 只能是 accept 或 reject")
+    reason = str(given.get("reason") or "").strip()
+    if not reason:
+        return _error(400, "reason_required", "一次決定多筆要寫理由")
+    field, origin = given.get("field") or None, given.get("origin") or None
+    shown = [
+        item
+        for item in _pending_proposals(store)
+        if (field is None or item["field"] == field)
+        and (origin is None or item["origin"] == origin)
+    ]
+    chosen = [i for i in shown if i["field"] == field or i["field"] not in runs.PROTECTED_FIELDS]
+    if len(chosen) != given.get("count"):
+        return _error(409, "proposals_changed", "待審提案已經變了，請重新確認筆數")
+    done = store.decide_proposals(
+        [(i["card_id"], int(i["id"])) for i in chosen], action, reason, who
+    )
+    return 200, {"ok": True, **done, "left_out": len(shown) - len(chosen)}
+
+
 def _pending_proposals(store: BiStore) -> list[dict[str, Any]]:
     """What a person needs to decide each pending proposal: the field in words, and the
     evidence the current value rests on, beside where the proposed one came from."""
@@ -893,6 +932,8 @@ def _pending_proposals(store: BiStore) -> list[dict[str, Any]]:
             {
                 **item,
                 "label": definition.label if definition else item["field"],
+                "origin": _proposal_origin(item),
+                "protected": item["field"] in runs.PROTECTED_FIELDS,
                 "needs_reason": bool(definition and definition.klass == "judgement"),
                 "current_evidence": [
                     {k: e.get(k) for k in ("source_name", "excerpt", "basis")}

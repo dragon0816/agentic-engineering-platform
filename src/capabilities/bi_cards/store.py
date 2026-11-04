@@ -1126,6 +1126,43 @@ class BiStore:
             for r in rows
         ]
 
+    def decide_proposals(
+        self, chosen: list[tuple[str, int]], action: str, reason: str, actor: str
+    ) -> dict[str, int]:
+        """Many proposals in one write, so one commit and one rebuild. Accepting writes
+        each as a person's value and settles the others on its field, as one by one does."""
+        self.refuse_write()
+        at = now()
+        counts = {"decided": 0, "superseded": 0}
+        with self._db(write=True) as db:
+            for card_id, proposal_id in chosen:
+                row = db.execute(
+                    "SELECT * FROM proposals WHERE id = ? AND card_id = ? AND status = 'pending'",
+                    (proposal_id, card_id),
+                ).fetchone()
+                if row is None:
+                    counts["superseded"] += 1  # an accept on its field settled it
+                    continue
+                counts["decided"] += 1
+                if action == "reject":
+                    db.execute(
+                        "UPDATE proposals SET status = 'rejected', reason = ? WHERE id = ?",
+                        (reason, proposal_id),
+                    )
+                    continue
+                stored = db.execute(
+                    "SELECT * FROM fields WHERE card_id = ? AND field = ?",
+                    (card_id, row["field"]),
+                ).fetchone()
+                self._write_person_value(
+                    db, card_id, row["field"], _load(row["value"]), stored, actor, at, reason
+                )
+                db.execute(
+                    "UPDATE cards SET version = version + 1, updated = ? WHERE id = ?",
+                    (at, card_id),
+                )
+        return counts
+
     def reject_proposal(self, card_id: str, proposal_id: int, reason: str = "") -> bool:
         """Close one pending proposal without touching the card."""
         self.refuse_write()

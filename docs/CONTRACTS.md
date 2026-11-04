@@ -6699,3 +6699,7 @@ An AI run's values meet a card as an import's do (`docs/phases/BI_CARD_PAGE_IMPO
 `take` is a person's choice: `POST /api/bi/runs/<id>/candidates/<cid> {take_new: {field: true|false}}`, or editing the field. **`confidence` and `evidence_grade` are protected:** on a card that exists, a differing value is always a proposal, and an empty `confidence` is a proposal when the value is `verified` (400 `field_protected` on `take_new`). A value that differs inside one run stays as the field's `alternatives`, shown in the review and written as a proposal; the warning `value_conflict` stays.
 
 A `proposal:` unit may hold `evidence`, and `proposals` gains that column. `GET /api/bi/proposals`: `evidence` is now the proposed value's, `current_evidence` the current value's.
+
+An AI run never writes `confidence: verified`, on a new card or an empty field: `merge` is `capped`, the highest lower level is stored with no evidence, and the claim is a proposal with its evidence.
+
+`GET /api/bi/proposals` items gain `origin` (the source file, else the reference) and `protected`. `POST /api/bi/proposals/decide {dataset, action, reason, field?, origin?, count}` → `{decided, superseded, left_out}` decides every proposal the filters show in one write. A reason is required (400 `reason_required`). `count` is what the person confirmed (409 `proposals_changed`). `confidence` and `evidence_grade` are included only when `field` names them.

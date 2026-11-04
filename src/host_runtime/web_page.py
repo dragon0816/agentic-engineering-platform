@@ -2583,6 +2583,15 @@ tr:last-child td { border-bottom: none; }
               <h4 id="bi-b-props-h">待審提案</h4>
               <p class="bi-meta">來源和卡片上的值不一樣時，不會直接覆蓋，要由你逐筆決定。
                 決定後要 commit、push，同事才看得到。</p>
+              <div class="bi-actions" id="bi-b-props-bulk">
+                <label class="bi-meta">欄位 <select id="bi-b-props-field"></select></label>
+                <label class="bi-meta">來源 <select id="bi-b-props-origin"></select></label>
+                <input id="bi-b-props-reason" class="bi-input" maxlength="500"
+                  placeholder="一次決定多筆的理由（必填）" aria-label="一次決定多筆的理由">
+                <button class="bi-btn" id="bi-b-props-accept" type="button">接受顯示的全部</button>
+                <button class="bi-btn" id="bi-b-props-reject" type="button">否決顯示的全部</button>
+              </div>
+              <div id="bi-b-props-confirm" role="alert"></div>
               <ul id="bi-b-props-list" class="bi-fit"></ul>
             </div>
             <div class="bi-actions">
@@ -13049,7 +13058,6 @@ async function biBuildVault() {
   if (seq !== bi.vaultSeq) return;
   biVaultState(state);
   askableLoad().catch((failure) => { el("bi-b-askable").textContent = failure.message; });
-  biProposals().catch((failure) => { el("bi-b-props-list").textContent = failure.message; });
 }
 
 async function biProposals() {
@@ -13057,11 +13065,73 @@ async function biProposals() {
   const dataset = biDataset();
   const reply = await call("/api/bi/proposals?dataset=" + encodeURIComponent(dataset));
   if (dataset !== biDataset()) return;
-  const items = reply.proposals || [];
-  el("bi-b-props").hidden = !items.length;
-  el("bi-b-props-h").textContent = "待審提案（" + items.length + " 筆）";
-  el("bi-b-props-list").replaceChildren(...items.map((item) => biProposalRow(item, dataset)));
+  bi.proposals = reply.proposals || [];
+  el("bi-b-props").hidden = !bi.proposals.length;
+  el("bi-b-props-h").textContent = "待審提案（" + bi.proposals.length + " 筆）";
+  el("bi-b-props-confirm").replaceChildren();
+  const fill = (id, values, label) => {
+    const pick = el(id), kept = pick.value;
+    pick.replaceChildren(bh("option", "", "全部"));
+    pick.options[0].value = "";
+    for (const value of [...new Set(values)].sort()) {
+      const option = bh("option", "", label(value)); option.value = value; pick.append(option);
+    }
+    pick.value = [...pick.options].some((o) => o.value === kept) ? kept : "";
+  };
+  const labels = Object.fromEntries(bi.proposals.map((p) => [p.field, p.label]));
+  fill("bi-b-props-field", bi.proposals.map((p) => p.field), (f) => labels[f] || f);
+  fill("bi-b-props-origin", bi.proposals.map((p) => p.origin), (o) => o);
+  biProposalsShown();
 }
+
+function biProposalsShown() {
+  // Which proposals the filters show, and which of them 「全部」 would decide: a protected
+  // field (`confidence`, `evidence_grade`) only when the filter names it.
+  const field = el("bi-b-props-field").value, origin = el("bi-b-props-origin").value;
+  const shown = (bi.proposals || []).filter((p) => (!field || p.field === field)
+    && (!origin || p.origin === origin));
+  const chosen = shown.filter((p) => p.field === field || !p.protected);
+  el("bi-b-props-confirm").replaceChildren();
+  el("bi-b-props-accept").textContent = "接受顯示的全部（" + chosen.length + " 筆）";
+  el("bi-b-props-reject").textContent = "否決顯示的全部（" + chosen.length + " 筆）";
+  el("bi-b-props-accept").disabled = el("bi-b-props-reject").disabled = !chosen.length;
+  el("bi-b-props-list").replaceChildren(...shown.map((item) => biProposalRow(item, biDataset())));
+  return {field, origin, shown, chosen};
+}
+
+function biProposalsAll(action) {
+  // One reason, and a second click on what will happen and how many.
+  const {field, origin, shown, chosen} = biProposalsShown();
+  const box = el("bi-b-props-confirm"), reason = el("bi-b-props-reason");
+  if (!reason.value.trim()) {
+    box.append(bh("p", "bi-err", "請寫下理由。")); reason.focus(); return;
+  }
+  const left = shown.length - chosen.length;
+  const yes = biButton("確定" + (action === "accept" ? "接受 " : "否決 ") + chosen.length + " 筆",
+    async () => {
+      yes.disabled = true;
+      try {
+        const done = await biCall("/api/bi/proposals/decide", {dataset: biDataset(), action,
+          reason: reason.value.trim(), field: field || null, origin: origin || null,
+          count: chosen.length});
+        reason.value = "";
+        biNotice(true, "已決定 " + done.decided + " 筆提案；要 commit 才會寫進知識庫。");
+        await biBuildVault();
+      } catch (failure) {
+        box.replaceChildren(bh("p", "bi-err", failure.message + "。"));
+        await biProposals();
+      }
+    }, "go");
+  box.append(bh("p", "bi-warn", "將" + (action === "accept" ? "接受 " : "否決 ") + chosen.length
+    + " 筆提案" + (left ? "；另有 " + left + " 筆 confidence 或 evidence_grade 不包含在內，"
+      + "要先篩選到那個欄位" : "") + "。"), yes,
+  biButton("取消", () => box.replaceChildren(), "bi-btn"));
+}
+
+el("bi-b-props-field").addEventListener("change", biProposalsShown);
+el("bi-b-props-origin").addEventListener("change", biProposalsShown);
+el("bi-b-props-accept").addEventListener("click", () => biProposalsAll("accept"));
+el("bi-b-props-reject").addEventListener("click", () => biProposalsAll("reject"));
 
 function biProposalRow(item, dataset) {
   const reason = bh("input", "bi-input");
@@ -13098,6 +13168,8 @@ function biProposalRow(item, dataset) {
 function biVaultState(state) {
   const box = el("bi-b-v-state"), v = state.vault || {};
   box.replaceChildren();
+  // Whatever moved the vault (a sync, an import, a commit) may have moved its proposals.
+  biProposals().catch((failure) => { el("bi-b-props-list").textContent = failure.message; });
   const open = (state.conflicts || []).filter((c) => c.open).length;
   box.append(bh("p", "", bh("strong", "", v.title || v.id), "・" + (v.purpose || "（沒有寫目的）")),
     bh("p", "bi-meta", "共用資料夾：" + v.path + "・你的作者名稱：" + v.author));
@@ -15507,6 +15579,7 @@ function biBuildShowCandidate(candidateId) {
       "儲存 " + item.field);
     save.disabled = !open;
     const merged = {fill: "填入", join: "合併清單", same: "相同", take: "你選了新值",
+      capped: "AI 不能寫 verified：存 " + (item.capped || "（空）") + "，另成提案",
       proposal: "值不同，變成提案，不會覆蓋", human_kept: "保留人工值，改成提案",
       bookkeeping: "記錄用欄位"}[item.merge];
     const take = open && !item.protected && (item.merge === "proposal" || item.merge === "take"

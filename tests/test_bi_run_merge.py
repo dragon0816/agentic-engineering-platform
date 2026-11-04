@@ -180,14 +180,74 @@ def test_a_run_never_settles_confidence_or_evidence_grade(tmp_path: Path) -> Non
     assert held["value"] == "verified" and held["kind"] == "human"
 
 
-def test_an_empty_confidence_is_not_filled_with_verified(tmp_path: Path) -> None:
+def test_an_ai_run_never_writes_verified_even_on_a_new_card(tmp_path: Path) -> None:
     _, _, dataset, a, _ = _two_pcs(tmp_path)
-    _seed(a, dataset)
-    run_id = _run(a, dataset, _answer(confidence=_fact("verified"), evidence_grade=_fact("D")))
+    for seeded in (False, True):  # a new card, then a card with the field empty
+        name = "FAKE-NEW" if not seeded else KEY
+        if seeded:
+            _seed(a, dataset)
+        fields = {"name": _fact(name, "FAKE-LINK" if seeded else "FAKE"),
+                  "supplier": _fact("FAKE-A"), "customer": _fact("FAKE-B", "FAKE-B"),
+                  "confidence": _fact("verified")}  # fmt: skip
+        answer = {"candidates": [{"entity_type": KIND, "name": name, "fields": fields}]}
+        run_id = _run(a, dataset, answer)
+        merge = _detail(a, dataset, run_id)["run"]["merge"]
+        assert (merge["capped"], merge["proposal"]) == (1, 1), name
+        _accept_and_commit(a, dataset, run_id)
+        store = BiStore(a, dataset)
+        card = store.find(KIND, name)
+        assert card is not None
+        assert store.fields(card["id"])["confidence"]["value"] == "assumed", name
+        claims = [
+            p
+            for p in _ok(_call(a, "GET", "/api/bi/proposals", dataset=dataset))["proposals"]
+            if p["card_id"] == card["id"] and p["field"] == "confidence"
+        ]
+        assert [p["value"] for p in claims] == ["verified"], name
+        assert claims[0]["evidence"][0]["excerpt"]  # the model's claim keeps its evidence
+        # The stored level does not rest on evidence that said something else.
+        assert not [e for e in store.evidence(card["id"]) if e["field"] == "confidence"]
+
+
+def test_many_proposals_can_be_decided_at_once_with_one_reason(tmp_path: Path) -> None:
+    _, vault_id, dataset, a, _ = _two_pcs(tmp_path)
+    _seed(a, dataset, product="舊的", body="舊的內文", confidence="assumed")
+    run_id = _run(
+        a,
+        dataset,
+        _answer(product=_fact("新的"), body=_fact("新的內文"), confidence=_fact("verified")),
+    )
     _accept_and_commit(a, dataset, run_id)
-    assert _value(a, dataset, "confidence") is None
+    assert not vault.Vault(a, vault_id).repo._pending()["sets"]
+    pending = _pending(a, dataset)
+    assert sorted(pending) == ["body", "confidence", "product"]
+    origin = pending["body"]["origin"]
+    assert "note.md" in origin and pending["confidence"]["protected"] is True
+
+    def decide(**given: Any) -> Any:
+        body = {"dataset": dataset, "action": "accept", "reason": "看過了", **given}
+        return _post(a, "/api/bi/proposals/decide", body)
+
+    status, body = decide(count=2, reason=" ")
+    assert (status, body["code"]) == (400, "reason_required")
+    # The count is what the person saw; `confidence` is left out unless filtered to it.
+    status, body = decide(count=3)
+    assert (status, body["code"]) == (409, "proposals_changed")
+    assert sorted(_pending(a, dataset)) == ["body", "confidence", "product"]
+
+    done = _ok(decide(count=2, origin=origin))
+    assert (done["decided"], done["left_out"]) == (2, 1)
+    assert _value(a, dataset, "product") == "新的" and _value(a, dataset, "body") == "新的內文"
+    assert _value(a, dataset, "confidence") == "assumed"
     assert list(_pending(a, dataset)) == ["confidence"]
-    assert _value(a, dataset, "evidence_grade") == "D"  # empty, so it overwrites nothing
+    # One write: one set of changes for one commit, and the reason is in the history.
+    history = BiStore(a, dataset).history(CARD)
+    assert any(h["field"] == "product" and h["reason"] == "看過了" for h in history)
+
+    # Filtered to the protected field, a rejection includes it.
+    done = _ok(decide(count=1, field="confidence", action="reject", reason="沒有依據"))
+    assert done["decided"] == 1 and _pending(a, dataset) == {}
+    assert _value(a, dataset, "confidence") == "assumed"
 
 
 def test_a_value_that_differs_inside_a_run_becomes_a_proposal(tmp_path: Path) -> None:
