@@ -6398,3 +6398,8 @@ Owner's bugs, relayed by the BI orchestrator: no Signal card could be found thou
 - **A list and what it opens sit side by side at one height, each scrolling on its own** (`.bi-split`): cards and their detail, sources and their Markdown. 看／改 was out of view below a long table, and a failed load was reported at the top of the page. Both now show in the pane. Stacked on a phone, the page goes to the pane.
 - **The sources table follows the 領域 chosen,** which also keeps deciding the folder a new file goes to. 「不指定資料夾」 shows every source.
 - **摘要, 用途, 範圍 come first on a card.** With no summary it says 「沒有摘要」; nothing stands in for it.
+
+
+## 2026-11-05: Empty reading fields are filled by a run over each card's own text
+
+The owner's rules: through ingest, only the card's own source text, fill only, reviewed. A run of its own, one call per card, whose candidates go through the existing review, merge and commit. Headings and evidence notes reach the model, since removing them made a card's unconfirmed supply link read as fact. Quotes are checked word for word in code. Rejected: another AI ingest of each page, whose full extraction would raise proposals on fields nobody asked about; and page import calling a model, which is what keeps it free and predictable. `scope` waits for the owner: a third of its values were true but no scope.

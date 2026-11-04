@@ -26,6 +26,8 @@ from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import BiStore, BiStoreError, PlannedRow, new_states
 
 MAX_PAGES = 5000
+#: Unicode's private use area: where Windows' Big5 table puts bytes it cannot read.
+_PRIVATE_USE = re.compile("[\ue000-\uf8ff]")
 MAX_EXCERPT = 500
 MAX_PREVIEWS = 10
 _KEY = re.compile(r"^([A-Za-z_][\w-]*)\s*:\s*(.*)$")
@@ -571,6 +573,27 @@ def _new_evidence(
     return set(planned.values) - cited
 
 
+def garbled_name(name: str) -> bool:
+    """A file name of UTF-8 bytes once read as Big5, as an unpacking on Windows leaves it:
+    such a name is no name of the source, and evidence would carry it for good."""
+    if name.isascii():
+        return False
+    if _PRIVATE_USE.search(name):
+        return True
+    try:
+        return name.encode("cp950").decode("utf-8") != name
+    except UnicodeError:
+        return False
+
+
+def _source_name(path: str, planned: PlannedRow) -> str:
+    """The name a page is kept under: its file's, or its card's when the file's is garbled."""
+    pure = PurePosixPath(path)
+    if not garbled_name(pure.name):
+        return pure.name
+    return re.sub(r'[\\/:*?"<>|]', "-", str(planned.name)) + pure.suffix
+
+
 def apply(
     store: BiStore, prepared: PagePreview, *, actor: str, folder: Any = None
 ) -> dict[str, Any]:
@@ -594,7 +617,10 @@ def apply(
                 continue
             if path not in sources:
                 sources[path] = staging.add_source(
-                    PurePosixPath(path).name, text=prepared.pages[path], folder=folder, actor=actor
+                    _source_name(path, planned),
+                    text=prepared.pages[path],
+                    folder=folder,
+                    actor=actor,
                 )
             proof = _evidence(prepared, path, planned, sources[path], number)
             if fresh is not None:

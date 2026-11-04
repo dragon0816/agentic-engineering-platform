@@ -1,5 +1,13 @@
 # Handoff
 
+## Filling card summaries (2026-11-05, Claude Code worker D) — waiting for the word on the full run
+
+Branch `bi-summary-fill` off main `6bf0a301`, not pushed. Built: `reading_runs.py`, `POST /api/bi/runs {reading: true}`; a garbled file name no longer becomes a source's name. Findings, how to start it, what repairing old records takes: `docs/phases/BI_SUMMARY_FILL.md`. CI's checks and targeted tests pass; no full suite. Nothing written to the real vault.
+
+**Open:** the page cannot open a run started through the API (`web_page.py`, not touched); the 13 unmarked demo cards, listed in `.scratch/summary-fill-skipped-demo-cards.md`, git-ignored, with `skip` ids in `.scratch/sum-skip.json`. A real run needs Agent Web restarted on this code.
+
+**Next, on the orchestrator's word:** merge, restart, run with `skip` on the real vault, the owner reviews, commit.
+
 ## BI page redesign, S1 done (2026-11-05, Claude Code)
 
 **Goal.** The owner found the BI Knowledge page too hard to use and chose the whole redesign before release, even if the date slips. Rule: 「ui請以簡單為主，善用table，menu/comobox」. Design and slices `docs/phases/BI_PAGE_SIMPLE.md`; decisions `docs/DECISIONS.md` 2026-11-05.

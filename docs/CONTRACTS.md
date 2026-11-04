@@ -6717,6 +6717,14 @@ An AI run never writes `confidence: verified`, on a new card or an empty field: 
 **An identical request reuses its answer** (`capabilities/bi_cards/answer_cache.py`), per PC in `<dataset>/answer_cache/`, keyed by messages, model alias, output limit and contract; failures and wrong shapes are not kept, and a withdrawn source clears them. `POST /api/bi/runs` takes `fresh: true` to ask anyway. `run.answers`: `{reused, asked, input_tokens, output_tokens}`.
 
 **A domain from the application.** `POST /api/bi/import/pages/preview` takes `folder`: a row with no domain takes that application's, marked `inference`, and merges as any value; a one-domain card that holds one keeps it; a library folder gives none. `POST /api/bi/vaults/<id>/fill-domains {confirm?}` → `{fill, by_domain, left, applied, purpose?}` gives cards with no domain their applications' domains in one commit; without `confirm` it writes nothing.
+## BI: a run that fills empty reading fields (2026-11-05)
+
+Design and measurements: `docs/phases/BI_SUMMARY_FILL.md`. Code: `capabilities/bi_cards/reading_runs.py`. A page import uses no model, so it leaves `summary` and `usage` empty; a page's body stays a source of its card.
+
+`POST /api/bi/runs {dataset, kind: "trial"|"ingest", reading: true, skip?: [card id, key or name], card_ids?: [card id], fresh?}` starts it, one model call per card, for cards missing `reading_runs.FIELDS` that are not samples and have text of their own: a card page's body and the card's `body` field. Refused: `reading_nothing` when no card qualifies, `reading_invalid`, `model_unavailable`, `classification_not_approved`. The run is an ordinary AI run: `GET /api/bi/runs/<id>`, candidate review and commit as usual, retry for failed cards, with `method_ref` `llm:reading`. A candidate's fields are `basis: inference` with one piece of evidence, its `excerpt` found word for word in the text sent, or the value is dropped with `evidence_not_found`. Each merges as `fill`; a value filled since stays, with the new one a proposal. A run warning `reading_left_empty` says how many cards stayed empty.
+
+`POST /api/bi/import/pages/apply`: a page whose file name is garbled (`page_import.garbled_name`) is kept under its card's name.
+
 ## `bi__query`: the words of `text` (2026-11-04)
 
 `text` is words, each on the card in any field, not one string in one field; the card list's `q` too. In `bi__query` only: when no card holds them all and there are at least two words, `cards` are those holding at least two, most first, and `scope_note` says they may not be the answer. With none at all, `scope_note` asks for shorter words before saying "no data".

@@ -534,3 +534,29 @@ def test_the_page_previews_and_imports_a_chosen_folder(tmp_path: Path) -> None:
             page.click_text("#bi-b-pages-plan", "確認匯入")
             page.notice("已匯入卡片頁")
     assert BiStore(ws, "lab").find("Technology", "FAKE-TSN") is not None
+
+
+@pytest.mark.parametrize(
+    ("name", "garbled"),
+    [
+        ("鴻海.md", False),
+        ("R&S 機器人 Wi-Fi-藍牙射頻測試方案.md", False),
+        ("plain.md", False),
+        ("暾餅絲.md", True),  # 鴻海's UTF-8 bytes read as Big5
+        ("隞\uef3b窄.md", True),  # 仁寶's, with a byte only the private use area holds
+    ],
+)
+def test_a_garbled_file_name_is_told_from_a_real_one(name: str, garbled: bool) -> None:
+    assert page_import.garbled_name(name) is garbled
+
+
+def test_a_garbled_file_name_is_not_what_evidence_names(tmp_path: Path) -> None:
+    ws, dataset = _dataset(tmp_path)
+    pages = [{"path": "BI/Technology/暾餅絲.md", "text": TECH}, *PAGES[1:2]]
+    _apply(ws, _preview(ws, dataset, pages)["preview_id"])
+    assert {s["name"] for s in Staging(ws, dataset).sources()} == {"FAKE-TSN.md", "L1-Fake-Node.md"}
+    store = BiStore(ws, dataset)
+    card = store.find("Technology", "FAKE-TSN")
+    assert card is not None
+    shown = {e["source_name"] for e in store.evidence(card["id"])}
+    assert shown == {"FAKE-TSN.md"}

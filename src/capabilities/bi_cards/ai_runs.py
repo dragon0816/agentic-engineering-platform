@@ -301,7 +301,12 @@ def _work(
 ) -> None:
     staging = Staging(workspace, dataset)
     try:
-        _extract(staging, run_id, model, alias, only=only)
+        if (staging.layout(run_id) or {}).get("reading"):
+            from capabilities.bi_cards import reading_runs
+
+            reading_runs.extract_all(staging, run_id, model, alias, only=only)
+        else:
+            _extract(staging, run_id, model, alias, only=only)
     except Exception as failure:  # noqa: BLE001 - the run shows every failure
         staging.set_status(run_id, "failed", error=f"extract_failed: {type(failure).__name__}")
 
