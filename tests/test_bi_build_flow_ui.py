@@ -219,8 +219,11 @@ def test_the_whole_build_flow(
         page.click("#bi-b-trial")
         page.see("bi-b-trial-result", "AI 沒有建立候選卡，它的說明：這份來源沒有客戶說的話")
         answer["now"] = MEETING_ANSWER
+        # The same request would repeat the empty answer; the person asks anew.
+        page.click("#bi-b-fresh")
         page.click("#bi-b-trial")
         page.see("bi-b-trial-result", "A 公司評估 TSN")
+        page.click("#bi-b-fresh")
         page.see("bi-b-trial-result", "試跑完成")
         assert "A 公司評估 TSN" in page.text_of("bi-b-trial-result")
         assert len(store.card_rows()) == before  # a trial writes nothing

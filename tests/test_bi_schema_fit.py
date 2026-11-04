@@ -68,7 +68,8 @@ def _run(ws: Path, dataset: str, *items: dict[str, Any], kind: str = "ingest") -
     source = _ok(_post(ws, "/api/bi/sources", body))["source"]["id"]
     jobs = Jobs()
     model = Scripted({"candidates": [CANDIDATE], "items": list(items)})
-    given = {"dataset": dataset, "kind": kind, "source_id": source, "folder": FOLDER}
+    # A different scripted answer to the same request: not the kept one.
+    given = {"dataset": dataset, "kind": kind, "source_id": source, "folder": FOLDER, "fresh": True}
     run = _ok(_post(ws, "/api/bi/runs", given, _runtime(model, jobs)))["run"]
     jobs.run_all()
     return str(run["id"]), model
