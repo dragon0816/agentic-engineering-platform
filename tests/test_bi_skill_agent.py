@@ -10,6 +10,7 @@ Both models are scripted; all data is fictional.
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +19,7 @@ from test_bi_vault import _call, _ok
 from test_business_cards_conversation import Conversation
 from test_host_wiring import ready
 
+from capabilities.bi_cards import vault
 from capabilities.bi_cards.ai_runs import AiRuntime
 from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import BiStore
@@ -34,6 +36,8 @@ TOOLS = {
     "bi_skill__compare",
     "bi_skill__test_cases",
     "bi_skill__benchmark",
+    "bi_skill__draft_tool",
+    "bi_skill__try_tool",
     "bi_skill__suggest",
     "bi__query",
 }
@@ -131,3 +135,88 @@ def test_the_agent_tries_its_draft_and_its_suggestion_is_checked(tmp_path: Path)
     listed = _ok(_call(ws, "GET", f"/api/bi/vaults/{made['vault']['id']}/skills"))
     classify = next(s for s in listed["skills"] if s["name"] == "classify")
     assert classify["revision"] == 1 and classify["body"] != NEW_BODY
+
+
+def test_the_agent_proposes_a_tool_and_tries_it_only_once_approved(tmp_path: Path) -> None:
+    config, layout = ready(tmp_path)
+    skill_packs.install_bundle(layout, None, shipped=shipped())
+    ws = layout.workspace_root
+    shared = tmp_path / "shared"
+    shared.mkdir()
+    made = _ok(_call(ws, "POST", "/api/bi/vaults", {
+        "path": str(shared), "title": "Market", "purpose": "虛構", "schema": "bi.schema/v1.1",
+        "author": "alice"}))  # fmt: skip
+    dataset, vault_id = made["vault"]["dataset"], made["vault"]["id"]
+    source = _ok(_call(ws, "POST", "/api/bi/sources", {
+        "dataset": dataset, "name": "meeting.md", "text": NOTE,
+        "classification": "UNCLASSIFIED"}))["source"]["id"]  # fmt: skip
+    secret = _ok(_call(ws, "POST", "/api/bi/sources", {
+        "dataset": dataset, "name": "secret.md", "text": "虛構機密",
+        "classification": "RESTRICTED"}))["source"]["id"]  # fmt: skip
+    code = (
+        "import os\n"
+        "text = open(INPUT, encoding='utf-8').read()\n"
+        "open(os.path.join(OUTPUT, 'out.md'), 'w', encoding='utf-8').write('# ' + text)\n"
+    )
+    sha = hashlib.sha256(code.encode()).hexdigest()
+    ai = AiRuntime(
+        model=lambda: (Scripted(MEETING_ANSWER), "test-model"),
+        background=lambda _t, work: work(),
+        approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
+    )
+    opened = {"dataset": dataset, "kind": "skill", "target": "classify"}
+    session = _ok(_call(ws, "POST", "/api/bi/sessions", opened))["session"]
+    with build_runtime(config, layout=layout) as runtime:
+        gateway = runtime.agent.gateway
+        agent = Conversation()
+        gateway.router.model = agent
+        drafted = {"home": "aidc", "name": "normalize", "code": code}
+        tried = {"sha256": sha, "source_id": source}
+        agent.then(
+            {"tools": [("bi_skill__draft_tool", drafted)]},
+            {"tools": [("bi_skill__try_tool", tried)]},
+            {"text": "請先看過程式碼並核准。"},
+            {"tools": [("bi_skill__try_tool", tried)]},
+            {"tools": [("bi_skill__try_tool", {"sha256": sha, "source_id": secret})]},
+            {"text": "試跑成功。"},
+        )
+        bench = bi_bench.BenchRuntime(
+            ask_for=lambda _v, _a: lambda q, s: {},
+            extract_for=lambda _v, _a: lambda c: [],
+            background=lambda _t, work: work(),
+            skill_asker_for=lambda d, s, a: bi_skill_agent.harness_asker(
+                gateway, ws, d, s, ai, a, "engineering"
+            ),
+        )
+        path = f"/api/bi/sessions/{session['id']}/turns"
+        before = vault.Vault(ws, vault_id).repo.working_units()
+
+        def turn(message: str) -> dict[str, Any]:
+            body = {"dataset": dataset, "message": message}
+            status, answer = route(ws, "alice", "POST", path, {}, body, None, ai, bench)
+            assert status == 200, answer
+            last: dict[str, Any] = answer["session"]["turns"][-1]
+            return last
+
+        first = turn("這份來源規則讀不了，寫個程式")
+        assert [(t["name"], t["ok"]) for t in first["sent"]["tools"]] == [
+            ("bi_skill__draft_tool", True),
+            ("bi_skill__try_tool", False),
+        ]
+        told = "\n".join(m.text for m in agent.requests[2].messages if m.role == "tool")
+        assert "tool_needs_approval" in told
+        # The code waits for the person; nothing was staged, and the model cannot approve it.
+        listed = _ok(_call(ws, "GET", f"/api/bi/vaults/{vault_id}/tools"))
+        assert listed["drafts"][0]["code"] == code and listed["drafts"][0]["approved"] is False
+        assert not any("approve" in t.name for t in agent.requests[0].tools)
+        _ok(_call(ws, "POST", f"/api/bi/vaults/{vault_id}/tool-approve",
+                  {"sha256": sha, "confirm": True}))  # fmt: skip
+        second = turn("核准了，試試看")
+        assert [t["ok"] for t in second["sent"]["tools"]] == [True, False]
+    shown = "\n".join(m.text for m in agent.requests[-1].messages if m.role == "tool")
+    assert "客戶會議紀錄" in shown
+    assert "classification_not_approved" in shown and "虛構機密" not in shown
+    # Only shown: no source kept, nothing staged, no card.
+    assert len(Staging(ws, dataset).sources()) == 2
+    assert vault.Vault(ws, vault_id).repo.working_units() == before
+    assert BiStore(ws, dataset).card_rows() == []

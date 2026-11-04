@@ -15,6 +15,9 @@ built and on what users get, so it runs as a Host sub-run of
   candidates (`docs/phases/BI_BUILD_FLOW.md` §6; never a commit, never a T1
   report, so it never satisfies the push check);
 - `bi__query`: the cards of the working copy, read the way the Agent reads;
+- `bi_skill__draft_tool` / `bi_skill__try_tool`: a data-processing tool for what a rule
+  cannot do: kept on this PC for the person to read, tried only once that person has
+  approved exactly that code, its output only shown (`tool_runs`);
 - `bi_skill__suggest`: the final suggestion, checked as a hand-saved skill;
   a problem goes back to the model to fix.
 
@@ -39,6 +42,7 @@ from capabilities.bi_cards import (
     runs,
     sessions,
     skill_session,
+    tool_runs,
     vault,
     vault_checks,
 )
@@ -80,8 +84,11 @@ Rules:
   write rules that ask the extractor to invent values or skip evidence.
 - A skill can change only "body" (its full Markdown text), "applies_to" (source folders, extract
   only) and "card_types" (names from the schema); give complete values.
-- Anything a skill cannot express (a new file type, OCR, a parser, code, a schema change) goes in
-  "needs_engineering". Never claim such a thing works.
+- A file a rule cannot read may need a data-processing tool: propose one with
+  bi_skill__draft_tool. The person must read and approve the code before bi_skill__try_tool runs
+  it, and only the person saves it. Its output becomes a source that goes through the usual review.
+- Anything else a skill cannot express (OCR, a schema change) goes in "needs_engineering". Never
+  claim such a thing works.
 - If the person only asks a question, answer it and call bi_skill__suggest with no changes."""
 
 CHANGES_SCHEMA = {
@@ -163,6 +170,35 @@ def harness_asker(
             except BiStoreError as error:
                 return _failed(error.code, error.message)
             return HostToolOutcome(status="succeeded", data={"run_id": run_id, "result": summary})
+
+        async def draft_tool(_c: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
+            try:
+                found = tool_runs.draft(workspace, vault_id, args, f"{actor} via web")
+            except BiStoreError as error:
+                return _failed(error.code, error.message)
+            return HostToolOutcome(status="succeeded", data=found)
+
+        def tried_tool(args: Mapping[str, Any]) -> dict[str, Any]:
+            source_id = str(args.get("source_id") or "")
+            source = Staging(workspace, dataset).source(source_id)
+            if source is None:
+                raise BiStoreError("source_unknown", "沒有這個來源")
+            ai_runs.check_classification(ai, source["classification"])
+            found = tool_runs.try_draft(workspace, vault_id, str(args.get("sha256")), source_id)
+            return {
+                "printed": sessions.fenced("Tool printed:", found["printed"]),
+                "files": [
+                    {**f, "text": sessions.fenced("Tool output:", f["text"])}
+                    for f in found["files"]
+                ],
+            }
+
+        async def try_tool(_c: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
+            try:
+                found = await asyncio.to_thread(tried_tool, args)
+            except BiStoreError as error:
+                return _failed(error.code, error.message)
+            return HostToolOutcome(status="succeeded", data=found)
 
         async def compare(_c: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
             try:
@@ -342,6 +378,34 @@ def harness_asker(
                     ["source_id"],
                 ),
                 try_rule,
+            ),
+            HostTool(
+                _tool(
+                    "bi_skill__draft_tool",
+                    "Propose a data-processing Python tool for sources a rule cannot read: it gets "
+                    "`INPUT` (the source's path) and `OUTPUT` (a folder) and writes .csv or .md "
+                    "files there; no network, no child processes. `home` is an application or "
+                    "library/<entry>. It is kept for the person to read and returns its `sha256`. "
+                    "Only the person can approve it or save it as a revision.",
+                    {
+                        "home": {"type": "string"},
+                        "name": {"type": "string"},
+                        "code": {"type": "string"},
+                    },
+                    ["home", "name", "code"],
+                ),
+                draft_tool,
+            ),
+            HostTool(
+                _tool(
+                    "bi_skill__try_tool",
+                    "Run a drafted tool on one source and see its output (nothing is kept). "
+                    "`tool_needs_approval` means the person has not approved that code: tell them "
+                    "to read and approve it on the page, and stop asking until they say so.",
+                    {"sha256": {"type": "string"}, "source_id": {"type": "string"}},
+                    ["sha256", "source_id"],
+                ),
+                try_tool,
             ),
             HostTool(
                 _tool(

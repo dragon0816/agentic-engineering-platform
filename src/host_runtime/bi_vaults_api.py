@@ -21,6 +21,7 @@ from capabilities.bi_cards import (
     migrate,
     packs,
     profile_merge,
+    tool_runs,
     vault,
     vault_checks,
     vault_sources,
@@ -86,6 +87,8 @@ def route(
             return 200, vault.history(workspace, parts[0], limit)
         if len(parts) == 2 and parts[1] == "skills":
             return 200, vault.skills(workspace, parts[0])
+        if len(parts) == 2 and parts[1] == "tools":
+            return 200, tool_runs.listing(workspace, parts[0])
         if len(parts) == 2 and parts[1] == "profiles":
             return 200, vault.profiles(workspace, parts[0])
         if len(parts) == 2 and parts[1] == "checks":
@@ -160,6 +163,10 @@ def route(
         return 200, {"ok": True, **vault.save_profile(workspace, vault_id, given)}
     if action == "profile-proposals":
         return 200, {"ok": True, **profile_merge.decide(workspace, vault_id, given, actor)}
+    if action == "tool-approve":
+        return 200, {"ok": True, **tool_runs.approve(workspace, vault_id, given, actor)}
+    if action == "tool-run":
+        return 200, {"ok": True, **tool_runs.run(workspace, vault_id, given, actor)}
     if action == "tools":
         return 200, {"ok": True, **vault.save_tool(workspace, vault_id, given)}
     if action == "publish":

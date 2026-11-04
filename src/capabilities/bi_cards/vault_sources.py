@@ -216,6 +216,23 @@ def _sources_purpose(names: list[str]) -> str:
     return f"加入來源：{listed}"[: repo_engine.MAX_PURPOSE] if listed else "更新來源的 Markdown"
 
 
+def _with_derived(units: Mapping[str, Any], value: Mapping[str, Any]) -> list[Mapping[str, Any]]:
+    """A source and what a tool made from it, and from that: they hold its content."""
+    found = [value]
+    shas = {value["sha256"]}
+    others = [v for k, v in units.items() if k.startswith(PREFIX) and isinstance(v, dict)]
+    grew = True
+    while grew:
+        grew = False
+        for other in others:
+            parent = (other.get("derived_from") or {}).get("sha256")
+            if parent in shas and other["sha256"] not in shas:
+                found.append(other)
+                shas.add(other["sha256"])
+                grew = True
+    return found
+
+
 def withdraw(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
     """Withdraw a pushed source (design §5). Only a person's confirm calls this. It
     removes the file and its Markdown from the shared folder and AEP's copies as
@@ -235,8 +252,13 @@ def withdraw(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[s
         value = target.repo.units().get(unit_key(source["sha256"]))
         if not isinstance(value, dict):
             raise BiStoreError("source_not_pushed", "這個來源還沒有 push，不用撤回")
-        files = [{"path": value["file"], "sha256": value["sha256"]}] + [
-            {"path": item["file"], "sha256": item["sha256"]} for item in value["markdown"]
+        files = [
+            entry
+            for unit in _with_derived(target.repo.units(), value)
+            for entry in (
+                {"path": unit["file"], "sha256": unit["sha256"]},
+                *({"path": item["file"], "sha256": item["sha256"]} for item in unit["markdown"]),
+            )
         ]
         try:
             record = target.repo.withdraw(files, str(given.get("reason") or ""))

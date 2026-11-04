@@ -73,10 +73,10 @@ READ_ACTIONS = {
     sqlite3.SQLITE_RECURSIVE,
 }
 
-# The script's guard (an audit hook) and the helpers it is given. It runs as
-# `python -I runner.py`; the script is `script.py` beside it.
-RUNNER = r'''
-import json, os, sqlite3, sys
+# The script's guard (an audit hook), shared with a home's tools (`tool_runs`), and the
+# helpers it is given. It runs as `python -I runner.py`; the script is `script.py` beside it.
+GUARD = r"""
+import json, os, sys
 # -I ignores PYTHONIOENCODING: without this, Windows writes the result in its
 # ANSI code page and every non-ASCII text comes back garbled.
 sys.stdout.reconfigure(encoding="utf-8")
@@ -116,6 +116,12 @@ def _guard(event, args):
             raise PermissionError("writing outside the scratch folder is not allowed")
     if event in WRITES and args and not all(_inside(a) for a in args[:2] if a is not None):
         raise PermissionError("changing files outside the scratch folder is not allowed")
+"""
+
+RUNNER = (
+    GUARD
+    + r'''
+import sqlite3
 
 def query(sql, params=()):
     """Rows of a read-only query on the knowledge base copy, as dicts."""
@@ -135,6 +141,7 @@ exec(compile(code, "script.py", "exec"), space)
 result = space.get("result")
 print("\n" + "@@AEP_RESULT@@" + json.dumps(result, ensure_ascii=False, default=str))
 '''
+)
 
 
 def _copy(db_path: Path, scratch: Path) -> Path:

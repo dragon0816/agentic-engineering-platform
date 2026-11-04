@@ -6333,3 +6333,10 @@ From the BI orchestrator's brief for Phase 3-a; design `docs/phases/BI_CARD_MODE
 ## 2026-11-04: A card's evidence review is stored on the evidence row
 
 Phase 2-c needs a person's judgement of a reference on a card, and `BI_CARD_MODEL.md` §3 only has `assessment` on `relation_evidence`. **Decision:** `evidence` gains one optional `assessment` column, and an `evidence:` row may hold the key; old rows stay valid and `MODEL_VERSION` rises to 6. The review travels as a note on the correction path. **Rejected:** a new `review:` unit (proposal §5 asks not to add tables and units for this, and the row is where the judgement belongs); pseudo-relations in `relation_evidence` for a card's field (would show up as relations).
+## 2026-11-04: A BI tool's output is a new source
+
+**Decision.** A home's tool (P2-a) writes CSV or Markdown, kept as new sources in the raw source's folder with its classification and `derived_from`. Withdrawing the raw source withdraws them. The AI of a skill session may draft a tool and try an approved draft; only a person approves code, per revision and PC by its hash, and saves a revision.
+
+**Why.** The owner's rule is that output reaches cards only through preview and review, and the source path already gives that, along with evidence, sharing, classification checks and withdrawal.
+
+**Rejected.** Writing the output as a Markdown revision of the raw source: it fits no CSV, and it would replace what the source's own converter or a person wrote. Letting the AI run its own draft unapproved, as analyses do: the owner asked for approval before a new revision's first run, and a tool reads raw sources. The guard is not a boundary against a determined attacker, so the code must be read first.

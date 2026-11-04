@@ -1,7 +1,7 @@
-"""A home's tools (`docs/phases/BI_CARD_MODEL.md` §4): stored and listed, never run.
+"""A home's tools (`docs/phases/BI_CARD_MODEL.md` §4): the immutable revisions.
 
 A revision is a file `<home>/tools/<name>/rev-<n>-<author>.<ext>`, written once;
-`tool:<home>/<name>` names the current one. Running a tool in an ingest is Phase 2.
+`tool:<home>/<name>` names the current one. Running one in an ingest: `tool_runs`.
 """
 
 from __future__ import annotations
@@ -69,7 +69,7 @@ def stage_text(repo: Any, given: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def current_tools(units: Mapping[str, Any]) -> list[dict[str, Any]]:
-    """The current tools, as a list for people; nothing here runs one."""
+    """The current tools, as a list for people."""
     return [
         {"name": key.removeprefix(card_model.TOOL_PREFIX), **value}
         for key, value in sorted(units.items())
