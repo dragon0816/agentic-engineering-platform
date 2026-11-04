@@ -1,16 +1,20 @@
 # Handoff
 
-## R6 on the real vault (2026-11-04 16:10, Claude Code worker D) — stopped before push
+## R6 on the real vault (2026-11-04 16:30, Claude Code worker D) — published
 
-On the real Agent Web (53583), main `31895dc8`. `market-bi` is renamed `market-bi.v4-old`, nothing deleted. Vault `market-intel`, schema 5.0.0: **760 cards, 21 types; 39 local commits, not pushed**; only the first schema commit is in the shared folder; no tag, no publish.
+On the real Agent Web (53583), main `31895dc8`. Vault `market-intel`, schema 5.0.0: **760 cards, 21 types, pushed, tag `2026q4-r6`, published.** `market-bi.v4-old` stays, nothing deleted.
 
-**Done:** five bases imported; 19 import proposals decided; 113 aliases; `aidc` profile revision 3 and skill `aidc/aidc-extract`; 122 domains filled from applications; AI runs on both reports committed by the owner's selection (`20a0b9376dd7`, `b6335ab16ec0`).
+**Timings:** push 72.2 s (41 commits, shared folder 6 to 1,013 files, 12.7 MB, no conflict copies); OneDrive reported all 1,013 synced 4.3 min after polling began; publish 90.4 s (760 pages in `cards/`, snapshot `published/2026q4-r6.sqlite` 5.59 MB).
 
-**Pending:** 346 proposals, mostly `body` and `product`, left for the owner on purpose. Lists, git-ignored: `.scratch/r6/27-pairs.md` (the 27 supply pairs, kept and skipped), `.scratch/r6/not-written.json` (37 skipped and 5 not written: Amazon and xAI proposed as two types, Anthropic with an invalid value).
+**Verified:** `/api/knowledge/askable` says askable with `reads.tag` `2026q4-r6`; the feed `/api/v1/bi/vaults` shows the tag. One question in the real general chat, "who supplies NVIDIA", 85.8 s, 4 `bi__query` calls: 17 suppliers, matching SQL on the published copy, with the host's source line and sample note. Screenshot, git-ignored: `.scratch/r6/chat-answer.png`; it shows the table, and the two closing lines are below its fold, in `.scratch/r6/chat-answer.txt`.
 
-**Known:** quality's `evidence_source` went from 1 to 60, since supply links the model made have no `source` or `source_date`. `鴻海` is still two types; `聯發科`/`MediaTek` and `致茂`/`致茂電子` look like two cards each.
+**Source fill:** 58 empty `source` values filled from the card's evidence (`compute.md`; none from `power_cooling.md`), `source_date` never invented. It made two commits, not one, since the import route takes no purpose: the sources commit names the file, the cards commit has the drafted purpose. `evidence_source` 60 to 35; those left lack `source_date`.
 
-**Next, on the orchestrator's word:** push (474+ files to OneDrive), tag `2026q4-r6`, publish. Drivers, git-ignored: `.scratch/r6_*.py`. Why counts differ between runs: `docs/phases/BI_EXTRACTION_VARIANCE.md`.
+**Still open for the owner:** 346 proposals, mostly `body` and `product`; `鴻海` two types; `聯發科`/`MediaTek` and `致茂`/`致茂電子` two cards each; 441 cards with no summary (warning only); quality: `link_unresolved` 13, `link_wrong_type` 5, `number_ungrounded` 23, `revenue_layer` 11, `product_without_node` 4. Not written: 31 skipped pairs, 6 unnamed Signal, Amazon and xAI (two types in one run), Anthropic (invalid value); lists in `.scratch/r6/27-pairs.md` and `.scratch/r6/not-written.json`.
+
+**Not run:** the runbook's benchmark and dashboard steps 10-11 (the push notes the content has run no tests) and steps 15-18 (Atlas, a colleague joining, the rs-k copy). `test_bi_vault_ui` still needs a quiet run. It fails under load, unexplained.
+
+**Next, on the orchestrator's word:** those steps, then `p2-schema-fit` (it needs the new output limit on rebase). Drivers, git-ignored: `.scratch/r6_*.py`. Why counts differ between runs: `docs/phases/BI_EXTRACTION_VARIANCE.md`.
 
 ## The BI card model (2026-11-03, Claude Code worker D) — latest
 
