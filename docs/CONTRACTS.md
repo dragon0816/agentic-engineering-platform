@@ -6626,7 +6626,7 @@ applications/<application>/{sources,skills,tools,profile}/
 library/<entry>/{sources,skills,tools,profile}/
 library/skills/<name>/rev-<n>-<author>.md      a skill with no home: it spans every home (classify)
 <home>/skills/<name>/rev-<n>-<author>.md       unit skill:<short>/<name>
-<home>/tools/<name>/rev-<n>-<author>.<ext>     unit tool:<short>/<name>; stored and listed, never run
+<home>/tools/<name>/rev-<n>-<author>.<ext>     unit tool:<short>/<name>; run per "a home's tools" below
 <home>/profile/rev-<n>-<author>.json           unit profile:<short>
 ```
 
@@ -6685,3 +6685,17 @@ Design: `docs/phases/BI_CARD_MODEL.md` §6. `POST /api/bi/vaults/<id>/publish` a
 
 - `cards/<card id>.md`, with `cards/_manifest.json` `{tag, commit, at, by, hashes}` written last. Generated from the version published now, read-only, never read back. Frontmatter: `id`, `type`, `key`, `aliases`, `sample: true` on a sample, `generated: true`. Only pages whose hash differs are written; a removed card's page is deleted. A withdrawn source's excerpts leave the pages at once.
 - `published/<tag>.sqlite`, written once. The publish record (`repository.publish(tag, extra)`, the engine knows no BI name) gains `snapshot: {path, sha256}`, or `null` when it could not be written. Readers still rebuild from units.
+
+## BI card model: a home's tools in ingest (2026-11-04)
+
+Design: `docs/phases/BI_CARD_MODEL.md` P2-a. Code: `capabilities/bi_cards/tool_runs.py`.
+
+A tool is a Python script stored as an immutable revision. It gets `INPUT` (a copy of the source) and `OUTPUT` (a folder) and writes `.csv` or `.md` files there, at most 20 and 50 MB in all, within 300 s. **Output is only ever new sources**, staged in the raw source's folder with its classification and `derived_from: {source, sha256, tool, revision, tool_sha256}` on the unit; cards come only through the usual preview and review. Withdrawing a source also withdraws what was derived from it.
+
+**Guard.** The `analyses.run_python` guard: own process, `-I`, empty environment; an audit hook refuses network, child processes, native libraries, SQLite and writes outside `OUTPUT`. It can still read files. It guards against mistakes and stray model output; **it is not a boundary against a determined attacker.**
+
+**Approval.** The first run of a revision on a PC needs a person's approval of that code, by its hash, kept per PC in the vault's local folder. A revision with the same code as an approved draft is already approved there.
+
+**API.** `GET /api/bi/vaults/<id>/tools` → `{tools: [{name, revision, author, path, sha256, code, approved}], drafts: [{name, sha256, code, approved, ...}], guard}`. `POST …/tool-approve` `{sha256, confirm: true}`. `POST …/tool-run` `{name, source_id}` → `{sources: [{id, name, already}], printed, tool}`; `tool_needs_approval` (409, with `sha256` and `code_text`), `tool_failed`, `tool_output_invalid`, `tool_not_python`, `tool_missing` (400), `tool_unknown`, `source_unknown` (404).
+
+**Skill AI (Session B).** `bi_skill__draft_tool {home, name, code}` keeps a draft on this PC and stages nothing. `bi_skill__try_tool {sha256, source_id}` runs an approved draft on a source whose classification the model may see, and shows the output without keeping it. The AI cannot approve a tool or save a revision.

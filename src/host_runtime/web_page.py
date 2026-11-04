@@ -2753,6 +2753,22 @@ tr:last-child td { border-bottom: none; }
               <div class="bi-actions">
                 <button class="bi-btn" id="bi-b-pf-save" type="button">存成新版本</button></div>
             </div>
+            <div class="bi-step" id="bi-b-tools">
+              <h5>資料處理程式</h5>
+              <p class="bi-meta">把原始來源轉成 CSV 或 Markdown，產出會成為新的來源，
+                再走一樣的預覽和審核，不會直接寫卡片。每個新版本第一次在這台電腦執行前，
+                要由人看過程式碼並核准。執行時擋網路、子程序和輸出資料夾以外的寫入；
+                這是防止失誤，不是防範蓄意攻擊的邊界。</p>
+              <div id="bi-b-tl-list"></div>
+              <label class="bi-label" for="bi-b-tl-name">新增版本：應用/名稱</label>
+              <input id="bi-b-tl-name" class="bi-input" spellcheck="false"
+                placeholder="aidc/normalize-report 或 library/products/normalize">
+              <label class="bi-label" for="bi-b-tl-code">
+                Python 程式（讀 INPUT，寫到 OUTPUT）</label>
+              <textarea id="bi-b-tl-code" class="bi-input" rows="6" spellcheck="false"></textarea>
+              <div class="bi-actions">
+                <button class="bi-btn" id="bi-b-tl-save" type="button">存成新版本</button></div>
+            </div>
             <div class="bi-step" id="bi-b-rerun">
               <h5>改完規則後重跑</h5>
               <p class="bi-meta">用現在的規則重讀來源，只列出和卡片不同的值；你確認的才會寫入。
@@ -13710,6 +13726,7 @@ async function biVersions(vaultId) {
   biVerHistory(vaultId, history);
   biSkills(vaultId).catch((failure) => biNotice(false, "讀不到判讀規則：" + failure.message));
   biProfiles(vaultId).catch((failure) => biNotice(false, "讀不到 profile：" + failure.message));
+  biTools(vaultId).catch((failure) => biNotice(false, "讀不到資料處理程式：" + failure.message));
 }
 
 function biVerHistory(vaultId, history) {
@@ -13840,6 +13857,62 @@ async function biSkills(vaultId) {
   el("bi-b-folder-box").hidden = false;
   biRerunForm(reply.folders || []);
 }
+
+// -- a home's data-processing tools (BI_CARD_MODEL.md P2-a) -------------------------
+async function biTools(vaultId) {
+  const reply = await call("/api/bi/vaults/" + vaultId + "/tools");
+  const box = el("bi-b-tl-list"); box.replaceChildren();
+  const approve = async (item) => {
+    try {
+      await biVerRun(vaultId, "tool-approve", {sha256: item.sha256, confirm: true});
+      biNotice(true, "已核准「" + item.name + "」這份程式碼（只在這台電腦）。");
+    } catch (failure) { biNotice(false, "沒有核准：" + failure.message); }
+  };
+  const runOn = async (item) => {
+    if (!bi.build.sourceId) { biNotice(false, "請先在上面選一份來源。"); return; }
+    try {
+      const done = await biVerRun(vaultId, "tool-run",
+        {name: item.name, source_id: bi.build.sourceId});
+      biNotice(true, "產出新來源：" + done.sources.map((s) => s.name).join("、")
+        + "；選它之後走一樣的預覽和審核。");
+    } catch (failure) { biNotice(false, "沒有執行：" + failure.message); }
+  };
+  const row = (item, draft) => {
+    const title = item.name + (draft ? "（AI 提出的草稿）" : "（第 " + item.revision + " 版）");
+    const code = bh("pre", "bi-meta", item.code || item.problem || "");
+    const actions = [];
+    if (item.code && !item.approved) {
+      actions.push(biButton("看過了，核准", () => approve(item), "bi-btn", "核准：" + item.name));
+    }
+    if (!draft && item.approved) {
+      actions.push(biButton("對選取的來源執行", () => runOn(item), "bi-btn", "執行：" + item.name));
+    }
+    if (draft) {
+      actions.push(biButton("填入下面，存成新版本", () => {
+        el("bi-b-tl-name").value = item.name; el("bi-b-tl-code").value = item.code;
+      }, "bi-btn", "填入：" + item.name));
+    }
+    return bh("li", "", bh("strong", "", title), " ",
+      item.approved ? biBadge("已核准", "good") : biBadge("等待核准", "warn"), code,
+      bh("div", "bi-actions", ...actions));
+  };
+  const items = [...(reply.tools || []).map((t) => row(t, false)),
+    ...(reply.drafts || []).map((d) => row(d, true))];
+  box.append(items.length ? bh("ul", "bi-log", ...items)
+    : bh("p", "bi-meta", "還沒有資料處理程式。"));
+}
+
+el("bi-b-tl-save").addEventListener("click", async () => {
+  const parts = el("bi-b-tl-name").value.trim().split("/");
+  const name = parts.pop(), home = parts.join("/");
+  try {
+    const reply = await biVerRun(bi.verVault, "tools",
+      {home, name, suffix: ".py", text: el("bi-b-tl-code").value});
+    biNotice(true, "「" + reply.tool.name + "」存成第 " + reply.tool.revision
+      + " 版；commit 並 push 後大家才會用到。");
+    el("bi-b-tl-code").value = "";
+  } catch (failure) { biNotice(false, "沒有儲存：" + failure.message); }
+});
 
 // -- a home's profile and its field proposals (BI_CARD_MODEL.md §4.2, §4.3) --------
 async function biProfiles(vaultId) {

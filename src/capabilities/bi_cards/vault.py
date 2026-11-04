@@ -2087,8 +2087,8 @@ def save_profile(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> di
 
 
 def save_tool(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
-    """Stage a new revision of a home's tool. It is only stored and listed, never
-    run; the person commits it."""
+    """Stage a new revision of a home's tool; the person commits it. Running it is
+    `tool_runs`, after that person's approval on each PC."""
     vault = _vault(workspace, vault_id)
     with vault.lock, _repo_errors():
         value = vault_tools.stage_text(vault.repo, given)

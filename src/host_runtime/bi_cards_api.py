@@ -814,6 +814,7 @@ CONFLICTS = {
     "schema_version_not_newer",
     "schema_changed",
     "skill_needs_update",
+    "tool_needs_approval",
     "schema_conflict",
     "suggestion_applied",
     "suggestion_invalid",
