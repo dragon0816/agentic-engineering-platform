@@ -6301,3 +6301,7 @@ Design: `docs/phases/BI_CARD_MODEL.md`; source: `docs/proposals/AEP_BI_Card_Data
 `aidc`, `aerospace`, `robotics`, `wireless`; the 11 segments stay as `segment` values on cards. The list stays data, per vault. Rejected: the 11 segments as folders, since none of the 434 card pages names one, so R6 would have sorted them by hand.
 
 Library entries have an application's shape (owner, 2026-11-04): `library/<products|technologies|competitors>/{sources/, skills/, tools/, profile/}`, the list data too. `classify` stays at `library/skills/`, so `skills` cannot be an entry name. Unit keys use `library/<entry>`, so an application of the same name cannot collide.
+
+## 2026-11-04: Schema fit is kept on the AI run (Phase 2-b)
+
+Each item's action and a person's decision on it are kept with the run, per PC, as candidates are. The proposal's §8.1 F allows it and no new table is needed. Consequence: another PC does not see a pending item until it reaches a profile proposal or a schema version. Approved `dictionary_change` and `propose_type` register nothing; a person takes them to Session A, since the existing proposal flow only adds fields. Rejected for now: fit units shared in the vault, and auto-drafting a schema version from an approval.

@@ -531,6 +531,7 @@ def run_view(staging: Staging, run_id: str) -> dict[str, Any]:
             warnings=layout.get("warnings") or [],
             types=layout.get("types") or [],
             relations=layout.get("relations") or [],
+            items=layout.get("items") or [],
         )
         rules = layout.get("skills")
         if isinstance(rules, dict):  # a vault's run: what its home's profile said, or none

@@ -33,6 +33,7 @@ from capabilities.bi_cards import (
     names,
     profile,
     runs,
+    schema_fit,
     source_markdown,
     vault_sources,
 )
@@ -293,6 +294,7 @@ def _extract(
         on_chunk=progress,
         domain_notes=notes,
         infer_relations=staging.store.vault_id is not None,
+        check_fit=staging.store.vault_id is not None,
         profile=used_profile,
     )
     found = staging.candidates(run_id) if only else []
@@ -314,6 +316,7 @@ def _extract(
     staging.put_candidates(run_id, merged)
     retried = set(only or [])
     kept = [f for f in layout.get("failures") or [] if int(f["chunk"]) not in retried]
+    layout["items"] = schema_fit.merge_items(layout.get("items") or [], result.items, merged)
     layout["relations"] = runs.merge_relations(
         staging.store, layout.get("relations") or [], result.relations
     )

@@ -6685,3 +6685,11 @@ Design: `docs/phases/BI_CARD_MODEL.md` §6. `POST /api/bi/vaults/<id>/publish` a
 
 - `cards/<card id>.md`, with `cards/_manifest.json` `{tag, commit, at, by, hashes}` written last. Generated from the version published now, read-only, never read back. Frontmatter: `id`, `type`, `key`, `aliases`, `sample: true` on a sample, `generated: true`. Only pages whose hash differs are written; a removed card's page is deleted. A withdrawn source's excerpts leave the pages at once.
 - `published/<tag>.sqlite`, written once. The publish record (`repository.publish(tag, extra)`, the engine knows no BI name) gains `snapshot: {path, sha256}`, or `null` when it could not be written. Readers still rebuild from units.
+
+## BI schema fit per item (Phase 2, 2026-11-04)
+
+Design: proposal §8.1. Code: `capabilities/bi_cards/schema_fit.py`. In a vault, an AI run asks the model how each knowledge item fits the schema. `GET /api/bi/runs/<id>` gains `run.items: [{id, summary, actions, reason, questions, card, target_card?, proposal, source_id, locator, excerpt, schema, status, decided_by?, decided_at?, decision_reason?}]`, kept with the run (per PC, as candidates are; no unit and no table).
+
+`actions` hold `update_card`, `create_card`, `dictionary_change`, `extend_schema`, `propose_type`, `needs_clarification`, and may combine. Update or create comes from the candidate's real action, and each candidate has an item. Nothing is dropped: an unknown action, a quote not in the source, or a `propose_type` lacking any of `unit_boundary`, `why_not_existing`, `why_independent`, `business_use` becomes `needs_clarification` with a question. Status: `through_candidate` (reviewed as a candidate), `proposed`, `approved`, `rejected`, `needs_clarification`.
+
+`POST /api/bi/runs/<id>/items/<iid> {dataset, status, reason?}`, status `approved`, `rejected` or `needs_clarification`; a reason is required except to approve (400 `reason_required`). 400 `fit_needs_clarification` to approve an item still holding that action, `fit_item_not_reviewed`, `fit_item_decided`, `run_trial`. An approved `extend_schema` adds a proposal to the home's profile, staged for the person's commit, for `POST /api/bi/vaults/<id>/profile-proposals` (400 `fit_home_unknown`, `profile_missing`). An approved `dictionary_change` or `propose_type` registers nothing: a schema version stays Session A's.
