@@ -197,6 +197,39 @@ def _folder_of(staging: Staging, source: dict[str, Any]) -> str | None:
     return None if repo is None else vault_sources.folder_of(repo.working_units(), source["sha256"])
 
 
+def home_domain(reg: Registry, folder: str | None) -> str | None:
+    """The domain a source's application stands for: the schema's domain of that name
+    (`aidc` is `AIDC`). A library entry spans domains, so it has none."""
+    home = homes.home_of(folder or "")
+    if home is None or home.startswith(f"{homes.LIBRARY}/"):
+        return None
+    return next((d for d in reg.domains if d.lower() == home.lower()), None)
+
+
+def _default_domain(reg: Registry, candidate: dict[str, Any], domain: str) -> bool:
+    """Give a new card with no domain its source's; whether it did."""
+    entity = reg.types.get(str(candidate.get("entity_type")))
+    item = entity.get("domain") if entity is not None else None
+    if item is None or candidate.get("match") == "existing":
+        return False
+    if any(f["field"] == "domain" and f["value"] for f in candidate["fields"]):
+        return False
+    value, _ = reg.normalize(item, domain)
+    if value is None:
+        return False
+    candidate["fields"].append(
+        {
+            "field": "domain",
+            "value": value,
+            "basis": "inference",
+            "evidence": [],
+            "current": None,
+            "change": "add",
+        }
+    )
+    return True
+
+
 def _vault_rules(staging: Staging, folder: Any, draft: Any = None) -> dict[str, Any] | None:
     """A vault's skills for a source in `folder`; None for a plain dataset,
     which keeps its domain notes (BI vault V11)."""
@@ -323,6 +356,12 @@ def _extract(
     if used_profile:
         for item in merged:
             profile.mark_candidate(reg, item, used_profile)
+    domain = home_domain(reg, _folder_of(staging, source)) if source else None
+    if domain is not None:
+        merged = [
+            runs.evaluate(staging.store, reg, item) if _default_domain(reg, item, domain) else item
+            for item in merged
+        ]
     staging.put_candidates(run_id, merged)
     retried = set(only or [])
     kept = [f for f in layout.get("failures") or [] if int(f["chunk"]) not in retried]

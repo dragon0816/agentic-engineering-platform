@@ -117,12 +117,19 @@ def _merge_field(definition: Any, item: dict[str, Any], stored: Any) -> None:
     item.pop("merged", None)
     item.pop("capped", None)
     chosen = (item.get("take_new") or item.get("basis") == "human") and not protected
+    is_list = stored is not None and (
+        (definition is not None and definition.is_list) or isinstance(stored["value"], list)
+    )
     if stored is None:
         _fill(definition, item)
     elif stored["value"] == value:
         item["merge"] = "same"
     elif chosen:
         item["merge"] = "take"
+    elif is_list and _joined(stored["value"], value) == stored["value"]:
+        # All of it is on the card already, whoever set it: nothing to write or propose.
+        item["merge"] = "same"
+        item["merged"] = stored["value"]
     elif stored["kind"] == "human":
         item["merge"] = "human_kept"
     elif protected:
@@ -130,10 +137,9 @@ def _merge_field(definition: Any, item: dict[str, Any], stored: Any) -> None:
     elif definition is not None and definition.klass == "derived":
         item["merge"] = "bookkeeping"
         item["later"] = _later(value, stored["value"])
-    elif (definition is not None and definition.is_list) or isinstance(stored["value"], list):
-        joined = _joined(stored["value"], value)
-        item["merge"] = "same" if joined == stored["value"] else "join"
-        item["merged"] = joined
+    elif is_list:
+        item["merge"] = "join"
+        item["merged"] = _joined(stored["value"], value)
     else:
         item["merge"] = "proposal"
 
@@ -954,7 +960,8 @@ def _planned(
         name, how = item["field"], item.get("merge")
         if how == "proposal":
             propose.add(name)
-        elif how == "join":
+        elif how == "join" or (how == "same" and "merged" in item):
+            # Never the model's list as it came: a shorter one would drop what the card holds.
             values[name] = item["merged"]
         elif how == "capped":
             # What is written is not what the evidence said: that goes with the proposal.

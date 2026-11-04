@@ -473,6 +473,12 @@ def candidate(
                 continue
             basis = "inference"
         value, problems = reg.normalize(item, text)
+        if item.name == "domain":
+            # The model's own word for a domain is dropped with a word to the reviewer: a
+            # new card takes its source's (`ai_runs`), so this never blocks a candidate.
+            warnings.extend({"code": code, "message": said} for code, said in problems)
+            if value is None:
+                continue
         if value is None:
             message = problems[0][1] if problems else f"{item.label}：「{text}」無法採用"
             value_errors.append({"code": "value_invalid", "message": message, "field": item.name})

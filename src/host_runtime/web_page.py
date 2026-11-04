@@ -9577,10 +9577,8 @@ function kpVerHistory(history) {
       actions.append(kpButton("發佈 " + tag.name, () => kpRun("發佈", async () => {
         if (!confirm("發佈 tag「" + tag.name + "」？發佈後 Agent 只讀這個版本的內容；"
           + "要撤回就再發佈另一個 tag。")) return;
-        const reply = await kpRepoCall(kpRepoPath("publish"), {tag: tag.name, confirm: true});
-        kpVerSay("已發佈「" + tag.name + "」：Agent 下一個問題就讀這個版本。"
-          + (reply && reply.summary_missing ? "提醒：" + reply.summary_missing.total
-            + " 張卡片還沒有摘要（不影響發佈）。" : ""));
+        await kpRepoCall(kpRepoPath("publish"), {tag: tag.name, confirm: true});
+        kpVerSay("已發佈「" + tag.name + "」：Agent 下一個問題就讀這個版本。");
         await kpVerShow();
       })));
     }
@@ -13095,6 +13093,11 @@ function biProposalsShown() {
   el("bi-b-props-accept").textContent = "接受顯示的全部（" + chosen.length + " 筆）";
   el("bi-b-props-reject").textContent = "否決顯示的全部（" + chosen.length + " 筆）";
   el("bi-b-props-accept").disabled = el("bi-b-props-reject").disabled = !chosen.length;
+  if (shown.length && !chosen.length) {
+    el("bi-b-props-confirm").append(bh("p", "bi-meta", "這 " + shown.length
+      + " 筆都是 confidence 或 evidence_grade：一次決定前要先在「欄位」選定其中一個，"
+      + "也可以逐筆決定。"));
+  }
   el("bi-b-props-list").replaceChildren(...shown.map((item) => biProposalRow(item, biDataset())));
   return {field, origin, shown, chosen};
 }
@@ -13798,9 +13801,19 @@ function biVerAsk(where, label, value, go, run) {
   where.append(row); input.focus();
 }
 
+function biPublishWords(name, reply) {
+  const missing = reply.summary_missing;
+  const counts = missing ? Object.entries(missing.by_type)
+    .map(([type, count]) => biTypeLabel(type) + " " + count).join("、") : "";
+  return "已發佈「" + name + "」：Agent 現在讀這個版本。"
+    + "資料夾裡的 cards/ 是給人看的唯讀頁，要改值請提更正單。"
+    + (missing ? "提醒：" + missing.total + " 張卡片還沒有摘要（" + counts + "），不影響發佈。"
+      : "");
+}
+
 async function biVerRun(vaultId, action, body, done) {
   const reply = await biCall("/api/bi/vaults/" + vaultId + "/" + action, body || {});
-  if (done) biNotice(true, done);
+  if (done) biNotice(true, typeof done === "function" ? done(reply) : done);
   bi.loaded = {}; biRefreshCounts();
   biVaultState(await call("/api/bi/vaults/" + vaultId + "/status"));
   return reply;
@@ -13877,8 +13890,7 @@ function biVerHistory(vaultId, history) {
         if (!confirm("發佈 tag「" + tag.name + "」？發佈後 Agent 只讀這個版本的內容；"
           + "要撤回就再發佈另一個 tag。")) return;
         await biVerRun(vaultId, "publish", {tag: tag.name, confirm: true},
-          "已發佈「" + tag.name + "」：Agent 現在讀這個版本。"
-          + "資料夾裡的 cards/ 是給人看的唯讀頁，要改值請提更正單。");
+          (reply) => biPublishWords(tag.name, reply));
       }, "bi-btn", "發佈 tag " + tag.name));
     }
     row.append(actions, detail); list.append(row);
@@ -15646,6 +15658,8 @@ el("bi-b-commit-go").addEventListener("click", async () => {
     const reply = await biCall("/api/bi/runs/" + run.id + "/commit", {dataset: biDataset()});
     bi.build.run = reply.run; bi.build.result = reply; bi.loaded = {};
     biBuildStage("result"); biRefreshCounts();
+    // The commit may have made proposals, and moved the vault's state.
+    biBuildVault().catch((failure) => biNotice(false, "知識庫狀態沒有載入：" + failure.message));
   } catch (failure) {
     const cards = (failure.payload && failure.payload.cards) || [];
     msg.append(bh("p", "bi-err", "沒有寫入：" + failure.message
