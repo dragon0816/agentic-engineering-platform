@@ -14822,10 +14822,10 @@ function biWithdrawForm(source) {
 
 async function biBuildSources() {
   // Newest call only: an older list arriving late must not drop the source just added.
-  const seq = bi.sourcesSeq = (bi.sourcesSeq || 0) + 1;
-  const reply = await call("/api/bi/sources?dataset=" + encodeURIComponent(biDataset()));
+  const seq = bi.sourcesSeq = (bi.sourcesSeq || 0) + 1, listed = biDataset();
+  const reply = await call("/api/bi/sources?dataset=" + encodeURIComponent(listed));
   await biSourceFolders().catch(() => {});
-  if (seq !== bi.sourcesSeq) return;
+  if (seq !== bi.sourcesSeq || listed !== biDataset()) return;
   bi.build.sources = reply.sources || [];
   const cloud = bi.build.sources.filter((s) => s.shared === "cloud_only").length;
   const waiting = (reply.waiting || []).length;
@@ -14844,6 +14844,9 @@ async function biBuildSources() {
     radio.setAttribute("aria-label", "使用 " + source.name);
     radio.disabled = !source.format;
     radio.addEventListener("change", () => {
+      // A list still showing the dataset just left: a source of it would be dropped as soon
+      // as the new list arrives, and the steps after this one would quietly stay shut.
+      if (listed !== biDataset()) { radio.checked = false; return; }
       bi.build.sourceId = source.id; el("bi-b-next1").disabled = false; biBuildSave();
       biFollowSourceFolder();
       biBuildSteps();

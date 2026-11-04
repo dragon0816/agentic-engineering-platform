@@ -134,6 +134,16 @@ def test_the_whole_build_flow(
             " return pick && pick.checked && bi.build.sourceId; })()"
         )
         source = str(page.run("bi.build.sourceId"))
+        # A row of the dataset just left, still on screen, cannot be picked (it would be
+        # dropped as the new list arrives, leaving step 2's later parts shut).
+        assert page.run(
+            "(() => { const real = biDataset, before = bi.build.sourceId;"
+            " const row = document.querySelector('#bi-b-sources tbody input');"
+            " biDataset = () => 'another'; bi.build.sourceId = null; row.checked = false;"
+            " row.click(); const untouched = bi.build.sourceId === null && !row.checked;"
+            " biDataset = real; bi.build.sourceId = before; row.checked = true;"
+            " return untouched; })()"
+        )
         page.shoot("1-converted")
 
         # -- step 2a: Session A on the harness: suggestion, draft, publish, upgrade -----------
