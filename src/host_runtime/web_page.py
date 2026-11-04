@@ -13237,6 +13237,13 @@ function biBenchReport(report) {
     if ((report.regressions || []).length) parts.push("退步 " + report.regressions.length + " 題");
     if (report.extract) parts.push("擷取 " + report.extract.score + " 分");
     box.append(bh("p", "", parts.join("；")));
+    const classes = Object.entries(report.error_classes || {});
+    if (classes.length) {
+      const words = {retrieval: "檢索", relation: "關係", extraction: "萃取", evidence: "採信",
+        generation: "生成", unknown: "分不出"};
+      box.append(bh("p", "bi-meta", "工作版本答錯的詞："
+        + classes.map(([name, count]) => (words[name] || name) + " " + count).join("、")));
+    }
   }
   const regressed = new Set(report.regressions || []);
   const rows = [...(report.results || [])].sort((x, y) =>
