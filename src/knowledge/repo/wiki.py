@@ -45,6 +45,8 @@ from knowledge.repo.repository import (
     RepoError,
     Repository,
     canonical,
+    extended,
+    long_path,
     path_problem,
     register_type,
     remove_retrying,
@@ -544,16 +546,18 @@ def materialize(
     written = pages(units)
     try:
         for path, text in written.items():
-            out = building / path
+            out = long_path(building / path)
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text(text, encoding="utf-8", newline="\n")
         for name in ("raw", "wiki"):
-            (building / name).mkdir(parents=True, exist_ok=True)
+            long_path(building / name).mkdir(parents=True, exist_ok=True)
         if repo_folder is not None:
             roots = [r for r in (staged_files, repo_folder) if r is not None]
 
             def find(rel: str) -> Path:
-                return next((r / rel for r in roots if (r / rel).is_file()), repo_folder / rel)
+                return next(
+                    (r / rel for r in roots if long_path(r / rel).is_file()), repo_folder / rel
+                )
 
             schema = units.get(SCHEMA_UNIT)
             if isinstance(schema, str) and find(f"schemas/{schema}.md").is_file():
@@ -569,10 +573,10 @@ def materialize(
                         out.write_text(skill.body + "\n", encoding="utf-8", newline="\n")
                 elif key.startswith(RAW_PREFIX) and isinstance(value, dict):
                     source = find(str(value.get("file") or ""))
-                    if source.is_file():
-                        out = building / "raw" / key[len(RAW_PREFIX) :]
+                    if long_path(source).is_file():
+                        out = long_path(building / "raw" / key[len(RAW_PREFIX) :])
                         out.parent.mkdir(parents=True, exist_ok=True)
-                        shutil.copyfile(source, out)
+                        shutil.copyfile(long_path(source), out)
         (building / READ_ONLY_NOTE).write_text(_note(units), encoding="utf-8", newline="\n")
         old = None
         if target.exists():
@@ -589,5 +593,5 @@ def materialize(
             remove_retrying(stale)
     finally:
         if building.exists():
-            shutil.rmtree(building)
+            shutil.rmtree(extended(building))
     return {"pages": len(written), "path": str(target)}

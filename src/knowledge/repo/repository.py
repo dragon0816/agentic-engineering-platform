@@ -122,6 +122,8 @@ CREATE TABLE IF NOT EXISTS file_hashes (
 _REPLACE_ATTEMPTS = 6
 # A folder holds many files to be scanned, so a rename waits longer: about 2 s in all.
 _RENAME_ATTEMPTS = 10
+# Past this a path gets Windows' long form: temporary names add a few characters to 260.
+_LONG_PATH = 240
 _LOCKS: dict[str, threading.RLock] = {}
 _LOCKS_GUARD = threading.Lock()
 
@@ -220,6 +222,21 @@ def _pretty(document: Any) -> bytes:
     return (json.dumps(document, ensure_ascii=False, sort_keys=True, indent=1) + "\n").encode()
 
 
+def extended(path: Path) -> Path:
+    """`path` in Windows' long form, which needs no `LongPathsEnabled`; what is built on
+    it can pass 260 characters. Elsewhere the same path."""
+    text = str(path)
+    if os.name != "nt" or text.startswith("\\\\?\\"):
+        return path
+    full = os.path.abspath(text)
+    return Path("\\\\?\\UNC\\" + full[2:] if full.startswith("\\\\") else "\\\\?\\" + full)
+
+
+def long_path(path: Path) -> Path:
+    """`path`, in the long form only when it needs it: others stay as they were."""
+    return extended(path) if len(str(path)) >= _LONG_PATH else path
+
+
 def _write_atomic(path: Path, data: bytes) -> None:
     """Write `path` through a temporary file in the same folder and a rename."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -261,7 +278,7 @@ def remove_retrying(folder: Path) -> bool:
     One still held stays for the caller to try again later."""
     for attempt in range(_RENAME_ATTEMPTS):
         try:
-            shutil.rmtree(folder)
+            shutil.rmtree(extended(folder))
             return True
         except FileNotFoundError:
             return True
@@ -274,6 +291,7 @@ def remove_retrying(folder: Path) -> bool:
 def _copy_atomic(source: Path, path: Path) -> None:
     """Copy a file by stream through a temporary file and a rename: an original
     may be too large to hold in memory."""
+    path, source = long_path(path), long_path(source)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.parent / f".{path.name}.{uuid.uuid4().hex[:8]}.tmp"
     try:
@@ -293,7 +311,7 @@ def _write_new(path: Path, data: bytes) -> None:
 
 def _file_sha(path: Path) -> str:
     digest = hashlib.sha256()
-    with path.open("rb") as handle:
+    with long_path(path).open("rb") as handle:
         for chunk in iter(lambda: handle.read(1 << 20), b""):
             digest.update(chunk)
     return digest.hexdigest()
@@ -713,7 +731,7 @@ class Repository:
         """The hash of a repository file, cached by size and modification time;
         None while it is missing or cannot be read (a cloud-only file OneDrive
         cannot bring down now, or one a drive client holds): its commit waits."""
-        path = self.folder / rel
+        path = long_path(self.folder / rel)
         try:
             stat = path.stat()
         except OSError:
@@ -790,7 +808,7 @@ class Repository:
             gone = self.withdrawn()
             pending = self._pending()
             for path in gone:
-                (self.work / "files" / path).unlink(missing_ok=True)
+                long_path(self.work / "files" / path).unlink(missing_ok=True)
             kept = {k: v for k, v in pending["files"].items() if k not in gone}
             if len(kept) != len(pending["files"]):
                 self._save_pending({"sets": pending["sets"], "files": kept})
@@ -1114,12 +1132,12 @@ class Repository:
         with self.lock:
             self._refuse_withdrawn(path)
             sha = _file_sha(source)
-            existing = self.folder / path
+            existing = long_path(self.folder / path)
             if existing.is_file() and self._sha_or_refuse(existing, path) != sha:
                 raise RepoError(
                     "path_taken", f"{path} 已經有另一份內容；檔案寫入後不能修改，請換檔名"
                 )
-            target = self.work / "files" / path
+            target = long_path(self.work / "files" / path)
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source, target)
             item = {"sha256": sha, "bytes": target.stat().st_size}
@@ -1290,12 +1308,12 @@ class Repository:
         """Copy a staged file into the folder (before any commit names it). Another
         PC's unpushed commit must not bring a withdrawn file straight back."""
         self._refuse_withdrawn(item["path"])
-        target = self.folder / item["path"]
+        target = long_path(self.folder / item["path"])
         if target.is_file():
             if self._sha_or_refuse(target, item["path"]) != item["sha256"]:
                 raise RepoError("path_taken", f"{item['path']} 已經有另一份內容")
             return
-        source = self.work / "files" / item["path"]
+        source = long_path(self.work / "files" / item["path"])
         if not source.is_file() or _file_sha(source) != item["sha256"]:
             raise RepoError("file_missing", f"工作區裡的 {item['path']} 不見了或被改過")
         _copy_atomic(source, target)

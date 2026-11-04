@@ -226,7 +226,8 @@ def agent_source(workspace: Path, repo_id: str) -> tuple[Path, str]:
     """For the Agent's catalog (`KnowledgeCatalog.register_live`): the folder
     to read and the version built there."""
     view = reading_folder(workspace, repo_id)
-    return view, (view.parent / MARKER).read_text(encoding="utf-8")
+    # Its pages and originals keep their names, which can pass Windows' 260 characters.
+    return engine.extended(view), (view.parent / MARKER).read_text(encoding="utf-8")
 
 
 # -- the version operations, as the page uses them ------------------------------------
