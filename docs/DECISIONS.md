@@ -6343,3 +6343,9 @@ Phase 2-c needs a person's judgement of a reference on a card, and `BI_CARD_MODE
 ## 2026-11-04: Schema fit is kept on the AI run (Phase 2-b)
 
 Each item's action and a person's decision on it are kept with the run, per PC, as candidates are. The proposal's §8.1 F allows it and no new table is needed. Consequence: another PC does not see a pending item until it reaches a profile proposal or a schema version. Approved `dictionary_change` and `propose_type` register nothing; a person takes them to Session A, since the existing proposal flow only adds fields. Rejected for now: fit units shared in the vault, and auto-drafting a schema version from an approval.
+
+## 2026-11-04: Schema fit stays in, at about 40-50% more output tokens
+
+On the two densest chunks of `compute.md`, three runs each, real model, 32,000 output limit. Without asking for items, output means were 16,275 and 12,877 (highest 18,151); with items 22,439 and 19,056 (highest 23,370, 73% of the limit, no truncation). Input and output together rose 20-22%. So it neither reaches the limit nor doubles the cost, the orchestrator's two conditions for leaving it out. Three runs per arm is few: run-to-run spread in an arm is up to about 6,800 tokens.
+
+121 items: no `propose_type`, `extend_schema` or `dictionary_change`. 44 are `needs_clarification`, 41 of them added by the check rather than said by the model, which is review work a person will meet; not tuned here. Rejected: leaving Phase 2-b out of the release, and a per-run switch, which nobody asked for.

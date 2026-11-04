@@ -1,5 +1,17 @@
 # Handoff
 
+## Phase 2 and 3 integrated on `phase23` (2026-11-04, Claude Code worker D) — waiting for a full suite
+
+`phase23` from main `ad532e2d`, merged one at a time, none rewritten: `p3-bench`, `p3-retrieval`, `p2-review`, `p2-tools`, `p2-schema-fit`. Feed tests, the ADR-K10 guard and each branch's own tests passed after each merge, like CI; `tests/fixtures/bi_feed` unchanged. **The full suite has not run.**
+
+**Conflicts:** docs kept both sides; `MODEL_VERSION` is 9 (main 8, `p2-review` raised 5 to 6), so a local `bi.sqlite` rebuilds once; `runs.py` and the page's run chips keep all of both.
+
+**Schema fit is in**, on the measurement in `docs/DECISIONS.md`. It is always on for a vault's AI run, and its new prompt means no earlier kept answer is reused.
+
+**Fixed:** `test_the_whole_build_flow` has failed on main since `31895dc8` (identical requests repeat), unrelated to this integration; that test and the schema fit tests now ask anew. The fix reaches main only with this branch.
+
+**Next, on the orchestrator's word:** the full suite, then R6 steps 10-11 and 17. Measuring driver, git-ignored: `.scratch/fit_tokens.py`, log `.scratch/fit.log`.
+
 ## R6 on the real vault (2026-11-04 16:30, Claude Code worker D) — published
 
 On the real Agent Web (53583), main `31895dc8`. Vault `market-intel`, schema 5.0.0: **760 cards, 21 types, pushed, tag `2026q4-r6`, published.** `market-bi.v4-old` stays, nothing deleted.
