@@ -333,11 +333,13 @@ def test_the_combobox_opens_an_ordinary_run_and_a_reading_trial_too(tmp_path: Pa
             )
             page.wait("innerWidth === 390")
             _choose(page, "bi-b-run-pick", reading)
-            _shown(page, 4)
+            page.wait(f"bi.build.run.id === {json.dumps(reading)}")
+            page.wait("document.querySelectorAll('#bi-b-cand-src').length === 0")
             page.click("#bi-b-cands button")
             page.wait("!!document.querySelector('#bi-b-cand-src mark')")
             page.shoot("phone-detail")
             assert _rect(page, "#bi-b-cand")["top"] >= _rect(page, "#bi-b-cands")["bottom"] - 1
+            assert 0 <= _rect(page, "#bi-b-cand")["top"] < 844, "the pane is out of view"
             page.wait(
                 "document.querySelector('#bi-b-review-split').getBoundingClientRect().right <= 391"
             )

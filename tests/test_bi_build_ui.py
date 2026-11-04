@@ -61,7 +61,8 @@ def test_build_and_import_steps_in_a_browser(served: Any, tmp_path: Path) -> Non
             if value:
                 return value
             time.sleep(0.1)
-        raise AssertionError(expression)
+        said = run("(document.getElementById('bi-b-trial-result') || {}).textContent")
+        raise AssertionError(f"{expression}\ntrial result: {said!r}")
 
     def click(selector: str) -> None:
         run(f"document.querySelector({json.dumps(selector)}).click()")

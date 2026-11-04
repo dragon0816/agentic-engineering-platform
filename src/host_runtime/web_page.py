@@ -16093,7 +16093,12 @@ function biBuildRunPick() {
 }
 
 async function biBuildOpenRun(runId) {
-  await biBuildFetchRun(runId);
+  // The last one chosen: an earlier run answering late must not take its place.
+  const seq = bi.build.openSeq = (bi.build.openSeq || 0) + 1;
+  const detail = await call("/api/bi/runs/" + runId + "?dataset="
+    + encodeURIComponent(biDataset()));
+  if (seq !== bi.build.openSeq) return;
+  bi.build.run = detail.run; bi.build.candidates = detail.candidates;
   bi.build.candidateId = null; bi.build.texts = new Map();
   el("bi-b-cand-type").value = ""; el("bi-b-cand-state").value = "";
   biBuildSave(); biBuildRenderRun();
