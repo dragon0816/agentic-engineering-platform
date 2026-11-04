@@ -1,6 +1,6 @@
 # The BI Knowledge page, redesigned to be simple
 
-Status: design and slices, 2026-11-05. Decision `docs/DECISIONS.md` 2026-11-05. Base `main` 86a7d614, branch `bi-page-simple`.
+Status: S1 done, 2026-11-05; S2–S8 not started. Decision `docs/DECISIONS.md` 2026-11-05. Base `main` 86a7d614, branch `bi-page-simple`.
 
 **The owner's rule, verbatim:** 「ui請以簡單為主，善用table，menu/comobox」.
 

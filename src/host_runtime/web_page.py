@@ -1238,6 +1238,7 @@ tr:last-child td { border-bottom: none; }
 .bi-manage > summary::before { content: "\25B8\A0"; color: var(--dim); }
 .bi-manage[open] > summary::before { content: "\25BE\A0"; }
 .bi-adv { margin-top: 12px; }
+#bi-b-chips { align-items: center; }
 .bi-row-menu > summary { cursor: pointer; color: var(--accent); white-space: nowrap;
   min-height: 32px; list-style: none; }
 .bi-row-menu > summary::before { content: "\25B8\A0"; }
@@ -1981,7 +1982,8 @@ tr:last-child td { border-bottom: none; }
   <section id="panel-knowledge">
     <div class="workspace-head">
       <div><h2>Knowledge</h2>
-        <p class="note">Improve one folder of a shared knowledge vault in three steps, inside
+        <p class="note" id="kn-note">Improve one folder of a shared knowledge vault in three steps,
+          inside
           your own sandbox. Nothing reaches the vault until you push.</p></div>
       <button id="kp-refresh" type="button">Refresh</button>
     </div>
@@ -11849,6 +11851,7 @@ function knShow(name, load = true) {
   el("kn-pane-pipeline").hidden = knPane !== "pipeline";
   el("kn-pane-bi").hidden = knPane !== "bi";
   el("kp-refresh").hidden = knPane !== "pipeline";
+  el("kn-note").hidden = knPane !== "pipeline";
   if (!load) return;
   if (knPane === "bi") biLoad();
   else if (!knPipelineLoaded) {

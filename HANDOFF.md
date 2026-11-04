@@ -1,5 +1,19 @@
 # Handoff
 
+## BI page redesign, S1 done (2026-11-05, Claude Code)
+
+**Goal.** The owner found the BI Knowledge page too hard to use and chose the whole redesign before release, even if the date slips. Rule: 「ui請以簡單為主，善用table，menu/comobox」. Design and slices `docs/phases/BI_PAGE_SIMPLE.md`; decisions `docs/DECISIONS.md` 2026-11-05.
+
+**Where.** Branch `bi-page-simple` in the Paseo worktree `bi-build-flow`, on `main` 86a7d614; not pushed, not merged.
+
+**Done.** S1, the restructure. No backend change. S2–S8 not started: the suggest button, one AI panel, batch, question table and embedded dashboard, one-step share, remaining tables, final pass.
+
+**Verified.** `ruff format --check .`, `ruff check .`, `mypy src tests` clean; every BI browser file one at a time. Not run: the full suite.
+
+**Known.** `test_bi_build_flow_ui` failed once in about 15 runs of this branch: the method step's button did not open. Not reproduced since, cause unknown; `tests/bi_page_driver.py` now reports which steps are shut and the selected source, so the next failure says more. The same file failed once on `p3-retrieval` with the same failing line, detail not kept.
+
+**Next action.** Orchestrator: merge, then S3 alone, because it touches every step.
+
 ## R6 finished: vault published, `rs-k` copy imported (2026-11-04, Claude Code worker D)
 
 On main `b4b3403f`, Agent Web 53583. **Vault** `market-intel` publishes `2026q4-r6.2` (commit `826b8acd`): 760 cards, 12 questions, 37 Dashboard sections. Questions were accepted on the orchestrator's word; the owner has not read them.

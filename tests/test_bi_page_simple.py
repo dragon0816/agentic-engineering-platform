@@ -202,6 +202,10 @@ def test_a_read_only_dataset_keeps_a_way_to_another_one() -> None:
     assert not any(tag == "details" for tag, _name in PANE.around["bi-b-ro-links"])
 
 
+def test_the_other_tabs_sentence_does_not_show_on_this_one() -> None:
+    assert 'el("kn-note").hidden = knPane !== "pipeline";' in PAGE
+
+
 def test_a_panel_opened_from_elsewhere_opens_advanced_first() -> None:
     assert 'el("bi-advanced").open = true;' in PAGE
 
