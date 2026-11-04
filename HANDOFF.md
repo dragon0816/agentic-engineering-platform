@@ -1,5 +1,11 @@
 # Handoff
 
+## Filling card summaries (2026-11-05, Claude Code worker D) — waiting for the orchestrator
+
+Branch `bi-summary-fill`, docs only so far. Measured on copies; nothing written to the real vault, no product code. Findings and numbers: `docs/phases/BI_SUMMARY_FILL.md`. Drivers and raw answers, git-ignored: `.scratch/s*.py`, `.scratch/sum_try.py`, `.scratch/sum-out3.jsonl`.
+
+**Next, on the orchestrator's word:** the path and the full run. Do not strip headings from what the model reads: that reversed a card's meaning in round 2.
+
 ## BI page redesign, S1 done (2026-11-05, Claude Code)
 
 **Goal.** The owner found the BI Knowledge page too hard to use and chose the whole redesign before release, even if the date slips. Rule: 「ui請以簡單為主，善用table，menu/comobox」. Design and slices `docs/phases/BI_PAGE_SIMPLE.md`; decisions `docs/DECISIONS.md` 2026-11-05.
