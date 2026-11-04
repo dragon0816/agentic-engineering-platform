@@ -46,6 +46,7 @@ from knowledge.repo.repository import (
     canonical,
     path_problem,
     register_type,
+    rename_retrying,
 )
 from knowledge.sections import HUMAN_AREAS, correction_of, parse, sourced_lines
 
@@ -574,12 +575,12 @@ def materialize(
         old = None
         if target.exists():
             old = target.parent / f".{target.name}.{uuid.uuid4().hex[:8]}.old"
-            target.rename(old)
+            rename_retrying(target, old)
         try:
-            building.rename(target)
+            rename_retrying(building, target)
         except OSError:
             if old is not None:
-                old.rename(target)  # put the previous view back
+                rename_retrying(old, target)  # put the previous view back
             raise
         if old is not None:
             shutil.rmtree(old)

@@ -120,6 +120,8 @@ CREATE TABLE IF NOT EXISTS file_hashes (
 
 # Tries before a replace that Windows keeps refusing is given up.
 _REPLACE_ATTEMPTS = 6
+# A folder holds many files to be scanned, so a rename waits longer: about 2 s in all.
+_RENAME_ATTEMPTS = 10
 _LOCKS: dict[str, threading.RLock] = {}
 _LOCKS_GUARD = threading.Lock()
 
@@ -237,6 +239,19 @@ def replace_retrying(source: Path, target: Path) -> None:
         except PermissionError:
             if attempt == _REPLACE_ATTEMPTS - 1:
                 source.unlink(missing_ok=True)
+                raise
+            time.sleep(0.05 * (attempt + 1))
+
+
+def rename_retrying(source: Path, target: Path) -> None:
+    """`Path.rename` of a folder, retried briefly: Windows refuses it while another
+    process holds a file inside. The source stays on failure."""
+    for attempt in range(_RENAME_ATTEMPTS):
+        try:
+            source.rename(target)
+            return
+        except PermissionError:
+            if attempt == _RENAME_ATTEMPTS - 1:
                 raise
             time.sleep(0.05 * (attempt + 1))
 

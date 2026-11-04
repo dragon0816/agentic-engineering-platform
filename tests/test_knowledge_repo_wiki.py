@@ -314,3 +314,41 @@ def test_materialize_never_replaces_a_persons_folder(
     materialize(a.units(), view)  # rebuilt: the hand edit is gone
     assert not (view / "wiki" / "stray.md").exists()
     assert [p.name for p in tmp_path.iterdir() if p.name.startswith(".view")] == []
+
+
+def _refuse_rename(monkeypatch: pytest.MonkeyPatch, times: int, suffix: str = "") -> None:
+    """Windows refusing a folder's rename, as while another process holds a file inside."""
+    real, left = Path.rename, [times]
+
+    def rename(self: Path, target: Path) -> Path:
+        if left[0] and self.name.endswith(suffix):
+            left[0] -= 1
+            raise PermissionError(13, "Access is denied")
+        return real(self, target)
+
+    monkeypatch.setattr(Path, "rename", rename)
+    monkeypatch.setattr("knowledge.repo.repository.time.sleep", lambda _s: None)
+
+
+def test_materialize_waits_out_a_brief_refusal(
+    pcs: tuple[Repository, Repository, Path], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    a, _, _ = pcs
+    view = tmp_path / "view"
+    _refuse_rename(monkeypatch, 3)
+    materialize(a.units(), view)
+    assert (view / READ_ONLY_NOTE).is_file()
+
+
+def test_materialize_keeps_the_view_when_still_refused(
+    pcs: tuple[Repository, Repository, Path], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    a, _, _ = pcs
+    view = tmp_path / "view"
+    materialize(a.units(), view)
+    (view / "wiki" / "kept.md").write_text("the previous view", encoding="utf-8")
+    _refuse_rename(monkeypatch, 1000, suffix=".tmp")
+    with pytest.raises(PermissionError):
+        materialize(a.units(), view)
+    assert (view / "wiki" / "kept.md").is_file()
+    assert [p.name for p in tmp_path.iterdir() if p.name.startswith(".view")] == []
