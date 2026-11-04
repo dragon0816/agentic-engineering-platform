@@ -37,6 +37,32 @@ class Names:
         return self.table.get(norm_key(text), text)
 
 
+def every_name(store: BiStore) -> dict[str, list[dict[str, str]]]:
+    """Each loose name or alias -> the cards answering it, of any type."""
+    found: dict[str, list[dict[str, str]]] = {}
+    if not store.exists:
+        return found
+    cards = {str(r["id"]): r for r in store.card_rows()}
+
+    def add(name: Any, card: Any) -> None:
+        key = norm_key(name)
+        entry = {"id": str(card["id"]), "name": str(card["name"]), "type": str(card["entity_type"])}
+        if key and entry not in found.setdefault(key, []):
+            found[key].append(entry)
+
+    for card in cards.values():
+        add(card["name"], card)
+        add(card["canonical_key"], card)
+    with store._db() as db:
+        rows = db.execute("SELECT card_id, value FROM fields WHERE field = ?", (FIELD,)).fetchall()
+    for row in rows:
+        owner = cards.get(str(row["card_id"]))
+        value = json.loads(row["value"]) if owner is not None and row["value"] else []
+        for alias in value if isinstance(value, list) else [value]:
+            add(alias, owner)
+    return found
+
+
 def from_store(store: BiStore) -> Names:
     """Every card's aliases and former names -> its name."""
     table: dict[str, str] = {}

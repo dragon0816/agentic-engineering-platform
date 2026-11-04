@@ -34,6 +34,7 @@ from typing import Any
 from capabilities.bi_cards import (
     catalog,
     importer,
+    names,
     readers,
     recipes,
     schema_versions,
@@ -92,6 +93,7 @@ def _similar(store: BiStore, entity_type: str, key: str) -> list[Any]:
 #: An AI run never settles these on a card that exists: a person does, on the proposal.
 PROTECTED_FIELDS = ("confidence", "evidence_grade")
 VERIFIED = "verified"
+SAME_NAME = "same_name_other_type"
 MERGES = ("fill", "join", "proposal", "same", "human_kept", "bookkeeping", "take", "capped")
 
 
@@ -253,7 +255,50 @@ def evaluate(store: BiStore, reg: Registry, candidate: dict[str, Any]) -> dict[s
     # until the person edits the field.
     errors.extend(candidate.get("value_errors") or [])
     candidate["errors"] = errors
+    _mark_same_name(store, candidate)
     return candidate
+
+
+def unconfirmed_same_name(candidate: dict[str, Any]) -> list[dict[str, str]]:
+    """The cards of another type a new card's name also answers, not yet looked at."""
+    confirmed = candidate.get("same_name_confirmed") or []
+    return [c for c in candidate.get("same_name") or [] if c["id"] not in confirmed]
+
+
+def _mark_same_name(store: BiStore, candidate: dict[str, Any]) -> None:
+    """An AI run tends to make a card beside one of another type for the same company.
+    Never merged: a person says whether it is another thing (V on R6: 0 → 9 on 3 chunks).
+    Only a model's candidates hold `value_errors`: an import's rows are the person's."""
+    if "value_errors" not in candidate:
+        return
+    candidate["warnings"] = [w for w in candidate["warnings"] if w["code"] != SAME_NAME]
+    candidate["same_name"] = []
+    if candidate["action"] != "create":
+        return
+    table = names.every_name(store)
+    aliases: Any = next((f["value"] for f in candidate["fields"] if f["field"] == names.FIELD), [])
+    wanted = [
+        candidate.get("name"),
+        candidate["canonical_key"],
+        *(aliases if isinstance(aliases, list) else [aliases]),
+    ]
+    others = {
+        card["id"]: card
+        for name in wanted
+        for card in table.get(norm_key(name or ""), [])
+        if card["type"] != candidate["entity_type"]
+    }
+    candidate["same_name"] = sorted(others.values(), key=lambda c: (c["type"], c["name"]))
+    for card in candidate["same_name"]:
+        candidate["warnings"].append(
+            {
+                "code": SAME_NAME,
+                "message": f"已經有同名的 {card['type']} 卡「{card['name']}」："
+                "同一個對象就不要新建；確認是不同的對象才接受",
+            }
+        )
+    if candidate["review"] == "accepted" and unconfirmed_same_name(candidate):
+        candidate["review"] = "pending"  # the card appeared after the person accepted
 
 
 def _diff_view(candidate: dict[str, Any]) -> Any:
@@ -262,6 +307,7 @@ def _diff_view(candidate: dict[str, Any]) -> Any:
         candidate["match_ids"],
         candidate["base_version"],
         candidate["action"],
+        [c["id"] for c in unconfirmed_same_name(candidate)],
         [(f["field"], f["current"], f["change"]) for f in candidate["fields"]],
     )
 
@@ -733,6 +779,7 @@ def review(
     match: Any,
     actor: str,
     take_new: Any = None,
+    confirm_same_name: Any = None,
 ) -> dict[str, Any]:
     staging = Staging(workspace, dataset)
     staging.store.refuse_write()
@@ -765,6 +812,8 @@ def review(
             raise BiStoreError("match_invalid", "合併到既有卡片需要 card_id")
         candidate["choice"] = {"action": match["action"], "card_id": match.get("card_id")}
     evaluate(staging.store, reg, candidate)
+    if confirm_same_name is True:
+        candidate["same_name_confirmed"] = [c["id"] for c in candidate.get("same_name") or []]
     if decision is not None:
         if decision not in ("accepted", "rejected", "pending"):
             raise BiStoreError("review_invalid", "review 只能是 accepted、rejected 或 pending")
@@ -774,6 +823,14 @@ def review(
                 "這張候選卡還有錯誤，修正後才能接受",
                 errors=candidate["errors"],
             )
+        others = unconfirmed_same_name(candidate)
+        if decision == "accepted" and others:
+            raise BiStoreError(
+                "same_name_unconfirmed",
+                "已經有同名的卡片（" + "、".join(f"{c['type']}「{c['name']}」" for c in others)
+                + "）：確認是不同的對象才能接受",
+                cards=others,
+            )  # fmt: skip
         candidate["review"] = decision
     elif candidate["review"] == "accepted" and candidate["errors"]:
         candidate["review"] = "pending"

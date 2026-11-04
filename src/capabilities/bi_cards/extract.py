@@ -341,6 +341,20 @@ def _is_reading(item: FieldDef) -> bool:
     return item.name in READING_FIELDS and item.klass == "judgement"
 
 
+def _named_elsewhere(known: dict[str, list[str]], types: Sequence[str], text: str) -> str:
+    """Cards of the types not asked for whose names the excerpt writes: only those, so a
+    large base adds little to each call."""
+    loose = norm_key(text)
+    lines = []
+    for type_name, values in sorted(known.items()):
+        if type_name in types:
+            continue
+        named = [v for v in values if len(norm_key(v)) >= MIN_QUOTE and norm_key(v) in loose]
+        if named:
+            lines.append(f"- {type_name}: {', '.join(named[:MAX_KNOWN_NAMES])}")
+    return "\n".join(lines)
+
+
 def messages(
     reg: Registry,
     types: Sequence[str],
@@ -383,9 +397,17 @@ def messages(
         for type_name, values in sorted(known.items())
         if values and type_name in types
     )
+    elsewhere = _named_elsewhere(known, types, chunk.text)
     body = (
         f"Source: {source_name}, lines {chunk.line_start}-{chunk.line_end}\n"
-        f"Known cards:\n{names or '(none)'}\n\n{DATA_FENCE}\n{chunk.text}\n{DATA_END}"
+        f"Known cards:\n{names or '(none)'}\n"
+        + (
+            "Named in this excerpt and already cards of other types (the same entity is that "
+            f"card: do not make another card for it under a different type):\n{elsewhere}\n"
+            if elsewhere
+            else ""
+        )
+        + f"\n{DATA_FENCE}\n{chunk.text}\n{DATA_END}"
     )
     found = [ModelMessage(role="system", text=system), ModelMessage(role="user", text=body)]
     if problems:

@@ -577,6 +577,7 @@ def _run_action(
             match=given.get("match"),
             actor=who,
             take_new=given.get("take_new"),
+            confirm_same_name=given.get("confirm_same_name"),
         )
         return 200, {"ok": True, **answer}
     if len(rest) == 2 and rest[0] == "relations":

@@ -2912,6 +2912,7 @@ tr:last-child td { border-bottom: none; }
             <button class="bi-btn" id="bi-b-accept-clean" type="button" disabled>
               接受所有沒有錯誤的候選卡</button></div>
           <div id="bi-b-chips" class="bi-chips" aria-label="候選卡摘要"></div>
+          <div id="bi-b-same"></div>
           <div class="bi-browse">
             <div><ul id="bi-b-cands" class="bi-cards" aria-label="候選卡清單"></ul></div>
             <div class="bi-detail" id="bi-b-cand" aria-live="polite">
@@ -14019,6 +14020,10 @@ function biProfileShow() {
         field.use === "required" ? biBadge("必填", "warn") : biBadge("選填", "dim"),
         field.note ? bh("span", "bi-meta", " " + field.note) : "")))
         : bh("p", "bi-meta", "沒有列欄位。"));
+      if ((used.not_applicable || []).length) {
+        row.append(bh("p", "bi-meta", "不適用：" + used.not_applicable.map((item) => item.field
+          + (item.reason ? "（" + item.reason + "）" : "")).join("、")));
+      }
       list.append(row);
     }
     view.append(list);
@@ -15504,6 +15509,7 @@ function biBuildRenderRun() {
     }, "bi-btn"));
   }
   el("bi-b-chips").append(...biRunNothing(run), ...biRunRelations(run));
+  biBuildSameNames();
   for (const candidate of bi.build.candidates) {
     const decision = BI_DECISION[candidate.review] || [candidate.review, "dim"];
     const button = biButton("", () => biBuildShowCandidate(candidate.id), "bi-card-btn");
@@ -15517,6 +15523,36 @@ function biBuildRenderRun() {
     list.append(bh("li", "", button));
   }
   if (bi.build.candidateId) biBuildShowCandidate(bi.build.candidateId);
+}
+
+function biSameNameOpen(candidate) {
+  const confirmed = candidate.same_name_confirmed || [];
+  return (candidate.same_name || []).filter((card) => !confirmed.includes(card.id));
+}
+
+function biBuildSameNames() {
+  // New cards named like a card of another type: never merged, and never accepted in bulk.
+  const box = el("bi-b-same"); box.replaceChildren();
+  const open = bi.build.candidates.filter((c) => c.review === "pending"
+    && biSameNameOpen(c).length);
+  if (!open.length) return;
+  const list = bh("ul", "bi-list");
+  for (const candidate of open) {
+    const cards = biSameNameOpen(candidate).map((card) => biTypeLabel(card.type)
+      + "「" + card.name + "」").join("、");
+    list.append(bh("li", "", bh("strong", "", candidate.name || candidate.canonical_key),
+      bh("span", "bi-meta", " 新的 " + biTypeLabel(candidate.entity_type) + "；已經有 " + cards),
+      bh("div", "bi-actions",
+        biButton("是不同的對象，接受", () => biBuildReview(candidate.id,
+          candidate.errors.length ? {confirm_same_name: true}
+            : {confirm_same_name: true, review: "accepted"}), "bi-btn"),
+        biButton("同一個對象，不新建", () => biBuildReview(candidate.id,
+          {review: "rejected"}), "bi-btn"))));
+  }
+  box.append(bh("h4", "", "和既有卡片同名（" + open.length + "）"),
+    bh("p", "bi-meta", "AI 想新建的卡片，名字和另一種類型的卡片相同。"
+      + "不會自動合併，也不會被「接受所有」帶過。"),
+    list);
 }
 
 async function biBuildReview(candidateId, body) {
@@ -15621,7 +15657,9 @@ function biBuildShowCandidate(candidateId) {
 
 el("bi-b-accept-clean").addEventListener("click", async () => {
   const todo = bi.build.candidates.filter((c) => c.review === "pending" && !c.errors.length
-    && c.action !== "skip");
+    && c.action !== "skip" && !biSameNameOpen(c).length);
+  const held = bi.build.candidates.filter((c) => c.review === "pending"
+    && biSameNameOpen(c).length).length;
   // 「下一步」 waits for all of them: moving on early wrote only the ones accepted so far.
   bi.build.accepting = true;
   try {
@@ -15630,7 +15668,8 @@ el("bi-b-accept-clean").addEventListener("click", async () => {
     bi.build.accepting = false;
     biBuildRenderRun();
   }
-  biNotice(true, "已接受 " + todo.length + " 張沒有錯誤的候選卡。");
+  biNotice(true, "已接受 " + todo.length + " 張沒有錯誤的候選卡。"
+    + (held ? held + " 張和既有卡片同名，要在清單上逐張確認。" : ""));
 });
 
 // -- steps 5-6: commit and result --------------------------------------------
