@@ -31,6 +31,7 @@ from test_business_cards_conversation import Conversation
 from test_host_wiring import ready
 
 from capabilities.bi_cards import vault
+from capabilities.bi_cards.store import BiStore
 from host_runtime import bi_bench, bi_cards_tools, skill_packs
 from host_runtime.assets import shipped
 from host_runtime.host import build_runtime
@@ -205,7 +206,12 @@ def test_a_question_is_asked_through_the_agent_on_the_chosen_version(tmp_path: P
         query = (bi_cards_tools.TOOL_NAME, {"dataset": dataset, "text": "TSN"})
         model.then({"tools": [query]}, {"text": "答案在卡片裡"})
         ask = bi_bench.agent_ask(gateway, workspace, vault_id, "engineer", "engineering")
-        assert ask("TSN 的標準組織？", "working")["ok"]
+        reply = ask("TSN 的標準組織？", "working")
+        assert reply["ok"]
+        # The trace the error classes read: what the tool returned, card ids included.
+        card = BiStore(workspace, dataset).find("Technology", "TSN")
+        assert card is not None and card["id"] in reply["shown"]
+        assert any("ETSI" in text for text in reply["shown"])
         working = model.tool_results()
         model.then({"tools": [query]}, {"text": "答案在卡片裡"})
         ask("TSN 的標準組織？", "published")

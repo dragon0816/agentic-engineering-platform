@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sqlite3
 import uuid
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
@@ -28,7 +29,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
-from capabilities.bi_cards import ai_runs, benchmark, schema_versions, vault, vault_checks
+from capabilities.bi_cards import (
+    ai_runs,
+    benchmark,
+    error_class,
+    schema_versions,
+    vault,
+    vault_checks,
+)
 from capabilities.bi_cards.ai_runs import AiRuntime
 from capabilities.bi_cards.capability import QueryHandler
 from capabilities.bi_cards.staging import Staging
@@ -42,7 +50,8 @@ REPORT_FORMAT = "aep.bi.bench_report/v1"
 BENCH_DIR = "benchmarks"
 MAX_ANSWER = 4000
 Side = Literal["working", "published"]
-#: (question text, side) -> {"ok": the turn answered, "answer": its text}.
+#: (question text, side) -> {"ok": the turn answered, "answer": its text, "shown": the
+#: strings its tools returned, when a trace was kept}.
 Ask = Callable[[str, Side], Mapping[str, Any]]
 #: (an extraction case) -> the candidates a trial run produced.
 Extract = Callable[[Mapping[str, Any]], list[dict[str, Any]]]
@@ -74,13 +83,65 @@ def _save(workspace: Path, vault_id: str, report: dict[str, Any]) -> None:
     schema_versions.replace(temporary, target)
 
 
-def _side(question: Question, reply: Mapping[str, Any]) -> dict[str, Any]:
+def _side(
+    question: Question,
+    reply: Mapping[str, Any],
+    world: Callable[[], error_class.World | None],
+) -> dict[str, Any]:
     text = str(reply.get("answer") or "")
+    graded = grade(question, text)
+    shown = reply.get("shown")
     return {
         "ok": bool(reply.get("ok")),
-        "grade": grade(question, text).model_dump(mode="json"),
+        "grade": graded.model_dump(mode="json"),
         "answer": text[:MAX_ANSWER],
+        # Only says where to look; `grade` alone decides pass or fail.
+        "errors": []
+        if graded.passed
+        else error_class.classify(
+            missing=graded.missing,
+            forbidden=graded.forbidden,
+            answered=bool(reply.get("ok")),
+            shown=shown,
+            world=None if shown is None else world(),
+        ),
     }
+
+
+def _store_of(workspace: Path, vault_id: str, side: Side) -> BiStore:
+    dataset = f"{VAULT_PREFIX}{vault_id}"
+    if side == "working":
+        return BiStore(workspace, dataset, view=vault.local_dir(workspace, vault_id))
+    return vault.reading_store(workspace, dataset)
+
+
+def _world(workspace: Path, vault_id: str, side: Side) -> error_class.World | None:
+    """What this side's cards hold and what the vault's sources say. A source with no
+    Markdown yet is left out: it then reads as not saying the term, never the reverse."""
+    try:
+        store = _store_of(workspace, vault_id, side)
+        cards = {}
+        for row in store.card_rows():
+            fields = store.fields(row["id"])
+            values = {name: str(field["value"]) for name, field in fields.items()}
+            cards[row["id"]] = error_class.Card(
+                text=" ".join([row["name"], row["canonical_key"], *values.values()]),
+                values=values,
+                linked=frozenset(
+                    r["to_card_id"] if r["from_card_id"] == row["id"] else r["from_card_id"]
+                    for r in store.relations(row["id"])
+                ),
+                evidence=store.evidence(row["id"]),
+            )
+        staging = Staging(workspace, f"{VAULT_PREFIX}{vault_id}")
+        texts = [
+            staging.markdown_text(s["id"], int(s["markdown_rev"]))
+            for s in staging.sources()
+            if s.get("markdown_rev")
+        ]
+    except (BiStoreError, OSError, sqlite3.Error, KeyError):
+        return None  # classes then say unknown, and the run goes on
+    return error_class.World(cards=cards, sources="\n".join(texts))
 
 
 def _finish(report: dict[str, Any]) -> None:
@@ -92,6 +153,9 @@ def _finish(report: dict[str, Any]) -> None:
         for r in results
         if r["published"]["grade"]["passed"] and not r["working"]["grade"]["passed"]
     ]
+    report["error_classes"] = error_class.counts(
+        item for r in results for item in r["working"].get("errors") or []
+    )
     scored = [c["result"] for c in report["cases"] if c.get("result")]
     report["extract"] = (
         {k: v for k, v in benchmark.summarize(scored).items() if k != "notes"} if scored else None
@@ -128,6 +192,16 @@ def run(
         "error": None,
     }
     _save(workspace, vault_id, report)
+    worlds: dict[str, error_class.World | None] = {}
+
+    def world_of(side: Side) -> Callable[[], error_class.World | None]:
+        def read() -> error_class.World | None:
+            if side not in worlds:
+                worlds[side] = _world(workspace, vault_id, side)
+            return worlds[side]
+
+        return read
+
     try:
         for item in graded:
             question = Question(
@@ -138,8 +212,9 @@ def run(
                 must_not=tuple(item["must_not"]),
             )
             result = {"unit": item["unit"], "set": item["set"], "question": item["question"]}
-            for side in ("working", "published"):
-                result[side] = _side(question, ask(item["question"], side))
+            sides: tuple[Side, Side] = ("working", "published")
+            for side in sides:
+                result[side] = _side(question, ask(item["question"], side), world_of(side))
             report["results"].append(result)
             _save(workspace, vault_id, report)
         for case in cases:
@@ -265,7 +340,18 @@ def ask_on(
         tools=[tool],
         role=ROLE.format(dataset=dataset),
     )
-    return {"ok": result.status == "answered", "answer": result.text}
+    outcomes = [
+        item.host.data
+        for item in result.tools
+        if item.name == bi_cards_tools.TOOL_NAME
+        and item.host is not None
+        and item.host.status == "succeeded"
+    ]
+    return {
+        "ok": result.status == "answered",
+        "answer": result.text,
+        "shown": list(error_class.walk_strings(outcomes)),
+    }
 
 
 def agent_ask(gateway: Any, workspace: Path, vault_id: str, actor: str, namespace: str) -> Ask:
@@ -275,11 +361,11 @@ def agent_ask(gateway: Any, workspace: Path, vault_id: str, actor: str, namespac
 
     def chosen(side: Side) -> tuple[BiStore, str]:
         if side == "working":
-            view = BiStore(workspace, dataset, view=vault.local_dir(workspace, vault_id))
+            view = _store_of(workspace, vault_id, side)
             return view, "內容來自這台電腦的工作版本（還沒 push 的改動也在內）"
         reads = vault.Vault(workspace, vault_id).reads()
         note = f"內容來自發佈版本 {reads['tag']}" if reads["tag"] else "內容來自已 push 的最新版本"
-        return vault.reading_store(workspace, dataset), note
+        return _store_of(workspace, vault_id, side), note
 
     def ask(question: str, side: Side) -> Mapping[str, Any]:
         return ask_on(gateway, workspace, dataset, actor, namespace, chosen(side), question)
