@@ -69,7 +69,14 @@ def _run(ws: Path, dataset: str, *items: dict[str, Any], kind: str = "ingest") -
     jobs = Jobs()
     model = Scripted({"candidates": [CANDIDATE], "items": list(items)})
     # A different scripted answer to the same request: not the kept one.
-    given = {"dataset": dataset, "kind": kind, "source_id": source, "folder": FOLDER, "fresh": True}
+    given = {
+        "dataset": dataset,
+        "kind": kind,
+        "source_id": source,
+        "folder": FOLDER,
+        "fresh": True,
+        "check_fit": True,
+    }
     run = _ok(_post(ws, "/api/bi/runs", given, _runtime(model, jobs)))["run"]
     jobs.run_all()
     return str(run["id"]), model
@@ -234,6 +241,19 @@ def test_a_field_needs_a_home_with_a_profile(tmp_path: Path) -> None:
     assert still["status"] == "proposed"  # it can be approved once there is a profile
 
 
+def test_a_run_is_asked_only_when_it_says_so(tmp_path: Path) -> None:
+    _, dataset, a = _start(tmp_path)
+    body = {"dataset": dataset, "name": "plain.md", "text": NOTE, "folder": FOLDER}
+    source = _ok(_post(a, "/api/bi/sources", body))["source"]["id"]
+    jobs = Jobs()
+    model = Scripted({"candidates": [CANDIDATE], "items": [NEW_TYPE]})
+    given = {"dataset": dataset, "kind": "ingest", "source_id": source, "folder": FOLDER}
+    run = _ok(_post(a, "/api/bi/runs", given, _runtime(model, jobs)))["run"]
+    jobs.run_all()
+    assert all("Schema fit" not in m.text for m in model.requests[0].messages)
+    assert _items(a, dataset, str(run["id"])) == []  # an answer's items are not read either
+
+
 def test_a_dataset_that_is_no_vault_is_not_asked(tmp_path: Path) -> None:
     ws = tmp_path / "ws"
     ws.mkdir()
@@ -242,7 +262,7 @@ def test_a_dataset_that_is_no_vault_is_not_asked(tmp_path: Path) -> None:
     source = _ok(_post(ws, "/api/bi/sources", body))["source"]["id"]
     jobs = Jobs()
     model = Scripted({"candidates": []})
-    given = {"dataset": "lab", "kind": "ingest", "source_id": source}
+    given = {"dataset": "lab", "kind": "ingest", "source_id": source, "check_fit": True}
     _ok(_post(ws, "/api/bi/runs", given, _runtime(model, jobs)))
     jobs.run_all()
     assert "propose_type" not in model.requests[0].messages[0].text

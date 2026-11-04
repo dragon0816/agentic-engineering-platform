@@ -6349,3 +6349,7 @@ Each item's action and a person's decision on it are kept with the run, per PC, 
 On the two densest chunks of `compute.md`, three runs each, real model, 32,000 output limit. Without asking for items, output means were 16,275 and 12,877 (highest 18,151); with items 22,439 and 19,056 (highest 23,370, 73% of the limit, no truncation). Input and output together rose 20-22%. So it neither reaches the limit nor doubles the cost, the orchestrator's two conditions for leaving it out. Three runs per arm is few: run-to-run spread in an arm is up to about 6,800 tokens.
 
 121 items: no `propose_type`, `extend_schema` or `dictionary_change`. 44 are `needs_clarification`, 41 of them added by the check rather than said by the model, which is review work a person will meet; not tuned here. Rejected: leaving Phase 2-b out of the release, and a per-run switch, which nobody asked for.
+
+## 2026-11-04: Schema fit is a per-run tick, default off (orchestrator)
+
+Measured always on, a dense chunk gave about 7 questions, 36% of its items `needs_clarification`, 41 of 44 added by the check. Too much review for colleagues on Friday. A run asks only with `check_fit: true`, from a tick in the run form, in a vault; it is stored on the run, so a resumed run keeps it. Off, the prompt is as before Phase 2-b, so kept answers are still reused. Rejected: leaving Phase 2-b out, since the owner can still use it, and tuning the check before the release.

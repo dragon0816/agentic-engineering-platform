@@ -101,6 +101,7 @@ def start(
     schema: tuple[Registry, str] | None = None,
     checks: list[dict[str, Any]] | None = None,
     fresh: Any = False,
+    check_fit: Any = False,
     folder: Any = None,
     skill_draft: Any = None,
     trial_schema: dict[str, Any] | None = None,
@@ -175,6 +176,7 @@ def start(
         {
             "mode": "llm",
             "fresh": fresh is True,
+            "check_fit": check_fit is True,
             "types": scope,
             "instructions": text,
             "checks": checks or [],
@@ -331,6 +333,7 @@ def _extract(
     rules = layout["skills"] if isinstance(layout.get("skills"), dict) else {}
     notes = str(rules.get("text") or "")
     used_profile = rules.get("profile")
+    check_fit = staging.store.vault_id is not None and bool(layout.get("check_fit"))
     cached = answer_cache.CachingModel(
         model, staging.store.dir, fresh=bool(layout.get("fresh")), usable=_usable_answer
     )
@@ -348,7 +351,7 @@ def _extract(
         on_chunk=progress,
         domain_notes=notes,
         infer_relations=staging.store.vault_id is not None,
-        check_fit=staging.store.vault_id is not None,
+        check_fit=check_fit,
         profile=used_profile,
     )
     found = staging.candidates(run_id) if only else []
@@ -384,7 +387,8 @@ def _extract(
     staging.put_candidates(run_id, merged)
     retried = set(only or [])
     kept = [f for f in layout.get("failures") or [] if int(f["chunk"]) not in retried]
-    layout["items"] = schema_fit.merge_items(layout.get("items") or [], result.items, merged)
+    if check_fit:
+        layout["items"] = schema_fit.merge_items(layout.get("items") or [], result.items, merged)
     layout["relations"] = runs.merge_relations(
         staging.store, layout.get("relations") or [], result.relations
     )

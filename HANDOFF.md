@@ -1,16 +1,17 @@
 # Handoff
 
-## Phase 2 and 3 integrated on `phase23` (2026-11-04, Claude Code worker D) — waiting for a full suite
+## Phase 2 and 3 integrated on `phase23` (2026-11-04, Claude Code worker D) — full suite's failures fixed
 
-`phase23` from main `ad532e2d`, merged one at a time, none rewritten: `p3-bench`, `p3-retrieval`, `p2-review`, `p2-tools`, `p2-schema-fit`. Feed tests, the ADR-K10 guard and each branch's own tests passed after each merge, like CI; `tests/fixtures/bi_feed` unchanged. **The full suite has not run.**
+`phase23` from main `ad532e2d`, merged one at a time, none rewritten: `p3-bench`, `p3-retrieval`, `p2-review`, `p2-tools`, `p2-schema-fit`. `MODEL_VERSION` is 9, so a local `bi.sqlite` rebuilds once.
 
-**Conflicts:** docs kept both sides; `MODEL_VERSION` is 9 (main 8, `p2-review` raised 5 to 6), so a local `bi.sqlite` rebuilds once; `runs.py` and the page's run chips keep all of both.
+**Full suite on `0002ba6b`: 3 failed, 5383 passed, 37 skipped.** All three fixed after it; the suite has not run again since.
+- `test_a_bi_answer_shows_its_chart_inline_in_the_file_viewer`, test: it read the frame while its own second `loadConversations` had removed it. Instrumented, 2 of 12 failed with exactly that; 20 of 20 pass after the fix.
+- `test_a_folder_in_another_home_is_refused_and_none_means_the_sources_own`, test: the second identical run was answered from the kept answers, so it sent no request.
+- `test_a_proposal_is_refused_with_the_reason[values3-permission]`, product, cause not proved: `wiki.materialize`'s folder rename was refused once. **The holder was not caught**: 240 real publishes and 10,000 synthetic renames, 6,000 of them and all the publishes four at a time, gave no refusal. The folder's name is random and only `materialize` knows it, so no AEP cleanup can reach it. `rename_retrying` waits about 2 s, as `replace_retrying` does for files. Not covered: `shutil.rmtree(old)` after the swap can still raise on the same refusal.
 
-**Schema fit is in**, on the measurement in `docs/DECISIONS.md`. It is always on for a vault's AI run, and its new prompt means no earlier kept answer is reused.
+**Schema fit:** per run, default off (`check_fit`, a tick in the run form), in a vault only. Off it records no items and its prompt is as before, so kept answers are reused. On-measure in `docs/DECISIONS.md`.
 
-**Fixed:** `test_the_whole_build_flow` has failed on main since `31895dc8` (identical requests repeat), unrelated to this integration; that test and the schema fit tests now ask anew. The fix reaches main only with this branch.
-
-**Next, on the orchestrator's word:** the full suite, then R6 steps 10-11 and 17. Measuring driver, git-ignored: `.scratch/fit_tokens.py`, log `.scratch/fit.log`.
+**Next:** R6 steps 10-11 and 17, on the orchestrator's word. Measuring driver, git-ignored: `.scratch/fit_tokens.py`, log `.scratch/fit.log`.
 
 ## R6 on the real vault (2026-11-04 16:30, Claude Code worker D) — published
 

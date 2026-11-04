@@ -2863,6 +2863,8 @@ tr:last-child td { border-bottom: none; }
               <select id="bi-b-folder"></select></div>
             <div><label><input id="bi-b-fresh" type="checkbox">
               不沿用上次的回答（同樣的來源和規則，重新問模型一次）</label></div>
+            <div><label><input id="bi-b-fit" type="checkbox">
+              同時檢查內容和綱要合不合（知識庫才有；輸出約多四到五成，也會多出要人回答的問題）</label></div>
             <div><label class="bi-label" for="bi-b-m-name">另存為新的 Skill（名稱）</label>
               <input id="bi-b-m-name" class="bi-input" maxlength="80"
                 placeholder="例如：會議紀錄擷取"></div>
@@ -15239,6 +15241,7 @@ function biRunBody(kind) {
   if (methodId === "builtin:llm" && source && source.format === "table") body.path = "ai";
   if (methodId === "builtin:rules") body.path = "rules";
   if (el("bi-b-fresh").checked) body.fresh = true;
+  if (el("bi-b-fit").checked && biDataset().startsWith("vault-")) body.check_fit = true;
   // 「不指定」 sends nothing: the server then uses the source's own folder.
   if (biDataset().startsWith("vault-") && el("bi-b-folder").value
     && el("bi-b-folder").value !== "sources") {

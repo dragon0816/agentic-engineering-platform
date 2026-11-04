@@ -538,6 +538,7 @@ def _start_run(
             schema=schema,
             folder=given.get("folder"),
             fresh=given.get("fresh"),
+            check_fit=given.get("check_fit"),
         )
         return 200, {"ok": True, "run": run}
     mapping = given.get("mapping")
