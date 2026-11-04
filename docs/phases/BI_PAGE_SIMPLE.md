@@ -189,3 +189,14 @@ Every slice may add to `tests/bi_page_driver.py`; those are small rebases.
 1. **`kn-pane-pipeline` is out of scope.** The Knowledge page opens on the BI tab when this PC has a BI dataset or vault. Small, so it is done in S1.
 2. **Tag names in S6:** the page proposes a date as the tag name, editable.
 3. **A push with no test run stays allowed,** with a visible note. S6 keeps that and shows the note.
+
+## 8. Next: the review table (part of S7), for whoever takes it
+
+Brief from the orchestrator, 2026-11-05. D's `bi-summary-fill` adds a reading run, `POST /api/bi/runs {reading: true, ...}` in `reading_runs.py`, started through the API. `#bi-b-cands` shows only `bi.build.run`, so such a run cannot be opened. About 180 candidates will wait there. Base it on main once D's branch is in. Stay inside the review stage: Lane D is on the AI panel.
+
+- **A combobox of the dataset's runs waiting for review.** The chosen one opens in the review list. `GET /api/bi/runs` or similar: check what exists. `biBuildFetchRun(runId)` then `biBuildRenderRun()` already draw one run.
+- **Candidates as a table** with its own scroller, using `.bi-split`, `.bi-split-list`, `.bi-scroller`, `.bi-split-pane` (see `#bi-b-src-split` and `biListTable`): card name, field, proposed value.
+- **Selecting a row shows source text and the quote on the right,** with accept and reject. Today's detail is `#bi-b-cand`.
+- **180 must be workable,** including `#bi-b-accept-clean`. Measure the draw, as `test_bi_many_sources_ui` does.
+- **Test with a reading run:** nothing built for ordinary runs may trip. Read `biBuildAllowed`, which allows `commit` only when `run.kind === "ingest"`, and `biBuildRenderRun`, which returns early for any other kind. Check what `kind` a reading run has.
+- **Tests that use the list today:** `#bi-b-cands button` in `test_bi_build_flow_ui`, `test_bi_build_ui`, `test_bi_vault_ui` and others. Rewrite them to the table; do not weaken them.
