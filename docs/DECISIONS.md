@@ -6369,3 +6369,14 @@ From worker V's acceptance, relayed by the BI orchestrator.
 - **A per-PC copy of a dashboard's AEP panels** (vault, slug, params, read time), so a stopped Atlas can still draw charts for a dashboard asked about for the first time in a conversation. The answer says it is the last read and that Atlas decides the layout. No copy: the explanation, nothing guessed. Rejected: keeping the whole document (AEP draws no layout from it, and a copy of Atlas's data would drift).
 - **The port comes with the turn**, not a host setting. The page already holds the address per browser and frames Atlas with it, so one person's chat and frame always agree, with no new setting to keep in step. Only a port travels, so the host can reach nothing but `127.0.0.1`. A non-loopback address sends none, and the default port stands. Rejected: a host-level setting (a second place for the same address; two browsers could disagree with it).
 - **A dashboard's result says what the answer holds**: framed or not, charts drawn, panels not shown and why, so the model cannot say 「已在這裡顯示」 for a board it could not read.
+
+## 2026-11-05 — The BI Knowledge page is redesigned to be simple, and this outranks the 11-05 date
+
+Owner, 2026-11-05, relayed by the BI orchestrator, after trying the page and finding it too hard to use. Design and slices: `docs/phases/BI_PAGE_SIMPLE.md`.
+
+- **The rule, verbatim:** 「ui請以簡單為主，善用table，menu/comobox」.
+- **The whole redesign is done before release, even if the date slips.** It outranks the release date of 2026-11-05 21:00. Scope is not cut to meet a date.
+- **The main path is only the owner's flow:** step 1 input and convert; step 2 schema and ingest; step 3 testing. The top section and step 1's knowledge base block are duplicates and go away as separate blocks.
+- **Moved, not deleted:** what the flow does not name stays reachable under 進階. No backend route is removed. Create and join a vault, tool approval, proposals, correction notes, evidence review, push, tag and publish stay reachable, because the Agent and colleagues read only published versions.
+- **A subscribed copy keeps a way in and a way out.** The select moves into step 1, so the build tab can no longer be hidden for a read-only dataset, or someone on a subscribed copy could not choose another. Rejected: a second select for reading (a mirror again).
+- **The bench gate is not weakened by a simpler share step.** It stays in `repo.push`. A push with no test run is allowed today and stays allowed with its note, unless the owner changes that.

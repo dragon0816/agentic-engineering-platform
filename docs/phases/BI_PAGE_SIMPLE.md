@@ -1,0 +1,191 @@
+# The BI Knowledge page, redesigned to be simple
+
+Status: design and slices, 2026-11-05. Decision `docs/DECISIONS.md` 2026-11-05. Base `main` 86a7d614, branch `bi-page-simple`.
+
+**The owner's rule, verbatim:** 「ui請以簡單為主，善用table，menu/comobox」.
+
+So: tables, menus and comboboxes rather than long text, stacked forms and rows of buttons. No explanatory paragraphs on the main path. The owner chose the whole redesign before release, even if the date slips, so **scope is not cut to meet a date**.
+
+Line numbers below are `src/host_runtime/web_page.py` at 86a7d614.
+
+## 1. The owner's flow: the only things on the main path
+
+| Step | Part | What the person does |
+|---|---|---|
+| 1 輸入與轉檔 | 1 | Choose the vault |
+| | 2 | Choose the market field |
+| | 3 | Add files |
+| | 4 | Press convert, then review the converted result |
+| 2 Schema 與 Ingest | 1 | A button: from the newly added data, the system suggests whether to add a class to the schema |
+| | 2 | Review the current skills and tools; change or add them through an AI session that stays on this page |
+| | 3 | Ingest button |
+| | 4 | Review the cards and decide whether to apply |
+| 3 測試 | 1 | View or edit the dashboard; an AI session can help |
+| | 2 | View or edit the question set in a table; a selected row opens an editable section on the right |
+| | 3 | Start the test run |
+| | 4 | View results and the dashboard, and decide whether to commit |
+
+The top section (dataset, domain, sample, refresh, dataset management, schema line) and step 1's knowledge base block are duplicates, and both go away as separate blocks.
+
+## 2. What the code says (checked, not assumed)
+
+| Finding | Evidence | Consequence |
+|---|---|---|
+| `#bi-dataset` is the page's state; `#bi-b-ds` only mirrors it | `biDataset()` used 92 times; mirror at 14619, filled at 13234 | One select, keep the id, drop the mirror |
+| A subscribed copy cannot be built | Build tab hidden at 16084, redirect in `biShowView` at 12144, mirror filters read-only out at 13235 | Moving the select into step 1 would strand someone on a subscribed copy. See §3.1 |
+| `#bi-domain` only filters reading | `biDomain()` 11905; `biRunBody` 15260 never sends it | It is not the owner's "market field" |
+| The owner's "market field" is `#bi-b-src-folder` | Sent as `folder` at 14974; selects the extract rule | Promote it. Shown only for a vault, as today |
+| Adding a file already converts it | `Staging._keep` converts before anything is kept; `source_no_text` refuses, another failure is kept with its reason | No backend needed. 「加入來源」 becomes 「轉檔」. A file is not converted separately |
+| A run takes one source | `biRunBody` sends `source_id`; `_extract` reads `run["source_ids"][0]` | Batch needs design. §5, S4 |
+| `check_fit` is only a tick on a run, and a custom method ignores it | `biRunBody` returns at 15264 before the tick | The suggest button needs its own path. §5, S2 |
+| `propose_type` is a recorded decision, not a schema change | `schema_fit.py` line 8 | A suggestion ends in Session A, not in a write |
+| The bench gate is real, but only for a test that was run | `bi_bench.gate`: blocks on `regressions` of the newest finished run whose `units_sha256` matches. **With no such run it blocks nothing and only notes it**. `repo.push` returns `status: blocked` | A share step must stop on `blocked`, and must show the "not tested" note. §5, S6 |
+| Publish takes a person's confirm | `vault.publish` refuses without `confirm: true` | One click on a share button can carry it, only with a confirmation in front |
+| A question is overwritten by its `set` and `slug` | `checked_question` + `_stage`; the list returns both | Edit in place is possible with no backend. Changing `set` is delete plus save |
+| Five AI session kinds, five panels | `sessions.KINDS`; panels `bi-b-sa`, `-sb`, `-ska`, `-ana`, `-qa` | One panel. §5, S3 |
+
+**The Knowledge page's other tab, `kn-pane-pipeline`,** opens first and is a different product: an English three-step sandbox wizard for wiki folders (`kp-*`, routes `/api/knowledge/pipeline/*`), with a block saying sandboxes will give way to knowledge repositories. It shares no controls with the BI pane. **Not in this redesign** unless the owner says so, because the owner's flow names only BI steps. One effect stays: a BI user lands on the wrong tab first. Open question for the owner in §7.
+
+## 3. Target layout
+
+```
+[ 建立與匯入 | Dashboard | 卡片 ]                         12 張卡片 · 更新於 …   [ 進階 ▾ ]
+ ① 輸入與轉檔  ② Schema 與 Ingest  ③ 測試                   (stepper)
+
+ Step 1
+ 知識庫 [combobox]  [管理 ▾]   領域 [combobox]  機密等級 [combobox]   [選檔]  [轉檔]
+ ┌ table of sources: 使用 | 來源 | 格式 | Markdown | 大小 | 機密等級 | 共用資料夾 | 加入時間
+ [ 進階 ▸ ]                                                    [ 下一步 ]
+```
+
+### 3.1 One selection, and no trap
+
+`#bi-dataset` moves into step 1, with its existing option groups (我的資料集, 已訂閱). Its id does not change, because 92 reads and 39 test references use it.
+
+**The trap and its fix.** Today selecting a subscribed copy hides the build tab. With the select inside step 1, that would hide the only way back. So:
+
+- The build tab stays visible for every dataset, and step 1 stays reachable.
+- A read-only dataset still opens on the Dashboard, as today, with its banner.
+- On a read-only dataset, step 1 shows the select, the banner and a link to the cards, and hides the add-file row. Steps 2 and 3 are disabled in the stepper.
+
+So the Dashboard and 卡片 tabs are the reading entry for subscribed copies and stay until S5; only then is it decided whether they remain as tabs. They hold what a colleague who only reads needs.
+
+### 3.2 Advanced
+
+- **One page-level `#bi-advanced`:** things about the dataset rather than a step.
+- **One 進階 section per step:** things used in that step.
+
+Advanced is a `<details>`, closed by default. Anything opened from elsewhere in the page opens its details first.
+
+## 4. Where every control goes
+
+"S1" means moved by slice 1. A later slice is named where it replaces the control. **Nothing here removes a backend route.**
+
+### Top section and tabs
+
+| Control | Goes to |
+|---|---|
+| `bi-dataset` | Step 1 |
+| `bi-domain`, `bi-sample` (read filters) | `#bi-advanced` |
+| `bi-counts` | One line beside the tabs |
+| `bi-refresh` 更新 | **Removed.** Changing dataset and opening a tab reload |
+| `bi-publish`, publish panel, result, `bi-pub-state` | `#bi-advanced` |
+| `bi-manage`, `bi-new`, `bi-install`, `bi-demo` and panels | `#bi-advanced` |
+| `bi-schema-note` | `#bi-advanced` |
+| `bi-empty-state` | Stays above the tabs, a line and two buttons |
+| `bi-ro` | Stays above the tabs |
+| `bi-subs` | `#bi-advanced` |
+| `bi-hint`, `bi-ask` 到對話中問 | **Removed** |
+| `bi-atlas-open`, `bi-atlas-set`, `bi-atlas-url` | Stay on the Dashboard tab; chat embeds need the address and this is its only setter |
+| `bi-dom` (legacy domains) | Stays; shows only for an old dataset |
+| Cards tab, `bi-fts` | Tab stays. `bi-fts` stays in its details |
+
+### Step 1
+
+| Control | Goes to |
+|---|---|
+| `bi-b-ds`, its handler | **Removed** (the mirror) |
+| Long text in `bi-b-vault`, `bi-b-src-shared`, the conversion paragraph | **Removed** |
+| `bi-b-v-new`, `-join` (create, join a vault), `bi-b-v-sync` | Menu 管理 ▾ beside the select |
+| `bi-b-v-convert` | 進階 of step 1 |
+| `bi-b-v-state` | Stays under the select: conflicts and unreadable files must be seen |
+| `bi-b-askable` | 進階 of step 1 |
+| `bi-b-props` (proposals) | Step 2 review; shows only when some are open |
+| `bi-b-src-folder` | Row, labelled 領域 |
+| `bi-b-file`, `bi-b-class`, `bi-b-upload` | Row; `bi-b-upload` reads 轉檔 |
+| `bi-b-sources` table, `bi-b-md` viewer | Stay |
+| `bi-b-src-withdraw` | Stays; appears when asked |
+| `bi-b-pages` (Obsidian) | 進階 of step 1 |
+
+### Step 2
+
+| Control | Goes to |
+|---|---|
+| `bi-b-fit` | 進階, until S2's button replaces it; then removed |
+| `bi-b-skills` list, `bi-b-tl-list`, `bi-b-ska` | Main path, part 2 |
+| `bi-b-sk-new`, `bi-b-sk-form` | 進階 until S3 makes adding go through the AI panel |
+| `bi-b-profile`, `bi-b-rerun`, tool code form | 進階. Tool approval renders in `bi-b-tl-list`, which stays on the main path |
+| `bi-b-sa` (Session A), drafts, `bi-b-versions`, `bi-b-upgrade` | 進階, with schema publish and upgrade reachable there |
+| `bi-b-m-pick` | Main path, part 3 |
+| `bi-b-start` | Main path, part 3: this is the ingest button |
+| `bi-b-fresh`, `bi-b-folder`, method naming, `bi-b-sb`, `bi-b-entity`, recipe, instructions, trial, compare | 進階 |
+| `bi-b-cands`, `bi-b-accept-clean`, `bi-b-same` | Main path, part 4 |
+| Commit and result stages | Stay as the end of part 4, not separate entries in the stepper |
+| Correction notes, evidence review | Stay in the card and candidate detail they are drawn in |
+
+### Step 3
+
+| Control | Goes to |
+|---|---|
+| `bi-b-to-dash`, `bi-b-to-cards` | Main path until S5 embeds the dashboard |
+| `bi-b-an-list`, `bi-b-an-new`, `bi-b-ana` | Main path, part 1 |
+| `bi-b-an-pack`, file import, export, `bi-b-atl` | 進階 |
+| `bi-b-bq-list`, `bi-b-bq-form`, `bi-b-qa` | Main path, part 2 |
+| `bi-b-bc-*` (extraction cases) | 進階 |
+| `bi-b-bench-run`, report | Main path, parts 3 and 4 |
+| `bi-b-ver-*` commit, push, conflicts | Main path after the results |
+| `bi-b-ver-history` (tag, publish, revert) | Stays reachable; **tag and publish must not be hidden until S6 gives them a place**. Colleagues and the Agent read only published versions |
+| `bi-b-ver-discard` | 進階 |
+
+## 5. Slices, in order
+
+The estimates are agent hours of work plus test runs, unmeasured, from the size of these parts of the page. A browser test file takes minutes and the machine is shared, so waiting time can be larger than work. Each slice ends with CI checks and its browser tests, and adds a `docs/TASKS.md` row.
+
+| # | Slice | Backend | Estimate |
+|---|---|---|---|
+| S1 | **The restructure.** §3 and §4: one selection, no trap, stepper of three, advanced areas, paragraphs out, ingest button in part 3. No new feature | None | 8–12 h, about half of it tests in 23 files |
+| S2 | **The suggest button.** A run that asks only the fit question over the newly added sources, answered as a table: class, why, how many items. It costs model output (recorded earlier as 40–50% more on an ingest), so it is a press, not automatic. Adopting a suggestion opens Session A with it. Remove `bi-b-fit` | A fit-only route or kind. Must work for a custom method, which today skips it | 6–10 h |
+| S3 | **One AI panel.** One component on the page for the five session kinds: a side panel opened from the row or button it concerns, with one log and one input. Removes the five panels | None expected; sessions are separate by kind already | 8–14 h. **Touches every step** |
+| S4 | **Batch.** Tick several sources; ingest runs them; review across them. Recommended: one run per source, a batch id grouping them, the review table reading all of them, and one apply. Rejected unless it proves needed: one run over many sources, because `_extract` and the source evidence assume one | Batch grouping; apply over several runs | 10–16 h |
+| S5 | **Step 3.** Question table with an editor on the right (save by `set` and `slug`; changing `set` is delete plus save); dashboard embedded; a results view for the commit decision, side by side with the dashboard. Decide then whether the Dashboard tab stays | None for questions; to check for the embedded dashboard | 10–14 h |
+| S6 | **Share.** Commit then push, tag, publish as one step with a confirmation. Stops on `blocked` or `conflicts`, showing why; shows "這次內容沒有跑過測試" from the gate's note. **Does not weaken the gate**: the gate stays in `repo.push`. Whether an untested push should block is the owner's to change, not this slice's | A thin route, or none if the page sequences it. Tag names need a rule | 4–8 h |
+| S7 | **Tables everywhere left.** Skills and tools; candidate review; cards; history. Menus for row actions | None | 6–10 h |
+| S8 | **Final pass.** Screenshots at 1366 and 390 px, wording, accessibility, the whole-flow browser test, user guide and install docs, the full suite | None | 4–8 h |
+
+**Total: about 56–92 agent hours.** No date is promised from this.
+
+### What can run in parallel on `web_page.py`
+
+The file has one big block of markup and one of script, so edits collide by region rather than by file.
+
+- **S1 runs alone and first.** It moves almost all the BI markup; anything alongside it would conflict.
+- **S3 runs alone, straight after S1.** It touches all three steps.
+- **After S3, S2, S5 and S6 can run at the same time.** S2 is the top of step 2, S5 is step 3's questions and dashboard, S6 is `bi-b-ver-*`. S5 and S6 meet at the commit decision, so S5 hands over `bi-b-ver-*` untouched and S6 owns it. Expect small rebases.
+- **S4 runs after S2,** because both change step 2's ingest start, and can overlap S5 and S6.
+- **S7 touches every region.** It runs after S2–S6, or is split per step and given to the slice that owns that step.
+- **S8 is last and alone.**
+
+Every slice may add to `tests/bi_page_driver.py`; those are small rebases.
+
+## 6. Tests
+
+- Ids are kept wherever a test needs them, and a test that used a removed control is rewritten to the new flow, not weakened. The removed ids are `bi-b-ds`, `bi-refresh`, `bi-hint` and `bi-ask`.
+- A control inside a closed `<details>` still takes a script's `.click()`, so tests that drive by script keep working. That proves less than a person could: **S8's whole-flow test opens the details it uses**, so a control that cannot really be reached fails there.
+- New static tests pin the main path: which ids sit outside any 進階, no explanatory paragraph in it, and one select.
+- The feed goldens and Atlas are not touched. ADR-K10 guard unchanged: this is page markup.
+
+## 7. Open questions, for the owner through the orchestrator
+
+1. **Is `kn-pane-pipeline` in scope?** Recommendation: not now, but open the Knowledge page on the BI tab when a BI dataset or vault exists on this PC, a small change that belongs in S8.
+2. **Tag names in S6.** Recommendation: the page proposes one (`YYYY-MM-DD`, with a suffix if taken) in an editable box.
+3. **Should a push with no test run be blocked?** It is allowed today. S6 keeps that and shows the note, because changing it is a policy decision.
