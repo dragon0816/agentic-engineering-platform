@@ -78,7 +78,8 @@ MAIN_PATH = (
     # Step 2: skills and tools, ingest, the cards.
     "bi-b-sk-list",
     "bi-b-tl-list",
-    "bi-b-ska",
+    "bi-b-sk-new",
+    "bi-ai",
     "bi-b-start",
     "bi-b-cands",
     "bi-b-commit-go",
@@ -111,10 +112,9 @@ ADVANCED = (
     "bi-b-pages",
     "bi-b-profile",
     "bi-b-rerun",
-    "bi-b-sk-new",
     "bi-b-sk-form",
     "bi-b-tl-save",
-    "bi-b-sa",
+    "bi-b-sa-open",
     "bi-b-draft-new",
     "bi-b-versions",
     "bi-b-upgrade",
@@ -124,7 +124,7 @@ ADVANCED = (
     "bi-b-instr",
     "bi-b-trial",
     "bi-b-cmp-go",
-    "bi-b-sb",
+    "bi-b-sb-open",
     "bi-b-an-pack",
     "bi-b-atl",
     "bi-b-bc-list",
@@ -230,3 +230,11 @@ def test_the_knowledge_page_opens_on_bi_unless_another_tab_was_chosen() -> None:
     assert 'call("/api/bi/datasets")' in opening and 'knShow("bi")' in opening
     # Only a person's click on a tab counts as a choice.
     assert 'localStorage.setItem("kn-pane-chosen"' in PAGE
+
+
+def test_one_ai_panel_and_none_of_the_five() -> None:
+    assert PAGE.count('class="bi-ai-panel"') == 1
+    for gone in ("bi-b-sa-log", "bi-b-sb-log", "bi-b-ska-log", "bi-b-ana-log", "bi-b-qa-log"):
+        assert gone not in PAGE
+    for word in ("（Session A）", "（Session B）", "和對話同一套 harness"):
+        assert word not in PAGE

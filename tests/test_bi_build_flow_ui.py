@@ -140,7 +140,12 @@ def test_the_whole_build_flow(
         page.stage("schema")
         page.click("#bi-b-draft-new")
         page.wait("!document.getElementById('bi-b-draft').hidden")
-        page.see("bi-b-sa-model", "harness")
+        page.click("#bi-b-sa-open")
+        page.ai_opened("schema")
+        # It says what goes to the model and that nothing changes unasked, in plain words.
+        page.see("bi-ai-sent", "會送出")
+        assert "確認才會改動" in page.text_of("bi-ai-sent")
+        assert "harness" not in page.text_of("bi-ai") and "Session" not in page.text_of("bi-ai")
         agent.then(
             {"tools": [("bi_schema__cards", {})]},
             {"tools": [("bi_schema__read_source", {"source_id": source})]},
@@ -159,14 +164,14 @@ def test_the_whole_build_flow(
             },
             {"text": "我試過了，既有卡片不受影響。"},
         )
-        page.set_value("bi-b-sa-goal", "追蹤客戶預算")
-        page.set_value("bi-b-sa-msg", "訊號卡要記預算級距")
-        page.click("#bi-b-sa-send")
-        page.see("bi-b-sa-log", "擴充這份 schema")
-        log = page.text_of("bi-b-sa-log")
+        page.set_value("bi-ai-goal", "追蹤客戶預算")
+        page.set_value("bi-ai-msg", "訊號卡要記預算級距")
+        page.click("#bi-ai-send")
+        page.see("bi-ai-log", "擴充這份 schema")
+        log = page.text_of("bi-ai-log")
         assert "Agent 用了" in log and "試草稿" in log and "budget_band" in log
         page.shoot("2a-session-a")
-        page.click_text("#bi-b-sa-log", "套用到草稿")
+        page.click_text("#bi-ai-log", "套用到草稿")
         page.see("bi-b-draft-info", "第 2 版")
         page.click("#bi-b-draft-publish")
         page.notice("bi.schema/v1.1@5.1.0")
@@ -200,14 +205,14 @@ def test_the_whole_build_flow(
             ".find(li => li.textContent.includes('classify'))"
             ".querySelector('button[aria-label*=\"AI\"]').click()"
         )
-        page.wait("!document.getElementById('bi-b-ska').hidden")
-        page.see("bi-b-ska-model", "test-model")
-        page.set_value("bi-b-ska-msg", "會議紀錄裡客戶說在評估的，要建 Signal")
-        page.click("#bi-b-ska-send")
-        page.see("bi-b-ska-log", "套用後的變化")
-        assert "草稿試跑" in page.text_of("bi-b-ska-log")
-        page.click("#bi-b-ska-log button.go")
-        page.see("bi-b-ska-log", "已套用為第")
+        page.ai_opened("skill")
+        page.see("bi-ai-sent", "test-model")
+        page.set_value("bi-ai-msg", "會議紀錄裡客戶說在評估的，要建 Signal")
+        page.click("#bi-ai-send")
+        page.see("bi-ai-log", "套用後的變化")
+        assert "草稿試跑" in page.text_of("bi-ai-log")
+        page.click("#bi-ai-log button.go")
+        page.see("bi-ai-log", "已套用為第")
         page.shoot("2a-session-b")
 
         # -- steps 2b–2e: trial → ingest → review → write --------------------------------------
@@ -265,16 +270,22 @@ def test_the_whole_build_flow(
             {"text": "出了兩題。"},
         )
         page.click("#bi-b-qa-open")
-        page.wait("!document.getElementById('bi-b-qa').hidden")
-        page.set_value("bi-b-qa-msg", "出題")
-        page.click("#bi-b-qa-send")
-        page.see("bi-b-qa-log", "加入測試題")
-        assert "必須提到：A 公司" in page.text_of("bi-b-qa-log")
-        assert vault_checks.listing(workspace, vault_id)["questions"] == []  # not yet
-        page.run(
-            "document.querySelectorAll('#bi-b-qa-log input[type=checkbox]')[1].checked = false"
+        page.ai_opened("questions")
+        # The questions stay beside the AI, and 跑測試 is not pushed down by it.
+        beside = page.run(
+            "(() => { const r = (i) => document.getElementById(i).getBoundingClientRect();"
+            " return r('bi-b-bq-list').right <= r('bi-ai').left"
+            " && r('bi-b-bench-run').right <= r('bi-ai').left"
+            " && r('bi-ai-send').bottom <= innerHeight; })()"
         )
-        page.click_text("#bi-b-qa-log", "加入測試題")
+        assert beside
+        page.set_value("bi-ai-msg", "出題")
+        page.click("#bi-ai-send")
+        page.see("bi-ai-log", "加入測試題")
+        assert "必須提到：A 公司" in page.text_of("bi-ai-log")
+        assert vault_checks.listing(workspace, vault_id)["questions"] == []  # not yet
+        page.run("document.querySelectorAll('#bi-ai-log input[type=checkbox]')[1].checked = false")
+        page.click_text("#bi-ai-log", "加入測試題")
         page.notice("已加入 1 題")
         page.see("bi-b-bq-list", "哪家客戶在評估 TSN")
         assert [q["question"] for q in vault_checks.listing(workspace, vault_id)["questions"]] == [
@@ -283,7 +294,7 @@ def test_the_whole_build_flow(
         # The log shows what was added, not what was offered.
         assert (
             page.run(
-                "[...document.querySelectorAll('#bi-b-qa-log input[type=checkbox]')]"
+                "[...document.querySelectorAll('#bi-ai-log input[type=checkbox]')]"
                 ".map((t) => t.checked).join()"
             )
             == "true,false"
@@ -304,11 +315,11 @@ def test_the_whole_build_flow(
             {"text": "排好了。"},
         )
         page.click("#bi-b-an-new")
-        page.wait("!document.getElementById('bi-b-ana').hidden")
-        page.set_value("bi-b-ana-msg", "幫我排一個 Dashboard")
-        page.click("#bi-b-ana-send")
-        page.see("bi-b-ana-log", "套用 Dashboard")
-        page.click_text("#bi-b-ana-log", "套用 Dashboard")
+        page.ai_opened("analysis")
+        page.set_value("bi-ai-msg", "幫我排一個 Dashboard")
+        page.click("#bi-ai-send")
+        page.see("bi-ai-log", "套用 Dashboard")
+        page.click_text("#bi-ai-log", "套用 Dashboard")
         page.notice("已套用 Dashboard")
         layout = analyses.dashboard_layout(vault.Vault(workspace, vault_id).repo.working_units())
         assert layout["order"] == ["by-type"]

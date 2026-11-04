@@ -176,7 +176,9 @@ def test_session_panels_in_a_browser(
         # -- step 3: no model → the panel says so; a rules method with revisions ------------
         click("#bi-build-steps [data-stage=method]")
         wait(stage_shown("method"))
-        wait("document.getElementById('bi-b-sb-model').textContent.includes('model_unavailable')")
+        click("#bi-b-sb-open")
+        wait("document.getElementById('bi-ai').dataset.kind === 'method'")
+        wait("document.getElementById('bi-ai-sent').textContent.includes('model_unavailable')")
         # The built-ins are always listed; a table source starts on 「表格規則」, and
         # Session B is shown before any Skill is saved (owner, 2026-10-28).
         pick = "document.getElementById('bi-b-m-pick')"
@@ -184,8 +186,8 @@ def test_session_panels_in_a_browser(
             "builtin:llm,builtin:rules"
         )
         assert run(f"{pick}.value") == "builtin:rules"
-        assert "表格規則" in text_of("bi-b-sb-target")
-        assert run("document.getElementById('bi-b-sb-send').offsetHeight > 0")
+        assert "表格規則" in text_of("bi-ai-target")
+        assert run("document.getElementById('bi-ai-send').offsetHeight > 0")
         set_value("bi-b-recipe", json.dumps(RECIPE, ensure_ascii=False))
         set_value("bi-b-m-name", "技術表")
         click("#bi-b-m-new")
@@ -194,12 +196,12 @@ def test_session_panels_in_a_browser(
         assert run(
             "document.getElementById('bi-b-m-pick').selectedOptions[0].textContent"
         ).startswith("技術表")
-        set_value("bi-b-sb-msg", "沒有文件依據的需求標成推測")
-        click("#bi-b-sb-send")
-        wait("document.getElementById('bi-b-sb-status').textContent.includes('沒有可用的模型')")
-        assert run("document.getElementById('bi-b-sb-status').getAttribute('role')") == "status"
-        assert run("document.getElementById('bi-b-sb-send').offsetHeight > 0")  # visible
-        assert "沒有對話" in text_of("bi-b-sb-log")  # nothing was stored
+        set_value("bi-ai-msg", "沒有文件依據的需求標成推測")
+        click("#bi-ai-send")
+        wait("document.getElementById('bi-ai-status').textContent.includes('沒有可用的模型')")
+        assert run("document.getElementById('bi-ai-status').getAttribute('role')") == "status"
+        assert run("document.getElementById('bi-ai-send').offsetHeight > 0")  # visible
+        assert "沒有對話" in text_of("bi-ai-log")  # nothing was stored
 
         click("#bi-b-trial")
         wait("document.getElementById('bi-b-trial-result').textContent.includes('試跑完成')")
@@ -235,20 +237,22 @@ def test_session_panels_in_a_browser(
         # -- step 2: a draft tried on the sample, no model yet ------------------------------
         click("#bi-build-steps [data-stage=schema]")
         wait(stage_shown("schema"))
-        # Session A is shown without a draft; with no model, sending makes nothing.
-        wait("document.getElementById('bi-b-sa-model').textContent.includes('model_unavailable')")
-        assert run("document.getElementById('bi-b-sa-send').offsetHeight > 0")
-        assert "還沒有開啟草稿" in text_of("bi-b-sa-target")
-        set_value("bi-b-sa-msg", "幫技術卡加一個價格帶欄位")
-        click("#bi-b-sa-send")
-        wait("document.getElementById('bi-b-sa-status').textContent.includes('沒有可用的模型')")
+        # It opens without a draft; with no model, sending makes nothing.
+        click("#bi-b-sa-open")
+        wait("document.getElementById('bi-ai').dataset.kind === 'schema'")
+        wait("document.getElementById('bi-ai-sent').textContent.includes('model_unavailable')")
+        assert run("document.getElementById('bi-ai-send').offsetHeight > 0")
+        assert "還沒有開啟草稿" in text_of("bi-ai-target")
+        set_value("bi-ai-msg", "幫技術卡加一個價格帶欄位")
+        click("#bi-ai-send")
+        wait("document.getElementById('bi-ai-status').textContent.includes('沒有可用的模型')")
         assert not (workspace / "bi" / "schema-drafts").exists()
-        set_value("bi-b-sa-msg", "")
+        set_value("bi-ai-msg", "")
         click("#bi-b-draft-new")
         wait("!document.getElementById('bi-b-draft').hidden")
-        wait("document.getElementById('bi-b-sa-target').textContent.includes('第 1 版')")
-        assert run("document.querySelector('#bi-b-sa-sources input').checked")
-        assert run("document.getElementById('bi-b-sa-send').offsetHeight > 0")  # visible
+        wait("document.getElementById('bi-ai-target').textContent.includes('第 1 版')")
+        assert run("document.querySelector('#bi-ai-sources input').checked")
+        assert run("document.getElementById('bi-ai-send').offsetHeight > 0")  # visible
         click("#bi-b-draft-trial")
         wait("document.getElementById('bi-b-draft-trial-result').textContent.includes('試跑完成')")
         assert "draft:" in text_of("bi-b-draft-trial-result")
@@ -256,19 +260,19 @@ def test_session_panels_in_a_browser(
         # -- Session A with a (scripted) model -------------------------------------------
         scripted = Model(_answer)
         model["pair"] = (scripted, "test-model")
-        set_value("bi-b-sa-goal", "追蹤機器人技術的價格")
-        set_value("bi-b-sa-msg", "幫技術卡加一個價格帶欄位")
-        click("#bi-b-sa-send")
-        wait("document.getElementById('bi-b-sa-log').textContent.includes('擴充這份 schema')")
-        log = text_of("bi-b-sa-log")
+        set_value("bi-ai-goal", "追蹤機器人技術的價格")
+        set_value("bi-ai-msg", "幫技術卡加一個價格帶欄位")
+        click("#bi-ai-send")
+        wait("document.getElementById('bi-ai-log').textContent.includes('擴充這份 schema')")
+        log = text_of("bi-ai-log")
         assert "price_band" in log and "價格帶的分級" in log
         assert "tech.csv" in log and "INTERNAL" in log and "test-model" in log
         assert scripted.requests[-1].tools == ()
-        run("document.getElementById('bi-b-sa-log').scrollIntoView()")
+        run("document.getElementById('bi-ai-log').scrollIntoView()")
         shoot("2-session-a")
-        click_text("#bi-b-sa-log", "套用到草稿")
+        click_text("#bi-ai-log", "套用到草稿")
         wait("document.getElementById('bi-b-draft-info').textContent.includes('第 2 版')")
-        wait("document.getElementById('bi-b-sa-log').textContent.includes('已套用為草稿第 2 版')")
+        wait("document.getElementById('bi-ai-log').textContent.includes('已套用為草稿第 2 版')")
         click("#bi-b-draft-trial")
         wait("document.getElementById('bi-b-draft-trial-result').textContent.includes('第 2 版')")
         size(390, 844, True)
@@ -281,26 +285,28 @@ def test_session_panels_in_a_browser(
         # -- Session B with the model: a suggested check saved as a revision ----------------
         click("#bi-build-steps [data-stage=method]")
         wait(stage_shown("method"))
-        wait("document.getElementById('bi-b-sb-model').textContent.includes('test-model')")
-        set_value("bi-b-sb-msg", "技術卡一定要有標準組織")
-        click("#bi-b-sb-send")
-        wait("document.getElementById('bi-b-sb-log').textContent.includes('需要工程開發')")
-        click_text("#bi-b-sb-log", "套用為新版次")
+        click("#bi-b-sb-open")
+        wait("document.getElementById('bi-ai').dataset.kind === 'method'")
+        wait("document.getElementById('bi-ai-sent').textContent.includes('test-model')")
+        set_value("bi-ai-msg", "技術卡一定要有標準組織")
+        click("#bi-ai-send")
+        wait("document.getElementById('bi-ai-log').textContent.includes('需要工程開發')")
+        click_text("#bi-ai-log", "套用為新版次")
         wait("document.getElementById('bi-b-m-info').textContent.includes('第 4 版')")
         assert "必要欄位檢查 1 條" in text_of("bi-b-m-info")
-        run("document.getElementById('bi-b-sb-log').scrollIntoView()")
+        run("document.getElementById('bi-ai-log').scrollIntoView()")
         shoot("3-session-b")
         # A built-in is never changed: the first message saves a copy and talks about it.
         run(
             "{ const s = document.getElementById('bi-b-m-pick'); s.value = 'builtin:llm';"
             " s.dispatchEvent(new Event('change')); }"
         )
-        wait("document.getElementById('bi-b-sb-target').textContent.includes('AI 擷取')")
-        assert "沒有對話" in text_of("bi-b-sb-log")
-        set_value("bi-b-sb-msg", "技術卡一定要有標準組織")
-        click("#bi-b-sb-send")
+        wait("document.getElementById('bi-ai-target').textContent.includes('AI 擷取')")
+        assert "沒有對話" in text_of("bi-ai-log")
+        set_value("bi-ai-msg", "技術卡一定要有標準組織")
+        click("#bi-ai-send")
         wait("document.getElementById('bi-notice').textContent.includes('另存為你的 Skill')")
-        wait("document.getElementById('bi-b-sb-log').textContent.includes('需要工程開發')")
+        wait("document.getElementById('bi-ai-log').textContent.includes('需要工程開發')")
         assert not str(run("document.getElementById('bi-b-m-pick').value")).startswith("builtin:")
         assert "AI 擷取（我的版本" in text_of("bi-b-m-info")
         assert not cards_db.exists()
