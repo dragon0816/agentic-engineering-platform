@@ -128,7 +128,8 @@ def route(
     vault_id, action = parts
     if action == "sync":
         synced = vault.sync(workspace, vault_id)
-        bi_feed_api.refresh(workspace, vault_id)  # the published version may have changed
+        if synced.get("moved"):
+            bi_feed_api.refresh(workspace, vault_id)  # the published version may have changed
         return 200, {"ok": True, "sync": synced}
     if action == "commit":
         return 200, {"ok": True, **vault.commit(workspace, vault_id, given)}

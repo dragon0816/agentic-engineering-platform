@@ -42,11 +42,12 @@ import re
 import shutil
 import sqlite3
 import tempfile
+import threading
 import time
 import uuid
 from collections.abc import Callable, Iterator, Mapping
 from contextlib import closing, contextmanager
-from dataclasses import replace
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -94,6 +95,8 @@ MAX_VAULT_ID = 40 - len(VAULT_PREFIX)
 AUTHOR_RE = repo_engine.AUTHOR_RE
 MAX_AUTHOR = repo_engine.MAX_AUTHOR
 STATE_FILE = "vault_sync.json"
+#: What `bi.sqlite` was last built from (`Vault.rebuild`).
+BUILD_FILE = "vault_build.json"
 #: The local copy of the version the Agent reads (design §7), with `version.json`.
 PUBLISHED_DIR = "published"
 
@@ -1125,6 +1128,9 @@ class Vault:
         """Rebuild `bi.sqlite` from the working units."""
         with self.lock:
             self.local.mkdir(parents=True, exist_ok=True)
+            built = self.local / BUILD_FILE
+            built.unlink(missing_ok=True)  # back only if this build finishes
+            mark = self._build_mark()
             with closing(sqlite3.connect(self.db_path, isolation_level=None)) as db:
                 db.row_factory = sqlite3.Row
                 units = self.repo.working_units()
@@ -1139,14 +1145,25 @@ class Vault:
         from capabilities.bi_cards import search_index
 
         search_index.sync_quietly(BiStore(self.workspace, self.dataset))
+        built.write_text(json.dumps(mark), encoding="utf-8")
+
+    def _build_mark(self) -> dict[str, Any]:
+        return {"inputs": self.repo.fingerprint(), "model": card_model.MODEL_VERSION}
+
+    def _is_built(self) -> bool:
+        """Whether `bi.sqlite` is what a rebuild would make now."""
+        try:
+            built = json.loads((self.local / BUILD_FILE).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return False
+        return bool(self.db_path.is_file() and built == self._build_mark())
 
     def reads(self) -> dict[str, Any]:
         """What the Agent reads (decision 8): the published tag, or the pushed
         head of a vault never published (a published commit not applied here
         yet is read as the head until it arrives)."""
         record = self.repo.published()
-        applied = {c["id"] for c in self.repo.history(limit=10**9)}
-        if record is not None and record["commit"] in applied:
+        if record is not None and record["commit"] in self.repo.applied_ids():
             return {"tag": record["tag"], "commit": record["commit"]}
         return {"tag": None, "commit": self.repo.head()}
 
@@ -1300,16 +1317,27 @@ class Vault:
         return target["tag"] is not None and self._manifest().get("commit") != target["commit"]
 
     def sync(self) -> dict[str, Any]:
-        """Apply what the others pushed, then rebuild the local database."""
+        """Apply what the others pushed, and rebuild the local database only when
+        what it is built from changed. `moved` says whether anything here or the
+        version the feed shows did, so a caller can skip the work that follows."""
         with self.lock:
             self._require_folder()
             self._install_schemas()
             with _repo_errors():
                 report = self.repo.sync()
-            vault_sources.sync_staging(self.repo, self.workspace, self.dataset)
-            self.rebuild()
-            (self.local / STATE_FILE).write_text(json.dumps({"at": now()}), encoding="utf-8")
-            return report
+                built = self._is_built()
+                reads = self.reads()
+            if not built:
+                vault_sources.sync_staging(self.repo, self.workspace, self.dataset)
+                self.rebuild()
+            state = self.local / STATE_FILE
+            try:
+                known = json.loads(state.read_text(encoding="utf-8")).get("reads")
+            except (OSError, ValueError):
+                known = None
+            state.write_text(json.dumps({"at": now(), "reads": reads}), encoding="utf-8")
+            # A first sync on this PC only records what it reads: nothing moved.
+            return {**report, "moved": not built or (known is not None and known != reads)}
 
     @contextmanager
     def capture(self, store: BiStore) -> Iterator[sqlite3.Connection]:
@@ -1719,8 +1747,42 @@ def listing(workspace: Path) -> list[dict[str, Any]]:
     return found
 
 
+@dataclass
+class _Flight:
+    done: threading.Event = field(default_factory=threading.Event)
+    report: dict[str, Any] | None = None
+    failure: BaseException | None = None
+
+
+_FLIGHTS: dict[tuple[str, str], _Flight] = {}
+_FLIGHTS_LOCK = threading.Lock()
+
+
 def sync(workspace: Path, vault_id: str) -> dict[str, Any]:
-    return Vault(workspace, vault_id).sync()
+    """Sync once at a time: a caller arriving during a sync of this vault, such as a
+    second tab's page load, shares its answer instead of queueing behind it."""
+    key = (str(workspace), vault_id)
+    with _FLIGHTS_LOCK:
+        flight = _FLIGHTS.get(key)
+        leader = flight is None
+        if flight is None:
+            flight = _FLIGHTS[key] = _Flight()
+    if not leader:
+        flight.done.wait()
+        if flight.failure is not None:
+            raise flight.failure
+        assert flight.report is not None
+        return dict(flight.report)
+    try:
+        flight.report = Vault(workspace, vault_id).sync()
+        return dict(flight.report)
+    except BaseException as failure:
+        flight.failure = failure
+        raise
+    finally:
+        with _FLIGHTS_LOCK:
+            del _FLIGHTS[key]
+        flight.done.set()
 
 
 def status(workspace: Path, vault_id: str) -> dict[str, Any]:
