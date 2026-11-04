@@ -67,6 +67,7 @@ from capabilities.bi_cards import (
     page_import,
     quality,
     questions_session,
+    reading_runs,
     rerun,
     runs,
     schema_fit,
@@ -490,6 +491,19 @@ def _start_run(
     if kind not in ("trial", "ingest"):
         return _error(400, "run_kind_invalid", "kind 只能是 trial 或 ingest")
     dataset = _dataset(given.get("dataset"))
+    if given.get("reading") is True:
+        # Empty reading fields, from each card's own text (`reading_runs`): no one source.
+        run = reading_runs.start(
+            workspace,
+            dataset,
+            ai,
+            kind=str(kind),
+            actor=who,
+            skip=given.get("skip"),
+            only=given.get("card_ids"),
+            fresh=given.get("fresh"),
+        )
+        return 200, {"ok": True, "run": run}
     source_id = str(given.get("source_id") or "")
     source = Staging(workspace, dataset).source(source_id)
     schema = None

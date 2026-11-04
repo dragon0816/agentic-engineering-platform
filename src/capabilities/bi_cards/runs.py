@@ -1078,9 +1078,10 @@ def commit(workspace: Path, dataset: str, run_id: str, *, actor: str) -> dict[st
         )
         for number, candidate in enumerate(chosen, start=1)
     ]
-    applied = store.commit_run(
-        run_id, rows, filename=", ".join(n for n in names.values() if n), actor=actor
-    )
+    shown = [n for n in names.values() if n]
+    # A reading run has a source per card: the record names a few.
+    filename = ", ".join(shown[:3]) + (f" 等 {len(shown)} 份" if len(shown) > 3 else "")
+    applied = store.commit_run(run_id, rows, filename=filename, actor=actor)
     result: dict[str, Any] = {
         "import_id": applied.import_id,
         "created": applied.created,
