@@ -2,7 +2,9 @@
 
 Owner's rules (2026-11-05, through the orchestrator): through ingest, not a side door; AI summarises only from the card's own source text; where the source has nothing the field stays empty; fill only, never a filled value or `verified`/`evidence_grade`; sample data stays marked; evidence kept like any field; the owner reviews before anything applies.
 
-Status: the run is built and tried on a copy, nothing written to the vault. The full run waits for the orchestrator's word.
+Status: run `e3de934115f0` is staged on the real vault, nothing committed; it waits for the owner's review.
+
+**Owner's decisions (2026-11-05, through the orchestrator):** `scope` is not filled. The 13 demo cards are not filled for now. Nothing was said about marking those cards as sample, so they are not marked. The vault's 4 uncommitted changes stay untouched until the owner answers about them.
 
 ## Cause
 
@@ -65,13 +67,13 @@ POST /api/bi/runs {"dataset": "vault-<id>", "kind": "ingest", "reading": true, "
 
 `"kind": "trial"` shows the same candidates and cannot be committed; `"card_ids"` limits it to some cards. It is one model call per card, two at a time; an identical request repeats its answer unless `"fresh": true`. Candidates, review, commit and retry are any AI run's: `GET /api/bi/runs/<id>`, `POST .../candidates/<id> {"dataset", "review": "accepted"}`, `POST .../commit`. Nothing is written before the commit.
 
-Rules in code: a card is read only if it lacks a field in `reading_runs.FIELDS`, is not a sample, and has text of its own beyond headings, notes and lines repeated on 4 or more cards. Its text is a card page's body and its `body` field, with headings and evidence notes kept. A value goes when its quote is not word for word in that text, or when it is only the card's name. Each merges as `fill`; a value filled since then stays, and the new one is a proposal. `scope` is left out for now: to add it, add it to `FIELDS`.
+Rules in code: a card is read only if it lacks a field in `reading_runs.FIELDS`, is not a sample, and has text of its own beyond headings, notes and lines repeated on 4 or more cards. Its text is a card page's body and its `body` field, with headings and evidence notes kept. A value goes when its quote is not word for word in that text, or when it is only the card's name. Each merges as `fill`; a value filled since then stays, and the new one is a proposal. `scope` is not filled, by the owner's decision; adding it to `FIELDS` is all it would take if that changes.
 
 **The page cannot open this run yet.** `#bi-b-cands` shows the run the page itself started; there is no list of runs to pick from, so a run started through the API is not reachable there. Opening one needs a small change in `web_page.py`. Once open, the page's 「接受所有沒有錯誤的候選卡」 would serve.
 
 ## Measured on a copy, through the run
 
-The vault's local data copied to a temp plain dataset, so no shared folder is known to it. `plan`: 258 cards, of which 237 lack both fields and 21 (Signal) only `usage`; 85 samples and 123 with no text of their own are not read. 13 are held back until the owner decides on marking them, leaving 245.
+The vault's local data copied to a temp plain dataset, so no shared folder is known to it. `plan`: 258 cards, of which 237 lack both fields and 21 (Signal) only `usage`; 85 samples and 123 with no text of their own are not read. 13 demo cards are not filled, by the owner's decision, leaving 245.
 
 24 cards, the real model, then accepted and committed on the copy: 18 summaries and 3 usages, read by hand against the source, none with an invented fact, 6 cards left empty, no failure. 18 cards changed, only those fields added; no filled value, mark or name moved. 11,252 tokens in, 10,256 out, 69.5 s. For 245 cards that is about 220,000 tokens and 12 minutes. Yield 18 of 24, so about 180 summaries; a small sample.
 
