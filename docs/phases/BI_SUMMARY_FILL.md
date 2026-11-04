@@ -80,3 +80,11 @@ The vault's local data copied to a temp plain dataset, so no shared folder is kn
 15 sources, 14 cards, 68 evidence rows, such as `暾餅絲.md` for 鴻海, `銝…-KY.md` for 世芯-KY. **Not AEP's doing**: those 15 file names are garbled on disk in the folders given to the import (`aidc-bi-kb` 10, `BI_Vault_Example` 3, `Aerospace-BI-KB` 2): UTF-8 bytes once read as Big5, as an unpacking on Windows leaves them. AEP kept what it was given. The import now guards it: `page_import.garbled_name` tells such a name, and the source is kept under its card's name.
 
 **Existing records, not repaired.** The names stand in the vault's units: 15 `source:`, 76 `evidence:`, 16 `field:` and 2 `proposal:` ops across 9 of 45 commit files; in 15 shared file names under `applications/*/sources`; in 14 pages of `cards/`; and in the published snapshots. Commits and files are never rewritten, so a repair is a new commit restating those units with the right name, through a small one-off tool that does not exist yet, then push, tag and publish; `cards/` rewrites 14 pages. The shared file names and the old snapshots would stay as they are, since a written file cannot change. On a copy first.
+
+## The real run
+
+Run `e3de934115f0` on `market-intel`, main `aba2c203`, 2026-11-05: 245 cards asked (224 for both fields, 21 Signal for `usage`), 13 demo cards skipped. 144 candidates: 140 summaries, 12 usages, all `fill`, all pending. 101 cards stayed empty, including every Signal card. 0 failed. 114,238 tokens in, 91,343 out, 684 s. The yield is 140 of 224, below the trial's 18 of 24. After a commit 301 of the 441 would still have no summary.
+
+Stopped at staging: nothing committed. Cards, fields, evidence, relations, proposals, push state, published tag and the shared folder are the same before and after. It wrote the run to `staging.sqlite` and answers to the local answer cache.
+
+20 candidates outside the trial, read against their sources: no invented fact, none reversed. 11 good, 8 faithful but thin or awkward, 1 a bare label that should be empty (`Keysight TSN 一致性方案`: 「競品方案。」). One summary drops a limit its text puts on the figure (`啟碁-2026前三季-公司`: 「不可與 2025 全年直接算同比」).

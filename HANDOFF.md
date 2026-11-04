@@ -1,12 +1,10 @@
 # Handoff
 
-## Filling card summaries (2026-11-05, Claude Code worker D) — waiting for the word on the full run
+## Filling card summaries (2026-11-05, Claude Code worker D) — run staged, waiting for the owner's review
 
-Branch `bi-summary-fill` off main `6bf0a301`, not pushed. Built: `reading_runs.py`, `POST /api/bi/runs {reading: true}`; a garbled file name no longer becomes a source's name. Findings, how to start it, what repairing old records takes: `docs/phases/BI_SUMMARY_FILL.md`. CI's checks and targeted tests pass; no full suite. Nothing written to the real vault.
+Run `e3de934115f0` on the real `market-intel`: 144 candidates (140 summaries, 12 usages), 101 cards empty, 0 failed. Nothing committed; numbers and sample in `docs/phases/BI_SUMMARY_FILL.md`. The review entry in the page is a page worker's. The 13 demo cards and garbled records wait for the owner.
 
-**Open:** the page cannot open a run started through the API (`web_page.py`, not touched); the 13 unmarked demo cards, listed in `.scratch/summary-fill-skipped-demo-cards.md`, git-ignored, with `skip` ids in `.scratch/sum-skip.json`. A real run needs Agent Web restarted on this code.
-
-**Next, on the orchestrator's word:** merge, restart, run with `skip` on the real vault, the owner reviews, commit.
+**Next, after the review:** commit the run, push, tag, publish, each on the orchestrator's word. The vault held 4 uncommitted changes before this run, not from it: look at them before any commit.
 
 ## BI page redesign, S1 done (2026-11-05, Claude Code)
 
