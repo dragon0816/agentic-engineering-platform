@@ -28,6 +28,7 @@ registered with `set_benchmark`; without one the push notes that it did not run.
 
 from __future__ import annotations
 
+import glob
 import hashlib
 import re
 import shutil
@@ -46,6 +47,7 @@ from knowledge.repo.repository import (
     canonical,
     path_problem,
     register_type,
+    remove_retrying,
     rename_retrying,
 )
 from knowledge.sections import HUMAN_AREAS, correction_of, parse, sourced_lines
@@ -582,8 +584,9 @@ def materialize(
             if old is not None:
                 rename_retrying(old, target)  # put the previous view back
             raise
-        if old is not None:
-            shutil.rmtree(old)
+        # The swap is done: a previous view still held stays, and the next build removes it.
+        for stale in target.parent.glob(f".{glob.escape(target.name)}.*.old"):
+            remove_retrying(stale)
     finally:
         if building.exists():
             shutil.rmtree(building)

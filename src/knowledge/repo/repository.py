@@ -256,6 +256,21 @@ def rename_retrying(source: Path, target: Path) -> None:
             time.sleep(0.05 * (attempt + 1))
 
 
+def remove_retrying(folder: Path) -> bool:
+    """`shutil.rmtree`, retried briefly for the same refusal; whether the folder went.
+    One still held stays for the caller to try again later."""
+    for attempt in range(_RENAME_ATTEMPTS):
+        try:
+            shutil.rmtree(folder)
+            return True
+        except FileNotFoundError:
+            return True
+        except OSError:
+            if attempt < _RENAME_ATTEMPTS - 1:
+                time.sleep(0.05 * (attempt + 1))
+    return False
+
+
 def _copy_atomic(source: Path, path: Path) -> None:
     """Copy a file by stream through a temporary file and a rename: an original
     may be too large to hold in memory."""

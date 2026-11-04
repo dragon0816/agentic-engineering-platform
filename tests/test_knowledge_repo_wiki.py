@@ -6,8 +6,10 @@ Two PCs are two workspaces sharing one repository folder, as in
 
 from __future__ import annotations
 
+import shutil
 from collections.abc import Iterator, Mapping
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -338,6 +340,31 @@ def test_materialize_waits_out_a_brief_refusal(
     _refuse_rename(monkeypatch, 3)
     materialize(a.units(), view)
     assert (view / READ_ONLY_NOTE).is_file()
+
+
+def test_a_held_old_view_is_no_failure_and_goes_next_time(
+    pcs: tuple[Repository, Repository, Path], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    a, _, _ = pcs
+    view = tmp_path / "view"
+    materialize(a.units(), view)
+    (view / "wiki" / "stray.md").write_text("from the previous view", encoding="utf-8")
+    real = shutil.rmtree
+
+    def held(path: Any, *args: Any, **kwargs: Any) -> None:
+        if str(path).endswith(".old"):
+            raise PermissionError(13, "Access is denied")
+        real(path, *args, **kwargs)
+
+    monkeypatch.setattr(shutil, "rmtree", held)
+    monkeypatch.setattr("knowledge.repo.repository.time.sleep", lambda _s: None)
+    result = materialize(a.units(), view)  # reports what it did: the swap succeeded
+    assert result["path"] == str(view) and not (view / "wiki" / "stray.md").exists()
+    assert len(list(tmp_path.glob(".view.*.old"))) == 1
+
+    monkeypatch.setattr(shutil, "rmtree", real)
+    materialize(a.units(), view)
+    assert list(tmp_path.glob(".view.*")) == []
 
 
 def test_materialize_keeps_the_view_when_still_refused(
