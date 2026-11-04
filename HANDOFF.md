@@ -1,16 +1,18 @@
 # Handoff
 
-## R6 finished except `rs-k`; four fixes on `r6-rmtree-world` (2026-11-04, Claude Code worker D)
+## R6 finished: vault published, `rs-k` copy imported (2026-11-04, Claude Code worker D)
 
-**Vault:** `market-intel` is published at `2026q4-r6.2` (commit `826b8acd`): 760 cards, 12 benchmark questions, 37 Dashboard sections with the five data correctness panels first. `2026q4-r6.1` exists without those panels showing. Questions were accepted on the orchestrator's word; the owner has not read them.
+On main `b4b3403f`, Agent Web 53583. **Vault** `market-intel` publishes `2026q4-r6.2` (commit `826b8acd`): 760 cards, 12 questions, 37 Dashboard sections. Questions were accepted on the orchestrator's word; the owner has not read them.
 
-**`rs-k` copy: not imported.** The attempt stopped at `FileNotFoundError`: a long workspace path passed Windows' 260 characters with `LongPathsEnabled` off. `Wiki_Knowledge\rs-k-test` holds an empty skeleton and the registry lists it; `knowledge-repos\rs-k-test` holds 519 staged files. No commit, tag or publish. The orchestrator allows removing them, after checking they hold no commits or sources, and retrying with the same id once this branch is on main and Agent Web restarted. The source folder's digest is in `.scratch/r7/rsk-before.txt`, git-ignored.
+**`rs-k` copy** `Wiki_Knowledge\rs-k-test`, tag and publish `rs-k-test.1`, unbound (`askable`: `not_bound`). Import 267.8 s, publish 16.5 s. Pages 2,009 (2,006 wiki + index, log, decisions), raw 559, skill `ask-knowledge`; 564 files, 25.8 MB in the shared folder; 27,948 units, no conflicts. Source digest unchanged. Not carried: `wiki/entities/CAG #86.md`, whose name is refused, and `raw/.convert-state.json`, a dot file. The view's longest path is 273 characters. Runbook §6 step 4, binding it to compare answers, is the owner's and not done.
 
-**On `r6-rmtree-world`, off main `d8fce30f`, not merged:** the long path fix; a held old view is no failure; `requires` the schema lacks are refused and the Dashboard names what it leaves out; `bi__query` text is words; a benchmark report keeps tool calls; error classes work on cards with relations. The running Agent Web has none of it until merged and restarted. Targeted tests and CI's checks only; the full suite has not run on it.
+**Bench on main:** 12/12 both sides, no regressions, `error_classes` empty since nothing failed. The classifier was checked on the real vault with made-up terms: `retrieval`, `generation` and `unknown` as expected. `extraction`, `relation` and `evidence` were not exercised on real data.
 
-**Known:** the real error classes still need a bench run after the merge. SpaceX's suppliers: `SupplyLink` gives 8, `Account.key_suppliers` 7 (no 群創), so answers switch. An import skips `wiki/entities/CAG #86.md` for its name. Not bypassed, but a failed gate was rerun: bench run 4 flagged a regression on an analysis-only commit, run 5 was clean.
+**The earlier skeleton** went to the recycle bin through the Windows shell: `shutil.rmtree` is refused on OneDrive's folders, which carry ReadOnly. So code removing a folder in a shared OneDrive folder would fail too; nothing does today outside a person's hand.
 
-**Next, on the orchestrator's word:** merge and restart; remove the skeleton; import `rs-k` and tag `rs-k-test.1`; bench again for error classes.
+**Known:** SpaceX's suppliers: `SupplyLink` 8, `Account.key_suppliers` 7 (no 群創). `bi__query`'s near match can return many cards (277 for one question, 10 shown, nearest first). Bench runs have varied before: 9/8 and 12/11 and 11/12 on unchanged cards; run 4's regression was cleared by a rerun.
+
+**Next, on the orchestrator's word:** nothing queued from this work. Runbook steps 15-16 (Atlas panels, a colleague joining) and the owner's reading of the questions remain.
 
 ## Phase 2 and 3 integrated on `phase23` (2026-11-04, Claude Code worker D) — full suite's failures fixed
 
