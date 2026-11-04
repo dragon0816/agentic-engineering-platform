@@ -6353,3 +6353,11 @@ On the two densest chunks of `compute.md`, three runs each, real model, 32,000 o
 ## 2026-11-04: Schema fit is a per-run tick, default off (orchestrator)
 
 Measured always on, a dense chunk gave about 7 questions, 36% of its items `needs_clarification`, 41 of 44 added by the check. Too much review for colleagues on Friday. A run asks only with `check_fit: true`, from a tick in the run form, in a vault; it is stored on the run, so a resumed run keeps it. Off, the prompt is as before Phase 2-b, so kept answers are still reused. Rejected: leaving Phase 2-b out, since the owner can still use it, and tuning the check before the release.
+
+## 2026-11-05 — Chat's Atlas: a kept copy of a dashboard's panels, and the port with the turn
+
+From worker V's acceptance, relayed by the BI orchestrator.
+
+- **A per-PC copy of a dashboard's AEP panels** (vault, slug, params, read time), so a stopped Atlas can still draw charts for a dashboard asked about for the first time in a conversation. The answer says it is the last read and that Atlas decides the layout. No copy: the explanation, nothing guessed. Rejected: keeping the whole document (AEP draws no layout from it, and a copy of Atlas's data would drift).
+- **The port comes with the turn**, not a host setting. The page already holds the address per browser and frames Atlas with it, so one person's chat and frame always agree, with no new setting to keep in step. Only a port travels, so the host can reach nothing but `127.0.0.1`. A non-loopback address sends none, and the default port stands. Rejected: a host-level setting (a second place for the same address; two browsers could disagree with it).
+- **A dashboard's result says what the answer holds**: framed or not, charts drawn, panels not shown and why, so the model cannot say 「已在這裡顯示」 for a board it could not read.

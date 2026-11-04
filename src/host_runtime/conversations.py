@@ -170,6 +170,8 @@ class ConversationTurnRequest(Contract):
     # The transcript this message came from when the person spoke it
     # (docs/phases/VOICE_INPUT.md §3.2); the text is always `message`.
     voice_transcript: Symbol | None = None
+    # The port of the person's Atlas, set per browser: only ever 127.0.0.1 here.
+    atlas_port: int | None = Field(default=None, ge=1, le=65535, strict=True)
 
     @model_validator(mode="after")
     def no_credential_material(self) -> Self:

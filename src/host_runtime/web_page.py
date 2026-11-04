@@ -3755,7 +3755,8 @@ function answerAtlasEmbed(session, embed, files) {
     const note = document.createElement("p");
     note.className = "atlas-embed-note";
     const file = files.find((item) => item.path === embed.fallback);
-    note.append(text(file ? "Atlas 沒有執行，這裡顯示 AEP 的圖表；開啟 Atlas 可看到完整版本。"
+    note.append(text(embed.stale_note && file ? String(embed.stale_note) + "。"
+      : file ? "Atlas 沒有執行，這裡顯示 AEP 的圖表；開啟 Atlas 可看到完整版本。"
       : "Atlas 沒有執行；開啟 Atlas 可看到「" + String(embed.title || "") + "」。"));
     box.replaceChildren(note, ...(file ? [answerHtml(session, file)] : []));
   };
@@ -5736,6 +5737,8 @@ form.addEventListener("submit", (event) => {
         ...(entry.replyTo ? {reply_to: entry.replyTo} : {}),
         ...(entry.files.length ? {attachments: entry.files.map(file => file.file_id)} : {}),
         ...(spoken ? {voice_transcript: spoken} : {}),
+        // The Atlas this browser uses, so the chat reads the same one it frames.
+        ...(atlasEmbedAddress() ? {atlas_port: Number(atlasEmbedAddress().port)} : {}),
       });
       answer = completed.answer;
       queue.splice(queue.indexOf(entry), 1);

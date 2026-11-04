@@ -27,8 +27,10 @@ not running.
 from __future__ import annotations
 
 import asyncio
+import logging
 import secrets
 from collections.abc import Awaitable, Callable, Mapping, Sequence
+from contextvars import ContextVar
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -63,6 +65,12 @@ __all__ = [
     "with_bi_sources",
 ]
 
+_LOG = logging.getLogger(__name__)
+#: This turn's Atlas port, from the address the person set in their browser; None
+#: is the default port (`ConversationTurnRequest.atlas_port`).
+ATLAS_PORT: ContextVar[int | None] = ContextVar("aep_bi_atlas_port", default=None)
+#: What the person is told about charts drawn from the last copy of a dashboard.
+STALE_BOARD = "Atlas 目前沒開，這是上次讀到的 dashboard，版面以 Atlas 為準"
 TOOL_NAME = "bi__query"
 ATLAS_TOOL = "bi__atlas_show"
 ATLAS_DOWN = (
@@ -314,7 +322,7 @@ async def _atlas_dashboard(
     context: RequestContext,
     dashboard: Any,
 ) -> HostToolOutcome:
-    port = bi_atlas_import.DEFAULT_PORT
+    port = ATLAS_PORT.get() or bi_atlas_import.DEFAULT_PORT
     try:
         names = await asyncio.to_thread(bi_atlas_import.names, port)
         if not dashboard:
@@ -327,27 +335,153 @@ async def _atlas_dashboard(
         document = await asyncio.to_thread(bi_atlas_import.document, str(dashboard), port)
     except BiStoreError as error:
         if error.code == "atlas_unreachable":
-            return _atlas_failed(error.code, ATLAS_DOWN)
+            return await _atlas_stopped(workspace, read, context, dashboard)
         return _atlas_failed(error.code, error.message)
+    name = str(dashboard)
+    try:
+        bi_atlas_embed.remember_board(workspace, name, document, datetime.now())
+    except OSError as error:
+        _LOG.warning("Atlas dashboard copy not kept: %s", type(error).__name__)
+    written, shown, missing = await _board_charts(
+        workspace, read, context, name, bi_atlas_embed.panel_refs(document)
+    )
+    framed = await asyncio.to_thread(bi_atlas_embed.framable, port)
+    embed = _board_embed(name)
+    data: dict[str, Any] = {
+        "note": _board_note(framed, shown, missing),
+        "atlas_frame": framed,
+        "charts": shown,
+        "not_shown": missing,
+        "atlas_embed": embed,
+    }
+    if written is not None:
+        embed["fallback"] = written["path"]
+        data["attach"] = [written]
+    return HostToolOutcome(status="succeeded", data=data)
+
+
+def _board_embed(name: str) -> dict[str, Any]:
+    return {
+        "kind": "dashboard",
+        "name": name,
+        "path": bi_atlas_embed.dashboard_path(name),
+        "title": name,
+    }
+
+
+async def _board_charts(
+    workspace: Path,
+    read: Callable[[RequestContext, dict[str, Any]], Awaitable[Any]],
+    context: RequestContext,
+    name: str,
+    refs: list[dict[str, Any]],
+) -> tuple[dict[str, str] | None, list[str], list[dict[str, str]]]:
+    """The chart page of a dashboard's AEP panels, the titles on it, and each panel
+    that is not, with why."""
     sections: list[Any] = []
-    for vault_id, slug in bi_atlas_embed.panels_of(document)[: bi_atlas_embed.FALLBACK_PANELS]:
+    missing: list[dict[str, str]] = []
+    for index, ref in enumerate(refs):
+        where = {"vault": str(ref["vault"]), "slug": str(ref["slug"])}
+        if index >= bi_atlas_embed.FALLBACK_PANELS:
+            missing.append({**where, "code": "over_chart_limit"})
+            continue
         result = await read(
-            context, {"dataset": vault.dataset_name(vault_id), "analysis": slug, "params": {}}
+            context,
+            {
+                "dataset": vault.dataset_name(str(ref["vault"])),
+                "analysis": ref["slug"],
+                "params": ref.get("params") or {},
+            },
         )
-        if result.status == "succeeded" and isinstance(result.data, dict):
-            sections.extend(result.data.get("analysis") or ())
-    written = None
-    if sections:
-        written = chart_page(
-            workspace, {"analysis": sections, "dataset": f"Atlas Dashboard「{dashboard}」"}, {}
+        found = result.data.get("analysis") if isinstance(result.data, dict) else None
+        if result.status == "succeeded" and found:
+            sections.extend(found)
+        else:
+            failure = result.failure.code if result.failure is not None else result.status
+            missing.append({**where, "code": str(failure)})
+    if not sections:
+        return None, [], missing
+    written = chart_page(
+        workspace, {"analysis": sections, "dataset": f"Atlas Dashboard「{name}」"}, {}
+    )
+    return written, [str(s.get("title") or s.get("id")) for s in sections], missing
+
+
+def _panel_names(missing: list[dict[str, str]]) -> str:
+    return ", ".join(f"{m['slug']} ({m['code']})" for m in missing)
+
+
+def _board_note(framed: bool, shown: list[str], missing: list[dict[str, str]]) -> str:
+    """What the answer really holds, for the model to report; never more."""
+    if framed and not missing:
+        return (
+            "The person sees this dashboard in the answer: live from Atlas, or AEP's chart if "
+            "Atlas is not running."
+        )
+    if framed:
+        return (
+            "Atlas's dashboard is framed in the answer, but AEP could not read these panels, so "
+            f"they may be blank there: {_panel_names(missing)}. Tell the person which; do not say "
+            "the dashboard is shown in full."
+        )
+    if shown:
+        lost = f" Not shown: {_panel_names(missing)}; say so." if missing else ""
+        return (
+            f"Atlas cannot be framed now. AEP's charts are in the answer: {', '.join(shown)}.{lost}"
+        )
+    lost = f" Unreadable panels: {_panel_names(missing)}." if missing else ""
+    return (
+        "Nothing of this dashboard could be shown: Atlas cannot be framed now and AEP has no "
+        f"chart of it.{lost} Say so, and never say it is shown here."
+    )
+
+
+async def _atlas_stopped(
+    workspace: Path,
+    read: Callable[[RequestContext, dict[str, Any]], Awaitable[Any]],
+    context: RequestContext,
+    dashboard: Any,
+) -> HostToolOutcome:
+    """Atlas does not answer: charts from this PC's last copy of the dashboard, marked
+    as such; with none, the plain explanation."""
+    if not dashboard:
+        copies = bi_atlas_embed.board_copies(workspace)
+        if not copies:
+            return _atlas_failed("atlas_unreachable", ATLAS_DOWN)
+        return HostToolOutcome(
+            status="succeeded",
+            data={
+                "note": "Atlas is not running; these dashboards were last read at these times.",
+                "dashboards": sorted(copies),
+                "read_at": copies,
+            },
         )
     name = str(dashboard)
-    return _shown_in_atlas(
-        {"kind": "dashboard", "name": name, "path": bi_atlas_embed.dashboard_path(name),
-         "title": name},
-        written,
-        {},
-    )  # fmt: skip
+    copy = bi_atlas_embed.board_copy(workspace, name)
+    if copy is None:
+        return _atlas_failed("atlas_unreachable", ATLAS_DOWN)
+    written, shown, missing = await _board_charts(
+        workspace, read, context, name, list(copy["panels"])
+    )
+    if written is None:
+        unread = f" Unreadable panels: {_panel_names(missing)}." if missing else ""
+        return _atlas_failed("atlas_unreachable", f"{ATLAS_DOWN}{unread}")
+    read_at = str(copy.get("read_at") or "")
+    told = f"{STALE_BOARD}（上次讀到：{read_at}）"
+    lost = f" Not shown: {_panel_names(missing)}; say so." if missing else ""
+    return HostToolOutcome(
+        status="succeeded",
+        data={
+            "note": f"Atlas is not running. Tell the person: 「{told}」. AEP's charts of the "
+            f"last read dashboard are in the answer: {', '.join(shown)}.{lost}",
+            "atlas_frame": False,
+            "charts": shown,
+            "not_shown": missing,
+            "read_at": read_at,
+            "atlas_embed": {**_board_embed(name), "fallback": written["path"], "stale_note": told},
+            "attach": [written],
+        },
+    )
 
 
 def _shown_in_atlas(
