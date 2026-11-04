@@ -348,6 +348,9 @@ def test_vault_panel_and_dashboard_in_a_browser(
         wait("document.getElementById('bi-b-sk-list').textContent.includes('第 2 版')")
         assert "第 2 版" in text_of("bi-ai-target")
         shoot("vault-skill-ai")
+        # A session belongs to its dataset.
+        run("biLeaveDataset()")
+        assert run("document.getElementById('bi-ai').hidden")
         click("#bi-stepper [data-stage=test]")  # the applied revision waits for a commit
         wait("document.getElementById('bi-b-ver-pending').textContent.includes('power-extract')")
         shoot("vault-step3")

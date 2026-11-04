@@ -1235,13 +1235,15 @@ tr:last-child td { border-bottom: none; }
 .bi-ai-panel p { margin: 0; }
 .bi-ai-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .bi-ai-head h4 { margin: 0; }
-#bi-ai-log { flex: 1; min-height: 0; overflow: auto; margin: 0; align-content: start; }
+.bi-ai-body { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column;
+  gap: 6px; }
+#bi-ai-log { margin: 0; }
 #kn-pane-bi.bi-ai-open { margin-right: calc(min(440px, 40vw) + 12px); }
 tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
 @media (max-width: 760px) {
-  .bi-ai-panel { top: auto; left: 0; width: auto; height: 62vh; border-left: 0;
+  .bi-ai-panel { top: auto; left: 0; width: auto; height: 66vh; border-left: 0;
     border-top: 1px solid var(--line); box-shadow: 0 -4px 16px #0002; }
-  #kn-pane-bi.bi-ai-open { margin-right: 0; margin-bottom: 64vh; }
+  #kn-pane-bi.bi-ai-open { margin-right: 0; margin-bottom: 68vh; }
 }
 #bi-b-ver h5 { margin: 12px 0 4px; font-size: 13px; }
 .bi-substeps ol { margin-top: 0; }
@@ -2342,6 +2344,7 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
           <div class="bi-ai-head">
             <h4 id="bi-ai-title"></h4>
             <button class="bi-btn" id="bi-ai-close" type="button">關閉</button></div>
+          <div class="bi-ai-body" id="bi-ai-body">
           <p class="bi-meta" id="bi-ai-target"></p>
           <p class="bi-meta" id="bi-ai-sent"></p>
           <div id="bi-ai-new" class="bi-step-grid" hidden>
@@ -2359,6 +2362,7 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
           </div>
           <ol id="bi-ai-log" class="bi-log" role="log" aria-live="polite"
             aria-label="AI 對話紀錄"></ol>
+          </div>
           <div class="mem-status" id="bi-ai-status" role="status" aria-live="polite" hidden></div>
           <label class="bi-label" for="bi-ai-msg" id="bi-ai-label"></label>
           <textarea id="bi-ai-msg" class="bi-input" rows="2" maxlength="4000"></textarea>
@@ -12117,6 +12121,7 @@ for (const button of document.querySelectorAll("#bi-views [data-bi-view]")) {
 }
 // A publish draft belongs to the dataset it was made for: switching drops it.
 function biLeaveDataset() {
+  biAiClose();
   bi.cardId = null; bi.publish = null;
   biPanel("publish", false); el("bi-pub-result").hidden = true;
   el("bi-pub-state").replaceChildren();
@@ -13567,6 +13572,7 @@ function biAiShow(session) {
   if (!bi.ai) return;
   bi.ai.session = session;
   biBuildSessionLog("bi-ai-log", session, bi.ai.render);
+  const body = el("bi-ai-body"); body.scrollTop = body.scrollHeight;
 }
 
 function biAiTarget(text) { el("bi-ai-target").textContent = text; }
@@ -13597,7 +13603,13 @@ async function biAiOpen(spec) {
   biStatus("bi-ai-status", "");
   biAiTarget(spec.about);
   biBuildSessionLog("bi-ai-log", null, spec.render);
-  if (row) row.scrollIntoView({block: "nearest"});
+  // After the page has made room: what it came from stays in view beside the panel.
+  const shown = row || spec.shows || spec.from;
+  // On a phone the panel takes the lower part, so what it came from goes to the top.
+  const phone = matchMedia("(max-width: 760px)").matches;
+  if (shown && shown.isConnected) {
+    shown.scrollIntoView({block: phone ? "start" : row ? "nearest" : "center"});
+  }
   await biBuildAiState("bi-ai-sent", spec.sends, spec.agent);
   if (bi.ai === spec && spec.ref) {
     const found = await call("/api/bi/sessions?dataset=" + encodeURIComponent(spec.dataset)
@@ -13655,6 +13667,7 @@ async function biQuestionsAi() {
     sends: "卡片與分析", agent: true, checkModel: false,
     label: "你想測什麼", placeholder: "例如：出五題，涵蓋客戶訊號與產品對應",
     busy: "正在查卡片、試問題目…（可能要幾分鐘）", render: biQuestionsSuggestion,
+    shows: el("bi-b-bq-list"),
     sessionTarget: () => target});
 }
 
@@ -13914,6 +13927,7 @@ async function biAnalysisAi(slug, title, from) {
     sends: "資料表與欄位的說明、查詢結果", agent: true, checkModel: false,
     label: "你想看什麼", placeholder: "例如：各應用領域各有幾個商機？畫長條圖",
     busy: "正在查資料、畫圖…（可能要一兩分鐘）", render: biAnalysisSuggestion,
+    shows: el("bi-b-an-new"),
     sessionTarget: () => target});
 }
 
@@ -14581,6 +14595,7 @@ async function biSkillNew() {
     .map((folder) => { const o = bh("option", "", folder); o.value = folder; return o; }));
   el("bi-ai-new-name").value = "";
   const spec = {...biSkillSpec("vault-" + bi.verVault), mode: "new", title: "和 AI 新增規則",
+    shows: el("bi-b-sk-list"),
     about: "第一句話會先存成第 1 版（還沒 commit），AI 再幫你改。",
     label: "這條規則要做什麼", placeholder: "例如：虛構電源廠是 Account",
     sessionTarget: () => spec.name,
@@ -15481,6 +15496,9 @@ async function biBuildAiState(target, extra, agent) {
 }
 
 async function biBuildMethods(fill) {
+  // At once, not after the reply: a trial pressed meanwhile must not send a table to the
+  // model because the select still shows its first option.
+  if (!bi.build.method && !bi.build.skill) el("bi-b-m-pick").value = biBuiltinFor();
   const reply = await call("/api/bi/methods?dataset=" + encodeURIComponent(biDataset()));
   // Keep what the person picked; otherwise the built-in that fits the source.
   const pick = el("bi-b-m-pick"), keep = bi.build.method ? bi.build.method.method.id

@@ -275,6 +275,7 @@ def test_the_whole_build_flow(
         beside = page.run(
             "(() => { const r = (i) => document.getElementById(i).getBoundingClientRect();"
             " return r('bi-b-bq-list').right <= r('bi-ai').left"
+            " && r('bi-b-bq-list').top < innerHeight && r('bi-b-bq-list').bottom > 0"
             " && r('bi-b-bench-run').right <= r('bi-ai').left"
             " && r('bi-ai-send').bottom <= innerHeight; })()"
         )
