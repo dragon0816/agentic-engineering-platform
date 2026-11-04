@@ -6715,3 +6715,14 @@ An AI run never writes `confidence: verified`, on a new card or an empty field: 
 **An identical request reuses its answer** (`capabilities/bi_cards/answer_cache.py`), per PC in `<dataset>/answer_cache/`, keyed by messages, model alias, output limit and contract; failures and wrong shapes are not kept, and a withdrawn source clears them. `POST /api/bi/runs` takes `fresh: true` to ask anyway. `run.answers`: `{reused, asked, input_tokens, output_tokens}`.
 
 **A domain from the application.** `POST /api/bi/import/pages/preview` takes `folder`: a row with no domain takes that application's, marked `inference`, and merges as any value; a one-domain card that holds one keeps it; a library folder gives none. `POST /api/bi/vaults/<id>/fill-domains {confirm?}` → `{fill, by_domain, left, applied, purpose?}` gives cards with no domain their applications' domains in one commit; without `confirm` it writes nothing.
+## `bi__query`: hops and passages (Phase 3-a, 2026-11-04)
+
+Design: `docs/phases/BI_CARD_MODEL.md` Phase 3. Additions to `bi-cards/query@1.0.0`; a call without them answers as before, with the new keys empty.
+
+- **Input** `hops` (0–3, default 0): walk the found cards' relations, both ways, breadth first.
+- **Output** `related`: each card reached once, by a shortest path, no found card among them, at most 30; a cycle ends. A card entry as in `cards`, plus `from`, `hops`, `path` and `claim`. A rejected relation is not walked.
+- **`path`:** steps of `relation_id`, `type`, `direction` (`out` along the relation, `in` against it), `status`, `origin`, `claim`, `to_name`, `to_type`, and `also` for other relations between the same two cards.
+- **`claim`:** `confirmed` and `unreviewed` (a card's field holds it) are `fact`; `inferred`, `pending` and `disputed` are themselves. A path's `claim` is its weakest step. `scope_note` carries the rule, and says when the limit left cards out. With `hops`, a found card also lists its direct `relations`, at most 20.
+- **Output** `passages`, with `text`: at most 5, `source_id`, `source_name`, `rev`, `line_start`, `line_end`, `line`, `snippet`. `passages_withheld`: matching chunks of sources whose `classification` is not in the host's `models.data_approval.approved_classes`, counted up to that limit; `scope_note` says so. No approval known: none read.
+- **Which version:** a vault's passages come from the version `bi__query` reads: the sources in that commit, at their revision then, listed in `sources.json` beside the published view. A source only on this PC, or withdrawn since, gives none. A subscribed copy has no sources, so none. A benchmark's chosen version reads none.
+- `aep_bi_query` takes `hops` and returns `related`, `passages` and `passages_withheld`.

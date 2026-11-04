@@ -77,6 +77,7 @@ TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
                 "domain": _Q,
                 "follow_links": {"type": "boolean"},
                 "limit": {"type": "integer"},
+                "hops": {"type": "integer"},
             },
         },
     ),

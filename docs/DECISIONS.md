@@ -6314,3 +6314,19 @@ Measured in `docs/phases/BI_EXTRACTION_VARIANCE.md`: gpt-5.5 gives different car
 - **An identical request reuses its answer,** per PC, with `fresh` to ask anyway. Consequence: a re-run repeats until the prompt changes, including a mistake it made; and it does not make a first run complete. The key holds the model's alias, not the endpoint's model, so changing what an alias points at needs `fresh`.
 - **A card with no domain takes its application's, marked inference,** on imports and through `fill-domains`. A library folder gives none. Mixed `domain` storage is the schema's: `enum` on 5 types, `list` on 16. Not a bug.
 - **Rejected for now: sending only the known names a chunk mentions.** It steadied supply links on one chunk but halved revenue facts there and made same-named `Account` cards.
+## 2026-11-04 — `bi__query` walks relations and returns passages (BI card model Phase 3-a)
+
+From the BI orchestrator's brief for Phase 3-a; design `docs/phases/BI_CARD_MODEL.md` §3.3.
+
+- **A relation's status decides how it may be said.** `claim` in the result: `fact` only for `confirmed` or a link a card's
+  field holds; a path is as sure as its weakest step. The rule travels in `scope_note`, not only in the Skill, because a
+  host may hold an older Skill text.
+- **Passages obey the data approval.** A source's text reaches a model only in an approved class, as
+  `check_classification` requires for AI runs. The brief added no ACL; this is that existing rule on a new way to reach the
+  text, not a new permission. Withheld chunks are counted, so a gap is not read as absence. Rejected: returning all
+  passages (a RESTRICTED source would go to the model through a search).
+- **Passages follow the version the answer reads.** A vault answers from its published version, so its passages come only
+  from the sources in that commit. Rejected: the dataset's own index, which holds this PC's unpushed sources.
+- **Card search stays a substring scan.** Only passages use the index; changing card matching (all words, ranking) would
+  change existing answers days before a release.
+- **Not done:** reading `published/<tag>.sqlite`, on the Phase 3 list; not in this brief, and readers keep rebuilding from units.

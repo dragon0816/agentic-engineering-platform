@@ -72,6 +72,8 @@ SUBSCRIBED_DIR = "subscribed"
 VAULTS_DIR = "vaults"
 #: A registered vault is the dataset `vault-<vault id>`.
 VAULT_PREFIX = "vault-"
+#: Beside a vault's published view: its sources' Markdown revisions in that version.
+PUBLISHED_SOURCES = "sources.json"
 VAULT_REGISTRY = "registry.json"
 #: `schema-drafts` and `benchmarks` hold schema drafts and benchmark reports
 #: (BI ingest, 2026-10-28).

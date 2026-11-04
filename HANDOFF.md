@@ -15,6 +15,19 @@ On the real Agent Web (53583), main `31895dc8`. Vault `market-intel`, schema 5.0
 **Not run:** the runbook's benchmark and dashboard steps 10-11 (the push notes the content has run no tests) and steps 15-18 (Atlas, a colleague joining, the rs-k copy). `test_bi_vault_ui` still needs a quiet run. It fails under load, unexplained.
 
 **Next, on the orchestrator's word:** those steps, then `p2-schema-fit` (it needs the new output limit on rebase). Drivers, git-ignored: `.scratch/r6_*.py`. Why counts differ between runs: `docs/phases/BI_EXTRACTION_VARIANCE.md`.
+## `bi__query` hops and passages, P3-a (2026-11-04, Claude Code)
+
+**Goal.** Phase 3-a of `docs/phases/BI_CARD_MODEL.md`, from the BI orchestrator's brief. Decision `docs/DECISIONS.md` 2026-11-04; contract `docs/CONTRACTS.md` "`bi__query`: hops and passages".
+
+**Where.** Branch `p3-retrieval` in the Paseo worktree `bi-build-flow`, on `05cbdc30`; not pushed, not merged.
+
+**Done.** `hops` and `related`; `passages` from the search index, of the version read and only in approved data classes; `aep_bi_query` follows. Feed goldens unchanged.
+
+**Verified.** `ruff format --check .`, `ruff check .`, `mypy src tests` clean; the affected test files one at a time, recorded in the commit's report to the orchestrator. `test_bi_build_flow_ui` and `test_bi_chat_charts` each failed once in the sequential run and passed when rerun alone; cause not established. Real-model check: a row in `docs/TASKS.md`. Not run: the full suite.
+
+**Open.** Reading `published/<tag>.sqlite`; card search through the index. An existing PC's published view gets `sources.json` on its next `bi__query` read of a vault, so nothing needs migrating. An installed Skill keeps its text until `assets install-bundled`; the tool's description and `scope_note` carry the rule meanwhile.
+
+**Next action.** Orchestrator: merge, then the full suite and browser tests.
 
 ## The BI card model (2026-11-03, Claude Code worker D) — latest
 

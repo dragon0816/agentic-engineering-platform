@@ -1305,7 +1305,11 @@ def build_gateway(
     # BI knowledge cards (owner 2026-10-21, Case A): the read-only chat query,
     # installed when this host has the Skill, as for business cards.
     if _has_skill(layout, BI_SKILL):
-        for spec, handler, request, response in bi_cards_bindings(layout.workspace_root):
+        approval = None if binding is None else binding.data_approval
+        for spec, handler, request, response in bi_cards_bindings(
+            layout.workspace_root,
+            approved=() if approval is None else approval.approved_classes,
+        ):
             installed.register(
                 spec, handler, request, response, ExecutionDependencies(central_required=False)
             )

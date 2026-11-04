@@ -30,14 +30,14 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
 from capabilities.bi_cards import catalog, extract
 from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, now
+from capabilities.bi_cards.store import PUBLISHED_SOURCES, BiStore, BiStoreError, now
 
 INDEX_FILE = "search.sqlite"
 TOKENIZER = "trigram"
@@ -46,6 +46,8 @@ SNIPPET_CHARS = 160
 MAX_TERMS = 8
 MAX_QUERY_CHARS = 200
 DEFAULT_LIMIT = 20
+#: Passages one `bi__query` search returns.
+PASSAGE_LIMIT = 5
 MAX_LIMIT = 100
 
 SCHEMA = f"""
@@ -120,9 +122,25 @@ def _card_versions(store: BiStore) -> dict[str, int]:
 
 
 def _source_revisions(store: BiStore) -> dict[str, int]:
+    if store.view is not None and store.read_only:
+        return _published_revisions(store)
     if store.read_only:
         return {}  # a subscribed copy has no sources on this PC
     return dict(Staging(store.workspace, store.dataset).markdown_sources())
+
+
+def _published_revisions(store: BiStore) -> dict[str, int]:
+    """A vault's published view: the revisions in that version (written beside it
+    by `refresh_published`), and of those what this PC still has, so a source
+    withdrawn since is gone and an unpushed one was never here. No such file: no
+    sources, as for a benchmark's chosen version."""
+    assert store.view is not None
+    try:
+        listed = json.loads((store.view / PUBLISHED_SOURCES).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    held = {str(s["id"]) for s in Staging(store.workspace, store.dataset).sources()}
+    return {str(k): int(v) for k, v in listed.items() if str(k) in held}
 
 
 def _behind(db: sqlite3.Connection, store: BiStore) -> dict[str, int | bool]:
@@ -208,7 +226,10 @@ def _index_sources(db: sqlite3.Connection, store: BiStore, *, full: bool) -> int
     for source_id in changed:
         rev = wanted[source_id]
         source = staging.source(source_id) or {}
-        text = staging.markdown_text(source_id, rev)
+        try:
+            text = staging.markdown_text(source_id, rev)
+        except (BiStoreError, OSError):
+            continue  # not readable now (a file only in the cloud): tried again next sync
         db.execute("DELETE FROM chunk_text WHERE source_id = ?", (source_id,))
         for chunk in extract.chunks(text, CHUNK_CHARS):
             db.execute(
@@ -327,19 +348,27 @@ def _like(word: str) -> str:
 
 
 def _rows(
-    db: sqlite3.Connection, table: str, columns: str, words: list[str], limit: int
+    db: sqlite3.Connection,
+    table: str,
+    columns: str,
+    words: list[str],
+    limit: int,
+    sources: Sequence[str] | None = None,
 ) -> tuple[list[sqlite3.Row], str]:
+    """`sources` keeps a chunk search to those source ids."""
+    within = "" if sources is None else f" AND source_id IN ({','.join('?' * len(sources))})"
+    chosen = tuple(sources or ())
     if all(len(w) >= 3 for w in words):
         rows = db.execute(
-            f"SELECT {columns} FROM {table} WHERE {table} MATCH ? ORDER BY rank LIMIT ?",
-            (_match(words), limit),
+            f"SELECT {columns} FROM {table} WHERE {table} MATCH ?{within} ORDER BY rank LIMIT ?",
+            (_match(words), *chosen, limit),
         ).fetchall()
         return rows, "index"
     # A word shorter than a trigram cannot use the index: scan the rows.
     where = " AND ".join("text LIKE ? ESCAPE '\\'" for _ in words)
     rows = db.execute(
-        f"SELECT {columns} FROM {table} WHERE {where} LIMIT ?",
-        (*[_like(w) for w in words], limit),
+        f"SELECT {columns} FROM {table} WHERE {where}{within} LIMIT ?",
+        (*[_like(w) for w in words], *chosen, limit),
     ).fetchall()
     return rows, "scan"
 
@@ -379,6 +408,61 @@ def _limit(value: Any) -> int:
     return max(1, min(MAX_LIMIT, number))
 
 
+def _passages(
+    db: sqlite3.Connection, words: list[str], limit: int, sources: Sequence[str] | None = None
+) -> list[dict[str, Any]]:
+    rows, _ = _rows(
+        db, "chunk_text", "text, source_id, rev, line_start, line_end", words, limit, sources
+    )
+    names = {str(r["source_id"]): r["name"] for r in db.execute("SELECT * FROM sources")}
+    found = []
+    for row in rows:
+        text = str(row["text"])
+        lines = text.split("\n")
+        first_line = next(
+            (i for i, line in enumerate(lines) if any(w.lower() in line.lower() for w in words)),
+            0,
+        )
+        found.append(
+            {
+                "source_id": row["source_id"],
+                "source_name": names.get(str(row["source_id"]), ""),
+                "rev": int(row["rev"]),
+                "line_start": int(row["line_start"]),
+                "line_end": int(row["line_end"]),
+                "line": int(row["line_start"]) + first_line,
+                **snippet(text, words),
+            }
+        )
+    return found
+
+
+def passages(
+    store: BiStore, query: Any, *, approved: Collection[str], limit: int = PASSAGE_LIMIT
+) -> dict[str, Any]:
+    """Passages for the model: only from sources of a data class approved for it.
+    `withheld` counts the matching chunks left out for that (at most `limit`), so
+    the answer can say so. No marks: they point into the snippet for a page."""
+    empty: dict[str, Any] = {"passages": [], "withheld": 0}
+    words = terms(str(query or ""))
+    if not words or not _has_data(store) or (store.read_only and store.view is None):
+        return empty
+    sync_quietly(store)
+    classes = {
+        str(s["id"]): str(s["classification"])
+        for s in Staging(store.workspace, store.dataset).sources()
+    }
+    allowed = [k for k, v in classes.items() if v in approved]
+    refused = [k for k, v in classes.items() if v not in approved]
+    with _db(store) as db:
+        found = _passages(db, words, limit, allowed) if allowed else []
+        withheld = len(_rows(db, "chunk_text", "source_id", words, limit, refused)[0])
+    return {
+        "passages": [{k: v for k, v in item.items() if k != "marks"} for item in found],
+        "withheld": withheld if refused else 0,
+    }
+
+
 def search(store: BiStore, query: Any, *, limit: Any = None) -> dict[str, Any]:
     """Cards and Markdown passages matching every word of `query`."""
     words = terms(str(query or ""))
@@ -409,33 +493,7 @@ def search(store: BiStore, query: Any, *, limit: Any = None) -> dict[str, Any]:
                     "hits": hits,
                 }
             )
-        chunk_rows, _ = _rows(
-            db, "chunk_text", "text, source_id, rev, line_start, line_end", words, count
-        )
-        names = {str(r["source_id"]): r["name"] for r in db.execute("SELECT * FROM sources")}
-        passages = []
-        for row in chunk_rows:
-            text = str(row["text"])
-            lines = text.split("\n")
-            first_line = next(
-                (
-                    i
-                    for i, line in enumerate(lines)
-                    if any(w.lower() in line.lower() for w in words)
-                ),
-                0,
-            )
-            passages.append(
-                {
-                    "source_id": row["source_id"],
-                    "source_name": names.get(str(row["source_id"]), ""),
-                    "rev": int(row["rev"]),
-                    "line_start": int(row["line_start"]),
-                    "line_end": int(row["line_end"]),
-                    "line": int(row["line_start"]) + first_line,
-                    **snippet(text, words),
-                }
-            )
+        passages = _passages(db, words, count)
     return {
         "query": " ".join(words),
         "terms": words,
