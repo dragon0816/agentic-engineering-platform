@@ -69,6 +69,7 @@ from capabilities.bi_cards import (
     questions_session,
     rerun,
     runs,
+    schema_fit,
     schema_session,
     schema_versions,
     search_index,
@@ -590,6 +591,11 @@ def _run_action(
     if len(rest) == 2 and rest[0] == "relations":
         decided = runs.decide_relation(
             workspace, dataset, run_id, rest[1], given.get("status"), actor=who
+        )
+        return 200, {"ok": True, **decided}
+    if len(rest) == 2 and rest[0] == "items":
+        decided = schema_fit.decide(
+            workspace, dataset, run_id, rest[1], given.get("status"), given.get("reason"), actor=who
         )
         return 200, {"ok": True, **decided}
     if rest == ["recheck"]:

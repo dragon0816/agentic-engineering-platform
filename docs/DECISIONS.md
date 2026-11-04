@@ -6340,3 +6340,6 @@ Phase 2-c needs a person's judgement of a reference on a card, and `BI_CARD_MODE
 **Why.** The owner's rule is that output reaches cards only through preview and review, and the source path already gives that, along with evidence, sharing, classification checks and withdrawal.
 
 **Rejected.** Writing the output as a Markdown revision of the raw source: it fits no CSV, and it would replace what the source's own converter or a person wrote. Letting the AI run its own draft unapproved, as analyses do: the owner asked for approval before a new revision's first run, and a tool reads raw sources. The guard is not a boundary against a determined attacker, so the code must be read first.
+## 2026-11-04: Schema fit is kept on the AI run (Phase 2-b)
+
+Each item's action and a person's decision on it are kept with the run, per PC, as candidates are. The proposal's §8.1 F allows it and no new table is needed. Consequence: another PC does not see a pending item until it reaches a profile proposal or a schema version. Approved `dictionary_change` and `propose_type` register nothing; a person takes them to Session A, since the existing proposal flow only adds fields. Rejected for now: fit units shared in the vault, and auto-drafting a schema version from an approval.

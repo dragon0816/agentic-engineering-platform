@@ -26,7 +26,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from capabilities.bi_cards import card_model
+from capabilities.bi_cards import card_model, schema_fit
 from capabilities.bi_cards import profile as profile_rules
 from capabilities.bi_cards.schema import FieldDef, Registry, TypeDef, norm_key
 from common.execution import TraceIdentifiers
@@ -148,6 +148,8 @@ class Extraction:
     chunks: int = 0
     #: Relations the model inferred, each with a quote found in the source.
     relations: list[dict[str, Any]] = field(default_factory=list)
+    #: How each knowledge item fits the schema (`schema_fit`).
+    items: list[dict[str, Any]] = field(default_factory=list)
 
 
 # -- chunking ----------------------------------------------------------------
@@ -367,6 +369,7 @@ def messages(
     domain_notes: str = "",
     infer_relations: bool = False,
     profile: Mapping[str, Any] | None = None,
+    check_fit: bool = False,
 ) -> tuple[ModelMessage, ...]:
     graded = any(
         reg.types[name].get("evidence_grade") is not None for name in types if name in reg.types
@@ -393,6 +396,8 @@ def messages(
     )
     if infer_relations and reg.relation_types:
         system += relation_rules(reg)
+    if check_fit:
+        system += schema_fit.RULES
     names = "\n".join(
         f"- {type_name}: {', '.join(values[:MAX_KNOWN_NAMES])}"
         for type_name, values in sorted(known.items())
@@ -710,6 +715,7 @@ def extract_chunk(
     domain_notes: str = "",
     relations: list[dict[str, Any]] | None = None,
     profile: Mapping[str, Any] | None = None,
+    items: list[dict[str, Any]] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, str]], dict[str, Any] | None]:
     """(candidates, warnings, failure) for one chunk."""
     problems: list[str] = []
@@ -728,6 +734,7 @@ def extract_chunk(
                     problems,
                     domain_notes,
                     infer_relations=relations is not None,
+                    check_fit=items is not None,
                     profile=profile,
                 ),
                 requirements=ModelRequirements(structured_output=True, local_only=local_only),
@@ -774,6 +781,8 @@ def extract_chunk(
                 inferred, unsupported = read_relations(reg, answer, chunk, source_id)
                 relations.extend(inferred)
                 warnings.extend(unsupported)
+            if items is not None:
+                items.extend(schema_fit.read_items(reg, answer, locate, chunk, source_id))
             return found, warnings, None
     return (
         [],
@@ -807,6 +816,7 @@ def extract(
     domain_notes: str = "",
     infer_relations: bool = False,
     profile: Mapping[str, Any] | None = None,
+    check_fit: bool = False,
 ) -> Extraction:
     """Every chunk of `text` (or only the chunk indexes in `only`, to retry
     failed ones), merged into candidates."""
@@ -829,6 +839,7 @@ def extract(
             local_only=local_only,
             domain_notes=domain_notes,
             relations=result.relations if infer_relations else None,
+            items=result.items if check_fit else None,
             profile=profile,
         )
         if failure is not None:

@@ -740,6 +740,7 @@ def run_view(staging: Staging, run_id: str) -> dict[str, Any]:
             relations=layout.get("relations") or [],
             merge=merge_counts(found),
             answers=layout.get("answers"),
+            items=layout.get("items") or [],
         )
         rules = layout.get("skills")
         if isinstance(rules, dict):  # a vault's run: what its home's profile said, or none

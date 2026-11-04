@@ -15264,6 +15264,40 @@ function biRunNothing(run) {
   return notes;
 }
 
+const BI_FIT_ACTION = {update_card: "更新卡片", create_card: "新增卡片",
+  dictionary_change: "字典調整", extend_schema: "擴充欄位", propose_type: "新卡型提案",
+  needs_clarification: "待釐清"};
+
+function biRunFit(run) {
+  // What the schema cannot hold yet: nothing registers until a person decides, and an
+  // approved field goes to the application's profile for its own merge.
+  const items = (run.items || []).filter((item) => item.status !== "through_candidate");
+  if (!items.length) return [];
+  const decide = async (item, status, reason) => {
+    await biCall("/api/bi/runs/" + run.id + "/items/" + item.id,
+      {dataset: biDataset(), status, reason: reason.value.trim()});
+    await biBuildFetchRun(run.id); biBuildRenderRun();
+  };
+  return [bh("h4", "", "不適合現有 schema 的內容（逐項決定）"),
+    bh("ul", "bi-fit", ...items.map((item) => {
+      const reason = bh("input", "");
+      reason.placeholder = "理由（退回或待釐清必填）";
+      const open = item.status === "proposed" || item.status === "needs_clarification";
+      return bh("li", "", item.actions.map((a) => BI_FIT_ACTION[a] || a).join(" + ") + "："
+        + item.summary,
+        bh("div", "bi-meta", item.reason + (item.excerpt ? "（「" + item.excerpt + "」）" : "")),
+        ...(item.questions || []).map((q) => bh("div", "bi-warn", "待確認：" + q)),
+        open
+          ? bh("span", "", reason, " ",
+            item.actions.includes("needs_clarification") ? ""
+              : biButton("核准", () => decide(item, "approved", reason), "bi-btn"), " ",
+            biButton("退回", () => decide(item, "rejected", reason), "bi-btn"), " ",
+            biButton("待釐清", () => decide(item, "needs_clarification", reason), "bi-btn"))
+          : biBadge(item.status === "approved" ? "已核准" : "已退回",
+            item.status === "approved" ? "good" : "dim"));
+    }))];
+}
+
 function biRunRelations(run) {
   // Relations the AI inferred: each decided by a person, on its quote. Confirming needs both
   // cards to exist, so it works once the run's cards are written.
@@ -15771,7 +15805,7 @@ function biBuildRenderRun() {
       await biBuildFollow(run.id); await biBuildFetchRun(run.id); biBuildRenderRun();
     }, "bi-btn"));
   }
-  el("bi-b-chips").append(...biRunNothing(run), ...biRunRelations(run));
+  el("bi-b-chips").append(...biRunNothing(run), ...biRunRelations(run), ...biRunFit(run));
   biBuildSameNames();
   for (const candidate of bi.build.candidates) {
     const decision = BI_DECISION[candidate.review] || [candidate.review, "dim"];
