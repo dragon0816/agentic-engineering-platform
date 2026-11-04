@@ -95,8 +95,6 @@ MAIN_PATH = (
 
 #: Not named by the owner: under 進階, and still there.
 ADVANCED = (
-    "bi-domain",
-    "bi-sample",
     "bi-publish",
     "bi-publish-panel",
     "bi-subs",
@@ -230,3 +228,11 @@ def test_the_knowledge_page_opens_on_bi_unless_another_tab_was_chosen() -> None:
     assert 'call("/api/bi/datasets")' in opening and 'knShow("bi")' in opening
     # Only a person's click on a tab counts as a choice.
     assert 'localStorage.setItem("kn-pane-chosen"' in PAGE
+
+
+def test_a_read_filter_sits_beside_what_it_filters() -> None:
+    """Under 進階 they filtered the Dashboard and cards with nothing showing it."""
+    for ident in ("bi-domain", "bi-sample"):
+        assert ("div", "bi-view-dashboard") in PANE.around[ident], ident
+    assert ("div", "bi-view-cards") in PANE.around["bi-card-domain"]
+    assert '"&domain=" + encodeURIComponent(el("bi-card-domain").value)' in PAGE

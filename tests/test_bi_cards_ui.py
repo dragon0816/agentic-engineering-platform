@@ -708,7 +708,7 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
             " && (document.getElementById('bi-detail-title')?.textContent || '').includes('WiFi7')"
         )
         cards_query = [body for _m, route, body in stub.calls if route == "/api/bi/cards"][-1]
-        assert cards_query["domain"] == "robotics"
+        assert not cards_query.get("domain")  # the card list starts on every domain
         # -- card detail: classes, sources, links, proposals, history ------------------------
         detail = "document.getElementById('bi-detail-body').textContent"
         wait(f"{detail}.includes('王經理')")

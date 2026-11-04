@@ -1296,15 +1296,30 @@ tr:last-child td { border-bottom: none; }
   .bi-browse { grid-template-columns: minmax(0, 1fr); }
   .bi-cards { max-height: none; }
 }
-@media (max-width: 640px) {
-  table.bi-stack thead { display: none; }
-  table.bi-stack, table.bi-stack tbody, table.bi-stack tr, table.bi-stack td { display: block;
-    width: 100%; }
-  table.bi-stack tr { padding: 6px 0; border-bottom: 1px solid var(--line); }
-  table.bi-stack td { border: 0; padding: 2px 4px; }
-  table.bi-stack td[data-label]::before { content: attr(data-label) "\FF1A"; color: var(--dim);
-    font-size: 12px; }
-  .bi-funnel-row { grid-template-columns: minmax(60px, 96px) minmax(0, 1fr) 2.5em; }
+/* A list and what it opens, side by side at one height, each scrolling on its own. */
+.bi-src-split { display: grid; gap: 14px;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+.bi-src-split .bi-scroller { max-height: 50vh; overflow: auto; }
+.bi-split-pane { min-width: 0; padding: 12px; border: 1px solid var(--line);
+  border-radius: 10px; background: var(--panel); }
+#bi-b-src-split { margin-top: 10px; }
+.bi-split { margin-bottom: 14px; }
+#bi-detail-abstract { margin-top: 8px; }
+#bi-b-sources tbody tr { cursor: pointer; }
+#bi-b-sources td { overflow-wrap: anywhere; word-break: normal; }
+#bi-b-sources td:nth-child(5) { white-space: nowrap; }
+#bi-b-sources .bi-btn { min-height: 30px; padding: 2px 8px; white-space: nowrap; }
+#bi-b-sources tbody tr[aria-selected="true"] { box-shadow: inset 3px 0 0 var(--accent); }
+@media (max-width: 900px) {
+  .bi-src-split { grid-template-columns: minmax(0, 1fr); }
+}
+@media (min-width: 901px) {
+  .bi-split { height: max(420px, 76vh); align-items: stretch;
+    grid-template-rows: minmax(0, 1fr); }
+  .bi-split-list { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+  .bi-split-list > .bi-scroller { flex: 1 1 0; min-height: 0; max-height: none; overflow: auto;
+    align-content: start; }
+  .bi-split-pane { min-height: 0; overflow-y: auto; }
 }
 </style>
 </head>
@@ -2370,6 +2385,16 @@ tr:last-child td { border-bottom: none; }
           </div>
           <div id="bi-dom-plan" aria-live="polite"></div>
         </div>
+        <div class="bi-filters">
+          <div id="bi-domain-box"><label class="bi-label" for="bi-domain">領域</label>
+            <select id="bi-domain">
+              <option value="robotics" selected>機器人 Robotics</option>
+              <option value="wireless">無線通訊 Wireless</option>
+              <option value="aidc">AIDC</option>
+            </select></div>
+          <div id="bi-sample-box"><label class="bi-check"><input type="checkbox" id="bi-sample">
+            含 SAMPLE 示範卡</label></div>
+        </div>
         <div id="bi-dash-params" class="bi-actions" hidden></div>
         <div class="mem-status" id="bi-status-dash" role="status" aria-live="polite" hidden></div>
         <div id="bi-dash-summary" class="bi-summary"></div>
@@ -2380,6 +2405,8 @@ tr:last-child td { border-bottom: none; }
         <div class="bi-filters">
           <div><label class="bi-label" for="bi-type">類型</label>
             <select id="bi-type"><option value="">全部類型</option></select></div>
+          <div id="bi-card-domain-box"><label class="bi-label" for="bi-card-domain">領域</label>
+            <select id="bi-card-domain"><option value="">全部領域</option></select></div>
           <div><label class="bi-label" for="bi-q">搜尋</label>
             <input id="bi-q" class="bi-input" type="search" autocomplete="off"
               placeholder="名稱或代碼"></div>
@@ -2397,14 +2424,14 @@ tr:last-child td { border-bottom: none; }
           </form>
           <div id="bi-fts-out" aria-live="polite"></div>
         </details>
-        <div class="bi-browse">
-          <div>
+        <div class="bi-browse bi-split">
+          <div class="bi-split-list" id="bi-card-list">
             <div class="mem-status" id="bi-status-cards" role="status" aria-live="polite"
                  hidden></div>
             <p class="bi-meta" id="bi-card-count"></p>
-            <ul id="bi-cards" class="bi-cards" aria-label="卡片清單"></ul>
+            <ul id="bi-cards" class="bi-cards bi-scroller" aria-label="卡片清單"></ul>
           </div>
-          <div class="bi-detail" id="bi-detail">
+          <div class="bi-detail bi-split-pane" id="bi-detail">
             <div class="mem-status" id="bi-status-detail" role="status" aria-live="polite"
                  hidden></div>
             <div id="bi-detail-body"><p class="bi-empty">選一張卡片，查看欄位、來源、關聯與歷史。
@@ -2507,11 +2534,23 @@ tr:last-child td { border-bottom: none; }
           <p class="bi-warn" id="bi-b-src-cloud" role="status" hidden></p>
           <div class="bi-step" id="bi-b-src-withdraw" role="region" aria-label="撤回來源"
             hidden></div>
-          <div class="bi-scroll"><table class="bi-table bi-stack" id="bi-b-sources">
-            <thead><tr><th>使用</th><th>來源</th><th>格式</th><th>Markdown</th><th>大小</th>
-              <th>機密等級</th><th>共用資料夾</th><th>加入時間</th></tr></thead>
-              <tbody></tbody></table></div>
-          <div class="bi-step" id="bi-b-md" role="region" aria-labelledby="bi-b-md-h" hidden>
+          <div class="bi-split bi-src-split" id="bi-b-src-split">
+            <div class="bi-split-list">
+              <div class="bi-filters">
+                <div><label class="bi-label" for="bi-b-src-q">搜尋來源</label>
+                  <input id="bi-b-src-q" class="bi-input" type="search" autocomplete="off"
+                    placeholder="檔名"></div>
+                <div class="bi-meta" id="bi-b-src-count" role="status"></div>
+              </div>
+              <div class="bi-scroll bi-scroller"><table class="bi-table bi-stack" id="bi-b-sources">
+                <thead><tr><th>使用</th><th>來源</th><th>格式</th><th>Markdown</th>
+                  <th>機密等級</th><th>共用資料夾</th></tr></thead>
+                <tbody></tbody></table></div>
+            </div>
+            <div class="bi-split-pane" id="bi-b-src-pane" aria-live="polite">
+              <p class="bi-empty" id="bi-b-md-empty">選一份來源，看轉檔結果。</p>
+              <div class="mem-status" id="bi-b-md-status" role="status" hidden></div>
+          <div id="bi-b-md" role="region" aria-labelledby="bi-b-md-h" hidden>
             <h4 id="bi-b-md-h"></h4>
             <p class="bi-meta" id="bi-b-md-info"></p>
             <div class="bi-step-grid">
@@ -2529,6 +2568,8 @@ tr:last-child td { border-bottom: none; }
               <div><button class="bi-btn" id="bi-b-md-close" type="button">關閉</button></div>
             </div>
             <div id="bi-b-md-msg" role="status" aria-live="polite"></div>
+          </div>
+            </div>
           </div>
           <details class="bi-manage bi-adv" id="bi-b-adv-source">
             <summary>進階：知識庫與匯入</summary>
@@ -2988,14 +3029,6 @@ tr:last-child td { border-bottom: none; }
       <summary><span class="bi-sec-title">進階：資料集與發佈</span></summary>
       <div class="bi-sec-body">
         <div class="bi-step-grid">
-          <div id="bi-domain-box"><label class="bi-label" for="bi-domain">領域</label>
-            <select id="bi-domain">
-              <option value="robotics" selected>機器人 Robotics</option>
-              <option value="wireless">無線通訊 Wireless</option>
-              <option value="aidc">AIDC</option>
-            </select></div>
-          <div id="bi-sample-box"><label class="bi-check"><input type="checkbox" id="bi-sample">
-            含 SAMPLE 示範卡</label></div>
         </div>
         <p class="bi-meta bi-schema-note" id="bi-schema-note"></p>
         <div class="bi-actions">
@@ -12043,12 +12076,20 @@ function biDomainOptions(domains) {
   const values = domains.map((d) => d.toLowerCase());
   select.value = values.includes(current) ? current
     : (values.includes("robotics") ? "robotics" : values[0]);
+  // The card list starts on every domain: a filter nobody chose hides cards silently.
+  const cards = el("bi-card-domain"), kept = cards.value;
+  cards.replaceChildren(bh("option", "", "全部領域"), ...[...select.options].map((option) => {
+    const copy = bh("option", "", option.textContent); copy.value = option.value; return copy;
+  }));
+  cards.firstChild.value = "";
+  cards.value = values.includes(kept) ? kept : "";
 }
 
 function biRenderSchema() {
   const isBi = biIsBi(), schema = bi.schema || {};
   el("bi-demo").hidden = !isBi;
   el("bi-domain-box").hidden = Array.isArray(schema.domains) && !schema.domains.length;
+  el("bi-card-domain-box").hidden = el("bi-domain-box").hidden;
   biDomainOptions(schema.domains || []);
   const note = el("bi-schema-note"); note.replaceChildren();
   if (!schema.ref) return;
@@ -12160,6 +12201,9 @@ el("bi-dataset").addEventListener("change", () => {
 });
 el("bi-empty-demo").addEventListener("click", () => el("bi-demo").click());
 el("bi-empty-new").addEventListener("click", () => biOpenNew());
+el("bi-card-domain").addEventListener("change", () => {
+  bi.cardId = null; biLoadCards();
+});
 el("bi-domain").addEventListener("change", () => {
   bi.loaded = {}; bi.cardId = null; biShowView(bi.view);
 });
@@ -12469,7 +12513,7 @@ async function biLoadCards() {
   biStatus("bi-status-cards", "loading", "載入中…");
   const query = "?dataset=" + encodeURIComponent(biDataset()) + "&type="
     + encodeURIComponent(el("bi-type").value) + "&q=" + encodeURIComponent(el("bi-q").value.trim())
-    + "&domain=" + encodeURIComponent(biDomain());
+    + "&domain=" + encodeURIComponent(el("bi-card-domain").value);
   let reply;
   try { reply = await biCall("/api/bi/cards" + query); }
   catch (failure) {
@@ -12485,9 +12529,15 @@ async function biLoadCards() {
 
 function biRenderCards() {
   const list = el("bi-cards"); list.replaceChildren();
-  el("bi-card-count").textContent = bi.cards.length + " 張卡片";
+  // Of how many, so a filter can never hide cards without saying so.
+  const total = (biCurrent() || {}).cards;
+  el("bi-card-count").textContent = bi.cards.length + " 張卡片"
+    + (Number.isInteger(total) && total !== bi.cards.length ? "（共 " + total + " 張）" : "");
   if (!bi.cards.length) {
-    list.append(bh("li", "bi-empty", el("bi-q").value.trim() || el("bi-type").value
+    const picked = el("bi-card-domain");
+    list.append(bh("li", "bi-empty", picked.value && total
+      ? picked.selectedOptions[0].textContent + " 領域沒有這類卡片。"
+      : el("bi-q").value.trim() || el("bi-type").value
       ? "沒有符合的卡片。"
       : "這個資料集還沒有卡片。先「載入示範資料」或到「建立與匯入」加入資料。"));
     return;
@@ -12651,6 +12701,7 @@ async function biLoadDetail(focus) {
   if (bi.cardId !== id) return;
   biStatus("bi-status-detail", ""); bi.detail = reply;
   biRenderDetail();
+  el("bi-detail").scrollTop = 0;  // a card opens at its top
   if (focus) {
     const title = el("bi-detail-title");
     title.focus({preventScroll: true});
@@ -12660,6 +12711,8 @@ async function biLoadDetail(focus) {
   }
   biLoadHistory();
 }
+
+const BI_ABSTRACT = [["summary", "摘要"], ["usage", "用途"], ["scope", "範圍"]];
 
 function biRenderDetail() {
   const {card, fields = [], links = [], proposals = []} = bi.detail;
@@ -12671,11 +12724,22 @@ function biRenderDetail() {
     bh("span", "bi-meta", card.canonical_key + " · 版本 " + card.version
       + " · 更新於 " + biTime(card.updated)));
   body.append(title, head);
+  // What the card is about comes first, each with its source, history and 更正單.
+  const about = bh("div", "bi-fields"); about.id = "bi-detail-abstract";
+  for (const [name, label] of BI_ABSTRACT) {
+    const item = fields.find((f) => f.field === name);
+    if (item) about.append(biFieldRow(card, {...item, label}));
+  }
+  if (biIsBi() && !fields.some((f) => f.field === "summary")) {
+    about.prepend(bh("p", "bi-meta", "沒有摘要"));
+  }
+  if (about.childNodes.length) body.append(about);
   if (card.domain != null) body.append(bh("p", "bi-meta", "領域：" + biValue(card.domain)));
   body.append(bh("h4", "", "欄位"));
   const list = bh("div", "bi-fields");
-  for (const item of fields) list.append(biFieldRow(card, item));
-  if (!fields.length) list.append(bh("p", "bi-empty", "沒有欄位。"));
+  const others = fields.filter((f) => !BI_ABSTRACT.some(([name]) => name === f.field));
+  for (const item of others) list.append(biFieldRow(card, item));
+  if (!others.length) list.append(bh("p", "bi-empty", "沒有其他欄位。"));
   body.append(list);
   biRenderStates(body, card, bi.detail.field_states || {});
   biRenderReviews(body, card);
@@ -13178,7 +13242,7 @@ function biBuildReadOnly() {
   const readOnly = biReadOnly();
   el("bi-b-src-input").hidden = readOnly; el("bi-b-adv-source").hidden = readOnly;
   el("bi-b-ro-links").hidden = !readOnly;
-  el("bi-b-sources").parentNode.hidden = readOnly;  // a copy has no sources here
+  el("bi-b-src-split").hidden = readOnly;  // a copy has no sources here
   el("bi-b-next1").parentNode.hidden = readOnly;
   return readOnly;
 }
@@ -14823,51 +14887,105 @@ async function biBuildSources() {
     + (waiting ? waiting + " 個檔案還在等 OneDrive 同步，同步好才看得到。" : "");
   if (!bi.build.sources.some((s) => s.id === bi.build.sourceId)) bi.build.sourceId = null;
   biFollowSourceFolder();
+  biRenderSources();
+  el("bi-b-next1").disabled = !bi.build.sourceId;
+  biBuildSteps();
+}
+
+function biRenderSources() {
+  // The 領域 chosen and the words typed; 「不指定資料夾」 is every folder.
+  const folder = el("bi-b-src-folder-box").hidden ? "sources" : el("bi-b-src-folder").value;
+  const words = el("bi-b-src-q").value.trim().toLowerCase();
+  const shown = bi.build.sources.filter((source) =>
+    (!folder || folder === "sources" || source.folder === folder)
+    && (!words || source.name.toLowerCase().includes(words)));
+  el("bi-b-src-count").textContent = bi.build.sources.length
+    ? "顯示 " + shown.length + "／" + bi.build.sources.length + " 份" : "";
   const body = el("bi-b-sources").tBodies[0]; body.replaceChildren();
-  for (const source of bi.build.sources) {
+  for (const source of shown) {
     const radio = document.createElement("input");
     radio.type = "radio"; radio.name = "bi-b-source"; radio.value = source.id;
     radio.checked = source.id === bi.build.sourceId;
     radio.setAttribute("aria-label", "使用 " + source.name);
     radio.disabled = !source.format;
-    radio.addEventListener("change", () => {
-      bi.build.sourceId = source.id; el("bi-b-next1").disabled = false; biBuildSave();
-      biFollowSourceFolder();
-      biBuildSteps();
-    });
+    radio.addEventListener("change", () => biPickSource(source));
     const format = {table: "表格（預設表格規則）", document: "文件（預設 AI 擷取）",
       text: "文字（預設 AI 擷取）"};
     const md = source.convert_error
       ? bh("span", "bi-err", "轉檔失敗：" + source.convert_error.message)
       : source.markdown_rev ? "第 " + source.markdown_rev + " 版" : "尚未轉檔";
-    body.append(bh("tr", "", bh("td", "", radio), bh("td", "", source.name),
+    const name = bh("td", "", source.name);
+    name.title = Math.max(1, Math.round(source.size / 1024)) + " KB・加入於 " + biTime(source.at);
+    const row = bh("tr", "", bh("td", "", radio), name,
       bh("td", "", format[source.format] || "尚未支援"),
       bh("td", "", md, " ", source.format
-        ? biButton("看／改", () => biBuildMarkdown(source.id), "bi-btn", "看或修改 "
+        ? biButton("看／改", () => biPickSource(source), "bi-btn", "看或修改 "
           + source.name + " 的 Markdown") : ""),
-      bh("td", "", Math.max(1, Math.round(source.size / 1024)) + " KB"),
-      bh("td", "", source.classification), bh("td", "", biSharedCell(source)),
-      bh("td", "", biTime(source.at))));
+      bh("td", "", source.classification), bh("td", "", biSharedCell(source)));
+    row.dataset.source = source.id;
+    row.setAttribute("aria-selected", String(source.id === bi.build.sourceId));
+    // A press anywhere on the row opens it; its own controls do their own thing.
+    if (source.format) {
+      row.addEventListener("click", (event) => {
+        if (!event.target.closest("button, input, a")) biPickSource(source);
+      });
+    }
+    body.append(row);
   }
-  if (!bi.build.sources.length) {
-    body.append(bh("tr", "", bh("td", "bi-empty", "還沒有來源。先選檔案，按「加入來源」。")));
+  if (!shown.length) {
+    body.append(bh("tr", "", bh("td", "bi-empty", bi.build.sources.length
+      ? "這個領域或搜尋沒有來源。" : "還沒有來源。先選檔案，按「轉檔」。")));
   }
-  el("bi-b-next1").disabled = !bi.build.sourceId;
-  biBuildSteps();
 }
+
+el("bi-b-src-q").addEventListener("input", () => biRenderSources());
+el("bi-b-src-folder").addEventListener("change", () => biRenderSources());
 
 // -- step 1: a source's Markdown (BI vaults V2, BI_VAULT.md §5) ----------------
 // Every source is read through its current Markdown revision; an edit saves a
 // new revision from the one shown (409 markdown_stale when someone saved first).
+function biShowMarkdownPane() {
+  // Side by side the whole pair fits; stacked on a phone, go to the pane.
+  const stacked = window.matchMedia("(max-width: 900px)").matches;
+  (stacked ? el("bi-b-src-pane") : el("bi-b-src-split")).scrollIntoView(
+    {block: stacked ? "start" : "nearest"});
+}
+
+function biPickSource(source) {
+  bi.build.sourceId = source.id; el("bi-b-next1").disabled = false; biBuildSave();
+  biFollowSourceFolder();
+  biBuildSteps();
+  for (const row of el("bi-b-sources").tBodies[0].rows) {
+    const picked = row.dataset.source === source.id;
+    row.setAttribute("aria-selected", String(picked));
+    const radio = row.querySelector("input[type=radio]");
+    if (radio) radio.checked = picked;
+  }
+  biBuildMarkdown(source.id);
+}
+
 async function biBuildMarkdown(sourceId, rev) {
   const box = el("bi-b-md"), msg = el("bi-b-md-msg");
+  // Opens where the person is looking, and says there how it went.
+  const seq = bi.mdSeq = (bi.mdSeq || 0) + 1;
   msg.replaceChildren();
+  box.hidden = true; el("bi-b-md-empty").hidden = true;
+  biStatus("bi-b-md-status", "loading", "載入 Markdown…");
+  biShowMarkdownPane();
   const path = "/api/bi/sources/" + encodeURIComponent(sourceId) + "/markdown"
     + (rev ? "/" + rev : "") + "?dataset=" + encodeURIComponent(biDataset());
   let view;
   try { view = await call(path); }
-  catch (failure) { biNotice(false, "Markdown 沒有載入：" + failure.message); return; }
+  catch (failure) {
+    if (seq !== bi.mdSeq) return;
+    biStatus("bi-b-md-status", "error", "Markdown 沒有載入：" + failure.message + "。",
+      () => biBuildMarkdown(sourceId, rev));
+    return;
+  }
+  if (seq !== bi.mdSeq) return;
+  biStatus("bi-b-md-status", "");
   bi.build.md = view; box.hidden = false;
+  el("bi-b-src-pane").scrollTop = 0;
   el("bi-b-md-h").textContent = "「" + view.source.name + "」的 Markdown";
   const r = view.revision || {};
   el("bi-b-md-info").textContent = view.current_rev
@@ -14892,7 +15010,9 @@ async function biBuildMarkdown(sourceId, rev) {
 el("bi-b-md-rev").addEventListener("change", () => {
   if (bi.build.md) biBuildMarkdown(bi.build.md.source.id, el("bi-b-md-rev").value);
 });
-el("bi-b-md-close").addEventListener("click", () => { el("bi-b-md").hidden = true; });
+el("bi-b-md-close").addEventListener("click", () => {
+  el("bi-b-md").hidden = true; el("bi-b-md-empty").hidden = false;
+});
 el("bi-b-md-save").addEventListener("click", async () => {
   const view = bi.build.md, msg = el("bi-b-md-msg"); if (!view) return;
   msg.replaceChildren();
@@ -15032,6 +15152,8 @@ el("bi-b-upload").addEventListener("click", async () => {
     el("bi-b-file").value = "";
     await biBuildSources(); biBuildSave();
     biStatus("bi-status-build", "");
+    const added = bi.build.sources.find((source) => source.id === bi.build.sourceId);
+    if (added && added.format) biPickSource(added);
   } catch (failure) {
     biStatus("bi-status-build", "error", "來源沒有加入：" + failure.message + "。");
   } finally { button.disabled = !el("bi-b-file").files.length; }

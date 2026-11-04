@@ -6388,3 +6388,13 @@ Owner, through the BI orchestrator, on `docs/phases/BI_PAGE_SIMPLE.md` §7. All 
 - **`kn-pane-pipeline` is out of scope.** The Knowledge page opens on the BI tab when this PC has a BI dataset or vault.
 - **One-step share:** the page proposes a date as the tag name, and it stays editable.
 - **A push with no test run stays allowed,** with a visible note. The bench gate still blocks a push when a finished run on the same content regressed.
+
+## 2026-11-05 — BI page: a filter is always in sight, and a list opens beside itself
+
+Owner's bugs, relayed by the BI orchestrator: no Signal card could be found though 23 exist; 「按"看/改"沒反應」; a card's abstract could not be found.
+
+- **The card list starts on every domain.** It filtered by a domain nobody chose, defaulting to robotics, and S1 had moved that control under 進階, so market-intel showed 99 of 760 cards. A 領域 combobox now sits beside 類型 and 搜尋, with 全部領域 by default, and the count says how many of how many.
+- **The Dashboard keeps one domain.** Its analyses take a single `domain`, and an empty one means robotics in the route, so 全部 would claim something it does not do. The combobox and 含 SAMPLE sit on the Dashboard tab, in sight. Rejected: a 全部 option there.
+- **A list and what it opens sit side by side at one height, each scrolling on its own** (`.bi-split`): cards and their detail, sources and their Markdown. 看／改 was out of view below a long table, and a failed load was reported at the top of the page. Both now show in the pane. Stacked on a phone, the page goes to the pane.
+- **The sources table follows the 領域 chosen,** which also keeps deciding the folder a new file goes to. 「不指定資料夾」 shows every source.
+- **摘要, 用途, 範圍 come first on a card.** With no summary it says 「沒有摘要」; nothing stands in for it.

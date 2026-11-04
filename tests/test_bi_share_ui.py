@@ -456,7 +456,7 @@ def test_bi_sharing_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None
         run("document.querySelector('#bi-views [data-bi-view=build]').click()")
         wait("!document.getElementById('bi-view-build').hidden")
         assert not hidden("bi-b-ro-links") and hidden("bi-b-src-input")
-        assert run("document.getElementById('bi-b-sources').parentNode.hidden")
+        assert hidden("bi-b-src-split")
         assert hidden("bi-status-build"), content("bi-status-build")
         assert not run("document.querySelector('#bi-stepper [data-stage=source]').disabled")
         assert run("document.querySelector('#bi-stepper [data-stage=ingest]').disabled")
