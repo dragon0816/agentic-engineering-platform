@@ -190,7 +190,11 @@ Every slice may add to `tests/bi_page_driver.py`; those are small rebases.
 2. **Tag names in S6:** the page proposes a date as the tag name, editable.
 3. **A push with no test run stays allowed,** with a visible note. S6 keeps that and shows the note.
 
-## 8. Next: the review table (part of S7), for whoever takes it
+## 8. The review table (part of S7)
+
+Status: built, branch `bi-review-table`, 2026-11-05. Combobox `#bi-b-run-pick` of the dataset's waiting runs (every ingest run, and reading trials; a page's own trial stays in its step), table `#bi-b-cands` with a type and a state filter and a count, `#bi-b-cand` beside it with accept and reject first, then the fields, then the source with the quote marked. A decision moves to the next undecided row. Measured on 180 fictional candidates: open 1.5 s, redraw 11-14 ms, accept 178 in 16-19 s with a counter on the button (one request each; no bulk route was needed). Not yet seen on the real run. Test: `tests/test_bi_review_table_ui.py`.
+
+The brief as given:
 
 Brief from the orchestrator, 2026-11-05. D's `bi-summary-fill` adds a reading run, `POST /api/bi/runs {reading: true, ...}` in `reading_runs.py`, started through the API. `#bi-b-cands` shows only `bi.build.run`, so such a run cannot be opened. About 180 candidates will wait there. Base it on main once D's branch is in. Stay inside the review stage: Lane D is on the AI panel.
 
