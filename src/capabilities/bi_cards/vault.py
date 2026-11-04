@@ -459,6 +459,7 @@ def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str
         key = keys.get(int(r["id"]))
         said = r["reason"] if "reason" in r.keys() else None  # noqa: SIM118 - a sqlite3.Row
         why = {"reason": said} if said else {}
+        held = r["evidence"] if "evidence" in r.keys() else None  # noqa: SIM118 - a sqlite3.Row
         if key is not None and key.startswith("conflict:"):
             if r["status"] != "pending":
                 units[f"decision:{_short(key)}"] = {"status": r["status"], **why}
@@ -473,6 +474,7 @@ def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str
             "import_id": r["import_id"],
             "status": r["status"],
             **why,
+            **({"evidence": _load(held)} if held else {}),
         }
         if key is None:
             identity = {k: value[k] for k in ("card", "field", "value", "kind", "ref", "at")}
@@ -863,7 +865,7 @@ def materialize(
                 continue
             cursor = db.execute(
                 "INSERT INTO proposals (card_id, field, value, kind, ref, at, import_id, status, "
-                "reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "reason, evidence) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     value["card"],
                     value["field"],
@@ -874,6 +876,7 @@ def materialize(
                     value.get("import_id"),
                     value["status"],
                     value.get("reason"),
+                    _dump(value["evidence"]) if value.get("evidence") else None,
                 ),
             )
             db.execute("INSERT INTO vault_keys VALUES (?, ?)", (cursor.lastrowid, key))

@@ -128,7 +128,8 @@ CREATE TABLE IF NOT EXISTS proposals (
   at TEXT NOT NULL,
   import_id TEXT,
   status TEXT NOT NULL DEFAULT 'pending',
-  reason TEXT
+  reason TEXT,
+  evidence TEXT
 );
 CREATE TABLE IF NOT EXISTS meta (
   key TEXT PRIMARY KEY,
@@ -223,8 +224,9 @@ def add_missing_columns(connection: sqlite3.Connection) -> None:
     if "run_id" not in columns:  # a dataset from before ingest runs
         connection.execute("ALTER TABLE imports ADD COLUMN run_id TEXT")
     columns = {r[1] for r in connection.execute("PRAGMA table_info(proposals)")}
-    if "reason" not in columns:
-        connection.execute("ALTER TABLE proposals ADD COLUMN reason TEXT")
+    for name in ("reason", "evidence"):
+        if name not in columns:
+            connection.execute(f"ALTER TABLE proposals ADD COLUMN {name} TEXT")
     columns = {r[1] for r in connection.execute("PRAGMA table_info(evidence)")}
     for name, definition in EVIDENCE_COLUMNS.items():
         if name not in columns:
@@ -376,6 +378,8 @@ class PlannedRow:
     #: Fields a person just confirmed one by one (a re-run, `rerun.py`): the value
     #: replaces a person's value rather than becoming a proposal beside it.
     overwrite: frozenset[str] = frozenset()
+    #: Other values for a field, from elsewhere in one source: each a proposal.
+    alternatives: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
 
 
 def new_states(
@@ -899,6 +903,14 @@ class BiStore:
                 r["field"]: r
                 for r in db.execute("SELECT * FROM fields WHERE card_id = ?", (card_id,))
             }
+            for name, others in planned.alternatives.items():
+                for other in others:
+                    new = _dump(other["value"])
+                    stored = current.get(name)
+                    if stored is None or stored["value"] != new:
+                        self._propose(
+                            db, card_id, name, new, kind, ref, at, result, other.get("evidence")
+                        )
             for name, value in planned.values.items():
                 if value is None:
                     continue
@@ -908,18 +920,9 @@ class BiStore:
                     continue
                 kept = stored is not None and stored["kind"] == "human"
                 if name in planned.propose or (kept and name not in planned.overwrite):
-                    pending = db.execute(
-                        "SELECT 1 FROM proposals WHERE card_id = ? AND field = ? AND "
-                        "value = ? AND status = 'pending'",
-                        (card_id, name, new),
-                    ).fetchone()
-                    if pending is None:
-                        db.execute(
-                            "INSERT INTO proposals (card_id, field, value, kind, ref, at, "
-                            "import_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                            (card_id, name, new, kind, ref, at, result.import_id),
-                        )
-                        result.proposals += 1
+                    self._propose(
+                        db, card_id, name, new, kind, ref, at, result, planned.evidence.get(name)
+                    )
                     continue
                 old_source = (
                     None
@@ -1118,6 +1121,7 @@ class BiStore:
                 "current": None if r["current"] is None else _load(r["current"]),
                 "current_kind": r["current_kind"],
                 "source": {"kind": r["kind"], "ref": r["ref"], "at": r["at"]},
+                "evidence": [] if r["evidence"] is None else _load(r["evidence"]),
             }
             for r in rows
         ]
@@ -1303,6 +1307,41 @@ class BiStore:
         with self._db() as db:
             row = db.execute("SELECT value FROM meta WHERE key = 'schema_history'").fetchone()
         return list(json.loads(row[0])) if row else []
+
+    @staticmethod
+    def _propose(
+        db: sqlite3.Connection,
+        card_id: str,
+        name: str,
+        new: str,
+        kind: str,
+        ref: str,
+        at: str,
+        result: Any,
+        evidence: Any,
+    ) -> None:
+        """A pending proposal with the evidence for its value, once per value."""
+        pending = db.execute(
+            "SELECT 1 FROM proposals WHERE card_id = ? AND field = ? AND "
+            "value = ? AND status = 'pending'",
+            (card_id, name, new),
+        ).fetchone()
+        if pending is None:
+            db.execute(
+                "INSERT INTO proposals (card_id, field, value, kind, ref, at, import_id, evidence) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    card_id,
+                    name,
+                    new,
+                    kind,
+                    ref,
+                    at,
+                    result.import_id,
+                    _dump(evidence) if evidence else None,
+                ),
+            )
+            result.proposals += 1
 
     @staticmethod
     def _write_person_value(

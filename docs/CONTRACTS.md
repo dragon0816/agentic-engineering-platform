@@ -6691,3 +6691,11 @@ Design: `docs/phases/BI_CARD_MODEL.md` §6. `POST /api/bi/vaults/<id>/publish` a
 `GET /api/bi/proposals?dataset=` → `{proposals: [{id, card_id, card_name, entity_type, version, field, label, needs_reason, value, current, current_kind, source: {kind, ref, at}, evidence: [{source_name, excerpt, basis}]}]}`, every pending proposal; `evidence` is what the current value rests on. Decided with `POST /api/bi/cards/<id>/proposals/<pid>`, which now keeps a rejection's `reason`: a `proposal:` or `decision:` unit may hold `reason`, and `proposals` gains that column.
 
 `POST /api/bi/runs` with `folder` in another home than the source's own: 400 `run_folder_mismatch`, since another home's skill and profile would apply. With no `folder`, the source's own.
+
+## BI: an AI run merges onto existing cards (2026-11-04)
+
+An AI run's values meet a card as an import's do (`docs/phases/BI_CARD_PAGE_IMPORT.md` §4); rule and recipe runs are unchanged. Each field of a candidate gains `merge`: `fill`, `join` (the joined list is written), `same`, `proposal` (written as a pending proposal with its evidence, never over the value, also under 「接受所有沒有錯誤的候選卡」), `human_kept`, `bookkeeping` (a derived field: the later value stays), or `take`. `GET /api/bi/runs/<id>` gains `run.merge`, the counts.
+
+`take` is a person's choice: `POST /api/bi/runs/<id>/candidates/<cid> {take_new: {field: true|false}}`, or editing the field. **`confidence` and `evidence_grade` are protected:** on a card that exists, a differing value is always a proposal, and an empty `confidence` is a proposal when the value is `verified` (400 `field_protected` on `take_new`). A value that differs inside one run stays as the field's `alternatives`, shown in the review and written as a proposal; the warning `value_conflict` stays.
+
+A `proposal:` unit may hold `evidence`, and `proposals` gains that column. `GET /api/bi/proposals`: `evidence` is now the proposed value's, `current_evidence` the current value's.

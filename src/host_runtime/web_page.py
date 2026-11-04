@@ -13081,8 +13081,10 @@ function biProposalRow(item, dataset) {
       + item.label + "；要 commit 才會寫進知識庫。");
     await biBuildVault();
   };
-  const facts = (item.evidence || []).map((e) => bh("div", "bi-meta",
-    "目前的值依據：" + e.source_name + (e.excerpt ? "「" + e.excerpt + "」" : "")));
+  const said = (label, rows) => (rows || []).map((e) => bh("div", "bi-meta",
+    label + (e.source_name || "") + (e.excerpt ? "「" + e.excerpt + "」" : "")));
+  const facts = [...said("提議的依據：", item.evidence),
+    ...said("目前的值依據：", item.current_evidence)];
   return bh("li", "", bh("strong", "", item.card_name),
     bh("span", "bi-meta", " " + biTypeLabel(item.entity_type) + "・" + item.label),
     bh("div", "", "目前：" + (item.current === null ? "（空）" : biValue(item.current))),
@@ -14939,7 +14941,16 @@ function biRunChips(run) {
     biBadge("更新 " + (s.update || 0), "dim"), biBadge("略過 " + (s.skip || 0), "dim"),
     biBadge("錯誤 " + (s.errors || 0), s.errors ? "bad" : "dim"),
     biBadge("警告 " + (s.warnings || 0), s.warnings ? "warn" : "dim"),
-    biBadge("已接受 " + (s.accepted || 0), "good")];
+    biBadge("已接受 " + (s.accepted || 0), "good"), ...biRunMerge(run)];
+}
+
+function biRunMerge(run) {
+  // What writing this run would do to the cards there already.
+  const m = run.merge;
+  if (!m) return [];
+  return [biBadge("既有卡片：填入 " + m.fill, "good"), biBadge("合併清單 " + m.join, "good"),
+    biBadge("變成提案 " + m.proposal, m.proposal ? "warn" : "dim"),
+    ...(m.take ? [biBadge("你選了新值 " + m.take, "warn")] : [])];
 }
 
 // An AI run reads its source in the background: follow it until it ends.
@@ -15495,11 +15506,22 @@ function biBuildShowCandidate(candidateId) {
         .map((v) => v.trim()).filter(Boolean) : input.value}}), "bi-btn",
       "儲存 " + item.field);
     save.disabled = !open;
+    const merged = {fill: "填入", join: "合併清單", same: "相同", take: "你選了新值",
+      proposal: "值不同，變成提案，不會覆蓋", human_kept: "保留人工值，改成提案",
+      bookkeeping: "記錄用欄位"}[item.merge];
+    const take = open && !item.protected && (item.merge === "proposal" || item.merge === "take"
+      || item.merge === "human_kept")
+      ? biButton(item.take_new ? "改回提案" : "改用新值", () => biBuildReview(candidate.id,
+        {take_new: {[item.field]: !item.take_new}}), "bi-btn", "這個欄位改用新值 " + item.field)
+      : "";
+    const others = (item.alternatives || []).map((o) => bh("div", "bi-warn",
+      "另一段寫的是：" + biValue(o.value) + "（會變成提案）"));
     const change = {add: "新增", change: "變更", same: "相同", human_kept: "保留人工值，改成提議"};
     rows.append(bh("tr", "", bh("td", "", (field && field.label) || item.field),
       bh("td", "", biValue(item.value)), bh("td", "", biBadge(basis[0], basis[1])),
-      bh("td", "", biEvidence(item)), bh("td", "", biValue(item.current) + "（"
-        + (change[item.change] || item.change) + "）"), bh("td", "", input, save)));
+      bh("td", "", biEvidence(item), ...others), bh("td", "", biValue(item.current) + "（"
+        + (merged || change[item.change] || item.change) + "）", " ", take),
+      bh("td", "", input, save)));
   }
   table.append(rows);
   parts.push(bh("div", "bi-scroll", table));

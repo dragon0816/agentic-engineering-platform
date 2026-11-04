@@ -574,6 +574,7 @@ def _run_action(
             fields=given.get("fields"),
             match=given.get("match"),
             actor=who,
+            take_new=given.get("take_new"),
         )
         return 200, {"ok": True, **answer}
     if len(rest) == 2 and rest[0] == "relations":
@@ -893,7 +894,7 @@ def _pending_proposals(store: BiStore) -> list[dict[str, Any]]:
                 **item,
                 "label": definition.label if definition else item["field"],
                 "needs_reason": bool(definition and definition.klass == "judgement"),
-                "evidence": [
+                "current_evidence": [
                     {k: e.get(k) for k in ("source_name", "excerpt", "basis")}
                     for e in held
                     if e["field"] == item["field"]

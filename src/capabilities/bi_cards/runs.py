@@ -89,6 +89,58 @@ def _similar(store: BiStore, entity_type: str, key: str) -> list[Any]:
     ]
 
 
+#: An AI run never settles these on a card that exists: a person does, on the proposal.
+PROTECTED_FIELDS = ("confidence", "evidence_grade")
+VERIFIED = "verified"
+MERGES = ("fill", "join", "proposal", "same", "human_kept", "bookkeeping", "take")
+
+
+def _merge_field(definition: Any, item: dict[str, Any], stored: Any) -> None:
+    """How an AI run's value meets the card, as an import's does (`BI_CARD_PAGE_IMPORT.md`
+    §4): an empty value is filled, a list joined, a differing value becomes a proposal,
+    never an overwrite. `take` is a person choosing this value, on this field."""
+    from capabilities.bi_cards.page_import import _joined, _later
+
+    name, value = item["field"], item["value"]
+    protected = name in PROTECTED_FIELDS
+    item["protected"] = protected
+    item.pop("merged", None)
+    chosen = (item.get("take_new") or item.get("basis") == "human") and not protected
+    if stored is None:
+        raises = name == "confidence" and value == VERIFIED
+        item["merge"] = "proposal" if raises else "fill"
+    elif stored["value"] == value:
+        item["merge"] = "same"
+    elif chosen:
+        item["merge"] = "take"
+    elif stored["kind"] == "human":
+        item["merge"] = "human_kept"
+    elif protected:
+        item["merge"] = "proposal"
+    elif definition is not None and definition.klass == "derived":
+        item["merge"] = "bookkeeping"
+        item["later"] = _later(value, stored["value"])
+    elif (definition is not None and definition.is_list) or isinstance(stored["value"], list):
+        joined = _joined(stored["value"], value)
+        item["merge"] = "same" if joined == stored["value"] else "join"
+        item["merged"] = joined
+    else:
+        item["merge"] = "proposal"
+
+
+def merge_counts(candidates: list[dict[str, Any]]) -> dict[str, int]:
+    """What an AI run would do to cards that exist, and the conflicts inside the run."""
+    counts = dict.fromkeys(MERGES, 0)
+    for candidate in candidates:
+        if candidate.get("review") == "rejected" or candidate.get("action") == "skip":
+            continue
+        for item in candidate["fields"]:
+            if candidate.get("match") == "existing" and item.get("merge") in counts:
+                counts[item["merge"]] += 1
+            counts["proposal"] += len(item.get("alternatives") or ())
+    return counts
+
+
 def evaluate(store: BiStore, reg: Registry, candidate: dict[str, Any]) -> dict[str, Any]:
     """Recompute match, base version, per-field diff, action and errors
     against the cards now; the review state and edits are kept."""
@@ -132,6 +184,10 @@ def evaluate(store: BiStore, reg: Registry, candidate: dict[str, Any]) -> dict[s
     for item in candidate["fields"]:
         stored = current.get(item["field"])
         item["current"] = None if stored is None else stored["value"]
+        if card is None:
+            item["merge"], item["protected"] = "fill", False
+        else:
+            _merge_field(entity.get(item["field"]), item, stored)
         if stored is None:
             item["change"] = "add"
             changes += 1
@@ -531,6 +587,7 @@ def run_view(staging: Staging, run_id: str) -> dict[str, Any]:
             warnings=layout.get("warnings") or [],
             types=layout.get("types") or [],
             relations=layout.get("relations") or [],
+            merge=merge_counts(found),
         )
         rules = layout.get("skills")
         if isinstance(rules, dict):  # a vault's run: what its home's profile said, or none
@@ -655,6 +712,7 @@ def review(
     fields: Any,
     match: Any,
     actor: str,
+    take_new: Any = None,
 ) -> dict[str, Any]:
     staging = Staging(workspace, dataset)
     staging.store.refuse_write()
@@ -668,6 +726,18 @@ def review(
         if not isinstance(fields, dict):
             raise BiStoreError("fields_invalid", "fields 必須是 {欄位: 值}")
         _edit_fields(reg, entity, candidate, fields, actor)
+    if take_new is not None:
+        if not isinstance(take_new, dict):
+            raise BiStoreError("take_new_invalid", "take_new 必須是 {欄位: true 或 false}")
+        by_name = {f["field"]: f for f in candidate["fields"]}
+        for name, chosen in take_new.items():
+            if name not in by_name:
+                raise BiStoreError("field_unknown", f"這張候選卡沒有欄位 {name}")
+            if name in PROTECTED_FIELDS and chosen:
+                raise BiStoreError(
+                    "field_protected", f"{name} 不能由 AI 匯入改寫；請到待審提案決定"
+                )
+            by_name[name]["take_new"] = bool(chosen)
     if match is not None:
         if not isinstance(match, dict) or match.get("action") not in ("create", "update", "skip"):
             raise BiStoreError("match_invalid", "match.action 只能是 create、update 或 skip")
@@ -830,8 +900,13 @@ def commit(workspace: Path, dataset: str, run_id: str, *, actor: str) -> dict[st
     if not chosen:
         raise BiStoreError("nothing_accepted", "沒有已接受、需要寫入的候選卡")
     names = {s: (staging.source(s) or {}).get("name", "") for s in run["source_ids"]}
+    merge = _is_ai(staging, run_id)
     rows = [
-        (_planned(candidate, number, run_id, names), candidate["id"], candidate["base_version"])
+        (
+            _planned(candidate, number, run_id, names, merge),
+            candidate["id"],
+            candidate["base_version"],
+        )
         for number, candidate in enumerate(chosen, start=1)
     ]
     applied = store.commit_run(
@@ -850,15 +925,51 @@ def commit(workspace: Path, dataset: str, run_id: str, *, actor: str) -> dict[st
     return _committed(staging, run_id, result, counts, already=False)
 
 
+def _is_ai(staging: Staging, run_id: str) -> bool:
+    return (staging.layout(run_id) or {}).get("mode") == "llm"
+
+
 def _planned(
-    candidate: dict[str, Any], number: int, run_id: str, names: dict[str, Any]
+    candidate: dict[str, Any], number: int, run_id: str, names: dict[str, Any], merge: bool = False
 ) -> PlannedRow:
+    values = _values(candidate)
+    propose: set[str] = set()
+    overwrite: set[str] = set()
+    alternatives: dict[str, list[dict[str, Any]]] = {}
+    for item in candidate["fields"] if merge else ():
+        name, how = item["field"], item.get("merge")
+        if how == "proposal":
+            propose.add(name)
+        elif how == "join":
+            values[name] = item["merged"]
+        elif how == "take":
+            overwrite.add(name)
+        elif how == "bookkeeping" and not item.get("later"):
+            values.pop(name, None)
+        if item.get("alternatives"):
+            alternatives[name] = [
+                {
+                    **other,
+                    "evidence": [
+                        {
+                            **e,
+                            "source_name": names.get(e["source_id"], ""),
+                            "basis": other.get("basis"),
+                        }
+                        for e in other.get("evidence") or ()
+                    ],
+                }
+                for other in item["alternatives"]
+            ]
     return PlannedRow(
         row=number,
         entity_type=candidate["entity_type"],
         canonical_key=candidate["canonical_key"],
         name=str(candidate.get("name") or candidate["canonical_key"]),
-        values=_values(candidate),
+        values=values,
+        propose=frozenset(propose),
+        overwrite=frozenset(overwrite),
+        alternatives=alternatives,
         synthetic=bool(candidate.get("synthetic")),
         ref=f"run:{run_id}/{candidate['id']}",
         states=candidate.get("states") or {},
@@ -885,7 +996,8 @@ def clean_rows(staging: Staging, run_id: str) -> list[PlannedRow]:
         raise BiStoreError("run_unknown", "找不到這次執行")
     names = {s: (staging.source(s) or {}).get("name", "") for s in run["source_ids"]}
     clean = [c for c in staging.candidates(run_id) if c["action"] in WRITABLE and not c["errors"]]
-    return [_planned(c, number, run_id, names) for number, c in enumerate(clean, start=1)]
+    merge = _is_ai(staging, run_id)
+    return [_planned(c, number, run_id, names, merge) for number, c in enumerate(clean, start=1)]
 
 
 def index_state(store: BiStore) -> dict[str, Any]:
