@@ -4,7 +4,7 @@
 
 Run `e3de934115f0` on the real `market-intel`: 144 candidates (140 summaries, 12 usages), 101 cards empty, 0 failed. Nothing committed; numbers and sample in `docs/phases/BI_SUMMARY_FILL.md`. The review entry in the page is a page worker's. The 13 demo cards and garbled records wait for the owner.
 
-**Next, after the review:** commit the run, push, tag, publish, each on the orchestrator's word. The vault held 4 uncommitted changes before this run, not from it: look at them before any commit.
+**Next, after the review:** commit the run, push, tag, publish, each on the orchestrator's word. The vault's 4 uncommitted changes, from 2026-11-04 21:25 and not the owner's, were discarded on the owner's word on 2026-11-05: an accepted proposal on `800G-1.6T-Ethernet`'s `body` and `data-coverage` hidden. Who made them was not found: Agent Web keeps no request log. Snapshot, git-ignored: `.scratch/w-snap`.
 
 ## BI page redesign, S1 done (2026-11-05, Claude Code)
 
