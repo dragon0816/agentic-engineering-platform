@@ -196,7 +196,7 @@ def test_the_whole_build_flow(
             {"text": "試跑找到訊號卡。"},
         )
         page.run(
-            "[...document.querySelectorAll('#bi-b-sk-list li')]"
+            "[...document.querySelectorAll('#bi-b-sk-list tbody tr')]"
             ".find(li => li.textContent.includes('classify'))"
             ".querySelector('button[aria-label*=\"AI\"]').click()"
         )
@@ -214,6 +214,7 @@ def test_the_whole_build_flow(
         store = BiStore(workspace, dataset)
         before = len(store.card_rows())
         page.stage("method")
+        page.shoot("2b-ingest")
         # A run that makes nothing says why, in the model's words, not just an empty list.
         answer["now"] = {"candidates": [], "notes": "這份來源沒有客戶說的話"}
         page.click("#bi-b-trial")
@@ -227,10 +228,10 @@ def test_the_whole_build_flow(
         page.see("bi-b-trial-result", "試跑完成")
         assert "A 公司評估 TSN" in page.text_of("bi-b-trial-result")
         assert len(store.card_rows()) == before  # a trial writes nothing
-        page.click("[data-stage=method] [data-bi-next=review]")
-        page.wait("!document.querySelector('#bi-view-build .kp-stage[data-stage=review]').hidden")
         page.click("#bi-b-start")
+        page.wait("!document.querySelector('#bi-view-build .kp-stage[data-stage=review]').hidden")
         page.wait("document.querySelectorAll('#bi-b-cands button').length > 0")
+        page.shoot("2c-review")
         page.click("#bi-b-accept-clean")
         page.wait("!document.getElementById('bi-b-next4').disabled")
         assert len(store.card_rows()) == before  # review writes nothing
@@ -340,7 +341,7 @@ def test_the_whole_build_flow(
         page.notice("已 push")
         page.see("bi-b-ver-history", "加入客戶訊號")
         page.run(
-            "[...document.querySelectorAll('#bi-b-ver-history li:first-child button')]"
+            "[...document.querySelectorAll('#bi-b-ver-history tbody tr:first-child button')]"
             ".find((b) => b.textContent === '加 tag').click()"
         )
         page.run("document.querySelector('#bi-b-ver-history .bi-ver-ask input').value = 'v1'")

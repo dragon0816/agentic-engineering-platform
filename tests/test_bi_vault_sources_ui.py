@@ -55,7 +55,7 @@ def test_a_source_added_on_one_pc_is_read_on_another(
     with _served(config_a, layout_a, _Model("none", {})) as server:
         with BiPage(tmp_path / "browser-a", server.address) as page:
             _open_build(page, dataset)
-            assert page.run("!document.getElementById('bi-b-src-shared').hidden")
+            assert page.run("!document.getElementById('bi-b-src-folder-box').hidden")
             page.wait(
                 f"[...document.getElementById('bi-b-src-folder').options]"
                 f".some((o) => o.value === {json.dumps(FOLDER)})"

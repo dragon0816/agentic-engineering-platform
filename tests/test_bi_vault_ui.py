@@ -207,7 +207,7 @@ def test_vault_panel_and_dashboard_in_a_browser(
         wait(
             "document.getElementById('bi-b-v-state').textContent.includes('還沒 push 的 commit 0')"
         )
-        state = text_of("bi-b-v-state")
+        state = text_of("bi-b-v-info")
         assert "虛構範例" in state and str(shared) in state
         assert not run("document.getElementById('bi-b-v-sync').hidden")
         assert run("document.getElementById('bi-b-v-convert').hidden")
@@ -251,10 +251,10 @@ def test_vault_panel_and_dashboard_in_a_browser(
         wait("document.getElementById('bi-b-ver-history').textContent.includes('補上虛構備註')")
         assert len(list((folder / "commits").rglob("*.json"))) == 2
         assert "補上虛構備註" in (folder / "REPO.md").read_text(encoding="utf-8")
-        click("#bi-b-ver-history li .bi-actions button:nth-child(1)")
-        wait("document.querySelector('#bi-b-ver-history li').textContent.includes('虛構備註')")
+        click("#bi-b-ver-history tbody tr .bi-actions button:nth-child(1)")
+        wait("document.querySelector('#bi-b-ver-history tbody').textContent.includes('虛構備註')")
         run(
-            "[...document.querySelectorAll('#bi-b-ver-history li:first-child button')]"
+            "[...document.querySelectorAll('#bi-b-ver-history tbody tr:first-child button')]"
             ".find((b) => b.textContent === '加 tag').click()"
         )
         run("document.querySelector('#bi-b-ver-history .bi-ver-ask input').value = 'v1'")
@@ -303,7 +303,7 @@ def test_vault_panel_and_dashboard_in_a_browser(
 
         # -- Session B on a skill: suggest, apply as the next revision ------------------------
         run(
-            "[...document.querySelectorAll('#bi-b-sk-list li')]"
+            "[...document.querySelectorAll('#bi-b-sk-list tbody tr')]"
             ".find((li) => li.textContent.includes('power-extract'))"
             ".querySelector('button[aria-label*=\"AI\"]').click()"
         )
@@ -485,7 +485,7 @@ def test_vault_panel_and_dashboard_in_a_browser(
         set_value("bi-b-v-purpose", "虛構範例")
         click("#bi-b-v-go")
         wait("document.getElementById('bi-notice').textContent.includes('已建立共用知識庫')")
-        wait("document.getElementById('bi-b-v-state').textContent.includes('Market Signals')")
+        wait("document.getElementById('bi-b-v-info').textContent.includes('Market Signals')")
         assert run("document.getElementById('bi-dataset').value").startswith("vault-market-signals")
         assert len([p for p in shared.iterdir() if p.is_dir()]) == 2
 

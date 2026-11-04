@@ -1235,7 +1235,15 @@ tr:last-child td { border-bottom: none; }
 .bi-substeps ol { margin-top: 0; }
 .bi-manage > summary { cursor: pointer; min-height: 44px; display: inline-flex;
   align-items: center; padding: 0 12px; }
+.bi-manage > summary::before { content: "\25B8\A0"; color: var(--dim); }
+.bi-manage[open] > summary::before { content: "\25BE\A0"; }
 .bi-adv { margin-top: 12px; }
+.bi-row-menu > summary { cursor: pointer; color: var(--accent); white-space: nowrap;
+  min-height: 32px; list-style: none; }
+.bi-row-menu > summary::before { content: "\25B8\A0"; }
+.bi-row-menu[open] > summary::before { content: "\25BE\A0"; }
+.bi-detail-row td { padding: 0 4px; border: 0; }
+.bi-detail-row pre { margin: 4px 0; }
 .bi-menu > .bi-btn { display: block; margin: 4px 0; }
 .bi-views-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px;
   justify-content: space-between; }
@@ -2442,7 +2450,6 @@ tr:last-child td { border-bottom: none; }
                 aria-expanded="false" aria-controls="bi-b-v-form">加入既有的 vault</button>
             </details>
           </div>
-            <p class="bi-meta" id="bi-b-target"></p>
             <div id="bi-b-v-state" role="status" aria-live="polite"></div>
             <form id="bi-b-v-form" class="bi-step" hidden novalidate>
               <h4 id="bi-b-v-form-h"></h4>
@@ -2521,7 +2528,10 @@ tr:last-child td { border-bottom: none; }
             </div>
             <div id="bi-b-md-msg" role="status" aria-live="polite"></div>
           </div>
-          <details class="bi-manage bi-adv" id="bi-b-adv-source"><summary>進階</summary>
+          <details class="bi-manage bi-adv" id="bi-b-adv-source">
+            <summary>進階：知識庫與匯入</summary>
+            <p class="bi-meta" id="bi-b-target"></p>
+            <div id="bi-b-v-info"></div>
               <button class="bi-btn" id="bi-b-v-convert" type="button" data-mode="convert"
                 aria-expanded="false" aria-controls="bi-b-v-form">把這個資料集轉成 vault</button>
             <div id="bi-b-askable" aria-live="polite"></div>
@@ -2567,7 +2577,8 @@ tr:last-child td { border-bottom: none; }
               <div class="mem-status" id="bi-b-ska-status" role="status" aria-live="polite"
                 hidden></div>
             </div>
-          <details class="bi-manage bi-adv" id="bi-b-adv-skills"><summary>進階</summary>
+          <details class="bi-manage bi-adv" id="bi-b-adv-skills">
+            <summary>進階：規則與程式</summary>
             <div class="bi-step" id="bi-b-profile">
               <h5>應用的 profile</h5>
               <p class="bi-meta">每個應用用到哪些卡片類型和欄位。AI 判讀這個應用的來源時，
@@ -2639,7 +2650,8 @@ tr:last-child td { border-bottom: none; }
             </form>
           </details>
           </div>
-          <details class="bi-manage bi-adv" id="bi-b-adv-schema"><summary>進階</summary>
+          <details class="bi-manage bi-adv" id="bi-b-adv-schema">
+            <summary>進階：Schema</summary>
           <div id="bi-b-versions"></div>
           <div id="bi-b-upgrade" hidden></div>
           <div class="bi-ai" id="bi-b-sa" role="region" aria-labelledby="bi-b-sa-h">
@@ -2686,7 +2698,7 @@ tr:last-child td { border-bottom: none; }
           </details>
           <div class="bi-actions"><button class="bi-btn" type="button" data-bi-next="source">
             上一步</button><button class="go" type="button" data-bi-next="method">
-            下一步：試跑</button></div>
+            下一步：Ingest</button></div>
         </section>
         <section class="kp-stage card bi-step" data-stage="method" aria-labelledby="bi-b-method"
           hidden>
@@ -2699,7 +2711,8 @@ tr:last-child td { border-bottom: none; }
               </select></div>
             <div><button class="go" id="bi-b-start" type="button">Ingest</button></div>
           </div>
-          <details class="bi-manage bi-adv" id="bi-b-adv-method"><summary>進階</summary>
+          <details class="bi-manage bi-adv" id="bi-b-adv-method">
+            <summary>進階：擷取設定與試跑</summary>
           <div class="bi-step-grid">
             <div id="bi-b-folder-box" hidden><label class="bi-label" for="bi-b-folder">
               來源在知識庫的哪個資料夾（決定 AI 用哪條擷取規則）</label>
@@ -2839,7 +2852,8 @@ tr:last-child td { border-bottom: none; }
               <div class="mem-status" id="bi-b-ana-status" role="status" aria-live="polite"
                 hidden></div>
             </div>
-          <details class="bi-manage bi-adv" id="bi-b-adv-an"><summary>進階</summary>
+          <details class="bi-manage bi-adv" id="bi-b-adv-an">
+            <summary>進階：分析包與匯入</summary>
             <div class="bi-actions">
               <button class="bi-btn" id="bi-b-an-pack" type="button">匯入預設分析包</button>
               <label class="bi-btn" for="bi-b-an-file">匯入分析包檔案</label>
@@ -2876,6 +2890,9 @@ tr:last-child td { border-bottom: none; }
             <div class="mem-status" id="bi-b-bench-status" role="status" aria-live="polite"
               hidden></div>
             <div id="bi-b-bq-list"></div>
+            <div class="bi-actions">
+              <button class="bi-btn" id="bi-b-qa-open" type="button">和 AI 一起出題</button></div>
+            <details class="bi-manage" id="bi-b-bq-new"><summary>新增測試題</summary>
             <form id="bi-b-bq-form" class="bi-step" novalidate>
               <div class="bi-step-grid">
                 <div><label class="bi-label" for="bi-b-bq-q">題目（使用者會怎麼問）</label>
@@ -2890,9 +2907,9 @@ tr:last-child td { border-bottom: none; }
                   <input id="bi-b-bq-set" class="bi-input" maxlength="60" spellcheck="false"
                     value="main"></div>
               </div>
-              <div class="bi-actions"><button class="bi-btn" type="submit">新增測試題</button>
-                <button class="bi-btn" id="bi-b-qa-open" type="button">和 AI 一起出題</button></div>
+              <div class="bi-actions"><button class="bi-btn" type="submit">新增測試題</button></div>
             </form>
+            </details>
             <div class="bi-ai" id="bi-b-qa" role="region" aria-labelledby="bi-b-qa-h" hidden>
               <h5 id="bi-b-qa-h">和 AI 一起出測試題</h5>
               <p class="bi-meta" id="bi-b-qa-target"></p>
@@ -2910,7 +2927,8 @@ tr:last-child td { border-bottom: none; }
             <div class="bi-actions">
               <button class="go" id="bi-b-bench-run" type="button">跑測試</button></div>
             <div id="bi-b-bench-report" aria-live="polite"></div>
-          <details class="bi-manage bi-adv" id="bi-b-adv-bench"><summary>進階</summary>
+          <details class="bi-manage bi-adv" id="bi-b-adv-bench">
+            <summary>進階：擷取測試</summary>
             <h5>擷取測試</h5>
             <div id="bi-b-bc-list"></div>
             <details id="bi-b-bc-box"><summary>新增擷取測試</summary>
@@ -2954,7 +2972,8 @@ tr:last-child td { border-bottom: none; }
             <div id="bi-b-ver-conflicts" role="alert"></div>
             <h5>歷史與發佈</h5>
             <div id="bi-b-ver-history"></div>
-          <details class="bi-manage bi-adv" id="bi-b-adv-ver"><summary>進階</summary>
+          <details class="bi-manage bi-adv" id="bi-b-adv-ver">
+            <summary>進階：捨棄改動</summary>
               <button class="bi-btn" id="bi-b-ver-discard" type="button">
                 捨棄還沒 commit 的改動</button>
           </details>
@@ -2964,7 +2983,7 @@ tr:last-child td { border-bottom: none; }
         </section>
       </div>
       <details class="card bi-sec" id="bi-advanced">
-      <summary><span class="bi-sec-title">進階</span></summary>
+      <summary><span class="bi-sec-title">進階：資料集與發佈</span></summary>
       <div class="bi-sec-body">
         <div class="bi-step-grid">
           <div id="bi-domain-box"><label class="bi-label" for="bi-domain">領域</label>
@@ -11806,12 +11825,18 @@ el("mem-people-status").addEventListener("change", () => memLoadPeople().catch((
 // 「BI 卡片」: a dataset of typed cards. Dashboard, a card browser with
 // field-level sources and history, and the CSV import wizard (preview →
 // per-card diff → 確認寫入 → 復原). Nothing is written before 確認寫入.
-let knPane = "pipeline", knPipelineLoaded = false;
+let knPane = "pipeline", knPipelineLoaded = false, knChosen = false;
 
 async function loadKnowledgeTab() {
-  let stored = "pipeline";
-  try { stored = localStorage.getItem("kn-pane") || "pipeline"; } catch (e) { /* */ }
+  // The tab a person last chose; with none, BI when this PC has a BI dataset or vault.
+  let stored = null;
+  try { stored = localStorage.getItem("kn-pane-chosen"); } catch (e) { /* */ }
   if (stored === "bi") { knShow("bi"); return; }
+  if (stored !== "pipeline") {
+    const found = await call("/api/bi/datasets").catch(() => ({datasets: []}));
+    if (knChosen) return;  // they chose a tab while this was being read
+    if ((found.datasets || []).length) { knShow("bi"); return; }
+  }
   knShow("pipeline", false);
   await loadKnowledge(); knPipelineLoaded = true;
 }
@@ -11824,7 +11849,6 @@ function knShow(name, load = true) {
   el("kn-pane-pipeline").hidden = knPane !== "pipeline";
   el("kn-pane-bi").hidden = knPane !== "bi";
   el("kp-refresh").hidden = knPane !== "pipeline";
-  try { localStorage.setItem("kn-pane", knPane); } catch (e) { /* */ }
   if (!load) return;
   if (knPane === "bi") biLoad();
   else if (!knPipelineLoaded) {
@@ -11833,7 +11857,11 @@ function knShow(name, load = true) {
 }
 
 for (const button of document.querySelectorAll("#kn-tabs [data-kn]")) {
-  button.addEventListener("click", () => knShow(button.dataset.kn));
+  button.addEventListener("click", () => {
+    knChosen = true;
+    try { localStorage.setItem("kn-pane-chosen", button.dataset.kn); } catch (e) { /* */ }
+    knShow(button.dataset.kn);
+  });
 }
 
 const BI_GAP_SECTIONS = ["6", "10", "19", "18"];
@@ -13147,6 +13175,8 @@ function biBuildReadOnly() {
   const readOnly = biReadOnly();
   el("bi-b-src-input").hidden = readOnly; el("bi-b-adv-source").hidden = readOnly;
   el("bi-b-ro-links").hidden = !readOnly;
+  el("bi-b-sources").parentNode.hidden = readOnly;  // a copy has no sources here
+  el("bi-b-next1").parentNode.hidden = readOnly;
   return readOnly;
 }
 
@@ -13154,6 +13184,7 @@ async function biBuildLoad() {
   if (biBuildReadOnly()) {
     // A subscribed copy is only read: here it is the way to another dataset.
     el("bi-b-v-state").replaceChildren(); el("bi-b-target").textContent = "";
+    biStatus("bi-status-build", "");
     el("bi-b-sources").tBodies[0].replaceChildren();
     bi.build.sourceId = null; el("bi-b-next1").disabled = true;
     biBuildStage("source", false);
@@ -13212,6 +13243,7 @@ async function biBuildVault() {
   const box = el("bi-b-v-state"); box.replaceChildren();
   el("bi-b-ver-none").hidden = Boolean(vault);
   if (!vault) {
+    el("bi-b-v-info").replaceChildren();
     el("bi-b-ver").hidden = true; el("bi-b-skills").hidden = true;
     el("bi-b-bench").hidden = true; el("bi-b-an").hidden = true;
     box.append(bh("p", "bi-meta", "只在這台電腦。"));
@@ -13357,7 +13389,8 @@ function biVaultState(state) {
   // Whatever moved the vault (a sync, an import, a commit) may have moved its proposals.
   biProposals().catch((failure) => { el("bi-b-props-list").textContent = failure.message; });
   const open = (state.conflicts || []).filter((c) => c.open).length;
-  box.append(bh("p", "", bh("strong", "", v.title || v.id), "・" + (v.purpose || "（沒有寫目的）")),
+  el("bi-b-v-info").replaceChildren(
+    bh("p", "", bh("strong", "", v.title || v.id), "・" + (v.purpose || "（沒有寫目的）")),
     bh("p", "bi-meta", "共用資料夾：" + v.path + "・你的作者名稱：" + v.author));
   if (!state.reachable) {
     box.append(bh("p", "bi-warn", "現在讀不到共用資料夾（OneDrive 沒有同步或路徑不對）："
@@ -13463,13 +13496,14 @@ async function biBench(vaultId) {
   el("bi-b-bench").hidden = false;
   const questions = el("bi-b-bq-list"); questions.replaceChildren();
   if (!reply.questions.length) questions.append(bh("p", "bi-meta", "還沒有測試題。"));
-  for (const q of reply.questions) {
-    const terms = (q.must.length ? "必須提到：" + q.must.join("、") : "")
-      + (q.must_not.length ? "　不可以說：" + q.must_not.join("、") : "");
-    questions.append(bh("div", "bi-step", bh("strong", "", q.question),
-      bh("p", "bi-meta", "題組 " + q.set + (terms ? "・" + terms : "・沒有評分條件")),
-      bh("div", "bi-actions", biButton("刪除", () => biBenchSave({delete: q.unit}), "bi-btn",
-        "刪除測試題 " + q.question))));
+  else {
+    const list = biListTable(["題目", "必須提到", "不可以說", "題組", "動作"]);
+    for (const q of reply.questions) {
+      biRow(list, [q.question, q.must.join("、") || "—", q.must_not.join("、") || "—", q.set,
+        biRowMenu(biButton("刪除", () => biBenchSave({delete: q.unit}), "bi-btn",
+          "刪除測試題 " + q.question))]);
+    }
+    questions.append(list.box);
   }
   const cases = el("bi-b-bc-list"); cases.replaceChildren();
   if (!reply.cases.length) cases.append(bh("p", "bi-meta", "還沒有擷取測試。"));
@@ -13697,6 +13731,9 @@ async function biAnalyses(vaultId) {
     [order[at], order[at + step]] = [order[at + step], order[at]];
     return biSaveDashboard(vaultId, {order, hidden: [...hidden]});
   };
+  const heads = ["分析", "類型", "Dashboard", "動作"];
+  const onBoard = biListTable(heads), offBoard = biListTable(heads);
+  let off = 0;
   for (const item of items) {
     const state = biAnState(vaultId, item.slug), out = biAnOut("list", item, state);
     const where = !item.offered
@@ -13708,14 +13745,24 @@ async function biAnalyses(vaultId) {
         "在 Dashboard 顯示分析 " + item.title)
       : biButton("在 Dashboard 隱藏", () => biSaveDashboard(vaultId, {order: reply.order,
         hidden: [...hidden, item.slug]}), "bi-btn", "在 Dashboard 隱藏分析 " + item.title);
-    box.append(bh("div", "bi-step", bh("strong", "", item.title),
-      bh("p", "bi-meta", (item.question ? item.question + "・" : "")
-        + (item.kind === "sql" ? "SQL" : "Python 腳本") + "・" + item.chart.type + "・" + where),
-      biParamInputs(item, state.values, () => biRunInto(vaultId, item, state, out)
-        .catch((failure) => biNotice(false, failure.message))),
-      bh("div", "bi-actions",
-        biButton("執行", () => biRunInto(vaultId, item, state, out), "bi-btn",
-          "執行分析 " + item.title),
+    const shownOn = item.offered && !hidden.has(item.slug);
+    if (!shownOn) off += 1;
+    const table = shownOn ? onBoard : offBoard;
+    const title = [bh("strong", "", item.title)];
+    if (item.question) title.push(bh("div", "bi-meta", item.question));
+    const row = biRow(table, [title, (item.kind === "sql" ? "SQL" : "Python") + "・"
+      + item.chart.type, where, ""]);
+    // Its parameters and result open under the row when it is run.
+    const under = biRowDetail(table);
+    under.row.hidden = !state.table;
+    under.cell.append(...[biParamInputs(item, state.values, () => biRunInto(vaultId, item, state,
+      out).catch((failure) => biNotice(false, failure.message))), out].filter(Boolean));
+    row.lastChild.append(
+      biRowMenu(
+        biButton("執行", () => {
+          under.row.hidden = false;
+          return biRunInto(vaultId, item, state, out);
+        }, "bi-btn", "執行分析 " + item.title),
         biButton("和 AI 一起修改", () => biAnalysisAi(item.slug, item.title), "bi-btn",
           "和 AI 一起修改分析 " + item.title),
         reply.order.includes(item.slug) ? biButton("上移", () => move(item.slug, -1), "bi-btn",
@@ -13727,7 +13774,12 @@ async function biAnalyses(vaultId) {
           await biCall("/api/bi/vaults/" + vaultId + "/analyses", {delete: item.unit});
           biVaultState(await call("/api/bi/vaults/" + vaultId + "/status"));
           biNotice(true, "已刪除分析（commit 並 push 後大家才會少這個分析）。");
-        }, "bi-btn", "刪除分析 " + item.title)), out));
+        }, "bi-btn", "刪除分析 " + item.title)));
+  }
+  if (off < items.length) box.append(onBoard.box);
+  if (off) {
+    box.append(bh("details", "bi-manage", bh("summary", "", "不在 Dashboard 的分析（" + off + "）"),
+      offBoard.box));
   }
 }
 
@@ -13978,6 +14030,39 @@ function biVerChanges(changes) {
   return list;
 }
 
+// A list as a table, its row's actions as a menu (the owner: 善用 table, menu).
+function biListTable(heads) {
+  const body = bh("tbody", "");
+  const table = bh("table", "bi-table bi-stack",
+    bh("thead", "", bh("tr", "", ...heads.map((head) => bh("th", "", head)))), body);
+  return {box: bh("div", "bi-scroll", table), body, heads};
+}
+
+function biRow(table, cells) {
+  const row = bh("tr", "", ...cells.map((cell, index) => {
+    const td = bh("td", "", ...(Array.isArray(cell) ? cell : [cell]));
+    td.dataset.label = table.heads[index];
+    return td;
+  }));
+  table.body.append(row);
+  return row;
+}
+
+function biRowDetail(table) {
+  // What a row opens: a full-width row under it, empty until then.
+  const cell = bh("td", ""); cell.colSpan = table.heads.length;
+  const row = bh("tr", "bi-detail-row", cell);
+  table.body.append(row);
+  return {row, cell};
+}
+
+function biRowMenu(...items) {
+  const found = items.filter(Boolean);
+  return found.length > 1
+    ? bh("details", "bi-row-menu", bh("summary", "", "動作"), bh("div", "bi-actions", ...found))
+    : bh("div", "bi-actions", ...found);
+}
+
 function biVerAsk(where, label, value, go, run) {
   // One inline question (a purpose, a tag name) under the row that asked it.
   where.querySelector(".bi-ver-ask")?.remove();
@@ -14050,46 +14135,46 @@ function biVerHistory(vaultId, history) {
   const byCommit = {};
   for (const tag of tags) (byCommit[tag.commit] = byCommit[tag.commit] || []).push(tag);
   const live = (tag) => Boolean(published && published.tag === tag.name);
-  const list = bh("ul", "bi-log");
+  const list = biListTable(["版本", "時間", "作者", "項數", "動作"]);
   (history.commits || []).forEach((commit, index) => {
-    const row = bh("li", "");
     const badges = (byCommit[commit.id] || []).map((tag) =>
       biBadge("tag " + tag.name + (live(tag) ? "・發佈中" : ""), live(tag) ? "good" : ""));
-    row.append(bh("div", "", bh("strong", "", commit.purpose), " ", ...badges),
-      bh("div", "bi-meta", biTime(commit.created) + "・" + commit.author + "・" + commit.units
-        + " 項" + (commit.kind === "revert" ? "・回復版本" : "") + "・" + commit.id.slice(0, 10)));
-    const actions = bh("div", "bi-actions"), detail = bh("div", "");
-    actions.append(biButton("看改動", async () => {
+    const actions = [];
+    const shown = biRow(list, [[bh("strong", "", commit.purpose), " ", ...badges,
+      commit.kind === "revert" ? bh("span", "bi-meta", "・回復版本") : ""],
+    biTime(commit.created), commit.author, String(commit.units), ""]);
+    const under = biRowDetail(list), row = under.cell, detail = bh("div", "");
+    row.append(detail);
+    actions.push(biButton("看改動", async () => {
       if (detail.childNodes.length) { detail.replaceChildren(); return; }
       const reply = await call("/api/bi/vaults/" + vaultId + "/diff?commit="
         + encodeURIComponent(commit.id));
       detail.replaceChildren(biVerChanges(reply.changes || []));
     }, "bi-btn", "看「" + commit.purpose + "」的改動"));
     if (index > 0) {
-      actions.append(biButton("回到這個版本", () => biVerAsk(row, "回復的目的",
+      actions.push(biButton("回到這個版本", () => biVerAsk(row, "回復的目的",
         "回到「" + commit.purpose + "」的版本", "回復（成為新的 commit）", (purpose) =>
           biVerRun(vaultId, "revert", {version: commit.id, purpose},
             "已回復成新的 commit；按「Push 給大家」送出。")),
       "bi-btn", "回到「" + commit.purpose + "」的版本"));
     }
-    actions.append(biButton("加 tag", () => biVerAsk(row,
+    actions.push(biButton("加 tag", () => biVerAsk(row,
       "tag 名稱（小寫英數字與 . -，例如 2026q4）", "", "建立 tag", (name) =>
         biVerRun(vaultId, "tag", {name, version: commit.id, purpose: commit.purpose},
           "已建立 tag「" + name + "」；要讓 Agent 讀它，請按「發佈 " + name + "」。")),
     "bi-btn", "幫「" + commit.purpose + "」加 tag"));
     for (const tag of byCommit[commit.id] || []) {
       if (live(tag)) continue;
-      actions.append(biButton("發佈 " + tag.name, async () => {
+      actions.push(biButton("發佈 " + tag.name, async () => {
         if (!confirm("發佈 tag「" + tag.name + "」？發佈後 Agent 只讀這個版本的內容；"
           + "要撤回就再發佈另一個 tag。")) return;
         await biVerRun(vaultId, "publish", {tag: tag.name, confirm: true},
           (reply) => biPublishWords(tag.name, reply));
       }, "bi-btn", "發佈 tag " + tag.name));
     }
-    row.append(actions, detail); list.append(row);
+    shown.lastChild.append(biRowMenu(...actions));
   });
-  if (!(history.commits || []).length) list.append(bh("li", "bi-meta", "還沒有 commit。"));
-  box.append(list);
+  box.append((history.commits || []).length ? list.box : bh("p", "bi-meta", "還沒有 commit。"));
 }
 
 function biVerConflicts(vaultId, conflicts) {
@@ -14136,28 +14221,27 @@ async function biSkills(vaultId) {
   const reply = await call("/api/bi/vaults/" + vaultId + "/skills");
   bi.skills = reply;
   const box = el("bi-b-sk-list"); box.replaceChildren();
-  const list = bh("ul", "bi-log");
+  const list = biListTable(["規則", "種類", "版本", "套用到", "狀態", "動作"]);
   for (const item of reply.skills || []) {
     const where = (item.applies_to || []).length ? item.applies_to.join("、") : "所有來源";
-    const badges = [biBadge(item.role === "classify" ? "分類" : "擷取", "dim"),
-      biBadge("第 " + item.revision + " 版", "dim")];
-    if (item.generated) badges.push(biBadge("依 schema 產生", "dim"));
-    if (item.needs_update) badges.push(biBadge("需要更新", "warn"));
+    const state = [];
+    if (item.generated) state.push(biBadge("依 schema 產生", "dim"));
+    if (item.needs_update) {
+      state.push(biBadge("需要更新", "warn"), bh("p", "bi-meta", "知識庫現在用 " + reply.schema
+        + "；修改並儲存後才會再使用"));
+    }
+    if (item.problem) state.push(bh("p", "bi-warn", item.problem));
     const edit = bh("button", "bi-btn", "修改");
     edit.type = "button";
-    edit.addEventListener("click", () => biSkillForm(item));
+    edit.addEventListener("click", () => {
+      el("bi-b-adv-skills").open = true; biSkillForm(item);
+    });
     const talk = biButton("和 AI 一起修改", () => biSkillAi(item), "bi-btn",
       "和 AI 一起修改判讀規則 " + item.name);
-    const row = bh("li", "", bh("strong", "", item.name), " ", ...badges,
-      bh("p", "bi-meta", "套用到：" + where + "・schema " + (item.schema || "")
-        + (item.needs_update
-          ? "（知識庫現在用 " + reply.schema + "；修改並儲存後才會再使用）" : "")),
-      bh("div", "bi-actions", edit, talk));
-    if (item.problem) row.append(bh("p", "bi-warn", item.problem));
-    list.append(row);
+    biRow(list, [bh("strong", "", item.name), item.role === "classify" ? "分類" : "擷取",
+      "第 " + item.revision + " 版", where, state, biRowMenu(talk, edit)]);
   }
-  if (!(reply.skills || []).length) box.append(bh("p", "bi-meta", "還沒有判讀規則。"));
-  else box.append(list);
+  box.append((reply.skills || []).length ? list.box : bh("p", "bi-meta", "還沒有判讀規則。"));
   const pick = el("bi-b-folder"), kept = pick.value;
   pick.replaceChildren(...(reply.folders || ["sources"]).map((f) => {
     const option = bh("option", "", f === "sources" ? "（不指定資料夾）" : f);
@@ -14203,6 +14287,7 @@ async function biTools(vaultId) {
         + "；接著走一樣的試跑、預覽和審核。");
     } catch (failure) { biNotice(false, "沒有執行：" + failure.message); }
   };
+  const list = biListTable(["程式", "狀態", "動作"]);
   const row = (item, draft) => {
     const title = item.name + (draft ? "（AI 提出的草稿）" : "（第 " + item.revision + " 版）");
     const code = bh("pre", "bi-meta", item.code || item.problem || "");
@@ -14215,16 +14300,21 @@ async function biTools(vaultId) {
     }
     if (draft) {
       actions.push(biButton("填入下面，存成新版本", () => {
+        el("bi-b-adv-skills").open = true;
         el("bi-b-tl-name").value = item.name; el("bi-b-tl-code").value = item.code;
       }, "bi-btn", "填入：" + item.name));
     }
-    return bh("li", "", bh("strong", "", title), " ",
-      item.approved ? biBadge("已核准", "good") : biBadge("等待核准", "warn"), code,
-      bh("div", "bi-actions", ...actions));
+    biRow(list, [bh("strong", "", title),
+      item.approved ? biBadge("已核准", "good") : biBadge("等待核准", "warn"),
+      biRowMenu(...actions)]);
+    // Code waiting for approval is shown open: approving means having read it.
+    const shown = bh("details", "", bh("summary", "", "程式碼"), code);
+    shown.open = Boolean(item.code && !item.approved);
+    biRowDetail(list).cell.append(shown);
   };
-  const items = [...(reply.tools || []).map((t) => row(t, false)),
-    ...(reply.drafts || []).map((d) => row(d, true))];
-  box.append(items.length ? bh("ul", "bi-log", ...items)
+  for (const tool of reply.tools || []) row(tool, false);
+  for (const draft of reply.drafts || []) row(draft, true);
+  box.append((reply.tools || []).length + (reply.drafts || []).length ? list.box
     : bh("p", "bi-meta", "還沒有資料處理程式。"));
 }
 
@@ -15785,8 +15875,11 @@ function biBuildRenderRun() {
     list.append(bh("li", "bi-empty", "到上一步按「Ingest」產生候選卡。"));
     return;
   }
-  el("bi-b-chips").append(biBadge("執行 " + run.id + "・" + run.status, "dim"),
-    ...biRunChips(run));
+  // What decides the next press on the line; the rest of the run's counts folded.
+  const chips = [biBadge("執行 " + run.id + "・" + run.status, "dim"), ...biRunChips(run)];
+  const main = chips.filter((chip) => /^(候選|錯誤|警告|已接受)/.test(chip.textContent));
+  const more = chips.filter((chip) => !main.includes(chip));
+  el("bi-b-chips").append(...main, bh("details", "bi-manage", bh("summary", "", "明細"), ...more));
   if ((run.failures || []).length) {
     el("bi-b-chips").append(bh("p", "bi-err", "有 " + run.failures.length + " 段沒有判讀成功（"
       + run.failures.map((f) => "第 " + f.line_start + "–" + f.line_end + " 行：" + f.message)

@@ -98,6 +98,7 @@ class BiPage:
         return (
             f"notice: {read(_NOTICE)!r}\n"
             f"visible stage: {read(_VISIBLE_STAGE)!r}\n"
+            f"steps shut: {read(_SHUT_STEPS)!r}, source: {read('bi.build.sourceId')!r}\n"
             f"page: {read(_PAGE_STATE)!r}\n"
             f"requests still open: {read('window.__aepWatch && window.__aepWatch.open')!r}\n"
             f"requests failed: {read('window.__aepWatch && window.__aepWatch.failed')!r}\n"
@@ -161,6 +162,10 @@ class BiPage:
             self.browser.screenshot(self.shots / f"{name}.png")
 
 
+_SHUT_STEPS = (
+    "[...document.querySelectorAll('#bi-build-steps [data-stage]')]"
+    ".filter(b => b.disabled).map(b => b.dataset.stage).join(',')"
+)
 _VISIBLE_STAGE = (
     "[...document.querySelectorAll('#bi-view-build .kp-stage')]"
     ".filter(s => !s.hidden).map(s => s.dataset.stage).join(',')"

@@ -85,7 +85,7 @@ MAIN_PATH = (
     # Step 3: dashboard, questions, the test run, its result, and what follows it.
     "bi-b-an-list",
     "bi-b-bq-list",
-    "bi-b-bq-form",
+    "bi-b-qa-open",
     "bi-b-bench-run",
     "bi-b-bench-report",
     "bi-b-ver-commit",
@@ -212,3 +212,17 @@ def test_every_element_the_script_names_is_in_the_page() -> None:
     drawn = set(re.findall(r'\.id = "(bi-[a-z0-9-]+)"', PAGE))
     missing = sorted(name for name in named - drawn if f'id="{name}"' not in PAGE)
     assert missing == []
+
+
+def test_no_function_of_the_page_is_declared_twice() -> None:
+    """The later one silently wins, for every caller of the earlier one."""
+    names = re.findall(r"^(?:async )?function (\w+)\(", PAGE, flags=re.MULTILINE)
+    assert sorted({name for name in names if names.count(name) > 1}) == []
+
+
+def test_the_knowledge_page_opens_on_bi_unless_another_tab_was_chosen() -> None:
+    opening = PAGE[PAGE.index("async function loadKnowledgeTab()") :]
+    opening = opening[: opening.index("function knShow")]
+    assert 'call("/api/bi/datasets")' in opening and 'knShow("bi")' in opening
+    # Only a person's click on a tab counts as a choice.
+    assert 'localStorage.setItem("kn-pane-chosen"' in PAGE

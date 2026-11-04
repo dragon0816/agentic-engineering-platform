@@ -6380,3 +6380,11 @@ Owner, 2026-11-05, relayed by the BI orchestrator, after trying the page and fin
 - **Moved, not deleted:** what the flow does not name stays reachable under 進階. No backend route is removed. Create and join a vault, tool approval, proposals, correction notes, evidence review, push, tag and publish stay reachable, because the Agent and colleagues read only published versions.
 - **A subscribed copy keeps a way in and a way out.** The select moves into step 1, so the build tab can no longer be hidden for a read-only dataset, or someone on a subscribed copy could not choose another. Rejected: a second select for reading (a mirror again).
 - **The bench gate is not weakened by a simpler share step.** It stays in `repo.push`. A push with no test run is allowed today and stays allowed with its note, unless the owner changes that.
+
+## 2026-11-05 — The BI page redesign: three answers from the owner
+
+Owner, through the BI orchestrator, on `docs/phases/BI_PAGE_SIMPLE.md` §7. All three as recommended.
+
+- **`kn-pane-pipeline` is out of scope.** The Knowledge page opens on the BI tab when this PC has a BI dataset or vault.
+- **One-step share:** the page proposes a date as the tag name, and it stays editable.
+- **A push with no test run stays allowed,** with a visible note. The bench gate still blocks a push when a finished run on the same content regressed.

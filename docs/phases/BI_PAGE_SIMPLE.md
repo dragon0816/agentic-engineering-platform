@@ -44,7 +44,7 @@ The top section (dataset, domain, sample, refresh, dataset management, schema li
 | A question is overwritten by its `set` and `slug` | `checked_question` + `_stage`; the list returns both | Edit in place is possible with no backend. Changing `set` is delete plus save |
 | Five AI session kinds, five panels | `sessions.KINDS`; panels `bi-b-sa`, `-sb`, `-ska`, `-ana`, `-qa` | One panel. §5, S3 |
 
-**The Knowledge page's other tab, `kn-pane-pipeline`,** opens first and is a different product: an English three-step sandbox wizard for wiki folders (`kp-*`, routes `/api/knowledge/pipeline/*`), with a block saying sandboxes will give way to knowledge repositories. It shares no controls with the BI pane. **Not in this redesign** unless the owner says so, because the owner's flow names only BI steps. One effect stays: a BI user lands on the wrong tab first. Open question for the owner in §7.
+**The Knowledge page's other tab, `kn-pane-pipeline`,** opens first and is a different product: an English three-step sandbox wizard for wiki folders (`kp-*`, routes `/api/knowledge/pipeline/*`), with a block saying sandboxes will give way to knowledge repositories. It shares no controls with the BI pane. **Not in this redesign** (the owner, §7).
 
 ## 3. Target layout
 
@@ -158,7 +158,7 @@ The estimates are agent hours of work plus test runs, unmeasured, from the size 
 | S3 | **One AI panel.** One component on the page for the five session kinds: a side panel opened from the row or button it concerns, with one log and one input. Removes the five panels | None expected; sessions are separate by kind already | 8–14 h. **Touches every step** |
 | S4 | **Batch.** Tick several sources; ingest runs them; review across them. Recommended: one run per source, a batch id grouping them, the review table reading all of them, and one apply. Rejected unless it proves needed: one run over many sources, because `_extract` and the source evidence assume one | Batch grouping; apply over several runs | 10–16 h |
 | S5 | **Step 3.** Question table with an editor on the right (save by `set` and `slug`; changing `set` is delete plus save); dashboard embedded; a results view for the commit decision, side by side with the dashboard. Decide then whether the Dashboard tab stays | None for questions; to check for the embedded dashboard | 10–14 h |
-| S6 | **Share.** Commit then push, tag, publish as one step with a confirmation. Stops on `blocked` or `conflicts`, showing why; shows "這次內容沒有跑過測試" from the gate's note. **Does not weaken the gate**: the gate stays in `repo.push`. Whether an untested push should block is the owner's to change, not this slice's | A thin route, or none if the page sequences it. Tag names need a rule | 4–8 h |
+| S6 | **Share.** Commit then push, tag, publish as one step with a confirmation. Stops on `blocked` or `conflicts`, showing why; shows "這次內容沒有跑過測試" from the gate's note. **Does not weaken the gate**: the gate stays in `repo.push`. An untested push stays allowed, with the note (the owner, §7) | A thin route, or none if the page sequences it. The tag name is a proposed date, editable | 4–8 h |
 | S7 | **Tables everywhere left.** Skills and tools; candidate review; cards; history. Menus for row actions | None | 6–10 h |
 | S8 | **Final pass.** Screenshots at 1366 and 390 px, wording, accessibility, the whole-flow browser test, user guide and install docs, the full suite | None | 4–8 h |
 
@@ -184,8 +184,8 @@ Every slice may add to `tests/bi_page_driver.py`; those are small rebases.
 - New static tests pin the main path: which ids sit outside any 進階, no explanatory paragraph in it, and one select.
 - The feed goldens and Atlas are not touched. ADR-K10 guard unchanged: this is page markup.
 
-## 7. Open questions, for the owner through the orchestrator
+## 7. The owner's answers (2026-11-05, through the orchestrator)
 
-1. **Is `kn-pane-pipeline` in scope?** Recommendation: not now, but open the Knowledge page on the BI tab when a BI dataset or vault exists on this PC, a small change that belongs in S8.
-2. **Tag names in S6.** Recommendation: the page proposes one (`YYYY-MM-DD`, with a suffix if taken) in an editable box.
-3. **Should a push with no test run be blocked?** It is allowed today. S6 keeps that and shows the note, because changing it is a policy decision.
+1. **`kn-pane-pipeline` is out of scope.** The Knowledge page opens on the BI tab when this PC has a BI dataset or vault. Small, so it is done in S1.
+2. **Tag names in S6:** the page proposes a date as the tag name, editable.
+3. **A push with no test run stays allowed,** with a visible note. S6 keeps that and shows the note.
