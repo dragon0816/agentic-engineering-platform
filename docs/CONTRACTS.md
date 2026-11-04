@@ -6717,6 +6717,10 @@ An AI run never writes `confidence: verified`, on a new card or an empty field: 
 **An identical request reuses its answer** (`capabilities/bi_cards/answer_cache.py`), per PC in `<dataset>/answer_cache/`, keyed by messages, model alias, output limit and contract; failures and wrong shapes are not kept, and a withdrawn source clears them. `POST /api/bi/runs` takes `fresh: true` to ask anyway. `run.answers`: `{reused, asked, input_tokens, output_tokens}`.
 
 **A domain from the application.** `POST /api/bi/import/pages/preview` takes `folder`: a row with no domain takes that application's, marked `inference`, and merges as any value; a one-domain card that holds one keeps it; a library folder gives none. `POST /api/bi/vaults/<id>/fill-domains {confirm?}` → `{fill, by_domain, left, applied, purpose?}` gives cards with no domain their applications' domains in one commit; without `confirm` it writes nothing.
+## `bi__query`: the words of `text` (2026-11-04)
+
+`text` is words, each on the card in any field, not one string in one field; the card list's `q` too. In `bi__query` only: when no card holds them all and there are at least two words, `cards` are those holding at least two, most first, and `scope_note` says they may not be the answer. With none at all, `scope_note` asks for shorter words before saying "no data".
+
 ## `bi__query`: hops and passages (Phase 3-a, 2026-11-04)
 
 Design: `docs/phases/BI_CARD_MODEL.md` Phase 3. Additions to `bi-cards/query@1.0.0`; a call without them answers as before, with the new keys empty.

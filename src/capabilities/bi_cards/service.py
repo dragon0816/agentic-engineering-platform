@@ -197,16 +197,23 @@ def _in_domain(fields: dict[str, dict[str, Any]], domain: str, reg: Registry) ->
     return domain.lower() in {str(v).lower() for v in values if v is not None}
 
 
-def _matches(card: Any, fields: dict[str, dict[str, Any]], text: str) -> bool:
-    needle = text.lower()
-    if needle in card["name"].lower() or needle in card["canonical_key"].lower():
-        return True
+#: A text of at least this many words, none matching in full, shows the cards with most of them.
+MIN_CLOSEST_WORDS = 2
+
+
+def _words_found(card: Any, fields: dict[str, dict[str, Any]], words: list[str]) -> int:
+    """How many of `words` stand somewhere on the card, each in any of its fields."""
+    held = [card["name"].lower(), card["canonical_key"].lower()]
     for item in fields.values():
         value = item["value"]
-        for part in value if isinstance(value, list) else [value]:
-            if needle in str(part).lower():
-                return True
-    return False
+        held.extend(str(part).lower() for part in (value if isinstance(value, list) else [value]))
+    return sum(1 for word in words if any(word in part for part in held))
+
+
+def _matches(card: Any, fields: dict[str, dict[str, Any]], text: str) -> bool:
+    """Every word of `text` on the card. A question's words rarely stand in one field."""
+    words = text.lower().split()
+    return _words_found(card, fields, words) == len(words)
 
 
 def search(
@@ -416,6 +423,20 @@ def query_cards(
     found = search(
         store, entity_type=entity_type, text=text, domain=domain, field=field, value=value
     )
+    words = (text or "").lower().split()
+    closest = False
+    if not found and len(words) >= MIN_CLOSEST_WORDS:
+        # Question words such as 營收 are often on no card: say so, and show the nearest.
+        scored = [
+            (_words_found(card, fields, words), card, fields)
+            for card, fields in search(
+                store, entity_type=entity_type, domain=domain, field=field, value=value
+            )
+        ]
+        near = [item for item in scored if item[0] >= MIN_CLOSEST_WORDS]
+        near.sort(key=lambda item: -item[0])
+        found = [(card, fields) for _, card, fields in near]
+        closest = bool(found)
     cards = []
     for card, fields in found[:limit]:
         entry = _card_entry(store, card, fields)
@@ -429,6 +450,13 @@ def query_cards(
             entry["relations"] = [_step(r) for r in store.relations(card["id"])[:MAX_DIRECT]]
         cards.append(entry)
     note = f"以上只來自資料集「{store.dataset}」的卡片；沒有找到的，只能說「在這份資料集中沒有」。"
+    if closest:
+        note += (
+            f"沒有一張卡片含「{text}」的所有字詞；以上是含最多字詞的卡片，最接近的在前，"
+            "不一定是答案，請看內容再回答。"
+        )
+    elif not found and text:
+        note += "沒有卡片含這些字詞；回答「沒有」之前，請換較短的字詞（例如公司名）再查一次。"
     related: list[dict[str, Any]] = []
     if hops:
         walked = walk_relations(store, [c["card_id"] for c in cards], hops=hops)

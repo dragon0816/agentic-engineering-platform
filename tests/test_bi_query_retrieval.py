@@ -81,6 +81,41 @@ def _names(answer: dict[str, Any]) -> list[str]:
     return [item["name"] for item in answer["related"]]
 
 
+# -- the words of a text (R6: a question's whole text came back empty every time) -----
+
+
+def test_every_word_may_stand_anywhere_on_the_card(tmp_path: Path) -> None:
+    store = _store(tmp_path, "Acme-FY26-segment-AI晶片", "Acme-FY26-segment-記憶體", "Other")
+    answer = _ask(tmp_path, dataset="demo", text="Acme FY26 AI晶片")
+    assert [c["name"] for c in answer["cards"]] == ["Acme-FY26-segment-AI晶片"]
+    assert "所有字詞" not in answer["scope_note"]
+    assert [c["name"] for c, _ in service.search(store, text="acme 記憶體")] == [
+        "Acme-FY26-segment-記憶體"
+    ]
+
+
+def test_a_questions_words_no_card_holds_show_the_nearest_and_say_so(tmp_path: Path) -> None:
+    _store(tmp_path, "Acme-FY26-segment-記憶體", "Acme-FY26-segment-AI晶片", "Acme", "Other")
+    answer = _ask(tmp_path, dataset="demo", text="Acme FY26 AI晶片 營收 年增率")
+    names = [c["name"] for c in answer["cards"]]
+    assert names[0] == "Acme-FY26-segment-AI晶片" and "Other" not in names
+    assert "Acme" not in names  # one word of five is not near
+    assert answer["total"] == len(names)
+    assert "所有字詞" in answer["scope_note"] and "不一定是答案" in answer["scope_note"]
+
+
+def test_nothing_near_asks_for_shorter_words_before_saying_no(tmp_path: Path) -> None:
+    _store(tmp_path, "Acme")
+    for text in ("zzz yyy", "zzz"):
+        answer = _ask(tmp_path, dataset="demo", text=text)
+        assert answer["total"] == 0 and "較短的字詞" in answer["scope_note"]
+
+
+def test_the_card_list_stays_strict(tmp_path: Path) -> None:
+    store = _store(tmp_path, "Acme-FY26")
+    assert service.search(store, text="Acme FY26 營收") == []
+
+
 # -- hops ---------------------------------------------------------------------
 
 
