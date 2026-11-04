@@ -6301,3 +6301,7 @@ Design: `docs/phases/BI_CARD_MODEL.md`; source: `docs/proposals/AEP_BI_Card_Data
 `aidc`, `aerospace`, `robotics`, `wireless`; the 11 segments stay as `segment` values on cards. The list stays data, per vault. Rejected: the 11 segments as folders, since none of the 434 card pages names one, so R6 would have sorted them by hand.
 
 Library entries have an application's shape (owner, 2026-11-04): `library/<products|technologies|competitors>/{sources/, skills/, tools/, profile/}`, the list data too. `classify` stays at `library/skills/`, so `skills` cannot be an entry name. Unit keys use `library/<entry>`, so an application of the same name cannot collide.
+
+## 2026-11-04: `not_applicable` only when stated, never derived from a profile
+
+**Owner decision.** A field a profile omits is unknown. It is `not_applicable` only when a profile lists it (`not_applicable: [field]`, with an optional reason) or a correction note states it. `used_fields` stays for what the AI is asked. **Why:** a profile says what one expert asks for, not what cannot apply: derivation marked 181 fields on market-intel, and earlier 2,066, as 不適用 where the truth was 未知, which the model would then state as fact. `MODEL_VERSION` rises to 8, so existing vaults rebuild with no commit changed. **Rejected:** deriving only for types the profile lists (the previous rule, still wrong on what an expert merely left out).

@@ -4,7 +4,8 @@
     profile:<home>                           {"revision", "author", "path", "sha256", "schema"}
 
 A profile lists which types and fields a home uses, with the expert's notes. A
-type or field not listed is not used there. It never defines anything: a new
+type or field not listed is not asked for there, and reads as unknown; only what a
+type lists under `not_applicable` is 不適用. It never defines anything: a new
 field goes in `proposals` until it is merged into the schema (§4.3). So
 validation stays against the merged schema, and a value outside the profile is a
 candidate marked `outside_profile`, not dropped.
@@ -31,10 +32,10 @@ REJECTED = "rejected"
 PROPOSAL_STATUSES = (PROPOSED, MERGED, REJECTED)
 #: Every card may have these, whatever a home uses: a card's other names, and what
 #: §3.6 gives every card, a missing summary being a warning at publish. So the model
-#: is always asked and they are never 不適用.
+#: is always asked and a profile cannot call them 不適用.
 ALWAYS_FIELDS = ("aliases", "summary", "usage", "scope")
 _TOP_KEYS = {"format", "application", "revision", "schema", "types", "proposals"}
-_TYPE_KEYS = {"category", "fields"}
+_TYPE_KEYS = {"category", "fields", "not_applicable"}
 _FIELD_KEYS = {"use", "note"}
 _PROPOSAL_KEYS = {"type", "field", "definition", "reason", "status"}
 
@@ -62,6 +63,32 @@ def _checked_field(type_name: str, name: str, entry: Any) -> dict[str, Any]:
     return {"use": entry["use"], **({"note": note} if note else {})}
 
 
+def _checked_not_applicable(entity: Any, raw: Any, used: Mapping[str, Any]) -> list[dict[str, str]]:
+    """`not_applicable: [field]`, an item being a name or `{"field", "reason"}`."""
+    if raw is None:
+        return []
+    if not isinstance(raw, list):
+        raise _invalid(f"{entity.name} 的 not_applicable 必須是清單")
+    found: list[dict[str, str]] = []
+    for entry in raw:
+        given = {"field": entry} if isinstance(entry, str) else entry
+        if not isinstance(given, dict) or set(given) - {"field", "reason"}:
+            raise _invalid(f"{entity.name} 的 not_applicable 每項是欄位名或 field 和 reason")
+        name, reason = given.get("field"), given.get("reason")
+        item = entity.get(name) if isinstance(name, str) else None
+        if item is None:
+            raise _invalid(f"schema 的 {entity.name} 沒有欄位 {name}")
+        if reason is not None and not isinstance(reason, str):
+            raise _invalid(f"{entity.name}.{name} 的 reason 必須是文字")
+        never = item.klass == "derived" or item.required or name in entity.naming
+        if never or name in ALWAYS_FIELDS:
+            raise _invalid(f"{entity.name}.{name} 不能標成不適用")
+        if name in used:
+            raise _invalid(f"{entity.name}.{name} 已列為使用，不能同時標成不適用")
+        found.append({"field": str(name), **({"reason": reason} if reason else {})})
+    return found
+
+
 def _checked_types(reg: Registry, raw: Any) -> dict[str, Any]:
     if not isinstance(raw, dict):
         raise _invalid("types 必須是物件")
@@ -71,7 +98,7 @@ def _checked_types(reg: Registry, raw: Any) -> dict[str, Any]:
         if entity is None:
             raise _invalid(f"schema 沒有類型 {type_name}")
         if not isinstance(entry, dict) or set(entry) - _TYPE_KEYS:
-            raise _invalid(f"{type_name} 只能有 category 和 fields")
+            raise _invalid(f"{type_name} 只能有 category、fields 和 not_applicable")
         category = entry.get("category")
         if category is not None and not isinstance(category, str):
             raise _invalid(f"{type_name} 的 category 必須是文字")
@@ -83,7 +110,12 @@ def _checked_types(reg: Registry, raw: Any) -> dict[str, Any]:
             if entity.get(name) is None:
                 raise _invalid(f"schema 的 {type_name} 沒有欄位 {name}；新欄位請放在 proposals")
             checked[name] = _checked_field(type_name, name, value)
-        found[type_name] = {**({"category": category} if category else {}), "fields": checked}
+        stated = _checked_not_applicable(entity, entry.get("not_applicable"), checked)
+        found[type_name] = {
+            **({"category": category} if category else {}),
+            "fields": checked,
+            **({"not_applicable": stated} if stated else {}),
+        }
     return found
 
 

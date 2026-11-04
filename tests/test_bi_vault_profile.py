@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from contextlib import closing
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -15,7 +16,7 @@ from test_bi_vault import _call, _commit, _ok, _push, _refused, _two_pcs
 
 from capabilities.bi_cards import card_model, catalog, extract, profile, vault
 from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStoreError
+from capabilities.bi_cards.store import BiStore, BiStoreError
 from host_runtime.bi_cards_api import route
 
 SCHEMA = "bi.schema/v1.1@5.0.0"
@@ -353,23 +354,38 @@ def test_with_no_profile_nothing_is_computed(tmp_path: Path) -> None:
     assert db.execute("SELECT COUNT(*) FROM field_states").fetchone()[0] == 0
 
 
-def test_a_field_no_home_uses_is_not_applicable(tmp_path: Path) -> None:
-    unused = _unused()
+def _stating(reason: str | None = "這裡不談") -> dict[str, Any]:
+    item: Any = {"field": _unused(), "reason": reason} if reason else _unused()
+    technology = {**PROFILE["types"]["Technology"], "not_applicable": [item]}
+    return {"types": {"Technology": technology}}
+
+
+def test_a_field_a_profile_omits_stays_unknown(tmp_path: Path) -> None:
+    """Owner 2026-11-04: a profile says what is asked for, not what cannot apply."""
     db = _rebuilt(tmp_path, {"aidc": PROFILE})
-    states = _states(db, "one")
-    assert unused in states
-    assert "domain" not in states  # the profile uses it
-    entity = _reg().types["Technology"]
-    for name in (*entity.naming, *profile.ALWAYS_FIELDS):
-        assert name not in states
-    assert not any(f.klass == "derived" and f.name in states for f in entity.fields)
-    assert not any(f.required and f.name in states for f in entity.fields)
+    assert _states(db, "one") == set()
+    assert db.execute("SELECT COUNT(*) FROM field_states").fetchone()[0] == 0
+
+
+def test_a_field_a_profile_states_is_not_applicable_with_its_reason(tmp_path: Path) -> None:
+    db = _rebuilt(tmp_path, {"aidc": _stating()})
+    assert _states(db, "one") == {_unused()}
+    row = db.execute(
+        "SELECT state, reason, origin FROM field_states WHERE card_id = 'one' AND field = ?",
+        (_unused(),),
+    ).fetchone()
+    assert tuple(row) == (card_model.NOT_APPLICABLE, "這裡不談", "profile")
     # A value stands; a state would say the opposite of it.
-    assert unused not in _states(db, "valued")
-    # A home with no profile: not every home has one, so nothing is computed.
-    assert _states(db, "two") == set()
+    assert _unused() not in _states(db, "valued")
+    # A home with no profile says nothing, and the one that stated it still has.
+    assert _states(db, "two") == {_unused()}
     # A card in no home reads `unknown`.
     assert _states(db, "unhomed") == set() and _states(db, "bare") == set()
+
+
+def test_a_stated_field_may_be_a_bare_name(tmp_path: Path) -> None:
+    checked = profile.checked(_stating(None), "aidc", _reg())
+    assert checked["types"]["Technology"]["not_applicable"] == [{"field": _unused()}]
 
 
 def test_a_type_the_profile_leaves_out_says_nothing(tmp_path: Path) -> None:
@@ -380,32 +396,14 @@ def test_a_type_the_profile_leaves_out_says_nothing(tmp_path: Path) -> None:
     assert db.execute("SELECT COUNT(*) FROM field_states").fetchone()[0] == 0
 
 
-def test_one_home_not_listing_the_type_means_nothing_is_computed(tmp_path: Path) -> None:
-    silent: dict[str, Any] = {"types": {"Signal": {"fields": {}}}}
-    db = _rebuilt(tmp_path, {"aidc": PROFILE, "wireless": silent})
-    assert _states(db, "two") == set()  # in both homes; one has not spoken
-    assert _unused() in _states(db, "one")  # only in the home that has
-
-
-def test_a_listed_type_keeps_what_is_never_not_applicable(tmp_path: Path) -> None:
-    db = _rebuilt(tmp_path, {"aidc": {"types": {"Technology": {"fields": {}}}}})
-    states = _states(db, "one")
-    assert _unused() in states
-    entity = _reg().types["Technology"]
-    for name in (*entity.naming, *profile.ALWAYS_FIELDS):
-        assert name not in states
-    assert not any(f.required and f.name in states for f in entity.fields)
-
-
-def test_a_field_one_of_two_homes_uses_is_not_computed(tmp_path: Path) -> None:
+def test_a_field_another_home_uses_is_not_stated_away(tmp_path: Path) -> None:
     both = {"types": {"Technology": {"fields": {_unused(): {"use": "optional"}}}}}
-    db = _rebuilt(tmp_path, {"aidc": PROFILE, "wireless": both})
-    states = _states(db, "two")
-    assert "domain" not in states and _unused() not in states
-    assert states  # another field neither uses
+    db = _rebuilt(tmp_path, {"aidc": _stating(), "wireless": both})
+    assert _states(db, "two") == set()
+    assert _states(db, "one") == {_unused()}  # only in the home that stated it
 
 
-def test_a_stated_state_wins_over_a_computed_one(tmp_path: Path) -> None:
+def test_a_stated_state_wins_over_a_profiles(tmp_path: Path) -> None:
     db = sqlite3.connect(tmp_path / "bi.sqlite", isolation_level=None)
     name = _reg().types["Technology"].naming_field
     state = {"state": card_model.CONFIRMED_NONE, "reason": "虛構"}
@@ -417,18 +415,83 @@ def test_a_stated_state_wins_over_a_computed_one(tmp_path: Path) -> None:
         f"evidence:one:{name}": _evidence("aaa"),
         f"state:one:{_unused()}": state,
     }
-    vault.materialize(db, units, [], [], _reg(), {"aidc": PROFILE})
+    vault.materialize(db, units, [], [], _reg(), {"aidc": _stating()})
     row = db.execute(
         "SELECT state, origin FROM field_states WHERE card_id = 'one' AND field = ?", (_unused(),)
     ).fetchone()
     assert tuple(row) == (card_model.CONFIRMED_NONE, "unit")
 
 
-def test_a_computed_state_is_never_a_unit(tmp_path: Path) -> None:
-    db = _rebuilt(tmp_path, {"aidc": PROFILE})
+def test_a_profiles_state_is_never_a_unit(tmp_path: Path) -> None:
+    db = _rebuilt(tmp_path, {"aidc": _stating()})
     db.row_factory = sqlite3.Row
     assert _states(db, "one")
     assert not [k for k in vault.units_from_db(db) if k.startswith(card_model.STATE_PREFIX)]
+
+
+@pytest.mark.parametrize(
+    "listed",
+    [
+        "not a list",
+        ["no_such_field"],
+        [{"field": "domain"}],  # the profile uses it
+        ["summary"],  # every card may have one
+        [{"field": "domain", "weight": 1}],
+        [{"reason": "沒有欄位"}],
+    ],
+)
+def test_a_profile_cannot_state_what_it_may_not(listed: Any) -> None:
+    technology = {**PROFILE["types"]["Technology"], "not_applicable": listed}
+    with pytest.raises(BiStoreError) as failure:
+        profile.checked({"types": {"Technology": technology}}, "aidc", _reg())
+    assert failure.value.code == "profile_invalid"
+
+
+def test_a_naming_or_required_field_cannot_be_stated(tmp_path: Path) -> None:
+    entity = _reg().types["Technology"]
+    listed = [entity.naming_field]
+    with pytest.raises(BiStoreError):
+        profile.checked(
+            {"types": {"Technology": {"fields": {}, "not_applicable": listed}}}, "aidc", _reg()
+        )
+
+
+def test_an_existing_vault_loses_derived_states_on_rebuild_with_no_commit(tmp_path: Path) -> None:
+    """market-intel's 181: old derived rows vanish when the database rebuilds once."""
+    _, vault_id, dataset, a, _ = _two_pcs(tmp_path)
+    _save(a, vault_id)
+    answer = {
+        "candidates": [
+            {
+                "entity_type": "Technology",
+                "name": "FAKE-TECH",
+                "fields": {
+                    "name": {"value": "FAKE-TECH", "basis": "inference", "reason": "虛構"},
+                    "domain": {"value": "AIDC", "basis": "inference", "reason": "虛構"},
+                },
+            }
+        ]
+    }
+    _ai_run(a, dataset, AIDC, Scripted(answer))
+    target = vault.Vault(a, vault_id)
+    with closing(sqlite3.connect(target.db_path)) as db:
+        db.execute(
+            "INSERT INTO field_states (card_id, field, state, origin) VALUES "
+            "('x1', 'f1', 'not_applicable', 'profile'), ('x2', 'f2', 'not_applicable', 'profile')"
+        )
+        db.execute(f"PRAGMA user_version = {card_model.MODEL_VERSION - 1}")
+        db.commit()
+    units = target.repo.working_units()
+    log = target.repo.status()
+    BiStore(a, dataset)  # opening it rebuilds an older database once
+    assert target.repo.working_units() == units
+    assert target.repo.status() == log
+    with closing(sqlite3.connect(target.db_path)) as db:
+        assert db.execute("PRAGMA user_version").fetchone()[0] == card_model.MODEL_VERSION
+        assert (
+            db.execute("SELECT COUNT(*) FROM field_states WHERE origin = 'profile'").fetchone()[0]
+            == 0
+        )
 
 
 def test_publish_reports_what_a_profile_requires_and_never_blocks(tmp_path: Path) -> None:

@@ -642,10 +642,9 @@ def _fill_homes(
     profiles: Mapping[str, Mapping[str, Any]],
 ) -> None:
     """Derived, after everything else (`BI_CARD_MODEL.md` §1, §3.4): a card belongs to
-    the homes whose sources gave it evidence, and a field is `not_applicable` when
-    the card has a home, every home's profile lists the card's type, and none uses the
-    field. A profile that does not list the type has not spoken about it, so the field
-    reads `unknown`, as for a card in no home. A state or value already there wins."""
+    the homes whose sources gave it evidence, and a field is `not_applicable` only when
+    one of those homes' profiles states it and none uses it. A field a profile merely
+    omits reads `unknown` (owner 2026-11-04). A state or value already there wins."""
     folders = {
         str(value.get("id")): str(value.get("folder") or "")
         for key, value in units.items()
@@ -664,25 +663,28 @@ def _fill_homes(
         return
     for row in db.execute("SELECT id, entity_type FROM cards").fetchall():
         card_id, entity = str(row[0]), reg.types.get(str(row[1]))
-        own = belongs.get(card_id)
-        if entity is None or not own or not own <= set(profiles):
+        if entity is None or card_id not in belongs:
             continue
-        uses = [profile.used_fields(entity, profiles[home]) for home in own]
-        if None in uses:
+        stated: dict[str, str | None] = {}
+        used: set[str] = set()
+        for home in sorted(belongs[card_id]):
+            view = ((profiles.get(home) or {}).get("types") or {}).get(entity.name) or {}
+            used.update(view.get("fields") or ())
+            for item in view.get("not_applicable") or ():
+                stated.setdefault(item["field"], item.get("reason"))
+        if not stated:
             continue
         have = {
             str(item[0])
             for item in db.execute("SELECT field FROM fields WHERE card_id = ?", (card_id,))
         }
         db.executemany(
-            "INSERT OR IGNORE INTO field_states (card_id, field, state, origin) "
-            "VALUES (?, ?, ?, 'profile')",
+            "INSERT OR IGNORE INTO field_states (card_id, field, state, reason, origin) "
+            "VALUES (?, ?, ?, ?, 'profile')",
             [
-                (card_id, item.name, card_model.NOT_APPLICABLE)
-                for item in entity.fields
-                if item.klass != "derived"
-                and item.name not in have
-                and not any(item.name in (used or ()) for used in uses)
+                (card_id, name, card_model.NOT_APPLICABLE, reason)
+                for name, reason in sorted(stated.items())
+                if name not in have and name not in used and entity.get(name) is not None
             ],
         )
 
