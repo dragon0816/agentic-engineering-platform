@@ -127,10 +127,7 @@ def _world(workspace: Path, vault_id: str, side: Side) -> error_class.World | No
             cards[row["id"]] = error_class.Card(
                 text=" ".join([row["name"], row["canonical_key"], *values.values()]),
                 values=values,
-                linked=frozenset(
-                    r["to_card_id"] if r["from_card_id"] == row["id"] else r["from_card_id"]
-                    for r in store.relations(row["id"])
-                ),
+                linked=frozenset(r["other_id"] for r in store.relations(row["id"])),
                 evidence=store.evidence(row["id"]),
             )
         staging = Staging(workspace, f"{VAULT_PREFIX}{vault_id}")

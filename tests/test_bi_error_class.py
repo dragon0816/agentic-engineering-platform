@@ -9,11 +9,13 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from test_bi_query_retrieval import _id, _relate
 from test_bi_vault import _commit, _import, _push, _row, _two_pcs
 from test_bi_vault_bench import _save
 
 from capabilities.bi_cards import error_class, vault
 from capabilities.bi_cards.error_class import Card, World
+from capabilities.bi_cards.store import BiStore
 from host_runtime import bi_bench
 
 TSN = Card(
@@ -105,6 +107,18 @@ def test_every_failed_term_gets_its_own_entry_and_counts_add_up() -> None:
 def test_the_walk_takes_strings_and_leaves_keys_out() -> None:
     data = [{"cards": [{"id": "tsn", "fields": ["a", {"secret_key": "b"}], "n": 3}]}, None]
     assert list(error_class.walk_strings(data)) == ["tsn", "a", "b"]
+
+
+def test_a_card_with_relations_is_still_classified(tmp_path: Path) -> None:
+    """Real vaults have relations: reading them must not turn every class into unknown."""
+    _, vault_id, dataset, a, _ = _two_pcs(tmp_path)
+    _import(a, dataset, _row("TSN", standard_body="IEEE 802.1"), _row("PTP"))
+    store = BiStore(a, dataset)
+    _relate(store, "TSN", "PTP")
+    world = bi_bench._world(a, vault_id, "working")
+    assert world is not None
+    tsn, ptp = _id(store, "TSN"), _id(store, "PTP")
+    assert world.cards[tsn].linked == {ptp} and world.cards[ptp].linked == {tsn}
 
 
 def test_a_run_classifies_without_changing_the_score_or_the_gate(tmp_path: Path) -> None:
