@@ -34,9 +34,9 @@ from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequi
 
 OUTPUT_CONTRACT = "aep.bi.extract.v1"
 CHUNK_CHARS = 6000
-#: Reasoning counts against this: a dense 6,000-character chunk spent all of 6,000 on it and
-#: answered nothing (measured 2026-11-04).
-MAX_OUTPUT_TOKENS = 16000
+#: Reasoning counts against this. Measured 2026-11-04 on real AIDC report chunks of 1,567 and
+#: 2,494 characters: 10,956 and 13,349 tokens, and 16,705 when asked for every supply link.
+MAX_OUTPUT_TOKENS = 32000
 MAX_ATTEMPTS = 3
 TRUNCATED = "model_output_truncated"
 MAX_KNOWN_NAMES = 200

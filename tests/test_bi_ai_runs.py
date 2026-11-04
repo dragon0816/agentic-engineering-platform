@@ -274,7 +274,7 @@ def test_a_retry_is_refused_when_the_source_s_data_class_is_no_longer_approved(
 
 
 def test_a_truncated_answer_says_which_chunk_and_can_be_tried_again(tmp_path: Path) -> None:
-    """Measured 2026-11-04: a dense chunk spent all of 6,000 output tokens on reasoning.
+    """Measured 2026-11-04: real report chunks needed up to 16,705 output tokens.
     The limit has room for that, and a chunk that still does not fit is not lost silently."""
     jobs = Jobs()
     truncated = Failure(code="model_output_truncated", message="cut", retryable=False)
@@ -282,7 +282,7 @@ def test_a_truncated_answer_says_which_chunk_and_can_be_tried_again(tmp_path: Pa
     ai = _runtime(model, jobs)
     run = _start(tmp_path, ai, _note(tmp_path))
     jobs.run_all()
-    assert model.requests[0].max_output_tokens == 16000
+    assert model.requests[0].max_output_tokens == 32000
     detail = _detail(tmp_path, run["id"])
     assert detail["run"]["status"] == "failed" and detail["candidates"] == []
     (failure,) = detail["run"]["failures"]
