@@ -133,6 +133,8 @@ def route(
         return 200, {"ok": True, **vault.push(workspace, vault_id)}
     if action == "resolve":
         return 200, {"ok": True, **vault.resolve(workspace, vault_id, given)}
+    if action == "fill-domains":
+        return 200, {"ok": True, **vault.fill_domains(workspace, vault_id, given, actor)}
     if action == "relations":
         return 200, {"ok": True, **vault.decide_relation(workspace, vault_id, given, actor)}
     if action == "discard":

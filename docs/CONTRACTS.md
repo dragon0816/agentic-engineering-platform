@@ -6707,3 +6707,11 @@ A `proposal:` unit may hold `evidence`, and `proposals` gains that column. `GET 
 An AI run never writes `confidence: verified`, on a new card or an empty field: `merge` is `capped`, the highest lower level is stored with no evidence, and the claim is a proposal with its evidence.
 
 `GET /api/bi/proposals` items gain `origin` (the source file, else the reference) and `protected`. `POST /api/bi/proposals/decide {dataset, action, reason, field?, origin?, count}` → `{decided, superseded, left_out}` decides every proposal the filters show in one write. A reason is required (400 `reason_required`). `count` is what the person confirmed (409 `proposals_changed`). `confidence` and `evidence_grade` are included only when `field` names them.
+
+## BI: a model's supply link, a repeated answer, a domain from the application (2026-11-04)
+
+**A model's `SupplyLink` matches by supplier and customer** when no card has its exact name; seeds keep their keys and imports are unchanged. One card on that pair: an update, the card keeps its name (`merge: key_kept`), and a differing `product` is a proposal. Several cards: `match: ambiguous`, error `match_unresolved`, a person chooses. Several candidates of a run for one pair: error `pair_repeated` on each without a person's choice, with `pair_repeats` naming the others. `POST /api/bi/runs/<id>/recheck` applies this to a run with no model call.
+
+**An identical request reuses its answer** (`capabilities/bi_cards/answer_cache.py`), per PC in `<dataset>/answer_cache/`, keyed by messages, model alias, output limit and contract; failures and wrong shapes are not kept, and a withdrawn source clears them. `POST /api/bi/runs` takes `fresh: true` to ask anyway. `run.answers`: `{reused, asked, input_tokens, output_tokens}`.
+
+**A domain from the application.** `POST /api/bi/import/pages/preview` takes `folder`: a row with no domain takes that application's, marked `inference`, and merges as any value; a one-domain card that holds one keeps it; a library folder gives none. `POST /api/bi/vaults/<id>/fill-domains {confirm?}` → `{fill, by_domain, left, applied, purpose?}` gives cards with no domain their applications' domains in one commit; without `confirm` it writes nothing.

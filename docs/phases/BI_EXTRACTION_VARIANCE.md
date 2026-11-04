@@ -61,3 +61,18 @@ The supply-link rule was reported as fixing the table: 7 of 16 without it, 16 of
 **Not fixed by any of these:** which rows the model covers on a first run, chunk 12's 6 to 16. A real fix would read tables deterministically, or check coverage in a second pass. Both are larger work.
 
 **Accepted cards do not change:** this variation is between runs. Once a person accepts a run, the cards stay as accepted.
+
+## What was decided and measured next (2026-11-04)
+
+Fixes 1 and 3 are built (owner). **Fix 2 was tested and not built.** Three runs each, on the names a chunk mentions (14–15 of 641), with a sentence saying a known company still gets its update:
+
+| Chunk | | Full list (5 runs) | Only names mentioned (3 runs) |
+|---|---|---|---|
+| 12 | `SupplyLink` pairs | 16, 6, 16, 14, 10 | **16, 16, 16** |
+| 12 | `RevenueFact` | 14, 12, 14, 10, 13 | **7, 7, 5** |
+| 12 | `Account` | 0 | 5, the ODMs, which are `Ecosystem` cards |
+| 12 | Identities in every run | 38% | 17% (47 names for 16 pairs) |
+| 7 | `Ecosystem` and `Account` | 3 each run | 4, 8, 4 |
+| 7 | `RevenueFact` | 17 each run | 17 each run |
+
+Supply links became steady, but revenue facts halved and same-named cards appeared: the full list was also teaching the type and naming of known cards. That is not clearly better coverage. Three runs on two chunks; a variant keeping those lessons was not tried.

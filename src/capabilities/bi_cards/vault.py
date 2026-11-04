@@ -75,6 +75,7 @@ from capabilities.bi_cards.store import (
     VAULTS_DIR,
     BiStore,
     BiStoreError,
+    PlannedRow,
     add_missing_columns,
     card_id_for,
     is_subscribed,
@@ -1805,6 +1806,85 @@ def relation_decided(store: BiStore, item: Mapping[str, Any]) -> bool:
     relation = card_model.relation_id(ends[0], str(item["type"]), ends[1])
     units = Vault(store.workspace, store.vault_id).repo.working_units()
     return f"{card_model.RELATION_PREFIX}{relation}" in units
+
+
+def fill_domains(
+    workspace: Path, vault_id: str, given: Mapping[str, Any], actor: str
+) -> dict[str, Any]:
+    """Give a card with no domain the domains of its applications, marked as inference.
+    Without `confirm` it only says what it would do. A one-domain type with cards from
+    several applications, or a card in none, is listed and left for a person."""
+    vault = _vault(workspace, vault_id)
+    store = BiStore(workspace, vault.dataset)
+    reg = catalog.for_store(store)
+    with closing(sqlite3.connect(store.path)) as db:
+        cards = db.execute(
+            "SELECT id, entity_type, canonical_key, name FROM cards c WHERE NOT EXISTS "
+            "(SELECT 1 FROM fields f WHERE f.card_id = c.id AND f.field = 'domain')"
+        ).fetchall()
+        applications: dict[str, list[str]] = {}
+        for card_id, home in db.execute("SELECT card_id, application FROM card_app_folders"):
+            applications.setdefault(card_id, []).append(home)
+    rows: list[tuple[PlannedRow, str, int | None]] = []
+    left: list[dict[str, Any]] = []
+    counts: dict[str, int] = {}
+    for card_id, kind, key, name in cards:
+        definition = reg.type(kind).get("domain")
+        if definition is None:
+            continue
+        domains = sorted(
+            {
+                found
+                for home in applications.get(card_id, ())
+                if (found := homes.domain_of_folder(reg.domains, homes.sources_dir(home)))
+            }
+        )
+        if not domains or (len(domains) > 1 and not definition.is_list):
+            left.append({"id": card_id, "name": name, "type": kind, "domains": domains})
+            continue
+        value, _problems = reg.normalize(definition, "；".join(domains))
+        if value is None:
+            left.append({"id": card_id, "name": name, "type": kind, "domains": domains})
+            continue
+        for found in domains:
+            counts[found] = counts.get(found, 0) + 1
+        card = store.card(card_id)
+        version = None if card is None else int(card["version"])
+        rows.append(
+            (
+                PlannedRow(
+                    row=len(rows) + 1,
+                    entity_type=kind,
+                    canonical_key=key,
+                    name=name,
+                    values={"domain": value},
+                    synthetic=False,
+                    ref="application-default",
+                    evidence={
+                        "domain": [
+                            {
+                                "source_id": "",
+                                "source_name": f"應用資料夾 {'、'.join(domains)}",
+                                "locator": {"default": "application"},
+                                "excerpt": "",
+                                "basis": "inference",
+                            }
+                        ]
+                    },
+                ),
+                card_id,
+                version,
+            )
+        )
+    plan = {"fill": len(rows), "by_domain": counts, "left": left}
+    if given.get("confirm") is not True or not rows:
+        return {**plan, "applied": False}
+    text = f"依應用資料夾補上 {len(rows)} 張卡的 domain（推論，不是來源明寫）"
+    with purpose(text):
+        store.commit_run(
+            f"home-domain-{uuid.uuid4().hex[:8]}", rows, filename="應用資料夾的 domain", actor=actor
+        )
+    return {**plan, "applied": True, "purpose": text}
 
 
 def decide_relation(

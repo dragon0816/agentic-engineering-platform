@@ -19,7 +19,7 @@ from dataclasses import dataclass, field, replace
 from pathlib import PurePosixPath
 from typing import Any
 
-from capabilities.bi_cards import importer
+from capabilities.bi_cards import homes, importer
 from capabilities.bi_cards.catalog import for_store
 from capabilities.bi_cards.schema import Registry, norm_key, parse_date
 from capabilities.bi_cards.staging import Staging
@@ -191,6 +191,10 @@ class PagePreview:
     #: For each preview, row number -> the card version the merge was planned on.
     versions: list[dict[int, int | None]] = field(default_factory=list)
     mark_conflicts: list[dict[str, Any]] = field(default_factory=list)
+    #: (type, key) of rows whose `domain` came from the folder, not from the row.
+    defaulted: set[tuple[str, str]] = field(default_factory=set)
+    #: The folder the preview planned for, which the apply keeps to.
+    folder: str | None = None
 
     def to_api(self) -> dict[str, Any]:
         counts = {"create": 0, "update": 0, "unchanged": 0, "skip": 0, "warnings": 0}
@@ -388,8 +392,41 @@ def merge_rows(
     return versions, conflicts
 
 
-def preview(store: BiStore, given: Any, *, samples: bool = False) -> PagePreview:
-    """Read the files and preview every type; writes nothing."""
+def _default_domains(
+    store: BiStore, reg: Registry, final: list[tuple[importer.Preview, list[str]]], folder: Any
+) -> set[tuple[str, str]]:
+    """A row that says no domain takes its application's, and then merges as any value
+    does. A schema default is not the row saying so. One-domain cards keep theirs."""
+    domain = homes.domain_of_folder(reg.domains, str(folder or ""))
+    defaulted: set[tuple[str, str]] = set()
+    if domain is None:
+        return defaulted
+    for item, _ in final:
+        rows = {row["row"]: row for row in item.rows}
+        for number, planned in list(item.planned.items()):
+            definition = reg.type(planned.entity_type).get("domain")
+            if definition is None or not planned.canonical_key:
+                continue
+            cells = (rows.get(number) or {}).get("fields") or []
+            if any(c["field"] == "domain" and str(c.get("raw") or "").strip() for c in cells):
+                continue
+            card = store.find(planned.entity_type, planned.canonical_key)
+            held = None if card is None else store.fields(card["id"]).get("domain")
+            if held is not None and not definition.is_list:
+                continue
+            value, _problems = reg.normalize(definition, domain)
+            if value is None:
+                continue
+            item.planned[number] = replace(planned, values={**planned.values, "domain": value})
+            defaulted.add((planned.entity_type, planned.canonical_key))
+    return defaulted
+
+
+def preview(
+    store: BiStore, given: Any, *, samples: bool = False, folder: Any = None
+) -> PagePreview:
+    """Read the files and preview every type; writes nothing. With the `folder` it will
+    be kept in, a row with no domain takes that application's."""
     reg = for_store(store)
     problems: list[dict[str, Any]] = []
     skipped: list[dict[str, str]] = []
@@ -466,6 +503,7 @@ def preview(store: BiStore, given: Any, *, samples: bool = False) -> PagePreview
             known.setdefault(planned.entity_type, set()).add(planned.canonical_key)
     problems[:] = [p for p in problems if p["code"] not in _TABLE_CODES]
     final = previews(known, renamed)
+    defaulted = _default_domains(store, reg, final, folder)
     versions, conflicts = merge_rows(store, reg, final)
     result = PagePreview(
         preview_id=uuid.uuid4().hex[:12],
@@ -479,6 +517,8 @@ def preview(store: BiStore, given: Any, *, samples: bool = False) -> PagePreview
         skipped=skipped,
         versions=versions,
         mark_conflicts=conflicts,
+        defaulted=defaulted,
+        folder=str(folder) if folder else None,
     )
     _remember(result)
     return result
@@ -499,6 +539,11 @@ def _evidence(
     )
     found: dict[str, list[dict[str, Any]]] = {}
     for name in planned.values:
+        if name == "domain" and (planned.entity_type, planned.canonical_key) in prepared.defaulted:
+            found[name] = [{"source_id": source["id"], "source_name": source["name"],
+                            "locator": {"default": "application"}, "excerpt": "",
+                            "basis": "inference"}]  # fmt: skip
+            continue
         if page is None:  # a table: the row is the locator
             locator: dict[str, Any] = {"line": number, "column": name}
             excerpt = ""
@@ -531,6 +576,7 @@ def apply(
 ) -> dict[str, Any]:
     """Keep each file as a source and write every row in one transaction, as the
     preview planned: a card that moved since then refuses the whole (`cards_changed`)."""
+    folder = folder or prepared.folder
     staging = Staging(store.workspace, store.dataset)
     rows: list[tuple[PlannedRow, str, int | None]] = []
     sources: dict[str, dict[str, Any]] = {}

@@ -112,6 +112,15 @@ def home_of(folder: str) -> str | None:
     return matched.group("app") or f"{LIBRARY}/{matched.group('entry')}"
 
 
+def domain_of_folder(domains: Any, folder: str | None) -> str | None:
+    """The domain a source folder's application stands for: the schema's domain of that
+    name (`aidc` is `AIDC`). A library entry spans domains, so it has none."""
+    home = home_of(folder or "")
+    if home is None or home.startswith(f"{LIBRARY}/"):
+        return None
+    return next((d for d in domains if d.lower() == home.lower()), None)
+
+
 class BiLayout(FileLayout):
     """A BI vault's files; `skills` and `sources` remain for what old commits name."""
 

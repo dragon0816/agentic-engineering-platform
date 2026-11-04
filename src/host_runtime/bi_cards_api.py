@@ -380,7 +380,10 @@ def _route(
         # Obsidian card pages (BI_CARD_PAGE_IMPORT): no model; writes nothing.
         store = BiStore(workspace, _dataset(given.get("dataset")))
         prepared_pages = page_import.preview(
-            store, given.get("pages"), samples=given.get("samples") is True
+            store,
+            given.get("pages"),
+            samples=given.get("samples") is True,
+            folder=given.get("folder"),
         )
         return 200, {"ok": True, **prepared_pages.to_api()}
     if path == "/api/bi/import/pages/apply":
@@ -530,6 +533,7 @@ def _start_run(
             actor=who,
             schema=schema,
             folder=given.get("folder"),
+            fresh=given.get("fresh"),
         )
         return 200, {"ok": True, "run": run}
     mapping = given.get("mapping")

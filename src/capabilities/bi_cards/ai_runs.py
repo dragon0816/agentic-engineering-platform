@@ -28,6 +28,7 @@ from pathlib import Path
 from typing import Any
 
 from capabilities.bi_cards import (
+    answer_cache,
     catalog,
     extract,
     homes,
@@ -98,6 +99,7 @@ def start(
     method_ref: str | None = None,
     schema: tuple[Registry, str] | None = None,
     checks: list[dict[str, Any]] | None = None,
+    fresh: Any = False,
     folder: Any = None,
     skill_draft: Any = None,
     trial_schema: dict[str, Any] | None = None,
@@ -171,6 +173,7 @@ def start(
         run_id,
         {
             "mode": "llm",
+            "fresh": fresh is True,
             "types": scope,
             "instructions": text,
             "checks": checks or [],
@@ -198,12 +201,15 @@ def _folder_of(staging: Staging, source: dict[str, Any]) -> str | None:
 
 
 def home_domain(reg: Registry, folder: str | None) -> str | None:
-    """The domain a source's application stands for: the schema's domain of that name
-    (`aidc` is `AIDC`). A library entry spans domains, so it has none."""
-    home = homes.home_of(folder or "")
-    if home is None or home.startswith(f"{homes.LIBRARY}/"):
-        return None
-    return next((d for d in reg.domains if d.lower() == home.lower()), None)
+    return homes.domain_of_folder(reg.domains, folder)
+
+
+def _usable_answer(response: Any) -> bool:
+    """An answer worth repeating: JSON of the shape extraction reads."""
+    answer = response.structured_output
+    if not isinstance(answer, dict):
+        answer = extract._salvage(response.text)
+    return not extract._shape(answer)
 
 
 def _default_domain(reg: Registry, candidate: dict[str, Any], domain: str) -> bool:
@@ -324,8 +330,11 @@ def _extract(
     rules = layout["skills"] if isinstance(layout.get("skills"), dict) else {}
     notes = str(rules.get("text") or "")
     used_profile = rules.get("profile")
+    cached = answer_cache.CachingModel(
+        model, staging.store.dir, fresh=bool(layout.get("fresh")), usable=_usable_answer
+    )
     result = extract.extract(
-        model,
+        cached,
         alias,
         reg,
         text=text,
@@ -353,6 +362,13 @@ def _extract(
             by_key[key] = item
     checked = runs.apply_checks(list(by_key.values()), layout.get("checks"))
     merged = [runs.evaluate(staging.store, reg, c) for c in checked]
+    held = layout.get("answers") or {}
+    layout["answers"] = {
+        "reused": int(held.get("reused") or 0) + cached.hits,
+        "asked": int(held.get("asked") or 0) + cached.misses,
+        "input_tokens": int(held.get("input_tokens") or 0) + cached.input_tokens,
+        "output_tokens": int(held.get("output_tokens") or 0) + cached.output_tokens,
+    }
     if used_profile:
         for item in merged:
             profile.mark_candidate(reg, item, used_profile)
@@ -362,6 +378,7 @@ def _extract(
             runs.evaluate(staging.store, reg, item) if _default_domain(reg, item, domain) else item
             for item in merged
         ]
+    runs.mark_pair_repeats(staging.store, reg, merged)
     staging.put_candidates(run_id, merged)
     retried = set(only or [])
     kept = [f for f in layout.get("failures") or [] if int(f["chunk"]) not in retried]

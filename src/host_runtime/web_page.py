@@ -2845,6 +2845,8 @@ tr:last-child td { border-bottom: none; }
             <div id="bi-b-folder-box" hidden><label class="bi-label" for="bi-b-folder">
               來源在知識庫的哪個資料夾（決定 AI 用哪條擷取規則）</label>
               <select id="bi-b-folder"></select></div>
+            <div><label><input id="bi-b-fresh" type="checkbox">
+              不沿用上次的回答（同樣的來源和規則，重新問模型一次）</label></div>
             <div><label class="bi-label" for="bi-b-m-name">另存為新的 Skill（名稱）</label>
               <input id="bi-b-m-name" class="bi-input" maxlength="80"
                 placeholder="例如：會議紀錄擷取"></div>
@@ -14648,7 +14650,8 @@ el("bi-b-pages-dir").addEventListener("change", async (event) => {
     const pages = await Promise.all(chosen.map(async (f) =>
       ({path: f.webkitRelativePath || f.name, text: await f.text()})));
     biPagesPlan(await biCall("/api/bi/import/pages/preview", {dataset: biDataset(), pages,
-      samples: el("bi-b-pages-samples").checked}));
+      samples: el("bi-b-pages-samples").checked,
+      folder: biVaultOf(biDataset()) ? el("bi-b-src-folder").value : undefined}));
   } catch (failure) { biNotice(false, "沒有預覽：" + failure.message); }
 });
 
@@ -14978,6 +14981,7 @@ function biRunBody(kind) {
   const source = bi.build.sources.find((s) => s.id === bi.build.sourceId);
   if (methodId === "builtin:llm" && source && source.format === "table") body.path = "ai";
   if (methodId === "builtin:rules") body.path = "rules";
+  if (el("bi-b-fresh").checked) body.fresh = true;
   // 「不指定」 sends nothing: the server then uses the source's own folder.
   if (biDataset().startsWith("vault-") && el("bi-b-folder").value
     && el("bi-b-folder").value !== "sources") {
@@ -15037,7 +15041,9 @@ function biRunMerge(run) {
   // What writing this run would do to the cards there already.
   const m = run.merge;
   if (!m) return [];
-  return [biBadge("既有卡片：填入 " + m.fill, "good"), biBadge("合併清單 " + m.join, "good"),
+  const a = run.answers || {};
+  return [...(a.reused ? [biBadge(a.reused + " 段沿用上次的回答（提示詞完全相同）", "dim")] : []),
+    biBadge("既有卡片：填入 " + m.fill, "good"), biBadge("合併清單 " + m.join, "good"),
     biBadge("變成提案 " + m.proposal, m.proposal ? "warn" : "dim"),
     ...(m.take ? [biBadge("你選了新值 " + m.take, "warn")] : [])];
 }
@@ -15602,6 +15608,13 @@ function biBuildShowCandidate(candidateId) {
     parts.push(bh("p", "bi-warn", "這些欄位不在這個應用的 profile 裡："
       + candidate.outside_profile.join("、")));
   }
+  if (open && candidate.errors.some((e) => e.code === "pair_repeated")) {
+    const keep = candidate.match === "existing"
+      ? {action: "update", card_id: candidate.match_ids[0]} : {action: "create"};
+    parts.push(bh("div", "bi-actions", biButton("留這一張", () => biBuildReview(candidate.id,
+      {match: keep}), "bi-btn"), biButton("略過", () => biBuildReview(candidate.id,
+      {match: {action: "skip"}}), "bi-btn")));
+  }
   if (open && candidate.match === "ambiguous") {
     parts.push(bh("div", "bi-actions", biButton("新建", () => biBuildReview(candidate.id,
       {match: {action: "create"}}), "bi-btn"), ...candidate.match_ids.map((id) =>
@@ -15628,6 +15641,7 @@ function biBuildShowCandidate(candidateId) {
     save.disabled = !open;
     const merged = {fill: "填入", join: "合併清單", same: "相同", take: "你選了新值",
       capped: "AI 不能寫 verified：存 " + (item.capped || "（空）") + "，另成提案",
+      key_kept: "卡片保留原本的名字",
       proposal: "值不同，變成提案，不會覆蓋", human_kept: "保留人工值，改成提案",
       bookkeeping: "記錄用欄位"}[item.merge];
     const take = open && !item.protected && (item.merge === "proposal" || item.merge === "take"

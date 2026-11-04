@@ -6305,3 +6305,12 @@ Library entries have an application's shape (owner, 2026-11-04): `library/<produ
 ## 2026-11-04: `not_applicable` only when stated, never derived from a profile
 
 **Owner decision.** A field a profile omits is unknown. It is `not_applicable` only when a profile lists it (`not_applicable: [field]`, with an optional reason) or a correction note states it. `used_fields` stays for what the AI is asked. **Why:** a profile says what one expert asks for, not what cannot apply: derivation marked 181 fields on market-intel, and earlier 2,066, as 不適用 where the truth was 未知, which the model would then state as fact. `MODEL_VERSION` rises to 8, so existing vaults rebuild with no commit changed. **Rejected:** deriving only for types the profile lists (the previous rule, still wrong on what an expert merely left out).
+
+## 2026-11-04: A model's supply link matches by its two ends; identical requests repeat (owner, relayed by the BI orchestrator)
+
+Measured in `docs/phases/BI_EXTRACTION_VARIANCE.md`: gpt-5.5 gives different cards from identical bytes, with no way to fix it (`temperature` must be 1; a seed does not make it repeat).
+
+- **`SupplyLink` from a model matches an existing card by supplier and customer,** not by the product phrase in its name. A seed keeps its key, so no schema or key change. A differing product is a proposal. Several cards on a pair, or several candidates of a run for one pair, are for a person; nothing merges silently. Consequence: two real products of one pair need a person's explicit 「留這一張」 or new card. Rejected: a `RevenueFact` key from company, period and layer, which made a chunk less stable because the model's `period` varies.
+- **An identical request reuses its answer,** per PC, with `fresh` to ask anyway. Consequence: a re-run repeats until the prompt changes, including a mistake it made; and it does not make a first run complete. The key holds the model's alias, not the endpoint's model, so changing what an alias points at needs `fresh`.
+- **A card with no domain takes its application's, marked inference,** on imports and through `fill-domains`. A library folder gives none. Mixed `domain` storage is the schema's: `enum` on 5 types, `list` on 16. Not a bug.
+- **Rejected for now: sending only the known names a chunk mentions.** It steadied supply links on one chunk but halved revenue facts there and made same-named `Account` cards.

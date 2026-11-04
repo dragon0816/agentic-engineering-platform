@@ -616,6 +616,22 @@ class BiStore:
             for r in rows
         ]
 
+    def field_values(self, entity_type: str, fields: Sequence[str]) -> dict[str, dict[str, Any]]:
+        """These fields of every card of a type: {card id: {field: value}}."""
+        if not self.exists:
+            return {}
+        marks = ", ".join("?" for _ in fields)
+        with self._db() as db:
+            rows = db.execute(
+                "SELECT f.card_id, f.field, f.value FROM fields f JOIN cards c ON c.id = f.card_id "
+                f"WHERE c.entity_type = ? AND f.field IN ({marks})",  # noqa: S608
+                (entity_type, *fields),
+            ).fetchall()
+        found: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            found.setdefault(row["card_id"], {})[row["field"]] = _load(row["value"])
+        return found
+
     def other_names(self) -> list[tuple[str, str]]:
         """(card id, name) of every alias and former name in `card_names`."""
         if not self.exists:

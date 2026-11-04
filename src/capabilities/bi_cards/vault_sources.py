@@ -135,6 +135,7 @@ def stage_revision(repo: Any, staging: Any, source_id: str, rev: int) -> None:
 def sync_staging(repo: Any, workspace: Path, dataset: str) -> dict[str, int]:
     """This PC's source list from the repository (a colleague's sources read
     through); it writes nothing to the shared folder."""
+    from capabilities.bi_cards import answer_cache
     from capabilities.bi_cards.staging import Staging
 
     staging = Staging(workspace, dataset)
@@ -142,6 +143,7 @@ def sync_staging(repo: Any, workspace: Path, dataset: str) -> dict[str, int]:
     if gone:
         repo.forget_withdrawn()
         staging.purge_withdrawn(gone)
+        answer_cache.clear(staging.store.dir)  # kept answers quote their sources
     units = [
         value
         for key, value in repo.working_units().items()

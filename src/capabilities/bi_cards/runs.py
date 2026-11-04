@@ -162,6 +162,60 @@ def merge_counts(candidates: list[dict[str, Any]]) -> dict[str, int]:
     return counts
 
 
+#: A model's card of these types is the same card when these fields match: its name holds a
+#: phrase the model words freely (owner, 2026-11-04). The card keeps its own name.
+PAIR_FIELDS = {"SupplyLink": ("supplier", "customer")}
+
+
+def _pair_of(candidate: dict[str, Any], values: dict[str, Any]) -> tuple[str, str] | None:
+    """A model's candidate's two ends, compared loosely. Only a model's candidates hold
+    `value_errors`: an import's rows keep their own keys."""
+    fields = PAIR_FIELDS.get(candidate["entity_type"])
+    if fields is None or "value_errors" not in candidate:
+        return None
+    ends = [values.get(name) for name in fields]
+    if not all(isinstance(end, str) and end.strip() for end in ends):
+        return None
+    return norm_key(ends[0]), norm_key(ends[1])
+
+
+def _cards_of_pair(store: BiStore, entity_type: str, pair: tuple[str, str]) -> list[str]:
+    first, second = PAIR_FIELDS[entity_type]
+    return [
+        card_id
+        for card_id, held in store.field_values(entity_type, (first, second)).items()
+        if (norm_key(held.get(first, "")), norm_key(held.get(second, ""))) == pair
+    ]
+
+
+def mark_pair_repeats(store: BiStore, reg: Registry, candidates: list[dict[str, Any]]) -> None:
+    """Several candidates of a run for one pair: a person chooses, nothing merges silently.
+    Those with a person's choice count towards the group but are not held."""
+    groups: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
+    for candidate in candidates:
+        pair = _pair_of(candidate, _values(candidate))
+        if pair is None or candidate["review"] == "rejected":
+            continue
+        if (candidate.get("choice") or {}).get("action") == "skip":
+            continue
+        groups.setdefault((candidate["entity_type"], *pair), []).append(candidate)
+    held = {
+        candidate["id"]: [str(c.get("name")) for c in group if c is not candidate]
+        for group in groups.values()
+        if len(group) > 1
+        for candidate in group
+    }
+    for candidate in candidates:
+        if candidate.get("pair_repeats") != held.get(candidate["id"]):
+            if candidate["id"] in held:
+                candidate["pair_repeats"] = held[candidate["id"]]
+            else:
+                candidate.pop("pair_repeats", None)
+            evaluate(store, reg, candidate)
+            if candidate["review"] == "accepted" and candidate["errors"]:
+                candidate["review"] = "pending"
+
+
 def evaluate(store: BiStore, reg: Registry, candidate: dict[str, Any]) -> dict[str, Any]:
     """Recompute match, base version, per-field diff, action and errors
     against the cards now; the review state and edits are kept."""
@@ -187,7 +241,26 @@ def evaluate(store: BiStore, reg: Registry, candidate: dict[str, Any]) -> dict[s
         if card is not None:
             match, match_ids = "existing", [card["id"]]
         elif choice.get("action") != "create":
+            pair = _pair_of(candidate, values)
+            same_pair = [] if pair is None else _cards_of_pair(store, entity.name, pair)
             similar = _similar(store, entity.name, key)
+            if len(same_pair) == 1:
+                card = store.card(same_pair[0])
+                assert card is not None
+                key = str(card["canonical_key"])
+                match, match_ids = "existing", [card["id"]]
+                similar = []
+            elif same_pair:
+                match, match_ids = "ambiguous", same_pair
+                similar = []
+                errors.append(
+                    {
+                        "code": "match_unresolved",
+                        "message": f"這組供應商與客戶已經有 {len(same_pair)} 張卡，請選一張合併，"
+                        "或確認要新建",
+                        "field": None,
+                    }
+                )
             if similar:
                 match, match_ids = "ambiguous", [c["id"] for c in similar]
                 errors.append(
@@ -210,6 +283,8 @@ def evaluate(store: BiStore, reg: Registry, candidate: dict[str, Any]) -> dict[s
             _fill(entity.get(item["field"]), item)
         else:
             _merge_field(entity.get(item["field"]), item, stored)
+            if item["field"] in entity.naming and item["merge"] not in ("same", "fill"):
+                item["merge"] = "key_kept"  # the card it matched keeps its own name
         if stored is None:
             item["change"] = "add"
             changes += 1
@@ -251,6 +326,16 @@ def evaluate(store: BiStore, reg: Registry, candidate: dict[str, Any]) -> dict[s
     else:
         action = "update" if changes else "unchanged"
     candidate["action"] = action
+    if candidate.get("pair_repeats") and not choice:
+        errors.append(
+            {
+                "code": "pair_repeated",
+                "message": "這次執行有另一張候選卡是同一組供應商與客戶（"
+                + "、".join(candidate["pair_repeats"][:6])
+                + "）：請留一張，其他略過",
+                "field": None,
+            }
+        )
     # Values the model gave that do not fit the schema (AI path) stay errors
     # until the person edits the field.
     errors.extend(candidate.get("value_errors") or [])
@@ -654,6 +739,7 @@ def run_view(staging: Staging, run_id: str) -> dict[str, Any]:
             types=layout.get("types") or [],
             relations=layout.get("relations") or [],
             merge=merge_counts(found),
+            answers=layout.get("answers"),
         )
         rules = layout.get("skills")
         if isinstance(rules, dict):  # a vault's run: what its home's profile said, or none
@@ -835,6 +921,10 @@ def review(
     elif candidate["review"] == "accepted" and candidate["errors"]:
         candidate["review"] = "pending"
     staging.put_candidates(run_id, [candidate])
+    everything = staging.candidates(run_id)
+    mark_pair_repeats(staging.store, reg, everything)
+    staging.put_candidates(run_id, everything)
+    candidate = next(c for c in everything if c["id"] == candidate_id)
     return {"candidate": public(candidate), "run": run_view(staging, run_id)}
 
 
@@ -918,6 +1008,7 @@ def recheck(workspace: Path, dataset: str, run_id: str) -> dict[str, Any]:
             changed.append(candidate["id"])
             if candidate["review"] == "accepted":
                 candidate["review"] = "pending"
+    mark_pair_repeats(staging.store, reg, found)
     staging.put_candidates(run_id, found)
     return {
         "run": run_view(staging, run_id),
@@ -1031,7 +1122,7 @@ def _planned(
             ]
         elif how == "take":
             overwrite.add(name)
-        elif how == "bookkeeping" and not item.get("later"):
+        elif how == "key_kept" or (how == "bookkeeping" and not item.get("later")):
             values.pop(name, None)
         if item.get("alternatives") or name in alternatives:
             alternatives[name] = [
