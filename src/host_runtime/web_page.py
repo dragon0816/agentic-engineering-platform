@@ -13873,8 +13873,11 @@ async function biTools(vaultId) {
     try {
       const done = await biVerRun(vaultId, "tool-run",
         {name: item.name, source_id: bi.build.sourceId});
-      biNotice(true, "產出新來源：" + done.sources.map((s) => s.name).join("、")
-        + "；選它之後走一樣的預覽和審核。");
+      bi.build.sourceId = done.sources[0].id;
+      await biBuildSources();
+      biBuildSave();
+      biNotice(true, "產出新來源並已選取：" + done.sources.map((s) => s.name).join("、")
+        + "；接著走一樣的試跑、預覽和審核。");
     } catch (failure) { biNotice(false, "沒有執行：" + failure.message); }
   };
   const row = (item, draft) => {
