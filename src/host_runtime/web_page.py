@@ -2594,6 +2594,10 @@ tr:last-child td { border-bottom: none; }
                 <div data-for="new"><label class="bi-label" for="bi-b-v-title">知識庫名稱</label>
                   <input id="bi-b-v-title" class="bi-input" maxlength="120"
                     placeholder="例如：市場訊號與產品對應"></div>
+                <div data-for="new"><label class="bi-label" for="bi-b-v-id">
+                  知識庫 id（資料夾名稱，之後不能改；留空由名稱產生）</label>
+                  <input id="bi-b-v-id" class="bi-input" maxlength="40" spellcheck="false"
+                    placeholder="例如：market-intel"></div>
                 <div data-for="new convert"><label class="bi-label" for="bi-b-v-purpose">
                   目的（Agent 依這段話判斷什麼問題該查它）</label>
                   <input id="bi-b-v-purpose" class="bi-input" maxlength="1000"
@@ -14225,6 +14229,8 @@ el("bi-b-v-form").addEventListener("submit", async (event) => {
     Object.assign(body, {title: el("bi-b-v-title").value.trim(),
       purpose: el("bi-b-v-purpose").value.trim(), schema: el("bi-b-v-schema").value});
     if (!body.title) { err.append(bh("p", "bi-err", "請填知識庫名稱。")); return; }
+    const id = el("bi-b-v-id").value.trim();
+    if (id) body.id = id;
   }
   if (mode === "convert") {
     Object.assign(body, {dataset: biDataset(), purpose: el("bi-b-v-purpose").value.trim()});

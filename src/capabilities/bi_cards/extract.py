@@ -34,7 +34,11 @@ from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequi
 
 OUTPUT_CONTRACT = "aep.bi.extract.v1"
 CHUNK_CHARS = 6000
+#: Reasoning counts against this: a dense 6,000-character chunk spent all of 6,000 on it and
+#: answered nothing (measured 2026-11-04).
+MAX_OUTPUT_TOKENS = 16000
 MAX_ATTEMPTS = 3
+TRUNCATED = "model_output_truncated"
 MAX_KNOWN_NAMES = 200
 MIN_QUOTE = 2
 BASES = ("fact", "inference", "unknown")
@@ -688,9 +692,24 @@ def extract_chunk(
                 ),
                 requirements=ModelRequirements(structured_output=True, local_only=local_only),
                 output_contract=OUTPUT_CONTRACT,
-                max_output_tokens=6000,
+                max_output_tokens=MAX_OUTPUT_TOKENS,
             )
         )
+        if response.failure is not None and response.failure.code == TRUNCATED:
+            # Said for this chunk, and worth another try: the model may reason less next time.
+            return (
+                [],
+                [],
+                {
+                    "chunk": chunk.index,
+                    "line_start": chunk.line_start,
+                    "line_end": chunk.line_end,
+                    "code": TRUNCATED,
+                    "message": "這一段內容太密，模型的回答超過長度上限，這一段沒有讀到；"
+                    "可以重試，或把來源切小",
+                    "retryable": True,
+                },
+            )
         if response.failure is not None:
             return (
                 [],

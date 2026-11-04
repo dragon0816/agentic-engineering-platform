@@ -271,3 +271,28 @@ def test_a_retry_is_refused_when_the_source_s_data_class_is_no_longer_approved(
     _ok(_call(tmp_path, "POST", path, {"dataset": "demo"}, ai))
     jobs.run_all()
     assert _detail(tmp_path, run["id"])["run"]["status"] == "review"
+
+
+def test_a_truncated_answer_says_which_chunk_and_can_be_tried_again(tmp_path: Path) -> None:
+    """Measured 2026-11-04: a dense chunk spent all of 6,000 output tokens on reasoning.
+    The limit has room for that, and a chunk that still does not fit is not lost silently."""
+    jobs = Jobs()
+    truncated = Failure(code="model_output_truncated", message="cut", retryable=False)
+    model = Scripted(truncated, MEETING_ANSWER)
+    ai = _runtime(model, jobs)
+    run = _start(tmp_path, ai, _note(tmp_path))
+    jobs.run_all()
+    assert model.requests[0].max_output_tokens == 16000
+    detail = _detail(tmp_path, run["id"])
+    assert detail["run"]["status"] == "failed" and detail["candidates"] == []
+    (failure,) = detail["run"]["failures"]
+    assert failure["code"] == "model_output_truncated" and failure["retryable"] is True
+    assert failure["chunk"] == 0 and failure["line_start"] == 1 and failure["line_end"] >= 1
+    assert "這一段沒有讀到" in failure["message"] and "可以重試" in failure["message"]
+
+    path = f"/api/bi/runs/{run['id']}/retry"
+    _ok(_call(tmp_path, "POST", path, {"dataset": "demo"}, ai))
+    jobs.run_all()
+    again = _detail(tmp_path, run["id"])
+    assert again["run"]["status"] == "review" and again["run"]["failures"] == []
+    assert again["candidates"]

@@ -44,9 +44,9 @@ name aliases to carry over.
 
 **Where each base goes (owner, 2026-11-04):** `aidc-bi-kb` and the two reports to the application `aidc`, `Aerospace-BI-KB` to `aerospace`, `robotics_kb_sample` to `robotics`, `Wireless-Module-BI-KB-SAMPLE` and `BI_Vault_Example` to `wireless`. No page names a market segment, so nothing is sorted into the 11 segments. The vault's list is these four. Layout: `docs/phases/BI_CARD_MODEL.md` §4.
 
-Two AIDC reports: `C:\Users\Chi_L\OneDrive - Rohde & Schwarz\BI_Knowledge\market-bi\applications\aidc-compute.md` and
-`aidc-power_cooling.md`. Read only; copy out, never move. Compare them with `aidc-bi-kb/sources/compute.md` and
-`power_cooling.md` first, by content: add one copy of each.
+Two AIDC reports: `market-bi\applications\aidc-computing\sources\aidc-compute.md` and
+`market-bi\applications\aidc-power\sources\aidc-power_cooling.md`, under `C:\Users\Chi_L\OneDrive - Rohde & Schwarz\BI_Knowledge`. Their SHA-256 match
+`files\aidc-bi-kb\sources\compute.md` and `power_cooling.md`, so **add one copy of each, from `files\`**; nothing needs copying out of OneDrive.
 
 Schema: built in, `bi.schema/v1.1@5.0.0`, the newest (21 types; `segment` holds the 11 market segments; `domain` is a list on the types a card may share; the card model's `summary`, `usage`, `scope`, relation types). The old folder
 `market-bi` is a reference for a person only: nothing is converted from it by a tool.
@@ -148,7 +148,7 @@ that flow is changing, so read the current ones on the page.
 | 1 | Run §4. Settle the open points of §3 with the owner and record them in `docs/DECISIONS.md`. | Exit code 0; each recorded |
 | 2 | Restart Agent Web if it predates the build flow (check `/api/tasks` first, AGENTS rule 19). | Page shows the build-flow steps |
 | 3 | Rename the old folder to `market-bi.v4-old` in Explorer. Wait for OneDrive to finish. | Old folder present under the new name on OneDrive's site; nothing deleted |
-| 4 | Knowledge > BI > 建立與匯入 > 建立共用知識庫（vault）: id `market-intel`, in `BI_Knowledge`, schema `bi.schema/v1.1` (5.0.0), author `leo.chi`. | `repo.json` is there; folders `applications/aidc`, `aerospace`, `robotics`, `wireless` and `library/products`, `technologies`, `competitors` |
+| 4 | Knowledge > BI > 建立與匯入 > 建立共用知識庫（vault）: **fill the id field with `market-intel`** (left empty, the id gets a random ending, forever), in `BI_Knowledge`, schema `bi.schema/v1.1` (5.0.0), author `leo.chi`. | `repo.json` is there; folders `applications/aidc`, `aerospace`, `robotics`, `wireless` and `library/products`, `technologies`, `competitors` |
 | 5 | Step 1: add the AIDC base's sources (§3's list) **to the application `aidc`**, let them become Markdown. They reach the shared folder with the push (D2). | Each source has Markdown under `applications/aidc/sources`; spot-check a few |
 | 6 | Step 2: Session A only if the schema must change; Session B for the skills. Move the manager's reading rules there. **Before any AI extraction, the owner approves a profile for that application** (only `aidc` this session: its two reports; seeds and pages read none). On the page for that application, or an agent writes it from what the owner says; the owner reads it before the commit. Without one the model sees the whole schema, with a notice. | The owner reviewed every schema change, skill and profile |
 | 7 | Import the AIDC seeds first (`seed/`, the 22 card CSVs): preview, apply. Then its pages through the card-page importer (§3). | 22 CSVs → 323 cards; §7's AIDC numbers match |
