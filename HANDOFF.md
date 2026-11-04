@@ -1,5 +1,17 @@
 # Handoff
 
+## R6 on the real vault (2026-11-04 16:10, Claude Code worker D) — stopped before push
+
+On the real Agent Web (53583), main `31895dc8`. `market-bi` is renamed `market-bi.v4-old`, nothing deleted. Vault `market-intel`, schema 5.0.0: **760 cards, 21 types; 39 local commits, not pushed**; only the first schema commit is in the shared folder; no tag, no publish.
+
+**Done:** five bases imported; 19 import proposals decided; 113 aliases; `aidc` profile revision 3 and skill `aidc/aidc-extract`; 122 domains filled from applications; AI runs on both reports committed by the owner's selection (`20a0b9376dd7`, `b6335ab16ec0`).
+
+**Pending:** 346 proposals, mostly `body` and `product`, left for the owner on purpose. Lists, git-ignored: `.scratch/r6/27-pairs.md` (the 27 supply pairs, kept and skipped), `.scratch/r6/not-written.json` (37 skipped and 5 not written: Amazon and xAI proposed as two types, Anthropic with an invalid value).
+
+**Known:** quality's `evidence_source` went from 1 to 60, since supply links the model made have no `source` or `source_date`. `鴻海` is still two types; `聯發科`/`MediaTek` and `致茂`/`致茂電子` look like two cards each.
+
+**Next, on the orchestrator's word:** push (474+ files to OneDrive), tag `2026q4-r6`, publish. Drivers, git-ignored: `.scratch/r6_*.py`. Why counts differ between runs: `docs/phases/BI_EXTRACTION_VARIANCE.md`.
+
 ## The BI card model (2026-11-03, Claude Code worker D) — latest
 
 **Where.** Branch `bi-card-model` from `11a4653b`, in the worktree `bi-vault-asking`. Phase 1 lanes A, B, C and D are all merged there (tasks in `docs/phases/BI_CARD_MODEL.md` §8). Not pushed, not on `main`.
