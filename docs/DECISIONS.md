@@ -6301,3 +6301,7 @@ Design: `docs/phases/BI_CARD_MODEL.md`; source: `docs/proposals/AEP_BI_Card_Data
 `aidc`, `aerospace`, `robotics`, `wireless`; the 11 segments stay as `segment` values on cards. The list stays data, per vault. Rejected: the 11 segments as folders, since none of the 434 card pages names one, so R6 would have sorted them by hand.
 
 Library entries have an application's shape (owner, 2026-11-04): `library/<products|technologies|competitors>/{sources/, skills/, tools/, profile/}`, the list data too. `classify` stays at `library/skills/`, so `skills` cannot be an entry name. Unit keys use `library/<entry>`, so an application of the same name cannot collide.
+
+## 2026-11-04: A card's evidence review is stored on the evidence row
+
+Phase 2-c needs a person's judgement of a reference on a card, and `BI_CARD_MODEL.md` §3 only has `assessment` on `relation_evidence`. **Decision:** `evidence` gains one optional `assessment` column, and an `evidence:` row may hold the key; old rows stay valid and `MODEL_VERSION` rises to 6. The review travels as a note on the correction path. **Rejected:** a new `review:` unit (proposal §5 asks not to add tables and units for this, and the row is where the judgement belongs); pseudo-relations in `relation_evidence` for a card's field (would show up as relations).

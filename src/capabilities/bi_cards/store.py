@@ -155,7 +155,8 @@ CREATE TABLE IF NOT EXISTS evidence (
   reference_id TEXT NOT NULL DEFAULT '',
   stance TEXT NOT NULL DEFAULT 'supports',
   reference_at TEXT,
-  reference_time_basis TEXT
+  reference_time_basis TEXT,
+  assessment TEXT
 );
 CREATE TABLE IF NOT EXISTS relations (
   relation_id TEXT PRIMARY KEY,
@@ -213,6 +214,7 @@ EVIDENCE_COLUMNS = {
     "stance": "TEXT NOT NULL DEFAULT 'supports'",
     "reference_at": "TEXT",
     "reference_time_basis": "TEXT",
+    "assessment": "TEXT",
 }
 
 
@@ -404,6 +406,7 @@ def _reference_view(row: Mapping[str, Any]) -> dict[str, Any]:
         "reference_at": dated or row["at"],
         "reference_time_basis": row.get("reference_time_basis")
         or (None if dated else card_model.SUBMISSION_FALLBACK),
+        "assessment": _load(row.get("assessment")),
     }
 
 
@@ -564,8 +567,105 @@ class BiStore:
         with self._db() as db:
             return list(db.execute("SELECT * FROM cards ORDER BY entity_type, canonical_key"))
 
-    def relations(self, card_id: str) -> list[dict[str, Any]]:
-        """A card's relations both ways, a rejected one left out, with their evidence."""
+    def relation_row(self, relation_id: str) -> dict[str, Any] | None:
+        """One relation; None when unknown, or on a dataset not written since the model."""
+        if not self.exists:
+            return None
+        with self._db() as db:
+            if not db.execute("SELECT 1 FROM sqlite_master WHERE name = 'relations'").fetchone():
+                return None
+            row = db.execute(
+                "SELECT * FROM relations WHERE relation_id = ?", (relation_id,)
+            ).fetchone()
+        return None if row is None else dict(row)
+
+    def relation_references(self, relation_id: str) -> list[dict[str, Any]]:
+        """What a person reviews a relation on: its linked evidence, and for one derived
+        from a link field that field's evidence not linked yet. A place in a source
+        comes with each when the source is cited on a card."""
+        relation = self.relation_row(relation_id)
+        if relation is None:
+            return []
+        found: dict[str, dict[str, Any]] = {}
+        with self._db() as db:
+
+            def place(reference: str) -> dict[str, Any]:
+                row = db.execute(
+                    "SELECT source_name, locator, excerpt, at FROM evidence "
+                    "WHERE reference_id = ? ORDER BY seq LIMIT 1",
+                    (reference,),
+                ).fetchone()
+                if row is None:
+                    return {"source_name": "", "locator": None, "excerpt": "", "at": None}
+                return {**dict(row), "locator": _load(row["locator"])}
+
+            for r in db.execute(
+                "SELECT * FROM relation_evidence WHERE relation_id = ? ORDER BY evidence_link_id",
+                (relation_id,),
+            ).fetchall():
+                found[r["reference_id"]] = {
+                    "reference_id": r["reference_id"],
+                    "basis_card_id": r["basis_card_id"],
+                    "linked": True,
+                    "stance": r["stance"],
+                    "assessment": _load(r["assessment"]),
+                    **place(r["reference_id"]),
+                }
+            if relation["source_field"]:
+                for r in db.execute(
+                    "SELECT DISTINCT reference_id, stance FROM evidence "
+                    "WHERE card_id = ? AND field = ?",
+                    (relation["from_card_id"], relation["source_field"]),
+                ).fetchall():
+                    found.setdefault(
+                        r["reference_id"],
+                        {
+                            "reference_id": r["reference_id"],
+                            "basis_card_id": relation["from_card_id"],
+                            "linked": False,
+                            "stance": r["stance"],
+                            "assessment": None,
+                            **place(r["reference_id"]),
+                        },
+                    )
+        return list(found.values())
+
+    def review_evidence(
+        self,
+        card_id: str,
+        field: str,
+        reference_id: str,
+        *,
+        stance: str,
+        date: str | None,
+        assessment: Mapping[str, Any],
+    ) -> None:
+        """A person's review of a reference, on each of its rows (`evidence_review`). A
+        row from before the card model takes the evidence time, so its unit holds the
+        reference and the review reads back."""
+        self.refuse_write()
+        with self._db(write=True) as db:
+            db.execute(
+                "UPDATE evidence SET stance = ?, assessment = ?, "
+                "reference_time_basis = CASE WHEN ? IS NOT NULL THEN NULL "
+                "WHEN reference_at IS NULL THEN ? ELSE reference_time_basis END, "
+                "reference_at = COALESCE(?, reference_at, at) "
+                "WHERE card_id = ? AND field = ? AND reference_id = ?",
+                (
+                    stance,
+                    _dump(assessment),
+                    date,
+                    card_model.SUBMISSION_FALLBACK,
+                    date,
+                    card_id,
+                    field,
+                    reference_id,
+                ),
+            )
+
+    def relations(self, card_id: str, *, rejected: bool = False) -> list[dict[str, Any]]:
+        """A card's relations both ways, with their evidence: those in use, or with
+        `rejected` the ones a person turned down."""
         if not self.exists:
             return []
         with self._db() as db:
@@ -576,9 +676,10 @@ class BiStore:
                 "CASE WHEN r.from_card_id = ? THEN 'out' ELSE 'in' END AS direction "
                 "FROM relations r JOIN cards c ON c.id = "
                 "CASE WHEN r.from_card_id = ? THEN r.to_card_id ELSE r.from_card_id END "
-                "WHERE (r.from_card_id = ? OR r.to_card_id = ?) AND r.status != 'rejected' "
+                "WHERE (r.from_card_id = ? OR r.to_card_id = ?) "
+                "AND (r.status = 'rejected') = ? "
                 "ORDER BY r.relation_type, c.name",
-                (card_id, card_id, card_id, card_id),
+                (card_id, card_id, card_id, card_id, int(rejected)),
             ).fetchall()
             evidence: dict[str, list[dict[str, Any]]] = {}
             for r in db.execute(
@@ -821,8 +922,8 @@ class BiStore:
                         db.execute(
                             "INSERT INTO evidence (card_id, field, run_id, source_id, "
                             "source_name, locator, excerpt, basis, at, reference_id, stance, "
-                            "reference_at, reference_time_basis) "
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            "reference_at, reference_time_basis, assessment) "
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                             (
                                 card["id"],
                                 name,
@@ -834,6 +935,9 @@ class BiStore:
                                 str(item.get("basis") or "fact"),
                                 at,
                                 *reference_parts(item, planned.values, at),
+                                _dump({"system": {"reason": item["reason"]}})
+                                if item.get("reason")
+                                else None,
                             ),
                         )
         return result

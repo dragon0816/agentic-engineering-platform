@@ -12644,6 +12644,8 @@ function biRenderDetail() {
   for (const item of fields) list.append(biFieldRow(card, item));
   if (!fields.length) list.append(bh("p", "bi-empty", "沒有欄位。"));
   body.append(list);
+  biRenderStates(body, card, bi.detail.field_states || {});
+  biRenderReviews(body, card);
   body.append(bh("h4", "", "關聯"));
   if (!links.length) body.append(bh("p", "bi-meta", "沒有關聯。"));
   else {
@@ -12682,6 +12684,178 @@ function biRenderDetail() {
   status.setAttribute("role", "status");
   const historyList = bh("div", ""); historyList.id = "bi-history";
   history.append(status, historyList); body.append(history);
+}
+
+const BI_STATE_WORDS = {not_applicable: "不適用", pending_confirmation: "待確認",
+  confirmed_none: "確認沒有", unknown: "未知"};
+const BI_STANCE = [["supports", "支持：這段出處支持這個敘述"],
+  ["refutes", "反駁：這段出處和這個敘述相反"], ["context_only", "僅背景：只是背景，不能當依據"]];
+const BI_DIRECT = [["direct", "直接支持：出處明確寫出這件事"],
+  ["indirect", "間接支持：要經過推論才得到"], ["insufficient", "不足以支持：不能當作依據"],
+  ["unknown", "未知：資訊不足，無法判斷"]];
+const BI_SAME = [["independent", "獨立來源：不是轉述別的來源"],
+  ["same_source", "同源：轉述或轉載同一個來源"], ["unknown", "未知：看不出來"]];
+const BI_REVIEW_VERDICT = [["accepted", "採信"], ["pending", "待確認"], ["rejected", "不採信"]];
+const biWord = (list, code) => ((list.find(([c]) => c === code) || [, code])[1] || "")
+  .split("：")[0];
+
+function biRenderStates(body, card, states) {
+  const names = Object.keys(states);
+  if (!names.length) return;
+  body.append(bh("h4", "", "沒有值的欄位"));
+  const ul = bh("ul", "bi-list"); ul.dataset.fieldStates = "true";
+  for (const name of names) {
+    const label = (biSchemaField(card.entity_type, name) || {}).label || name;
+    const state = states[name];
+    ul.append(bh("li", "", bh("strong", "", label), text("："
+      + (BI_STATE_WORDS[state.state] || state.state) + " "),
+      bh("span", "bi-meta", state.raw ? "（寫的是「" + state.raw + "」）" : "")));
+  }
+  body.append(ul);
+}
+
+function biPlace(item) {
+  const place = Object.entries(item.locator || {}).map(([k, v]) => k + " " + v).join("・");
+  return (item.source_name || "沒有來源檔") + (place ? "（" + place + "）" : "");
+}
+
+// One reference to review: what it says, where, what the model judged and any earlier
+// review. Changes go through a note (preview, then confirm), never a field edit.
+function biReviewRow(card, target, statement, item) {
+  const row = bh("div", "bi-field"); row.dataset.review = item.reference_id || "relation";
+  const now = (item.assessment || {}).current || {};
+  const reason = ((item.assessment || {}).system || {}).reason;
+  row.append(bh("div", "bi-field-head", bh("strong", "", statement),
+    biBadge(biWord(BI_STANCE, item.stance || "supports"),
+      item.stance === "refutes" ? "warn" : "dim"),
+    now.verdict ? biBadge(biWord(BI_REVIEW_VERDICT, now.verdict), "accent") : text("")));
+  if (item.reference_id) {
+    row.append(bh("div", "bi-field-value", "「" + (item.excerpt || "") + "」"),
+      bh("p", "bi-meta", "出處：" + biPlace(item)));
+  } else row.append(bh("p", "bi-meta", "這條關係沒有出處，覆核會留下你的理由。"));
+  row.append(bh("p", "bi-meta", "AI 判定：" + (item.basis ? biBasisWord(item.basis) + "，" : "")
+    + biWord(BI_STANCE, ((item.assessment || {}).history || [])[0]?.before?.stance
+      || item.stance || "supports") + (reason ? "；理由：" + reason : "")));
+  for (const past of (item.assessment || {}).history || []) {
+    row.append(bh("p", "bi-meta", biTime(past.at) + " " + (past.author || past.by) + "："
+      + biWord(BI_REVIEW_VERDICT, past.before.verdict) + " → "
+      + biWord(BI_REVIEW_VERDICT, past.after.verdict)
+      + "，" + biWord(BI_DIRECT, past.before.directness) + " → "
+      + biWord(BI_DIRECT, past.after.directness) + "；" + past.reason));
+  }
+  if (!biReadOnly()) {
+    row.append(bh("div", "bi-field-foot", biButton("覆核",
+      () => biReviewForm(card, target, item, row), "bi-btn", "覆核「" + statement + "」")));
+  }
+  return row;
+}
+
+function biBasisWord(basis) { return (BI_BASIS[basis] || [basis])[0]; }
+
+function biRenderReviews(body, card) {
+  if (!biVaultOf(biDataset())) return;
+  const {fields = [], evidence = [], relations = [], rejected_relations: gone = []} = bi.detail;
+  body.append(bh("h4", "", "證據覆核"));
+  const box = bh("div", "bi-fields"); box.id = "bi-reviews";
+  const seen = new Set();
+  for (const item of evidence) {
+    const key = item.field + "/" + item.reference_id;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const field = fields.find((f) => f.field === item.field);
+    box.append(biReviewRow(card, {target: "card", field: item.field,
+      reference_id: item.reference_id}, ((field || {}).label || item.field) + "："
+      + biValue(field ? field.value : null), item));
+  }
+  for (const relation of [...relations, ...gone]) {
+    const arrow = relation.direction === "out" ? " → " : " ← ";
+    const statement = relation.type + arrow + relation.other_name + "（"
+      + relation.status + "）";
+    const target = {target: "relation", relation: relation.relation_id};
+    const given = relation.references || [];
+    for (const item of given) {
+      box.append(biReviewRow(card, {...target, reference_id: item.reference_id},
+        statement, {...item, assessment: item.assessment
+          || {system: relation.note ? {reason: relation.note} : undefined}}));
+    }
+    if (!given.length) {
+      box.append(biReviewRow(card, target, statement, {stance: "supports",
+        assessment: {system: relation.note ? {reason: relation.note} : undefined}}));
+    }
+  }
+  if (!box.children.length) box.append(bh("p", "bi-meta", "沒有可以覆核的出處。"));
+  body.append(box);
+}
+
+function biReviewForm(card, target, item, row) {
+  const old = row.querySelector(".bi-edit");
+  if (old) { old.remove(); return; }
+  const now = (item.assessment || {}).current || {};
+  const form = bh("form", "bi-edit"); form.noValidate = true;
+  const id = "bi-rev-" + (item.reference_id || target.relation) + "-";
+  const label = (words, node) => { const tag = bh("label", "bi-label", words);
+    tag.htmlFor = node.id; return tag; };
+  const choose = (name, list, value) => {
+    const node = document.createElement("select"); node.id = id + name; node.name = name;
+    for (const [code, words] of list) {
+      const option = document.createElement("option"); option.value = code;
+      option.textContent = words; node.append(option);
+    }
+    node.value = value; return node;
+  };
+  const typed = (name, value) => {
+    const node = document.createElement("input"); node.className = "bi-input";
+    node.id = id + name; node.name = name; node.value = value || ""; return node;
+  };
+  const verdict = choose("verdict", BI_REVIEW_VERDICT, now.verdict || "pending");
+  const stance = choose("stance", BI_STANCE, item.stance || "supports");
+  const direct = choose("directness", BI_DIRECT, now.directness || "unknown");
+  const same = choose("same_source", BI_SAME, now.same_source || "unknown");
+  const scope = typed("scope", now.scope), date = typed("date", now.date);
+  date.placeholder = "例如 2026-03-01；留空就不改";
+  const reason = document.createElement("textarea"); reason.id = id + "reason";
+  reason.name = "reason"; reason.required = true;
+  reason.placeholder = "為什麼這樣判斷？";
+  const error = bh("div", "bi-err"); error.setAttribute("role", "alert");
+  const review = bh("div", "bi-note-review");
+  const save = bh("button", "go", "預覽覆核"); save.type = "submit";
+  form.append(label("覆核結果", verdict), verdict, label("立場", stance), stance,
+    label("證據直接性", direct), direct, label("適用範圍", scope), scope,
+    label("日期", date), date, label("同源資訊", same), same,
+    label("理由（必填）", reason), reason, review, error,
+    bh("div", "bi-actions", save, biButton("取消", () => form.remove())));
+  const words = (state) => biWord(BI_REVIEW_VERDICT, state.verdict) + "、"
+    + biWord(BI_STANCE, state.stance) + "、" + biWord(BI_DIRECT, state.directness) + "、"
+    + biWord(BI_SAME, state.same_source) + (state.scope ? "、範圍 " + state.scope : "")
+    + (state.date ? "、日期 " + state.date : "");
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault(); error.textContent = ""; review.replaceChildren();
+    if (!reason.value.trim()) { error.textContent = "請寫下理由。"; reason.focus(); return; }
+    save.disabled = true;
+    try {
+      const note = await biCall("/api/bi/evidence-reviews/preview", {dataset: biDataset(),
+        ...target, card: card.id, base_version: card.version, verdict: verdict.value,
+        stance: stance.value, directness: direct.value, same_source: same.value,
+        scope: scope.value.trim(), date: date.value.trim(), reason: reason.value.trim()});
+      const go = biButton("確認覆核", async () => {
+        go.disabled = true;
+        try {
+          const done = await biCall("/api/bi/evidence-reviews/apply", {dataset: biDataset(),
+            text: note.text, base_version: note.base_version});
+          biNotice(true, done.unchanged ? "沒有變更：覆核結果和原本一樣。" : "已寫入覆核。");
+          await biLoadDetail(false);
+        } catch (failure) {
+          error.textContent = "沒有寫入：" + failure.message; go.disabled = false;
+        }
+      }, "go");
+      go.dataset.reviewConfirm = "true";
+      review.append(bh("p", "", note.unchanged ? "覆核結果和原本一樣，確認後不會有變更。"
+        : "原本：" + words(note.before) + "。改成：" + words(note.after)
+          + "。覆核單會存成來源（" + note.folder + "）。"), go);
+    } catch (failure) { error.textContent = "沒有寫入：" + failure.message; }
+    finally { save.disabled = false; }
+  });
+  row.append(form); verdict.focus();
 }
 
 function biFieldRow(card, item) {

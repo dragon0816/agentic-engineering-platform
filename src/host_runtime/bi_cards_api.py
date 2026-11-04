@@ -59,6 +59,7 @@ from capabilities.bi_cards import (
     board,
     catalog,
     correction,
+    evidence_review,
     importer,
     methods,
     migrate,
@@ -391,6 +392,8 @@ def _route(
         return 200, {"ok": True, **done}
     if path in ("/api/bi/corrections/preview", "/api/bi/corrections/apply"):
         return _correction(workspace, who, path.rpartition("/")[2], given)
+    if path in ("/api/bi/evidence-reviews/preview", "/api/bi/evidence-reviews/apply"):
+        return _evidence_review(workspace, who, path.rpartition("/")[2], given)
     if path == "/api/bi/import/undo":
         store = BiStore(workspace, _dataset(given.get("dataset")))
         store.undo_import(str(given.get("import_id") or ""), actor=who)
@@ -926,6 +929,18 @@ def _correction(workspace: Path, who: str, action: str, given: dict[str, Any]) -
         return 200, {"ok": True, **step(store, given, actor=who)}
     except BiStoreError as failure:
         if failure.code in correction.BAD_NOTE:
+            return _error(400, failure.code, failure.message)
+        raise
+
+
+def _evidence_review(workspace: Path, who: str, action: str, given: dict[str, Any]) -> Answer:
+    """A person's review of one reference (design §5.4), on the correction note's path."""
+    store = BiStore(workspace, _dataset(given.get("dataset")))
+    step = evidence_review.preview if action == "preview" else evidence_review.apply
+    try:
+        return 200, {"ok": True, **step(store, given, actor=who)}
+    except BiStoreError as failure:
+        if failure.code in evidence_review.BAD_NOTE:
             return _error(400, failure.code, failure.message)
         raise
 
