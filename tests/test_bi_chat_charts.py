@@ -248,7 +248,7 @@ def test_a_bi_answer_shows_its_chart_inline_in_the_file_viewer(tmp_path: Path) -
     import threading
 
     from integrations.browser import Browser
-    from integrations.websocket import Devtools
+    from integrations.websocket import Devtools, DevtoolsRefused, WebSocketError
 
     config, layout = _host(tmp_path)
     path = host_json(tmp_path, config)
@@ -297,6 +297,19 @@ def test_a_bi_answer_shows_its_chart_inline_in_the_file_viewer(tmp_path: Path) -
             assert frame["src"].startswith("/view/file?nonce=") and "token" not in frame["src"]
 
             def in_frame(expression: str) -> Any:
+                # A new sandboxed frame lives in the page for about 0.1 s, then moves to a
+                # process of its own: what was just found can be gone. Ask again; the
+                # deadline below still fails a frame that never draws.
+                try:
+                    return read_frame(expression)
+                except WebSocketError:
+                    return None  # the target listed a moment ago
+                except DevtoolsRefused as refused:
+                    if "Cannot find context" in str(refused):
+                        return None
+                    raise
+
+            def read_frame(expression: str) -> Any:
                 for target in browser._targets():
                     if target.get("type") == "iframe" and "/view/file" in str(target.get("url")):
                         with Devtools(str(target["webSocketDebuggerUrl"]), timeout_s=30) as dev:

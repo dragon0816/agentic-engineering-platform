@@ -32,7 +32,9 @@ def test_the_shipped_3_0_0_is_generated_and_only_adds_fields(tmp_path: Path) -> 
     assert ("Signal", "aliases") not in added  # named by date and title, not by a name
     assert {t for t, f in added if f == "tech_areas"} == {
         "Account", "CustomerProduct", "Ecosystem", "SupplyLink"}  # fmt: skip
-    assert catalog.resolve(tmp_path, "bi.schema/v1.1").version == "4.0.0"  # 4.0.0 came after
+    # Later versions came after, so a bare id no longer means this one (`test_bi_card_model_shape`
+    # pins the newest).
+    assert catalog.resolve(tmp_path, "bi.schema/v1.1").version != "3.0.0"
 
 
 def test_labels_are_aliases_of_the_allowed_values(tmp_path: Path) -> None:
