@@ -6685,3 +6685,9 @@ Design: `docs/phases/BI_CARD_MODEL.md` §6. `POST /api/bi/vaults/<id>/publish` a
 
 - `cards/<card id>.md`, with `cards/_manifest.json` `{tag, commit, at, by, hashes}` written last. Generated from the version published now, read-only, never read back. Frontmatter: `id`, `type`, `key`, `aliases`, `sample: true` on a sample, `generated: true`. Only pages whose hash differs are written; a removed card's page is deleted. A withdrawn source's excerpts leave the pages at once.
 - `published/<tag>.sqlite`, written once. The publish record (`repository.publish(tag, extra)`, the engine knows no BI name) gains `snapshot: {path, sha256}`, or `null` when it could not be written. Readers still rebuild from units.
+
+## BI: deciding pending proposals, and an AI run's folder (2026-11-04)
+
+`GET /api/bi/proposals?dataset=` → `{proposals: [{id, card_id, card_name, entity_type, version, field, label, needs_reason, value, current, current_kind, source: {kind, ref, at}, evidence: [{source_name, excerpt, basis}]}]}`, every pending proposal; `evidence` is what the current value rests on. Decided with `POST /api/bi/cards/<id>/proposals/<pid>`, which now keeps a rejection's `reason`: a `proposal:` or `decision:` unit may hold `reason`, and `proposals` gains that column.
+
+`POST /api/bi/runs` with `folder` in another home than the source's own: 400 `run_folder_mismatch`, since another home's skill and profile would apply. With no `folder`, the source's own.

@@ -30,6 +30,7 @@ from typing import Any
 from capabilities.bi_cards import (
     catalog,
     extract,
+    homes,
     names,
     profile,
     runs,
@@ -123,7 +124,18 @@ def start(
         reg = catalog.for_store(staging.store)
         schema = (reg, reg.ref)
     reg = schema[0]
-    rules = _vault_rules(staging, folder or _folder_of(staging, source), skill_draft)
+    actual = _folder_of(staging, source)
+    if (
+        folder
+        and actual
+        and homes.home_of(actual)
+        and (homes.home_of(str(folder)) != homes.home_of(actual))
+    ):
+        # Another home's skill and profile would apply, silently.
+        raise BiStoreError(
+            "run_folder_mismatch", f"這份來源在 {actual}，不能用 {folder} 的規則判讀"
+        )
+    rules = _vault_rules(staging, folder or actual, skill_draft)
     chosen_types = types not in (None, [])  # a person's choice stands, marked in the review
     if rules is not None and not chosen_types and rules["card_types"]:
         types = [t for t in rules["card_types"] if t in reg.types] or None

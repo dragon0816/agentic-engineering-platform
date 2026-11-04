@@ -372,11 +372,29 @@ def test_a_field_no_home_uses_is_not_applicable(tmp_path: Path) -> None:
     assert _states(db, "unhomed") == set() and _states(db, "bare") == set()
 
 
-def test_a_type_the_profile_leaves_out_is_not_used_there(tmp_path: Path) -> None:
+def test_a_type_the_profile_leaves_out_says_nothing(tmp_path: Path) -> None:
+    """A narrow profile marked 2,066 empty fields on 310 cards as 不適用 (V1). A question
+    must answer 未知 when the profile has not spoken about the type."""
     db = _rebuilt(tmp_path, {"aidc": {"types": {"Signal": {"fields": {}}}}})
+    assert _states(db, "one") == set()
+    assert db.execute("SELECT COUNT(*) FROM field_states").fetchone()[0] == 0
+
+
+def test_one_home_not_listing_the_type_means_nothing_is_computed(tmp_path: Path) -> None:
+    silent: dict[str, Any] = {"types": {"Signal": {"fields": {}}}}
+    db = _rebuilt(tmp_path, {"aidc": PROFILE, "wireless": silent})
+    assert _states(db, "two") == set()  # in both homes; one has not spoken
+    assert _unused() in _states(db, "one")  # only in the home that has
+
+
+def test_a_listed_type_keeps_what_is_never_not_applicable(tmp_path: Path) -> None:
+    db = _rebuilt(tmp_path, {"aidc": {"types": {"Technology": {"fields": {}}}}})
     states = _states(db, "one")
-    assert "domain" in states and _unused() in states
-    assert _reg().types["Technology"].naming_field not in states
+    assert _unused() in states
+    entity = _reg().types["Technology"]
+    for name in (*entity.naming, *profile.ALWAYS_FIELDS):
+        assert name not in states
+    assert not any(f.required and f.name in states for f in entity.fields)
 
 
 def test_a_field_one_of_two_homes_uses_is_not_computed(tmp_path: Path) -> None:

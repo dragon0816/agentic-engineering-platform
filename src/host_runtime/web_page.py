@@ -2579,6 +2579,12 @@ tr:last-child td { border-bottom: none; }
             <p class="bi-meta" id="bi-b-target"></p>
             <div id="bi-b-v-state" role="status" aria-live="polite"></div>
             <div id="bi-b-askable" aria-live="polite"></div>
+            <div id="bi-b-props" hidden>
+              <h4 id="bi-b-props-h">待審提案</h4>
+              <p class="bi-meta">來源和卡片上的值不一樣時，不會直接覆蓋，要由你逐筆決定。
+                決定後要 commit、push，同事才看得到。</p>
+              <ul id="bi-b-props-list" class="bi-fit"></ul>
+            </div>
             <div class="bi-actions">
               <button class="bi-btn" id="bi-b-v-sync" type="button" hidden>立即同步</button>
               <button class="bi-btn" id="bi-b-v-new" type="button" data-mode="new"
@@ -13043,6 +13049,48 @@ async function biBuildVault() {
   if (seq !== bi.vaultSeq) return;
   biVaultState(state);
   askableLoad().catch((failure) => { el("bi-b-askable").textContent = failure.message; });
+  biProposals().catch((failure) => { el("bi-b-props-list").textContent = failure.message; });
+}
+
+async function biProposals() {
+  // Every pending proposal of the working copy, so a person can settle them in one place.
+  const dataset = biDataset();
+  const reply = await call("/api/bi/proposals?dataset=" + encodeURIComponent(dataset));
+  if (dataset !== biDataset()) return;
+  const items = reply.proposals || [];
+  el("bi-b-props").hidden = !items.length;
+  el("bi-b-props-h").textContent = "待審提案（" + items.length + " 筆）";
+  el("bi-b-props-list").replaceChildren(...items.map((item) => biProposalRow(item, dataset)));
+}
+
+function biProposalRow(item, dataset) {
+  const reason = bh("input", "bi-input");
+  reason.placeholder = item.needs_reason ? "理由（這是判斷欄位，必填）" : "理由（否決時必填）";
+  reason.setAttribute("aria-label", "理由：" + item.card_name + " 的 " + item.label);
+  const error = bh("div", "bi-err");
+  const decide = async (action) => {
+    error.textContent = "";
+    if (!reason.value.trim() && (action === "reject" || item.needs_reason)) {
+      error.textContent = "請寫下理由。"; reason.focus(); return;
+    }
+    try {
+      await biCall("/api/bi/cards/" + encodeURIComponent(item.card_id) + "/proposals/" + item.id,
+        {dataset, action, base_version: item.version, reason: reason.value.trim()});
+    } catch (failure) { error.textContent = failure.message + "。"; return; }
+    biNotice(true, (action === "accept" ? "已接受" : "已否決") + "「" + item.card_name + "」的"
+      + item.label + "；要 commit 才會寫進知識庫。");
+    await biBuildVault();
+  };
+  const facts = (item.evidence || []).map((e) => bh("div", "bi-meta",
+    "目前的值依據：" + e.source_name + (e.excerpt ? "「" + e.excerpt + "」" : "")));
+  return bh("li", "", bh("strong", "", item.card_name),
+    bh("span", "bi-meta", " " + biTypeLabel(item.entity_type) + "・" + item.label),
+    bh("div", "", "目前：" + (item.current === null ? "（空）" : biValue(item.current))),
+    bh("div", "", "提議：" + biValue(item.value)),
+    bh("div", "bi-meta", "提議來源：" + (item.source.ref || item.source.kind)),
+    ...facts,
+    bh("div", "bi-actions", reason, biButton("接受", () => decide("accept"), "bi-btn"),
+      biButton("否決", () => decide("reject"), "bi-btn")), error);
 }
 
 function biVaultState(state) {
@@ -13837,12 +13885,21 @@ async function biSkills(vaultId) {
     option.value = f; return option;
   }));
   if ((reply.folders || []).includes(kept)) pick.value = kept;
-  const chosen = (bi.build.sources || []).find((s) => s.id === bi.build.sourceId);
-  if (chosen && chosen.folder && (reply.folders || []).includes(chosen.folder)) {
-    pick.value = chosen.folder;
-  }
+  biFollowSourceFolder();
   el("bi-b-folder-box").hidden = false;
   biRerunForm(reply.folders || []);
+}
+
+function biFollowSourceFolder() {
+  // The run's folder decides whose skill and profile apply: it starts as the source's own.
+  const pick = el("bi-b-folder");
+  const chosen = (bi.build.sources || []).find((s) => s.id === bi.build.sourceId);
+  if (!chosen || !chosen.folder || !pick.options.length) return;
+  if (![...pick.options].some((o) => o.value === chosen.folder)) {
+    const option = bh("option", "", chosen.folder);
+    option.value = chosen.folder; pick.append(option);
+  }
+  pick.value = chosen.folder;
 }
 
 // -- a home's profile and its field proposals (BI_CARD_MODEL.md §4.2, §4.3) --------
@@ -14212,7 +14269,9 @@ function biVaultForm(mode) {
     const option = bh("option", "", (item.title || item.id) + "（" + item.ref + "）");
     option.value = item.ref; schema.append(option);
   }
-  if ((bi.schema || {}).ref) schema.value = bi.schema.ref;
+  // A new vault starts on the newest shipped version, not the dataset shown or the oldest.
+  const newest = (bi.schemas || []).filter((s) => s.source === "shipped").pop();
+  if (newest) schema.value = newest.ref;
   el(mode === "new" ? "bi-b-v-title" : "bi-b-v-path").focus();
 }
 
@@ -14331,6 +14390,7 @@ async function biBuildSources() {
     ? cloud + " 個來源只在雲端：請把共用資料夾設為「一律保留在此裝置上」。" : "")
     + (waiting ? waiting + " 個檔案還在等 OneDrive 同步，同步好才看得到。" : "");
   if (!bi.build.sources.some((s) => s.id === bi.build.sourceId)) bi.build.sourceId = null;
+  biFollowSourceFolder();
   const body = el("bi-b-sources").tBodies[0]; body.replaceChildren();
   for (const source of bi.build.sources) {
     const radio = document.createElement("input");
@@ -14340,6 +14400,7 @@ async function biBuildSources() {
     radio.disabled = !source.format;
     radio.addEventListener("change", () => {
       bi.build.sourceId = source.id; el("bi-b-next1").disabled = false; biBuildSave();
+      biFollowSourceFolder();
       biBuildSteps();
     });
     const format = {table: "表格（預設表格規則）", document: "文件（預設 AI 擷取）",
@@ -14826,7 +14887,9 @@ function biRunBody(kind) {
   const source = bi.build.sources.find((s) => s.id === bi.build.sourceId);
   if (methodId === "builtin:llm" && source && source.format === "table") body.path = "ai";
   if (methodId === "builtin:rules") body.path = "rules";
-  if (biDataset().startsWith("vault-") && el("bi-b-folder").value) {
+  // 「不指定」 sends nothing: the server then uses the source's own folder.
+  if (biDataset().startsWith("vault-") && el("bi-b-folder").value
+    && el("bi-b-folder").value !== "sources") {
     body.folder = el("bi-b-folder").value;
   }
   const instructions = el("bi-b-instr").value.trim();

@@ -457,9 +457,11 @@ def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str
         if r["card_id"] not in ids:
             continue
         key = keys.get(int(r["id"]))
+        said = r["reason"] if "reason" in r.keys() else None  # noqa: SIM118 - a sqlite3.Row
+        why = {"reason": said} if said else {}
         if key is not None and key.startswith("conflict:"):
             if r["status"] != "pending":
-                units[f"decision:{_short(key)}"] = {"status": r["status"]}
+                units[f"decision:{_short(key)}"] = {"status": r["status"], **why}
             continue
         value = {
             "card": ids[r["card_id"]],
@@ -470,6 +472,7 @@ def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str
             "at": r["at"],
             "import_id": r["import_id"],
             "status": r["status"],
+            **why,
         }
         if key is None:
             identity = {k: value[k] for k in ("card", "field", "value", "kind", "ref", "at")}
@@ -638,8 +641,9 @@ def _fill_homes(
 ) -> None:
     """Derived, after everything else (`BI_CARD_MODEL.md` §1, §3.4): a card belongs to
     the homes whose sources gave it evidence, and a field is `not_applicable` when
-    the card has a home, every home has a profile, and none uses the field. A state
-    or value already there wins; a card in no home reads `unknown`."""
+    the card has a home, every home's profile lists the card's type, and none uses the
+    field. A profile that does not list the type has not spoken about it, so the field
+    reads `unknown`, as for a card in no home. A state or value already there wins."""
     folders = {
         str(value.get("id")): str(value.get("folder") or "")
         for key, value in units.items()
@@ -661,7 +665,9 @@ def _fill_homes(
         own = belongs.get(card_id)
         if entity is None or not own or not own <= set(profiles):
             continue
-        uses = [profile.used_fields(entity, profiles[home]) or set() for home in own]
+        uses = [profile.used_fields(entity, profiles[home]) for home in own]
+        if None in uses:
+            continue
         have = {
             str(item[0])
             for item in db.execute("SELECT field FROM fields WHERE card_id = ?", (card_id,))
@@ -674,7 +680,7 @@ def _fill_homes(
                 for item in entity.fields
                 if item.klass != "derived"
                 and item.name not in have
-                and not any(item.name in used for used in uses)
+                and not any(item.name in (used or ()) for used in uses)
             ],
         )
 
@@ -856,8 +862,8 @@ def materialize(
             if value["card"] not in present:
                 continue
             cursor = db.execute(
-                "INSERT INTO proposals (card_id, field, value, kind, ref, at, import_id, status) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO proposals (card_id, field, value, kind, ref, at, import_id, status, "
+                "reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     value["card"],
                     value["field"],
@@ -867,6 +873,7 @@ def materialize(
                     value["at"],
                     value.get("import_id"),
                     value["status"],
+                    value.get("reason"),
                 ),
             )
             db.execute("INSERT INTO vault_keys VALUES (?, ?)", (cursor.lastrowid, key))
@@ -881,8 +888,8 @@ def materialize(
             decided = units.get(f"decision:{_short(key)}")
             lost = conflict["value"] or {}
             cursor = db.execute(
-                "INSERT INTO proposals (card_id, field, value, kind, ref, at, import_id, status) "
-                "VALUES (?, ?, ?, 'conflict', ?, ?, NULL, ?)",
+                "INSERT INTO proposals (card_id, field, value, kind, ref, at, import_id, status, "
+                "reason) VALUES (?, ?, ?, 'conflict', ?, ?, NULL, ?, ?)",
                 (
                     cid,
                     name,
@@ -890,6 +897,7 @@ def materialize(
                     conflict["commit"],
                     (lost.get("history") or {}).get("at") or stamp,
                     decided["status"] if decided else "pending",
+                    decided.get("reason") if decided else None,
                 ),
             )
             db.execute("INSERT INTO vault_keys VALUES (?, ?)", (cursor.lastrowid, key))

@@ -127,7 +127,8 @@ CREATE TABLE IF NOT EXISTS proposals (
   ref TEXT NOT NULL,
   at TEXT NOT NULL,
   import_id TEXT,
-  status TEXT NOT NULL DEFAULT 'pending'
+  status TEXT NOT NULL DEFAULT 'pending',
+  reason TEXT
 );
 CREATE TABLE IF NOT EXISTS meta (
   key TEXT PRIMARY KEY,
@@ -221,6 +222,9 @@ def add_missing_columns(connection: sqlite3.Connection) -> None:
     columns = {r[1] for r in connection.execute("PRAGMA table_info(imports)")}
     if "run_id" not in columns:  # a dataset from before ingest runs
         connection.execute("ALTER TABLE imports ADD COLUMN run_id TEXT")
+    columns = {r[1] for r in connection.execute("PRAGMA table_info(proposals)")}
+    if "reason" not in columns:
+        connection.execute("ALTER TABLE proposals ADD COLUMN reason TEXT")
     columns = {r[1] for r in connection.execute("PRAGMA table_info(evidence)")}
     for name, definition in EVIDENCE_COLUMNS.items():
         if name not in columns:
@@ -1091,16 +1095,43 @@ class BiStore:
             return None
         return {"id": row["id"], "field": row["field"], "value": _load(row["value"])}
 
-    def reject_proposal(self, card_id: str, proposal_id: int) -> bool:
+    def pending_proposals(self) -> list[dict[str, Any]]:
+        """Every pending proposal, with its card and the value it would replace."""
+        if not self.exists:
+            return []
+        with self._db() as db:
+            rows = db.execute(
+                "SELECT p.*, c.name AS card_name, c.entity_type, c.version, f.value AS current, "
+                "f.kind AS current_kind FROM proposals p JOIN cards c ON c.id = p.card_id "
+                "LEFT JOIN fields f ON f.card_id = p.card_id AND f.field = p.field "
+                "WHERE p.status = 'pending' ORDER BY c.name, p.field, p.id"
+            ).fetchall()
+        return [
+            {
+                "id": r["id"],
+                "card_id": r["card_id"],
+                "card_name": r["card_name"],
+                "entity_type": r["entity_type"],
+                "version": int(r["version"]),
+                "field": r["field"],
+                "value": _load(r["value"]),
+                "current": None if r["current"] is None else _load(r["current"]),
+                "current_kind": r["current_kind"],
+                "source": {"kind": r["kind"], "ref": r["ref"], "at": r["at"]},
+            }
+            for r in rows
+        ]
+
+    def reject_proposal(self, card_id: str, proposal_id: int, reason: str = "") -> bool:
         """Close one pending proposal without touching the card."""
         self.refuse_write()
         if not self.exists:
             return False
         with self._db(write=True) as db:
             changed = db.execute(
-                "UPDATE proposals SET status = 'rejected' WHERE id = ? AND card_id = ? "
+                "UPDATE proposals SET status = 'rejected', reason = ? WHERE id = ? AND card_id = ? "
                 "AND status = 'pending'",
-                (proposal_id, card_id),
+                (reason or None, proposal_id, card_id),
             ).rowcount
         return bool(changed)
 

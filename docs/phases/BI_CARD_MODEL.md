@@ -117,7 +117,7 @@ Stored by id; shown as names, so `fields` and `card_values`, the 31 analyses and
 `Registry.normalize` is unchanged. A new `missing_state(text)` is called by `importer`, `page_import` and `recipes` before it, and `PlannedRow` gains `states`.
 
 - If the card already has a value and the row says `n/a`, the value stays and the preview lists it. A later value clears a state.
-- `not_applicable` is also **computed** at rebuild (`origin: profile`): no value, no explicit state, and every application the card belongs to has a profile that does not use the field. A card in no application is never computed, so it reads `unknown`.
+- `not_applicable` is also **computed** at rebuild (`origin: profile`): no value, no explicit state, and every application the card belongs to has a profile that lists the card's type and does not use the field, leaving out its name, required fields and `summary`, `usage`, `scope`, `aliases`. A profile that does not list the type has not spoken about it, so nothing is computed and the field reads `unknown`, as for a card in no application (owner's orchestrator, 2026-11-04, after V1 found 2,066 wrong states).
 - `pending_confirmation` is also computed from a pending proposal, whose value is the candidate.
 - `confirmed_none` comes only from a correction note (§5.2), so it has evidence. An empty list never implies it.
 - `bi__query` card output gains `field_states`, so the model can tell 未知 from 不適用. This adds a key to the contract.
@@ -172,7 +172,7 @@ A missing summary is a warning with counts at publish, never a block.
  "proposals": [{"type": "SupplyLink", "field": "…", "definition": {}, "reason": "…", "status": "proposed"}]}
 ```
 
-A type or field not listed is not used there. A definition (kind, enum) in a profile is refused, except inside a proposal.
+A field not listed under a listed type is not used there; a type not listed is one the profile says nothing about. A definition (kind, enum) in a profile is refused, except inside a proposal.
 
 - **Ingest:** `extract` shows the model only the profile's types and fields, with notes and category explanations. Validation stays against the merged schema, so a value outside the profile but in the schema is a candidate marked `outside_profile`, not dropped. No profile: the whole schema, as today, with a notice.
 - **Required in a profile** is a warning in the review and at publish; only the schema's `required` refuses.

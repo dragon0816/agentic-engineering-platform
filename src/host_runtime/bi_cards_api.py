@@ -247,6 +247,8 @@ def _route(
             drawn = board.board(workspace, store, domain, sample, given)
             # An old domain configuration still to move (BI D4): the page offers the migration.
             return 200, {**drawn, "domains_left": migrate.has_legacy(store)}
+        if path == "/api/bi/proposals":
+            return 200, {"proposals": _pending_proposals(store)}
         if path == "/api/bi/quality":
             # Quality checks (BI vault V13), read only.
             return 200, quality.check(store, catalog.for_store(store))
@@ -780,7 +782,7 @@ def _decide_proposal(
         return _error(404, "proposal_unknown", "找不到這筆待審提議（可能已處理）")
     action = given.get("action")
     if action == "reject":
-        store.reject_proposal(card_id, int(found["id"]))
+        store.reject_proposal(card_id, int(found["id"]), str(given.get("reason") or "").strip())
         card = store.card(card_id)
         return 200, {"ok": True, "version": int(card["version"]) if card is not None else 0}
     if action != "accept":
@@ -874,6 +876,31 @@ def _create_dataset(workspace: Path, given: dict[str, Any]) -> Answer:
             "read_only": False,
         },
     }
+
+
+def _pending_proposals(store: BiStore) -> list[dict[str, Any]]:
+    """What a person needs to decide each pending proposal: the field in words, and the
+    evidence the current value rests on, beside where the proposed one came from."""
+    reg = catalog.for_store(store)
+    found = []
+    evidence: dict[str, list[dict[str, Any]]] = {}
+    for item in store.pending_proposals():
+        entity = reg.types.get(item["entity_type"])
+        definition = None if entity is None else entity.get(item["field"])
+        held = evidence.setdefault(item["card_id"], store.evidence(item["card_id"]))
+        found.append(
+            {
+                **item,
+                "label": definition.label if definition else item["field"],
+                "needs_reason": bool(definition and definition.klass == "judgement"),
+                "evidence": [
+                    {k: e.get(k) for k in ("source_name", "excerpt", "basis")}
+                    for e in held
+                    if e["field"] == item["field"]
+                ][:3],
+            }
+        )
+    return found
 
 
 def _rename_card(workspace: Path, who: str, card_id: str, given: dict[str, Any]) -> Answer:
