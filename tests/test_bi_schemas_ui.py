@@ -168,9 +168,9 @@ def test_dataset_schemas_end_to_end_in_a_browser(served: Any, tmp_path: Path) ->
         wait("document.getElementById('bi-status-bar').hidden")
         # The page opens on 「建立與匯入」; this test starts on the Dashboard.
         run("document.querySelector('#bi-views [data-bi-view=dashboard]').click()")
-        # A fresh workspace: the shipped BI schema, with its Dashboard and chat hint.
+        # A fresh workspace: the shipped BI schema, with its Dashboard.
         wait("document.getElementById('bi-schema-note').textContent.includes('bi.schema/v1.1')")
-        assert not hidden("bi-hint") and not hidden("bi-demo") and not hidden("bi-domain-box")
+        assert not hidden("bi-demo") and not hidden("bi-domain-box")
         assert len(options("bi-type")) == 13  # 全部類型 + 12 BI types
 
         # -- 安裝 schema: a broken file lists every problem inline ----------------------------
@@ -222,11 +222,11 @@ def test_dataset_schemas_end_to_end_in_a_browser(served: Any, tmp_path: Path) ->
             run("document.getElementById('bi-dataset').selectedOptions[0].textContent")
         )
 
-        # -- the non-BI dataset: no Dashboard, no chat hint, its own types --------------------
+        # -- the non-BI dataset: no Dashboard, its own types ----------------------------------
         wait("!!document.querySelector('#bi-dash-sections .bi-none')")
         assert "這個 schema 沒有 Dashboard" in content("bi-dash-sections")
         assert "沒有 Dashboard 與對話查詢" in content("bi-schema-note")
-        assert hidden("bi-hint") and hidden("bi-demo") and hidden("bi-domain-box")
+        assert hidden("bi-demo") and hidden("bi-domain-box")
         assert options("bi-type") == ["", "Supplier", "Component", "Product", "SpecItem"]
         shoot("dashboard-none")
 
@@ -263,14 +263,14 @@ def test_dataset_schemas_end_to_end_in_a_browser(served: Any, tmp_path: Path) ->
         run("document.getElementById('bi-new-go').click()")
         wait("document.getElementById('bi-dataset').value === 'market'")
         wait("document.getElementById('bi-type').options.length === 13")
-        assert not hidden("bi-hint") and not hidden("bi-demo")
+        assert not hidden("bi-demo")
         run("document.querySelector('#bi-views [data-bi-view=dashboard]').click()")
         wait("document.querySelectorAll('#bi-dash-sections details').length > 0")
         assert not run("!!document.querySelector('#bi-dash-sections .bi-none')")
         choose("bi-dataset", "spec")
         wait("document.getElementById('bi-type').options.length === 5")
         wait("!!document.querySelector('#bi-dash-sections .bi-none')")
-        assert hidden("bi-hint")
+        assert hidden("bi-demo")
 
         # -- dark mode at 390 px ---------------------------------------------------------------
         scheme("dark")

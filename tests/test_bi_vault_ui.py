@@ -148,10 +148,10 @@ def test_vault_panel_and_dashboard_in_a_browser(
         click("#nav-knowledge")
         click("#kn-tabs [data-kn=bi]")
         wait("document.getElementById('bi-status-bar').hidden")
-        # The page opens on 「建立與匯入」, dataset management folded away; this test
+        # The page opens on 「建立與匯入」, what the flow does not name folded away; this test
         # starts on the Dashboard.
         assert not run("document.getElementById('bi-view-build').hidden")
-        assert not run("document.getElementById('bi-manage').open")
+        assert not run("document.getElementById('bi-advanced').open")
         run("document.querySelector('#bi-views [data-bi-view=dashboard]').click()")
         click("#bi-demo")
         wait("document.getElementById('bi-notice').textContent.includes('示範資料已載入')")
@@ -191,7 +191,7 @@ def test_vault_panel_and_dashboard_in_a_browser(
         # -- step 1: the demo dataset becomes a vault ----------------------------------------
         click("#bi-views [data-bi-view=build]")
         wait("document.getElementById('bi-b-v-state').textContent.includes('只在這台電腦')")
-        assert run("document.getElementById('bi-b-ds').value") == "demo"
+        assert run("document.getElementById('bi-dataset').value") == "demo"
         assert run("document.getElementById('bi-b-v-sync').hidden")
         before = hashlib.sha256(demo_db.read_bytes()).hexdigest()
         click("#bi-b-v-convert")

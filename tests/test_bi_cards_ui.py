@@ -513,7 +513,7 @@ def test_the_bi_area_is_a_knowledge_sub_tab_with_every_pane_status() -> None:
     assert 'data-bi-view="import"' not in knowledge and "匯入 CSV" not in knowledge
     assert 'id="bi-atlas-open"' in knowledge
     assert "載入示範資料" in knowledge and "確認寫入" in knowledge
-    assert "哪些測試方案對應 WiFi 7？" in knowledge and "[卡片 …]" in knowledge
+    assert 'id="bi-hint"' not in knowledge and 'id="bi-ask"' not in knowledge  # owner, 2026-11-05
     assert "人工值保留，改成提議" in PAGE and "stale_edit" in PAGE
 
 
@@ -849,7 +849,7 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
         # -- a failing card list shows inline with 重試 ----------------------------------------
         run("document.querySelector('#bi-views [data-bi-view=cards]').click()")
         stub.fail.add("/api/bi/cards")
-        run("document.getElementById('bi-refresh').click()")  # 更新 reloads the list
+        run("biLoad()")  # choosing the dataset again reloads the list
         wait("document.getElementById('bi-status-cards').textContent.includes('測試用的失敗')")
         stub.fail.clear()
         click_text("#bi-status-cards button", "重試")

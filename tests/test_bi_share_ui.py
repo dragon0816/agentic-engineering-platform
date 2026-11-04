@@ -152,7 +152,8 @@ class ShareStub(Stub):
 
 
 def test_the_sharing_controls_are_in_the_bi_area() -> None:
-    pane = PAGE.split('<div id="kn-pane-bi"', 1)[1].split('<div id="bi-view-dashboard"', 1)[0]
+    pane = PAGE.split('id="bi-advanced"', 1)[1].split('<section id="panel-reviews"', 1)[0]
+    assert 'id="bi-ro"' in PAGE
     for needle in (
         "發佈到 Shared Platform",
         'id="bi-publish-panel"',
@@ -161,7 +162,6 @@ def test_the_sharing_controls_are_in_the_bi_area() -> None:
         "開放給全公司",
         "第一次發佈需要管理員審核",
         "已訂閱的資料集",
-        'id="bi-ro"',
     ):
         assert needle in pane, needle
     # No public option: only the team or, confirmed, the whole platform.
@@ -450,8 +450,17 @@ def test_bi_sharing_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None
         wait("!document.getElementById('bi-ro').hidden")
         assert content("bi-ro-title") == "唯讀：leo.chi 發佈的 v1.2.0"
         assert hidden("bi-demo") and hidden("bi-publish")
-        assert run("document.querySelector('#bi-views [data-bi-view=build]').hidden")
         assert content("bi-pub-state") == ""
+        # Step 1 holds the select, so it stays reachable: the way to another dataset. Only
+        # what cannot be done on a copy is hidden, and the later steps are shut.
+        run("document.querySelector('#bi-views [data-bi-view=build]').click()")
+        wait("!document.getElementById('bi-view-build').hidden")
+        assert not hidden("bi-b-ro-links") and hidden("bi-b-src-input")
+        assert not run("document.querySelector('#bi-stepper [data-stage=source]').disabled")
+        assert run("document.querySelector('#bi-stepper [data-stage=ingest]').disabled")
+        assert run("document.querySelector('#bi-stepper [data-stage=test]').disabled")
+        run("document.getElementById('bi-b-ro-dash').click()")
+        wait("!document.getElementById('bi-view-dashboard').hidden")
         wait("document.getElementById('bi-dash-sections').textContent.includes('6. 缺口')")
         run("document.querySelector('#bi-views [data-bi-view=cards]').click()")
         wait("document.querySelectorAll('#bi-cards .bi-card-row').length === 2")
