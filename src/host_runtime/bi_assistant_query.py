@@ -31,6 +31,7 @@ BI_QUERY_FIELDS = (
     "domain",
     "follow_links",
     "limit",
+    "hops",
 )
 
 
@@ -89,6 +90,9 @@ def answer(
         "dataset": data.get("dataset"),
         "total": data.get("total"),
         "cards": data.get("cards") or [],
+        "related": data.get("related") or [],
+        "passages": data.get("passages") or [],
+        "passages_withheld": data.get("passages_withheld") or 0,
         "analysis": data.get("analysis") or [],
         "scope_note": data.get("scope_note"),
         "source": source_line(dataset, read),

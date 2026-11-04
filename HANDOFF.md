@@ -1,5 +1,19 @@
 # Handoff
 
+## `bi__query` hops and passages, P3-a (2026-11-04, Claude Code)
+
+**Goal.** Phase 3-a of `docs/phases/BI_CARD_MODEL.md`, from the BI orchestrator's brief. Decision `docs/DECISIONS.md` 2026-11-04; contract `docs/CONTRACTS.md` "`bi__query`: hops and passages".
+
+**Where.** Branch `p3-retrieval` in the Paseo worktree `bi-build-flow`, on `bc73a540`; not pushed, not merged.
+
+**Done.** `hops` and `related`; `passages` from the search index, of the version read and only in approved data classes; `aep_bi_query` follows. Feed goldens unchanged.
+
+**Verified.** `ruff format --check .`, `ruff check .`, `mypy src tests` clean; the affected test files one at a time, recorded in the commit's report to the orchestrator. Not run: the full suite and browser tests.
+
+**Open.** Reading `published/<tag>.sqlite`; card search through the index. An existing PC's published view gets `sources.json` on its next `bi__query` read of a vault, so nothing needs migrating. An installed Skill keeps its text until `assets install-bundled`; the tool's description and `scope_note` carry the rule meanwhile.
+
+**Next action.** Orchestrator: merge, then the full suite and browser tests.
+
 ## The BI card model (2026-11-03, Claude Code worker D) — latest
 
 **Where.** Branch `bi-card-model` from `11a4653b`, in the worktree `bi-vault-asking`. Phase 1 lanes A, B, C and D are all merged there (tasks in `docs/phases/BI_CARD_MODEL.md` §8). Not pushed, not on `main`.

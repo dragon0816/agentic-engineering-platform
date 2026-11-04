@@ -8,6 +8,7 @@ is not synthetic (DQ-1); every shipped demo card is synthetic.
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from importlib import resources
 from pathlib import Path
 from typing import Any
@@ -33,6 +34,25 @@ DEMO_FILES = (
     ("Concept", "concepts_robotics.csv"),
 )
 DEMO_ACTOR = "demo-fixture"
+#: How far `bi__query` walks the relations, and how many cards it brings back.
+MAX_HOPS = 3
+MAX_RELATED = 30
+#: A card's direct relations listed on it, at most.
+MAX_DIRECT = 20
+#: How far a relation's status lets the answer state it, surest first. A field on a
+#: card holds a derived one; a person confirmed the others that count as fact.
+CLAIMS = ("fact", "inferred", "pending", "disputed")
+_STATED_BY_STATUS = {
+    "confirmed": "fact",
+    "unreviewed": "fact",
+    "inferred": "inferred",
+    "pending": "pending",
+    "disputed": "disputed",
+}
+RELATED_RULE = (
+    "related 是沿關係走到的卡片，path 是怎麼走到的。claim 是 fact 才能當事實說；"
+    "inferred 要說是推論，pending 要說待確認，disputed 要說有爭議。"
+)
 
 
 def demo_text(name: str) -> str:
@@ -302,6 +322,75 @@ def card_detail(store: BiStore, card_id: str) -> dict[str, Any] | None:
     }
 
 
+def _claim(status: str) -> str:
+    return _STATED_BY_STATUS.get(status, "inferred")
+
+
+def _weakest(claims: Iterable[str]) -> str:
+    return max(claims, key=CLAIMS.index, default="fact")
+
+
+def _step(relation: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "relation_id": relation["relation_id"],
+        "type": relation["type"],
+        "direction": relation["direction"],
+        "status": relation["status"],
+        "origin": relation["origin"],
+        "claim": _claim(str(relation["status"])),
+        "to_name": relation["other_name"],
+        "to_type": relation["other_type"],
+    }
+
+
+def walk_relations(
+    store: BiStore, seeds: Sequence[str], *, hops: int, max_nodes: int = MAX_RELATED
+) -> dict[str, Any]:
+    """The cards `hops` steps from `seeds` over the relations, both ways, breadth
+    first: each once by a shortest path, no seed among them, so a cycle ends. A
+    rejected relation is not walked (`BiStore.relations`). `truncated` when the
+    node limit left cards out."""
+    paths: dict[str, list[dict[str, Any]]] = {seed: [] for seed in seeds}
+    origin = {seed: seed for seed in seeds}
+    reached: list[dict[str, Any]] = []
+    frontier = list(dict.fromkeys(seeds))
+    truncated = False
+    for depth in range(1, hops + 1):
+        following: list[str] = []
+        for card_id in frontier:
+            between: dict[str, list[dict[str, Any]]] = {}
+            for relation in store.relations(card_id):
+                other = str(relation["other_id"])
+                if other not in paths:  # also a relation of a card to itself
+                    between.setdefault(other, []).append(relation)
+            for other, relations in between.items():
+                if len(reached) >= max_nodes:
+                    truncated = True
+                    break
+                # The surest relation carries the path; none between the two is lost.
+                first, *rest = sorted(
+                    relations, key=lambda r: CLAIMS.index(_claim(str(r["status"])))
+                )
+                step = _step(first)
+                if rest:
+                    step["also"] = [_step(r) for r in rest]
+                paths[other] = [*paths[card_id], step]
+                origin[other] = origin[card_id]
+                reached.append(
+                    {
+                        "card_id": other,
+                        "name": first["other_name"],
+                        "hops": depth,
+                        "from_id": origin[other],
+                        "path": paths[other],
+                        "claim": _weakest(s["claim"] for s in paths[other]),
+                    }
+                )
+                following.append(other)
+        frontier = following
+    return {"reached": reached, "truncated": truncated}
+
+
 def query_cards(
     store: BiStore,
     *,
@@ -312,43 +401,84 @@ def query_cards(
     value: str | None,
     follow_links: bool,
     limit: int,
+    hops: int = 0,
 ) -> dict[str, Any]:
-    """The chat capability's answer: cards with per-field source evidence."""
+    """The chat capability's answer: cards with per-field source evidence, and
+    with `hops` the cards their relations reach, each with its path."""
     found = search(
         store, entity_type=entity_type, text=text, domain=domain, field=field, value=value
     )
     cards = []
     for card, fields in found[:limit]:
-        entry = {
-            "card": f"{card['entity_type']}:{card['canonical_key']}",
-            "card_id": card["id"],
-            "entity_type": card["entity_type"],
-            "name": card["name"],
-            "trusted": trusted(card, fields),
-            "synthetic": bool(card["synthetic"]),
-            "fields": {
-                name: {
-                    "value": item["value"],
-                    "source": f"{item['kind']}:{item['ref']}",
-                }
-                for name, item in fields.items()
-                if name != "body"
-            },
-            "field_states": {
-                name: {k: state[k] for k in ("state", "reason", "origin") if state[k] is not None}
-                for name, state in store.field_states(card["id"]).items()
-            },
-        }
+        entry = _card_entry(store, card, fields)
         if follow_links:
             entry["links"] = [
                 {**link, "card": None if link["missing"] else link["target_key"]}
                 for link in links(store, card, fields)
             ]
+        if hops:
+            # Those between two cards found here are not walked to, so listed here.
+            entry["relations"] = [_step(r) for r in store.relations(card["id"])[:MAX_DIRECT]]
         cards.append(entry)
+    note = f"以上只來自資料集「{store.dataset}」的卡片；沒有找到的，只能說「在這份資料集中沒有」。"
+    related: list[dict[str, Any]] = []
+    if hops:
+        walked = walk_relations(store, [c["card_id"] for c in cards], hops=hops)
+        related = _related(store, walked["reached"])
+        if related:
+            note += RELATED_RULE
+        if walked["truncated"]:
+            note += f"關係太多，只列出最近的 {MAX_RELATED} 張卡片。"
     return {
         "dataset": store.dataset,
         "total": len(found),
         "cards": cards,
-        "scope_note": f"以上只來自資料集「{store.dataset}」的卡片；沒有找到的，只能說"
-        f"「在這份資料集中沒有」。",
+        "related": related,
+        "scope_note": note,
     }
+
+
+def _card_entry(store: BiStore, card: Any, fields: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "card": f"{card['entity_type']}:{card['canonical_key']}",
+        "card_id": card["id"],
+        "entity_type": card["entity_type"],
+        "name": card["name"],
+        "trusted": trusted(card, fields),
+        "synthetic": bool(card["synthetic"]),
+        "fields": {
+            name: {
+                "value": item["value"],
+                "source": f"{item['kind']}:{item['ref']}",
+            }
+            for name, item in fields.items()
+            if name != "body"
+        },
+        "field_states": {
+            name: {k: state[k] for k in ("state", "reason", "origin") if state[k] is not None}
+            for name, state in store.field_states(card["id"]).items()
+        },
+    }
+
+
+def _related(store: BiStore, reached: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The reached cards as a search returns cards, with `from`, `hops`, `path`, `claim`."""
+    reg = for_store(store)
+    everything = store.all_fields() if reached else {}
+    found = []
+    for node in reached:
+        card = store.card(node["card_id"])
+        start = store.card(node["from_id"])
+        if card is None or start is None:
+            continue
+        fields = current_fields(reg, card["entity_type"], everything.get(card["id"], {}))
+        found.append(
+            {
+                **_card_entry(store, card, fields),
+                "from": f"{start['entity_type']}:{start['canonical_key']}",
+                "hops": node["hops"],
+                "path": node["path"],
+                "claim": node["claim"],
+            }
+        )
+    return found

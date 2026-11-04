@@ -17,13 +17,15 @@ came from, and say when that copy no longer updates (owner Q2).
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable
+import logging
+import sqlite3
+from collections.abc import Callable, Collection
 from pathlib import Path
 from typing import Any
 
 from pydantic import Field
 
-from capabilities.bi_cards import analyses, board, quality, service, subscriptions
+from capabilities.bi_cards import analyses, board, quality, search_index, service, subscriptions
 from capabilities.bi_cards.catalog import for_store
 from capabilities.bi_cards.store import DEFAULT_DATASET, BiStore, BiStoreError
 from capabilities.contracts import CapabilitySpec
@@ -53,6 +55,9 @@ QUERY_SPEC = CapabilitySpec.model_validate(
 )
 
 
+_LOG = logging.getLogger(__name__)
+
+
 class QueryRequest(Contract):
     #: A local dataset, or a subscribed `<namespace>/<name>`.
     dataset: str = Field(default=DEFAULT_DATASET, max_length=81)
@@ -63,6 +68,8 @@ class QueryRequest(Contract):
     value: str = Field(default="", max_length=200)
     follow_links: bool = True
     limit: int = Field(default=20, ge=1, le=100)
+    #: How many steps to walk the found cards' relations, both ways; 0 walks none.
+    hops: int = Field(default=0, ge=0, le=service.MAX_HOPS)
     #: A whole-dataset analysis computed like the page's dashboard (gaps,
     #: coverage, funnel …), so a "which applications lack …" answer covers
     #: every card instead of what a search happened to return.
@@ -153,6 +160,12 @@ class QueryResult(Contract):
     vault: dict[str, Any] | None = None
     #: Said under the answer whatever the model wrote, when example data is in it.
     sample_note: str = ""
+    #: With `hops`: the cards the relations reach, each with `path` and `claim`.
+    related: tuple[dict[str, Any], ...] = ()
+    #: With `text`: where the words stand in the sources of the version read.
+    passages: tuple[dict[str, Any], ...] = ()
+    #: Matching chunks of sources whose data class is not approved for the model.
+    passages_withheld: int = 0
 
 
 def source_note(source: dict[str, Any] | None) -> str:
@@ -167,13 +180,31 @@ def source_note(source: dict[str, Any] | None) -> str:
     return note
 
 
+def _source_passages(
+    store: BiStore, text: str, approved: Collection[str] | None, chosen_version: bool
+) -> dict[str, Any]:
+    """Never fails the cards' answer: the index is a rebuildable cache."""
+    if approved is None or chosen_version or not text.strip():
+        return {"passages": [], "withheld": 0}
+    try:
+        return search_index.passages(store, text, approved=approved)
+    except (sqlite3.Error, OSError, BiStoreError) as error:
+        _LOG.warning("BI passages not read: %s", type(error).__name__)
+        return {"passages": [], "withheld": 0}
+
+
 class QueryHandler:
     def __init__(
         self,
         workspace_root: Path,
         store_for: Callable[[str], tuple[BiStore, str] | None] | None = None,
+        *,
+        approved: Collection[str] | None = None,
     ) -> None:
         self.workspace_root = workspace_root
+        #: The data classes the host approved for its model; None reads no passage
+        #: (a source's text goes to a model only in an approved class).
+        self.approved = approved
         #: For a benchmark (BI T1): the store a dataset is read from and the
         #: note saying which version that is, in place of the published one;
         #: None for a dataset it does not cover. Nothing is synced then.
@@ -272,15 +303,22 @@ class QueryHandler:
                 value=request.value or None,
                 follow_links=request.follow_links,
                 limit=request.limit,
+                hops=request.hops,
             )
+            found = _source_passages(store, request.text, self.approved, chosen is not None)
+            withheld = found["withheld"]
+            held = f"另有 {withheld} 段來源的機密等級未核准送給模型，沒有列出。" if withheld else ""
             return QueryResult(
                 dataset=answer["dataset"],
                 total=answer["total"],
                 cards=tuple(answer["cards"]),
-                scope_note=answer["scope_note"] + (cited and f"{cited}。"),
+                scope_note=answer["scope_note"] + held + (cited and f"{cited}。"),
                 source=source,
-                sample_note=sample_note(store, answer["cards"]),
+                sample_note=sample_note(store, [*answer["cards"], *answer["related"]]),
                 vault=read_version,
+                related=tuple(answer["related"]),
+                passages=tuple(found["passages"]),
+                passages_withheld=withheld,
             )
 
         try:
@@ -290,6 +328,7 @@ class QueryHandler:
 
 
 def bindings(
-    workspace_root: Path,
+    workspace_root: Path, *, approved: Collection[str] | None = None
 ) -> tuple[tuple[CapabilitySpec, Any, type[Contract], type[Contract]], ...]:
-    return ((QUERY_SPEC, QueryHandler(workspace_root), QueryRequest, QueryResult),)
+    handler = QueryHandler(workspace_root, approved=approved)
+    return ((QUERY_SPEC, handler, QueryRequest, QueryResult),)

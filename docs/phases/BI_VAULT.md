@@ -123,8 +123,9 @@ Every source is converted once, the Markdown is kept beside the original, shown 
 A SQLite FTS5 index with the `trigram` tokenizer (works for Chinese without a word splitter; checked on
 SQLite 3.53.1) over card names and field values and over Markdown chunks with their file and lines. It is
 rebuilt from the folder like the cards. The result step and the vault header show its state: cards and
-chunks indexed, last rebuilt, behind by N changes. `bi__query` and the cards page search use it. No vector
-search is claimed.
+chunks indexed, last rebuilt, behind by N changes. The cards page search uses it, and `bi__query` uses it for
+passages (2026-11-04); `bi__query`'s card search is still a substring scan over the fields. No vector search is
+claimed.
 
 ### 6.2 The coverage matrix (from the owner's chart)
 

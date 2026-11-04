@@ -68,6 +68,7 @@ from capabilities.bi_cards.schema import Registry, norm_key
 from capabilities.bi_cards.store import (
     DATASET_RE,
     DB_FILE,
+    PUBLISHED_SOURCES,
     SCHEMA,
     SUBSCRIBED_DIR,
     VAULT_PREFIX,
@@ -1141,7 +1142,8 @@ class Vault:
                 built = json.loads(marker.read_text(encoding="utf-8"))
             except (OSError, ValueError):
                 built = None
-            if built == target and (folder / DB_FILE).is_file():
+            sources = folder / PUBLISHED_SOURCES
+            if built == target and (folder / DB_FILE).is_file() and sources.is_file():
                 return folder
             folder.mkdir(parents=True, exist_ok=True)
             commit = target["commit"]
@@ -1151,8 +1153,19 @@ class Vault:
                 repo_engine.replace_retrying(scratch, folder / DB_FILE)
             finally:
                 scratch.unlink(missing_ok=True)
+            # Which sources' Markdown this version holds, for the search index.
+            sources.write_text(json.dumps(self._sources_at(commit)), encoding="utf-8")
             marker.write_text(json.dumps(target), encoding="utf-8")
             return folder
+
+    def _sources_at(self, commit: str | None) -> dict[str, int]:
+        """Source id to its newest Markdown revision as of `commit`."""
+        units = self.repo.state_at(commit) if commit else {}
+        return {
+            str(value["id"]): max(int(item["rev"]) for item in value["markdown"])
+            for key, value in units.items()
+            if key.startswith(vault_sources.PREFIX) and value.get("markdown")
+        }
 
     def _build_at(self, commit: str | None, path: Path) -> None:
         """A database at `path` as of `commit`, from its units."""
