@@ -83,6 +83,10 @@ def _save(workspace: Path, vault_id: str, report: dict[str, Any]) -> None:
     schema_versions.replace(temporary, target)
 
 
+#: Tool calls kept per answer in a report; a turn stops well before this many.
+MAX_CALLS = 12
+
+
 def _side(
     question: Question,
     reply: Mapping[str, Any],
@@ -95,6 +99,8 @@ def _side(
         "ok": bool(reply.get("ok")),
         "grade": graded.model_dump(mode="json"),
         "answer": text[:MAX_ANSWER],
+        # What the model asked and how much came back: why an answer said "no data".
+        "calls": list(reply.get("calls") or [])[:MAX_CALLS],
         # Only says where to look; `grade` alone decides pass or fail.
         "errors": []
         if graded.passed
@@ -344,10 +350,22 @@ def ask_on(
         and item.host is not None
         and item.host.status == "succeeded"
     ]
+    calls = [
+        {
+            "arguments": item.arguments,
+            "status": item.host.status if item.host is not None else "",
+            "total": item.host.data.get("total")
+            if item.host is not None and isinstance(item.host.data, dict)
+            else None,
+        }
+        for item in result.tools
+        if item.name == bi_cards_tools.TOOL_NAME
+    ]
     return {
         "ok": result.status == "answered",
         "answer": result.text,
         "shown": list(error_class.walk_strings(outcomes)),
+        "calls": calls,
     }
 
 

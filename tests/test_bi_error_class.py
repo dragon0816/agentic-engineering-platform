@@ -109,6 +109,23 @@ def test_the_walk_takes_strings_and_leaves_keys_out() -> None:
     assert list(error_class.walk_strings(data)) == ["tsn", "a", "b"]
 
 
+def test_a_report_keeps_what_the_model_asked_and_how_much_came_back(tmp_path: Path) -> None:
+    _, vault_id, dataset, a, _ = _two_pcs(tmp_path)
+    _import(a, dataset, _row("TSN", standard_body="IEEE 802.1"))
+    _push(a, vault_id)
+    status, payload = _save(
+        a, vault_id, {"question": "標準組織？", "must": ["IEEE"], "must_not": []}
+    )
+    assert status == 200, payload
+    asked = [{"arguments": {"text": "標準 組織"}, "status": "succeeded", "total": 0}]
+
+    def ask(_text: str, _side: str) -> Mapping[str, Any]:
+        return {"ok": True, "answer": "沒有資料", "shown": [], "calls": asked}
+
+    report = bi_bench.run(a, vault_id, ask=ask, extract=lambda _c: [], actor="alice")
+    assert report["results"][0]["working"]["calls"] == asked
+
+
 def test_a_card_with_relations_is_still_classified(tmp_path: Path) -> None:
     """Real vaults have relations: reading them must not turn every class into unknown."""
     _, vault_id, dataset, a, _ = _two_pcs(tmp_path)

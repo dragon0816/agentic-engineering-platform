@@ -5940,7 +5940,7 @@ skill AI: owner decisions". Code `capabilities/bi_cards/vault_checks.py`, `host_
 - **Report** `aep.bi.bench_report/v1` in `bi/vaults/<id>/benchmarks/<run id>.json`, saved after every step:
   `{"format", "run_id", "vault_id", "status": running|finished|failed, "started_at", "finished_at", "by",
   "units_sha256" (digest of the working units), "total", "ungraded": [unit], "results": [{"unit", "set",
-  "question", "working": {"ok", "grade": {"passed", "missing", "forbidden"}, "answer", "errors": [{"term", "kind": "missing" | "forbidden", "class", "why"}]}, "published": {...}}],
+  "question", "working": {"ok", "grade": {"passed", "missing", "forbidden"}, "answer", "calls": [{"arguments", "status", "total"}] (what the model asked of `bi__query` and how many cards came back), "errors": [{"term", "kind": "missing" | "forbidden", "class", "why"}]}, "published": {...}}],
   "cases": [{"unit", "slug", "result"?: <benchmark.score>, "error"?}], "working_score", "published_score",
   "regressions": [unit], "error_classes": {class: count, on the working side}, "extract": <benchmark.summarize without notes>|null, "error"}`. `class` (`capabilities/bi_cards/error_class.py`, 2026-11-05) is `retrieval`, `relation`, `extraction`, `evidence`, `generation` or `unknown`; it never changes pass, fail, a regression or the push check.
 - **Push check** (`vault.set_benchmark(partial(bi_bench.gate, workspace))`, set in `build_runtime`): the newest
