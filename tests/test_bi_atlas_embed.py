@@ -16,6 +16,7 @@ import shutil
 import threading
 import time
 from collections.abc import Iterator
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -30,7 +31,7 @@ from capabilities.bi_cards.store import BiStoreError
 from common.execution import RequestContext, TraceIdentifiers
 from host_runtime import bi_atlas_embed, bi_atlas_import
 from host_runtime.bi_cards_api import route
-from host_runtime.bi_cards_tools import ATLAS_TOOL, TOOL_NAME
+from host_runtime.bi_cards_tools import ATLAS_PORT, ATLAS_TOOL, STALE_BOARD, TOOL_NAME
 from host_runtime.conversations import ConversationTurnRequest
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
@@ -60,6 +61,13 @@ DOCUMENT = {
 }  # fmt: skip
 
 
+def _free_port() -> int:
+    server = ThreadingHTTPServer(("127.0.0.1", 0), BaseHTTPRequestHandler)
+    port = int(server.server_address[1])
+    server.server_close()
+    return port
+
+
 def _golden(name: str) -> dict[str, Any]:
     found: dict[str, Any] = json.loads((GOLDEN / name).read_text("utf-8"))
     return found
@@ -67,6 +75,7 @@ def _golden(name: str) -> dict[str, Any]:
 
 class _Atlas(ThreadingHTTPServer):
     head_status = 200
+    document: dict[str, Any] = DOCUMENT
     seen: list[dict[str, Any]]
 
 
@@ -95,7 +104,7 @@ class _Handler(BaseHTTPRequestHandler):
         if self.path == "/dashboards":
             self._answer(200, json.dumps(["儀表板 one"]).encode("utf-8"))
         elif self.path.startswith("/dashboards/"):
-            self._answer(200, json.dumps(DOCUMENT).encode("utf-8"))
+            self._answer(200, json.dumps(self.server.document).encode("utf-8"))
         elif self.path.startswith("/embed/"):
             self._answer(200, EMBED_PAGE.encode("utf-8"), "text/html; charset=utf-8")
         else:
@@ -322,7 +331,7 @@ def test_dashboards_are_listed_and_a_named_one_gets_a_page(web: AgentWeb, atlas:
     assert _route(embed["path"]) == {"kind": "dashboard", "name": "儀表板 one"}
     page = Path(embed["fallback"]).read_text("utf-8")
     assert "各地區的客戶數" in page  # the dashboard's own analyses, for when Atlas is down
-    assert all(call["method"] == "GET" for call in atlas.seen)  # never written to
+    assert all(call["method"] in ("GET", "HEAD") for call in atlas.seen)  # never written to
 
 
 def test_atlas_down_tells_the_model_to_use_the_chart(
@@ -335,6 +344,154 @@ def test_atlas_down_tells_the_model_to_use_the_chart(
     outcome = _show(web, {"dashboard": "x"})
     assert outcome.failure.code == "atlas_unreachable"
     assert "bi__query" in outcome.failure.message and "opening Atlas" in outcome.failure.message
+
+
+UNREADABLE = {"panels": [
+    {"layout": {"y": 0, "x": 0}, "datasource": {"id": "aep.bi.result"},
+     "query": {"vault": fixtures.VAULT_ID, "slug": SLUG}},
+    {"layout": {"y": 1, "x": 0}, "datasource": {"id": "aep.bi.result"},
+     "query": {"vault": fixtures.VAULT_ID, "slug": "nope"}},
+]}  # fmt: skip
+
+
+def _stopped(monkeypatch: pytest.MonkeyPatch) -> None:
+    server = ThreadingHTTPServer(("127.0.0.1", 0), BaseHTTPRequestHandler)
+    port = server.server_address[1]
+    server.server_close()
+    monkeypatch.setattr(bi_atlas_import, "DEFAULT_PORT", port)
+
+
+def test_reading_a_dashboard_keeps_its_panels_and_nothing_else(
+    web: AgentWeb, atlas: _Atlas
+) -> None:
+    atlas.document = {
+        "panels": [
+            {"layout": {"y": 0, "x": 0}, "datasource": {"id": "aep.bi.result"},
+             "query": {"vault": "v", "slug": "s", "params": {"domain": "AIDC", "x": "${bi:x}"}},
+             "title": "not kept"},
+            {"layout": {"y": 1, "x": 0}, "datasource": {"id": "other"}, "query": {}},
+        ],
+    }  # fmt: skip
+    _show(web, {"dashboard": "儀表板 one"})
+    workspace = web.runtime.layout.workspace_root
+    copy = bi_atlas_embed.board_copy(workspace, "儀表板 one")
+    assert copy is not None and copy["read_at"]
+    # An Atlas variable means nothing here: the analysis's default stands for it.
+    assert copy["panels"] == [{"vault": "v", "slug": "s", "params": {"domain": "AIDC"}}]
+    assert bi_atlas_embed.board_copies(workspace) == {"儀表板 one": copy["read_at"]}
+
+
+def test_only_the_newest_copies_are_kept(tmp_path: Path) -> None:
+    now = datetime(2026, 11, 5, 9, 0)
+    for index in range(bi_atlas_embed.MAX_BOARDS + 2):
+        bi_atlas_embed.remember_board(tmp_path, f"board-{index}", {"panels": []}, now)
+    kept = bi_atlas_embed.board_copies(tmp_path)
+    assert len(kept) == bi_atlas_embed.MAX_BOARDS
+    assert "board-0" not in kept and f"board-{bi_atlas_embed.MAX_BOARDS + 1}" in kept
+
+
+def test_a_broken_copy_file_is_no_copy(tmp_path: Path) -> None:
+    (tmp_path / bi_atlas_embed.BOARDS_FILE).write_text("not json", encoding="utf-8")
+    assert bi_atlas_embed.board_copy(tmp_path, "x") is None
+    assert bi_atlas_embed.board_copies(tmp_path) == {}
+
+
+def test_a_stopped_atlas_draws_the_last_read_dashboard_and_says_so(
+    web: AgentWeb, atlas: _Atlas, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _show(web, {"dashboard": "儀表板 one"})
+    _stopped(monkeypatch)
+    shown = _show(web, {"dashboard": "儀表板 one"})
+    assert shown.status == "succeeded"
+    embed = shown.data["atlas_embed"]
+    assert embed["stale_note"].startswith(STALE_BOARD) and embed["stale_note"] in shown.data["note"]
+    assert "各地區的客戶數" in Path(embed["fallback"]).read_text("utf-8")
+    assert shown.data["atlas_frame"] is False and shown.data["not_shown"] == []
+    assert "各地區的客戶數" in shown.data["charts"]
+    # Without a name: what this PC has a copy of, not "Atlas has".
+    listed = _show(web, {})
+    assert listed.data["dashboards"] == ["儀表板 one"] and "not running" in listed.data["note"]
+
+
+def test_a_stopped_atlas_with_no_copy_only_explains(
+    web: AgentWeb, atlas: _Atlas, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _show(web, {"dashboard": "儀表板 one"})
+    _stopped(monkeypatch)
+    other = _show(web, {"dashboard": "別的"})
+    assert other.failure.code == "atlas_unreachable" and "bi__query" in other.failure.message
+
+
+def test_a_copy_whose_panels_cannot_be_read_only_explains(
+    web: AgentWeb, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    workspace = web.runtime.layout.workspace_root
+    gone = {"panels": [{"datasource": {"id": "aep.bi.result"},
+                        "query": {"vault": "gone-vault", "slug": "nope"}}]}  # fmt: skip
+    bi_atlas_embed.remember_board(workspace, "舊的", gone, datetime(2026, 11, 5, 9, 0))
+    _stopped(monkeypatch)
+    outcome = _show(web, {"dashboard": "舊的"})
+    assert outcome.failure.code == "atlas_unreachable" and "nope" in outcome.failure.message
+
+
+def test_a_stopped_atlas_lists_a_panel_it_could_not_read(
+    web: AgentWeb, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    workspace = web.runtime.layout.workspace_root
+    bi_atlas_embed.remember_board(workspace, "混合", UNREADABLE, datetime(2026, 11, 5, 9, 0))
+    _stopped(monkeypatch)
+    shown = _show(web, {"dashboard": "混合"})
+    assert [m["slug"] for m in shown.data["not_shown"]] == ["nope"]
+    assert "nope" in shown.data["note"] and "Not shown" in shown.data["note"]
+
+
+def test_a_running_atlas_with_an_unreadable_panel_does_not_claim_all_is_shown(
+    web: AgentWeb, atlas: _Atlas
+) -> None:
+    atlas.document = UNREADABLE
+    shown = _show(web, {"dashboard": "儀表板 one"})
+    assert shown.data["atlas_frame"] is True
+    assert [m["slug"] for m in shown.data["not_shown"]] == ["nope"]
+    assert "nope" in shown.data["note"] and "do not say" in shown.data["note"]
+    assert "in full" in shown.data["note"]
+
+
+def test_a_board_that_cannot_be_framed_or_read_says_nothing_is_shown(
+    web: AgentWeb, atlas: _Atlas
+) -> None:
+    atlas.head_status = 503
+    atlas.document = {"panels": UNREADABLE["panels"][1:]}
+    shown = _show(web, {"dashboard": "儀表板 one"})
+    assert shown.data["atlas_frame"] is False and shown.data["charts"] == []
+    assert "Nothing of this dashboard" in shown.data["note"]
+    assert "fallback" not in shown.data["atlas_embed"] and "attach" not in shown.data
+
+
+def test_a_board_read_in_full_says_it_is_shown(web: AgentWeb, atlas: _Atlas) -> None:
+    shown = _show(web, {"dashboard": "儀表板 one"})
+    assert shown.data["not_shown"] == [] and "sees this dashboard" in shown.data["note"]
+
+
+def test_a_turn_reads_the_atlas_at_the_port_it_carries(
+    web: AgentWeb, atlas: _Atlas, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    port = atlas.server_address[1]
+    _stopped(monkeypatch)  # the default port has no Atlas
+    session = web.create_conversation()["conversation"]["session_id"]
+    web.runtime.agent.gateway.router.model = _Scripted(
+        {"tools": [(ATLAS_TOOL, {"dashboard": "儀表板 one"})]}, {"text": "好"}
+    )
+    web.conversation_turn(
+        ConversationTurnRequest(session_id=session, message="看板子", atlas_port=port)
+    )
+    assert any(call["path"] == "/dashboards" for call in atlas.seen)
+    assert ATLAS_PORT.get() is None  # for that turn only
+
+
+@pytest.mark.parametrize("port", [0, 70000, "8127", True])
+def test_a_turn_refuses_a_port_that_is_not_one(port: Any) -> None:
+    with pytest.raises(ValueError):
+        ConversationTurnRequest(session_id="s", message="m", atlas_port=port)
 
 
 # -- the answer --------------------------------------------------------------------------
@@ -475,6 +632,41 @@ def test_the_frame_shows_atlas_and_falls_back_when_it_cannot(tmp_path: Path, atl
                 "answerAtlasEmbed('s', {kind: 'dashboard', path: 'nope', title: '別處的'}, [])"
                 ".textContent"
             )
+
+            # The chat reads the Atlas this browser has set, and a stopped one's board
+            # from the copy (the stand-in's port is not the default here).
+            atlas.head_status = 200
+            load(origin)
+            default = bi_atlas_import.DEFAULT_PORT
+            bi_atlas_import.DEFAULT_PORT = 1
+            web.runtime.agent.gateway.router.model = _Scripted(
+                {"tools": [(ATLAS_TOOL, {"dashboard": "儀表板 one"})]},
+                {"text": "第一次。"},
+                {"tools": [(ATLAS_TOOL, {"dashboard": "儀表板 one"})]},
+                {"text": "第二次。"},
+            )
+            browser._evaluate(
+                "document.getElementById('message').value = '看板子';"
+                "document.getElementById('ask').requestSubmit();"
+            )
+            wait("document.getElementById('log').textContent.includes('第一次。')")
+            assert any(call["path"] == "/dashboards" for call in atlas.seen)
+            wait(
+                "!!document.querySelector('iframe[data-atlas-origin][src*=\"/embed/dashboard/\"]')"
+            )
+            atlas.head_status = 503  # the frame's own probe says no; the reads below are refused
+            bi_atlas_import.DEFAULT_PORT = default
+            browser._evaluate(
+                f"localStorage.setItem('bi-atlas-url', 'http://127.0.0.1:{_free_port()}');"
+                "document.getElementById('message').value = '再看一次';"
+                "document.getElementById('ask').requestSubmit();"
+            )
+            wait("document.getElementById('log').textContent.includes('第二次。')")
+            wait(
+                "[...document.querySelectorAll('.atlas-embed-note')]"
+                f".some(n => n.textContent.startsWith({json.dumps(STALE_BOARD)}))"
+            )
+            wait("!!document.querySelector('.answer-atlas .answer-html iframe')")
 
             # An address that is not this PC is never framed.
             atlas.head_status = 200

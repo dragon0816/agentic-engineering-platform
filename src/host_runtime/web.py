@@ -130,6 +130,7 @@ from host_runtime.attachments import summary as attachment_summary
 from host_runtime.authoring import AuthoringError, AuthoringSession, AuthoringStudio
 from host_runtime.avatars import UserPreferences, UserPreferencesStore, catalog
 from host_runtime.bi_cards_tools import (
+    ATLAS_PORT,
     atlas_embeds,
     bi_chart_files,
     bi_question,
@@ -2989,6 +2990,7 @@ class AgentWeb:
                 pass
         self.turn_progress.begin(progress)
         listening = TURN_PROGRESS.set(progress)
+        atlas_port = ATLAS_PORT.set(item.atlas_port)
         # The conversation's own model (owner 2026-10-21) for everything the
         # turn does (owner 2026-10-22): the conversation, a Knowledge answer,
         # a Workflow draft. A CLI-backend session's model is the backend's
@@ -3003,6 +3005,7 @@ class AgentWeb:
             self._voice_used(item, progress.turn_id)
             return result
         finally:
+            ATLAS_PORT.reset(atlas_port)
             TURN_PROGRESS.reset(listening)
             self.turn_progress.end(progress)
 

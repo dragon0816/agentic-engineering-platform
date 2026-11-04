@@ -6361,3 +6361,11 @@ Measured always on, a dense chunk gave about 7 questions, 36% of its items `need
 ## 2026-11-04: Long paths take Windows' long form only when they need it
 
 A wiki repository keeps people's file names, and `work/files` and the reading view sit under a long workspace path. `LongPathsEnabled` needs an admin and colleagues' PCs will not have it. Paths of 240 characters or more use `\\?\`; shorter ones are unchanged, so nothing else sees a new form, except the Agent's reading view, which is always in the long form so its pages are not silently unseen. Rejected: shortening file names, since pages cite `raw/<name>`, and moving the workspace.
+
+## 2026-11-05 — Chat's Atlas: a kept copy of a dashboard's panels, and the port with the turn
+
+From worker V's acceptance, relayed by the BI orchestrator.
+
+- **A per-PC copy of a dashboard's AEP panels** (vault, slug, params, read time), so a stopped Atlas can still draw charts for a dashboard asked about for the first time in a conversation. The answer says it is the last read and that Atlas decides the layout. No copy: the explanation, nothing guessed. Rejected: keeping the whole document (AEP draws no layout from it, and a copy of Atlas's data would drift).
+- **The port comes with the turn**, not a host setting. The page already holds the address per browser and frames Atlas with it, so one person's chat and frame always agree, with no new setting to keep in step. Only a port travels, so the host can reach nothing but `127.0.0.1`. A non-loopback address sends none, and the default port stands. Rejected: a host-level setting (a second place for the same address; two browsers could disagree with it).
+- **A dashboard's result says what the answer holds**: framed or not, charts drawn, panels not shown and why, so the model cannot say 「已在這裡顯示」 for a board it could not read.

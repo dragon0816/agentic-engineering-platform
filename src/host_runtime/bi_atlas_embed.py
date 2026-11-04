@@ -10,13 +10,17 @@ iframe's load event cannot tell. AEP never writes to Atlas.
 
 from __future__ import annotations
 
+import json
 import urllib.error
 import urllib.request
 from collections.abc import Mapping
+from datetime import datetime
+from pathlib import Path
 from typing import Any
 from urllib.parse import quote, urlencode
 
 from capabilities.bi_cards.store import BiStoreError
+from host_runtime.workspace import write_atomically
 
 #: The contract's reserved query keys: never an analysis parameter in a URL.
 RESERVED = frozenset({"vault", "slug"})
@@ -24,6 +28,10 @@ PROBE_SECONDS = 2.0
 #: A dashboard's panels drawn for the chart page shown when Atlas is not running.
 FALLBACK_PANELS = 12
 BI_DATASOURCE = "aep.bi.result"
+#: Per PC, under the workspace: which AEP panels each dashboard had when last read,
+#: so a stopped Atlas still has charts to show. Only references, never Atlas's layout.
+BOARDS_FILE = "bi-atlas-dashboards.json"
+MAX_BOARDS = 50
 
 
 def _text(value: Any) -> str:
@@ -60,8 +68,27 @@ def framable(port: int) -> bool:
 
 def panels_of(document: Any) -> list[tuple[str, str]]:
     """The (vault, slug) of a dashboard's AEP panels, top to bottom, each once."""
+    return list(dict.fromkeys((r["vault"], r["slug"]) for r in panel_refs(document)))
+
+
+def _panel_params(query: Mapping[str, Any]) -> dict[str, Any]:
+    """A panel's plain parameters; an Atlas variable (`${...}`) means nothing here,
+    so the analysis's default stands for it."""
+    given = query.get("params")
+    if not isinstance(given, Mapping):
+        return {}
+    return {
+        str(name): value
+        for name, value in given.items()
+        if isinstance(value, (str, int, float, bool)) and "${" not in str(value)
+    }
+
+
+def panel_refs(document: Any) -> list[dict[str, Any]]:
+    """A dashboard's AEP panels top to bottom: vault, slug and parameters, each
+    such combination once."""
     panels = document.get("panels") if isinstance(document, Mapping) else None
-    found: list[tuple[float, float, str, str]] = []
+    found: list[tuple[float, float, dict[str, Any]]] = []
     for panel in panels if isinstance(panels, list) else []:
         if not isinstance(panel, Mapping):
             continue
@@ -76,5 +103,43 @@ def panels_of(document: Any) -> list[tuple[str, str]]:
         layout = panel.get("layout") if isinstance(panel.get("layout"), Mapping) else {}
         where = [layout.get(key) for key in ("y", "x")]  # type: ignore[union-attr]
         y, x = (float(v) if isinstance(v, (int, float)) else float("inf") for v in where)
-        found.append((y, x, vault_id, slug))
-    return list(dict.fromkeys((v, s) for _y, _x, v, s in sorted(found, key=lambda f: f[:2])))
+        found.append((y, x, {"vault": vault_id, "slug": slug, "params": _panel_params(query)}))
+    unique: dict[str, dict[str, Any]] = {}
+    for _y, _x, ref in sorted(found, key=lambda f: f[:2]):
+        unique.setdefault(json.dumps(ref, sort_keys=True, ensure_ascii=False), ref)
+    return list(unique.values())
+
+
+def _boards(workspace: Path) -> dict[str, Any]:
+    try:
+        found = json.loads((workspace / BOARDS_FILE).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return found if isinstance(found, dict) else {}
+
+
+def remember_board(workspace: Path, name: str, document: Any, now: datetime) -> None:
+    """Keep which AEP panels this dashboard has, the newest `MAX_BOARDS` boards."""
+    boards = _boards(workspace)
+    boards.pop(name, None)
+    boards[name] = {
+        "read_at": now.strftime("%Y-%m-%d %H:%M"),
+        "panels": panel_refs(document)[:FALLBACK_PANELS],
+    }
+    kept = dict(list(boards.items())[-MAX_BOARDS:])
+    text = json.dumps(kept, ensure_ascii=False, indent=2)
+    write_atomically(workspace / BOARDS_FILE, text.encode("utf-8"))
+
+
+def board_copy(workspace: Path, name: str) -> dict[str, Any] | None:
+    found = _boards(workspace).get(name)
+    return found if isinstance(found, dict) and isinstance(found.get("panels"), list) else None
+
+
+def board_copies(workspace: Path) -> dict[str, str]:
+    """The dashboards with a copy here, and when each was read."""
+    return {
+        name: str(item.get("read_at") or "")
+        for name, item in _boards(workspace).items()
+        if isinstance(item, dict)
+    }
