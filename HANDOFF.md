@@ -1,5 +1,17 @@
 # Handoff
 
+## R6 finished except `rs-k`; four fixes on `r6-rmtree-world` (2026-11-04, Claude Code worker D)
+
+**Vault:** `market-intel` is published at `2026q4-r6.2` (commit `826b8acd`): 760 cards, 12 benchmark questions, 37 Dashboard sections with the five data correctness panels first. `2026q4-r6.1` exists without those panels showing. Questions were accepted on the orchestrator's word; the owner has not read them.
+
+**`rs-k` copy: not imported.** The attempt stopped at `FileNotFoundError`: a long workspace path passed Windows' 260 characters with `LongPathsEnabled` off. `Wiki_Knowledge\rs-k-test` holds an empty skeleton and the registry lists it; `knowledge-repos\rs-k-test` holds 519 staged files. No commit, tag or publish. The orchestrator allows removing them, after checking they hold no commits or sources, and retrying with the same id once this branch is on main and Agent Web restarted. The source folder's digest is in `.scratch/r7/rsk-before.txt`, git-ignored.
+
+**On `r6-rmtree-world`, off main `d8fce30f`, not merged:** the long path fix; a held old view is no failure; `requires` the schema lacks are refused and the Dashboard names what it leaves out; `bi__query` text is words; a benchmark report keeps tool calls; error classes work on cards with relations. The running Agent Web has none of it until merged and restarted. Targeted tests and CI's checks only; the full suite has not run on it.
+
+**Known:** the real error classes still need a bench run after the merge. SpaceX's suppliers: `SupplyLink` gives 8, `Account.key_suppliers` 7 (no 群創), so answers switch. An import skips `wiki/entities/CAG #86.md` for its name. Not bypassed, but a failed gate was rerun: bench run 4 flagged a regression on an analysis-only commit, run 5 was clean.
+
+**Next, on the orchestrator's word:** merge and restart; remove the skeleton; import `rs-k` and tag `rs-k-test.1`; bench again for error classes.
+
 ## Phase 2 and 3 integrated on `phase23` (2026-11-04, Claude Code worker D) — full suite's failures fixed
 
 `phase23` from main `ad532e2d`, merged one at a time, none rewritten: `p3-bench`, `p3-retrieval`, `p2-review`, `p2-tools`, `p2-schema-fit`. `MODEL_VERSION` is 9, so a local `bi.sqlite` rebuilds once.

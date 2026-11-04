@@ -6353,3 +6353,11 @@ On the two densest chunks of `compute.md`, three runs each, real model, 32,000 o
 ## 2026-11-04: Schema fit is a per-run tick, default off (orchestrator)
 
 Measured always on, a dense chunk gave about 7 questions, 36% of its items `needs_clarification`, 41 of 44 added by the check. Too much review for colleagues on Friday. A run asks only with `check_fit: true`, from a tick in the run form, in a vault; it is stored on the run, so a resumed run keeps it. Off, the prompt is as before Phase 2-b, so kept answers are still reused. Rejected: leaving Phase 2-b out, since the owner can still use it, and tuning the check before the release.
+
+## 2026-11-04: `bi__query` text is words, with the nearest cards when none holds them all
+
+`text` was one string in one field, so every question-like query came back empty: 60 of 60 first queries on two real questions. The model then retried with fewer words, or went to SQL, and once gave a neighbouring card's figure; two bench turns said "no data" outright. After: 60 of 60 first queries held the answer, 1 tool call against 3.03, half the time, 60 of 60 passed against 59. Question words such as 營收 are on no card, so requiring all of them still returns nothing: hence the nearest cards, at least two words held, with a note that they may not be the answer. Only in `bi__query`; the page's card list stays strict. Rejected: telling the model to use short words only, which leaves the empty first query, and search over the FTS index, which holds source text and not card fields.
+
+## 2026-11-04: Long paths take Windows' long form only when they need it
+
+A wiki repository keeps people's file names, and `work/files` and the reading view sit under a long workspace path. `LongPathsEnabled` needs an admin and colleagues' PCs will not have it. Paths of 240 characters or more use `\\?\`; shorter ones are unchanged, so nothing else sees a new form, except the Agent's reading view, which is always in the long form so its pages are not silently unseen. Rejected: shortening file names, since pages cite `raw/<name>`, and moving the workspace.
