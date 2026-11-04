@@ -164,3 +164,25 @@ def test_a_step_opened_while_the_page_loads_is_not_taken_away(tmp_path: Path) ->
             page.wait(page.shows("bi-b-sources", "second.md"))
             page.wait("document.getElementById('bi-status-build').hidden")
             assert _visible_stage(page) == "schema"
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_a_table_tried_while_the_skills_load_still_goes_by_its_rules(tmp_path: Path) -> None:
+    """`test_bi_build_ui` failed 1 run in 12: the list's first entry is AI, until it is filled."""
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    _dataset(workspace, "lab")
+    Staging(workspace, "lab").add_source(
+        "tech.csv", text="技術,領域\nTSN,robotics\n", actor="alice"
+    )
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(tmp_path / "browser", server.address) as page:
+            _open(page, "lab")
+            _pick(page, "tech.csv")
+            _hold(page, "/api/bi/methods?")
+            page.stage("method")
+            assert page.run("document.getElementById('bi-b-m-pick').value") == "builtin:rules"
+            page.click("#bi-b-trial")
+            page.see("bi-b-trial-result", "試跑")
+            _free(page)
+            assert "試跑完成" in page.text_of("bi-b-trial-result")

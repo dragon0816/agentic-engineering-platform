@@ -15645,6 +15645,9 @@ el("bi-b-trial").addEventListener("click", async () => {
 // A method is a versioned file in the dataset; Session B suggests changes (one
 // model call per turn, no tools) and only 「套用為新版次」 writes a revision.
 async function biBuildMethodStage() {
+  // Right from the start: until the list is filled its first entry, AI, would send a table
+  // to the model on a press.
+  if (!bi.build.skill && !bi.build.method) el("bi-b-m-pick").value = biBuiltinFor();
   try {
     await Promise.all([biBuildMethods(), biBuildTrials(), biBuildAiState("bi-b-sb-model",
       "Skill、最近兩次試跑的候選卡")]);
