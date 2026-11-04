@@ -6330,3 +6330,6 @@ From the BI orchestrator's brief for Phase 3-a; design `docs/phases/BI_CARD_MODE
 - **Card search stays a substring scan.** Only passages use the index; changing card matching (all words, ranking) would
   change existing answers days before a release.
 - **Not done:** reading `published/<tag>.sqlite`, on the Phase 3 list; not in this brief, and readers keep rebuilding from units.
+## 2026-11-04: A card's evidence review is stored on the evidence row
+
+Phase 2-c needs a person's judgement of a reference on a card, and `BI_CARD_MODEL.md` §3 only has `assessment` on `relation_evidence`. **Decision:** `evidence` gains one optional `assessment` column, and an `evidence:` row may hold the key; old rows stay valid and `MODEL_VERSION` rises to 6. The review travels as a note on the correction path. **Rejected:** a new `review:` unit (proposal §5 asks not to add tables and units for this, and the row is where the judgement belongs); pseudo-relations in `relation_evidence` for a card's field (would show up as relations).

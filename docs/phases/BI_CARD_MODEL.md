@@ -218,6 +218,10 @@ The button opens a form: field, new value or state, reason (required), author. I
 
 Refused with `cards_changed` if a listed card moved. Seed and page cards have no model, so re-import with the mapping is their path, under the merge table of `BI_CARD_PAGE_IMPORT.md` §4.
 
+### 5.4 Evidence review (Phase 2-c)
+
+A note on the correction path, not a new mechanism: source → preview → confirm → commit, read with no model (`evidence_review.py`). It records a person's judgement of one reference on a card's field or on a relation (proposal §6.1 B): stance, directness, scope, date, same-source, and accept, pending or reject with a reason. Words only, no numeric weight. It never writes a field; a wrong value still takes a correction note. The judgement and its history go in `assessment`, on the evidence row or `relation_evidence` unit; `evidence` gains that one optional column, an exception to §3's freeze recorded in `docs/DECISIONS.md`. A verdict on card evidence is recorded and shown; nothing reads it for answers or coverage yet. A value with basis `inference` has no reference, so it has no row to review.
+
 ## 6. What is written to the shared folder at publish
 
 ### 6.1 `cards/<stable-id>.md` (D5): at publish, by the publishing PC

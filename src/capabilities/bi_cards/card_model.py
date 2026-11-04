@@ -29,7 +29,7 @@ from typing import Any
 
 #: A local `bi.sqlite` older than this is rebuilt once from the units. Kept in
 #: `PRAGMA user_version`, not `meta`: every `meta` row is a unit.
-MODEL_VERSION = 8
+MODEL_VERSION = 9
 
 STATE_PREFIX = "state:"
 RELATION_PREFIX = "relation:"
@@ -57,6 +57,10 @@ STATE_ORIGINS = ("unit", "profile", "proposal")
 SUPPORTS = "supports"
 STANCES = (SUPPORTS, "refutes", "context_only")
 SUBMISSION_FALLBACK = "submission_fallback"
+#: A person's review of a reference, in words (proposal §6.1 B): no numeric weight.
+DIRECTNESS = ("direct", "indirect", "insufficient", UNKNOWN)
+SAME_SOURCE = ("independent", "same_source", UNKNOWN)
+VERDICTS = ("accepted", "pending", "rejected")
 
 #: `unreviewed` is only for a relation derived from a link field; it never blocks use.
 UNREVIEWED = "unreviewed"

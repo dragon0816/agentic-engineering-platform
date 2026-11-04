@@ -282,6 +282,10 @@ def links(store: BiStore, card: Any, fields: dict[str, dict[str, Any]]) -> list[
     return result
 
 
+def _reviewable(store: BiStore, relation: dict[str, Any]) -> dict[str, Any]:
+    return {**relation, "references": store.relation_references(relation["relation_id"])}
+
+
 def card_detail(store: BiStore, card_id: str) -> dict[str, Any] | None:
     card = store.card(card_id)
     if card is None:
@@ -316,7 +320,11 @@ def card_detail(store: BiStore, card_id: str) -> dict[str, Any] | None:
         "card": {**summary, "version": int(card["version"])},
         "fields": shown,
         "links": links(store, card, fields),
-        "relations": store.relations(card_id),
+        "relations": [_reviewable(store, r) for r in store.relations(card_id)],
+        "rejected_relations": [
+            _reviewable(store, r) for r in store.relations(card_id, rejected=True)
+        ],
+        "field_states": store.field_states(card_id),
         "proposals": store.proposals(card_id),
         "evidence": store.evidence(card_id),
     }

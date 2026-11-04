@@ -365,7 +365,10 @@ def _reference_of(row: sqlite3.Row) -> dict[str, Any]:
     if "reference_at" not in row.keys() or row["reference_at"] is None:
         return {}
     parts = ("reference_id", "stance", "reference_at", "reference_time_basis")
-    return {k: row[k] for k in parts if row[k] is not None}
+    found = {k: row[k] for k in parts if row[k] is not None}
+    if "assessment" in row.keys() and row["assessment"] is not None:
+        found["assessment"] = _load(row["assessment"])
+    return found
 
 
 def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str, Any]:
@@ -795,7 +798,8 @@ def materialize(
                     db.execute(
                         "INSERT INTO evidence (card_id, field, run_id, source_id, source_name, "
                         "locator, excerpt, basis, at, reference_id, stance, reference_at, "
-                        "reference_time_basis) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        "reference_time_basis, assessment) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         (
                             cid,
                             name,
@@ -811,6 +815,7 @@ def materialize(
                             item.get("stance") or card_model.SUPPORTS,
                             item.get("reference_at"),
                             item.get("reference_time_basis"),
+                            None if item.get("assessment") is None else _dump(item["assessment"]),
                         ),
                     )
             elif key.startswith(card_model.STATE_PREFIX):
@@ -1909,8 +1914,8 @@ def decide_relation(
     from_id, kind, to_id = (str(given.get(k) or "") for k in ("from", "type", "to"))
     status = str(given.get("status") or "")
     origin = str(given.get("origin") or "registered")
-    if status not in ("confirmed", "rejected", "disputed"):
-        raise BiStoreError("relation_status_invalid", "決定只能是確認、否決或有爭議")
+    if status not in ("confirmed", "rejected", "disputed", "pending"):
+        raise BiStoreError("relation_status_invalid", "決定只能是確認、否決、有爭議或待確認")
     if origin not in ("ai_inferred", "registered"):
         raise BiStoreError("relation_origin_invalid", "來源只能是 AI 推論或登記")
     given_evidence = given.get("evidence") or []
@@ -1975,6 +1980,7 @@ def decide_relation(
                 "stance": stance,
                 "by": actor,
                 "at": at,
+                **({"assessment": item["assessment"]} if item.get("assessment") else {}),
             }
         with _repo_errors():
             vault.repo.stage_many(changes)

@@ -102,7 +102,8 @@ Rules:
 - Propose only what the excerpt supports. For every field give its basis:
   "fact": the excerpt states it; add "quote", copied exactly from the excerpt (a short
   phrase is enough), and "stance": "supports" when the quote backs the value, "refutes"
-  when it speaks against it, "context_only" when it is only background;
+  when it speaks against it, "context_only" when it is only background, with a "reason"
+  when it is not "supports";
   "inference": you reasoned it (a forecast, a guess, a likely need); add "reason";
   "unknown": you cannot tell; leave the value empty.
 - Never state a page, line or row number: the quote is enough.
@@ -527,6 +528,7 @@ def candidate(
                             if entry.get("stance") in card_model.STANCES
                             else card_model.SUPPORTS
                         ),
+                        **({"reason": _text(entry["reason"])} if entry.get("reason") else {}),
                     }
                 )
         if basis == "fact" and item.kind in ("int", "float") and isinstance(value, (int, float)):
