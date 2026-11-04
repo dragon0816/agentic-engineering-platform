@@ -161,6 +161,37 @@ def test_a_broken_analysis_in_a_dashboard_goes_back_to_the_model(tmp_path: Path)
     ]
 
 
+def test_requires_the_schema_lacks_go_back_to_the_model(tmp_path: Path) -> None:
+    config, ws, _vault_id, dataset = _vault(tmp_path)
+    wrong = {"title": "Coverage", "slug": "coverage-new", "kind": "sql", "code": COUNT,
+             "chart": {"type": "table"}, "requires": {"fields": ["cards.entity_type"]}}  # fmt: skip
+    fixed = {k: v for k, v in wrong.items() if k != "requires"}
+    _session, (_answer, agent) = _turn(
+        config, ws, dataset,
+        {"tools": [("bi_analysis__propose", wrong)]},
+        {"tools": [("bi_analysis__propose", fixed)]},
+        {"text": "done"},
+    )  # fmt: skip
+    told = [m.text for m in agent.requests[1].messages if "cards.entity_type" in m.text]
+    assert told and "Dashboard" in told[-1]
+
+
+def test_an_analysis_the_schema_keeps_off_the_board_says_why(tmp_path: Path) -> None:
+    _, ws, vault_id, dataset = _vault(tmp_path)
+    _ok(_call(ws, "POST", f"/api/bi/vaults/{vault_id}/analyses", {"save": {
+        "title": "Needs more", "slug": "needs-more", "kind": "sql", "code": COUNT,
+        "chart": {"type": "table"},
+        "requires": {"types": ["NoSuchType"], "fields": ["Account.no_such"]}}}))  # fmt: skip
+    listed = _ok(_call(ws, "GET", f"/api/bi/vaults/{vault_id}/analyses"))["analyses"]
+    (item,) = [a for a in listed if a["slug"] == "needs-more"]
+    assert item["offered"] is False and item["missing"] == ["NoSuchType", "Account.no_such"]
+    board = _ok(_call(ws, "GET", "/api/bi/dashboard", dataset=dataset))
+    assert "needs-more" not in [s["id"] for s in board["sections"]]
+    assert board["not_shown"] == [
+        {"slug": "needs-more", "title": "Needs more", "missing": ["NoSuchType", "Account.no_such"]}
+    ]
+
+
 @pytest.mark.parametrize(
     ("order", "proposed", "says"),
     [

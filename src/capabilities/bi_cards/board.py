@@ -172,6 +172,16 @@ def board(
     with ThreadPoolExecutor(max_workers=WORKERS) as pool:
         drawn = list(pool.map(draw, items)) if db.is_file() else []
     checked = quality.section(quality.check(store, registry))
+    # What the schema keeps off this board: said, not silently dropped.
+    not_shown = (
+        [
+            {"slug": a["slug"], "title": a["title"], "missing": a["missing"]}
+            for a in analyses.listing(workspace, store.vault_id)["analyses"]
+            if not a["offered"]
+        ]
+        if store.vault_id is not None
+        else []
+    )
     flags = [f for s in [*drawn, checked] for f in s["flags"]]
     stale = next((len(s["rows"]) for s in drawn if s["id"] == "stale"), 0)
     return {
@@ -186,6 +196,7 @@ def board(
             "stale": stale,
         },
         "sections": [*drawn, checked],
+        "not_shown": not_shown,
     }
 
 

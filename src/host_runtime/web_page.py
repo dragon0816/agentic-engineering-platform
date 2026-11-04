@@ -2494,6 +2494,7 @@ tr:last-child td { border-bottom: none; }
         <div id="bi-dash-params" class="bi-actions" hidden></div>
         <div class="mem-status" id="bi-status-dash" role="status" aria-live="polite" hidden></div>
         <div id="bi-dash-summary" class="bi-summary"></div>
+        <div id="bi-dash-not-shown" class="bi-warn" hidden></div>
         <div id="bi-dash-sections"></div>
       </div>
       <div id="bi-view-cards" role="tabpanel" aria-label="卡片" hidden>
@@ -12315,6 +12316,11 @@ async function biMigrateDomains() {
 
 function biRenderDashboard(reply) {
   const sections = (reply.sections || []).slice();
+  const notShown = reply.not_shown || [], absent = el("bi-dash-not-shown");
+  absent.hidden = !notShown.length;
+  absent.replaceChildren(...notShown.map((a) => bh("div", "", "「" + a.title
+    + "」沒有顯示：schema 沒有它需要的 " + a.missing.join("、")
+    + "。到「建立與匯入」的「分析與圖表」修改它的 requires。")));
   const holder = el("bi-dash-sections"), strip = el("bi-dash-summary");
   if (reply.dashboard === false) {  // a dataset of a non-BI schema
     holder.append(bh("div", "bi-none", bh("h3", "", reply.message || "這個 schema 沒有 Dashboard"),
@@ -13710,7 +13716,8 @@ async function biAnalyses(vaultId) {
   };
   for (const item of items) {
     const state = biAnState(vaultId, item.slug), out = biAnOut("list", item, state);
-    const where = !item.offered ? "schema 沒有它需要的類型或欄位，Dashboard 不顯示"
+    const where = !item.offered
+      ? "schema 沒有它需要的 " + (item.missing || []).join("、") + "，Dashboard 不顯示"
       : hidden.has(item.slug) ? "Dashboard 不顯示" : "Dashboard 第 " + (rank(item) + 1) + " 個";
     const shown = hidden.has(item.slug)
       ? biButton("在 Dashboard 顯示", () => biSaveDashboard(vaultId, {order: reply.order,

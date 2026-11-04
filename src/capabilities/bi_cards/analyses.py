@@ -365,21 +365,28 @@ def enum_values(spec: Mapping[str, Any], registry: Any | None) -> list[str]:
     return []
 
 
+def requires_missing(requires: Mapping[str, Any] | None, registry: Any | None) -> list[str]:
+    """The types and fields the analysis requires that the schema does not have."""
+    if not requires:
+        return []
+    named = [str(t) for t in requires.get("types") or []]
+    refs = [str(r) for r in requires.get("fields") or []]
+    if registry is None:
+        return [*named, *refs]
+    missing = [t for t in named if t not in registry.types]
+    for ref in refs:
+        type_name, _, field_name = ref.partition(".")
+        entity = registry.types.get(type_name)
+        if entity is None or entity.get(field_name) is None:
+            missing.append(ref)
+    return missing
+
+
 def requires_met(requires: Mapping[str, Any] | None, registry: Any | None) -> bool:
     """Whether the schema has every type and field the analysis requires."""
     if not requires:
         return True
-    if registry is None:
-        return False
-    for type_name in requires.get("types") or []:
-        if type_name not in registry.types:
-            return False
-    for ref in requires.get("fields") or []:
-        type_name, _, field_name = str(ref).partition(".")
-        entity = registry.types.get(type_name)
-        if entity is None or entity.get(field_name) is None:
-            return False
-    return True
+    return registry is not None and not requires_missing(requires, registry)
 
 
 def described_params(params: Mapping[str, Any] | None, registry: Any | None) -> dict[str, Any]:
@@ -635,8 +642,8 @@ def order(units: Mapping[str, Any], slugs: list[str]) -> list[str]:
 
 def listing(workspace: Path, vault_id: str) -> dict[str, Any]:
     """The working copy's analyses, each with its parameter `inputs` (enum
-    values resolved) and whether the schema `offered` it; `order` is the
-    Dashboard's (offered, not hidden) and `dashboard` the stored layout."""
+    values resolved), whether the schema `offered` it and what it is `missing`;
+    `order` is the Dashboard's (offered, not hidden) and `dashboard` the stored layout."""
     from capabilities.bi_cards import vault
 
     units = vault.Vault(workspace, vault_id).repo.working_units()
@@ -648,6 +655,7 @@ def listing(workspace: Path, vault_id: str) -> dict[str, Any]:
                 **item,
                 "inputs": described_params(item.get("params"), registry),
                 "offered": requires_met(item.get("requires"), registry),
+                "missing": requires_missing(item.get("requires"), registry),
             }
         )
     offered = [a["slug"] for a in found if a["offered"]]
