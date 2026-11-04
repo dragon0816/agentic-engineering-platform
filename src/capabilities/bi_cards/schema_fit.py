@@ -55,13 +55,16 @@ Check in this order, and prefer reusing what exists:
 1. update_card: the same thing, with new data or evidence. 2. create_card: a new thing of a
 kind the schema has. 3. dictionary_change: only a name, synonym or allowed value differs;
 proposal {"type", "field", "value", "maps_to"}. 4. extend_schema: the kind is right but a needed
-field is missing; proposal {"type", "field", "definition": {"label", "kind", "class", ...}}.
+field is missing; proposal {"type", "field", "definition": {"label", "kind", "class", ...}},
+with "kind" one of
+str, int, float, bool, date, enum, list, link, linklist and "class" one of sourced, judgement.
 5. propose_type: no type can reasonably hold it and it needs managing on its own; proposal
 {"name", "definition", "unit_boundary", "why_not_existing", "why_independent", "business_use"},
 each answered specifically. needs_clarification: you cannot tell; say what to ask in "questions".
 A new market, company or word, missing data, or many empty values never justify a new type.
 Actions may combine, such as ["update_card", "extend_schema"]. Keep content that does not fit
-here with its quote; do not force it into a card. A person reviews every schema change."""
+here with its quote; do not force it into a card. A person reviews every schema change.
+Write "summary", "reason" and "questions" in the language of the source."""
 
 
 def _text(value: Any) -> str:
@@ -76,8 +79,10 @@ def _clarify(item: dict[str, Any], gone: str, question: str) -> None:
 
 
 def _checked_proposal(reg: Registry, item: dict[str, Any], raw: Any) -> None:
-    """Keep the proposal its action needs, or turn that action into a question."""
+    """Turn an action whose proposal cannot stand into a question. The proposal stays
+    on the item either way, for the person: approving needs the question settled."""
     given = raw if isinstance(raw, dict) else {}
+    item["proposal"] = given or None
     if PROPOSE_TYPE in item["actions"]:
         missing = [label for key, label in FOUR_ANSWERS.items() if not _text(given.get(key))]
         name = _text(given.get("name"))
@@ -86,8 +91,6 @@ def _checked_proposal(reg: Registry, item: dict[str, Any], raw: Any) -> None:
             _clarify(item, PROPOSE_TYPE, f"新卡型提案缺少必要說明：{what}")
         elif name in reg.types:
             _clarify(item, PROPOSE_TYPE, f"schema 已經有類型 {name}，要不要沿用？")
-        else:
-            item["proposal"] = given
     if EXTEND_SCHEMA in item["actions"]:
         entity = reg.types.get(_text(given.get("type")))
         field = _text(given.get("field"))
@@ -95,13 +98,13 @@ def _checked_proposal(reg: Registry, item: dict[str, Any], raw: Any) -> None:
             _clarify(item, EXTEND_SCHEMA, "欄位提案要有既有類型、欄位名稱和定義")
         elif entity.get(field) is not None:
             _clarify(item, EXTEND_SCHEMA, f"{entity.name} 已經有欄位 {field}，要不要沿用？")
-        else:
-            item["proposal"] = given
+        elif given["definition"].get("kind") not in catalog.KINDS or given["definition"].get(
+            "class"
+        ) not in ("sourced", "judgement"):
+            _clarify(item, EXTEND_SCHEMA, "欄位定義的 kind 或 class 不是 schema 允許的值")
     if DICTIONARY_CHANGE in item["actions"]:
         if not _text(given.get("field")) or not _text(given.get("value")):
             _clarify(item, DICTIONARY_CHANGE, "字典調整要有欄位和用語")
-        else:
-            item["proposal"] = given
 
 
 def read_items(
@@ -125,6 +128,7 @@ def read_items(
             if isinstance(entry.get("questions"), list)
             else [],
             "card": _text(entry.get("card"))[:200],
+            "model_actions": [str(a) for a in said if a is not None],
             "proposal": None,
             "source_id": source_id,
             "locator": None,
@@ -147,6 +151,9 @@ def read_items(
             item["actions"] = list(dict.fromkeys(item["actions"]))
             item["questions"].append("模型引用的原文不在來源中，請對照來源確認")
         _checked_proposal(reg, item, entry.get("proposal"))
+        if item["questions"] and not set(item["actions"]) & REVIEWED:
+            # A question on a plain update or create would go unseen in the candidates' review.
+            item["actions"].append(NEEDS_CLARIFICATION)
         found.append(item)
     return found
 

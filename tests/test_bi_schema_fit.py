@@ -137,7 +137,9 @@ def test_a_new_type_needs_its_four_answers(tmp_path: Path) -> None:
         item = next(i for i in _items(a, dataset, run_id) if i["summary"] == "太空任務")
         assert item["actions"] == ["needs_clarification"], missing
         assert "缺少必要說明" in item["questions"][0]
-        assert item["proposal"] is None and item["excerpt"] == MISSION  # kept, not dropped
+        # Kept, not dropped: the proposal and what the model said, for the person.
+        assert item["proposal"]["name"] == "Mission" and item["excerpt"] == MISSION
+        assert item["model_actions"] == ["propose_type"]
     same = {**NEW_TYPE, "proposal": {"name": "Account", **FOUR}}
     run_id, _ = _run(a, dataset, same)
     item = next(i for i in _items(a, dataset, run_id) if i["summary"] == "太空任務")
@@ -243,3 +245,37 @@ def test_a_dataset_that_is_no_vault_is_not_asked(tmp_path: Path) -> None:
     _ok(_post(ws, "/api/bi/runs", given, _runtime(model, jobs)))
     jobs.run_all()
     assert "propose_type" not in model.requests[0].messages[0].text
+
+
+def test_what_a_real_model_got_wrong_stays_visible(tmp_path: Path) -> None:
+    """From a real run: invented field values, and a question on a plain new card."""
+    _, dataset, a = _start(tmp_path)
+    invented = {"label": "負載", "kind": "quantity", "class": "product_spec"}
+    run_id, model = _run(
+        a,
+        dataset,
+        {**EXTEND, "proposal": {**EXTEND["proposal"], "definition": invented}},
+        {**EXTEND, "summary": "沒有定義", "card": "", "action": "extend_schema", "proposal": None},
+        {
+            "summary": "階段用語",
+            "action": "create_card",
+            "card": "FAKE-ROVER",
+            "reason": "可以建卡",
+            "quote": LOAD,
+            "questions": ["這個用語是不是樣品階段的同義詞？"],
+        },
+    )
+    system = model.requests[0].messages[0].text
+    assert "linklist" in system and "language of the source" in system
+    items = {i["summary"]: i for i in _items(a, dataset, run_id)}
+    item = items["產品的負載"]
+    assert "needs_clarification" in item["actions"] and "extend_schema" not in item["actions"]
+    assert "不是 schema 允許的值" in item["questions"][0]
+    assert item["proposal"]["definition"] == invented and item["status"] == "proposed"
+    assert items["沒有定義"]["actions"] == ["needs_clarification"]
+    # A question reaches the person, not only the candidates' review.
+    asked = items["階段用語"]
+    assert asked["actions"] == ["create_card", "needs_clarification"]
+    assert asked["status"] == "proposed"
+    status, body = _decide(a, dataset, run_id, asked["id"], "approved")
+    assert (status, body["code"]) == (400, "fit_needs_clarification")
