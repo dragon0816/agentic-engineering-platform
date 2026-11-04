@@ -1,10 +1,12 @@
 # Handoff
 
-## Filling card summaries (2026-11-05, Claude Code worker D) — waiting for the orchestrator
+## Filling card summaries (2026-11-05, Claude Code worker D) — waiting for the word on the full run
 
-Branch `bi-summary-fill`, docs only so far. Measured on copies; nothing written to the real vault, no product code. Findings and numbers: `docs/phases/BI_SUMMARY_FILL.md`. Drivers and raw answers, git-ignored: `.scratch/s*.py`, `.scratch/sum_try.py`, `.scratch/sum-out3.jsonl`.
+Branch `bi-summary-fill` off main `6bf0a301`, not pushed. Built: `reading_runs.py`, `POST /api/bi/runs {reading: true}`; a garbled file name no longer becomes a source's name. Findings, how to start it, what repairing old records takes: `docs/phases/BI_SUMMARY_FILL.md`. CI's checks and targeted tests pass; no full suite. Nothing written to the real vault.
 
-**Next, on the orchestrator's word:** the path and the full run. Do not strip headings from what the model reads: that reversed a card's meaning in round 2.
+**Open:** the page cannot open a run started through the API (`web_page.py`, not touched); the 13 unmarked demo cards, listed in `.scratch/summary-fill-skipped-demo-cards.md`, git-ignored, with `skip` ids in `.scratch/sum-skip.json`. A real run needs Agent Web restarted on this code.
+
+**Next, on the orchestrator's word:** merge, restart, run with `skip` on the real vault, the owner reviews, commit.
 
 ## BI page redesign, S1 done (2026-11-05, Claude Code)
 

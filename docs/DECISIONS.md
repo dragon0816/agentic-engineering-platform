@@ -6388,3 +6388,8 @@ Owner, through the BI orchestrator, on `docs/phases/BI_PAGE_SIMPLE.md` §7. All 
 - **`kn-pane-pipeline` is out of scope.** The Knowledge page opens on the BI tab when this PC has a BI dataset or vault.
 - **One-step share:** the page proposes a date as the tag name, and it stays editable.
 - **A push with no test run stays allowed,** with a visible note. The bench gate still blocks a push when a finished run on the same content regressed.
+
+
+## 2026-11-05: Empty reading fields are filled by a run over each card's own text
+
+The owner's rules: through ingest, only the card's own source text, fill only, reviewed. A run of its own, one call per card, whose candidates go through the existing review, merge and commit. Headings and evidence notes reach the model, since removing them made a card's unconfirmed supply link read as fact. Quotes are checked word for word in code. Rejected: another AI ingest of each page, whose full extraction would raise proposals on fields nobody asked about; and page import calling a model, which is what keeps it free and predictable. `scope` waits for the owner: a third of its values were true but no scope.
