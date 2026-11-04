@@ -1304,6 +1304,21 @@ tr:last-child td { border-bottom: none; }
   border-radius: 10px; background: var(--panel); }
 #bi-b-src-split { margin-top: 10px; }
 .bi-split { margin-bottom: 14px; }
+#bi-b-cands tbody tr { cursor: pointer; }
+#bi-b-cands tbody tr[aria-selected="true"] { box-shadow: inset 3px 0 0 var(--accent); }
+#bi-b-cands .bi-cand-value { display: -webkit-box; -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; overflow: hidden; }
+#bi-b-cands .bi-link { min-height: 0; padding: 0; border: 0; background: none; color: inherit;
+  font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
+#bi-b-cands td { padding-top: 6px; padding-bottom: 6px; }
+#bi-b-cand h4 { margin-top: 0; }
+#bi-b-cand .bi-cand-edit { display: flex; gap: 6px; margin-top: 6px; }
+#bi-b-cand .bi-cand-edit .bi-input { flex: 1 1 auto; min-width: 0; }
+#bi-b-cand-src { position: relative; max-height: 40vh; overflow: auto; margin: 0; padding: 10px;
+  border: 1px solid var(--line); border-radius: 8px; white-space: pre-wrap;
+  overflow-wrap: anywhere; font: inherit; }
+#bi-b-cand-src mark { background: color-mix(in srgb, var(--warn) 35%, transparent);
+  color: inherit; }
 #bi-detail-abstract { margin-top: 8px; }
 #bi-b-sources tbody tr { cursor: pointer; }
 #bi-b-sources td { overflow-wrap: anywhere; word-break: normal; }
@@ -1320,6 +1335,7 @@ tr:last-child td { border-bottom: none; }
   .bi-split-list > .bi-scroller { flex: 1 1 0; min-height: 0; max-height: none; overflow: auto;
     align-content: start; }
   .bi-split-pane { min-height: 0; overflow-y: auto; }
+  #bi-b-review-split { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); }
 }
 </style>
 </head>
@@ -2826,14 +2842,27 @@ tr:last-child td { border-bottom: none; }
           hidden>
           <h3 class="kp-stage-title" id="bi-b-review" tabindex="-1">步驟 2／3・審核</h3>
           <div class="bi-actions">
+            <label class="bi-meta">待審核的執行 <select id="bi-b-run-pick"></select></label>
             <button class="bi-btn" id="bi-b-accept-clean" type="button" disabled>
               接受所有沒有錯誤的候選卡</button></div>
           <div id="bi-b-chips" class="bi-chips" aria-label="候選卡摘要"></div>
           <div id="bi-b-same"></div>
-          <div class="bi-browse">
-            <div><ul id="bi-b-cands" class="bi-cards" aria-label="候選卡清單"></ul></div>
-            <div class="bi-detail" id="bi-b-cand" aria-live="polite">
-              <p class="bi-empty">選一張候選卡，查看欄位、證據與差異。</p></div>
+          <div class="bi-split bi-src-split" id="bi-b-review-split">
+            <div class="bi-split-list">
+              <div class="bi-actions">
+                <label class="bi-meta">卡片類型 <select id="bi-b-cand-type"></select></label>
+                <label class="bi-meta">狀態 <select id="bi-b-cand-state">
+                  <option value="">全部</option><option value="pending">待決定</option>
+                  <option value="accepted">已接受</option><option value="rejected">已拒絕</option>
+                </select></label>
+                <span class="bi-meta" id="bi-b-cand-count" role="status"></span>
+              </div>
+              <div class="bi-scroll bi-scroller"><table class="bi-table bi-stack" id="bi-b-cands"
+                aria-label="候選卡清單"><thead><tr><th>卡片</th><th>欄位</th><th>提議值</th>
+                <th>狀態</th></tr></thead><tbody></tbody></table></div>
+            </div>
+            <div class="bi-split-pane" id="bi-b-cand" aria-live="polite">
+              <p class="bi-empty">選一列，看原文與引用。</p></div>
           </div>
             <div id="bi-b-props" hidden>
               <h4 id="bi-b-props-h">待審提案</h4>
@@ -12037,7 +12066,7 @@ async function biLoad() {
       biCall("/api/bi/vaults").catch(() => ({vaults: bi.vaults || []}))]);
     bi.datasets = datasets.datasets || []; bi.schemas = schemas.schemas || [];
     bi.vaults = vaults.vaults || [];
-    biRenderBar();
+    biRenderBar(); biBuildFollowDataset();
     bi.schema = await biCall("/api/bi/schema?dataset=" + encodeURIComponent(biDataset()));
   } catch (failure) {
     el("bi-counts").textContent = "—";
@@ -12197,7 +12226,7 @@ function biLeaveDataset() {
   el("bi-pub-state").replaceChildren();
 }
 el("bi-dataset").addEventListener("change", () => {
-  biRemember(el("bi-dataset").value); biLeaveDataset(); biLoad();
+  biRemember(el("bi-dataset").value); biLeaveDataset(); biBuildFollowDataset(); biLoad();
 });
 el("bi-empty-demo").addEventListener("click", () => el("bi-demo").click());
 el("bi-empty-new").addEventListener("click", () => biOpenNew());
@@ -13165,7 +13194,7 @@ function biBuildKey() { return "bi-build-" + biDataset(); }
 
 function biBuildSave() {
   const keep = {stage: bi.build.stage, sourceId: bi.build.sourceId,
-    runId: bi.build.run ? bi.build.run.id : null};
+    runId: bi.build.run ? bi.build.run.id : bi.build.runLoading || null};
   try { localStorage.setItem(biBuildKey(), JSON.stringify(keep)); } catch (e) { /* */ }
 }
 
@@ -13182,7 +13211,9 @@ function biBuildAllowed() {
   const run = bi.build.run, has = !!bi.build.sourceId;
   const open = run && run.kind === "ingest" && ["review", "partial"].includes(run.status);
   const accepted = open && run.summary && run.summary.accepted > 0;
-  return {source: true, schema: true, method: has, review: has,
+  // A run may wait for review with no source chosen: one started through the API.
+  return {source: true, schema: true, method: has,
+    review: has || !!run || (bi.build.waiting || []).length > 0,
     commit: !!accepted && !bi.build.accepting, result: !!(run && run.status === "committed"),
     test: true};
 }
@@ -13198,6 +13229,7 @@ function biBuildStepper(stage, allowed) {
 function biBuildSteps() { biBuildStepper(bi.build.stage, biBuildAllowed()); }
 
 function biBuildStage(name, focus = true) {
+  bi.build.moves = (bi.build.moves || 0) + 1;
   const allowed = biBuildAllowed();
   // Step 2 opens where it was left, or at its first part.
   if (name === "ingest") name = allowed[bi.build.ingestAt] ? bi.build.ingestAt : "schema";
@@ -13211,7 +13243,7 @@ function biBuildStage(name, focus = true) {
   biBuildSave();
   if (stage === "schema") biBuildSchema();
   if (stage === "method") biBuildMethodStage();
-  if (stage === "review") biBuildRenderRun();
+  if (stage === "review") biBuildReviewStage();
   if (stage === "commit") biBuildSummary();
   if (stage === "result") biBuildResult();
   if (stage === "test" && biVaultOf(biDataset())) {
@@ -13247,7 +13279,23 @@ function biBuildReadOnly() {
   return readOnly;
 }
 
+function biBuildFollowDataset() {
+  // The select changes a request before `biBuildLoad` runs. From that moment nothing of the
+  // old dataset may be read or saved as this one's: the old table and selection looked
+  // chosen, and the load then emptied them with the page already moving on.
+  if (bi.build.dataset === biDataset()) return;
+  bi.build.dataset = biDataset();
+  const stored = biBuildStored();
+  bi.build.sourceId = stored.sourceId || null; bi.build.runLoading = stored.runId || null;
+  bi.build.sources = []; bi.build.run = null; bi.build.candidates = [];
+  bi.build.candidateId = null; bi.build.waiting = []; bi.build.md = null;
+  el("bi-b-sources").tBodies[0].replaceChildren();
+  el("bi-b-md").hidden = true; el("bi-b-md-empty").hidden = false;
+  biBuildSteps();
+}
+
 async function biBuildLoad() {
+  biBuildFollowDataset();
   if (biBuildReadOnly()) {
     // A subscribed copy is only read: here it is the way to another dataset.
     el("bi-b-v-state").replaceChildren(); el("bi-b-target").textContent = "";
@@ -13258,8 +13306,7 @@ async function biBuildLoad() {
     return;
   }
   const stored = biBuildStored();
-  bi.build.sourceId = stored.sourceId || null;
-  bi.build.run = null; bi.build.candidates = []; bi.build.candidateId = null;
+  const load = bi.build.load = (bi.build.load || 0) + 1, moves = bi.build.moves;
   const schema = bi.schema || {};
   el("bi-b-target").textContent = "寫入目的地：資料集「" + biDataset() + "」・schema "
     + (schema.ref || schema.schema_id || "—") + "。";
@@ -13276,11 +13323,17 @@ async function biBuildLoad() {
   try {
     await biBuildSources();
     if (stored.runId) await biBuildFetchRun(stored.runId);
+    bi.build.runLoading = null;
+    await biBuildRuns();
     biStatus("bi-status-build", "");
   } catch (failure) {
     biStatus("bi-status-build", "error", "載入失敗：" + failure.message + "。", biBuildLoad);
   }
-  biBuildStage(stored.stage || "source", false);
+  if (load !== bi.build.load) return;  // a newer load ends this
+  // A step the person opened meanwhile stays open.
+  if (moves === bi.build.moves) biBuildStage(stored.stage || "source", false);
+  else if (bi.build.stage === "review") biBuildRenderRun();
+  else biBuildSteps();
 }
 
 // -- step 1: the knowledge base (BI vaults V4, docs/phases/BI_VAULT.md §3, §7.1) --
@@ -14803,6 +14856,13 @@ el("bi-b-v-form").addEventListener("submit", async (event) => {
         + (reply.sources.skipped ? "，" + reply.sources.skipped + " 份的檔案不見了、沒有帶過"
           : "")
         + (reply.sources.error ? "，來源沒有帶過，請重新加入" : "") + "）" : ""));
+    if (mode === "convert" && bi.build.sourceId) {
+      // The sources came along under the same ids, so what was chosen stays chosen.
+      try {
+        localStorage.setItem("bi-build-" + reply.vault.dataset,
+          JSON.stringify({stage: "source", sourceId: bi.build.sourceId, runId: null}));
+      } catch (e) { /* no storage */ }
+    }
     bi.want = reply.vault.dataset; await biLoad();
   } catch (failure) {
     err.append(bh("p", "bi-err", failure.message + "。"));
@@ -15989,45 +16049,177 @@ el("bi-b-start").addEventListener("click", async () => {
   } finally { button.disabled = false; }
 });
 
+function biRunReading(run) { return run.method_ref === "llm:reading"; }
+
+function biRunReviewable(run) {
+  // A page's trial is read in its own step; a reading run's has nowhere else to be read.
+  return !!run && (run.kind === "ingest" || biRunReading(run));
+}
+
+function biRunOpen(run) {
+  return !!run && run.kind === "ingest" && ["review", "partial"].includes(run.status);
+}
+
+async function biBuildRuns() {
+  const dataset = biDataset();
+  const reply = await call("/api/bi/runs?dataset=" + encodeURIComponent(dataset));
+  if (dataset !== biDataset()) return;
+  bi.build.waiting = (reply.runs || []).filter((run) => biRunReviewable(run)
+    && ["review", "partial"].includes(run.status));
+  biBuildRunPick();
+}
+
+function biRunLabel(run) {
+  const source = (bi.build.sources || []).find((s) => s.id === (run.source_ids || [])[0]);
+  const what = biRunReading(run) ? "補摘要" : source ? source.name : "匯入";
+  const s = run.summary || {};
+  return biTime(run.at) + "・" + what + (run.kind === "trial" ? "（試跑）" : "")
+    + "・待決定 " + (s.pending || 0) + "／" + (s.candidates || 0);
+}
+
+function biBuildRunPick() {
+  const select = el("bi-b-run-pick"), run = bi.build.run;
+  const runs = [...(bi.build.waiting || [])];
+  if (biRunReviewable(run)) {
+    const at = runs.findIndex((item) => item.id === run.id);
+    if (at >= 0) runs[at] = run; else runs.unshift(run);
+  }
+  select.replaceChildren(...runs.map((item) => {
+    const option = bh("option", "", biRunLabel(item)); option.value = item.id; return option;
+  }));
+  if (!runs.length) select.append(bh("option", "", "沒有待審核的執行"));
+  select.disabled = !runs.length || !!bi.build.accepting;
+  if (biRunReviewable(run)) select.value = run.id;
+}
+
+async function biBuildOpenRun(runId) {
+  await biBuildFetchRun(runId);
+  bi.build.candidateId = null; bi.build.texts = new Map();
+  el("bi-b-cand-type").value = ""; el("bi-b-cand-state").value = "";
+  biBuildSave(); biBuildRenderRun();
+}
+
+async function biBuildReviewStage() {
+  biBuildRenderRun();
+  const dataset = biDataset();
+  await biBuildRuns().catch((failure) => biNotice(false, "讀不到執行清單：" + failure.message));
+  if (dataset !== biDataset() || biRunReviewable(bi.build.run)) return;
+  if (bi.build.waiting.length) await biBuildOpenRun(bi.build.waiting[0].id);
+}
+
+el("bi-b-run-pick").addEventListener("change", () => {
+  biBuildOpenRun(el("bi-b-run-pick").value)
+    .catch((failure) => biNotice(false, failure.message));
+});
+
+function biCandShown() {
+  const type = el("bi-b-cand-type").value, state = el("bi-b-cand-state").value;
+  return bi.build.candidates.filter((c) => (!type || c.entity_type === type)
+    && (!state || c.review === state));
+}
+
+function biBuildCandTypes() {
+  const select = el("bi-b-cand-type"), keep = select.value, counts = new Map();
+  for (const c of bi.build.candidates) {
+    counts.set(c.entity_type, (counts.get(c.entity_type) || 0) + 1);
+  }
+  const all = bh("option", "", "全部"); all.value = "";
+  select.replaceChildren(all, ...[...counts].map(([type, count]) => {
+    const option = bh("option", "", biTypeLabel(type) + "（" + count + "）");
+    option.value = type; return option;
+  }));
+  select.value = counts.has(keep) ? keep : "";
+}
+
+function biCandLabel(candidate, item) {
+  const field = biSchemaField(candidate.entity_type, item.field);
+  return (field && field.label) || item.field;
+}
+
+function biBuildCandRows() {
+  const body = el("bi-b-cands").tBodies[0], shown = biCandShown();
+  const pending = bi.build.candidates.filter((c) => c.review === "pending").length;
+  el("bi-b-cand-count").textContent = "顯示 " + shown.length + "／" + bi.build.candidates.length
+    + "・待決定 " + pending;
+  body.replaceChildren(...shown.map((candidate) => {
+    const decision = BI_DECISION[candidate.review] || [candidate.review, "dim"];
+    const name = candidate.name || candidate.canonical_key || "（無名稱）";
+    const open = biButton(name, () => biBuildPickCandidate(candidate.id), "bi-link");
+    const fields = candidate.fields, first = fields.find((f) => f.change !== "same") || fields[0];
+    const labels = fields.slice(0, 2).map((item) => biCandLabel(candidate, item)).join("、")
+      + (fields.length > 2 ? " 等 " + fields.length + " 欄" : "");
+    const cells = [
+      ["卡片", [open, bh("div", "bi-meta", biTypeLabel(candidate.entity_type) + "・"
+        + (BI_RUN_ACTION[candidate.action] || candidate.action))]],
+      ["欄位", [labels]],
+      ["提議值", [bh("div", "bi-cand-value", first ? biValue(first.value) : "—")]],
+      ["狀態", [biBadge(decision[0], decision[1]),
+        candidate.errors.length ? biBadge("錯誤 " + candidate.errors.length, "bad") : "",
+        candidate.warnings.length ? biBadge("警告 " + candidate.warnings.length, "warn") : ""]]];
+    const row = bh("tr", "", ...cells.map(([label, parts]) => {
+      const cell = bh("td", "", ...parts); cell.dataset.label = label; return cell;
+    }));
+    row.dataset.candidate = candidate.id;
+    row.setAttribute("aria-selected", String(candidate.id === bi.build.candidateId));
+    row.addEventListener("click", (event) => {
+      if (!event.target.closest("button")) biBuildPickCandidate(candidate.id);
+    });
+    return row;
+  }));
+  if (!shown.length) {
+    const none = bh("td", "bi-empty", bi.build.candidates.length ? "這個篩選沒有候選卡。"
+      : "這次執行沒有候選卡。");
+    none.colSpan = 4; body.append(bh("tr", "", none));
+  }
+}
+
+function biBuildPickCandidate(candidateId) {
+  biBuildShowCandidate(candidateId);
+  // Side by side the whole pair fits; stacked on a phone, go to the pane.
+  const stacked = window.matchMedia("(max-width: 900px)").matches;
+  (stacked ? el("bi-b-cand") : el("bi-b-review-split")).scrollIntoView(
+    {block: stacked ? "start" : "nearest"});
+}
+
+for (const id of ["bi-b-cand-type", "bi-b-cand-state"]) {
+  el(id).addEventListener("change", () => biBuildCandRows());
+}
+
 function biBuildRenderRun() {
-  const run = bi.build.run, list = el("bi-b-cands");
-  list.replaceChildren(); el("bi-b-chips").replaceChildren();
-  const open = run && run.kind === "ingest" && ["review", "partial"].includes(run.status);
-  el("bi-b-accept-clean").disabled = !open;
+  const run = bi.build.run, body = el("bi-b-cands").tBodies[0];
+  body.replaceChildren(); el("bi-b-chips").replaceChildren();
+  el("bi-b-accept-clean").disabled = !biRunOpen(run);
   el("bi-b-next4").disabled = !biBuildAllowed().commit;
-  biBuildSteps();
-  if (!run || run.kind !== "ingest") {
-    list.append(bh("li", "bi-empty", "到上一步按「Ingest」產生候選卡。"));
+  biBuildSteps(); biBuildRunPick();
+  if (!biRunReviewable(run)) {
+    el("bi-b-cand-count").textContent = ""; el("bi-b-cand-type").replaceChildren();
+    el("bi-b-same").replaceChildren();
+    el("bi-b-cand").replaceChildren(bh("p", "bi-empty", "選一列，看原文與引用。"));
+    const none = bh("td", "bi-empty", "到上一步按「Ingest」產生候選卡。");
+    none.colSpan = 4; body.append(bh("tr", "", none));
     return;
   }
   // What decides the next press on the line; the rest of the run's counts folded.
   const chips = [biBadge("執行 " + run.id + "・" + run.status, "dim"), ...biRunChips(run)];
   const main = chips.filter((chip) => /^(候選|錯誤|警告|已接受)/.test(chip.textContent));
   const more = chips.filter((chip) => !main.includes(chip));
-  el("bi-b-chips").append(...main, bh("details", "bi-manage", bh("summary", "", "明細"), ...more));
+  const left = (run.warnings || []).filter((w) => w.code === "reading_left_empty")
+    .map((w) => bh("p", "bi-meta", w.message));
+  el("bi-b-chips").append(...main, run.kind === "trial" ? biBadge("試跑，不能寫入", "warn") : "",
+    bh("details", "bi-manage", bh("summary", "", "明細"), ...more, ...left));
   if ((run.failures || []).length) {
     el("bi-b-chips").append(bh("p", "bi-err", "有 " + run.failures.length + " 段沒有判讀成功（"
-      + run.failures.map((f) => "第 " + f.line_start + "–" + f.line_end + " 行：" + f.message)
-        .join("；") + "）。其他候選卡可以先審核。"), biButton("重試失敗的段落", async () => {
+      + run.failures.map((f) => (f.line_start ? "第 " + f.line_start + "–" + f.line_end + " 行："
+        : "") + f.message).join("；") + "）。其他候選卡可以先審核。"),
+    biButton("重試失敗的段落", async () => {
       await biCall("/api/bi/runs/" + run.id + "/retry", {dataset: biDataset()});
       await biBuildFollow(run.id); await biBuildFetchRun(run.id); biBuildRenderRun();
     }, "bi-btn"));
   }
   el("bi-b-chips").append(...biRunNothing(run), ...biRunRelations(run), ...biRunFit(run));
-  biBuildSameNames();
-  for (const candidate of bi.build.candidates) {
-    const decision = BI_DECISION[candidate.review] || [candidate.review, "dim"];
-    const button = biButton("", () => biBuildShowCandidate(candidate.id), "bi-card-btn");
-    button.replaceChildren(bh("strong", "", candidate.name || candidate.canonical_key
-      || "（無名稱）"), bh("span", "bi-meta", " " + biTypeLabel(candidate.entity_type) + "・"
-      + (BI_RUN_ACTION[candidate.action] || candidate.action)), " ",
-      biBadge(decision[0], decision[1]),
-      candidate.errors.length ? biBadge("錯誤 " + candidate.errors.length, "bad") : "",
-      candidate.warnings.length ? biBadge("警告 " + candidate.warnings.length, "warn") : "");
-    if (candidate.id === bi.build.candidateId) button.setAttribute("aria-current", "true");
-    list.append(bh("li", "", button));
-  }
+  biBuildSameNames(); biBuildCandTypes(); biBuildCandRows();
   if (bi.build.candidateId) biBuildShowCandidate(bi.build.candidateId);
+  else el("bi-b-cand").replaceChildren(bh("p", "bi-empty", "選一列，看原文與引用。"));
 }
 
 function biSameNameOpen(candidate) {
@@ -16060,13 +16252,33 @@ function biBuildSameNames() {
     list);
 }
 
-async function biBuildReview(candidateId, body) {
+async function biBuildReview(candidateId, body, quiet = false) {
   const run = bi.build.run;
   const reply = await biCall("/api/bi/runs/" + run.id + "/candidates/" + candidateId,
     {dataset: biDataset(), ...body});
   const index = bi.build.candidates.findIndex((c) => c.id === candidateId);
   if (index >= 0) bi.build.candidates[index] = reply.candidate;
-  bi.build.run = reply.run; biBuildSave(); biBuildRenderRun();
+  bi.build.run = reply.run;
+  if (!quiet) { biBuildSave(); biBuildRenderRun(); }
+}
+
+async function biBuildDecide(candidateId, review) {
+  // On to the next row still undecided: 180 of them are worked through one after another.
+  const list = biCandShown(), at = list.findIndex((c) => c.id === candidateId);
+  const next = [...list.slice(at + 1), ...list.slice(0, Math.max(at, 0))]
+    .find((c) => c.review === "pending");
+  await biBuildReview(candidateId, {review}, true);
+  bi.build.candidateId = next ? next.id : candidateId;
+  biBuildSave(); biBuildRenderRun();
+  const row = el("bi-b-cands").querySelector('tr[data-candidate="' + bi.build.candidateId + '"]');
+  if (row) {
+    row.scrollIntoView({block: "nearest"});
+    row.querySelector("button").focus({preventScroll: true});
+  }
+  el("bi-b-cand").scrollTop = 0;
+  // Stacked on a phone the row just opened is above: its pane is what comes next.
+  if (window.matchMedia("(max-width: 900px)").matches) el("bi-b-cand").scrollIntoView();
+  if (!next) biNotice(true, "這個篩選裡的候選卡都決定了。");
 }
 
 function biEvidence(item) {
@@ -16084,14 +16296,24 @@ function biBuildShowCandidate(candidateId) {
   const box = el("bi-b-cand"); box.replaceChildren();
   if (!candidate) return;
   bi.build.candidateId = candidateId;
-  const open = bi.build.run && ["review", "partial"].includes(bi.build.run.status);
+  for (const row of el("bi-b-cands").tBodies[0].rows) {
+    row.setAttribute("aria-selected", String(row.dataset.candidate === candidateId));
+  }
+  const open = biRunOpen(bi.build.run);
   const head = bh("h4", "", (candidate.name || candidate.canonical_key || "（無名稱）") + "・"
     + biTypeLabel(candidate.entity_type));
   const match = candidate.match === "existing" ? "對應到既有卡片（版本 "
     + candidate.base_version + "）" : candidate.match === "ambiguous" ? "有名稱相近的既有卡片"
     : "新卡片";
-  const parts = [head, bh("p", "bi-meta", match + "・" + (BI_RUN_ACTION[candidate.action]
-    || candidate.action))];
+  const parts = [head];
+  if (open) {
+    parts.push(bh("div", "bi-actions",
+      biButton("接受", () => biBuildDecide(candidate.id, "accepted"), "go"),
+      biButton("拒絕", () => biBuildDecide(candidate.id, "rejected"), "bi-btn"),
+      biButton("待決定", () => biBuildReview(candidate.id, {review: "pending"}), "bi-btn")));
+  }
+  parts.push(bh("p", "bi-meta", match + "・" + (BI_RUN_ACTION[candidate.action]
+    || candidate.action)));
   if (candidate.errors.length) {
     parts.push(bh("ul", "bi-err", ...candidate.errors.map((e) => bh("li", "", e.message))));
   }
@@ -16122,8 +16344,7 @@ function biBuildShowCandidate(candidateId) {
       biButton("略過", () => biBuildReview(candidate.id, {match: {action: "skip"}}), "bi-btn")));
   }
   const table = bh("table", "bi-table bi-stack", bh("thead", "", bh("tr", "",
-    bh("th", "", "欄位"), bh("th", "", "新值"), bh("th", "", "依據"), bh("th", "", "出處"),
-    bh("th", "", "目前值"), bh("th", "", "修改"))));
+    bh("th", "", "欄位"), bh("th", "", "新值與引用"), bh("th", "", "目前值"))));
   const rows = bh("tbody", "");
   for (const item of candidate.fields) {
     const basis = BI_BASIS[item.basis] || [item.basis, "dim"];
@@ -16151,38 +16372,93 @@ function biBuildShowCandidate(candidateId) {
     const others = (item.alternatives || []).map((o) => bh("div", "bi-warn",
       "另一段寫的是：" + biValue(o.value) + "（會變成提案）"));
     const change = {add: "新增", change: "變更", same: "相同", human_kept: "保留人工值，改成提議"};
-    rows.append(bh("tr", "", bh("td", "", (field && field.label) || item.field),
-      bh("td", "", biValue(item.value)), bh("td", "", biBadge(basis[0], basis[1])),
-      bh("td", "", biEvidence(item), ...others), bh("td", "", biValue(item.current) + "（"
-        + (merged || change[item.change] || item.change) + "）", " ", take),
-      bh("td", "", input, save)));
+    const line = bh("tr", "", bh("td", "", (field && field.label) || item.field),
+      bh("td", "", bh("div", "", biValue(item.value), " ", biBadge(basis[0], basis[1])),
+        biEvidence(item), ...others, bh("div", "bi-cand-edit", input, save)),
+      bh("td", "", biValue(item.current) + "（"
+        + (merged || change[item.change] || item.change) + "）", " ", take));
+    // A press on a field's row shows that field's quote in the source below.
+    line.addEventListener("click", (event) => {
+      if (!event.target.closest("button, input")) biBuildCandSource(item);
+    });
+    rows.append(line);
   }
   table.append(rows);
   parts.push(bh("div", "bi-scroll", table));
-  if (open) {
-    parts.push(bh("div", "bi-actions",
-      biButton("接受", () => biBuildReview(candidate.id, {review: "accepted"}), "go"),
-      biButton("拒絕", () => biBuildReview(candidate.id, {review: "rejected"}), "bi-btn"),
-      biButton("待決定", () => biBuildReview(candidate.id, {review: "pending"}), "bi-btn")));
-  }
+  const place = document.createElement("div"); place.id = "bi-b-cand-source";
+  parts.push(place);
   box.append(...parts);
+  biBuildCandSource(candidate.fields.find((f) => f.evidence.length) || null);
+}
+
+function biQuoteAt(text, quote) {
+  // Line ends and indents may differ between the source and a quote taken from its lines.
+  const words = quote.trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return null;
+  const pattern = words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("\\s+");
+  return new RegExp(pattern).exec(text);
+}
+
+async function biBuildCandSource(item) {
+  const box = el("bi-b-cand-source"); if (!box) return;
+  const seq = bi.build.sourceSeq = (bi.build.sourceSeq || 0) + 1;
+  const evidence = item && item.evidence.find((e) => e.source_id);
+  if (!evidence) {
+    box.replaceChildren(bh("p", "bi-meta", "這個欄位沒有來源原文。"));
+    return;
+  }
+  const texts = bi.build.texts = bi.build.texts || new Map();
+  let view = texts.get(evidence.source_id);
+  if (!view) {
+    box.replaceChildren(bh("p", "bi-meta", "載入原文中…"));
+    try {
+      view = await call("/api/bi/sources/" + encodeURIComponent(evidence.source_id)
+        + "/markdown?dataset=" + encodeURIComponent(biDataset()));
+      texts.set(evidence.source_id, view);
+    } catch (failure) {
+      if (seq === bi.build.sourceSeq) {
+        box.replaceChildren(bh("p", "bi-err", "讀不到原文：" + failure.message + "。"),
+          biButton("重試", () => biBuildCandSource(item), "bi-btn"));
+      }
+      return;
+    }
+    if (seq !== bi.build.sourceSeq) return;
+  }
+  const text = view.markdown || "", found = biQuoteAt(text, evidence.excerpt || "");
+  const pre = document.createElement("pre"); pre.id = "bi-b-cand-src"; pre.tabIndex = 0;
+  if (found) {
+    pre.append(text.slice(0, found.index), bh("mark", "", found[0]),
+      text.slice(found.index + found[0].length));
+  } else pre.textContent = text;
+  box.replaceChildren(bh("h4", "", "原文：" + view.source.name),
+    ...(found ? [] : [bh("p", "bi-warn", "原文裡找不到這段引用，請對照上面的引用。")]), pre);
+  const mark = pre.querySelector("mark");
+  if (mark) pre.scrollTop = Math.max(0, mark.offsetTop - 40);
 }
 
 el("bi-b-accept-clean").addEventListener("click", async () => {
+  const button = el("bi-b-accept-clean"), label = button.textContent;
   const todo = bi.build.candidates.filter((c) => c.review === "pending" && !c.errors.length
     && c.action !== "skip" && !biSameNameOpen(c).length);
   const held = bi.build.candidates.filter((c) => c.review === "pending"
     && biSameNameOpen(c).length).length;
   // 「下一步」 waits for all of them: moving on early wrote only the ones accepted so far.
-  bi.build.accepting = true;
+  bi.build.accepting = true; button.disabled = true;
+  biBuildRunPick(); biBuildSteps();
+  let done = 0;
   try {
-    for (const candidate of todo) await biBuildReview(candidate.id, {review: "accepted"});
+    for (const candidate of todo) {
+      await biBuildReview(candidate.id, {review: "accepted"}, true);
+      done += 1; button.textContent = "接受中… " + done + "／" + todo.length;
+    }
+    biNotice(true, "已接受 " + todo.length + " 張沒有錯誤的候選卡。"
+      + (held ? held + " 張和既有卡片同名，要在清單上逐張確認。" : ""));
+  } catch (failure) {
+    biNotice(false, "接受到第 " + (done + 1) + " 張時停下：" + failure.message + "。");
   } finally {
-    bi.build.accepting = false;
-    biBuildRenderRun();
+    bi.build.accepting = false; button.textContent = label;
+    biBuildSave(); biBuildRenderRun();
   }
-  biNotice(true, "已接受 " + todo.length + " 張沒有錯誤的候選卡。"
-    + (held ? held + " 張和既有卡片同名，要在清單上逐張確認。" : ""));
 });
 
 // -- steps 5-6: commit and result --------------------------------------------
