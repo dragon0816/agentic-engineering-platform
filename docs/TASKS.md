@@ -4311,3 +4311,4 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 
 - [x] 2026-11-05, Claude Code: BI page: each domain has its own questions, run and report; untagged questions show apart; 全部領域 is a read-only overview (`docs/phases/BI_PAGE_SIMPLE.md` §11). Each domain's dashboard not yet.
 - [x] 2026-11-05, Claude Code: BI commit list as a table (名稱, 種類, 領域, 改動), no JSON, no row for what came to nothing; 套用到 in readable names with the path as a tooltip; a green notice goes with the next press; the card count follows a page import, and a dataset with sources and no cards says so (`bi-commit-list`, `tests/test_bi_commit_list_ui.py`).
+- [x] 2026-11-05, Claude Code: A build tab load overtaken by a dataset change saved step 1 under the new dataset, so a reload could lose the step (`test_bi_source_selection_ui`). Open: `test_bi_sessions_ui` failed once waiting for 第 2 版 in `bi-b-m-info`, then 6 of 6 alone; cause not found.
