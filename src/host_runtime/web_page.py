@@ -12323,7 +12323,7 @@ function biRenderCounts() {
   const current = bi.datasets.find((item) => item.name === biDataset());
   const counts = el("bi-counts"); counts.replaceChildren();
   // A vault's status line, under the row, already says how many.
-  counts.hidden = Boolean(biVaultOf(keep));
+  counts.hidden = Boolean(biVaultOf(biDataset()));
   counts.append(bh("strong", "", String(current ? current.cards : 0)), text("張卡片"));
   const sources = (bi.build.sourcesFor === biDataset() && bi.build.sources || []).length;
   counts.append(bh("span", "", current && current.updated ? "· 更新於 " + biTime(current.updated)
