@@ -17,6 +17,7 @@ from bi_page_driver import BiPage, browser_missing
 from test_bi_vault import _call, _ok
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
+from capabilities.bi_cards import vault
 from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import BiStore
 from host_runtime import bi_bench
@@ -42,6 +43,10 @@ def _skill(workspace: Path, vault_id: str, name: str, folder: str) -> None:
 def _question(workspace: Path, vault_id: str, slug: str, home: str | None) -> None:
     body = {"question": f"虛構題 {slug}？", "must": ["好"], "slug": slug, "home": home}
     _ok(_call(workspace, "POST", f"/api/bi/vaults/{vault_id}/checks", body))
+
+
+def _q_row(slug: str) -> str:
+    return f"document.querySelector('#bi-b-bq-list tr[data-unit=\"check:question:main/{slug}\"]')"
 
 
 def _rows(page: BiPage) -> str:
@@ -174,6 +179,56 @@ def test_one_working_domain_carries_through_the_three_steps(tmp_path: Path) -> N
             )
             pending = page.text_of("bi-b-ver-pending")
             assert "aidc" in pending and "這次 commit 也會帶上其他領域的改動" in pending
+
+            # -- a question's domain is a combobox: 全庫 and the vault's homes ---------------
+            homes = page.run(
+                "[...document.getElementById('bi-b-bq-home').options]"
+                ".map((o) => o.textContent).join('/')"
+            )
+            assert str(homes).startswith("全庫/") and "aidc" in str(homes)
+            # A new one starts on the working domain.
+            page.click("#bi-b-bq-add")
+            assert page.run("document.getElementById('bi-b-bq-home').value") == "aidc"
+
+            def edit(slug: str) -> None:
+                page.run(
+                    "document.querySelector("
+                    f"'#bi-b-bq-list tr[data-unit=\"check:question:main/{slug}\"]').click()"
+                )
+                page.see("bi-b-bq-title", "修改題目")
+
+            def home_of(unit: str) -> Any:
+                return vault.Vault(workspace, vault_id).repo.working_units()[unit].get("home")
+
+            # An old question shows 全庫, and gaining a domain keeps its set and slug.
+            edit("whole")
+            assert page.run("document.getElementById('bi-b-bq-home').value") == ""
+            assert "全庫" in page.text_of("bi-b-bq-list")
+            page.choose("bi-b-bq-home", "aidc")
+            page.click("#bi-b-bq-save")
+            page.wait(_q_row("whole") + ".textContent.includes('aidc')")
+            assert home_of("check:question:main/whole") == "aidc"
+
+            # Saved again without touching it, it keeps its domain; back to 全庫, the field goes.
+            page.wait("document.getElementById('bi-b-bq-home').value === 'aidc'")
+            page.set_value("bi-b-bq-must", "好, 再好")
+            page.click("#bi-b-bq-save")
+            page.wait("document.getElementById('bi-b-bq-must').value === '好, 再好'")
+            page.wait(_q_row("whole") + ".textContent.includes('再好')")
+            assert home_of("check:question:main/whole") == "aidc"
+            page.choose("bi-b-bq-home", "")
+            page.click("#bi-b-bq-save")
+            page.wait(_q_row("whole") + ".textContent.includes('全庫')")
+            assert home_of("check:question:main/whole") is None
+
+            # Given to another domain, it leaves this list, and the editor starts afresh.
+            edit("mine")
+            page.choose("bi-b-bq-home", "wireless")
+            page.click("#bi-b-bq-save")
+            page.wait("!" + _q_row("mine"))
+            page.see("bi-b-bq-title", "新增題目")
+            assert home_of("check:question:main/mine") == "wireless"
+            page.shoot("step3-editor")
 
             # -- the AI panel knows, and closes on a change ---------------------------------
             page.click("#bi-b-qa-open")

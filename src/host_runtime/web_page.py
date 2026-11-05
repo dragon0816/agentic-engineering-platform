@@ -3007,6 +3007,8 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
                   <input id="bi-b-bq-set" class="bi-input" maxlength="60" spellcheck="false"
                     list="bi-b-bq-sets" value="main">
                   <datalist id="bi-b-bq-sets"></datalist>
+                  <label class="bi-label" for="bi-b-bq-home">領域</label>
+                  <select id="bi-b-bq-home"></select>
                   <div class="bi-actions">
                     <button class="go" type="submit" id="bi-b-bq-save">儲存</button>
                     <button class="bi-btn" id="bi-b-bq-del" type="button" hidden>刪除</button>
@@ -13793,7 +13795,7 @@ async function biBench(vaultId) {
     questions.append(list.box);
   }
   // The question being edited may be gone (deleted here, or by a colleague's commit).
-  if (bi.bqSel && !reply.questions.some((q) => q.unit === bi.bqSel.unit)) biBqPick(null);
+  if (bi.bqSel && !shown.some((q) => q.unit === bi.bqSel.unit)) biBqPick(null);
   el("bi-b-bq-sets").replaceChildren(...[...new Set(reply.questions.map((q) => q.set))]
     .map((name) => { const o = document.createElement("option"); o.value = name; return o; }));
   el("bi-b-bench-state").textContent = shown.length + " 題"
@@ -13837,6 +13839,19 @@ function biBqPick(q) {
   el("bi-b-bq-not").value = q ? q.must_not.join(", ") : "";
   if (q) el("bi-b-bq-set").value = q.set;
   el("bi-b-bq-del").hidden = !q;
+  biBqHomes();
+}
+
+function biBqHomes() {
+  // 全庫 and the vault's homes. A home no longer listed stays an option on its own question,
+  // or saving a question would quietly take its home away.
+  const q = bi.bqSel, own = q ? q.home || "" : biScope() || "";
+  const homes = (bi.build.homes || []).map((item) => item.home);
+  if (own && !homes.includes(own)) homes.push(own);
+  el("bi-b-bq-home").replaceChildren(...["", ...homes].map((home) => {
+    const option = bh("option", "", home || "全庫"); option.value = home; return option;
+  }));
+  el("bi-b-bq-home").value = own;
 }
 
 async function biBenchSave(body) {
@@ -13861,13 +13876,15 @@ el("bi-b-bq-form").addEventListener("submit", async (event) => {
   const q = bi.bqSel;
   const set = el("bi-b-bq-set").value.trim() || "main";
   const body = {question: el("bi-b-bq-q").value, must: el("bi-b-bq-must").value,
-    must_not: el("bi-b-bq-not").value, set, home: q ? q.home : biScope()};
+    must_not: el("bi-b-bq-not").value, set, home: el("bi-b-bq-home").value || null};
   try {
     if (q) {
       // A question is its set and slug: the same pair overwrites, another set is a move.
       const saved = await biBenchSave({...body, slug: q.slug});
       if (set !== q.set) await biBenchSave({delete: q.unit});
-      biBqPick({...q, ...{question: body.question, set, unit: saved.unit,
+      // Given to another domain, it has left this list and the editor starts afresh.
+      biBqPick(!biInScope(body.home) ? null : {...q, ...{question: body.question, set,
+        unit: saved.unit, home: body.home,
         must: biList(body.must), must_not: biList(body.must_not)}});
     } else {
       await biBenchSave(body);
@@ -15238,7 +15255,7 @@ async function biSourceFolders() {
   let stored = current;
   try { stored = current || localStorage.getItem(biScopeKey()) || ""; } catch (e) { /* */ }
   pick.value = bi.build.homes.some((item) => item.folder === stored) ? stored : "sources";
-  biScopeFollowed(); biFileChosen();
+  biScopeFollowed(); biFileChosen(); biBqHomes();
 }
 
 function biScopeChanged() {
