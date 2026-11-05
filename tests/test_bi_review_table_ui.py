@@ -81,6 +81,7 @@ def _review(page: BiPage, dataset: str) -> None:
     )
     page.wait("window.__opened")
     page.click("#bi-stepper [data-stage=ingest]")
+    page.wait("!document.querySelector('#bi-build-steps [data-stage=review]').disabled")
     page.stage("review")
 
 
@@ -381,6 +382,11 @@ def _row(name: str) -> str:
     )
 
 
+def _button(row: str, label: str) -> str:
+    """An expression for the button in `row` whose text holds `label`."""
+    return f"[...{row}.querySelectorAll('button')].find((b) => b.textContent.includes('{label}'))"
+
+
 def _colour(page: BiPage, selector: str) -> str:
     return str(page.run(f"getComputedStyle(document.querySelector({json.dumps(selector)})).color"))
 
@@ -600,3 +606,188 @@ def test_a_card_being_updated_links_to_itself_as_it_stands_now(tmp_path: Path) -
             page.see("bi-b-cand-src", "虛構項目 40")
             assert page.run("!!document.getElementById('bi-b-peek-back')")
             assert _selected(page) == "FAKE-040"
+
+
+LONG_BODY = "這段長文是虛構卡片目前的內容，有它自己的出處。" * 12
+SHORT_BODY = "一句話。"
+LONG_NOTE = f"# 長文\n\n{LONG_BODY}\n"
+SHORT_NOTE = f"# 短文\n\n{SHORT_BODY}\n"
+
+
+def _replacing(index: int, value: str) -> dict[str, Any]:
+    return {
+        "candidates": [
+            {
+                "entity_type": "Technology",
+                "name": f"FAKE-{index:03d}",
+                "fields": {"body": {"value": value, "basis": "fact", "quote": value}},
+            }
+        ]
+    }
+
+
+def _written_run(workspace: Path, dataset: str, name: str, note: str, answer: Any) -> None:
+    """An AI run through the routes, accepted and written."""
+    source = Staging(workspace, dataset).add_source(name, text=note, actor="alice", folder=FOLDER)
+    jobs = Jobs()
+    body = {"dataset": dataset, "kind": "ingest", "source_id": source["id"], "path": "ai"}
+    ai = _runtime(Scripted(answer), jobs)
+    run = _ok(route(workspace, "alice", "POST", "/api/bi/runs", {}, body, None, ai))["run"]
+    jobs.run_all()
+    found = _ok(_call(workspace, "GET", f"/api/bi/runs/{run['id']}", dataset=dataset))
+    for candidate in found["candidates"]:
+        _ok(
+            _call(workspace, "POST", f"/api/bi/runs/{run['id']}/candidates/{candidate['id']}",
+                  {"dataset": dataset, "review": "accepted"})
+        )  # fmt: skip
+    _ok(_call(workspace, "POST", f"/api/bi/runs/{run['id']}/commit", {"dataset": dataset}))
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_accepting_a_proposal_shows_what_it_loses_and_then_that_it_was_done(
+    tmp_path: Path,
+) -> None:
+    """A long sourced value was replaced by one line through this list, with no visible answer."""
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    dataset = _vault(tmp_path, workspace, [_page(40), _page(41), _page(42)])
+    for index in (40, 41, 42):
+        # Each note its own: the same text is one source, and repeats the same kept answer.
+        long_note, short_note = f"{LONG_NOTE}\n{index}\n", f"{SHORT_NOTE}\n{index}\n"
+        _written_run(workspace, dataset, f"長{index}.md", long_note, _replacing(index, LONG_BODY))
+        _written_run(workspace, dataset, f"短{index}.md", short_note, _replacing(index, SHORT_BODY))
+    store = BiStore(workspace, dataset)
+    found = store.find("Technology", "FAKE-040")
+    assert found is not None
+    card = str(found["id"])
+    shots = os.environ.get("AEP_UI_SHOTS")
+    row = (
+        "[...document.querySelectorAll('#bi-b-props-list > li')]"
+        ".find((r) => r.textContent.includes('FAKE-040'))"
+    )
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(
+            tmp_path / "browser", server.address, Path(shots) / "review-table" if shots else None
+        ) as page:
+            _review(page, dataset)
+            page.wait(f"!!{row}")
+
+            # -- with no run, nothing stands between the step's top and the list ----------------
+            assert _rect(page, "#bi-b-review-split")["height"] == 0
+            page.click("#bi-b-props-jump")
+            assert page.text_of("bi-b-props-jump") == "待審提案 3 筆"
+            head = _rect(page, "#bi-b-props-h")
+            assert -1 <= head["top"] < 500, "the list is out of view"
+
+            # -- side by side, whole, and what would go is said in numbers --------------------
+            cells = f"[...{row}.querySelectorAll('.bi-prop-sides td')]"
+            assert page.run(f"{cells}.length") == 2
+            assert page.run(f"{cells}[0].textContent.includes({json.dumps(LONG_BODY)})")
+            assert page.run(f"{cells}[1].textContent.includes({json.dumps(SHORT_BODY)})")
+            one = page.run(f"{cells}[0].getBoundingClientRect().top")
+            assert one == page.run(f"{cells}[1].getBoundingClientRect().top"), "not side by side"
+            warning = str(page.run(f"{row}.querySelector('.bi-prop-loss').textContent"))
+            assert f"{len(SHORT_BODY)} 字" in warning and f"{len(LONG_BODY)} 字" in warning
+            assert "出處" in str(page.run(f"{row}.textContent"))
+            page.shoot("proposal-before")
+
+            # -- a value that loses text takes a second, named press --------------------------
+            page.run(f"{_button(row, '接受')}.click()")
+            confirm = _button(row, "確定取代")
+            page.wait(f"!!{confirm}")
+            assert store.fields(card)["body"]["value"] == LONG_BODY
+
+            # -- pressed: an answer at once, and then the blue check, in the row ----------------
+            _hold(page, "/proposals/")
+            page.run(f"{confirm}.click()")
+            assert "儲存中" in str(page.run(f"{row}.textContent"))
+            _free(page)
+            page.wait(f"!!{row}.querySelector('.bi-state-accepted')")
+            page.see("bi-b-props-list", "要 commit")
+            mark = page.run(
+                f"{row}.querySelector('.bi-state-accepted').getBoundingClientRect().top"
+            )
+            assert 0 <= float(mark) < 1000, "the answer is out of view of the press"
+            assert store.fields(card)["body"]["value"] == SHORT_BODY
+
+            # -- it stays where it was, through the refresh that follows ------------------------
+            page.wait("document.getElementById('bi-b-props-h').textContent.includes('2 筆')")
+            page.wait(f"!!{row} && !!{row}.querySelector('.bi-state-accepted')")
+            assert not page.run(f"[...{row}.querySelectorAll('button')].length")
+            page.shoot("proposal-accepted")
+
+            # -- rejecting has its own mark ------------------------------------------------------
+            other = (
+                "[...document.querySelectorAll('#bi-b-props-list > li')]"
+                ".find((r) => r.textContent.includes('FAKE-041'))"
+            )
+            page.run(f"{other}.querySelector('input').value = '虛構的理由'; 0")
+            page.run(f"{_button(other, '否決')}.click()")
+            page.wait(f"!!{other}.querySelector('.bi-state-rejected')")
+            kept = store.find("Technology", "FAKE-041")
+            assert kept is not None and store.fields(str(kept["id"]))["body"]["value"] == LONG_BODY
+
+            # -- the last one decided does not take the list away with its marks -----------------
+            last = (
+                "[...document.querySelectorAll('#bi-b-props-list > li')]"
+                ".find((r) => r.textContent.includes('FAKE-042'))"
+            )
+            page.run(f"{last}.querySelector('input').value = '虛構的理由'; 0")
+            page.run(f"{_button(last, '否決')}.click()")
+            page.wait(f"!!{last}.querySelector('.bi-state-rejected')")
+            page.wait("document.getElementById('bi-b-props-h').textContent.includes('0 筆')")
+            assert not page.run("document.getElementById('bi-b-props').hidden")
+            assert page.run(f"!!{row}.querySelector('.bi-state-accepted')")
+
+            # -- a failure says so in the row, and nothing looks done ----------------------------
+            page.run(
+                "(() => { const real = window.fetch; window.__realFetch = real;"
+                " window.fetch = (u, o) => String(u).includes('/proposals/')"
+                ' ? Promise.resolve(new Response(\'{"code":"boom","message":"存不了"}\','
+                " {status: 500})) : real(u, o); })()"
+            )
+            page.run(
+                "el('bi-b-props-list').prepend(biProposalRow("
+                "{...bi.proposalsDecided[0].item, card_name: 'FAKE-999'}, biDataset())); 0"
+            )
+            failing = (
+                "[...document.querySelectorAll('#bi-b-props-list > li')]"
+                ".find((r) => r.textContent.includes('FAKE-999'))"
+            )
+            page.run(f"{_button(failing, '接受')}.click()")
+            confirm_failing = _button(failing, "確定取代")
+            page.wait(f"!!{confirm_failing}")
+            page.run(f"{confirm_failing}.click()")
+            page.wait(f"{failing}.textContent.includes('存不了')")
+            assert not page.run(f"!!{failing}.querySelector('.bi-state-accepted')")
+            assert page.run(
+                f"[...{failing}.querySelectorAll('button')].some(b => b.textContent === '接受')"
+            )
+            page.run("window.fetch = window.__realFetch")
+
+
+def test_what_accepting_a_proposal_does_to_the_fields_evidence(tmp_path: Path) -> None:
+    """As it stands, and worth knowing: the old citation stays, and the new one does not come."""
+    workspace = tmp_path / "ws"
+    workspace.mkdir()
+    dataset = _vault(tmp_path, workspace, [_page(40)])
+    _written_run(workspace, dataset, "長.md", LONG_NOTE, _replacing(40, LONG_BODY))
+    _written_run(workspace, dataset, "短.md", SHORT_NOTE, _replacing(40, SHORT_BODY))
+    store = BiStore(workspace, dataset)
+    found = store.find("Technology", "FAKE-040")
+    assert found is not None
+    card = str(found["id"])
+    pending = _ok(_call(workspace, "GET", "/api/bi/proposals", dataset=dataset))["proposals"]
+    item = next(p for p in pending if p["field"] == "body")
+    assert item["evidence"] and item["current_evidence"]
+    _ok(
+        _call(workspace, "POST", f"/api/bi/cards/{card}/proposals/{item['id']}",
+              {"dataset": dataset, "action": "accept", "base_version": item["version"]})
+    )  # fmt: skip
+    field = store.fields(card)["body"]
+    assert field["value"] == SHORT_BODY and field["kind"] == "human"
+    cited = [e["source_name"] for e in store.evidence(card) if e["field"] == "body"]
+    assert "長.md" in cited, "the replaced value's citation stays on the field"
+    assert "短.md" not in cited, "the accepted value's own citation is not carried over"
+    history = [h for h in store.history(card) if h["field"] == "body"]
+    assert any(LONG_BODY in str(h.get("old")) for h in history), "the old value stays in history"
