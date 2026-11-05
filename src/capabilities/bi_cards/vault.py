@@ -1834,6 +1834,48 @@ def unit_label(units: Mapping[str, Any], key: str) -> str:
     return {"proposal": "待審提議", "import": "匯入紀錄", "decision": "衝突決定"}.get(kind, key)
 
 
+def _card_homes(workspace: Path, vault_id: str) -> dict[str, list[str]]:
+    """Each card's homes, from the working database; a card or a database not there yet
+    simply has none, which the page counts as 其他."""
+    found: dict[str, list[str]] = {}
+    path = local_dir(workspace, vault_id) / "bi.sqlite"
+    if not path.is_file():
+        return found
+    try:
+        with closing(sqlite3.connect(f"{path.as_uri()}?mode=ro", uri=True)) as db:
+            for card_id, home in db.execute(
+                "SELECT card_id, application FROM card_app_folders ORDER BY application"
+            ):
+                found.setdefault(card_id, []).append(home)
+    except sqlite3.Error:
+        return {}
+    return found
+
+
+def unit_homes(
+    units: Mapping[str, Any], key: str, card_homes: Mapping[str, list[str]]
+) -> list[str]:
+    """The working domains a unit touches; none for what spans the vault."""
+    kind, _, rest = key.partition(":")
+    value = units.get(key)
+    if kind in ("card", "field", "evidence", "state"):
+        return list(card_homes.get(rest.partition(":")[0]) or [])
+    if kind == "source" and isinstance(value, dict):
+        home = homes.home_of(str(value.get("folder") or ""))
+        return [home] if home else []
+    if kind in ("skill", "tool"):
+        home = rest.rpartition("/")[0]
+        return [home] if home and not homes.home_problem(home) else []
+    if kind == "profile":
+        return [rest] if not homes.home_problem(rest) else []
+    if key.startswith(vault_checks.QUESTION_PREFIX) and isinstance(value, dict):
+        return [value["home"]] if value.get("home") else []
+    if key.startswith(vault_checks.EXTRACT_PREFIX) and isinstance(value, dict):
+        home = vault_checks.case_home(value)
+        return [home] if home else []
+    return []
+
+
 def pending(workspace: Path, vault_id: str) -> dict[str, Any]:
     """What this PC has not pushed: uncommitted changes and local commits."""
     vault = _vault(workspace, vault_id)
@@ -1842,10 +1884,12 @@ def pending(workspace: Path, vault_id: str) -> dict[str, Any]:
         work = vault.repo._pending()
         units = {**head, **work["sets"]}
         shown = card_model.card_names_of(units)
+        card_homes = _card_homes(workspace, vault_id)
         changes = [
             {
                 "unit": k,
                 "label": unit_label(units, k),
+                "homes": unit_homes(units, k, card_homes),
                 "before": card_model.render_links_within(head.get(k), shown),
                 "after": card_model.render_links_within(v, shown),
             }
@@ -2226,9 +2270,38 @@ def skills(workspace: Path, vault_id: str) -> dict[str, Any]:
         "skills": found,
         "schema": str(units.get(repo_engine.SCHEMA_UNIT) or ""),
         "folders": ["sources", *folders],
+        "homes": _working_domains(vault, units, folders),
         "roles": ["classify", "extract"],
         "tools": vault_tools.current_tools(units),
     }
+
+
+def _working_domains(
+    vault: Vault, units: Mapping[str, Any], folders: list[str]
+) -> list[dict[str, Any]]:
+    """What a person can work on (`docs/phases/BI_PAGE_SIMPLE.md` §9): the vault's homes and any
+    other its folders and sources are in, each with its folder and its schema domain."""
+    listed = {item["home"]: item["label"] for item in vault_skills.home_list(units)}
+    source_folders = [
+        str(value.get("folder") or "")
+        for key, value in units.items()
+        if key.startswith("source:") and isinstance(value, dict)
+    ]
+    for folder in (*folders, *source_folders):
+        home = homes.home_of(folder)
+        if home is not None:
+            listed.setdefault(home, home)
+    reg = vault._schema_of(units)
+    domains = reg.domains if reg is not None else ()
+    return [
+        {
+            "home": home,
+            "label": label,
+            "folder": homes.sources_dir(home),
+            "domain": homes.domain_of_folder(domains, homes.sources_dir(home)),
+        }
+        for home, label in listed.items()
+    ]
 
 
 def save_skill(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:

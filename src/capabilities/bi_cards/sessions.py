@@ -29,7 +29,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from capabilities.bi_cards import readers, source_markdown
+from capabilities.bi_cards import homes, readers, source_markdown
 from capabilities.bi_cards.extract import DATA_END, DATA_FENCE
 from capabilities.bi_cards.staging import Staging, parse_kind
 from capabilities.bi_cards.store import BiStoreError, now
@@ -45,6 +45,8 @@ MAX_TURNS_SENT = 12
 MAX_SOURCES = 5
 MAX_ATTEMPTS = 3
 UNAVAILABLE = "沒有可用的模型：到 Settings 設定模型後再試；不用 AI 也可以直接編輯"
+#: The line a turn starts with in a working domain (`docs/phases/BI_PAGE_SIMPLE.md` §9).
+SCOPE_PREFIX = "工作領域："
 
 
 @dataclass
@@ -308,10 +310,23 @@ def record(
     return session
 
 
+def scoped(message: Any, home: Any) -> Any:
+    """The message with a line naming the working domain in front, for every kind of session;
+    the page does not show that line. `home` is checked, so only a home's name gets through."""
+    if not home:
+        return message
+    if homes.home_problem(home):
+        raise BiStoreError("home_invalid", "領域必須是應用資料夾或 library 的項目")
+    text = check_message(message)
+    return f"{SCOPE_PREFIX}{home}（來源資料夾 {homes.sources_dir(home)}）\n\n{text}"
+
+
 def check_message(message: Any) -> str:
     text = str(message or "").strip()
     if not text:
         raise BiStoreError("message_missing", "請寫下你想要的調整")
-    if len(text) > MAX_MESSAGE:
+    # The line `scoped` adds is not the person's and does not count against them.
+    own = text.partition("\n\n")[2] if text.startswith(SCOPE_PREFIX) else text
+    if len(own) > MAX_MESSAGE:
         raise BiStoreError("message_too_long", f"訊息最多 {MAX_MESSAGE} 個字")
     return text

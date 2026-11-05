@@ -11,10 +11,12 @@ keeps (`capabilities.bi_cards.vault_checks`):
   its folder (`extract`) and scored (`capabilities.bi_cards.benchmark`).
 
 The report is saved after every step in `<vault local dir>/benchmarks/<run>.json`
-with the digest of the working units it tested. On push, `gate` finds the
-newest finished run for exactly the units being pushed: its regressions block
-the push; without one the push goes ahead with a note (a run asks the model for
-minutes, so a push never starts one).
+with the digest of the working units it tested. A run may cover one home
+(`docs/phases/BI_PAGE_SIMPLE.md` §9) and says what it left out. On push, `gate`
+reads the finished runs for exactly the units being pushed and takes each
+question's newest verdict, so a smaller run cannot hide what a larger one found;
+those regressions block the push. Without such a run the push goes ahead with a
+note (a run asks the model for minutes, so a push never starts one).
 """
 
 from __future__ import annotations
@@ -22,6 +24,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
+import time
 import uuid
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
@@ -173,12 +176,19 @@ def run(
     extract: Extract,
     actor: str,
     run_id: str | None = None,
+    home: str | None = None,
 ) -> dict[str, Any]:
-    """Run the vault's questions and cases on its working copy (synchronous)."""
+    """Run the vault's questions and cases on its working copy (synchronous): all of them,
+    or `home`'s and the whole vault's."""
     units = vault.Vault(workspace, vault_id).repo.working_units()
-    questions = vault_checks.questions(units)
-    cases = vault_checks.cases(units)
+    every_question = vault_checks.questions(units)
+    every_case = vault_checks.cases(units)
+    questions = [q for q in every_question if vault_checks.in_scope(home, q["home"])]
+    cases = [c for c in every_case if vault_checks.in_scope(home, vault_checks.case_home(c))]
     graded = [q for q in questions if q["must"] or q["must_not"]]
+    left = {q["unit"] for q in every_question if q["must"] or q["must_not"]}
+    left |= {c["unit"] for c in every_case}
+    left -= {q["unit"] for q in graded} | {c["unit"] for c in cases}
     report: dict[str, Any] = {
         "format": REPORT_FORMAT,
         "run_id": run_id or new_run_id(),
@@ -188,6 +198,8 @@ def run(
         "finished_at": None,
         "by": actor,
         "units_sha256": units_digest(units),
+        "scope": home or "",
+        "not_covered": sorted(left),
         "total": len(graded),
         "ungraded": [q["unit"] for q in questions if not (q["must"] or q["must_not"])],
         "results": [],
@@ -236,6 +248,8 @@ def run(
         report["status"] = "failed"
         report["error"] = str(failure)[:500] or type(failure).__name__
     report["finished_at"] = _now()
+    # Two runs can end within a second, and which came last decides a question's verdict.
+    report["finished_ns"] = time.time_ns()
     _save(workspace, vault_id, report)
     return report
 
@@ -249,7 +263,12 @@ def reports(workspace: Path, vault_id: str) -> list[dict[str, Any]]:
             found.append(json.loads(path.read_text(encoding="utf-8")))
         except (OSError, ValueError):
             continue
-    return sorted(found, key=lambda r: str(r.get("started_at") or ""), reverse=True)
+    # Within one second, a run still going is the newer.
+    return sorted(
+        found,
+        key=lambda r: (str(r.get("started_at") or ""), r.get("finished_ns") or float("inf")),
+        reverse=True,
+    )
 
 
 def latest(workspace: Path, vault_id: str) -> dict[str, Any] | None:
@@ -272,20 +291,47 @@ def gate(workspace: Path, before: Mapping[str, Any], after: Mapping[str, Any]) -
             blocking=[],
             notes=["這次 push 的內容沒有跑過測試（可以先在步驟 3 跑一次再 push）"],
         )
-    newest = max(runs, key=lambda r: str(r.get("finished_at") or ""))
+    runs.sort(key=lambda r: (str(r.get("finished_at") or ""), r.get("finished_ns") or 0))
+    newest = runs[-1]
+    # Each question's newest verdict: a run of one home says nothing of another's questions.
+    verdicts = {item["unit"]: item for run_ in runs for item in run_.get("results") or []}
+    passed = [_passed(item, "working") for item in verdicts.values()]
+    published = [_passed(item, "published") for item in verdicts.values()]
     note = (
-        f"測試 {newest.get('run_id')}：{newest.get('working_score')}/{newest.get('total')} 題通過"
-        f"（發佈版本是 {newest.get('published_score')}/{newest.get('total')}）"
+        f"測試 {newest.get('run_id')}：{sum(passed)}/{len(passed)} 題通過"
+        f"（發佈版本是 {sum(published)}/{len(published)}）"
     )
+    graded = {q["unit"] for q in vault_checks.questions(after) if q["must"] or q["must_not"]}
+    untested = len(graded - verdicts.keys())
+    if untested:
+        note += f"；另有 {untested} 題這次的內容沒有測"
     extract = newest.get("extract")
     if extract:
         note += f"；擷取 {extract.get('score')} 分"
-    units = {r["unit"]: r["question"] for r in newest.get("results") or []}
+
+    def where(unit: str) -> str:
+        value = after.get(unit)
+        home = value.get("home") if isinstance(value, dict) else None
+        return f"（{home}）" if home else ""
+
     blocking = [
-        f"測試退步：「{units.get(unit, unit)}」發佈版本答得對，這次的內容答錯"
-        for unit in newest.get("regressions") or []
+        f"測試退步{where(unit)}：「{item['question']}」發佈版本答得對，這次的內容答錯"
+        for unit, item in verdicts.items()
+        if _passed(item, "published") and not _passed(item, "working")
     ]
     return CheckReport(blocking=blocking, notes=[note])
+
+
+def _passed(item: Mapping[str, Any], side: Side) -> bool:
+    return bool(item[side]["grade"]["passed"])
+
+
+def standing(workspace: Path, vault_id: str) -> dict[str, list[str]]:
+    """What the push check says of the working copy today, for a person to see before
+    pressing push: a regression stands in every working domain."""
+    units = vault.Vault(workspace, vault_id).repo.working_units()
+    report = gate(workspace, {}, units)
+    return {"blocking": list(report.blocking), "notes": list(report.notes)}
 
 
 # -- how a run asks and extracts in Agent Web ------------------------------------------------
