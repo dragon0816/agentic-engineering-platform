@@ -12328,6 +12328,12 @@ function biRenderCounts() {
   const sources = (bi.build.sourcesFor === biDataset() && bi.build.sources || []).length;
   counts.append(bh("span", "", current && current.updated ? "· 更新於 " + biTime(current.updated)
     : sources ? "· " + sources + " 份來源，還沒有卡片" : "· 還沒有資料"));
+  // The same words on a vault's line: the bar is hidden there.
+  const line = el("bi-b-v-count");
+  if (line) {
+    const cards = current ? current.cards : 0;
+    line.textContent = cards + " 張卡片" + (!cards && sources ? "（" + sources + " 份來源）" : "");
+  }
 }
 
 function biRenderTypes() {
@@ -13856,9 +13862,13 @@ function biVaultState(state) {
     el("bi-b-bench").hidden = true; el("bi-b-an").hidden = true;
     return;
   }
-  box.append(bh("p", "bi-meta", state.cards + " 張卡片・別人 push 了還沒套用的 " + state.behind
+  const count = bh("span", ""); count.id = "bi-b-v-count";
+  box.append(bh("p", "bi-meta", count, "・別人 push 了還沒套用的 " + state.behind
     + " 個・你還沒 push 的 commit " + state.ahead + " 個・還沒 commit 的改動 "
     + state.uncommitted + " 個・上次同步 " + (state.last_sync ? biTime(state.last_sync) : "—")));
+  const shown = bi.datasets.find((item) => item.name === biDataset());
+  if (shown) shown.cards = state.cards;
+  biRenderCounts();
   if ((state.waiting || []).length) {
     box.append(bh("p", "bi-warn", state.waiting.length + " 個 commit 在等 OneDrive 把檔案同步完"
       + "（同步完會自動套用）。"));

@@ -193,11 +193,21 @@ def test_a_green_notice_goes_with_the_next_action_and_a_red_one_stays(tmp_path: 
 
 
 def _bar(page: BiPage) -> str:
+    """The bar beside the tabs, which a plain dataset shows."""
+    assert page.run("document.getElementById('bi-counts').offsetParent !== null"), "bar hidden"
     return page.text_of("bi-counts")
 
 
+def _line(page: BiPage) -> str:
+    """A vault's status line under the top row, which takes the bar's place there."""
+    page.wait("!!document.getElementById('bi-b-v-count')")
+    assert page.run("document.getElementById('bi-counts').hidden"), "the count shown twice"
+    assert page.run("document.getElementById('bi-b-v-count').offsetParent !== null"), "line hidden"
+    return page.text_of("bi-b-v-count")
+
+
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
-def test_a_file_converted_with_no_cards_yet_says_so(tmp_path: Path) -> None:
+def test_a_plain_dataset_says_its_count_in_the_bar(tmp_path: Path) -> None:
     config, layout = _bi_host(tmp_path / "pc")
     workspace = layout.workspace_root
     _ok(_call(workspace, "POST", "/api/bi/datasets", {"name": "empty", "schema": "bi.schema/v1.1"}))
@@ -209,6 +219,37 @@ def test_a_file_converted_with_no_cards_yet_says_so(tmp_path: Path) -> None:
             page.wait(page.shows("bi-counts", "還沒有卡片"))
             assert "1 份來源" in _bar(page)
             assert "尚未載入資料" not in _bar(page) and "還沒有資料" not in _bar(page)
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_a_vault_says_its_count_on_its_status_line(tmp_path: Path) -> None:
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    dataset, _ = _vault(tmp_path, workspace)
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(tmp_path / "browser", server.address) as page:
+            _open(page, dataset)
+            page.wait(page.shows("bi-b-v-count", "0 張卡片"))
+            assert "份來源" not in _line(page)
+
+            # A file converted, and no cards yet: the sources are what there is to count.
+            Staging(workspace, dataset).add_source(
+                "筆記.md", text="# 筆記\n\n虛構。\n", actor="alice", folder=AIDC
+            )
+            page.run("biBuildSources(); 0")
+            page.wait(page.shows("bi-b-v-count", "1 份來源"))
+            assert _line(page).startswith("0 張卡片")
+
+            # Cards imported from pages: at once, without a reload.
+            page.run(
+                "biCall('/api/bi/import/pages/preview', {dataset: biDataset(), folder: "
+                f"{json.dumps(AIDC)}, pages: [{{path: 'BI/p.md', text: {json.dumps(PAGE)}}}]}})"
+                ".then((plan) => biPagesPlan(plan)); 0"
+            )
+            page.wait("document.getElementById('bi-b-pages-plan').textContent.includes('確認匯入')")
+            page.click_text("#bi-b-pages-plan", "確認匯入")
+            page.wait(page.shows("bi-b-v-count", "1 張卡片"))
+            assert "份來源" not in _line(page)
 
 
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
@@ -230,7 +271,5 @@ def test_a_dataset_converted_to_a_vault_shows_its_cards_at_once(tmp_path: Path) 
             page.set_value("bi-b-v-author", "alice")
             page.click("#bi-b-v-go")
             page.wait("document.getElementById('bi-dataset').value.startsWith('vault-')")
-            assert _bar(page).startswith("1"), _bar(page)
-            page.wait("document.getElementById('bi-status-build').hidden")
-            assert _bar(page).startswith("1"), _bar(page)
-            assert "更新於" in _bar(page)
+            page.wait(page.shows("bi-b-v-count", "1 張卡片"))
+            assert _line(page).startswith("1 張卡片")
