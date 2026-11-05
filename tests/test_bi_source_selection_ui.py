@@ -186,3 +186,44 @@ def test_a_table_tried_while_the_skills_load_still_goes_by_its_rules(tmp_path: P
             page.see("bi-b-trial-result", "試跑")
             _free(page)
             assert "試跑完成" in page.text_of("bi-b-trial-result")
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_a_load_overtaken_by_a_dataset_change_does_not_write_over_the_new_ones_step(
+    tmp_path: Path,
+) -> None:
+    """`test_bi_review_table_ui` came back to step 1 after a reload, now and then. Opening the
+    tab during the page's first load starts a load for the dataset shown then, and its end
+    saved step 1 under whichever dataset the select had moved to."""
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    for name in ("one", "two"):
+        _dataset(workspace, name)
+    Staging(workspace, "two").add_source("second.md", text="# 二\n", actor="alice")
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(tmp_path / "browser", server.address) as page:
+            _open(page, "one")
+            page.run(
+                "localStorage.setItem('bi-build-two', JSON.stringify({stage: 'schema'}));"
+                " (() => { const real = window.fetch; window.__gates = {};"
+                f" for (const part of {json.dumps([SOURCES, SCHEMA])}) {{"
+                " let go; const gate = new Promise((r) => { go = r; });"
+                " window.__gates[part] = {gate, go}; }"
+                " window.fetch = async (u, o) => {"
+                " for (const [part, held] of Object.entries(window.__gates)) {"
+                " if (String(u).includes(part)) await held.gate; }"
+                " return real(u, o); }; })(); 0"
+            )
+            # A load for this dataset, waiting for its sources.
+            page.run("bi.loaded = {}; biShowView('build'); 0")
+            page.wait("document.getElementById('bi-status-build').hidden === false")
+            # The select moves on, and that load has not started yet.
+            _switch(page, "two")
+            page.wait("bi.build.dataset === 'two'")
+            page.run(f"window.__gates[{json.dumps(SOURCES)}].go(); 0")
+            page.wait("document.getElementById('bi-status-build').hidden")
+            assert _stored(page, "two").get("stage") == "schema"
+            page.run(f"window.__gates[{json.dumps(SCHEMA)}].go(); 0")
+            page.wait(page.shows("bi-b-sources", "second.md"))
+            page.wait("document.getElementById('bi-status-build').hidden")
+            assert _visible_stage(page) == "schema"

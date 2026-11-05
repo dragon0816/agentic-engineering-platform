@@ -47,6 +47,13 @@ def test_the_sources_come_before_the_reads_for_other_steps(tmp_path: Path) -> No
             page.click("#bi-views [data-bi-view=build]")
             page.wait("(bi.build.homes || []).length > 0")
             page.wait("window.__aepWatch.open.length === 0", 60)
+            # No request open can be a gap between two: the first load's vault panel asks for
+            # its status again after its sync. Its panel says when it has stopped.
+            page.wait(
+                "document.getElementById('bi-b-v-state').dataset.settled == bi.vaultSeq"
+                " && window.__aepWatch.open.length === 0",
+                60,
+            )
             page.run(LOG)
             page.run(f"bi.view = 'build'; bi.want = {dataset!r}; biLoad()")
             page.wait("window.__log.length > 0", 60)

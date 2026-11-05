@@ -483,6 +483,8 @@ def _route(
         return _run_action(workspace, who, parts[4], parts[5:], given, ai)
     if len(parts) == 6 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "rename":
         return _rename_card(workspace, who, parts[4], given)
+    if len(parts) == 6 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "unmark":
+        return _clear_mark(workspace, who, parts[4], given)
     if len(parts) == 7 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "proposals":
         return _decide_proposal(workspace, who, parts[4], parts[6], given)
     return _error(404, "route_unknown", "沒有這個 BI 路徑")
@@ -1028,6 +1030,19 @@ def _rename_card(workspace: Path, who: str, card_id: str, given: dict[str, Any])
         reason=reason,
     )
     return 200, {"ok": True, "version": version, "id": card_id, "name": name}
+
+
+def _clear_mark(workspace: Path, who: str, card_id: str, given: dict[str, Any]) -> Answer:
+    """A person says a card marked as a sample is real (`store.clear_sample_mark`)."""
+    store = BiStore(workspace, _dataset(given.get("dataset")))
+    base = given.get("base_version")
+    if not isinstance(base, int):
+        return _error(400, "base_version_missing", "需要 base_version")
+    reason = str(given.get("reason") or "").strip()
+    if not reason:
+        return _error(400, "reason_required", "解除範例資料標記要寫理由")
+    store.clear_sample_mark(card_id, base_version=base, actor=who, reason=reason)
+    return 200, {"ok": True, "id": card_id, "synthetic": False}
 
 
 def _correction(workspace: Path, who: str, action: str, given: dict[str, Any]) -> Answer:

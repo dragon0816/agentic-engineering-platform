@@ -152,6 +152,7 @@ TABLES = (
     "relation_evidence",
     "field_states",
     "card_names",
+    "card_marks",
     "card_app_folders",
 )
 UNIT_PREFIXES = (
@@ -460,6 +461,10 @@ def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str
     if "card_names" in tables:
         for r in db.execute("SELECT * FROM card_names WHERE kind = 'former' ORDER BY name"):
             former.setdefault(r["card_id"], []).append(r["name"])
+    cleared: dict[str, dict[str, str]] = {}
+    if "card_marks" in tables:
+        for r in db.execute("SELECT * FROM card_marks"):
+            cleared[r["card_id"]] = {"at": r["at"], "by": r["by"], "reason": r["reason"]}
     for r in db.execute("SELECT * FROM cards"):
         # The key as its unit holds it: a lost key shows with a suffix (`_card_keys`).
         card_key = str(r["canonical_key"]).removesuffix(f"#{r['id']}")
@@ -471,6 +476,7 @@ def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str
             "name": r["name"],
             "synthetic": bool(r["synthetic"]),
             **({"former_keys": former[r["id"]]} if r["id"] in former else {}),
+            **({"mark_cleared": cleared[r["id"]]} if r["id"] in cleared else {}),
         }
     latest = {
         (r["card_id"], r["field"]): _history_value(r)
@@ -838,6 +844,12 @@ def materialize(
                     "INSERT OR IGNORE INTO card_names (card_id, name, kind) "
                     "VALUES (?, ?, 'former')",
                     (cid, name),
+                )
+            mark = value.get("mark_cleared")
+            if isinstance(mark, dict):
+                db.execute(
+                    "INSERT INTO card_marks (card_id, at, by, reason) VALUES (?, ?, ?, ?)",
+                    (cid, str(mark.get("at")), str(mark.get("by")), str(mark.get("reason"))),
                 )
             db.execute(
                 "INSERT INTO cards (id, entity_type, canonical_key, name, version, synthetic, "
@@ -2075,7 +2087,9 @@ def pending(workspace: Path, vault_id: str) -> dict[str, Any]:
     """What this PC has not pushed: uncommitted changes and local commits."""
     vault = _vault(workspace, vault_id)
     with vault.lock:
-        head = vault.repo.units()
+        # Against what this PC has committed: a card only committed here has its name, and
+        # what a local commit added and the work removed is a change.
+        head = vault.repo.working_units(pending=False)
         work = vault.repo._pending()
         units = {**head, **work["sets"]}
         shown = card_model.card_names_of(units)
@@ -2089,6 +2103,8 @@ def pending(workspace: Path, vault_id: str) -> dict[str, Any]:
                 "after": card_model.render_links_within(v, shown),
             }
             for k, v in sorted(work["sets"].items())
+            # Added and removed again before any commit: nothing has changed.
+            if repo_engine.canonical(head.get(k)) != repo_engine.canonical(v)
         ]
         return {
             "uncommitted": changes,

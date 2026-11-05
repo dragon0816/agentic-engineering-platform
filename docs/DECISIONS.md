@@ -6543,6 +6543,10 @@ The owner: 「第一件事情是選擇vault，或者是新增一個vault，接�
 - **The working domain decides the Dashboard's domain, and only starts the card tab's filter.** Rejected: hiding the card filter too, since a person often needs to look across domains there; two filters that could silently disagree on the Dashboard, where one panel set has one domain.
 - **Sticky on a desktop only.** On a phone the stacked row would cover the page.
 
+## 2026-11-05: A sample mark can be cleared, and 「待查證」 no longer sets one
+
+Seven real cards, such as `WiFi-7`, were marked as samples only because a field said 「(待查證)」, which says a value needs checking, not that a card is made up; 29 real cards link to marked cards. The owner confirmed the seven are real. A mark was one way until now. `POST /api/bi/cards/<id>/unmark` clears it with a reason, kept on the `card:` unit as `mark_cleared` and in a small table, since history is otherwise derived from `field:` units and a card's mark is not one. Rejected: a pseudo field for the mark, which schema and pages would have to hide, and clearing through an import, where a row saying nothing cannot mean "real". A `SAMPLE-` name cannot be cleared this way: it would stay left out by name while claiming to be real, so such a card is renamed first. The rule for the default pack is unchanged and follows later.
+
 
 ## 2026-11-05: Each BI domain has its own Dashboard, on the analyses they share
 
