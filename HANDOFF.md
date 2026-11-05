@@ -1,5 +1,11 @@
 # Handoff
 
+## Accepting a proposal moves the citations (2026-11-05, Claude Code) — built, not merged
+
+Branch `bi-accept-evidence` off main `5caa6481`, not pushed. The decision and its known limits: `docs/DECISIONS.md` 2026-11-05. Real vault not touched; merging means `MODEL_VERSION` 10, so its `bi.sqlite` rebuilds once at the next start.
+
+**Next:** merge; the owner decides whether a run's commit that replaces a value directly should follow the same rule.
+
 ## Example skills in `market-intel` for review (2026-11-05, Claude Code) — waiting for colleagues to read them
 
 **Where.** Vault commit `011125aaec19`, pushed, published stays `2026q4-r6.2`. Files `library/skill-review/skills/<domain>-extract-review/`. Repository: `docs/examples/bi-skills/`, `docs/guides/BI_SKILL_EXAMPLES.zh-TW.md`, `tests/test_bi_skill_examples.py`, branch `bi-skill-examples`, not pushed.

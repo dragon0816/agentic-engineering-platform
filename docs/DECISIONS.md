@@ -6408,3 +6408,24 @@ The owner's rules: through ingest, only the card's own source text, fill only, r
 ## 2026-11-05: Agent Web records write requests, without what they say
 
 Four uncommitted changes appeared on the real `market-intel` on 2026-11-04 at 21:25 and nobody could be found: Agent Web logged no requests, by design, since a request carries the team's own words. The owner said yes to a record of writes only: time, method, path without query, status, `User-Agent`, `Referer` without query, the client's address, and an `X-AEP-Client` label. Rejected: bodies or query strings, which would undo why `log_message` is silent; reads, which are many and change nothing; a label as identity, since any process with the token can send any label. It is a queue and one thread, so a slow or unwritable log costs a line and never a request. It cannot answer who: it can answer which client said what, and when.
+
+
+## 2026-11-05: Accepting a proposal moves the citations with the value
+
+The owner's decision: a card's value and its citations must match. Before, accepting a proposal left the replaced value's citation on the field and on the card page's 參考來源, and dropped the proposal's own, so a card could cite text it no longer held.
+
+**Decided.** On accepting, the proposal's evidence becomes the field's, and the field's evidence goes to that change's history row, `old_evidence`, readable with the old value on the card's 歷史. A proposal with no evidence leaves the field with none, and the page says so before the press. Rejecting changes nothing.
+
+**Carried by units, so another PC rebuilds the same.** The `evidence:` unit is replaced, or gone when there is none; the field unit's `history` gains `old_evidence`, a list, `[]` when nothing moved. `MODEL_VERSION` goes to 10: a local `bi.sqlite` rebuilds once, since a PC on older code built commits from a newer one without the column. Old commits have no such key and read as before; so do pending proposals.
+
+**Other writes, by the same rule.** Bulk accept: as one by one. A correction note: it broke the rule, adding its evidence beside the replaced value's, so it now replaces, and undoing the note restores the old evidence. A rename and the migration in `migrate.py` are unchanged: a rename's citation says where the card came from, and the migration only adds to `aliases` and `chain`. A push conflict: choosing a field's side also chooses its evidence's, since they are separate units; a person can still choose otherwise on the evidence's own row.
+
+**A card keeps its home.** `card_app_folders` also counts `old_evidence`'s sources: replacing a value does not move a card out of a home.
+
+**Known limits.**
+- A run's commit that replaces a value directly (a rules run, and 改用新值 in review) still adds its evidence beside the old. Not in this decision's scope; the same rule would apply.
+- A push conflict where only the field conflicts, because the other side changed it without touching evidence (a rename's name field, a migration): choosing theirs still pushes my evidence unit.
+- A conflict proposal (`kind: conflict`, from a lost replay) carries no evidence, so accepting it leaves the field with none.
+- Evidence review works on the field's current evidence: a moved row's reviews stay readable in `old_evidence`, and it cannot be reviewed further.
+
+**Rejected.** Keeping both on the field with a mark on the old one: every reader of `evidence` (the card page, the review, the chat) would need to learn the mark, and a miss cites text the card no longer holds. Deriving old evidence from the commit's `evidence:` change: it ties history to which commit touched which unit, where the field's own `history` already travels.

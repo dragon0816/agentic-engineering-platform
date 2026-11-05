@@ -6781,3 +6781,22 @@ Design: proposal §8.1. Code: `capabilities/bi_cards/schema_fit.py`. In a vault,
 ## BI vault sync with nothing new (2026-11-05)
 
 `POST /api/bi/vaults/<id>/sync`: the answer's `sync` gains `moved`: whether the local database was rebuilt or the version the feed shows changed. A quiet sync reads no commit file (`Repository._commits_stamp`: names, sizes and times; each file a commit names is still checked by stat), rebuilds nothing unless `Repository.fingerprint` (applied and local commits, uncommitted changes, conflicts, withdrawals) or `card_model.MODEL_VERSION` differs from the last build, and queues no feed work. Concurrent `vault.sync` calls for one vault share one run and its answer or failure. The page shows the local copy first and syncs behind it, redrawing only for what came from outside (commits applied, a rebuild from them, or a changed version it reads).
+
+
+## BI: accepting a proposal moves the citations (2026-11-05)
+
+Decision: `docs/DECISIONS.md` 2026-11-05 "Accepting a proposal moves the citations with the value". Code: `store._write_person_value`, `store._proposal_evidence`, `vault.materialize`. Test: `tests/test_bi_accept_evidence.py`. Adds to "Knowledge repositories: the BI type (R2)".
+
+**Units.**
+- `field:<card id>:<field>`: `history` may hold `old_evidence`, a list of evidence rows in the shape of an `evidence:` unit's, `[]` when the change moved nothing. It is absent on any older unit and on a change that does not move evidence.
+- `evidence:<card id>:<field>`: after an accept, the accepted proposal's rows. Absent when it had none.
+
+**Local database.** `history.old_evidence` (JSON text, NULL when absent), added by `add_missing_columns`. `card_model.MODEL_VERSION` is 10.
+
+**Routes.**
+- `POST /api/bi/cards/<id>/proposals/<n>` with `action: "accept"` and `POST /api/bi/proposals/decide`: as above. The `reject` action changes no field, evidence or history.
+- `POST /api/bi/corrections/apply`: the note's evidence replaces the field's; `POST /api/bi/import/undo` restores what `old_evidence` holds.
+- `GET /api/bi/cards/<id>/history`: a row may hold `old_evidence`. The key is absent otherwise.
+- `POST /api/bi/vaults/<id>/resolve` on a `field:` unit with `mine` or `theirs` also decides its `evidence:` unit.
+
+**Not changed.** The feed and its goldens, the published snapshot's format, and `GET /api/bi/proposals`.
