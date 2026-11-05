@@ -15406,11 +15406,14 @@ async function biSkillAi(item, from) {
 async function biSkillNew() {
   // A rule to talk about has to exist: the first message saves it as revision 1, staged
   // like any change, and the conversation goes on from there.
-  const pick = el("bi-ai-new-folder");
-  pick.replaceChildren(...((bi.skills && bi.skills.folders) || []).filter((f) => f !== "sources")
+  // The working domain's folder, never another: under 全部領域 the person picks one.
+  const pick = el("bi-ai-new-folder"), none = bh("option", "", "（選一個資料夾）");
+  none.value = "";
+  pick.replaceChildren(none, ...((bi.skills && bi.skills.folders) || [])
+    .filter((f) => f !== "sources")
     .map((folder) => { const o = bh("option", "", folder); o.value = folder; return o; }));
   const own = el("bi-b-src-folder").value;
-  if (biScope() && [...pick.options].some((option) => option.value === own)) pick.value = own;
+  pick.value = biScope() && [...pick.options].some((option) => option.value === own) ? own : "";
   el("bi-ai-new-name").value = "";
   const spec = {...biSkillSpec("vault-" + bi.verVault), mode: "new", title: "和 AI 新增規則",
     shows: el("bi-b-sk-list"),
@@ -15421,8 +15424,9 @@ async function biSkillNew() {
       if (spec.name) return;
       const name = el("bi-ai-new-name").value.trim();
       if (!name) { el("bi-ai-new-name").focus(); throw new Error("請寫規則名稱"); }
+      if (!pick.value) { pick.focus(); throw new Error("請選這條規則套用到哪個資料夾"); }
       const reply = await biVerRun(bi.verVault, "skills", {name, role: "extract",
-        applies_to: pick.value ? [pick.value] : [], card_types: [], body: message});
+        applies_to: [pick.value], card_types: [], body: message});
       spec.name = name; spec.mode = null; el("bi-ai-new").hidden = true;
       spec.ref = "skill:" + name;
       el("bi-ai-title").textContent = "和 AI 修改規則";

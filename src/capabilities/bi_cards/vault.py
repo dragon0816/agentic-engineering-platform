@@ -2506,6 +2506,9 @@ def skills(workspace: Path, vault_id: str) -> dict[str, Any]:
         *vault.folder.glob(f"{homes.APPLICATIONS}/*/{homes.SOURCES}"),
         *vault.folder.glob(f"{homes.LIBRARY}/*/{homes.SOURCES}"),
     ]
+    # Every home from the units counts, uncommitted ones too: a domain created on this PC has
+    # its folders only in this PC's working copy until it is pushed.
+    working = _working_domains(vault, units)
     folders = sorted(
         {
             p.relative_to(vault.folder).as_posix()
@@ -2515,12 +2518,13 @@ def skills(workspace: Path, vault_id: str) -> dict[str, Any]:
             and vault_sources.MARKDOWN_DIR not in p.relative_to(vault.folder).parts
             and p != vault.folder / homes.SOURCES
         }
+        | {str(item["folder"]) for item in working}
     )
     return {
         "skills": found,
         "schema": str(units.get(repo_engine.SCHEMA_UNIT) or ""),
         "folders": ["sources", *folders],
-        "homes": _working_domains(vault, units),
+        "homes": working,
         "default_types": [t for t in extract.DEFAULT_TYPES],
         "roles": ["classify", "extract"],
         "tools": vault_tools.current_tools(units),

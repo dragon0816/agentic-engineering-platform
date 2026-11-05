@@ -101,6 +101,15 @@ def test_a_domain_is_created_in_the_row_and_becomes_the_working_domain(tmp_path:
             assert "Signal" in empty and "library/skill-review" in empty
             page.shoot("created")
 
+            # -- a new rule applies to it, unpushed (acceptance F9) --------------------------
+            page.stage("schema")
+            page.wait("(bi.skills && bi.skills.folders || []).length > 0", TIMES_OUT)
+            page.click("#bi-b-sk-new")
+            page.wait("document.getElementById('bi-ai').dataset.kind === 'skill'")
+            assert page.run("document.getElementById('bi-ai-new-folder').value") == NEW
+            page.shoot("new-rule-folder")
+            page.click("#bi-ai-close")
+
             # -- a file goes to it at once -------------------------------------------------
             page.upload("car.md", "# 虛構\n", "text/markdown")
             assert page.run("bi.build.sources.find((s) => s.name === 'car.md').folder") == NEW
@@ -184,3 +193,18 @@ def test_a_domain_is_created_in_the_row_and_becomes_the_working_domain(tmp_path:
             assert page.text_of("bi-b-bench-state").startswith("0 題")
             assert page.run("document.getElementById('bi-b-bench-run').disabled")
             page.shoot("empty-step3")
+
+            # -- under 全部領域 a new rule names its folder: none is chosen for the person ------
+            page.choose("bi-b-src-folder", "sources")
+            page.stage("schema")
+            page.wait(QUIET_READS, TIMES_OUT)
+            page.click("#bi-b-sk-new")
+            page.wait("document.getElementById('bi-ai').dataset.kind === 'skill'")
+            assert page.run("document.getElementById('bi-ai-new-folder').value") == ""
+            page.set_value("bi-ai-new-name", "no-folder")
+            page.set_value("bi-ai-msg", "虛構電源廠是 Account。")
+            page.click("#bi-ai-send")
+            page.wait(
+                "document.getElementById('bi-ai-status').textContent.includes('套用到哪個資料夾')"
+            )
+            assert "no-folder" not in page.text_of("bi-b-sk-list")
