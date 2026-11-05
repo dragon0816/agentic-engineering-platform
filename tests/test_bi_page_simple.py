@@ -163,7 +163,7 @@ def test_create_and_join_are_a_menu_beside_the_selection() -> None:
 
 
 def test_the_market_field_is_named_and_the_button_is_convert() -> None:
-    assert '<label class="bi-label" for="bi-b-src-folder">領域</label>' in PAGE
+    assert '<label class="bi-label" for="bi-b-src-folder">工作領域</label>' in PAGE
     assert 'id="bi-b-upload" type="button" disabled>轉檔</button>' in PAGE
 
 

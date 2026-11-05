@@ -102,6 +102,7 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
             return set((copy / "commits").rglob("*.json"))
 
         commits = shared_commits()
+        page.choose("bi-b-src-folder", "applications/aidc/sources")
         page.upload("tech.csv", TECH_CSV, "text/csv")
         page.stage("method")
         page.click("#bi-b-trial")

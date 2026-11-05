@@ -155,7 +155,7 @@ class BiPage:
         self.click(f"#bi-build-steps [data-stage={name}]")
         self.wait(f"!document.querySelector('#bi-view-build .kp-stage[data-stage={name}]').hidden")
 
-    def upload(self, name: str, text: str, media_type: str) -> None:
+    def attach(self, name: str, text: str, media_type: str) -> None:
         self.run(
             "(() => { const dt = new DataTransfer();"
             f" dt.items.add(new File([{json.dumps(text)}], {json.dumps(name)},"
@@ -163,6 +163,35 @@ class BiPage:
             " const f = document.getElementById('bi-b-file'); f.files = dt.files;"
             " f.dispatchEvent(new Event('change')); })()"
         )
+
+    def choose(self, element_id: str, value: str) -> None:
+        """Choose a combobox's option as a person does, with its change event."""
+        self.wait(
+            f"[...document.getElementById({json.dumps(element_id)}).options]"
+            f".some((o) => o.value === {json.dumps(value)})"
+        )
+        self.run(
+            f"(() => {{ const s = document.getElementById({json.dumps(element_id)});"
+            f" s.value = {json.dumps(value)}; s.dispatchEvent(new Event('change')); }})()"
+        )
+
+    def choose_row_source(self, name: str) -> None:
+        self.run(
+            "[...document.querySelectorAll('#bi-b-sources tbody tr')]"
+            f".find((r) => r.textContent.includes({json.dumps(name)}))"
+            ".querySelector('input[type=radio]').click()"
+        )
+        self.wait("bi.build.sourceId")
+
+    def reload(self) -> None:
+        self.browser.navigate(self.address)
+        self.wait('!document.getElementById("send").disabled')
+        self.click("#nav-knowledge")
+        self.click("#kn-tabs [data-kn=bi]")
+        self.wait("document.getElementById('bi-status-bar').hidden")
+
+    def upload(self, name: str, text: str, media_type: str) -> None:
+        self.attach(name, text, media_type)
         self.click("#bi-b-upload")
         self.wait(self.shows("bi-b-sources", name))
         self.wait("document.querySelectorAll('#bi-b-sources tbody input:checked').length === 1")
