@@ -419,6 +419,11 @@ def resolve_params(
     for name, spec in declared.items():
         kind, value = spec["type"], given.get(name, spec.get("default"))
         if kind == "enum":
+            # The page sends a domain in lower case, and the host compares domains without
+            # case: `aidc` is the schema's `AIDC`, or every panel taking it fails to draw.
+            value = next(
+                (v for v in spec["values"] if str(v).casefold() == str(value).casefold()), value
+            )
             if value is None or str(value) not in spec["values"]:
                 raise BiStoreError(
                     "param_invalid", f"參數 {name} 必須是 {'、'.join(spec['values'])} 之一"

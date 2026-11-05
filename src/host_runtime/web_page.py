@@ -13542,7 +13542,10 @@ async function biBuildLoad() {
   const askVault = () => {
     if (vaultAsked || load !== bi.build.load) return;
     vaultAsked = true;
-    biBuildVault().catch((failure) => biNotice(false, "知識庫狀態沒有載入：" + failure.message));
+    // Asked late, the person may be on another tab by now, whose notice this must not replace.
+    biBuildVault().catch((failure) => {
+      if (bi.view === "build") biNotice(false, "知識庫狀態沒有載入：" + failure.message);
+    });
   };
   const select = el("bi-b-entity"), keep = select.value;
   select.replaceChildren(bh("option", "", "自動判斷"));
