@@ -165,6 +165,8 @@ def route(
         return 200, {"ok": True, **vault.fill_domains(workspace, vault_id, given, actor)}
     if action == "relations":
         return 200, {"ok": True, **vault.decide_relation(workspace, vault_id, given, actor)}
+    if action == "schema-conflicts":
+        return 200, {"ok": True, **vault.decide_schema_conflict(workspace, vault_id, given)}
     if action == "discard":
         return 200, {"ok": True, **vault.discard(workspace, vault_id)}
     if action == "revert":

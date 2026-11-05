@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, unquote
 
-from capabilities.bi_cards import analyses, catalog
+from capabilities.bi_cards import analyses, catalog, schema_merge
 from capabilities.bi_cards.store import DB_FILE, BiStoreError, vault_registry
 from knowledge.repo import repository as repo_engine
 
@@ -116,7 +116,7 @@ def _registry(units: Mapping[str, Any], workspace: Path) -> Any | None:
     if not isinstance(ref, str) or not ref:
         return None
     try:
-        return catalog.resolve(workspace, ref)
+        return catalog.resolve(workspace, schema_merge.effective_ref(workspace, units))
     except Exception:  # noqa: BLE001 - an unknown schema offers nothing that requires one
         return None
 

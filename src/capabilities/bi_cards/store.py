@@ -1535,25 +1535,6 @@ class BiStore:
             db.execute("UPDATE meta SET value = ? WHERE key = 'schema'", (to_ref,))
         return moved
 
-    def home_domains(self) -> list[str]:
-        """The domains of the homes this vault created (`meta:home:<id>`, as rows of `meta`)."""
-        if not self.exists:
-            return []
-        with self._db() as db:
-            try:
-                rows = db.execute("SELECT value FROM meta WHERE key LIKE 'home:%'").fetchall()
-            except sqlite3.Error:
-                return []
-        found = []
-        for row in rows:
-            try:
-                domain = json.loads(row["value"]).get("domain")
-            except (ValueError, AttributeError):
-                continue
-            if domain:
-                found.append(str(domain))
-        return sorted(found)
-
     def meta_value(self, key: str) -> str | None:
         """One `meta` value as stored; None when absent or no database."""
         if not self.exists:

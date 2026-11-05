@@ -14,6 +14,15 @@ Branch `bi-step1-domain`, not pushed, with main `4558b988` merged in. Design `do
 **Known and not fixed:** a new domain's step 3 still lists the whole vault's analyses until slice 5. The commit list prints raw JSON for sources and skills. The build tab takes 23-43 s to open on `market-intel`.
 
 **Next:** slice 3. Nothing is written to the real vault; the copy driver is git-ignored, `.scratch/real_check.py`, and it removes its copy.
+## Schema changes that merge (2026-11-05, Claude Code) — branch `bi-schema-merge`, not merged
+
+**Done.** Compatible schema changes are units on the version; overlap stops for a person; only touched skills are flagged. Design `docs/phases/BI_CARD_MODEL.md` §4.3, decision `docs/DECISIONS.md` 2026-11-05.
+
+**Also done.** A created domain has one owner, `schema_merge` reading `meta:home:<id>` (`docs/DECISIONS.md` 2026-11-05). `schema_conflicts` is in the push conflict list, and a flag that still runs says so.
+
+**Not done.** A real vault has not used this. An older AEP refuses `schema_change:` units at sync, and the platform's 2026-10-22 reader refuses a `+` version, which a created domain now also gives. `test_bi_build_flow_ui` failed once with `navigation_failed` in a 55-file run and passed twice alone; cause not found.
+
+**Next action.** Orchestrator: merge.
 
 ## BI page: working domain, Markdown preview, file row (2026-11-05, Claude Code) — built, not merged
 

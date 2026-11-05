@@ -20,6 +20,7 @@ A vault registered on this PC is the dataset `vault-<vault id>` (registry
                                   "status"}
     import:<import id>           {"filename", "entity_type", "at", "by", "run_id", "undone"}
     decision:<key>               {"status"}: a person's decision on a replay conflict
+    schema_change:<kind>:<...>   a compatible schema change on the version (`schema_merge`)
 
 A card id is `card_id_for(type, key)` at its creation, the same on every PC, and
 never changes: a rename keeps it (`docs/phases/BI_CARD_MODEL.md` §3.1). `bi.sqlite` holds
@@ -62,12 +63,14 @@ from capabilities.bi_cards import (
     names,
     profile,
     schema_doc,
+    schema_merge,
+    schema_versions,
     vault_checks,
     vault_skills,
     vault_sources,
     vault_tools,
 )
-from capabilities.bi_cards.schema import Registry, norm_key
+from capabilities.bi_cards.schema import Registry, norm_key, shipped
 from capabilities.bi_cards.store import (
     DATASET_RE,
     DB_FILE,
@@ -201,6 +204,26 @@ def local_dir(workspace: Path, vault_id: str) -> Path:
     return workspace / "bi" / VAULTS_DIR / vault_id
 
 
+def _schema_conflict_key(item: Mapping[str, Any]) -> str:
+    return _short(f"conflict:{item['commit_id']}:{item['unit']}")
+
+
+def _schema_in_repo(repo: Any, ref: str) -> dict[str, Any] | None:
+    """A version's document as this repository holds it; None when it is not there."""
+    schema_id, _, version = ref.partition("@")
+    for reg in shipped():
+        if (reg.schema_id, reg.version) == (schema_id, version):
+            return dict(reg.document)
+    name = _schema_file_name(schema_id, version)
+    for root in (repo.folder, repo.work / "files"):
+        try:
+            found = json.loads((root / "schemas" / name).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        return found if isinstance(found, dict) else None
+    return None
+
+
 def _schema_file_name(schema_id: str, version: str) -> str:
     return f"{schema_id.replace('/', '__')}@{version}.json"
 
@@ -295,6 +318,8 @@ class BiType:
             )
         if key.startswith(repo_engine.SKILL_UNIT_PREFIX):
             return None
+        if key.startswith(schema_merge.PREFIX):
+            return schema_merge.unit_problem(key, value)
         if not key.startswith(UNIT_PREFIXES):
             return "not a BI unit"
         if key.startswith(vault_sources.PREFIX):
@@ -314,6 +339,46 @@ class BiType:
         if key.startswith("field:") and "value" not in value:
             return "field needs value"
         return None
+
+    def skill_binding(self, units: Mapping[str, Any], schema: str) -> dict[str, Any]:
+        """What a skill revision is written against: the version, and the changes merged
+        on it so far, so a later change can be told apart from these."""
+        seen = sorted(schema_merge.stored_changes(units))
+        return {
+            "schema": catalog.base_ref(schema),
+            **({"schema_seen": seen} if seen else {}),
+        }
+
+    def skill_review(
+        self, repo: Any, name: str, value: Mapping[str, Any], units: Mapping[str, Any]
+    ) -> dict[str, Any]:
+        """Whether the schema moved in a way that touches this skill (`BI_CARD_MODEL.md` §4.3)."""
+        current = str(units.get(repo_engine.SCHEMA_UNIT) or "")
+        written_for = catalog.base_ref(str(value.get("schema") or ""))
+        changes = schema_merge.stored_changes(units)
+        seen = set(value.get("schema_seen") or [])
+        if not current or (written_for == current and seen == set(changes)):
+            return {"needs_update": False, "update_blocks": False, "update_reason": ""}
+        old_base, new_base = _schema_in_repo(repo, written_for), _schema_in_repo(repo, current)
+        try:
+            skill = repo_skills.read_skill(repo, name, units)
+        except RepoError:
+            return schema_merge.skill_verdict(None, None, "", (), str(value.get("role")))
+        if old_base is None or new_base is None:
+            return schema_merge.skill_verdict(None, None, "", (), skill.role)
+        kept = {k: v for k, v in changes.items() if k in seen}
+        verdict = schema_merge.skill_verdict(
+            schema_merge.overlay(old_base, kept)[0],
+            schema_merge.overlay(new_base, changes)[0],
+            skill.body,
+            skill.card_types,
+            skill.role,
+            gone=sorted(seen - set(changes)),
+        )
+        if skill.extra.get("generated") == "true" and not verdict["update_blocks"]:
+            # Nobody edited it, and a run reads it as the schema is now (`run_rules`).
+            return {"needs_update": False, "update_blocks": False, "update_reason": ""}
+        return verdict
 
     def check(self, before: Mapping[str, Any], after: Mapping[str, Any]) -> CheckReport:
         cards = {k for k in after if k.startswith("card:")}
@@ -375,7 +440,11 @@ def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str
     tables = _tables(db)
     units: dict[str, Any] = {}
     for r in db.execute("SELECT * FROM meta") if "meta" in tables else []:
-        units[repo_engine.SCHEMA_UNIT if r["key"] == "schema" else f"meta:{r['key']}"] = r["value"]
+        if r["key"] == "schema":
+            # What the database reads may have changes merged on it; they are units of their own.
+            units[repo_engine.SCHEMA_UNIT] = catalog.base_ref(r["value"])
+        else:
+            units[f"meta:{r['key']}"] = r["value"]
     columns = {r[1] for r in db.execute("PRAGMA table_info(imports)")}
     for r in db.execute("SELECT * FROM imports"):
         units[f"import:{r['id']}"] = {
@@ -713,7 +782,8 @@ def materialize(
         db.execute("DELETE FROM sqlite_sequence WHERE name IN ('history', 'proposals', 'evidence')")
         for key, value in sorted(units.items()):
             if key == repo_engine.SCHEMA_UNIT:
-                db.execute("INSERT INTO meta (key, value) VALUES ('schema', ?)", (value,))
+                reads = reg.ref if reg is not None and catalog.base_ref(reg.ref) == value else value
+                db.execute("INSERT INTO meta (key, value) VALUES ('schema', ?)", (reads,))
             elif key.startswith("meta:"):
                 db.execute("INSERT INTO meta (key, value) VALUES (?, ?)", (key[5:], value))
             elif key.startswith("import:"):
@@ -1368,14 +1438,23 @@ class Vault:
                 return
             self._links_by_id(changed, after, targets)
             with _repo_errors():
+                moved = changed.get(repo_engine.SCHEMA_UNIT)
+                old = None
+                if moved and before.get(repo_engine.SCHEMA_UNIT):
+                    old = schema_merge.effective_ref(self.workspace, self.repo.working_units())
+                    del changed[repo_engine.SCHEMA_UNIT]
+                    moves = self._schema_units(str(moved))
+                    if repo_engine.SCHEMA_UNIT not in moves:
+                        # No version moved, and two PCs' additions must not meet on this list.
+                        changed.pop("meta:schema_history", None)
+                    changed.update(moves)
                 self.repo.stage_many(dict(sorted(changed.items())))
                 if changed.get(repo_engine.SCHEMA_UNIT):
                     self._stage_schema(str(changed[repo_engine.SCHEMA_UNIT]))
-                    old = before.get(repo_engine.SCHEMA_UNIT)
-                    if old:
-                        vault_skills.regenerate_classify(
-                            self.repo, self._registry(str(old)), self._registry()
-                        )
+                if old and changed.get(repo_engine.SCHEMA_UNIT):
+                    vault_skills.regenerate_classify(
+                        self.repo, self._registry(old), self._registry()
+                    )
                 if vault_skills.DOMAINS_UNIT in changed:
                     # A domain's notes live in its extract skill (design §8, decision 2).
                     vault_skills.move_notes(self.repo, self._registry())
@@ -1409,24 +1488,96 @@ class Vault:
             if item is not None and item.is_link:
                 changed[key] = {**value, "value": targets.stored(value["value"], item.link_to)}
 
+    def _schema_units(self, target_ref: str) -> dict[str, Any]:
+        """The units that move this vault to `target_ref`, a version just published on this
+        PC. Additions become their own units and take no number. Anything more is a new
+        version, numbered from its content so that two people's different versions are
+        different refs and conflict as a unit, rather than one number with two contents."""
+        target = catalog.resolve(self.workspace, target_ref)
+        name = _schema_file_name(target.schema_id, target.version)
+        if target.source != "installed" or (self.folder / "schemas" / name).is_file():
+            return {repo_engine.SCHEMA_UNIT: target_ref}  # a version the vault already knows
+        working = self.repo.working_units()
+        old_ref = schema_merge.effective_ref(self.workspace, working)
+        _, old = schema_versions.base_document(self.workspace, old_ref)
+        _, new = schema_versions.base_document(self.workspace, target_ref)
+        path = catalog.schema_path(self.workspace, target.schema_id, target.version)
+        additions = schema_merge.changes_between(old, new)
+        if additions is not None:
+            path.unlink(missing_ok=True)  # never pushed, so it must not take the number
+            schema_versions.renumbered(self.workspace, target_ref, None)
+            return additions
+        major, minor = catalog._version_tuple(target.version)[:2]  # noqa: SLF001
+        content = repo_engine.canonical({k: v for k, v in new.items() if k != "version"})
+        patch = int(hashlib.sha256(content.encode("utf-8")).hexdigest()[:5], 16)
+        version = f"{major}.{minor}.{patch}"
+        path.unlink(missing_ok=True)
+        catalog.install(
+            self.workspace,
+            f"{version}.json",
+            json.dumps({**new, "version": version}, ensure_ascii=False),
+        )
+        schema_versions.renumbered(self.workspace, target_ref, f"{target.schema_id}@{version}")
+        absorbed = {k: None for k in schema_merge.stored_changes(working)}
+        return {repo_engine.SCHEMA_UNIT: f"{target.schema_id}@{version}", **absorbed}
+
+    def schema_conflicts(self) -> list[dict[str, Any]]:
+        """Schema overlaps that landed with nobody to stop them, the same on every PC: a
+        change that no longer fits its version, and a change that lost a race on one unit.
+        A push stops at the first kind, and at the second before anything is written."""
+        units = self.repo.working_units()
+        found: list[dict[str, Any]] = [
+            {
+                "kind": "clash",
+                "unit": item["unit"],
+                "label": unit_label(units, item["unit"]),
+                "reason": item["reason"],
+                "value": units.get(item["unit"]),
+            }
+            for item in schema_merge.clashes(self.workspace, units)
+        ]
+        for item in self.repo.conflicts():
+            unit = str(item["unit"])
+            if not unit.startswith(schema_merge.PREFIX) and unit != repo_engine.SCHEMA_UNIT:
+                continue
+            decided = f"decision:{_schema_conflict_key(item)}"
+            if decided in units or repo_engine.canonical(units.get(unit)) == repo_engine.canonical(
+                item["value"]
+            ):
+                continue
+            found.append(
+                {
+                    "kind": "race",
+                    "unit": unit,
+                    "label": unit_label(units, unit),
+                    "reason": "兩個人同時改了這裡，先到的留下；要由人決定",
+                    "value": item["value"],
+                    "current": units.get(unit),
+                }
+            )
+        return found
+
+    def new_schema_clashes(self) -> list[str]:
+        """What this PC's commits would clash with once on the head, in words."""
+        head = {c["unit"] for c in schema_merge.clashes(self.workspace, self.repo.units())}
+        units = self.repo.working_units()
+        return [
+            f"{unit_label(units, c['unit'])}：{c['reason']}"
+            for c in schema_merge.clashes(self.workspace, units)
+            if c["unit"] not in head
+        ]
+
     def _schema_of(self, units: Mapping[str, Any]) -> Registry | None:
         """The schema these units are on; None when this PC has not got it."""
         try:
-            return catalog.with_home_domains(
-                self._registry(str(units.get(repo_engine.SCHEMA_UNIT) or "")),
-                vault_skills.created_domains(units),
-            )
+            return self._registry(schema_merge.effective_ref(self.workspace, units))
         except BiStoreError:
             return None
 
     def _registry(self, ref: str | None = None) -> Registry:
         """The schema `ref`, by default the working copy's."""
         if ref is None:
-            units = self.repo.working_units()
-            return catalog.with_home_domains(
-                catalog.resolve(self.workspace, str(units.get(repo_engine.SCHEMA_UNIT) or "")),
-                vault_skills.created_domains(units),
-            )
+            ref = schema_merge.effective_ref(self.workspace, self.repo.working_units())
         return catalog.resolve(self.workspace, ref)
 
     def _stage_schema(self, ref: str) -> None:
@@ -1491,6 +1642,7 @@ class Vault:
             "head": state.get("head"),
             "reads": self.reads() if reachable else None,
             "conflicts": conflicts,
+            "schema_conflicts": self.schema_conflicts() if reachable else [],
             "merges": [],
             "bad": state.get("bad") or [],
             "incomplete": [],
@@ -1830,6 +1982,8 @@ def unit_label(units: Mapping[str, Any], key: str) -> str:
         return {"domains": "領域設定", "dashboard": "Dashboard 的順序"}.get(rest, f"設定 {rest}")
     if key == repo_engine.SCHEMA_UNIT:
         return "schema 版本"
+    if key.startswith(schema_merge.PREFIX):
+        return schema_merge.describe(key)
     if kind == "skill":
         return f"skill「{rest}」"
     if kind == "source":
@@ -2124,6 +2278,10 @@ def push(workspace: Path, vault_id: str) -> dict[str, Any]:
     with vault.lock:
         vault._install_schemas()
         with _repo_errors():
+            vault.repo.sync()
+            clashes = vault.new_schema_clashes()
+            if clashes:
+                return {"status": "blocked", "blocking": clashes, "notes": []}
             result = vault.repo.push()
             if result["status"] == "pushed":
                 readme.write_readme(vault.repo)
@@ -2140,6 +2298,38 @@ def push(workspace: Path, vault_id: str) -> dict[str, Any]:
             ]
         vault.rebuild()
         return result
+
+
+def decide_schema_conflict(
+    workspace: Path, vault_id: str, given: Mapping[str, Any]
+) -> dict[str, Any]:
+    """A person's decision on an entry of `schema_conflicts`, staged for their commit:
+    `drop` a change, `keep` what stands, or `take` the change that lost."""
+    vault = _vault(workspace, vault_id)
+    unit, choice = str(given.get("unit") or ""), given.get("choice")
+    if choice not in ("drop", "keep", "take"):
+        raise BiStoreError("choice_invalid", "choice 必須是 drop、keep 或 take")
+    with vault.lock, _repo_errors():
+        entry = next((c for c in vault.schema_conflicts() if c["unit"] == unit), None)
+        if entry is None:
+            raise BiStoreError("schema_conflict_unknown", "這裡沒有這個 schema 衝突")
+        if choice == "drop":
+            if not unit.startswith(schema_merge.PREFIX):
+                raise BiStoreError("choice_invalid", "schema 版本不能放棄，只能選一邊")
+            vault.repo.stage(unit, None)
+        else:
+            if entry["kind"] != "race":
+                raise BiStoreError("choice_invalid", "這個改動只能放棄")
+            for item in vault.repo.conflicts():
+                if str(item["unit"]) == unit:
+                    key = _schema_conflict_key(item)
+                    vault.repo.stage(f"decision:{key}", {"status": "decided", "reason": choice})
+            if choice == "take":
+                vault.repo.stage(unit, entry["value"])
+                if unit == repo_engine.SCHEMA_UNIT:
+                    vault._stage_schema(str(entry["value"]))
+    vault.rebuild()
+    return {"schema_conflicts": vault.schema_conflicts(), "status": vault.status()}
 
 
 def resolve(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:

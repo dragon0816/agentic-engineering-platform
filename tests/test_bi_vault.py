@@ -516,7 +516,10 @@ def test_undo_and_a_schema_upgrade_travel_as_commits(tmp_path: Path) -> None:
     target = _ok(_call(a, "POST", f"/api/bi/schema-drafts/{draft_id}/publish", {}))["ref"]
     preview = _ok(_call(a, "POST", f"/api/bi/datasets/{dataset}/schema/preview", {"to": target}))
     body = {"to": target, "preview_token": preview["preview_token"]}
-    _ok(_call(a, "POST", f"/api/bi/datasets/{dataset}/schema/apply", body))
+    applied = _ok(_call(a, "POST", f"/api/bi/datasets/{dataset}/schema/apply", body))["to"]
+    # A vault's new version is numbered from its content, so two can never share a number.
+    assert applied.startswith("example/product-spec@1.1.") and applied != target
+    target = applied
     _commit(a, vault_id, "升級 schema：country 改名 region")
     assert _push(a, vault_id)["status"] == "pushed"
     purposes = [
