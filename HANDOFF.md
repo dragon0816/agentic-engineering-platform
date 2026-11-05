@@ -1,19 +1,20 @@
 # Handoff
 
-## BI page: create a domain done; ownership slices next (2026-11-05, Claude Code)
+## BI page: each domain's questions done; push check and dashboards next (2026-11-05, Claude Code)
 
 Branch `bi-step1-domain`, not pushed, with main `4558b988` merged in. Design `docs/phases/BI_PAGE_SIMPLE.md` §9, §10. Earlier slices of this work are already on main.
 
 **Verified, on fictional data unless marked:** browser and backend files listed in `docs/TASKS.md`, one at a time; a copy of `market-intel` with no model (§9.6, §10). **Not run:** the full suite, a real model.
 
 **Not built, agreed order with the orchestrator:**
-3. Questions owned by a domain, 全庫 shown apart, 全部領域 read-only, a report per domain.
-4. Push check by the domains a change touches; per-domain digest; the owner's rule for a card two domains reach, findings only (「關於同一張卡，概述應該不會變，證具, raw data連結就append上去，時間也是取合集」); what still interferes.
+4. Push check by the domains a change touches; per-domain digest; the owner's rule for a card two domains reach, findings only (「關於同一張卡，概述應該不會變，證具, raw data連結就append上去，時間也是取合集」); what still interferes. 定案 (the owner confirmed): after a meeting the responsible person sets a field's final value with a reason; it wins over a differing value or racing edit, related proposals and conflicts close, the old value stays in history, and it goes through normal commit and push, still blocked by a regression in the domains it touches. No access control.
 5. A dashboard per domain, with a dry-run list assigning `market-intel`'s 12 questions and 36 analyses. Stop and ask before changing `meta:dashboard` in a way the 17 feed goldens cannot hold.
 
 **Known and not fixed:** a new domain's step 3 still lists the whole vault's analyses until slice 5. The commit list prints raw JSON for sources and skills. The build tab takes 23-43 s to open on `market-intel`.
 
-**Next:** slice 3. Nothing is written to the real vault; the copy driver is git-ignored, `.scratch/real_check.py`, and it removes its copy.
+**Open:** `test_bi_step3_ui` failed once on `d339ca85` while 27 other test files ran before and after it, one at a time: a new question did not appear after a delete. It passed four times since. Cause not found, not fixed. The driver's failure message names the page's notice, so the next failure says more. Use `catalog.base_ref`, never a comparison with `store.schema_ref()`.
+
+**Next:** slice 4. Nothing is written to the real vault; the copy driver is git-ignored, `.scratch/real_check.py`, and it removes its copy.
 ## Schema changes that merge (2026-11-05, Claude Code) — branch `bi-schema-merge`, not merged
 
 **Done.** Compatible schema changes are units on the version; overlap stops for a person; only touched skills are flagged. Design `docs/phases/BI_CARD_MODEL.md` §4.3, decision `docs/DECISIONS.md` 2026-11-05.
