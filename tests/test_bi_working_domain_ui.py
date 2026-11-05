@@ -199,11 +199,15 @@ def test_one_working_domain_carries_through_the_three_steps(tmp_path: Path) -> N
             page.shoot("step3")
 
             # -- commit says what it carries ------------------------------------------------
+            # By the names people know them by (the list showed the folder's key before).
+            label = "bi.build.homes.find((h) => h.home === %r).label"
+            wireless, aidc = page.run(label % "wireless"), page.run(label % "aidc")
             page.wait(
-                "document.getElementById('bi-b-ver-pending').textContent.includes('wireless')"
+                "document.getElementById('bi-b-ver-pending').textContent"
+                f".includes({json.dumps(wireless)})"
             )
             pending = page.text_of("bi-b-ver-pending")
-            assert "aidc" in pending and "這次 commit 也會帶上其他領域的改動" in pending
+            assert str(aidc) in pending and "這次 commit 也會帶上其他領域的改動" in pending
 
             # -- a question's domain is a combobox: 全庫 and the vault's homes ---------------
             homes = page.run(

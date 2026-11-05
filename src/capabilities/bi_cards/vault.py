@@ -2067,7 +2067,9 @@ def pending(workspace: Path, vault_id: str) -> dict[str, Any]:
     """What this PC has not pushed: uncommitted changes and local commits."""
     vault = _vault(workspace, vault_id)
     with vault.lock:
-        head = vault.repo.units()
+        # Against what this PC has committed: a card only committed here has its name, and
+        # what a local commit added and the work removed is a change.
+        head = vault.repo.working_units(pending=False)
         work = vault.repo._pending()
         units = {**head, **work["sets"]}
         shown = card_model.card_names_of(units)
@@ -2081,6 +2083,8 @@ def pending(workspace: Path, vault_id: str) -> dict[str, Any]:
                 "after": card_model.render_links_within(v, shown),
             }
             for k, v in sorted(work["sets"].items())
+            # Added and removed again before any commit: nothing has changed.
+            if repo_engine.canonical(head.get(k)) != repo_engine.canonical(v)
         ]
         return {
             "uncommitted": changes,

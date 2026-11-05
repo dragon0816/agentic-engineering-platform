@@ -532,6 +532,9 @@ def test_the_page_previews_and_imports_a_chosen_folder(tmp_path: Path) -> None:
             page.see("bi-b-pages-plan", "看不懂的地方")
             assert BiStore(ws, "lab").card_rows() == []
             page.click_text("#bi-b-pages-plan", "確認匯入")
+            # The bar says so at once: it stayed at 0 張卡片 until the page was reloaded.
+            page.wait("!document.getElementById('bi-counts').textContent.startsWith('0')")
+            assert "更新於" in page.text_of("bi-counts")
             page.notice("已匯入卡片頁")
     assert BiStore(ws, "lab").find("Technology", "FAKE-TSN") is not None
 
