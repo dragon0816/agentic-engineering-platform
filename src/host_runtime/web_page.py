@@ -1329,7 +1329,7 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
 #bi-b-cands tbody tr { scroll-margin-top: 40px; }
 .bi-state { display: inline-flex; align-items: center; gap: 4px; font-size: 13px;
   font-weight: 600; white-space: nowrap; }
-.bi-state-icon { font-weight: 700; }
+.bi-state-icon { font-size: 16px; font-weight: 700; line-height: 1; }
 .bi-state-accepted .bi-state-icon { color: var(--accent); }
 .bi-state-rejected { color: var(--dim); }
 .bi-state-rejected .bi-state-icon { color: var(--bad); }
@@ -13198,7 +13198,8 @@ function biBuildAllowed() {
   // A run may wait for review with no source chosen: one started through the API.
   return {source: true, schema: true, method: has,
     review: has || !!run || (bi.build.waiting || []).length > 0,
-    commit: !!accepted && !bi.build.accepting && !bi.build.saving, result: !!(run && run.status === "committed"),
+    commit: !!accepted && !bi.build.accepting && !bi.build.saving,
+    result: !!(run && run.status === "committed"),
     test: true};
 }
 
@@ -16380,8 +16381,9 @@ function biSourceName(sourceId, fallback) {
 function biEvidence(item) {
   if (!item.evidence.length) return bh("span", "bi-meta", "—");
   return bh("span", "", ...item.evidence.map((e) => {
-    const place = Object.entries(e.locator || {}).filter(([k]) => k !== "default")
-      .map(([k, v]) => k + " " + v).join("・");
+    const {line_start: first, line_end: last, default: _, ...others} = e.locator || {};
+    const place = [...(first ? ["第 " + first + (last && last !== first ? "–" + last : "") + " 行"]
+      : []), ...Object.entries(others).map(([k, v]) => k + " " + v)].join("・");
     const stance = {refutes: "反駁", context_only: "僅背景"}[e.stance];
     return bh("span", "bi-meta", "「" + e.excerpt + "」（",
       e.source_id ? biButton(biSourceName(e.source_id, e.source_name),

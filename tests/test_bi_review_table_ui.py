@@ -471,13 +471,17 @@ def test_a_decision_shows_at_once_stays_after_a_reload_and_a_failure_says_so(
             assert "待決定 4" in page.text_of("bi-b-cand-count")
 
 
-LINKED_NOTE = "# 會議\n\n前面的文字。\n客戶提到 FAKE-040 正在評估。\n" + "後面的文字。\n" * 40
+LINKED_NOTE = (
+    "# 會議\n\n日期：2026-10-01\n前面的文字。\n客戶提到 FAKE-040 正在評估。\n"
+    + "後面的文字。\n" * 40
+)
 LINKED = {
     "candidates": [
         {
             "entity_type": "Signal",
             "name": f"訊號-{index}",
             "fields": {
+                "date": {"value": "2026-10-01", "basis": "fact", "quote": "日期：2026-10-01"},
                 "summary": {
                     "value": f"摘要 {index}",
                     "basis": "fact",
@@ -520,6 +524,8 @@ def test_links_in_the_card_under_review_open_beside_it_and_keep_the_place(tmp_pa
             _shown(page, 30)
             page.run(f"{_row('訊號-20')}.querySelector('button').click()")
             page.wait("!!document.querySelector('#bi-b-cand-src mark')")
+            page.see("bi-b-cand", "第 ")  # a place in the source, in words
+            assert "line_start" not in page.text_of("bi-b-cand")
             place = "document.querySelector('#bi-b-review-split .bi-scroller').scrollTop"
             page.run(f"{place} = 400; 0")
 
