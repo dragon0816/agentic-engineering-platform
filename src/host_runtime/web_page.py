@@ -15389,7 +15389,8 @@ function biSkillSpec(dataset) {
     sends: "這條規則、卡片類型與資料夾、最近兩次試跑的候選卡", agent: true,
     label: "你想怎麼調整這條規則",
     placeholder: "例如：電源相關的規格表，額定功率一律放在 specs 欄位",
-    busy: "正在讀來源、用草稿試跑、看測試結果…（可能要幾分鐘）", render: biApplySkill,
+    busy: "正在讀來源、用草稿試跑、看測試結果…（每次最多試跑 3 次、約 6 分鐘，"
+      + "時間到會先給目前最好的草稿）", render: biApplySkill,
     turn: () => ({source_ids: bi.build.sourceId && biDataset() === dataset
       ? [bi.build.sourceId] : []})};
 }
@@ -15404,8 +15405,8 @@ async function biSkillAi(item, from) {
 }
 
 async function biSkillNew() {
-  // A rule to talk about has to exist: the first message saves it as revision 1, staged
-  // like any change, and the conversation goes on from there.
+  // The new rule is the session's until the person applies a draft (acceptance F16: the
+  // first message was saved as revision 1 that nobody approved); applying saves revision 1.
   const pick = el("bi-ai-new-folder");
   pick.replaceChildren(...((bi.skills && bi.skills.folders) || []).filter((f) => f !== "sources")
     .map((folder) => { const o = bh("option", "", folder); o.value = folder; return o; }));
@@ -15414,19 +15415,19 @@ async function biSkillNew() {
   el("bi-ai-new-name").value = "";
   const spec = {...biSkillSpec("vault-" + bi.verVault), mode: "new", title: "和 AI 新增規則",
     shows: el("bi-b-sk-list"),
-    about: "第一句話會先存成第 1 版（還沒 commit），AI 再幫你改。",
+    about: "AI 會依你的描述寫出草稿並試跑；按「套用為新版本」才會存成第 1 版（還沒 commit）。",
     label: "這條規則要做什麼", placeholder: "例如：虛構電源廠是 Account",
     sessionTarget: () => spec.name,
     prepare: async (message) => {
       if (spec.name) return;
       const name = el("bi-ai-new-name").value.trim();
       if (!name) { el("bi-ai-new-name").focus(); throw new Error("請寫規則名稱"); }
-      const reply = await biVerRun(bi.verVault, "skills", {name, role: "extract",
-        applies_to: pick.value ? [pick.value] : [], card_types: [], body: message});
+      spec.session = (await biCall("/api/bi/sessions", {dataset: spec.dataset, kind: "skill",
+        target: name, new: {role: "extract", applies_to: pick.value ? [pick.value] : []}}))
+        .session;
       spec.name = name; spec.mode = null; el("bi-ai-new").hidden = true;
       spec.ref = "skill:" + name;
-      el("bi-ai-title").textContent = "和 AI 修改規則";
-      biAiTarget("規則「" + name + "」第 " + reply.skill.revision + " 版。");
+      biAiTarget("新規則「" + name + "」：套用 AI 的草稿後才會存成第 1 版（還沒 commit）。");
     }};
   await biAiOpen(spec);
 }

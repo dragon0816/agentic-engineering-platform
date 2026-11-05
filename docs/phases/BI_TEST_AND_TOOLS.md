@@ -71,6 +71,19 @@ The skill session becomes a Gateway sub-run with BI Host tools: `bi_skill__read_
 `bi_skill__benchmark` (T1 run on the draft), `bi__query` on the trial result, and `bi_skill__suggest` (the
 final suggestion, checked as today). Applying, committing and pushing stay the person's.
 
+**Budget per turn (acceptance F16, 2026-11-06).** One message ran 25 minutes and 9 trials and ended
+with 「模型沒有回應（turn_time_limit）」 and nothing to read. A skill turn now allows at most 3 trials
+(`bi_skill__try`, `bi_skill__test_cases`, `bi_skill__benchmark` each count) within 6 minutes, and the
+turn stops at 10; a trial past either is refused and the model is told to suggest its best draft.
+A turn that still ends without a suggestion returns the last draft that tried well and passes the
+check, with why it stopped and what was tried in its limits. The panel says the budget while it
+waits, and the turn keeps `sent.budget`. A turn with nothing to show says in Chinese what to do
+(`sessions.STOPPED`, for every session kind); the stop code is kept as `error.cause`.
+
+**A new rule is saved only when applied.** 「和 AI 新增規則」 opens a session that carries the rule
+it creates (`new`: role and folders, no text); the AI writes the text and 「套用為新版本」 saves
+revision 1. A failed or abandoned session leaves no rule; a name in use is `skill_exists`.
+
 ## 5. T3: analyses (outline)
 
 An analysis conversation on the same harness with `bi_analysis__sql` (read-only connection on a copy, row and

@@ -31,10 +31,11 @@ SUGGESTION_CONTRACT = "aep.bi.skill_suggestion.v1"
 CHANGE_KEYS = ("body", "applies_to", "card_types")
 TARGET_PREFIX = "skill:"
 #: A turn on the Agent harness (BI T2, `docs/phases/BI_TEST_AND_TOOLS.md` §4):
-#: (the context, the turns so far, the check of a suggestion) -> (what came
-#: back, the model alias, the tool calls made as `{"name", "ok"}`).
+#: (the context, the turns so far, the check of a suggestion, the skill as the
+#: session sees it) -> (what came back, the model alias, the tool calls made as
+#: `{"name", "ok"}`).
 Asker = Callable[
-    [str, list[dict[str, Any]], Callable[[dict[str, Any]], list[str]]],
+    [str, list[dict[str, Any]], Callable[[dict[str, Any]], list[str]], dict[str, Any]],
     tuple[sessions.Asked, str, list[dict[str, Any]]],
 ]
 
@@ -77,6 +78,33 @@ def _skill(workspace: Path, vault_id: str, name: str) -> tuple[dict[str, Any], d
     return found, listed
 
 
+def _session_skill(
+    workspace: Path, vault_id: str, session: dict[str, Any]
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """The skill a session is about: the vault's, or, for 「和 AI 新增規則」, the rule it
+    creates (revision 0, no text yet) until the person applies a draft (acceptance F16:
+    the person's first sentence was saved as revision 1 that nobody approved)."""
+    name = session["target_ref"][len(TARGET_PREFIX) :]
+    new = session.get("new")
+    if not new:
+        return _skill(workspace, vault_id, name)
+    listed = vault.skills(workspace, vault_id)
+    if any(s["name"] == name for s in listed["skills"]):
+        # Applied once: from then on it is the vault's rule.
+        return _skill(workspace, vault_id, name)
+    pending = {
+        "name": name,
+        "role": new.get("role") or "extract",
+        "applies_to": list(new.get("applies_to") or []),
+        "card_types": list(new.get("card_types") or []),
+        "body": "",
+        "revision": 0,
+        "schema": listed["schema"],
+        "new": True,
+    }
+    return pending, listed
+
+
 def _given(skill: dict[str, Any], changes: dict[str, Any]) -> dict[str, Any]:
     given = {
         "name": skill["name"],
@@ -116,11 +144,33 @@ def _recent_trials(staging: Staging) -> list[str]:
     return [r["id"] for r in staging.run_rows() if r["kind"] == "trial" and runs.listed(r)][:2]
 
 
-def create_session(workspace: Path, dataset: str, name: str, actor: str) -> dict[str, Any]:
+def create_session(
+    workspace: Path, dataset: str, name: str, actor: str, new: Any = None
+) -> dict[str, Any]:
+    """A session on a skill; with `new` ({`role`, `applies_to`}) on a rule that does not
+    exist yet, which is saved only when the person applies a draft."""
     vault_id = _vault_id(dataset)
-    _skill(workspace, vault_id, name)
+    pending = None
+    if new is not None:
+        if not isinstance(new, dict):
+            raise BiStoreError("skill_invalid", "new 必須是物件")
+        listed = vault.skills(workspace, vault_id)
+        if any(s["name"] == name for s in listed["skills"]):
+            raise BiStoreError("skill_exists", f"已經有判讀規則「{name}」，請換一個名稱")
+        pending = {
+            "role": str(new.get("role") or "extract"),
+            "applies_to": [str(f) for f in new.get("applies_to") or []],
+        }
+        # The name, role and folders are checked now, with a placeholder text.
+        vault.checked_skill(workspace, vault_id, {"name": name, **pending, "body": "-"})
+    else:
+        _skill(workspace, vault_id, name)
     return sessions.create(
-        Staging(workspace, dataset), kind="skill", target_ref=TARGET_PREFIX + name, actor=actor
+        Staging(workspace, dataset),
+        kind="skill",
+        target_ref=TARGET_PREFIX + name,
+        actor=actor,
+        new=pending,
     )
 
 
@@ -143,8 +193,7 @@ def session_turn(
     staging.store.refuse_write()
     session = sessions.load(staging, session_id, "skill")
     text = sessions.check_message(message)
-    name = session["target_ref"][len(TARGET_PREFIX) :]
-    skill, listed = _skill(workspace, vault_id, name)
+    skill, listed = _session_skill(workspace, vault_id, session)
     reg = vault.Vault(workspace, vault_id)._registry()
     samples, sent_sources = sessions.excerpts(staging, source_ids)
     for sent in sent_sources:
@@ -161,8 +210,14 @@ def session_turn(
         f"Card types this skill is about, with their fields:\n"
         f"{extract.describe_types(reg, types)}\n"
         f"Source folders: {', '.join(listed['folders'])}\n\n"
-        f"The skill now (revision {skill.get('revision')}):\n"
-        f"{json.dumps(shown, ensure_ascii=False, indent=1)}"
+        + (
+            "This is a NEW rule: it is not saved yet and has no text. Write its complete body "
+            "from the person's request; it is saved only when the person applies your "
+            "suggestion.\n"
+            if skill.get("new")
+            else f"The skill now (revision {skill.get('revision')}):\n"
+        )
+        + f"{json.dumps(shown, ensure_ascii=False, indent=1)}"
         + (
             f"\n\nThis skill was written for {skill.get('schema')}; the knowledge base now uses "
             f"{listed['schema']}. Bring it up to date with the schema."
@@ -188,7 +243,7 @@ def session_turn(
     turns = [*session["turns"], {"role": "user", "text": text}]
     tools: list[dict[str, Any]] = []
     if asker is not None:
-        asked, alias, tools = asker(context, turns, problems)
+        asked, alias, tools = asker(context, turns, problems, skill)
     else:
         model, alias = sessions.model_or_refuse(ai)
         asked = sessions.ask(
@@ -220,6 +275,7 @@ def session_turn(
         "runs": used_runs,
         "skill_revision": skill.get("revision"),
         **({"tools": tools, "harness": True} if asker is not None else {}),
+        **({"budget": asked.budget} if asked.budget is not None else {}),
     }
     session["source_ids"] = [s["id"] for s in sent_sources]
     return sessions.record(
@@ -244,8 +300,7 @@ def apply_suggestion(
     staging.store.refuse_write()
     session = sessions.load(staging, session_id, "skill")
     found, index = sessions.assistant_turn(staging, session, turn)
-    name = session["target_ref"][len(TARGET_PREFIX) :]
-    skill, _ = _skill(workspace, vault_id, name)
+    skill, _ = _session_skill(workspace, vault_id, session)
     saved = vault.save_skill(workspace, vault_id, _given(skill, found["suggestion"]["changes"]))
     revision = saved["skill"].get("revision")
     sessions.mark_applied(staging, session, index, {"revision": revision, "at": now(), "by": actor})

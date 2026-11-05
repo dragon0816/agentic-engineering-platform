@@ -656,7 +656,7 @@ def _session_create(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
         made = schema_session.create_session(workspace, dataset, target, who)
         return 200, {"ok": True, "session": made}
     if kind == "skill":
-        made = skill_session.create_session(workspace, dataset, target, who)
+        made = skill_session.create_session(workspace, dataset, target, who, given.get("new"))
         return 200, {"ok": True, "session": made}
     if kind == "analysis":
         made = analysis_session.create_session(workspace, dataset, target, who)

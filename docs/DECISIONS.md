@@ -6568,3 +6568,22 @@ The owner: 「這是一個多人合作的平台，但為了不彼此干擾，每
 - **定案 is an ordinary change with a reason,** built on `set_field`, closing proposals, and `resolve`. Not a Git force push: commits are immutable. No access control. Rejected: a new unit kind for final values, since the field's own history already holds who and why.
 - **Commit stays whole for now,** though `only` makes limiting it cheap. The owner has not asked, and the warning covers it.
 - **The owner's rule for a card two domains reach is recorded, not built:** it needs a merge rule in the engine's conflict path. Findings in §14.
+
+## 2026-11-06: The skill AI has a budget per turn and always leaves something to read
+
+Acceptance F16 (orchestrator, for the colleague release): one message in 和 AI 新增規則 ran 25 minutes
+and 9 trials, ended with 「模型沒有回應（turn_time_limit）」 and no suggestion, while the person's
+sentence had already been saved as revision 1. Spec: `docs/phases/BI_TEST_AND_TOOLS.md` §4.
+
+- **3 trials within 6 minutes, turn limit 10 minutes.** Trials are what takes minutes; counting them
+  bounds the turn better than the tool-call cap. Rejected: only a shorter wall clock, which cuts the
+  model off before it can suggest.
+- **Out of budget, the last draft that tried well comes back as the suggestion,** marked in its
+  limits as not finally checked by the AI. Rejected: an error with the drafts hidden in the log.
+- **Stop codes become Chinese sentences with what to do** in the shared session record, so every
+  BI session kind gets them; the code stays in `error.cause`.
+- **A new rule lives in its session until applied** (`new` in the session body). Rejected: saving a
+  placeholder revision, which is a rule nobody approved.
+- **Not changed:** the schema and questions AIs (15 minutes, 40 tool calls, no trial cap or
+  fallback) and the analysis AI (10 minutes, 30 calls) have the same shape; left for a decision.
+
