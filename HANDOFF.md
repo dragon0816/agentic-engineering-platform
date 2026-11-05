@@ -1,14 +1,10 @@
 # Handoff
 
-## Clearing sample marks (2026-11-06, Claude Code worker D) — done
+## Sample marks on `market-intel` (2026-11-06, Claude Code worker D) — done; the pack's rule waits
 
-On `market-intel`, main `5a0ef9fc`: the 7 real cards cleared, committed, pushed, not tagged or published. 92 samples of 760; only those 7 marks moved; run `e3de934115f0` unchanged. Published `2026q4-r6.2` still says 85. These 7 have no `summary` or `usage`: the reading run skipped them as samples. The pack's rule follows after the GUI.
+95 samples of 760, pushed, not tagged or published; published `2026q4-r6.2` still says 85. 4 Technologies stay cleared and 3 TestSolutions were marked again: `docs/phases/BI_SUMMARY_FILL.md`. Run `e3de934115f0` unchanged, waiting for the owner's review.
 
-## The sample mark and the default pack (2026-11-05, Claude Code worker D) — waiting for a decision
-
-Branch `bi-sample-check` off main `eb551cb6`, not pushed: `sample_not_marked` reads a card's pages in the quality report; `askable` retries a held file and logs its trace. `market-intel`: 14 demo cards marked, pushed, 99 samples of 760, not published. Staged run `e3de934115f0` unchanged.
-
-**Not done on purpose:** the pack's exclusion by `synthetic`. Patch: `.scratch/n2.py`, comparison: `.scratch/n1.json` and `n5.json`, all git-ignored. The saved analyses in a vault carry their own copy of the prelude, so a vault needs its pack imported again for any new rule to reach it.
+**Follows after the GUI:** the default pack's exclusion by `synthetic`, not the `SAMPLE-` name, with the demo data's Dashboard default, goldens and a pack re-import: saved analyses carry their own copy of the prelude. Patch: `.scratch/n2.py`, comparison `.scratch/n1.json`, git-ignored; `docs/phases/BI_CARD_PAGE_IMPORT.md` has the measure. Those numbers are from 99 samples, with the 7 still marked.
 
 ## A source that repeats a value adds its citation (2026-11-05, Claude Code) — built, not merged
 

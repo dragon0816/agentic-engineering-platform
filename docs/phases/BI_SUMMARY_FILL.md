@@ -4,7 +4,18 @@ Owner's rules (2026-11-05, through the orchestrator): through ingest, not a side
 
 Status: run `e3de934115f0` is staged on the real vault, nothing committed; it waits for the owner's review.
 
-**Owner's decisions (2026-11-05, through the orchestrator):** `scope` is not filled. The 13 demo cards are not filled, and were later marked as samples by the owner's decision (commits of 2026-11-05, `擁有者決定標成範例資料-*.csv`), with one more, `大銀 直驅馬達伺服模組`. 99 samples of 760. The vault's 4 uncommitted changes stay untouched until the owner answers about them.
+**Owner's decisions (2026-11-05, through the orchestrator):** `scope` is not filled. The 13 demo cards are not filled, and were later marked as samples by the owner's decision (commits of 2026-11-05, `擁有者決定標成範例資料-*.csv`), with one more, `大銀 直驅馬達伺服模組`. The vault's 4 uncommitted changes were discarded on the owner's word.
+
+## Sample marks (2026-11-06)
+
+**95 samples of 760**, 78 of them named `SAMPLE-`. Published `2026q4-r6.2` still says 85, until the next publish: 14 newly marked, 4 cleared.
+
+Seven cards were marked only because a field said 「(待查證)」, and were cleared on the owner's word on the report that they looked real. That report had read their fields, not their pages. A small reading run then showed the pages, and all 7 came back empty (run `3b966092821a`, cancelled):
+
+- **Marked again, 3 TestSolutions**, whose pages say (虛構範例): `FR2-AiP-OTA緊縮場方案`, `NTN衛星通道模擬方案`, `WiFi7-MLO互通與吞吐量方案`.
+- **Stay cleared, 4 Technologies**: `WiFi-7`, `6G`, `5G-NR-FR2`, `NTN-Satellite`. Real things that real cards link to, on the owner's decision, though their pages say 「(範例)請查證」. They have no `summary` or `usage`, and `sample_not_marked` skips a card a person cleared, so nothing flags that text.
+
+A re-mark removes the card's `mark_cleared`, so its `history` no longer shows the clear; the commits do. The default pack still leaves out by name, so 17 samples without the prefix count in its analyses until that rule changes.
 
 ## Cause
 
