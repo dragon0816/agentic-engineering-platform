@@ -453,8 +453,15 @@ def test_vault_panel_and_dashboard_in_a_browser(
         click("#bi-views [data-bi-view=dashboard]")
         # A vault's Dashboard is its analyses (BI P3): the saved bar chart is a section.
         wait("!!document.querySelector(\"#bi-dash-sections details[data-section='by-type'] svg\")")
-        assert "6. 缺口" in text_of("bi-dash-sections")  # the default pack's analyses
+        # A working domain's Dashboard has what it chose: the new one, and not the default pack.
+        assert "6. 缺口" not in text_of("bi-dash-sections")
         shoot("vault-analysis-dashboard")
+        # The vault's, under 全部領域, has them all; so does the rest of this test.
+        run(
+            "(() => { const s = document.getElementById('bi-b-src-folder');"
+            " s.value = 'sources'; s.dispatchEvent(new Event('change')); })()"
+        )
+        wait("document.getElementById('bi-dash-sections').textContent.includes('6. 缺口')")
 
         # -- parameters and the Dashboard's order (BI P1) ----------------------------------
         vault_id = str(run("bi.verVault"))

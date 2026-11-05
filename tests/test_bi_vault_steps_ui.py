@@ -38,8 +38,8 @@ BY_TYPE = {
 }
 
 
-def _layout(workspace: Path) -> dict[str, list[str]]:
-    return analyses.dashboard_layout(vault.Vault(workspace, VAULT).repo.working_units())
+def _layout(workspace: Path, home: str | None = None) -> dict[str, list[str]]:
+    return analyses.dashboard_layout(vault.Vault(workspace, VAULT).repo.working_units(), home)
 
 
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
@@ -137,14 +137,22 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
         page.click("#bi-ai-send")
         page.see("bi-ai-log", "套用 Dashboard")
         assert page.run("!!document.querySelector('#bi-ai-log svg.bi-chart')")  # its preview
-        assert "by-type" not in _layout(workspace)["order"]  # nothing before the click
+        # A Dashboard applied in a working domain is that domain's; the vault's does not move.
+        home = str(page.run("biScope()"))
+        assert home
+        vault_before = _layout(workspace)
+        assert "by-type" not in _layout(workspace, home)["order"]  # nothing before the click
         page.click_text("#bi-ai-log", "套用 Dashboard")
         page.notice("已套用 Dashboard")
         page.see("bi-b-an-list", "各類型的卡片數")
         page.see("bi-b-ver-pending", "分析")
-        layout = _layout(workspace)
+        layout = _layout(workspace, home)
         assert layout["order"] == ["by-type", "tech-updates"]
         assert set(layout["hidden"]) >= {"node-coverage", "accounts-by-region"}
+        assert _layout(workspace) == vault_before
+        # The rest of this test is about the vault's Dashboard, under 全部領域.
+        page.choose("bi-b-src-folder", "sources")
+        page.wait("!document.getElementById('bi-b-overview').hidden")
 
         # -- K2: an Atlas dashboard's order, previewed and confirmed --------------------------
         page.run("document.getElementById('bi-b-atl').open = true")
@@ -157,7 +165,7 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
         page.see("bi-b-atl-plan", "確認匯入順序")
         plan = page.text_of("bi-b-atl-plan")
         assert "tech-updates" in plan and "重複，略過" in plan and "別的知識庫，略過" in plan
-        assert _layout(workspace)["order"] == ["by-type", "tech-updates"]  # a dry run wrote nothing
+        assert _layout(workspace) == vault_before  # a dry run wrote nothing
         page.click_text("#bi-b-atl-plan", "確認匯入順序")
         page.notice("已匯入 Atlas")
         page.wait("document.getElementById('bi-b-atl-plan').textContent === ''")
@@ -167,6 +175,9 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
         assert "by-type" in {a["slug"] for a in analyses.listing(workspace, VAULT)["analyses"]}
 
         # -- a bench run the page's first read cannot see yet still reports when it ends ------
+        # A question belongs to a domain: back from the overview.
+        page.choose("bi-b-src-folder", str(page.run("bi.build.homes[0].folder")))
+        page.wait("!document.getElementById('bi-b-bq-pane').hidden")
         page.set_value("bi-b-bq-q", "FicTech 是什麼？")
         page.set_value("bi-b-bq-must", "FicTech")
         page.click("#bi-b-bq-form button[type=submit]")
