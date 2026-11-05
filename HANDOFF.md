@@ -1,5 +1,13 @@
 # Handoff
 
+## Review table (2026-11-05, Claude Code) — built, not merged
+
+Branch `bi-review-table` off main `aba2c203`, not pushed. Design and measurements `docs/phases/BI_PAGE_SIMPLE.md` §8; the two intermittent failures found and fixed: `docs/TASKS.md`, last row.
+
+**Not checked:** the real run on `market-intel`; only fictional data was used. Reading the real vault's database directly was refused by the session's permission check, and the brief allows it only through a copy. **Conflict to expect:** `bi-ai-panel` edits the same file; this branch touches the review stage, `biBuildLoad`, `biBuildAllowed`, the start of `biBuildMethodStage` and the convert handler.
+
+**Next:** merge; restart Agent Web on this code once `/api/tasks` is quiet; open the real run in 步驟 2 審核 and read a few rows against their source.
+
 ## Filling card summaries (2026-11-05, Claude Code worker D) — run staged, waiting for the owner's review
 
 Run `e3de934115f0` on the real `market-intel`: 144 candidates (140 summaries, 12 usages), 101 cards empty, 0 failed. Nothing committed; numbers and sample in `docs/phases/BI_SUMMARY_FILL.md`. The review entry in the page is a page worker's. The 13 demo cards and garbled records wait for the owner.

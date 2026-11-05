@@ -140,6 +140,13 @@ class BiPage:
             held = self.text_of(element_id)
             raise AssertionError(f"{failure}\n{element_id}: {held!r}") from None
 
+    def ai_opened(self, kind: str) -> None:
+        """The one AI panel is open on this kind of session."""
+        self.wait(
+            "!document.getElementById('bi-ai').hidden"
+            f" && document.getElementById('bi-ai').dataset.kind === '{kind}'"
+        )
+
     def notice(self, text: str) -> None:
         self.wait(self.shows("bi-notice", text))
 

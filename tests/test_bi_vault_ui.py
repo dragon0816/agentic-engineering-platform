@@ -45,13 +45,15 @@ def test_vault_panel_and_dashboard_in_a_browser(
 ) -> None:
     from integrations.browser import Browser, BrowserError
 
-    # The skill's Session B is answered by a scripted model (no tools, one call).
+    # A skill's AI session is answered by a scripted model (no tools, one call): first the
+    # rule being added, then a change to it.
     model = Scripted(
+        {"reply": "這條規則可以先這樣用。", "reasons": []},
         {
             "reply": "把虛構電源廠的規則寫清楚。",
             "changes": {"body": "虛構電源廠是 Account；額定功率放在 specs。"},
             "reasons": ["規格表常寫額定功率"],
-        }
+        },
     )
     monkeypatch.setattr(
         bi_cards_api,
@@ -290,36 +292,65 @@ def test_vault_panel_and_dashboard_in_a_browser(
             "[...document.getElementById('bi-b-folder').options]"
             ".some((o) => o.value === 'applications/aidc/sources')"
         )
+        # -- adding a rule goes through the AI panel, on this page ---------------------------
         click("#bi-b-sk-new")
-        set_value("bi-b-sk-name", "power-extract")
-        set_value("bi-b-sk-applies", "applications/aidc/sources")
-        set_value("bi-b-sk-body", "虛構電源廠是 Account。")
-        click("#bi-b-sk-form button.go")
-        wait("document.getElementById('bi-notice').textContent.includes('存成第 1 版')")
+        wait("document.getElementById('bi-ai').dataset.kind === 'skill'")
+        assert not run("document.getElementById('bi-ai-new').hidden")
+        wait("document.getElementById('bi-ai-sent').textContent.includes('會送出')")
+        shoot("ai-panel-new-rule")
+        # No name, nothing is saved and nothing reaches the model.
+        set_value("bi-ai-msg", "虛構電源廠是 Account。")
+        click("#bi-ai-send")
+        wait("document.getElementById('bi-ai-status').textContent.includes('請寫規則名稱')")
+        assert "power-extract" not in text_of("bi-b-sk-list")
+        assert model.requests == []
+        set_value("bi-ai-new-name", "power-extract")
+        run(
+            "{ const s = document.getElementById('bi-ai-new-folder');"
+            " s.value = 'applications/aidc/sources'; }"
+        )
+        click("#bi-ai-send")
         wait("document.getElementById('bi-b-ver-pending').textContent.includes('power-extract')")
         wait("document.getElementById('bi-b-sk-list').textContent.includes('power-extract')")
-        assert run("document.getElementById('bi-b-sk-form').hidden")
+        wait("document.getElementById('bi-ai-log').textContent.includes('這條規則可以先這樣用')")
+        assert "power-extract" in text_of("bi-ai-target") and "第 1 版" in text_of("bi-ai-target")
+        assert run("document.getElementById('bi-ai-new').hidden")
+        # The panel stays on this page, beside the table it came from, and fits the window.
+        assert run(
+            "(() => { const r = (i) => document.getElementById(i).getBoundingClientRect();"
+            " return r('bi-b-sk-list').right <= r('bi-ai').left"
+            " && r('bi-ai').height <= innerHeight && r('bi-ai-send').bottom <= innerHeight; })()"
+        )
         shoot("vault-skills")
+        click("#bi-ai-close")
+        assert run("document.getElementById('bi-ai').hidden")
+        assert not run("document.getElementById('kn-pane-bi').classList.contains('bi-ai-open')")
 
-        # -- Session B on a skill: suggest, apply as the next revision ------------------------
+        # -- an AI session on a skill: suggest, apply as the next revision --------------------
         run(
             "[...document.querySelectorAll('#bi-b-sk-list tbody tr')]"
             ".find((li) => li.textContent.includes('power-extract'))"
             ".querySelector('button[aria-label*=\"AI\"]').click()"
         )
-        wait("!document.getElementById('bi-b-ska').hidden")
-        assert "power-extract" in text_of("bi-b-ska-target")
-        wait("document.getElementById('bi-b-ska-model').textContent.includes('test-model')")
-        set_value("bi-b-ska-msg", "額定功率放在 specs")
-        click("#bi-b-ska-send")
-        wait("document.getElementById('bi-b-ska-log').textContent.includes('套用後的變化')")
-        assert "判讀規則第 1 版" in text_of("bi-b-ska-log")
-        click("#bi-b-ska-log button.go")
+        wait("!document.getElementById('bi-ai').hidden")
+        wait("document.querySelector('tr.bi-ai-from') !== null")
+        assert "power-extract" in text_of("bi-ai-target")
+        wait("document.getElementById('bi-ai-sent').textContent.includes('test-model')")
+        set_value("bi-ai-msg", "額定功率放在 specs")
+        click("#bi-ai-send")
+        wait(
+            "document.getElementById('bi-ai-log').textContent.includes('把虛構電源廠的規則寫清楚')"
+        )
+        assert "判讀規則第 1 版" in text_of("bi-ai-log")
+        click("#bi-ai-log button.go")
         wait("document.getElementById('bi-notice').textContent.includes('存成第 2 版')")
-        wait("document.getElementById('bi-b-ska-log').textContent.includes('已套用為第 2 版')")
+        wait("document.getElementById('bi-ai-log').textContent.includes('已套用為第 2 版')")
         wait("document.getElementById('bi-b-sk-list').textContent.includes('第 2 版')")
-        assert "第 2 版" in text_of("bi-b-ska-target")
+        assert "第 2 版" in text_of("bi-ai-target")
         shoot("vault-skill-ai")
+        # A session belongs to its dataset.
+        run("biLeaveDataset()")
+        assert run("document.getElementById('bi-ai').hidden")
         click("#bi-stepper [data-stage=test]")  # the applied revision waits for a commit
         wait("document.getElementById('bi-b-ver-pending').textContent.includes('power-extract')")
         shoot("vault-step3")
@@ -402,14 +433,14 @@ def test_vault_panel_and_dashboard_in_a_browser(
         # A converted vault starts with the default analysis pack (BI P2).
         assert "6. 缺口" in text_of("bi-b-an-list")
         click("#bi-b-an-new")
-        wait("!document.getElementById('bi-b-ana').hidden")
-        set_value("bi-b-ana-msg", "各類型各有幾張卡？畫長條圖")
-        click("#bi-b-ana-send")
-        wait("document.getElementById('bi-b-ana-log').textContent.includes('存成分析')")
-        assert run("!!document.querySelector('#bi-b-ana-log svg.bi-chart')")
-        assert "Agent 用了：SQL、提出分析" in text_of("bi-b-ana-log")
+        wait("!document.getElementById('bi-ai').hidden")
+        set_value("bi-ai-msg", "各類型各有幾張卡？畫長條圖")
+        click("#bi-ai-send")
+        wait("document.getElementById('bi-ai-log').textContent.includes('存成分析')")
+        assert run("!!document.querySelector('#bi-ai-log svg.bi-chart')")
+        assert "Agent 用了：SQL、提出分析" in text_of("bi-ai-log")
         shoot("vault-analysis-ai")
-        click("#bi-b-ana-log button.go")
+        click("#bi-ai-log button.go")
         wait("document.getElementById('bi-b-an-list').textContent.includes('各類型的卡片數')")
         wait("document.getElementById('bi-b-ver-pending').textContent.includes('分析')")
         click("#bi-views [data-bi-view=dashboard]")

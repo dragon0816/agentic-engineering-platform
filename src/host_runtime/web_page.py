@@ -1228,9 +1228,23 @@ tr:last-child td { border-bottom: none; }
   flex-wrap: wrap; gap: 4px 14px; }
 .bi-ai-sources label { display: inline-flex; gap: 6px; align-items: center;
   overflow-wrap: anywhere; }
-.bi-ai { margin: 12px 0; padding: 10px 12px; border: 1px solid var(--line);
-  border-radius: 8px; min-width: 0; }
-.bi-ai h4 { margin: 0 0 6px; }
+.bi-ai-panel { position: fixed; top: 0; right: 0; bottom: 0; z-index: 30;
+  width: min(440px, 40vw); display: flex; flex-direction: column; gap: 6px; padding: 12px;
+  background: var(--panel); border-left: 1px solid var(--line); box-shadow: -4px 0 16px #0002; }
+.bi-ai-panel[hidden] { display: none; }
+.bi-ai-panel p { margin: 0; }
+.bi-ai-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.bi-ai-head h4 { margin: 0; }
+.bi-ai-body { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column;
+  gap: 6px; }
+#bi-ai-log { margin: 0; }
+#kn-pane-bi.bi-ai-open { margin-right: calc(min(440px, 40vw) + 12px); }
+tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
+@media (max-width: 760px) {
+  .bi-ai-panel { top: auto; left: 0; width: auto; height: 66vh; border-left: 0;
+    border-top: 1px solid var(--line); box-shadow: 0 -4px 16px #0002; }
+  #kn-pane-bi.bi-ai-open { margin-right: 0; margin-bottom: 68vh; }
+}
 #bi-b-ver h5 { margin: 12px 0 4px; font-size: 13px; }
 .bi-substeps ol { margin-top: 0; }
 .bi-manage > summary { cursor: pointer; min-height: 44px; display: inline-flex;
@@ -1304,6 +1318,21 @@ tr:last-child td { border-bottom: none; }
   border-radius: 10px; background: var(--panel); }
 #bi-b-src-split { margin-top: 10px; }
 .bi-split { margin-bottom: 14px; }
+#bi-b-cands tbody tr { cursor: pointer; }
+#bi-b-cands tbody tr[aria-selected="true"] { box-shadow: inset 3px 0 0 var(--accent); }
+#bi-b-cands .bi-cand-value { display: -webkit-box; -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; overflow: hidden; }
+#bi-b-cands .bi-link { min-height: 0; padding: 0; border: 0; background: none; color: inherit;
+  font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
+#bi-b-cands td { padding-top: 6px; padding-bottom: 6px; }
+#bi-b-cand h4 { margin-top: 0; }
+#bi-b-cand .bi-cand-edit { display: flex; gap: 6px; margin-top: 6px; }
+#bi-b-cand .bi-cand-edit .bi-input { flex: 1 1 auto; min-width: 0; }
+#bi-b-cand-src { position: relative; max-height: 40vh; overflow: auto; margin: 0; padding: 10px;
+  border: 1px solid var(--line); border-radius: 8px; white-space: pre-wrap;
+  overflow-wrap: anywhere; font: inherit; }
+#bi-b-cand-src mark { background: color-mix(in srgb, var(--warn) 35%, transparent);
+  color: inherit; }
 #bi-detail-abstract { margin-top: 8px; }
 #bi-b-sources tbody tr { cursor: pointer; }
 #bi-b-sources td { overflow-wrap: anywhere; word-break: normal; }
@@ -1320,6 +1349,7 @@ tr:last-child td { border-bottom: none; }
   .bi-split-list > .bi-scroller { flex: 1 1 0; min-height: 0; max-height: none; overflow: auto;
     align-content: start; }
   .bi-split-pane { min-height: 0; overflow-y: auto; }
+  #bi-b-review-split { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); }
 }
 </style>
 </head>
@@ -2341,6 +2371,35 @@ tr:last-child td { border-bottom: none; }
     </div>
     <div id="kn-pane-bi" class="bi-pane" lang="zh-Hant" role="tabpanel" aria-label="BI 卡片"
          hidden>
+        <aside id="bi-ai" class="bi-ai-panel" aria-labelledby="bi-ai-title" hidden>
+          <div class="bi-ai-head">
+            <h4 id="bi-ai-title"></h4>
+            <button class="bi-btn" id="bi-ai-close" type="button">關閉</button></div>
+          <div class="bi-ai-body" id="bi-ai-body">
+          <p class="bi-meta" id="bi-ai-target"></p>
+          <p class="bi-meta" id="bi-ai-sent"></p>
+          <div id="bi-ai-new" class="bi-step-grid" hidden>
+            <div><label class="bi-label" for="bi-ai-new-name">規則名稱（小寫英數字與 -）</label>
+              <input id="bi-ai-new-name" class="bi-input" maxlength="60" spellcheck="false"></div>
+            <div><label class="bi-label" for="bi-ai-new-folder">套用到</label>
+              <select id="bi-ai-new-folder"></select></div>
+          </div>
+          <div id="bi-ai-schema" hidden>
+            <label class="bi-label" for="bi-ai-goal">目標</label>
+            <input id="bi-ai-goal" class="bi-input" maxlength="1000"
+              placeholder="例如：追蹤機器人產業的技術、應用與客戶訊號">
+            <details id="bi-ai-sources-box"><summary class="bi-label">附上的樣本來源</summary>
+              <div class="bi-ai-sources" id="bi-ai-sources"></div></details>
+          </div>
+          <ol id="bi-ai-log" class="bi-log" role="log" aria-live="polite"
+            aria-label="AI 對話紀錄"></ol>
+          </div>
+          <div class="mem-status" id="bi-ai-status" role="status" aria-live="polite" hidden></div>
+          <label class="bi-label" for="bi-ai-msg" id="bi-ai-label"></label>
+          <textarea id="bi-ai-msg" class="bi-input" rows="2" maxlength="4000"></textarea>
+          <div class="bi-actions">
+            <button class="go" id="bi-ai-send" type="button">送出</button></div>
+        </aside>
         <div class="bi-empty-state" id="bi-empty-state" role="note" hidden>
           <p class="bi-meta">這台電腦還沒有 BI 資料集。</p>
           <div class="bi-actions">
@@ -2601,24 +2660,11 @@ tr:last-child td { border-bottom: none; }
             hidden>
             <h4 id="bi-b-skills-h">判讀規則（skills）</h4>
             <div id="bi-b-sk-list"></div>
+            <div class="bi-actions">
+              <button class="bi-btn" id="bi-b-sk-new" type="button">和 AI 新增規則</button></div>
             <div id="bi-b-tools">
               <h5>資料處理程式</h5>
               <div id="bi-b-tl-list"></div>
-            </div>
-            <div class="bi-ai" id="bi-b-ska" role="region" aria-labelledby="bi-b-ska-h" hidden>
-              <h4 id="bi-b-ska-h">和 AI 一起修改判讀規則（Session B）</h4>
-              <p class="bi-meta" id="bi-b-ska-target"></p>
-              <p class="bi-meta" id="bi-b-ska-model"></p>
-              <ol id="bi-b-ska-log" class="bi-log" role="log" aria-live="polite"
-                aria-label="判讀規則對話紀錄"></ol>
-              <label class="bi-label" for="bi-b-ska-msg">你想怎麼調整這條規則</label>
-              <textarea id="bi-b-ska-msg" class="bi-input" rows="3" maxlength="4000"
-                placeholder="例如：電源相關的規格表，額定功率一律放在 specs 欄位"></textarea>
-              <div class="bi-actions">
-                <button class="go" id="bi-b-ska-send" type="button">送出</button>
-                <button class="bi-btn" id="bi-b-ska-close" type="button">關閉</button></div>
-              <div class="mem-status" id="bi-b-ska-status" role="status" aria-live="polite"
-                hidden></div>
             </div>
           <details class="bi-manage bi-adv" id="bi-b-adv-skills">
             <summary>進階：規則與程式</summary>
@@ -2666,8 +2712,6 @@ tr:last-child td { border-bottom: none; }
                 <button class="bi-btn" id="bi-b-rr-count" type="button">看要重跑幾份</button></div>
               <div id="bi-b-rr-out"></div>
             </div>
-            <div class="bi-actions">
-              <button class="bi-btn" id="bi-b-sk-new" type="button">新增擷取規則</button></div>
             <form id="bi-b-sk-form" class="bi-step" hidden>
               <div class="bi-step-grid">
                 <div><label class="bi-label" for="bi-b-sk-name">名稱（小寫英數字與 -）</label>
@@ -2697,26 +2741,8 @@ tr:last-child td { border-bottom: none; }
             <summary>進階：Schema</summary>
           <div id="bi-b-versions"></div>
           <div id="bi-b-upgrade" hidden></div>
-          <div class="bi-ai" id="bi-b-sa" role="region" aria-labelledby="bi-b-sa-h">
-            <h4 id="bi-b-sa-h">和 AI 一起調整 schema（Session A）</h4>
-            <p class="bi-meta" id="bi-b-sa-target"></p>
-            <p class="bi-meta" id="bi-b-sa-model"></p>
-            <label class="bi-label" for="bi-b-sa-goal">你的目標（用自己的話）</label>
-            <input id="bi-b-sa-goal" class="bi-input" maxlength="1000"
-              placeholder="例如：追蹤機器人產業的技術、應用與客戶訊號">
-            <fieldset class="bi-ai-sources" id="bi-b-sa-sources">
-              <legend class="bi-label">附上的樣本來源（最多 5 份，合計上限 12000 字）</legend>
-            </fieldset>
-            <ol id="bi-b-sa-log" class="bi-log" role="log" aria-live="polite"
-              aria-label="schema 對話紀錄"></ol>
-            <label class="bi-label" for="bi-b-sa-msg">你想怎麼調整 schema</label>
-            <textarea id="bi-b-sa-msg" class="bi-input" rows="3" maxlength="4000"
-              placeholder="例如：幫技術卡加一個價格帶欄位"></textarea>
-            <div class="bi-actions">
-              <button class="go" id="bi-b-sa-send" type="button">送出</button></div>
-            <div class="mem-status" id="bi-b-sa-status" role="status" aria-live="polite"
-              hidden></div>
-          </div>
+          <div class="bi-actions"><button class="bi-btn" id="bi-b-sa-open" type="button">
+            和 AI 調整 schema</button></div>
           <h4>Schema 草稿</h4>
           <p class="bi-meta">草稿每次儲存都是新的版次，可以比較與回復；儲存草稿不會改動任何資料集。
             發布後成為新版本，再用「預覽升級」把資料集移過去。</p>
@@ -2773,20 +2799,8 @@ tr:last-child td { border-bottom: none; }
           <div id="bi-b-m-box" hidden>
             <div id="bi-b-m-info" aria-live="polite"></div>
           </div>
-          <div class="bi-ai" id="bi-b-sb" role="region" aria-labelledby="bi-b-sb-h">
-            <h4 id="bi-b-sb-h">和 AI 一起調整擷取 Skill（Session B）</h4>
-            <p class="bi-meta" id="bi-b-sb-target"></p>
-            <p class="bi-meta" id="bi-b-sb-model"></p>
-            <ol id="bi-b-sb-log" class="bi-log" role="log" aria-live="polite"
-              aria-label="擷取 Skill 對話紀錄"></ol>
-            <label class="bi-label" for="bi-b-sb-msg">你想怎麼調整這個 Skill</label>
-            <textarea id="bi-b-sb-msg" class="bi-input" rows="3" maxlength="4000"
-              placeholder="例如：沒有文件依據的需求標成推測"></textarea>
-            <div class="bi-actions">
-              <button class="go" id="bi-b-sb-send" type="button">送出</button></div>
-            <div class="mem-status" id="bi-b-sb-status" role="status" aria-live="polite"
-              hidden></div>
-          </div>
+          <div class="bi-actions"><button class="bi-btn" id="bi-b-sb-open" type="button">
+            和 AI 調整擷取 Skill</button></div>
           <div class="bi-step-grid">
             <div><label class="bi-label" for="bi-b-entity">卡片類型（單一表格）</label>
               <select id="bi-b-entity"><option value="">自動判斷</option></select></div>
@@ -2826,14 +2840,27 @@ tr:last-child td { border-bottom: none; }
           hidden>
           <h3 class="kp-stage-title" id="bi-b-review" tabindex="-1">步驟 2／3・審核</h3>
           <div class="bi-actions">
+            <label class="bi-meta">待審核的執行 <select id="bi-b-run-pick"></select></label>
             <button class="bi-btn" id="bi-b-accept-clean" type="button" disabled>
               接受所有沒有錯誤的候選卡</button></div>
           <div id="bi-b-chips" class="bi-chips" aria-label="候選卡摘要"></div>
           <div id="bi-b-same"></div>
-          <div class="bi-browse">
-            <div><ul id="bi-b-cands" class="bi-cards" aria-label="候選卡清單"></ul></div>
-            <div class="bi-detail" id="bi-b-cand" aria-live="polite">
-              <p class="bi-empty">選一張候選卡，查看欄位、證據與差異。</p></div>
+          <div class="bi-split bi-src-split" id="bi-b-review-split">
+            <div class="bi-split-list">
+              <div class="bi-actions">
+                <label class="bi-meta">卡片類型 <select id="bi-b-cand-type"></select></label>
+                <label class="bi-meta">狀態 <select id="bi-b-cand-state">
+                  <option value="">全部</option><option value="pending">待決定</option>
+                  <option value="accepted">已接受</option><option value="rejected">已拒絕</option>
+                </select></label>
+                <span class="bi-meta" id="bi-b-cand-count" role="status"></span>
+              </div>
+              <div class="bi-scroll bi-scroller"><table class="bi-table bi-stack" id="bi-b-cands"
+                aria-label="候選卡清單"><thead><tr><th>卡片</th><th>欄位</th><th>提議值</th>
+                <th>狀態</th></tr></thead><tbody></tbody></table></div>
+            </div>
+            <div class="bi-split-pane" id="bi-b-cand" aria-live="polite">
+              <p class="bi-empty">選一列，看原文與引用。</p></div>
           </div>
             <div id="bi-b-props" hidden>
               <h4 id="bi-b-props-h">待審提案</h4>
@@ -2880,20 +2907,6 @@ tr:last-child td { border-bottom: none; }
             <div id="bi-b-an-list"></div>
             <div class="bi-actions">
               <button class="bi-btn" id="bi-b-an-new" type="button">和 AI 做新分析</button>
-            </div>
-            <div class="bi-ai" id="bi-b-ana" role="region" aria-labelledby="bi-b-ana-h" hidden>
-              <h5 id="bi-b-ana-h">和 AI 做分析</h5>
-              <p class="bi-meta" id="bi-b-ana-target"></p>
-              <ol id="bi-b-ana-log" class="bi-log" role="log" aria-live="polite"
-                aria-label="分析對話紀錄"></ol>
-              <label class="bi-label" for="bi-b-ana-msg">你想看什麼</label>
-              <textarea id="bi-b-ana-msg" class="bi-input" rows="3" maxlength="4000"
-                placeholder="例如：各應用領域各有幾個商機？畫長條圖"></textarea>
-              <div class="bi-actions">
-                <button class="go" id="bi-b-ana-send" type="button">送出</button>
-                <button class="bi-btn" id="bi-b-ana-close" type="button">關閉</button></div>
-              <div class="mem-status" id="bi-b-ana-status" role="status" aria-live="polite"
-                hidden></div>
             </div>
           <details class="bi-manage bi-adv" id="bi-b-adv-an">
             <summary>進階：分析包與匯入</summary>
@@ -2953,20 +2966,6 @@ tr:last-child td { border-bottom: none; }
               <div class="bi-actions"><button class="bi-btn" type="submit">新增測試題</button></div>
             </form>
             </details>
-            <div class="bi-ai" id="bi-b-qa" role="region" aria-labelledby="bi-b-qa-h" hidden>
-              <h5 id="bi-b-qa-h">和 AI 一起出測試題</h5>
-              <p class="bi-meta" id="bi-b-qa-target"></p>
-              <ol id="bi-b-qa-log" class="bi-log" role="log" aria-live="polite"
-                aria-label="出題對話紀錄"></ol>
-              <label class="bi-label" for="bi-b-qa-msg">你想測什麼</label>
-              <textarea id="bi-b-qa-msg" class="bi-input" rows="3" maxlength="4000"
-                placeholder="例如：出五題，涵蓋客戶訊號與產品對應"></textarea>
-              <div class="bi-actions">
-                <button class="go" id="bi-b-qa-send" type="button">送出</button>
-                <button class="bi-btn" id="bi-b-qa-close" type="button">關閉</button></div>
-              <div class="mem-status" id="bi-b-qa-status" role="status" aria-live="polite"
-                hidden></div>
-            </div>
             <div class="bi-actions">
               <button class="go" id="bi-b-bench-run" type="button">跑測試</button></div>
             <div id="bi-b-bench-report" aria-live="polite"></div>
@@ -12037,7 +12036,7 @@ async function biLoad() {
       biCall("/api/bi/vaults").catch(() => ({vaults: bi.vaults || []}))]);
     bi.datasets = datasets.datasets || []; bi.schemas = schemas.schemas || [];
     bi.vaults = vaults.vaults || [];
-    biRenderBar();
+    biRenderBar(); biBuildFollowDataset();
     bi.schema = await biCall("/api/bi/schema?dataset=" + encodeURIComponent(biDataset()));
   } catch (failure) {
     el("bi-counts").textContent = "—";
@@ -12192,12 +12191,13 @@ for (const button of document.querySelectorAll("#bi-views [data-bi-view]")) {
 }
 // A publish draft belongs to the dataset it was made for: switching drops it.
 function biLeaveDataset() {
+  biAiClose();
   bi.cardId = null; bi.publish = null;
   biPanel("publish", false); el("bi-pub-result").hidden = true;
   el("bi-pub-state").replaceChildren();
 }
 el("bi-dataset").addEventListener("change", () => {
-  biRemember(el("bi-dataset").value); biLeaveDataset(); biLoad();
+  biRemember(el("bi-dataset").value); biLeaveDataset(); biBuildFollowDataset(); biLoad();
 });
 el("bi-empty-demo").addEventListener("click", () => el("bi-demo").click());
 el("bi-empty-new").addEventListener("click", () => biOpenNew());
@@ -13165,7 +13165,7 @@ function biBuildKey() { return "bi-build-" + biDataset(); }
 
 function biBuildSave() {
   const keep = {stage: bi.build.stage, sourceId: bi.build.sourceId,
-    runId: bi.build.run ? bi.build.run.id : null};
+    runId: bi.build.run ? bi.build.run.id : bi.build.runLoading || null};
   try { localStorage.setItem(biBuildKey(), JSON.stringify(keep)); } catch (e) { /* */ }
 }
 
@@ -13182,7 +13182,9 @@ function biBuildAllowed() {
   const run = bi.build.run, has = !!bi.build.sourceId;
   const open = run && run.kind === "ingest" && ["review", "partial"].includes(run.status);
   const accepted = open && run.summary && run.summary.accepted > 0;
-  return {source: true, schema: true, method: has, review: has,
+  // A run may wait for review with no source chosen: one started through the API.
+  return {source: true, schema: true, method: has,
+    review: has || !!run || (bi.build.waiting || []).length > 0,
     commit: !!accepted && !bi.build.accepting, result: !!(run && run.status === "committed"),
     test: true};
 }
@@ -13198,6 +13200,7 @@ function biBuildStepper(stage, allowed) {
 function biBuildSteps() { biBuildStepper(bi.build.stage, biBuildAllowed()); }
 
 function biBuildStage(name, focus = true) {
+  bi.build.moves = (bi.build.moves || 0) + 1;
   const allowed = biBuildAllowed();
   // Step 2 opens where it was left, or at its first part.
   if (name === "ingest") name = allowed[bi.build.ingestAt] ? bi.build.ingestAt : "schema";
@@ -13211,7 +13214,7 @@ function biBuildStage(name, focus = true) {
   biBuildSave();
   if (stage === "schema") biBuildSchema();
   if (stage === "method") biBuildMethodStage();
-  if (stage === "review") biBuildRenderRun();
+  if (stage === "review") biBuildReviewStage();
   if (stage === "commit") biBuildSummary();
   if (stage === "result") biBuildResult();
   if (stage === "test" && biVaultOf(biDataset())) {
@@ -13247,7 +13250,23 @@ function biBuildReadOnly() {
   return readOnly;
 }
 
+function biBuildFollowDataset() {
+  // The select changes a request before `biBuildLoad` runs. From that moment nothing of the
+  // old dataset may be read or saved as this one's: the old table and selection looked
+  // chosen, and the load then emptied them with the page already moving on.
+  if (bi.build.dataset === biDataset()) return;
+  bi.build.dataset = biDataset();
+  const stored = biBuildStored();
+  bi.build.sourceId = stored.sourceId || null; bi.build.runLoading = stored.runId || null;
+  bi.build.sources = []; bi.build.run = null; bi.build.candidates = [];
+  bi.build.candidateId = null; bi.build.waiting = []; bi.build.md = null;
+  el("bi-b-sources").tBodies[0].replaceChildren();
+  el("bi-b-md").hidden = true; el("bi-b-md-empty").hidden = false;
+  biBuildSteps();
+}
+
 async function biBuildLoad() {
+  biBuildFollowDataset();
   if (biBuildReadOnly()) {
     // A subscribed copy is only read: here it is the way to another dataset.
     el("bi-b-v-state").replaceChildren(); el("bi-b-target").textContent = "";
@@ -13258,8 +13277,7 @@ async function biBuildLoad() {
     return;
   }
   const stored = biBuildStored();
-  bi.build.sourceId = stored.sourceId || null;
-  bi.build.run = null; bi.build.candidates = []; bi.build.candidateId = null;
+  const load = bi.build.load = (bi.build.load || 0) + 1, moves = bi.build.moves;
   const schema = bi.schema || {};
   el("bi-b-target").textContent = "寫入目的地：資料集「" + biDataset() + "」・schema "
     + (schema.ref || schema.schema_id || "—") + "。";
@@ -13276,11 +13294,17 @@ async function biBuildLoad() {
   try {
     await biBuildSources();
     if (stored.runId) await biBuildFetchRun(stored.runId);
+    bi.build.runLoading = null;
+    await biBuildRuns();
     biStatus("bi-status-build", "");
   } catch (failure) {
     biStatus("bi-status-build", "error", "載入失敗：" + failure.message + "。", biBuildLoad);
   }
-  biBuildStage(stored.stage || "source", false);
+  if (load !== bi.build.load) return;  // a newer load ends this
+  // A step the person opened meanwhile stays open.
+  if (moves === bi.build.moves) biBuildStage(stored.stage || "source", false);
+  else if (bi.build.stage === "review") biBuildRenderRun();
+  else biBuildSteps();
 }
 
 // -- step 1: the knowledge base (BI vaults V4, docs/phases/BI_VAULT.md §3, §7.1) --
@@ -13299,6 +13323,7 @@ function biVaultOf(name) {
 }
 
 async function biBuildVault() {
+  if (bi.ai && bi.ai.dataset !== biDataset()) biAiClose();
   // Newest call only: a reload for the dataset shown before must not paint over this one.
   const seq = bi.vaultSeq = (bi.vaultSeq || 0) + 1;
   const reply = await call("/api/bi/vaults");
@@ -13646,9 +13671,8 @@ function biQuestionsSuggestion(session, turn, index) {
     parts.push(bh("div", "bi-actions", biButton("加入測試題", async () => {
       const picks = ticks.flatMap((tick, i) => tick.checked ? [i] : []);
       const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
-        {dataset: bi.questionsAi.dataset, turn: index, picks});
-      bi.questionsAi.session = reply.session;
-      biBuildSessionLog("bi-b-qa-log", reply.session, biQuestionsSuggestion);
+        {dataset: bi.ai.dataset, turn: index, picks});
+      biAiShow(reply.session);
       await biBench(bi.verVault);
       biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
       biNotice(true, "已加入 " + reply.units.length
@@ -13658,45 +13682,114 @@ function biQuestionsSuggestion(session, turn, index) {
   return parts;
 }
 
+// -- the one AI panel: every session kind opens here, beside what it concerns --------
+// A kind says what it is about, what goes to the model, and how to get ready to send.
+// The conversation is the same for all, and nothing changes until the person confirms.
+function biAiShow(session) {
+  if (!bi.ai) return;
+  bi.ai.session = session;
+  biBuildSessionLog("bi-ai-log", session, bi.ai.render);
+  const body = el("bi-ai-body"); body.scrollTop = body.scrollHeight;
+}
+
+function biAiTarget(text) { el("bi-ai-target").textContent = text; }
+
+function biAiClose() {
+  const spec = bi.ai; if (!spec) return;
+  bi.ai = null;
+  el("bi-ai").hidden = true;
+  el("kn-pane-bi").classList.remove("bi-ai-open");
+  document.querySelectorAll("tr.bi-ai-from").forEach((r) => r.classList.remove("bi-ai-from"));
+  if (spec.from && spec.from.isConnected) spec.from.focus();
+}
+
+async function biAiOpen(spec) {
+  biAiClose();
+  spec.from = spec.from || document.activeElement;
+  const row = spec.from && spec.from.closest ? spec.from.closest("tr") : null;
+  if (row) row.classList.add("bi-ai-from");
+  bi.ai = spec;
+  el("bi-ai").dataset.kind = spec.kind;
+  el("bi-ai").hidden = false;
+  el("kn-pane-bi").classList.add("bi-ai-open");
+  el("bi-ai-title").textContent = spec.title;
+  el("bi-ai-label").textContent = spec.label;
+  el("bi-ai-msg").placeholder = spec.placeholder; el("bi-ai-msg").value = "";
+  el("bi-ai-new").hidden = spec.mode !== "new";
+  el("bi-ai-schema").hidden = spec.kind !== "schema";
+  biStatus("bi-ai-status", "");
+  biAiTarget(spec.about);
+  biBuildSessionLog("bi-ai-log", null, spec.render);
+  // After the page has made room: what it came from stays in view beside the panel.
+  const shown = row || spec.shows || spec.from;
+  // On a phone the panel takes the lower part, so what it came from goes to the top.
+  const phone = matchMedia("(max-width: 760px)").matches;
+  if (shown && shown.isConnected) {
+    shown.scrollIntoView({block: phone ? "start" : row ? "nearest" : "center"});
+  }
+  await biBuildAiState("bi-ai-sent", spec.sends, spec.agent);
+  if (bi.ai === spec && spec.ref) {
+    const found = await call("/api/bi/sessions?dataset=" + encodeURIComponent(spec.dataset)
+      + "&target=" + encodeURIComponent(spec.ref));
+    if (bi.ai === spec) biAiShow((found.sessions || [])[0] || null);
+  }
+  if (bi.ai === spec) el("bi-ai-msg").focus();
+  return spec;
+}
+
+function biAiNoModel() {
+  // Without a model nothing is made: no draft or copy for a message that cannot be sent.
+  return Object.assign(new Error(bi.build.ai.message), {code: "model_unavailable"});
+}
+
+el("bi-ai-close").addEventListener("click", biAiClose);
+el("bi-ai").addEventListener("keydown", (event) => {
+  if (event.key === "Escape") biAiClose();
+});
+el("bi-ai-send").addEventListener("click", async () => {
+  const spec = bi.ai; if (!spec) return;
+  const message = el("bi-ai-msg").value.trim();
+  if (!message) { el("bi-ai-msg").focus(); return; }
+  const button = el("bi-ai-send"); button.disabled = true;
+  biStatus("bi-ai-status", "loading", spec.busy);
+  try {
+    if (spec.agent !== undefined && spec.checkModel !== false) {
+      await biBuildAiState("bi-ai-sent", spec.sends, spec.agent);
+      if (!bi.build.ai.available) throw biAiNoModel();
+    }
+    if (spec.prepare) await spec.prepare(message, spec);
+    if (!spec.session) {
+      spec.session = (await biCall("/api/bi/sessions", {dataset: spec.dataset, kind: spec.kind,
+        target: spec.sessionTarget()})).session;
+    }
+    const reply = await biCall("/api/bi/sessions/" + spec.session.id + "/turns",
+      {dataset: spec.dataset, message, ...(spec.turn ? spec.turn() : {})});
+    spec.session = reply.session;
+    if (spec.saved) spec.saved(reply.session);
+    if (bi.ai === spec) {
+      el("bi-ai-msg").value = ""; biAiShow(reply.session); biStatus("bi-ai-status", "");
+    }
+  } catch (failure) {
+    if (bi.ai === spec) {
+      biStatus("bi-ai-status", "error", (failure.code === "model_unavailable"
+        ? "沒有可用的模型：" : "沒有送出：") + failure.message + "。");
+    }
+  } finally { button.disabled = false; }
+});
+
 async function biQuestionsAi() {
-  const dataset = "vault-" + bi.verVault;
   const target = el("bi-b-bq-set").value.trim() || "main";
-  bi.questionsAi = {dataset, target, session: null};
-  el("bi-b-qa").hidden = false;
-  el("bi-b-qa-target").textContent = "題組「" + target + "」。Agent 會自己查卡片與分析、"
-    + "必要時試問，再提出題目與評分用的詞；你勾選並按「加入測試題」才會加入。";
-  const found = await call("/api/bi/sessions?dataset=" + encodeURIComponent(dataset)
-    + "&target=" + encodeURIComponent("questions:" + target));
-  bi.questionsAi.session = (found.sessions || [])[0] || null;
-  biBuildSessionLog("bi-b-qa-log", bi.questionsAi.session, biQuestionsSuggestion);
-  el("bi-b-qa-msg").focus();
+  await biAiOpen({kind: "questions", dataset: "vault-" + bi.verVault, ref: "questions:" + target,
+    title: "和 AI 出測試題", about: "題組「" + target + "」。勾選並按「加入測試題」才會加入。",
+    sends: "卡片與分析", agent: true, checkModel: false,
+    label: "你想測什麼", placeholder: "例如：出五題，涵蓋客戶訊號與產品對應",
+    busy: "正在查卡片、試問題目…（可能要幾分鐘）", render: biQuestionsSuggestion,
+    shows: el("bi-b-bq-list"),
+    sessionTarget: () => target});
 }
 
 el("bi-b-qa-open").addEventListener("click", () => biQuestionsAi()
   .catch((failure) => biNotice(false, failure.message)));
-el("bi-b-qa-close").addEventListener("click", () => {
-  el("bi-b-qa").hidden = true; bi.questionsAi = null;
-});
-el("bi-b-qa-send").addEventListener("click", async () => {
-  const chosen = bi.questionsAi; if (!chosen) return;
-  const message = el("bi-b-qa-msg").value.trim();
-  if (!message) { el("bi-b-qa-msg").focus(); return; }
-  const button = el("bi-b-qa-send"); button.disabled = true;
-  biStatus("bi-b-qa-status", "loading", "Agent 正在查卡片與分析、試問題目…（可能要幾分鐘）");
-  try {
-    if (!chosen.session) {
-      chosen.session = (await biCall("/api/bi/sessions", {dataset: chosen.dataset,
-        kind: "questions", target: chosen.target})).session;
-    }
-    const reply = await biCall("/api/bi/sessions/" + chosen.session.id + "/turns",
-      {dataset: chosen.dataset, message});
-    chosen.session = reply.session; el("bi-b-qa-msg").value = "";
-    biBuildSessionLog("bi-b-qa-log", reply.session, biQuestionsSuggestion);
-    biStatus("bi-b-qa-status", "");
-  } catch (failure) {
-    biStatus("bi-b-qa-status", "error", "沒有送出：" + failure.message + "。");
-  } finally { button.disabled = false; }
-});
 
 el("bi-b-bench-run").addEventListener("click", async () => {
   const button = el("bi-b-bench-run"); button.disabled = true;
@@ -13830,8 +13923,9 @@ async function biAnalyses(vaultId) {
           under.row.hidden = false;
           return biRunInto(vaultId, item, state, out);
         }, "bi-btn", "執行分析 " + item.title),
-        biButton("和 AI 一起修改", () => biAnalysisAi(item.slug, item.title), "bi-btn",
-          "和 AI 一起修改分析 " + item.title),
+        biButton("和 AI 一起修改", (event) =>
+          biAnalysisAi(item.slug, item.title, event.currentTarget),
+          "bi-btn", "和 AI 一起修改分析 " + item.title),
         reply.order.includes(item.slug) ? biButton("上移", () => move(item.slug, -1), "bi-btn",
           "在 Dashboard 上移分析 " + item.title) : null,
         reply.order.includes(item.slug) ? biButton("下移", () => move(item.slug, 1), "bi-btn",
@@ -13896,9 +13990,8 @@ function biAnalysisSuggestion(session, turn, index) {
   } else {
     parts.push(bh("div", "bi-actions", biButton(edit ? "套用修改" : "存成分析", async () => {
       const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
-        {dataset: bi.analysisAi.dataset, turn: index});
-      bi.analysisAi.session = reply.session;
-      biBuildSessionLog("bi-b-ana-log", reply.session, biAnalysisSuggestion);
+        {dataset: bi.ai.dataset, turn: index});
+      biAiShow(reply.session);
       biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
       biNotice(true, (edit ? "已套用修改「" : "已存成分析「") + s.analysis.title
         + "」；commit 並 push 後大家才會看到。");
@@ -13932,9 +14025,8 @@ function biDashboardSuggestion(session, turn, index) {
   }
   parts.push(bh("div", "bi-actions", biButton("套用 Dashboard", async () => {
     const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
-      {dataset: bi.analysisAi.dataset, turn: index});
-    bi.analysisAi.session = reply.session;
-    biBuildSessionLog("bi-b-ana-log", reply.session, biAnalysisSuggestion);
+      {dataset: bi.ai.dataset, turn: index});
+    biAiShow(reply.session);
     biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
     biNotice(true, "已套用 Dashboard：" + d.analyses.length + " 個分析與順序；"
       + "commit 並 push 後大家才會看到。");
@@ -13942,17 +14034,18 @@ function biDashboardSuggestion(session, turn, index) {
   return parts;
 }
 
-async function biAnalysisAi(slug, title) {
-  const dataset = "vault-" + bi.verVault, target = slug || "new";
-  bi.analysisAi = {dataset, target, session: null};
-  el("bi-b-ana").hidden = false;
-  el("bi-b-ana-target").textContent = slug ? "修改分析「" + title + "」。"
-    : "新的分析：說出你想確認的關係或現象。Agent 會自己查資料、寫 SQL 或腳本，再畫給你看。";
-  const found = await call("/api/bi/sessions?dataset=" + encodeURIComponent(dataset)
-    + "&target=" + encodeURIComponent("analysis:" + target));
-  bi.analysisAi.session = (found.sessions || [])[0] || null;
-  biBuildSessionLog("bi-b-ana-log", bi.analysisAi.session, biAnalysisSuggestion);
-  el("bi-b-ana-msg").focus();
+async function biAnalysisAi(slug, title, from) {
+  const target = slug || "new";
+  await biAiOpen({kind: "analysis", dataset: "vault-" + bi.verVault, from,
+    ref: "analysis:" + target,
+    title: slug ? "和 AI 修改分析" : "和 AI 做新分析",
+    about: slug ? "分析「" + title + "」。按「存成分析」才會存。"
+      : "說出你想確認的關係或現象。按「存成分析」才會存。",
+    sends: "資料表與欄位的說明、查詢結果", agent: true, checkModel: false,
+    label: "你想看什麼", placeholder: "例如：各應用領域各有幾個商機？畫長條圖",
+    busy: "正在查資料、畫圖…（可能要一兩分鐘）", render: biAnalysisSuggestion,
+    shows: el("bi-b-an-new"),
+    sessionTarget: () => target});
 }
 
 async function biImportPack(pack) {
@@ -14052,30 +14145,6 @@ el("bi-b-atl-file").addEventListener("change", async (event) => {
 });
 el("bi-b-an-new").addEventListener("click", () => biAnalysisAi(null, null)
   .catch((failure) => biNotice(false, failure.message)));
-el("bi-b-ana-close").addEventListener("click", () => {
-  el("bi-b-ana").hidden = true; bi.analysisAi = null;
-});
-el("bi-b-ana-send").addEventListener("click", async () => {
-  const chosen = bi.analysisAi; if (!chosen) return;
-  const message = el("bi-b-ana-msg").value.trim();
-  if (!message) { el("bi-b-ana-msg").focus(); return; }
-  const button = el("bi-b-ana-send"); button.disabled = true;
-  biStatus("bi-b-ana-status", "loading", "Agent 正在查資料、畫圖…（可能要一兩分鐘）");
-  try {
-    if (!chosen.session) {
-      chosen.session = (await biCall("/api/bi/sessions", {dataset: chosen.dataset,
-        kind: "analysis", target: chosen.target})).session;
-    }
-    const reply = await biCall("/api/bi/sessions/" + chosen.session.id + "/turns",
-      {dataset: chosen.dataset, message});
-    chosen.session = reply.session; el("bi-b-ana-msg").value = "";
-    biBuildSessionLog("bi-b-ana-log", reply.session, biAnalysisSuggestion);
-    biStatus("bi-b-ana-status", "");
-  } catch (failure) {
-    biStatus("bi-b-ana-status", "error", "沒有送出：" + failure.message + "。");
-  } finally { button.disabled = false; }
-});
-
 // -- the 「版本」 area (knowledge repositories R5, KNOWLEDGE_REPO.md §10) ----------
 function biVerValue(value) {
   if (value === null || value === undefined) return "（沒有）";
@@ -14303,7 +14372,8 @@ async function biSkills(vaultId) {
     edit.addEventListener("click", () => {
       el("bi-b-adv-skills").open = true; biSkillForm(item);
     });
-    const talk = biButton("和 AI 一起修改", () => biSkillAi(item), "bi-btn",
+    const talk = biButton("和 AI 一起修改", (event) => biSkillAi(item, event.currentTarget),
+      "bi-btn",
       "和 AI 一起修改判讀規則 " + item.name);
     biRow(list, [bh("strong", "", item.name), item.role === "classify" ? "分類" : "擷取",
       "第 " + item.revision + " 版", where, state, biRowMenu(talk, edit)]);
@@ -14597,12 +14667,12 @@ function biRerunList(rerun) {
 function biSkillForm(item) {
   const form = el("bi-b-sk-form");
   form.hidden = false;
-  el("bi-b-sk-name").value = item ? item.name : "";
-  el("bi-b-sk-name").readOnly = Boolean(item);
-  el("bi-b-sk-role").value = item ? item.role : "extract";
-  el("bi-b-sk-applies").value = item ? (item.applies_to || []).join(", ") : "";
-  el("bi-b-sk-types").value = item ? (item.card_types || []).join(", ") : "";
-  el("bi-b-sk-body").value = item ? item.body || "" : "";
+  el("bi-b-sk-name").value = item.name;
+  el("bi-b-sk-name").readOnly = true;
+  el("bi-b-sk-role").value = item.role;
+  el("bi-b-sk-applies").value = (item.applies_to || []).join(", ");
+  el("bi-b-sk-types").value = (item.card_types || []).join(", ");
+  el("bi-b-sk-body").value = item.body || "";
   el("bi-b-sk-folders").textContent = "可用的資料夾：" + ((bi.skills && bi.skills.folders) || [])
     .filter((f) => f !== "sources").join("、");
   el("bi-b-sk-body").focus();
@@ -14610,25 +14680,54 @@ function biSkillForm(item) {
 
 const biList = (text) => text.split(/[,，、\n]/).map((s) => s.trim()).filter(Boolean);
 
-el("bi-b-sk-new").addEventListener("click", () => biSkillForm(null));
+el("bi-b-sk-new").addEventListener("click", () => biSkillNew()
+  .catch((failure) => biNotice(false, failure.message)));
 el("bi-b-rr-count").addEventListener("click", biRerunCount);
 
-// Session B on a vault skill (knowledge repositories R3): the AI suggests a new
+// An AI session on a vault skill (knowledge repositories R3): the AI suggests a new
 // text; 「套用」 stages the next revision, which is committed and pushed in 「版本」.
-async function biSkillAi(item) {
-  const dataset = "vault-" + bi.verVault;
-  bi.skillAi = {name: item.name, dataset, session: null};
-  el("bi-b-ska").hidden = false;
-  el("bi-b-ska-target").textContent = "對話的對象：判讀規則「" + item.name + "」第 "
-    + item.revision + " 版" + (item.needs_update ? "（需要更新：寫給 " + item.schema
-      + "，AI 會一起把它更新到知識庫現在的 schema）" : "") + "。";
-  await biBuildAiState("bi-b-ska-model",
-    "這條規則、知識庫的卡片類型與資料夾、最近兩次試跑的候選卡", true);
-  const found = await call("/api/bi/sessions?dataset=" + encodeURIComponent(dataset)
-    + "&target=" + encodeURIComponent("skill:" + item.name));
-  bi.skillAi.session = (found.sessions || [])[0] || null;
-  biBuildSessionLog("bi-b-ska-log", bi.skillAi.session, biApplySkill);
-  el("bi-b-ska-msg").focus();
+function biSkillSpec(dataset) {
+  return {kind: "skill", dataset, title: "和 AI 修改規則",
+    sends: "這條規則、卡片類型與資料夾、最近兩次試跑的候選卡", agent: true,
+    label: "你想怎麼調整這條規則",
+    placeholder: "例如：電源相關的規格表，額定功率一律放在 specs 欄位",
+    busy: "正在讀來源、用草稿試跑、看測試結果…（可能要幾分鐘）", render: biApplySkill,
+    turn: () => ({source_ids: bi.build.sourceId && biDataset() === dataset
+      ? [bi.build.sourceId] : []})};
+}
+
+async function biSkillAi(item, from) {
+  const name = item.name;
+  await biAiOpen({...biSkillSpec("vault-" + bi.verVault), name, from, ref: "skill:" + name,
+    about: "規則「" + name + "」第 " + item.revision + " 版"
+      + (item.needs_update ? "（需要更新：寫給 " + item.schema + "，AI 會一起更新）" : "") + "。",
+    sessionTarget: () => name});
+}
+
+async function biSkillNew() {
+  // A rule to talk about has to exist: the first message saves it as revision 1, staged
+  // like any change, and the conversation goes on from there.
+  const pick = el("bi-ai-new-folder");
+  pick.replaceChildren(...((bi.skills && bi.skills.folders) || []).filter((f) => f !== "sources")
+    .map((folder) => { const o = bh("option", "", folder); o.value = folder; return o; }));
+  el("bi-ai-new-name").value = "";
+  const spec = {...biSkillSpec("vault-" + bi.verVault), mode: "new", title: "和 AI 新增規則",
+    shows: el("bi-b-sk-list"),
+    about: "第一句話會先存成第 1 版（還沒 commit），AI 再幫你改。",
+    label: "這條規則要做什麼", placeholder: "例如：虛構電源廠是 Account",
+    sessionTarget: () => spec.name,
+    prepare: async (message) => {
+      if (spec.name) return;
+      const name = el("bi-ai-new-name").value.trim();
+      if (!name) { el("bi-ai-new-name").focus(); throw new Error("請寫規則名稱"); }
+      const reply = await biVerRun(bi.verVault, "skills", {name, role: "extract",
+        applies_to: pick.value ? [pick.value] : [], card_types: [], body: message});
+      spec.name = name; spec.mode = null; el("bi-ai-new").hidden = true;
+      spec.ref = "skill:" + name;
+      el("bi-ai-title").textContent = "和 AI 修改規則";
+      biAiTarget("規則「" + name + "」第 " + reply.skill.revision + " 版。");
+    }};
+  await biAiOpen(spec);
 }
 
 function biApplySkill(session, turn, index) {
@@ -14643,51 +14742,18 @@ function biApplySkill(session, turn, index) {
   } else if (s.result.diff.length) {
     parts.push(bh("div", "bi-actions", biButton("套用為新版本", async () => {
       const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
-        {dataset: bi.skillAi.dataset, turn: index});
-      bi.skillAi.session = reply.session;
-      el("bi-b-ska-target").textContent = "對話的對象：判讀規則「" + bi.skillAi.name
-        + "」第 " + reply.skill.revision + " 版（剛套用，還沒 commit）。";
-      biBuildSessionLog("bi-b-ska-log", reply.session, biApplySkill);
+        {dataset: bi.ai.dataset, turn: index});
+      const name = bi.ai.name;
+      biAiTarget("規則「" + name + "」第 " + reply.skill.revision + " 版（剛套用，還沒 commit）。");
+      biAiShow(reply.session);
       biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
-      biNotice(true, "判讀規則「" + bi.skillAi.name + "」存成第 " + reply.skill.revision
+      biNotice(true, "判讀規則「" + name + "」存成第 " + reply.skill.revision
         + " 版；commit 並 push 後大家才會用到。");
     }, "go", "把這個建議套用為判讀規則的新版本")));
   }
   return parts;
 }
 
-el("bi-b-ska-close").addEventListener("click", () => {
-  el("bi-b-ska").hidden = true; bi.skillAi = null;
-});
-el("bi-b-ska-send").addEventListener("click", async () => {
-  const chosen = bi.skillAi; if (!chosen) return;
-  const message = el("bi-b-ska-msg").value.trim();
-  if (!message) { el("bi-b-ska-msg").focus(); return; }
-  const button = el("bi-b-ska-send"); button.disabled = true;
-  biStatus("bi-b-ska-status", "loading",
-    "Agent 正在讀來源、用草稿試跑、看測試結果…（可能要幾分鐘）");
-  try {
-    if (!bi.build.ai || !bi.build.ai.available) {
-      biStatus("bi-b-ska-status", "error", "沒有可用的模型："
-        + ((bi.build.ai && bi.build.ai.message) || "") + "。");
-      return;
-    }
-    if (!chosen.session) {
-      chosen.session = (await biCall("/api/bi/sessions", {dataset: chosen.dataset,
-        kind: "skill", target: chosen.name})).session;
-    }
-    const reply = await biCall("/api/bi/sessions/" + chosen.session.id + "/turns",
-      {dataset: chosen.dataset, message,
-        source_ids: bi.build.sourceId && biDataset() === chosen.dataset
-          ? [bi.build.sourceId] : []});
-    chosen.session = reply.session; el("bi-b-ska-msg").value = "";
-    biBuildSessionLog("bi-b-ska-log", reply.session, biApplySkill);
-    biStatus("bi-b-ska-status", "");
-  } catch (failure) {
-    biStatus("bi-b-ska-status", "error", (failure.code === "model_unavailable"
-      ? "沒有可用的模型：" : "沒有送出：") + failure.message + "。");
-  } finally { button.disabled = false; }
-});
 el("bi-b-sk-cancel").addEventListener("click", () => { el("bi-b-sk-form").hidden = true; });
 el("bi-b-sk-form").addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -14803,6 +14869,13 @@ el("bi-b-v-form").addEventListener("submit", async (event) => {
         + (reply.sources.skipped ? "，" + reply.sources.skipped + " 份的檔案不見了、沒有帶過"
           : "")
         + (reply.sources.error ? "，來源沒有帶過，請重新加入" : "") + "）" : ""));
+    if (mode === "convert" && bi.build.sourceId) {
+      // The sources came along under the same ids, so what was chosen stays chosen.
+      try {
+        localStorage.setItem("bi-build-" + reply.vault.dataset,
+          JSON.stringify({stage: "source", sourceId: bi.build.sourceId, runId: null}));
+      } catch (e) { /* no storage */ }
+    }
     bi.want = reply.vault.dataset; await biLoad();
   } catch (failure) {
     err.append(bh("p", "bi-err", failure.message + "。"));
@@ -14873,11 +14946,11 @@ function biWithdrawForm(source) {
 
 async function biBuildSources() {
   // Newest call only: an older list arriving late must not drop the source just added.
-  const seq = bi.sourcesSeq = (bi.sourcesSeq || 0) + 1;
-  const reply = await call("/api/bi/sources?dataset=" + encodeURIComponent(biDataset()));
+  const seq = bi.sourcesSeq = (bi.sourcesSeq || 0) + 1, listed = biDataset();
+  const reply = await call("/api/bi/sources?dataset=" + encodeURIComponent(listed));
   await biSourceFolders().catch(() => {});
-  if (seq !== bi.sourcesSeq) return;
-  bi.build.sources = reply.sources || [];
+  if (seq !== bi.sourcesSeq || listed !== biDataset()) return;
+  bi.build.sources = reply.sources || []; bi.build.sourcesFor = listed;
   const cloud = bi.build.sources.filter((s) => s.shared === "cloud_only").length;
   const waiting = (reply.waiting || []).length;
   const warn = el("bi-b-src-cloud");
@@ -14908,7 +14981,12 @@ function biRenderSources() {
     radio.checked = source.id === bi.build.sourceId;
     radio.setAttribute("aria-label", "使用 " + source.name);
     radio.disabled = !source.format;
-    radio.addEventListener("change", () => biPickSource(source));
+    radio.addEventListener("change", () => {
+      // A row of the dataset just left would be dropped as soon as the new list arrives, and
+      // the steps after this one would quietly stay shut.
+      if (bi.build.sourcesFor !== biDataset()) { radio.checked = false; return; }
+      biPickSource(source);
+    });
     const format = {table: "表格（預設表格規則）", document: "文件（預設 AI 擷取）",
       text: "文字（預設 AI 擷取）"};
     const md = source.convert_error
@@ -15272,23 +15350,32 @@ function biBuildShowDraft(view) {
 // revision on a source without installing it. The conversation is always shown
 // (owner, 2026-10-28): without an open draft, the first message makes one from
 // the dataset's current version.
-async function biBuildSessA(reload) {
+function biSchemaAbout() {
   const draft = bi.build.draft;
-  el("bi-b-sa-target").textContent = draft
-    ? "對話的建議會套用到草稿「" + draft.draft.title + "」（第 " + draft.revision + " 版）。"
-    : "還沒有開啟草稿：送出第一句話時，會從目前版本 " + ((bi.schema || {}).ref || "")
-      + " 建立一份草稿；資料集在你發布並升級前都不會改變。";
-  const box = el("bi-b-sa-sources");
+  return draft ? "草稿「" + draft.draft.title + "」第 " + draft.revision + " 版。"
+    + "發布並升級前，資料集不會變。"
+    : "還沒有開啟草稿：第一句話會從 " + ((bi.schema || {}).ref || "目前版本")
+      + " 建一份。發布並升級前，資料集不會變。";
+}
+
+function biSchemaSources() {
+  const box = el("bi-ai-sources");
   const kept = new Set([...box.querySelectorAll("input:checked")].map((i) => i.value));
   if (!kept.size && bi.build.sourceId) kept.add(bi.build.sourceId);
-  box.replaceChildren(bh("legend", "bi-label", "附上的樣本來源（最多 5 份，合計上限 12000 字）"));
-  for (const source of bi.build.sources.filter((s) => s.parse !== "unsupported")) {
+  box.replaceChildren();
+  const usable = bi.build.sources.filter((s) => s.parse !== "unsupported");
+  for (const source of usable) {
     const check = document.createElement("input");
     check.type = "checkbox"; check.value = source.id; check.checked = kept.has(source.id);
     box.append(bh("label", "", check, source.name + "（" + source.classification + "）"));
   }
-  if (!bi.build.sources.length) box.append(bh("p", "bi-meta", "還沒有來源；只送草稿與目標。"));
-  await biBuildAiState("bi-b-sa-model", "草稿目前的類型與欄位、你的目標", "schema");
+  if (!usable.length) box.append(bh("p", "bi-meta", "還沒有來源；只送草稿與目標。"));
+  el("bi-ai-sources-box").querySelector("summary").textContent = "附上的樣本來源（最多 5 份，已選 "
+    + [...box.querySelectorAll("input:checked")].length + " 份）";
+}
+
+async function biBuildSessA(reload) {
+  const draft = bi.build.draft;
   if (!draft) {
     bi.build.sessA = null;
   } else if (reload || !bi.build.sessA || bi.build.sessA.target_ref !== "schema-draft:"
@@ -15296,10 +15383,37 @@ async function biBuildSessA(reload) {
     const found = await call("/api/bi/sessions?dataset=" + encodeURIComponent(biDataset())
       + "&target=" + encodeURIComponent("schema-draft:" + draft.draft.id));
     bi.build.sessA = (found.sessions || [])[0] || null;
-    el("bi-b-sa-goal").value = bi.build.sessA ? bi.build.sessA.goal || "" : "";
+    if (bi.ai && bi.ai.kind === "schema") {
+      el("bi-ai-goal").value = bi.build.sessA ? bi.build.sessA.goal || "" : "";
+    }
   }
-  biBuildSessionLog("bi-b-sa-log", bi.build.sessA, biBuildApplySchema);
+  if (bi.ai && bi.ai.kind === "schema") {
+    biAiTarget(biSchemaAbout()); biSchemaSources(); biAiShow(bi.build.sessA);
+  }
 }
+
+async function biSchemaAi() {
+  await biAiOpen({kind: "schema", dataset: biDataset(), title: "和 AI 調整 schema",
+    about: biSchemaAbout(), sends: "草稿的類型與欄位、你的目標、勾選的來源", agent: "schema",
+    label: "你想怎麼調整", placeholder: "例如：幫技術卡加一個價格帶欄位",
+    busy: "正在看來源與卡片、試草稿…（可能要幾分鐘）", render: biBuildApplySchema,
+    sessionTarget: () => bi.build.draft.draft.id,
+    prepare: async (_message, spec) => {
+      if (!bi.build.draft) {
+        biBuildShowDraft(await biCall("/api/bi/schema-drafts", {base: (bi.schema || {}).ref}));
+        await biBuildDrafts();
+      }
+      spec.session = bi.build.sessA;
+    },
+    turn: () => ({goal: el("bi-ai-goal").value, source_ids: [...el("bi-ai-sources")
+      .querySelectorAll("input:checked")].map((i) => i.value).slice(0, 5)}),
+    saved: (session) => { bi.build.sessA = session; }});
+  el("bi-ai-goal").value = bi.build.sessA ? bi.build.sessA.goal || "" : "";
+  await biBuildSessA(false);
+}
+
+el("bi-b-sa-open").addEventListener("click", () => biSchemaAi()
+  .catch((failure) => biNotice(false, failure.message)));
 
 const BI_VERDICT = {reuse: ["照用目前的 schema", "good"], extend: ["擴充這份 schema", "accent"],
   new: ["需要新的 schema（另建資料集）", "warn"], answer: ["回答問題，沒有建議", "dim"]};
@@ -15336,41 +15450,6 @@ function biBuildApplySchema(session, turn, index) {
   }
   return parts;
 }
-
-el("bi-b-sa-send").addEventListener("click", async () => {
-  const message = el("bi-b-sa-msg").value.trim();
-  if (!message) { el("bi-b-sa-msg").focus(); return; }
-  const button = el("bi-b-sa-send"); button.disabled = true;
-  biStatus("bi-b-sa-status", "loading", "Agent 正在看來源與卡片、試草稿…（可能要幾分鐘）");
-  try {
-    // Without a model nothing is made: no draft is created for a message that cannot be sent.
-    await biBuildAiState("bi-b-sa-model", "草稿目前的類型與欄位、你的目標", "schema");
-    if (!bi.build.ai.available) {
-      biStatus("bi-b-sa-status", "error", "沒有可用的模型：" + bi.build.ai.message + "。");
-      return;
-    }
-    if (!bi.build.draft) {
-      const made = await biCall("/api/bi/schema-drafts", {base: (bi.schema || {}).ref});
-      biBuildShowDraft(made); await biBuildDrafts();
-    }
-    const draft = bi.build.draft;
-    let session = bi.build.sessA;
-    if (!session) {
-      session = (await biCall("/api/bi/sessions", {dataset: biDataset(), kind: "schema",
-        target: draft.draft.id})).session;
-    }
-    const sources = [...el("bi-b-sa-sources").querySelectorAll("input:checked")]
-      .map((i) => i.value).slice(0, 5);
-    const reply = await biCall("/api/bi/sessions/" + session.id + "/turns",
-      {dataset: biDataset(), message, goal: el("bi-b-sa-goal").value, source_ids: sources});
-    bi.build.sessA = reply.session; el("bi-b-sa-msg").value = "";
-    biBuildSessionLog("bi-b-sa-log", reply.session, biBuildApplySchema);
-    biStatus("bi-b-sa-status", "");
-  } catch (failure) {
-    biStatus("bi-b-sa-status", "error", (failure.code === "model_unavailable"
-      ? "沒有可用的模型：" : "沒有送出：") + failure.message + "。");
-  } finally { button.disabled = false; }
-});
 
 el("bi-b-draft-trial").addEventListener("click", async () => {
   const draft = bi.build.draft, box = el("bi-b-draft-trial-result");
@@ -15585,13 +15664,15 @@ el("bi-b-trial").addEventListener("click", async () => {
 // A method is a versioned file in the dataset; Session B suggests changes (one
 // model call per turn, no tools) and only 「套用為新版次」 writes a revision.
 async function biBuildMethodStage() {
+  // Right from the start: until the list is filled its first entry, AI, would send a table
+  // to the model on a press.
+  if (!bi.build.skill && !bi.build.method) el("bi-b-m-pick").value = biBuiltinFor();
   try {
-    await Promise.all([biBuildMethods(), biBuildTrials(), biBuildAiState("bi-b-sb-model",
-      "Skill、最近兩次試跑的候選卡")]);
+    await Promise.all([biBuildMethods(), biBuildTrials()]);
   } catch (failure) { biNotice(false, "擷取 Skill 沒有載入：" + failure.message); }
 }
 
-async function biBuildAiState(target, extra, harness) {
+async function biBuildAiState(target, extra, agent) {
   const state = await call("/api/bi/ai?dataset=" + encodeURIComponent(biDataset()));
   bi.build.ai = state;
   const line = el(target); line.replaceChildren(); line.className = "bi-meta";
@@ -15600,28 +15681,14 @@ async function biBuildAiState(target, extra, harness) {
     line.append("目前沒有可用的模型（model_unavailable）：" + state.message + "。");
     return;
   }
-  if (harness === "schema") {
-    // Session A on the Agent's harness (docs/phases/BI_BUILD_FLOW.md §5).
-    line.append("由 Agent（和對話同一套 harness）處理：它會自己讀來源、看卡片、在草稿的副本上試改動"
-      + "（看差異、驗證錯誤、對既有卡片的影響，試跑用模型 " + state.model + "，不寫入卡片），"
-      + "再提出建議。它不能改草稿、發布或升級；送出的資料：" + extra + "。");
-    return;
-  }
-  if (harness) {
-    // BI T2: the skill AI runs on the Agent's harness with tools.
-    line.append("由 Agent（和對話同一套 harness）處理：它會自己讀來源、用草稿規則試跑"
-      + "（試跑用模型 " + state.model + "，不寫入卡片）、比較試跑、跑擷取測試、查目前的卡片，"
-      + "再提出建議。它不能存檔、commit 或 push；送出的資料：" + extra + "。");
-    return;
-  }
-  const source = bi.build.sources.find((s) => s.id === bi.build.sourceId);
-  line.append("模型：" + state.model + "。每次送出只呼叫一次模型（格式不對最多重試 3 次），"
-    + "模型沒有任何工具，不能改動資料。送出的資料：" + extra
-    + (source ? "，以及來源「" + source.name + "」（" + source.classification
-      + "）的前段（上限 12000 字）" : "（尚未選來源，不附來源內容）") + "。");
+  line.append("模型 " + state.model + (agent ? "" : "（每次送出呼叫一次，沒有工具）")
+    + "・會送出：" + extra + "。AI 不能存檔、commit 或 push；你確認才會改動。");
 }
 
 async function biBuildMethods(fill) {
+  // At once, not after the reply: a trial pressed meanwhile must not send a table to the
+  // model because the select still shows its first option.
+  if (!bi.build.method && !bi.build.skill) el("bi-b-m-pick").value = biBuiltinFor();
   const reply = await call("/api/bi/methods?dataset=" + encodeURIComponent(biDataset()));
   // Keep what the person picked; otherwise the built-in that fits the source.
   const pick = el("bi-b-m-pick"), keep = bi.build.method ? bi.build.method.method.id
@@ -15652,24 +15719,44 @@ function biBuiltinFor() {
   return source && source.parse === "table" ? "builtin:rules" : "builtin:llm";
 }
 
-function biSessBTarget() {
-  const line = el("bi-b-sb-target"), value = el("bi-b-m-pick").value;
+function biSessBAbout() {
   if (bi.build.method) {
-    line.textContent = "對話的建議會套用到 Skill「" + bi.build.method.document.name + "」（第 "
-      + bi.build.method.revision + " 版）。";
-  } else if (value === "builtin:rules") {
-    line.textContent = "內建「表格規則」自動對應表格欄位，沒有可讓 AI 調整的設定。要調整，"
-      + "先在下方貼配方（多表格報告用），送出時會另存成你自己的 Skill；或改選「AI 擷取」。";
-  } else {
-    line.textContent = "目前是內建「AI 擷取」：送出第一句話時，會用下方的判讀規則"
-      + "（空白就是預設規則）另存一份你自己的 Skill 再開始對話；內建 Skill 不會被改動。";
+    return "Skill「" + bi.build.method.document.name + "」第 " + bi.build.method.revision + " 版。";
   }
+  return el("bi-b-m-pick").value === "builtin:rules"
+    ? "內建「表格規則」沒有設定可調：先貼配方，或改選「AI 擷取」。"
+    : "內建「AI 擷取」：第一句話會另存成你的 Skill，內建的不變。";
 }
+
+function biSessBTarget() {
+  if (bi.ai && bi.ai.kind === "method") biAiTarget(biSessBAbout());
+}
+
+async function biMethodAi() {
+  const source = bi.build.sources.find((s) => s.id === bi.build.sourceId);
+  await biAiOpen({kind: "method", dataset: biDataset(), title: "和 AI 調整擷取 Skill",
+    about: biSessBAbout(),
+    sends: "Skill、最近兩次試跑的候選卡" + (source ? "、來源「" + source.name + "」（"
+      + source.classification + "）的前段（上限 12000 字）" : ""),
+    agent: false, label: "你想怎麼調整", placeholder: "例如：沒有文件依據的需求標成推測",
+    busy: "正在看 Skill 與樣本…（一次模型呼叫）", render: biBuildApplyMethod,
+    sessionTarget: () => bi.build.method.method.id,
+    prepare: async (_message, spec) => {
+      if (!bi.build.method) await biSessBCopy();
+      spec.session = bi.build.sessB;
+    },
+    turn: () => ({source_ids: bi.build.sourceId ? [bi.build.sourceId] : []}),
+    saved: (session) => { bi.build.sessB = session; }});
+  biAiShow(bi.build.sessB);
+}
+
+el("bi-b-sb-open").addEventListener("click", () => biMethodAi()
+  .catch((failure) => biNotice(false, failure.message)));
 
 function biBuildCloseMethod() {
   bi.build.method = null; el("bi-b-m-box").hidden = true; el("bi-b-m-save").hidden = true;
   bi.build.sessB = null;
-  biBuildSessionLog("bi-b-sb-log", null, biBuildApplyMethod);
+  if (bi.ai && bi.ai.kind === "method") biAiShow(null);
   biSessBTarget();
 }
 
@@ -15785,7 +15872,7 @@ async function biBuildOpenMethod(id, fill) {
     + "&target=" + encodeURIComponent("method:" + id));
   if (seq !== bi.build.methodSeq) return;
   bi.build.sessB = (found.sessions || [])[0] || null;
-  biBuildSessionLog("bi-b-sb-log", bi.build.sessB, biBuildApplyMethod);
+  if (bi.ai && bi.ai.kind === "method") biAiShow(bi.build.sessB);
   biSessBTarget();
 }
 
@@ -15829,8 +15916,7 @@ function biBuildSessionLog(target, session, renderSuggestion) {
   const log = el(target); log.replaceChildren();
   const turns = session ? session.turns : [];
   if (!turns.length) {
-    log.append(bh("li", "bi-meta", "還沒有對話。寫下你想要的調整，AI 只會提出建議，"
-      + "要你按「套用」才會改動。"));
+    log.append(bh("li", "bi-meta", "還沒有對話。"));
     return;
   }
   turns.forEach((turn, index) => {
@@ -15881,35 +15967,6 @@ async function biSessBCopy() {
     + "」，對話的建議會套用到它。");
   return bi.build.method;
 }
-
-el("bi-b-sb-send").addEventListener("click", async () => {
-  const message = el("bi-b-sb-msg").value.trim();
-  if (!message) { el("bi-b-sb-msg").focus(); return; }
-  const button = el("bi-b-sb-send"); button.disabled = true;
-  biStatus("bi-b-sb-status", "loading", "AI 正在看擷取 Skill 與樣本…（一次模型呼叫）");
-  try {
-    await biBuildAiState("bi-b-sb-model", "Skill、最近兩次試跑的候選卡");
-    if (!bi.build.ai.available) {
-      biStatus("bi-b-sb-status", "error", "沒有可用的模型：" + bi.build.ai.message + "。");
-      return;
-    }
-    const method = bi.build.method || await biSessBCopy();
-    let session = bi.build.sessB;
-    if (!session) {
-      session = (await biCall("/api/bi/sessions", {dataset: biDataset(), kind: "method",
-        target: method.method.id})).session;
-    }
-    const reply = await biCall("/api/bi/sessions/" + session.id + "/turns",
-      {dataset: biDataset(), message,
-        source_ids: bi.build.sourceId ? [bi.build.sourceId] : []});
-    bi.build.sessB = reply.session; el("bi-b-sb-msg").value = "";
-    biBuildSessionLog("bi-b-sb-log", reply.session, biBuildApplyMethod);
-    biStatus("bi-b-sb-status", "");
-  } catch (failure) {
-    biStatus("bi-b-sb-status", "error", (failure.code === "model_unavailable"
-      ? "沒有可用的模型：" : "沒有送出：") + failure.message + "。");
-  } finally { button.disabled = false; }
-});
 
 async function biBuildTrials() {
   const reply = await call("/api/bi/runs?dataset=" + encodeURIComponent(biDataset()));
@@ -15989,45 +16046,182 @@ el("bi-b-start").addEventListener("click", async () => {
   } finally { button.disabled = false; }
 });
 
+function biRunReading(run) { return run.method_ref === "llm:reading"; }
+
+function biRunReviewable(run) {
+  // A page's trial is read in its own step; a reading run's has nowhere else to be read.
+  return !!run && (run.kind === "ingest" || biRunReading(run));
+}
+
+function biRunOpen(run) {
+  return !!run && run.kind === "ingest" && ["review", "partial"].includes(run.status);
+}
+
+async function biBuildRuns() {
+  const dataset = biDataset();
+  const reply = await call("/api/bi/runs?dataset=" + encodeURIComponent(dataset));
+  if (dataset !== biDataset()) return;
+  bi.build.waiting = (reply.runs || []).filter((run) => biRunReviewable(run)
+    && ["review", "partial"].includes(run.status));
+  biBuildRunPick();
+}
+
+function biRunLabel(run) {
+  const source = (bi.build.sources || []).find((s) => s.id === (run.source_ids || [])[0]);
+  const what = biRunReading(run) ? "補摘要" : source ? source.name : "匯入";
+  const s = run.summary || {};
+  return biTime(run.at) + "・" + what + (run.kind === "trial" ? "（試跑）" : "")
+    + "・待決定 " + (s.pending || 0) + "／" + (s.candidates || 0);
+}
+
+function biBuildRunPick() {
+  const select = el("bi-b-run-pick"), run = bi.build.run;
+  const runs = [...(bi.build.waiting || [])];
+  if (biRunReviewable(run)) {
+    const at = runs.findIndex((item) => item.id === run.id);
+    if (at >= 0) runs[at] = run; else runs.unshift(run);
+  }
+  select.replaceChildren(...runs.map((item) => {
+    const option = bh("option", "", biRunLabel(item)); option.value = item.id; return option;
+  }));
+  if (!runs.length) select.append(bh("option", "", "沒有待審核的執行"));
+  select.disabled = !runs.length || !!bi.build.accepting;
+  if (biRunReviewable(run)) select.value = run.id;
+}
+
+async function biBuildOpenRun(runId) {
+  // The last one chosen: an earlier run answering late must not take its place.
+  const seq = bi.build.openSeq = (bi.build.openSeq || 0) + 1;
+  const detail = await call("/api/bi/runs/" + runId + "?dataset="
+    + encodeURIComponent(biDataset()));
+  if (seq !== bi.build.openSeq) return;
+  bi.build.run = detail.run; bi.build.candidates = detail.candidates;
+  bi.build.candidateId = null; bi.build.texts = new Map();
+  el("bi-b-cand-type").value = ""; el("bi-b-cand-state").value = "";
+  biBuildSave(); biBuildRenderRun();
+}
+
+async function biBuildReviewStage() {
+  biBuildRenderRun();
+  const dataset = biDataset();
+  await biBuildRuns().catch((failure) => biNotice(false, "讀不到執行清單：" + failure.message));
+  if (dataset !== biDataset() || biRunReviewable(bi.build.run)) return;
+  if (bi.build.waiting.length) await biBuildOpenRun(bi.build.waiting[0].id);
+}
+
+el("bi-b-run-pick").addEventListener("change", () => {
+  biBuildOpenRun(el("bi-b-run-pick").value)
+    .catch((failure) => biNotice(false, failure.message));
+});
+
+function biCandShown() {
+  const type = el("bi-b-cand-type").value, state = el("bi-b-cand-state").value;
+  return bi.build.candidates.filter((c) => (!type || c.entity_type === type)
+    && (!state || c.review === state));
+}
+
+function biBuildCandTypes() {
+  const select = el("bi-b-cand-type"), keep = select.value, counts = new Map();
+  for (const c of bi.build.candidates) {
+    counts.set(c.entity_type, (counts.get(c.entity_type) || 0) + 1);
+  }
+  const all = bh("option", "", "全部"); all.value = "";
+  select.replaceChildren(all, ...[...counts].map(([type, count]) => {
+    const option = bh("option", "", biTypeLabel(type) + "（" + count + "）");
+    option.value = type; return option;
+  }));
+  select.value = counts.has(keep) ? keep : "";
+}
+
+function biCandLabel(candidate, item) {
+  const field = biSchemaField(candidate.entity_type, item.field);
+  return (field && field.label) || item.field;
+}
+
+function biBuildCandRows() {
+  const body = el("bi-b-cands").tBodies[0], shown = biCandShown();
+  const pending = bi.build.candidates.filter((c) => c.review === "pending").length;
+  el("bi-b-cand-count").textContent = "顯示 " + shown.length + "／" + bi.build.candidates.length
+    + "・待決定 " + pending;
+  body.replaceChildren(...shown.map((candidate) => {
+    const decision = BI_DECISION[candidate.review] || [candidate.review, "dim"];
+    const name = candidate.name || candidate.canonical_key || "（無名稱）";
+    const open = biButton(name, () => biBuildPickCandidate(candidate.id), "bi-link");
+    const fields = candidate.fields, first = fields.find((f) => f.change !== "same") || fields[0];
+    const labels = fields.slice(0, 2).map((item) => biCandLabel(candidate, item)).join("、")
+      + (fields.length > 2 ? " 等 " + fields.length + " 欄" : "");
+    const cells = [
+      ["卡片", [open, bh("div", "bi-meta", biTypeLabel(candidate.entity_type) + "・"
+        + (BI_RUN_ACTION[candidate.action] || candidate.action))]],
+      ["欄位", [labels]],
+      ["提議值", [bh("div", "bi-cand-value", first ? biValue(first.value) : "—")]],
+      ["狀態", [biBadge(decision[0], decision[1]),
+        candidate.errors.length ? biBadge("錯誤 " + candidate.errors.length, "bad") : "",
+        candidate.warnings.length ? biBadge("警告 " + candidate.warnings.length, "warn") : ""]]];
+    const row = bh("tr", "", ...cells.map(([label, parts]) => {
+      const cell = bh("td", "", ...parts); cell.dataset.label = label; return cell;
+    }));
+    row.dataset.candidate = candidate.id;
+    row.setAttribute("aria-selected", String(candidate.id === bi.build.candidateId));
+    row.addEventListener("click", (event) => {
+      if (!event.target.closest("button")) biBuildPickCandidate(candidate.id);
+    });
+    return row;
+  }));
+  if (!shown.length) {
+    const none = bh("td", "bi-empty", bi.build.candidates.length ? "這個篩選沒有候選卡。"
+      : "這次執行沒有候選卡。");
+    none.colSpan = 4; body.append(bh("tr", "", none));
+  }
+}
+
+function biBuildPickCandidate(candidateId) {
+  biBuildShowCandidate(candidateId);
+  // Side by side the whole pair fits; stacked on a phone, go to the pane.
+  const stacked = window.matchMedia("(max-width: 900px)").matches;
+  (stacked ? el("bi-b-cand") : el("bi-b-review-split")).scrollIntoView(
+    {block: stacked ? "start" : "nearest"});
+}
+
+for (const id of ["bi-b-cand-type", "bi-b-cand-state"]) {
+  el(id).addEventListener("change", () => biBuildCandRows());
+}
+
 function biBuildRenderRun() {
-  const run = bi.build.run, list = el("bi-b-cands");
-  list.replaceChildren(); el("bi-b-chips").replaceChildren();
-  const open = run && run.kind === "ingest" && ["review", "partial"].includes(run.status);
-  el("bi-b-accept-clean").disabled = !open;
+  const run = bi.build.run, body = el("bi-b-cands").tBodies[0];
+  body.replaceChildren(); el("bi-b-chips").replaceChildren();
+  el("bi-b-accept-clean").disabled = !biRunOpen(run);
   el("bi-b-next4").disabled = !biBuildAllowed().commit;
-  biBuildSteps();
-  if (!run || run.kind !== "ingest") {
-    list.append(bh("li", "bi-empty", "到上一步按「Ingest」產生候選卡。"));
+  biBuildSteps(); biBuildRunPick();
+  if (!biRunReviewable(run)) {
+    el("bi-b-cand-count").textContent = ""; el("bi-b-cand-type").replaceChildren();
+    el("bi-b-same").replaceChildren();
+    el("bi-b-cand").replaceChildren(bh("p", "bi-empty", "選一列，看原文與引用。"));
+    const none = bh("td", "bi-empty", "到上一步按「Ingest」產生候選卡。");
+    none.colSpan = 4; body.append(bh("tr", "", none));
     return;
   }
   // What decides the next press on the line; the rest of the run's counts folded.
   const chips = [biBadge("執行 " + run.id + "・" + run.status, "dim"), ...biRunChips(run)];
   const main = chips.filter((chip) => /^(候選|錯誤|警告|已接受)/.test(chip.textContent));
   const more = chips.filter((chip) => !main.includes(chip));
-  el("bi-b-chips").append(...main, bh("details", "bi-manage", bh("summary", "", "明細"), ...more));
+  const left = (run.warnings || []).filter((w) => w.code === "reading_left_empty")
+    .map((w) => bh("p", "bi-meta", w.message));
+  el("bi-b-chips").append(...main, run.kind === "trial" ? biBadge("試跑，不能寫入", "warn") : "",
+    bh("details", "bi-manage", bh("summary", "", "明細"), ...more, ...left));
   if ((run.failures || []).length) {
     el("bi-b-chips").append(bh("p", "bi-err", "有 " + run.failures.length + " 段沒有判讀成功（"
-      + run.failures.map((f) => "第 " + f.line_start + "–" + f.line_end + " 行：" + f.message)
-        .join("；") + "）。其他候選卡可以先審核。"), biButton("重試失敗的段落", async () => {
+      + run.failures.map((f) => (f.line_start ? "第 " + f.line_start + "–" + f.line_end + " 行："
+        : "") + f.message).join("；") + "）。其他候選卡可以先審核。"),
+    biButton("重試失敗的段落", async () => {
       await biCall("/api/bi/runs/" + run.id + "/retry", {dataset: biDataset()});
       await biBuildFollow(run.id); await biBuildFetchRun(run.id); biBuildRenderRun();
     }, "bi-btn"));
   }
   el("bi-b-chips").append(...biRunNothing(run), ...biRunRelations(run), ...biRunFit(run));
-  biBuildSameNames();
-  for (const candidate of bi.build.candidates) {
-    const decision = BI_DECISION[candidate.review] || [candidate.review, "dim"];
-    const button = biButton("", () => biBuildShowCandidate(candidate.id), "bi-card-btn");
-    button.replaceChildren(bh("strong", "", candidate.name || candidate.canonical_key
-      || "（無名稱）"), bh("span", "bi-meta", " " + biTypeLabel(candidate.entity_type) + "・"
-      + (BI_RUN_ACTION[candidate.action] || candidate.action)), " ",
-      biBadge(decision[0], decision[1]),
-      candidate.errors.length ? biBadge("錯誤 " + candidate.errors.length, "bad") : "",
-      candidate.warnings.length ? biBadge("警告 " + candidate.warnings.length, "warn") : "");
-    if (candidate.id === bi.build.candidateId) button.setAttribute("aria-current", "true");
-    list.append(bh("li", "", button));
-  }
+  biBuildSameNames(); biBuildCandTypes(); biBuildCandRows();
   if (bi.build.candidateId) biBuildShowCandidate(bi.build.candidateId);
+  else el("bi-b-cand").replaceChildren(bh("p", "bi-empty", "選一列，看原文與引用。"));
 }
 
 function biSameNameOpen(candidate) {
@@ -16060,13 +16254,33 @@ function biBuildSameNames() {
     list);
 }
 
-async function biBuildReview(candidateId, body) {
+async function biBuildReview(candidateId, body, quiet = false) {
   const run = bi.build.run;
   const reply = await biCall("/api/bi/runs/" + run.id + "/candidates/" + candidateId,
     {dataset: biDataset(), ...body});
   const index = bi.build.candidates.findIndex((c) => c.id === candidateId);
   if (index >= 0) bi.build.candidates[index] = reply.candidate;
-  bi.build.run = reply.run; biBuildSave(); biBuildRenderRun();
+  bi.build.run = reply.run;
+  if (!quiet) { biBuildSave(); biBuildRenderRun(); }
+}
+
+async function biBuildDecide(candidateId, review) {
+  // On to the next row still undecided: 180 of them are worked through one after another.
+  const list = biCandShown(), at = list.findIndex((c) => c.id === candidateId);
+  const next = [...list.slice(at + 1), ...list.slice(0, Math.max(at, 0))]
+    .find((c) => c.review === "pending");
+  await biBuildReview(candidateId, {review}, true);
+  bi.build.candidateId = next ? next.id : candidateId;
+  biBuildSave(); biBuildRenderRun();
+  const row = el("bi-b-cands").querySelector('tr[data-candidate="' + bi.build.candidateId + '"]');
+  if (row) {
+    row.scrollIntoView({block: "nearest"});
+    row.querySelector("button").focus({preventScroll: true});
+  }
+  el("bi-b-cand").scrollTop = 0;
+  // Stacked on a phone the row just opened is above: its pane is what comes next.
+  if (window.matchMedia("(max-width: 900px)").matches) el("bi-b-cand").scrollIntoView();
+  if (!next) biNotice(true, "這個篩選裡的候選卡都決定了。");
 }
 
 function biEvidence(item) {
@@ -16084,14 +16298,24 @@ function biBuildShowCandidate(candidateId) {
   const box = el("bi-b-cand"); box.replaceChildren();
   if (!candidate) return;
   bi.build.candidateId = candidateId;
-  const open = bi.build.run && ["review", "partial"].includes(bi.build.run.status);
+  for (const row of el("bi-b-cands").tBodies[0].rows) {
+    row.setAttribute("aria-selected", String(row.dataset.candidate === candidateId));
+  }
+  const open = biRunOpen(bi.build.run);
   const head = bh("h4", "", (candidate.name || candidate.canonical_key || "（無名稱）") + "・"
     + biTypeLabel(candidate.entity_type));
   const match = candidate.match === "existing" ? "對應到既有卡片（版本 "
     + candidate.base_version + "）" : candidate.match === "ambiguous" ? "有名稱相近的既有卡片"
     : "新卡片";
-  const parts = [head, bh("p", "bi-meta", match + "・" + (BI_RUN_ACTION[candidate.action]
-    || candidate.action))];
+  const parts = [head];
+  if (open) {
+    parts.push(bh("div", "bi-actions",
+      biButton("接受", () => biBuildDecide(candidate.id, "accepted"), "go"),
+      biButton("拒絕", () => biBuildDecide(candidate.id, "rejected"), "bi-btn"),
+      biButton("待決定", () => biBuildReview(candidate.id, {review: "pending"}), "bi-btn")));
+  }
+  parts.push(bh("p", "bi-meta", match + "・" + (BI_RUN_ACTION[candidate.action]
+    || candidate.action)));
   if (candidate.errors.length) {
     parts.push(bh("ul", "bi-err", ...candidate.errors.map((e) => bh("li", "", e.message))));
   }
@@ -16122,8 +16346,7 @@ function biBuildShowCandidate(candidateId) {
       biButton("略過", () => biBuildReview(candidate.id, {match: {action: "skip"}}), "bi-btn")));
   }
   const table = bh("table", "bi-table bi-stack", bh("thead", "", bh("tr", "",
-    bh("th", "", "欄位"), bh("th", "", "新值"), bh("th", "", "依據"), bh("th", "", "出處"),
-    bh("th", "", "目前值"), bh("th", "", "修改"))));
+    bh("th", "", "欄位"), bh("th", "", "新值與引用"), bh("th", "", "目前值"))));
   const rows = bh("tbody", "");
   for (const item of candidate.fields) {
     const basis = BI_BASIS[item.basis] || [item.basis, "dim"];
@@ -16151,38 +16374,93 @@ function biBuildShowCandidate(candidateId) {
     const others = (item.alternatives || []).map((o) => bh("div", "bi-warn",
       "另一段寫的是：" + biValue(o.value) + "（會變成提案）"));
     const change = {add: "新增", change: "變更", same: "相同", human_kept: "保留人工值，改成提議"};
-    rows.append(bh("tr", "", bh("td", "", (field && field.label) || item.field),
-      bh("td", "", biValue(item.value)), bh("td", "", biBadge(basis[0], basis[1])),
-      bh("td", "", biEvidence(item), ...others), bh("td", "", biValue(item.current) + "（"
-        + (merged || change[item.change] || item.change) + "）", " ", take),
-      bh("td", "", input, save)));
+    const line = bh("tr", "", bh("td", "", (field && field.label) || item.field),
+      bh("td", "", bh("div", "", biValue(item.value), " ", biBadge(basis[0], basis[1])),
+        biEvidence(item), ...others, bh("div", "bi-cand-edit", input, save)),
+      bh("td", "", biValue(item.current) + "（"
+        + (merged || change[item.change] || item.change) + "）", " ", take));
+    // A press on a field's row shows that field's quote in the source below.
+    line.addEventListener("click", (event) => {
+      if (!event.target.closest("button, input")) biBuildCandSource(item);
+    });
+    rows.append(line);
   }
   table.append(rows);
   parts.push(bh("div", "bi-scroll", table));
-  if (open) {
-    parts.push(bh("div", "bi-actions",
-      biButton("接受", () => biBuildReview(candidate.id, {review: "accepted"}), "go"),
-      biButton("拒絕", () => biBuildReview(candidate.id, {review: "rejected"}), "bi-btn"),
-      biButton("待決定", () => biBuildReview(candidate.id, {review: "pending"}), "bi-btn")));
-  }
+  const place = document.createElement("div"); place.id = "bi-b-cand-source";
+  parts.push(place);
   box.append(...parts);
+  biBuildCandSource(candidate.fields.find((f) => f.evidence.length) || null);
+}
+
+function biQuoteAt(text, quote) {
+  // Line ends and indents may differ between the source and a quote taken from its lines.
+  const words = quote.trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return null;
+  const pattern = words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("\\s+");
+  return new RegExp(pattern).exec(text);
+}
+
+async function biBuildCandSource(item) {
+  const box = el("bi-b-cand-source"); if (!box) return;
+  const seq = bi.build.sourceSeq = (bi.build.sourceSeq || 0) + 1;
+  const evidence = item && item.evidence.find((e) => e.source_id);
+  if (!evidence) {
+    box.replaceChildren(bh("p", "bi-meta", "這個欄位沒有來源原文。"));
+    return;
+  }
+  const texts = bi.build.texts = bi.build.texts || new Map();
+  let view = texts.get(evidence.source_id);
+  if (!view) {
+    box.replaceChildren(bh("p", "bi-meta", "載入原文中…"));
+    try {
+      view = await call("/api/bi/sources/" + encodeURIComponent(evidence.source_id)
+        + "/markdown?dataset=" + encodeURIComponent(biDataset()));
+      texts.set(evidence.source_id, view);
+    } catch (failure) {
+      if (seq === bi.build.sourceSeq) {
+        box.replaceChildren(bh("p", "bi-err", "讀不到原文：" + failure.message + "。"),
+          biButton("重試", () => biBuildCandSource(item), "bi-btn"));
+      }
+      return;
+    }
+    if (seq !== bi.build.sourceSeq) return;
+  }
+  const text = view.markdown || "", found = biQuoteAt(text, evidence.excerpt || "");
+  const pre = document.createElement("pre"); pre.id = "bi-b-cand-src"; pre.tabIndex = 0;
+  if (found) {
+    pre.append(text.slice(0, found.index), bh("mark", "", found[0]),
+      text.slice(found.index + found[0].length));
+  } else pre.textContent = text;
+  box.replaceChildren(bh("h4", "", "原文：" + view.source.name),
+    ...(found ? [] : [bh("p", "bi-warn", "原文裡找不到這段引用，請對照上面的引用。")]), pre);
+  const mark = pre.querySelector("mark");
+  if (mark) pre.scrollTop = Math.max(0, mark.offsetTop - 40);
 }
 
 el("bi-b-accept-clean").addEventListener("click", async () => {
+  const button = el("bi-b-accept-clean"), label = button.textContent;
   const todo = bi.build.candidates.filter((c) => c.review === "pending" && !c.errors.length
     && c.action !== "skip" && !biSameNameOpen(c).length);
   const held = bi.build.candidates.filter((c) => c.review === "pending"
     && biSameNameOpen(c).length).length;
   // 「下一步」 waits for all of them: moving on early wrote only the ones accepted so far.
-  bi.build.accepting = true;
+  bi.build.accepting = true; button.disabled = true;
+  biBuildRunPick(); biBuildSteps();
+  let done = 0;
   try {
-    for (const candidate of todo) await biBuildReview(candidate.id, {review: "accepted"});
+    for (const candidate of todo) {
+      await biBuildReview(candidate.id, {review: "accepted"}, true);
+      done += 1; button.textContent = "接受中… " + done + "／" + todo.length;
+    }
+    biNotice(true, "已接受 " + todo.length + " 張沒有錯誤的候選卡。"
+      + (held ? held + " 張和既有卡片同名，要在清單上逐張確認。" : ""));
+  } catch (failure) {
+    biNotice(false, "接受到第 " + (done + 1) + " 張時停下：" + failure.message + "。");
   } finally {
-    bi.build.accepting = false;
-    biBuildRenderRun();
+    bi.build.accepting = false; button.textContent = label;
+    biBuildSave(); biBuildRenderRun();
   }
-  biNotice(true, "已接受 " + todo.length + " 張沒有錯誤的候選卡。"
-    + (held ? held + " 張和既有卡片同名，要在清單上逐張確認。" : ""));
 });
 
 // -- steps 5-6: commit and result --------------------------------------------

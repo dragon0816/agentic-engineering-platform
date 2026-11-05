@@ -69,7 +69,7 @@ POST /api/bi/runs {"dataset": "vault-<id>", "kind": "ingest", "reading": true, "
 
 Rules in code: a card is read only if it lacks a field in `reading_runs.FIELDS`, is not a sample, and has text of its own beyond headings, notes and lines repeated on 4 or more cards. Its text is a card page's body and its `body` field, with headings and evidence notes kept. A value goes when its quote is not word for word in that text, or when it is only the card's name. Each merges as `fill`; a value filled since then stays, and the new one is a proposal. `scope` is not filled, by the owner's decision; adding it to `FIELDS` is all it would take if that changes.
 
-**The page cannot open this run yet.** `#bi-b-cands` shows the run the page itself started; there is no list of runs to pick from, so a run started through the API is not reachable there. Opening one needs a small change in `web_page.py`. Once open, the page's 「接受所有沒有錯誤的候選卡」 would serve.
+**The page opens this run** (`bi-review-table`, `docs/phases/BI_PAGE_SIMPLE.md` §8): step 2's 審核 lists the waiting runs in a combobox, labelled 補摘要, with no source chosen.
 
 ## Measured on a copy, through the run
 
