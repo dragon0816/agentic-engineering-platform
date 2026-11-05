@@ -13678,7 +13678,8 @@ function biProposalRow(item, dataset) {
     loss ? bh("p", "bi-warn bi-prop-loss", "接受會用 " + loss.now + " 字取代目前的 " + loss.old
       + " 字。") : "",
     (item.evidence || []).length ? bh("p", "bi-meta",
-      "接受後這個欄位算人工的值，提議的出處成為它的出處。" + (cited ? "目前值的出處移到卡片的歷史，和舊值放在一起。" : ""))
+      "接受後這個欄位算人工的值，提議的出處成為它的出處。"
+      + (cited ? "目前值的出處移到卡片的歷史，和舊值放在一起。" : ""))
       : bh("p", "bi-warn bi-prop-bare", "這筆提議沒有出處：接受後這個欄位就沒有出處。"
         + (cited ? "目前值的出處移到卡片的歷史，和舊值放在一起。" : "")),
     bh("div", "bi-meta", "提議來源：" + (item.source.ref || item.source.kind)),
