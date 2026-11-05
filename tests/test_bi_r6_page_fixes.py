@@ -197,7 +197,8 @@ def test_the_page_follows_the_source_and_decides_proposals(served: Any, tmp_path
         shown = run("document.getElementById('bi-b-props-list').textContent")
         assert "舊的內容" in shown and "新的內容" in shown and "fake-page.md#3" in shown
 
-        reject = "#bi-b-props-list li:first-child .bi-actions button:last-child"
+        # The first row still undecided: a decided row stays on the list with its mark.
+        reject = "#bi-b-props-list .bi-actions button:last-child"
         click(reject)
         wait(
             "document.querySelector('#bi-b-props-list li .bi-err')"
@@ -210,11 +211,13 @@ def test_the_page_follows_the_source_and_decides_proposals(served: Any, tmp_path
         store = BiStore(workspace, dataset)
         assert store.fields(CARD)["body"]["value"] == "舊的內容"
 
-        accept = "#bi-b-props-list li:first-child .bi-actions button:nth-last-child(2)"
+        wait("!!document.querySelector('#bi-b-props-list .bi-state-rejected')")
+        accept = "#bi-b-props-list .bi-actions button:nth-last-child(2)"
         run("document.querySelector('#bi-b-props-list li input').value = '新的比較好'")
         click(accept)
         try:
-            wait("document.getElementById('bi-b-props').hidden === true", 60)
+            wait("document.getElementById('bi-b-props-h').textContent.includes('0 筆')", 60)
+            wait("!!document.querySelector('#bi-b-props-list .bi-state-accepted')", 60)
         except AssertionError:
             said = run("document.getElementById('bi-b-props-list').textContent")
             raise AssertionError(said) from None
@@ -270,6 +273,9 @@ def test_the_page_follows_the_source_and_decides_proposals(served: Any, tmp_path
         put("bi-b-props-reason", "沒有依據")
         click("#bi-b-props-reject")
         click("#bi-b-props-confirm .go")
-        wait("document.getElementById('bi-b-props').hidden === true")
+        wait("document.getElementById('bi-b-props-h').textContent.includes('0 筆')")
+        # Each answered in the list too, not only by a notice at the top of the page.
+        wait("document.querySelectorAll('#bi-b-props-list .bi-state-accepted').length === 3")
+        wait("document.querySelectorAll('#bi-b-props-list .bi-state-rejected').length === 3")
     finally:
         browser.close()

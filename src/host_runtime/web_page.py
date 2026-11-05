@@ -13458,6 +13458,11 @@ function biProposalsAll(action) {
           reason: reason.value.trim(), field: field || null, origin: origin || null,
           count: chosen.length});
         reason.value = "";
+        if (!done.superseded) {
+          const review = action === "accept" ? "accepted" : "rejected";
+          bi.proposalsDecided.push(...chosen.map((item) => ({item, review,
+            at: (bi.proposalsDecided || []).length})));
+        }
         biNotice(true, "已決定 " + done.decided + " 筆提案；要 commit 才會寫進知識庫。");
         await biBuildVault();
       } catch (failure) {
