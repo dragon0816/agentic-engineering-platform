@@ -710,6 +710,16 @@ class Staging:
             row = db.execute("SELECT * FROM sources WHERE id = ?", (source_id,)).fetchone()
             return None if row is None else self._source(row, db)
 
+    def stored_paths(self) -> dict[str, str]:
+        """Each source's stored file, for reading many without a query each."""
+        if not self.exists:
+            return {}
+        with self._db() as db:
+            return {r["id"]: str(r["stored"]) for r in db.execute("SELECT id, stored FROM sources")}
+
+    def read_stored(self, stored: str) -> bytes:
+        return self._read(stored)
+
     def source_bytes(self, source_id: str) -> bytes:
         if not self.exists:
             raise BiStoreError("source_unknown", "找不到這個來源")

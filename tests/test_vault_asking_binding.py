@@ -7,13 +7,17 @@ is fictional.
 
 from __future__ import annotations
 
+import io
 import json
+import logging
 import threading
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
+from urllib.parse import urlparse
 
 import pytest
 import test_bi_vault as bi
@@ -38,6 +42,7 @@ from test_vault_asking_e2e import (
 
 from capabilities.bi_cards.store import VAULT_REGISTRY, VAULTS_DIR
 from common.change_proposal import KINDS, PROPOSE_GUIDANCE, TELEGRAM_KINDS
+from host_runtime import knowledge_binding
 from host_runtime.contracts import CompanyHostConfiguration
 from host_runtime.host import HostError, build_knowledge_catalog, build_runtime
 from host_runtime.knowledge_binding import askable
@@ -428,3 +433,59 @@ def test_the_routes_need_the_token_and_open_the_same_card(tmp_path: Path) -> Non
             server.shutdown()
             server.server_close()
             thread.join(timeout=5)
+
+
+class _Answered:
+    """The little of a request handler `handle` uses."""
+
+    def __init__(self) -> None:
+        self.server = SimpleNamespace(web=object())
+        self.answers: list[tuple[int, dict[str, Any]]] = []
+        self.headers = {"Content-Length": "2"}
+        self.rfile = io.BytesIO(b"{}")
+
+    def _json(self, status: int, payload: dict[str, Any]) -> None:
+        self.answers.append((status, payload))
+
+
+def _flaky(monkeypatch: pytest.MonkeyPatch, refusals: int) -> list[str]:
+    asked: list[str] = []
+
+    def route(_web: Any, method: str, _path: str, _given: Any) -> tuple[int, dict[str, Any]]:
+        asked.append(method)
+        if len(asked) <= refusals:
+            raise PermissionError(13, "Access is denied", "fictional-file.json")
+        return 200, {"ok": True}
+
+    monkeypatch.setattr(knowledge_binding, "route", route)
+    monkeypatch.setattr("host_runtime.knowledge_binding.time.sleep", lambda _s: None)
+    return asked
+
+
+def test_a_read_waits_out_a_file_held_for_a_moment(monkeypatch: pytest.MonkeyPatch) -> None:
+    asked = _flaky(monkeypatch, 2)
+    handler = _Answered()
+    assert knowledge_binding.handle(handler, "GET", urlparse(knowledge_binding.PREFIX))
+    assert handler.answers == [(200, {"ok": True})] and len(asked) == 3
+
+
+def test_a_lasting_refusal_is_answered_and_its_trace_is_kept(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    asked = _flaky(monkeypatch, 99)
+    handler = _Answered()
+    with caplog.at_level(logging.ERROR, logger=knowledge_binding.__name__):
+        knowledge_binding.handle(handler, "GET", urlparse(knowledge_binding.PREFIX))
+    ((status, payload),) = handler.answers
+    assert status == 500 and payload["code"] == "askable_error" and len(asked) == 3
+    assert "fictional-file" not in payload["message"]  # the page says the kind only
+    (record,) = caplog.records
+    assert record.exc_info is not None and "fictional-file" in caplog.text
+
+
+def test_a_write_is_never_asked_twice(monkeypatch: pytest.MonkeyPatch) -> None:
+    asked = _flaky(monkeypatch, 1)
+    handler = _Answered()
+    path = urlparse(knowledge_binding.PREFIX + "/propose")
+    knowledge_binding.handle(handler, "POST", path)
+    assert asked == ["POST"] and handler.answers[0][0] == 500

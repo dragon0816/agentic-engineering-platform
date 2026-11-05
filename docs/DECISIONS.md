@@ -6530,3 +6530,7 @@ The owner: 「每個領域也要有各自的benchmark 問題和dashboard」, 「
 - **專人 is a working arrangement, not access control.** AEP adds no file permissions; IT decides through SharePoint. No owner field blocks anyone, and there is no login check.
 - **A question belongs to one domain; an untagged one is waiting for a domain** and runs in no domain's test, only in the overview's. Rejected: running untagged questions in every domain, which puts market-intel's 12 in front of everyone and is what the owner objected to.
 - **全部領域 is a read-only overview.** Rejected: letting it add a question with no owner, which would make more of what is being assigned away.
+
+## 2026-11-05: 14 demonstration cards marked as samples, through a CSV import
+
+The owner decided to mark 14 cards of `market-intel` whose pages say fictional or demonstration, 13 and then one the wider check found, with the marks in `card:` units so every PC rebuilds them. No new route: the CSV import already applies `FICTIONAL` to a row and keeps a mark once set, and on a row with no changed value it moves nothing else. Rejected: a dedicated mark route, not needed for this; the page import, which by design never changes a mark; and renaming them `SAMPLE-`, which would change their keys, links and identities. Consequence: these 14 are `synthetic` without the prefix, 21 such cards in all.

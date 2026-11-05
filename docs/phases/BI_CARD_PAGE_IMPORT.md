@@ -95,6 +95,8 @@ An answer carries one note per dataset: the count of sample cards its searches r
 「待查證」, so 90 of robotics' 104 seed cards would vanish from the Dashboard and the tests of the demo Dashboard fail. So a card marked only by
 its wording, with no `SAMPLE-` name, **still counts in a built-in analysis**, and the host's line says it may.
 
+Measured again on 2026-11-05, on the real `market-intel` and on this rule moved to `synthetic`: 20 of its 31 pack analyses move, robotics' demo seed loses 29 tables, and 7 cards marked only by 「待查證」 leave, such as `WiFi-7`, that 29 real cards link to. Not changed; the decision is the owner's.
+
 Known consequence, for the owner: `FICTIONAL` also matches 「待查證」 in a value, so a real card whose page says 「(待查證)」 is marked as a
 sample, as it would be from a CSV. The dry run reports how many that is per base.
 
