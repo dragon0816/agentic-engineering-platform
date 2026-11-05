@@ -198,7 +198,7 @@ Owner, 2026-11-05: 「在審核卡片的時候，按接受沒反應，是不是�
 
 **待審提案.** A long `body` on the real vault was replaced by one sentence through this list, 2026-11-05; the orchestrator infers that was the owner's 「按接受沒反應」, unproved. The list sat below the table's empty pane, and its only answer was a notice at the top of the page. Now: no table when no run is open, 待審提案 N 筆 jumps to it, and the step opens for proposals alone. Old and new sit side by side; a value under half of a current one of 100 characters or more says both lengths and takes a second press 確定取代; the row shows 儲存中… at once, then the mark, and stays in place. Bulk accept says how many lose text.
 
-**What accepting does to evidence (`store._write_person_value`; pinned by `test_what_accepting_a_proposal_does_to_the_fields_evidence`).** The field becomes `kind: human`, `ref: agent-web:<who>`. Its `evidence` rows are not touched: the replaced value's citation stays on the field and on the card page's 參考來源, where it now cites text the card no longer has. The proposal's own evidence is not carried over, so the new value has no citation. The old value and its source stay in `history`. **Open, for the owner:** whether accepting should move the citations. The page says so before the press; the behaviour is unchanged.
+**What accepting does to evidence.** The owner decided, 2026-11-05: the proposal's evidence becomes the field's, and the replaced value's goes to history with the old value, shown on the card's 歷史. The sentence before the press says so, and a proposal with no evidence says the field will have none. `docs/DECISIONS.md` 2026-11-05, `tests/test_bi_accept_evidence.py`.
 
 The brief as given:
 

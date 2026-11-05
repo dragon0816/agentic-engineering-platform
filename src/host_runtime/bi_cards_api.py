@@ -837,6 +837,7 @@ def _decide_proposal(
             "value": found["value"],
             "base_version": given.get("base_version"),
             "reason": given.get("reason"),
+            "proposal_id": int(found["id"]),
         },
     )
 
@@ -1069,7 +1070,15 @@ def _accept_value(workspace: Path, who: str, card_id: str, given: dict[str, Any]
         value = correction.checked_value(reg, item, given.get("value"))
     except BiStoreError as failure:
         return _error(400, failure.code, failure.message)
-    version = store.set_field(card_id, name, value, base_version=base, actor=who, reason=reason)
+    version = store.set_field(
+        card_id,
+        name,
+        value,
+        base_version=base,
+        actor=who,
+        reason=reason,
+        proposal_id=given.get("proposal_id"),
+    )
     if version == base:
         return 200, {"ok": True, "version": version, "unchanged": True}
     return 200, {"ok": True, "version": version}

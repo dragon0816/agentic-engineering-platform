@@ -688,7 +688,8 @@ def test_accepting_a_proposal_shows_what_it_loses_and_then_that_it_was_done(
             assert one == page.run(f"{cells}[1].getBoundingClientRect().top"), "not side by side"
             warning = str(page.run(f"{row}.querySelector('.bi-prop-loss').textContent"))
             assert f"{len(SHORT_BODY)} 字" in warning and f"{len(LONG_BODY)} 字" in warning
-            assert "出處" in str(page.run(f"{row}.textContent"))
+            said = str(page.run(f"{row}.textContent"))
+            assert "提議的出處成為它的出處" in said and "目前值的出處移到卡片的歷史" in said
             page.shoot("proposal-before")
 
             # -- a value that loses text takes a second, named press --------------------------
@@ -767,7 +768,9 @@ def test_accepting_a_proposal_shows_what_it_loses_and_then_that_it_was_done(
 
 
 def test_what_accepting_a_proposal_does_to_the_fields_evidence(tmp_path: Path) -> None:
-    """As it stands, and worth knowing: the old citation stays, and the new one does not come."""
+    """Rewritten for the owner's decision of 2026-11-05 (it pinned the opposite before): the
+    accepted value brings its own citation, and the old one goes to history with the old value.
+    The rest of the rule: `test_bi_accept_evidence`."""
     workspace = tmp_path / "ws"
     workspace.mkdir()
     dataset = _vault(tmp_path, workspace, [_page(40)])
@@ -787,7 +790,58 @@ def test_what_accepting_a_proposal_does_to_the_fields_evidence(tmp_path: Path) -
     field = store.fields(card)["body"]
     assert field["value"] == SHORT_BODY and field["kind"] == "human"
     cited = [e["source_name"] for e in store.evidence(card) if e["field"] == "body"]
-    assert "長.md" in cited, "the replaced value's citation stays on the field"
-    assert "短.md" not in cited, "the accepted value's own citation is not carried over"
+    assert cited == ["短.md"], "the accepted value's own citation, and only that"
     history = [h for h in store.history(card) if h["field"] == "body"]
     assert any(LONG_BODY in str(h.get("old")) for h in history), "the old value stays in history"
+    moved = next(h["old_evidence"] for h in history if h.get("old_evidence"))
+    assert [e["source_name"] for e in moved] == ["長.md"], "with its citation"
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_the_page_says_when_a_value_comes_with_no_citation_and_history_keeps_the_old(
+    tmp_path: Path,
+) -> None:
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    dataset = _vault(tmp_path, workspace, [_page(40)])
+    _written_run(workspace, dataset, "長40.md", LONG_NOTE, _replacing(40, LONG_BODY))
+    unsourced = {
+        "candidates": [
+            {
+                "entity_type": "Technology",
+                "name": "FAKE-040",
+                "fields": {"body": {"value": SHORT_BODY, "basis": "inference", "reason": "猜"}},
+            }
+        ]
+    }
+    _written_run(workspace, dataset, "短40.md", SHORT_NOTE, unsourced)
+    store = BiStore(workspace, dataset)
+    found = store.find("Technology", "FAKE-040")
+    assert found is not None
+    card = str(found["id"])
+    shots = os.environ.get("AEP_UI_SHOTS")
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(
+            tmp_path / "browser", server.address, Path(shots) / "review-table" if shots else None
+        ) as page:
+            _review(page, dataset)
+            page.wait("!!document.querySelector('#bi-b-props-list .bi-prop-bare')")
+            said = page.run("document.querySelector('#bi-b-props-list .bi-prop-bare').textContent")
+            assert "沒有出處" in str(said) and "目前值的出處移到卡片的歷史" in str(said)
+            page.click("#bi-b-props-jump")
+            page.shoot("proposal-no-citation")
+            row = "document.querySelector('#bi-b-props-list > li')"
+            page.run(f"{_button(row, '接受')}.click()")
+            page.wait(f"!!{_button(row, '確定取代')}")
+            page.run(f"{_button(row, '確定取代')}.click()")
+            page.wait("!!document.querySelector('#bi-b-props-list .bi-state-accepted')")
+            assert store.fields(card)["body"]["value"] == SHORT_BODY
+            assert not [e for e in store.evidence(card) if e["field"] == "body"]
+
+            # The card's history: the old value and what it rested on, together.
+            page.run(f"biOpenCard({json.dumps(card)}); 0")
+            page.wait("!!document.querySelector('#bi-history .bi-old-evidence')")
+            old = str(page.run("document.getElementById('bi-history').textContent"))
+            assert LONG_BODY[:20] in old and "舊值的出處：長40.md" in old
+            page.run("document.getElementById('bi-history').scrollIntoView(); 0")
+            page.shoot("history-old-citation")
