@@ -6408,3 +6408,15 @@ The owner's rules: through ingest, only the card's own source text, fill only, r
 ## 2026-11-05: Agent Web records write requests, without what they say
 
 Four uncommitted changes appeared on the real `market-intel` on 2026-11-04 at 21:25 and nobody could be found: Agent Web logged no requests, by design, since a request carries the team's own words. The owner said yes to a record of writes only: time, method, path without query, status, `User-Agent`, `Referer` without query, the client's address, and an `X-AEP-Client` label. Rejected: bodies or query strings, which would undo why `log_message` is silent; reads, which are many and change nothing; a label as identity, since any process with the token can send any label. It is a queue and one thread, so a slow or unwritable log costs a line and never a request. It cannot answer who: it can answer which client said what, and when.
+
+## 2026-11-05 — A start waits out a busy state file, and a second click joins the start under way
+
+The owner's click after a reboot ended in 「Agent Web stopped while starting (exit code 2)」, `state_unavailable`; the next start worked. Orchestrator's brief, same day.
+
+**What was found.** `SqliteLocalState` opens with `timeout=0` and takes `BEGIN IMMEDIATE` on every open, so any other connection holding the file is an immediate refusal, reported the same as a broken file. A held lock reproduces it in about 20 ms. The first start's log was last written at 14:58:57, 155 s after it began, while a second `web` started at 14:57:48 was printing its address at 14:59:00, so both were opening at about the same time: `open` starts another server if none answers yet. That is the likely holder, not a proven one: the log kept no more. `mcp` and `assistant-mcp` are ruled out: they return before `build_runtime` and never open this file.
+
+**Decided.**
+- `timeout=0` stays. It is deliberate (`031e7627`, "a second writer is refused rather than waited for"), and a running host's writes keep that answer.
+- Only opening at start waits: up to 30 s for a busy file (`LocalStateBusy`, still code `unavailable` to everyone else), then `state_busy`. A broken file or another device's fails at once. Rejected: a global busy timeout, which would make every write of a running host able to stall.
+- A second `open` joins a start under way (`agent-web-start.json`) rather than starting another server. Two servers starting together would otherwise now both pass the state file and meet on the port.
+- The page stops promising 10–30 s: measured here 72 s and more than 155 s on a loaded PC after a reboot. Its wait goes from 180 s to 300 s, which amends the 2026-10-16 decision, since 155 s plus the 30 s wait would pass 180 s.

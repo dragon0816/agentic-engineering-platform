@@ -1,5 +1,13 @@
 # Handoff
 
+## A busy state file at start (2026-11-05, Claude Code) — branch `web-start-retry`, not merged
+
+**Done.** A start waits up to 30 s for a busy `state.sqlite`, and a second click joins the start under way. Decision and evidence: `docs/DECISIONS.md` 2026-11-05. Tests: `tests/test_host_state_busy.py`, `tests/test_launcher.py`.
+
+**Not done.** The real desktop shortcut after a real reboot was not tried, and the owner's Agent Web was not restarted, so the live install still has the old code until the next release or restart. The holder of the lock on 2026-11-05 is likely, not proven.
+
+**Next action.** Orchestrator: merge. Then the owner's next start confirms it.
+
 ## Example skills in `market-intel` for review (2026-11-05, Claude Code) — waiting for colleagues to read them
 
 **Where.** Vault commit `011125aaec19`, pushed, published stays `2026q4-r6.2`. Files `library/skill-review/skills/<domain>-extract-review/`. Repository: `docs/examples/bi-skills/`, `docs/guides/BI_SKILL_EXAMPLES.zh-TW.md`, `tests/test_bi_skill_examples.py`, branch `bi-skill-examples`, not pushed.
