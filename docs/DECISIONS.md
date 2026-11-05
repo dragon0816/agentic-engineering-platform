@@ -6431,6 +6431,36 @@ The owner's click after a reboot ended in 「Agent Web stopped while starting (e
 - A second `open` joins a start under way (`agent-web-start.json`) rather than starting another server. Two servers starting together would otherwise now both pass the state file and meet on the port.
 - The page stops promising 10–30 s: measured here 72 s and more than 155 s on a loaded PC after a reboot. Its wait goes from 180 s to 300 s, which amends the 2026-10-16 decision, since 155 s plus the 30 s wait would pass 180 s.
 
+
+## 2026-11-05: Accepting a proposal moves the citations with the value
+
+The owner's decision: a card's value and its citations must match. Before, accepting a proposal left the replaced value's citation on the field and on the card page's 參考來源, and dropped the proposal's own, so a card could cite text it no longer held.
+
+**Decided.** On accepting, the proposal's evidence becomes the field's, and the field's evidence goes to that change's history row, `old_evidence`, readable with the old value on the card's 歷史. A proposal with no evidence leaves the field with none, and the page says so before the press. Rejecting changes nothing.
+
+**Carried by units, so another PC rebuilds the same.** The `evidence:` unit is replaced, or gone when there is none; the field unit's `history` gains `old_evidence`, a list, `[]` when nothing moved. `MODEL_VERSION` goes to 10: a local `bi.sqlite` rebuilds once, since a PC on older code built commits from a newer one without the column. Old commits have no such key and read as before; so do pending proposals.
+
+**Other writes, by the same rule.** Bulk accept: as one by one. A correction note: it broke the rule, adding its evidence beside the replaced value's, so it now replaces, and undoing the note restores the old evidence. A rename and the migration in `migrate.py` are unchanged: a rename's citation says where the card came from, and the migration only adds to `aliases` and `chain`. A push conflict: choosing a field's side also chooses its evidence's, since they are separate units; a person can still choose otherwise on the evidence's own row.
+
+**A card keeps its home.** `card_app_folders` also counts `old_evidence`'s sources: replacing a value does not move a card out of a home.
+
+**Known limits.**
+- A run's commit that replaces a value directly (a rules run, and 改用新值 in review) still adds its evidence beside the old. Not in this decision's scope; the same rule would apply.
+- A push conflict where only the field conflicts, because the other side changed it without touching evidence (a rename's name field, a migration): choosing theirs still pushes my evidence unit.
+- A conflict proposal (`kind: conflict`, from a lost replay) carries no evidence, so accepting it leaves the field with none.
+- Evidence review works on the field's current evidence: a moved row's reviews stay readable in `old_evidence`, and it cannot be reviewed further.
+
+**Rejected.** Keeping both on the field with a mark on the old one: every reader of `evidence` (the card page, the review, the chat) would need to learn the mark, and a miss cites text the card no longer holds. Deriving old evidence from the commit's `evidence:` change: it ties history to which commit touched which unit, where the field's own `history` already travels.
+
+- **Commit and push stay whole-vault for now.** The page says which homes a commit touches. Rejected: committing part of the changes by domain, which changes the repository model. The owner has not asked for that, and it is what publishing or blocking domains separately would need.
+
+## 2026-11-05: A person can create a BI domain, with no schema version
+
+The owner: 「需要讓使用者可以create domain」, 「新增domain時，需要可以按照規則生成相對應的檔案folder結構」. Design: `docs/phases/BI_PAGE_SIMPLE.md` §10.
+
+- **A created home is one unit, `meta:home:<id>`, and its domain widens the vault's schema when read.** Cards of it can carry the domain, and no skill turns 需要更新. Rejected: a new schema version per domain, since a draft, a publish and 需要更新 on every edited skill would disturb everyone for one person's folder; a home with no card domain, whose cards would silently lose it; appending to `meta:vault_segments`, where two people adding different homes would conflict.
+- **The folders come from the unit, with no placeholder file.** Each PC makes them on push and sync through the one definition, `homes.HOME_FOLDERS`. Rejected: a placeholder, which would need excluding everywhere sources, skills and tools are listed.
+- **The list of homes is built from units only.** An empty folder makes no home, so `library/skill-review` stays out. Accepted cost: a PC on an older AEP drops a created domain from its cards, with the existing warning.
 ## 2026-11-05 — Schema changes merge when they do not overlap, and only touched skills are flagged
 
 Owner, relayed by the BI orchestrator. Design: `docs/phases/BI_CARD_MODEL.md` §4.3.
@@ -6449,3 +6479,15 @@ Owner, relayed by the BI orchestrator. Design: `docs/phases/BI_CARD_MODEL.md` §
 - `MODEL_VERSION` stays: what a rebuild makes changes only for a vault with these units, and those did not exist before.
 
 **Accepted limits.** An older AEP refuses a vault with these units at sync. The platform's 2026-10-22 reader refuses a snapshot whose schema carries `+`. A later version taking in a change counts as possibly breaking for that type's skills: what the change said is no longer known.
+
+## 2026-11-05 — One owner for a created domain in the schema
+
+Two designs landed on the same day: `meta:home:<id>` widening the registry when read (`catalog.with_home_domains`), and `schema_change:domain:<name>`. `market-intel` holds neither, in any of its 45 commits (checked read-only), so no vault needs both read.
+
+**Decided.** `meta:home:<id>` stays and keeps `{label, domain}`, because the folder and label need it. `schema_merge.changes_of` reads that domain into what the vault reads; `with_home_domains`, `BiStore.home_domains` and the `schema_change:domain` unit are gone. A bare domain in a draft, with no home, is a new version.
+
+**Why not keep the widening:** `reg.domains` said more than `reg.document`, under one ref, so one id@version could mean two things. A snapshot carries the document and not `meta:home`, so a reader's copy would not have known the domain.
+
+**Why not keep the unit:** a home needs its unit anyway, so a create would write two units that must agree, and an AEP older than this refuses `schema_change:` units at sync. `meta:` it accepts.
+
+**Cost.** A created domain makes what the vault reads `<version>+<digest>`, so a snapshot of it is refused by the platform's 2026-10-22 reader until that is redeployed. A new domain flags no skill, even one whose text names it.

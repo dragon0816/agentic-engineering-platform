@@ -13,7 +13,8 @@ A vault registered on this PC is the dataset `vault-<vault id>` (registry
     schema                       the schema version (`<id>@<version>`)
     meta:<key>                   any other dataset meta (domain configuration …)
     card:<card id>               {"type", "key", "name", "synthetic"}
-    field:<card id>:<field>      {"value", "source", "history"}; value null = cleared
+    field:<card id>:<field>      {"value", "source", "history"}; value null = cleared;
+                                 `history.old_evidence`: what a replaced value rested on
     evidence:<card id>:<field>   [evidence rows]
     proposal:<key>               {"card", "field", "value", "kind", "ref", "at", "import_id",
                                   "status"}
@@ -57,6 +58,7 @@ from capabilities.bi_cards import (
     card_markdown,
     card_model,
     catalog,
+    extract,
     homes,
     names,
     profile,
@@ -83,6 +85,8 @@ from capabilities.bi_cards.store import (
     PlannedRow,
     add_missing_columns,
     card_id_for,
+    evidence_unit,
+    insert_evidence_unit,
     is_subscribed,
     now,
     vault_registry,
@@ -339,7 +343,7 @@ class BiType:
     def skill_binding(self, units: Mapping[str, Any], schema: str) -> dict[str, Any]:
         """What a skill revision is written against: the version, and the changes merged
         on it so far, so a later change can be told apart from these."""
-        seen = sorted(schema_merge.changes_of(units))
+        seen = sorted(schema_merge.stored_changes(units))
         return {
             "schema": catalog.base_ref(schema),
             **({"schema_seen": seen} if seen else {}),
@@ -351,7 +355,7 @@ class BiType:
         """Whether the schema moved in a way that touches this skill (`BI_CARD_MODEL.md` §4.3)."""
         current = str(units.get(repo_engine.SCHEMA_UNIT) or "")
         written_for = catalog.base_ref(str(value.get("schema") or ""))
-        changes = schema_merge.changes_of(units)
+        changes = schema_merge.stored_changes(units)
         seen = set(value.get("schema_seen") or [])
         if not current or (written_for == current and seen == set(changes)):
             return {"needs_update": False, "update_blocks": False, "update_reason": ""}
@@ -415,7 +419,9 @@ def _tables(db: sqlite3.Connection) -> set[str]:
     return {r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
 
 
-def _history_value(row: Mapping[str, Any]) -> dict[str, Any]:
+def _history_value(row: sqlite3.Row) -> dict[str, Any]:
+    # Only when the change moved it, so a unit from before this stays as it was.
+    moved = row["old_evidence"] if "old_evidence" in row.keys() else None  # noqa: SIM118
     return {
         "kind": row["kind"],
         "ref": row["ref"],
@@ -423,20 +429,8 @@ def _history_value(row: Mapping[str, Any]) -> dict[str, Any]:
         "at": row["at"],
         "import_id": row["import_id"],
         "reason": row["reason"],
+        **({} if moved is None else {"old_evidence": _load(moved)}),
     }
-
-
-def _reference_of(row: sqlite3.Row) -> dict[str, Any]:
-    """The reference parts an evidence unit's row holds. A row written before the
-    card model holds none and has no `reference_at`: its id is computed at each
-    rebuild, so its unit stays as it was and a capture does not diff it."""
-    if "reference_at" not in row.keys() or row["reference_at"] is None:
-        return {}
-    parts = ("reference_id", "stance", "reference_at", "reference_time_basis")
-    found = {k: row[k] for k in parts if row[k] is not None}
-    if "assessment" in row.keys() and row["assessment"] is not None:
-        found["assessment"] = _load(row["assessment"])
-    return found
 
 
 def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str, Any]:
@@ -507,16 +501,7 @@ def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str
             if r["card_id"] not in ids:
                 continue
             units.setdefault(f"evidence:{ids[r['card_id']]}:{r['field']}", []).append(
-                {
-                    "run_id": r["run_id"],
-                    "source_id": r["source_id"],
-                    "source_name": r["source_name"],
-                    "locator": _load(r["locator"]),
-                    "excerpt": r["excerpt"],
-                    "basis": r["basis"],
-                    "at": r["at"],
-                    **_reference_of(r),
-                }
+                evidence_unit(r)
             )
     if "field_states" in tables:
         for r in db.execute("SELECT * FROM field_states WHERE origin = 'unit'"):
@@ -606,6 +591,7 @@ def _field_history(
                     "import_id": history.get("import_id"),
                     "reason": history.get("reason"),
                     "old_source": None if before is None else before.get("source"),
+                    "old_evidence": history.get("old_evidence"),
                 }
             )
     return rows, cards
@@ -728,10 +714,17 @@ def _fill_homes(
         if key.startswith(vault_sources.PREFIX) and isinstance(value, dict)
     }
     belongs: dict[str, set[str]] = {}
-    for row in db.execute("SELECT DISTINCT card_id, source_id FROM evidence").fetchall():
-        home = homes.home_of(folders.get(str(row[1]), ""))
+    gave = {(str(r[0]), str(r[1])) for r in db.execute(
+        "SELECT DISTINCT card_id, source_id FROM evidence").fetchall()}  # fmt: skip
+    # What a replaced value rested on gave evidence too: replacing it does not move the card.
+    for row in db.execute(
+        "SELECT card_id, old_evidence FROM history WHERE old_evidence IS NOT NULL"
+    ).fetchall():
+        gave.update((str(row[0]), str(item["source_id"])) for item in _load(row[1]))
+    for card, source in sorted(gave):
+        home = homes.home_of(folders.get(source, ""))
         if home is not None:
-            belongs.setdefault(str(row[0]), set()).add(home)
+            belongs.setdefault(card, set()).add(home)
     db.executemany(
         "INSERT INTO card_app_folders (card_id, application) VALUES (?, ?)",
         [(card, home) for card, found in sorted(belongs.items()) for home in sorted(found)],
@@ -868,29 +861,7 @@ def materialize(
                 if cid not in present:
                     continue
                 for item in value:
-                    db.execute(
-                        "INSERT INTO evidence (card_id, field, run_id, source_id, source_name, "
-                        "locator, excerpt, basis, at, reference_id, stance, reference_at, "
-                        "reference_time_basis, assessment) "
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        (
-                            cid,
-                            name,
-                            item["run_id"],
-                            item["source_id"],
-                            item["source_name"],
-                            _dump(item["locator"]),
-                            item["excerpt"],
-                            item["basis"],
-                            item["at"],
-                            item.get("reference_id")
-                            or card_model.reference_id(item["source_id"], item["locator"]),
-                            item.get("stance") or card_model.SUPPORTS,
-                            item.get("reference_at"),
-                            item.get("reference_time_basis"),
-                            None if item.get("assessment") is None else _dump(item["assessment"]),
-                        ),
-                    )
+                    insert_evidence_unit(db, cid, name, item)
             elif key.startswith(card_model.STATE_PREFIX):
                 _, cid, name = key.split(":", 2)
                 if cid not in present:
@@ -919,7 +890,7 @@ def materialize(
                 continue
             db.execute(
                 "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, import_id, "
-                "reason, old_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "reason, old_source, old_evidence) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     row["card_id"],
                     row["field"],
@@ -936,6 +907,7 @@ def materialize(
                     row["import_id"],
                     row["reason"],
                     None if row["old_source"] is None else _dump(row["old_source"]),
+                    None if row["old_evidence"] is None else _dump(row["old_evidence"]),
                 ),
             )
         proposals = sorted(
@@ -1397,6 +1369,8 @@ class Vault:
                 report = self.repo.sync()
                 built = self._is_built()
                 reads = self.reads()
+            if report.get("applied") or not built:
+                self.ensure_home_folders()
             if not built:
                 vault_sources.sync_staging(self.repo, self.workspace, self.dataset)
                 self.rebuild()
@@ -1408,6 +1382,18 @@ class Vault:
             state.write_text(json.dumps({"at": now(), "reads": reads}), encoding="utf-8")
             # A first sync on this PC only records what it reads: nothing moved.
             return {**report, "moved": not built or (known is not None and known != reads)}
+
+    def ensure_home_folders(self) -> None:
+        """The folders of every pushed home a person created, in the shared folder. No file
+        marks them: each PC makes them from the unit on push and sync, so nothing here can be
+        taken for a source, skill or tool, and a folder lost in transfer comes back. Only an
+        empty folder is at stake, so a refusal is not worth stopping a sync for."""
+        for item in vault_skills.created_homes(self.repo.units()):
+            for folder in homes.home_folders(item["home"]):
+                try:
+                    repo_engine.long_path(self.folder / folder).mkdir(parents=True, exist_ok=True)
+                except OSError:
+                    continue
 
     @contextmanager
     def capture(self, store: BiStore) -> Iterator[sqlite3.Connection]:
@@ -1503,6 +1489,7 @@ class Vault:
         additions = schema_merge.changes_between(old, new)
         if additions is not None:
             path.unlink(missing_ok=True)  # never pushed, so it must not take the number
+            schema_versions.renumbered(self.workspace, target_ref, None)
             return additions
         major, minor = catalog._version_tuple(target.version)[:2]  # noqa: SLF001
         content = repo_engine.canonical({k: v for k, v in new.items() if k != "version"})
@@ -1514,7 +1501,8 @@ class Vault:
             f"{version}.json",
             json.dumps({**new, "version": version}, ensure_ascii=False),
         )
-        absorbed = {k: None for k in schema_merge.changes_of(working)}
+        schema_versions.renumbered(self.workspace, target_ref, f"{target.schema_id}@{version}")
+        absorbed = {k: None for k in schema_merge.stored_changes(working)}
         return {repo_engine.SCHEMA_UNIT: f"{target.schema_id}@{version}", **absorbed}
 
     def schema_conflicts(self) -> list[dict[str, Any]]:
@@ -1750,8 +1738,8 @@ def _new_vault(
         )
     (repo.folder / homes.skills_dir("")).mkdir(parents=True, exist_ok=True)
     for home in (*(s["folder"] for s in segments), *(f"{homes.LIBRARY}/{e}" for e in library)):
-        for name in homes.HOME_FOLDERS:
-            (repo.folder / homes.home_dir(home) / name).mkdir(parents=True, exist_ok=True)
+        for folder in homes.home_folders(home):
+            (repo.folder / folder).mkdir(parents=True, exist_ok=True)
     _register(
         workspace, {"id": vault_id, "path": str(repo.folder), "author": author, "joined": now()}
     )
@@ -2281,6 +2269,7 @@ def push(workspace: Path, vault_id: str) -> dict[str, Any]:
             result = vault.repo.push()
             if result["status"] == "pushed":
                 readme.write_readme(vault.repo)
+                vault.ensure_home_folders()
         if result["status"] == "conflicts":
             units = vault.repo.working_units()
             shown = card_model.card_names_of(units)
@@ -2329,10 +2318,12 @@ def decide_schema_conflict(
 
 def resolve(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
     vault = _vault(workspace, vault_id)
+    unit, choice = str(given.get("unit") or ""), str(given.get("choice") or "")
     with _repo_errors():
-        vault.repo.resolve(
-            str(given.get("unit") or ""), str(given.get("choice") or ""), given.get("value")
-        )
+        vault.repo.resolve(unit, choice, given.get("value"))
+        if unit.startswith("field:") and choice in ("mine", "theirs"):
+            # The citations go with the value chosen; the person can still choose otherwise.
+            vault.repo.resolve(f"evidence:{unit.removeprefix('field:')}", choice)
     return {"resolved": True}
 
 
@@ -2465,24 +2456,43 @@ def skills(workspace: Path, vault_id: str) -> dict[str, Any]:
         "skills": found,
         "schema": str(units.get(repo_engine.SCHEMA_UNIT) or ""),
         "folders": ["sources", *folders],
-        "homes": _working_domains(vault, units, folders),
+        "homes": _working_domains(vault, units),
+        "default_types": [t for t in extract.DEFAULT_TYPES],
         "roles": ["classify", "extract"],
         "tools": vault_tools.current_tools(units),
     }
 
 
-def _working_domains(
-    vault: Vault, units: Mapping[str, Any], folders: list[str]
-) -> list[dict[str, Any]]:
+def create_home(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
+    """Stage a new application (`docs/phases/BI_PAGE_SIMPLE.md` §10). Uncommitted like any
+    change; its folders exist in this PC's working copy now and in the shared one after push."""
+    vault = _vault(workspace, vault_id)
+    with vault.lock:
+        units = vault.repo.working_units()
+        item = vault_skills.new_home(given, units, vault._schema_of(units))
+        key, value = vault_skills.home_unit(item)
+        with _repo_errors():
+            vault.repo.stage(key, value)
+        for folder in homes.home_folders(item["home"]):
+            repo_engine.long_path(vault.repo.work / "files" / folder).mkdir(
+                parents=True, exist_ok=True
+            )
+        vault.rebuild()
+        units = vault.repo.working_units()
+        return {"home": item["home"], "homes": _working_domains(vault, units)}
+
+
+def _working_domains(vault: Vault, units: Mapping[str, Any]) -> list[dict[str, Any]]:
     """What a person can work on (`docs/phases/BI_PAGE_SIMPLE.md` §9): the vault's homes and any
-    other its folders and sources are in, each with its folder and its schema domain."""
+    other its sources are in, each with its folder and its schema domain. An empty folder makes
+    no home: `library/skill-review` holds review copies and is not a place to work."""
     listed = {item["home"]: item["label"] for item in vault_skills.home_list(units)}
     source_folders = [
         str(value.get("folder") or "")
         for key, value in units.items()
         if key.startswith("source:") and isinstance(value, dict)
     ]
-    for folder in (*folders, *source_folders):
+    for folder in source_folders:
         home = homes.home_of(folder)
         if home is not None:
             listed.setdefault(home, home)

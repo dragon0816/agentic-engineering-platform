@@ -450,6 +450,21 @@ def publish(workspace: Path, draft_id: str, rev: Any, actor: str) -> dict[str, A
     return {**installed, "ref": ref, "draft": meta}
 
 
+def renumbered(workspace: Path, ref: str, became: str | None) -> None:
+    """A published ref a vault took as something else: under its new number, or, when it
+    became additions (`became` None), no version at all. A draft's list must not offer it."""
+    root = drafts_root(workspace)
+    for path in root.glob(f"*/{DRAFT_FILE}") if root.is_dir() else ():
+        meta = _read_json(path)
+        kept = [
+            {**entry, "ref": became} if entry.get("ref") == ref else entry
+            for entry in meta.get("published") or []
+            if became is not None or entry.get("ref") != ref
+        ]
+        if kept != meta.get("published"):
+            _write_json(path, {**meta, "published": kept})
+
+
 # -- dataset upgrade ---------------------------------------------------------
 
 

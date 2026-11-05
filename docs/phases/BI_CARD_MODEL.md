@@ -189,7 +189,7 @@ Profile proposal → reviewed → merged by the reviewer's confirmation, with no
 
 | Change | Unit | Value |
 |---|---|---|
-| New domain | `schema_change:domain:<name>` | `{"domain"}` |
+| New domain | none of its own: `meta:home:<id>`'s `domain`, read here (`BI_PAGE_SIMPLE.md` §10) | |
 | New type | `schema_change:type:<Type>` | the type |
 | New field, not required | `schema_change:field:<Type>.<field>` | the field, without `used_by` |
 | Added enum value | `schema_change:enum:<Type>.<field>:<value>` | `{"value"}` |
@@ -197,6 +197,8 @@ Profile proposal → reviewed → merged by the reviewer's confirmation, with no
 | A home uses a field | `schema_change:used_by:<Type>.<field>:<home>` | `{"home"}` |
 
 Every path stays as it is: draft, publish, upgrade. `Vault.capture` compares the published target with what the vault reads. Only additions (`changes_between`) become units, and the target's number is given back, since it was never pushed. Anything more is a new version.
+
+A domain has one owner. `meta:home:<id>` keeps a created home's label, folder and domain, because a domain without a home has nowhere for its sources; `schema_merge.changes_of` reads that domain into the schema, with every other change. A bare domain in a draft is a new version.
 
 **Determinism.** `overlay` applies units by kind, then by key, so the result depends only on the set of units. What a vault reads is `<base>+<first 12 hex of the units' digest>`, for example `5.0.0+a1b2c3d4e5f6`, generated on each PC and installed locally, never pushed. So every PC has byte-identical schema, in any arrival order, and an addition takes no number. Tests: two PCs in both orders and a real race, then a third PC joining.
 
@@ -212,7 +214,7 @@ Every path stays as it is: draft, publish, upgrade. `Vault.capture` compares the
 | Two different new versions | At push | The same list, 「schema 版本」, each side showing its ref |
 | A new version against someone's unit, such as removing a field another just extended | At push (`new_schema_clashes`) | The existing notice: 「沒有送出：schema 的允許值 Technology.stage:pilot：欄位 Technology.stage 已經不在這個版本」 |
 | Removing a field with `used_by` | At preview and apply | `blocked` with code `field_used_by`: the upgrade does not apply |
-| Any of these in a real race, neither PC able to see the other | At sync | **Not on the page yet.** `status.schema_conflicts`, the same on every PC, and `POST /api/bi/vaults/<id>/schema-conflicts`. A clashing unit is left out of the schema until decided |
+| Any of these in a real race, neither PC able to see the other | At sync | The same list, under 「schema 的改動有 N 個要決定」: `status.schema_conflicts`, the same on every PC, and `POST /api/bi/vaults/<id>/schema-conflicts`. A clashing unit is left out of the schema until decided |
 
 **Skills.** A skill revision records its version and the change units it saw (`schema_seen`). `skill_verdict` flags it only when the change touches it:
 
@@ -224,9 +226,9 @@ Every path stays as it is: draft, publish, upgrade. `Vault.capture` compares the
 | What can lose meaning, elsewhere | Not flagged | Flagged, stops |
 | Cannot be worked out: file unreadable, another top-level key moved | Flagged, stops | Flagged, stops |
 
-"Names" covers type and field names, labels, enum values and domains. A change a later version took in counts as possibly losing meaning, for its own type, because what it said is no longer known. An unedited generated classify is read as the schema is now, so additions never flag it. The list gains `update_blocks` and `update_reason`.
+"Names" covers type and field names, labels and enum values. A new domain flags nothing, even when a skill's text names it. A change a later version took in counts as possibly losing meaning, for its own type, because what it said is no longer known. An unedited generated classify is read as the schema is now, so additions never flag it. The list gains `update_blocks` and `update_reason`.
 
-**Not done:** the page's line 「修改並儲存後才會再使用」 is wrong for a flag with `update_blocks: false`, and `schema_conflicts` has no place on the page. Both are `web_page.py`.
+**On the page:** `schema_conflicts` is in the push conflict list, `bi-b-ver-conflicts`: a clash offers 放棄這個改動, a race 留下現在的 and 改用另一個, each staged for the person's commit. A flag with `update_blocks: false` says what changed and that the rule keeps working.
 
 ## 5. Editing (D4)
 

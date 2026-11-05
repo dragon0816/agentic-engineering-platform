@@ -157,12 +157,11 @@ def _both_land(tmp_path: Path, first: Mutate, second: Mutate, *, order: str) -> 
     [
         (_new_field("cooling"), _new_field("power"), "fields"),
         (_new_type("Fictional"), _new_type("Imaginary"), "types"),
-        (_new_domain("marine"), _new_domain("rail"), "domains"),
         (_new_enum("maturity", "pilot"), _new_enum("maturity", "sunset"), "enum"),
         (_new_label("maturity", "成熟度甲"), _new_label("standard_body", "標準組織乙"), "labels"),
-        (_new_field("cooling"), _new_domain("marine"), "field and domain"),
+        (_new_field("cooling"), _new_enum("maturity", "pilot"), "field and enum"),
     ],
-    ids=["fields", "types", "domains", "enum values", "labels of two fields", "mixed"],
+    ids=["fields", "types", "enum values", "labels of two fields", "mixed"],
 )
 def test_non_overlapping_changes_both_land_in_either_order(
     tmp_path: Path, first: Mutate, second: Mutate, landed: str
@@ -511,13 +510,11 @@ def test_only_additions_become_units() -> None:
     new = copy.deepcopy(old)
     new["version"] = "5.1.0"
     _new_field("cooling")(new)
-    _new_domain("marine")(new)
     _new_enum("maturity", "pilot")(new)
     units = schema_merge.changes_between(old, new)
     assert units is not None
     assert set(units) == {
         "schema_change:field:Technology.cooling",
-        "schema_change:domain:marine",
         "schema_change:enum:Technology.maturity:pilot",
     }
     for mutate in (
@@ -526,6 +523,7 @@ def test_only_additions_become_units() -> None:
         lambda d: _field(d, "Technology", "maturity")["enum"].pop(),
         lambda d: _new_field("needed", required=True)(d),
         lambda d: d["domains"].pop(),
+        _new_domain("marine"),  # with no home it has nowhere to be a unit
     ):
         changed = copy.deepcopy(old)
         changed["version"] = "5.1.0"
@@ -571,3 +569,76 @@ def test_the_snapshot_of_a_merged_schema_reads_back(tmp_path: Path) -> None:
     assert store.schema_ref().startswith(f"{BASE}+")
     built = snapshot.build_snapshot(store)
     assert snapshot.read_snapshot(built).schema_ref == done["ref"]
+
+
+# -- a created domain ------------------------------------------------------------------
+
+
+def _create(ws: Path, vault_id: str, name: str) -> None:
+    _ok(_call(ws, "POST", f"/api/bi/vaults/{vault_id}/homes", {"name": name}))
+
+
+@pytest.mark.parametrize("order", ["ab", "ba", "race"])
+def test_two_created_domains_and_a_field_land_in_any_order(tmp_path: Path, order: str) -> None:
+    drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
+    _create(a, vault_id, "marine")
+    _change(a, dataset, _new_field("cooling"))
+    _create(b, vault_id, "rail")
+    _commit(a, vault_id, "虛構：a")
+    _commit(b, vault_id, "虛構：b")
+    if order == "race":
+        assert _push(a, vault_id)["status"] == "pushed"
+        assert _push(b, vault_id)["status"] == "pushed"
+    else:
+        pcs = [("a", a), ("b", b)] if order == "ab" else [("b", b), ("a", a)]
+        assert _push(pcs[0][1], vault_id)["status"] == "pushed"
+        drive.deliver(pcs[0][0], pcs[1][0], vault_id)
+        assert _push(pcs[1][1], vault_id)["status"] == "pushed"
+    drive.deliver("a", "b", vault_id)
+    drive.deliver("b", "a", vault_id)
+    _sync(a, vault_id)
+    _sync(b, vault_id)
+    assert _effective_bytes(a, dataset) == _effective_bytes(b, dataset)
+    reg = catalog.for_store(BiStore(a, dataset))
+    assert {"marine", "rail"} <= set(reg.domains)
+    assert {"marine", "rail"} <= set(reg.document["domains"]), "one truth: the document says so"
+    assert not [k for k in vault.Vault(a, vault_id).repo.units() if ":domain:" in k]
+
+
+def test_a_created_domain_flags_no_skill_even_one_that_names_it(tmp_path: Path) -> None:
+    _, vault_id, dataset, a, _ = _two_pcs(tmp_path)
+    _skill(a, vault_id, "wireless/names-it", "marine 的來源要小心。", card_types=["Technology"])
+    _skill(a, vault_id, "robotics/plain", "一般規則。")
+    _commit(a, vault_id, "虛構")
+    _push(a, vault_id)
+    before = BiStore(a, dataset).schema_ref()
+    _create(a, vault_id, "marine")
+    assert BiStore(a, dataset).schema_ref() != before, "what it reads moved"
+    assert vault.Vault(a, vault_id).repo.working_units()["schema"] == before, "its version did not"
+    found = _skills(a, vault_id)
+    assert not [name for name, item in found.items() if item["needs_update"]]
+
+
+def test_a_snapshot_carries_a_created_domain(tmp_path: Path) -> None:
+    from capabilities.bi_cards import snapshot
+
+    _, vault_id, dataset, a, _ = _two_pcs(tmp_path)
+    _create(a, vault_id, "marine")
+    built = snapshot.build_snapshot(BiStore(a, dataset))
+    assert "marine" in snapshot.read_snapshot(built).document["schema"]["document"]["domains"]
+
+
+# -- a draft's list, once a vault took its version as something else ------------------------
+
+
+def test_a_drafts_list_offers_nothing_that_answers_schema_unknown(tmp_path: Path) -> None:
+    _, _, dataset, a, _ = _two_pcs(tmp_path)
+    _change(a, dataset, _new_field("cooling"))
+    listed = [p["ref"] for d in schema_versions.drafts(a) for p in d["published"]]
+    assert listed == [], "additions took no version, so nothing is offered"
+    _change(a, dataset, _new_field("spec_note"))
+    _change(a, dataset, _remove_field("spec_note"))
+    listed = [p["ref"] for d in schema_versions.drafts(a) for p in d["published"]]
+    assert len(listed) == 1
+    for ref in listed:
+        assert catalog.resolve(a, ref).ref == ref

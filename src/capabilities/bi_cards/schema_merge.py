@@ -11,6 +11,10 @@ A change that is not an addition is still a new version, for a person (`changes_
 answers None). What units cannot see, a unit against a version that no longer fits it, is
 a clash: `overlay` leaves that unit out, the same on every PC, and says so.
 
+A created home's domain is read here too, from the home's own unit (`meta:home:<id>`,
+`BI_PAGE_SIMPLE.md` §10), so this is the one owner of what a vault's schema holds. A bare
+domain in a draft, with no home, is a new version.
+
 This module also says which skills a change touches (`skill_verdict`).
 """
 
@@ -24,7 +28,7 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog
+from capabilities.bi_cards import catalog, vault_skills
 from capabilities.bi_cards.store import BiStoreError
 from knowledge.repo.repository import SCHEMA_UNIT, canonical
 
@@ -63,15 +67,22 @@ def used_by_key(type_name: str, field: str, home: str) -> str:
 
 def unit_problem(key: str, value: Any) -> str | None:
     kind = key[len(PREFIX) :].partition(":")[0]
-    if kind not in KINDS:
+    if kind not in KINDS or kind == "domain":
         return "not a schema change"
     if value is not None and not isinstance(value, dict):
         return "a schema change must be an object"
     return None
 
 
-def changes_of(units: Mapping[str, Any]) -> dict[str, Any]:
+def stored_changes(units: Mapping[str, Any]) -> dict[str, Any]:
+    """The changes that are units of their own."""
     return {k: units[k] for k in sorted(units) if k.startswith(PREFIX) and units[k] is not None}
+
+
+def changes_of(units: Mapping[str, Any]) -> dict[str, Any]:
+    """What these units change in the schema: their own, and each created home's domain."""
+    created = {domain_key(d): {"domain": d} for d in vault_skills.created_domains(units)}
+    return {**stored_changes(units), **dict(sorted(created.items()))}
 
 
 def describe(key: str) -> str:
@@ -111,12 +122,8 @@ def changes_between(old: Mapping[str, Any], new: Mapping[str, Any]) -> dict[str,
         _without(new, "version", "domains", "types")
     ):
         return None
-    old_domains = list(old.get("domains") or [])
-    if not set(old_domains) <= set(new.get("domains") or []):
-        return None
-    for name in new.get("domains") or []:
-        if name not in old_domains:
-            units[domain_key(name)] = {"domain": name}
+    if set(old.get("domains") or []) != set(new.get("domains") or []):
+        return None  # a domain with no home has nowhere to be a unit: a new version
     before, after = _types(old), _types(new)
     if not set(before) <= set(after):
         return None
@@ -194,7 +201,7 @@ def _apply(document: dict[str, Any], key: str, value: Mapping[str, Any]) -> str 
     type_name, field, tail = _target(key)
     if kind == "domain":
         domains = document.setdefault("domains", [])
-        if type_name not in domains:
+        if not any(str(d).lower() == type_name.lower() for d in domains):
             domains.append(type_name)
         return None
     types = _types(document)
@@ -358,8 +365,7 @@ def _touched(old: Mapping[str, Any], new: Mapping[str, Any]) -> tuple[list[dict[
     old_domains, new_domains = set(old.get("domains") or []), set(new.get("domains") or [])
     if old_domains - new_domains:
         return found, True
-    for name in sorted(new_domains - old_domains):
-        found.append({"type": None, "field": None, "names": [name], "breaking": False})
+    # A new domain changes what no rule relies on: one person's must not disturb anyone.
     before, after = _types(old), _types(new)
     for name in sorted(set(before) | set(after)):
         was, now = before.get(name), after.get(name)
@@ -414,8 +420,6 @@ def _mentions(body: str, names: Iterable[str]) -> str | None:
 
 
 def _thing(item: Mapping[str, Any]) -> str:
-    if item["type"] is None:
-        return f"領域 {item['names'][0]}"
     return f"{item['type']}.{item['field']}" if item["field"] else str(item["type"])
 
 
@@ -431,7 +435,7 @@ def skill_verdict(
     """Whether a change touches a skill: `{"needs_update", "update_blocks", "update_reason"}`.
 
     A skill is touched when a changed type is one of its `card_types`, or its text names a
-    changed type, field, label, enum value or domain. A skill with no `card_types` reads
+    changed type, field, label or enum value. A skill with no `card_types` reads
     every type, so anything that can lose meaning touches it. An addition never stops a
     skill from running, since nothing it relied on moved; what can lose meaning does. When
     this cannot be worked out, it is flagged and stops, as every version change used to.
@@ -451,7 +455,7 @@ def skill_verdict(
         type_name, field, _ = _target(key)
         found.append(
             {
-                "type": type_name if "." in key or field else None,
+                "type": type_name,
                 "field": field or None,
                 "names": [n for n in (type_name, field) if n],
                 "breaking": True,

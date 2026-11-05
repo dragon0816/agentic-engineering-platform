@@ -5954,8 +5954,16 @@ skill AI: owner decisions". Code `capabilities/bi_cards/vault_checks.py`, `host_
   a run of one home cannot hide what another run found. Each regression is a blocking line naming the question's
   home if it has one (push `status: "blocked"`), and blocks in every working domain. The note says how many
   questions no run covered. Without such a run the push goes ahead with the note 「這次 push 的內容沒有跑過測試」.
-- **Working domain** (`docs/phases/BI_PAGE_SIMPLE.md` §9): `GET /api/bi/vaults/<id>/skills` adds `"homes":
-  [{"home", "label", "folder", "domain": str|null}]`. `GET .../pending` adds `"homes": [home]` to each uncommitted
+- **Creating a domain** (`docs/phases/BI_PAGE_SIMPLE.md` §10): `POST /api/bi/vaults/<id>/homes` `{"name", "folder"?}`
+  stages `meta:home:<id>` = JSON text `{"label", "domain"}` (`domain` empty when the schema has the home's own) and
+  makes `applications/<id>/{sources,skills,tools,profile}` in the working copy → `{"ok", "home", "homes"}`. Refused 400:
+  `home_name_missing`, `home_name_invalid`, `home_folder_needed` (no Latin letters in the name), `home_folder_invalid`,
+  `home_reserved`, `home_exists` (a name, folder, case variant or schema alias of a home). Push and sync make the
+  folders in the shared folder from the unit; no file marks them. The domain widens the vault's schema when read
+  (`catalog.with_home_domains`); the schema file does not change.
+- **Working domain** (`docs/phases/BI_PAGE_SIMPLE.md` §9): `GET /api/bi/vaults/<id>/skills` adds `"default_types"` and `"homes":
+  [{"home", "label", "folder", "domain": str|null}]`, built from units only: the vault's lists, created homes and homes
+  holding a source. An empty folder makes no home. `GET .../pending` adds `"homes": [home]` to each uncommitted
   change, empty for what spans the vault. `POST /api/bi/sessions/<id>/turns` takes optional `"scope": <home>` for
   every kind (`home_invalid` 400): the turn starts with a line naming it. `apply` on a `questions` session takes
   optional `"home"`.
@@ -6795,11 +6803,29 @@ Design: proposal §8.1. Code: `capabilities/bi_cards/schema_fit.py`. In a vault,
 
 `POST /api/bi/vaults/<id>/sync`: the answer's `sync` gains `moved`: whether the local database was rebuilt or the version the feed shows changed. A quiet sync reads no commit file (`Repository._commits_stamp`: names, sizes and times; each file a commit names is still checked by stat), rebuilds nothing unless `Repository.fingerprint` (applied and local commits, uncommitted changes, conflicts, withdrawals) or `card_model.MODEL_VERSION` differs from the last build, and queues no feed work. Concurrent `vault.sync` calls for one vault share one run and its answer or failure. The page shows the local copy first and syncs behind it, redrawing only for what came from outside (commits applied, a rebuild from them, or a changed version it reads).
 
+
+## BI: accepting a proposal moves the citations (2026-11-05)
+
+Decision: `docs/DECISIONS.md` 2026-11-05 "Accepting a proposal moves the citations with the value". Code: `store._write_person_value`, `store._proposal_evidence`, `vault.materialize`. Test: `tests/test_bi_accept_evidence.py`. Adds to "Knowledge repositories: the BI type (R2)".
+
+**Units.**
+- `field:<card id>:<field>`: `history` may hold `old_evidence`, a list of evidence rows in the shape of an `evidence:` unit's, `[]` when the change moved nothing. It is absent on any older unit and on a change that does not move evidence.
+- `evidence:<card id>:<field>`: after an accept, the accepted proposal's rows. Absent when it had none.
+
+**Local database.** `history.old_evidence` (JSON text, NULL when absent), added by `add_missing_columns`. `card_model.MODEL_VERSION` is 10.
+
+**Routes.**
+- `POST /api/bi/cards/<id>/proposals/<n>` with `action: "accept"` and `POST /api/bi/proposals/decide`: as above. The `reject` action changes no field, evidence or history.
+- `POST /api/bi/corrections/apply`: the note's evidence replaces the field's; `POST /api/bi/import/undo` restores what `old_evidence` holds.
+- `GET /api/bi/cards/<id>/history`: a row may hold `old_evidence`. The key is absent otherwise.
+- `POST /api/bi/vaults/<id>/resolve` on a `field:` unit with `mine` or `theirs` also decides its `evidence:` unit.
+
+**Not changed.** The feed and its goldens, the published snapshot's format, and `GET /api/bi/proposals`.
 ## BI schema changes that merge (2026-11-05)
 
 Design: `docs/phases/BI_CARD_MODEL.md` §4.3. Code: `capabilities/bi_cards/schema_merge.py`.
 
-- **Units:** `schema_change:{domain,type,field,enum,label,used_by}:...`, values in §4.3. The `schema` unit keeps naming the base version.
+- **Units:** `schema_change:{type,field,enum,label,used_by}:...`, values in §4.3. The `schema` unit keeps naming the base version. A created home's domain comes from `meta:home:<id>`.
 - **Version text:** `<major>.<minor>.<patch>` or, read by a vault with such units, `<major>.<minor>.<patch>+<12 hex>`. `catalog.base_ref` and `catalog.base_version` strip it; `/api/bi/schemas` does not list derived versions; `store.schema_ref()` returns what the vault reads.
 - **`GET /api/bi/vaults/<id>/status`** adds `schema_conflicts`: `[{"kind": "clash"|"race", "unit", "label", "reason", "value", "current"?}]`.
 - **`POST /api/bi/vaults/<id>/schema-conflicts`** `{unit, choice}`: `drop` a change, `keep` what stands, `take` the one that lost (`race` only). Staged for the person's commit. `schema_conflict_unknown`, `choice_invalid`.

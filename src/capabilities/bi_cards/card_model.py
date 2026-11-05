@@ -29,7 +29,7 @@ from typing import Any
 
 #: A local `bi.sqlite` older than this is rebuilt once from the units. Kept in
 #: `PRAGMA user_version`, not `meta`: every `meta` row is a unit.
-MODEL_VERSION = 9
+MODEL_VERSION = 10
 
 STATE_PREFIX = "state:"
 RELATION_PREFIX = "relation:"

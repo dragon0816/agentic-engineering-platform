@@ -231,6 +231,9 @@ def add_missing_columns(connection: sqlite3.Connection) -> None:
     for name in ("reason", "evidence"):
         if name not in columns:
             connection.execute(f"ALTER TABLE proposals ADD COLUMN {name} TEXT")
+    columns = {r[1] for r in connection.execute("PRAGMA table_info(history)")}
+    if "old_evidence" not in columns:  # a dataset from before a replaced value kept its evidence
+        connection.execute("ALTER TABLE history ADD COLUMN old_evidence TEXT")
     columns = {r[1] for r in connection.execute("PRAGMA table_info(evidence)")}
     for name, definition in EVIDENCE_COLUMNS.items():
         if name not in columns:
@@ -434,6 +437,93 @@ def reference_parts(
         stance if stance in card_model.STANCES else card_model.SUPPORTS,
         str(dated or at),
         None if dated else card_model.SUBMISSION_FALLBACK,
+    )
+
+
+def evidence_reference(row: sqlite3.Row) -> dict[str, Any]:
+    """The reference parts an evidence unit's row holds. A row written before the
+    card model holds none and has no `reference_at`: its id is computed at each
+    rebuild, so its unit stays as it was and a capture does not diff it."""
+    if "reference_at" not in row.keys() or row["reference_at"] is None:  # noqa: SIM118
+        return {}
+    parts = ("reference_id", "stance", "reference_at", "reference_time_basis")
+    found = {k: row[k] for k in parts if row[k] is not None}
+    if "assessment" in row.keys() and row["assessment"] is not None:  # noqa: SIM118
+        found["assessment"] = _load(row["assessment"])
+    return found
+
+
+def evidence_unit(row: sqlite3.Row) -> dict[str, Any]:
+    """An evidence row as a vault's unit holds it."""
+    return {
+        "run_id": row["run_id"],
+        "source_id": row["source_id"],
+        "source_name": row["source_name"],
+        "locator": _load(row["locator"]),
+        "excerpt": row["excerpt"],
+        "basis": row["basis"],
+        "at": row["at"],
+        **evidence_reference(row),
+    }
+
+
+def insert_evidence_unit(
+    db: sqlite3.Connection, card_id: str, field: str, item: Mapping[str, Any]
+) -> None:
+    """An evidence row back from what `evidence_unit` gave."""
+    db.execute(
+        "INSERT INTO evidence (card_id, field, run_id, source_id, source_name, "
+        "locator, excerpt, basis, at, reference_id, stance, reference_at, "
+        "reference_time_basis, assessment) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            card_id,
+            field,
+            item["run_id"],
+            item["source_id"],
+            item["source_name"],
+            _dump(item["locator"]),
+            item["excerpt"],
+            item["basis"],
+            item["at"],
+            item.get("reference_id") or card_model.reference_id(item["source_id"], item["locator"]),
+            item.get("stance") or card_model.SUPPORTS,
+            item.get("reference_at"),
+            item.get("reference_time_basis"),
+            None if item.get("assessment") is None else _dump(item["assessment"]),
+        ),
+    )
+
+
+def insert_planned_evidence(
+    db: sqlite3.Connection,
+    card_id: str,
+    field: str,
+    item: Mapping[str, Any],
+    *,
+    values: Mapping[str, Any],
+    run_id: str,
+    at: str,
+) -> None:
+    """An evidence row from a run's candidate or a proposal that kept its evidence."""
+    db.execute(
+        "INSERT INTO evidence (card_id, field, run_id, source_id, "
+        "source_name, locator, excerpt, basis, at, reference_id, stance, "
+        "reference_at, reference_time_basis, assessment) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            card_id,
+            field,
+            run_id,
+            str(item.get("source_id") or ""),
+            str(item.get("source_name") or ""),
+            _dump(item.get("locator") or {}),
+            str(item.get("excerpt") or ""),
+            str(item.get("basis") or "fact"),
+            at,
+            *reference_parts(item, values, at),
+            _dump({"system": {"reason": item["reason"]}}) if item.get("reason") else None,
+        ),
     )
 
 
@@ -810,6 +900,12 @@ class BiStore:
                     "at": r["at"],
                     "by": r["by"],
                     "reason": r["reason"] or "",
+                    # Only when the change moved it: an older row, or an import's, has none.
+                    **(
+                        {"old_evidence": _load(r["old_evidence"])}
+                        if "old_evidence" in r.keys() and r["old_evidence"] is not None  # noqa: SIM118
+                        else {}
+                    ),
                 }
                 for r in db.execute(
                     "SELECT * FROM history WHERE card_id = ? ORDER BY seq", (card_id,)
@@ -945,26 +1041,14 @@ class BiStore:
                     if stored.get(name) != _dump(planned.values.get(name)):
                         continue  # kept a person's value: the evidence is in the proposal
                     for item in items:
-                        db.execute(
-                            "INSERT INTO evidence (card_id, field, run_id, source_id, "
-                            "source_name, locator, excerpt, basis, at, reference_id, stance, "
-                            "reference_at, reference_time_basis, assessment) "
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                            (
-                                card["id"],
-                                name,
-                                run_id,
-                                str(item.get("source_id") or ""),
-                                str(item.get("source_name") or ""),
-                                _dump(item.get("locator") or {}),
-                                str(item.get("excerpt") or ""),
-                                str(item.get("basis") or "fact"),
-                                at,
-                                *reference_parts(item, planned.values, at),
-                                _dump({"system": {"reason": item["reason"]}})
-                                if item.get("reason")
-                                else None,
-                            ),
+                        insert_planned_evidence(
+                            db,
+                            card["id"],
+                            name,
+                            item,
+                            values=planned.values,
+                            run_id=run_id,
+                            at=at,
                         )
         return result
 
@@ -1277,8 +1361,17 @@ class BiStore:
                     (card_id, row["field"]),
                 ).fetchone()
                 self._write_person_value(
-                    db, card_id, row["field"], _load(row["value"]), stored, actor, at, reason
+                    db,
+                    card_id,
+                    row["field"],
+                    _load(row["value"]),
+                    stored,
+                    actor,
+                    at,
+                    reason,
+                    moves_evidence=True,
                 )
+                self._proposal_evidence(db, row)
                 db.execute(
                     "UPDATE cards SET version = version + 1, updated = ? WHERE id = ?",
                     (at, card_id),
@@ -1515,9 +1608,22 @@ class BiStore:
         *,
         ref: str | None = None,
         import_id: str | None = None,
+        moves_evidence: bool = False,
     ) -> None:
-        """A person's value, its history row, and the proposals it settles."""
+        """A person's value, its history row, and the proposals it settles.
+
+        `moves_evidence`: the value replaces what the field's evidence says, so that evidence
+        goes to this history row, readable with the old value. The caller then adds the new
+        value's own, if it has any (`docs/DECISIONS.md` 2026-11-05)."""
         new = _dump(value)
+        old_evidence = None
+        if moves_evidence:
+            rows = db.execute(
+                "SELECT * FROM evidence WHERE card_id = ? AND field = ? ORDER BY seq",
+                (card_id, field),
+            ).fetchall()
+            old_evidence = _dump([evidence_unit(r) for r in rows])
+            db.execute("DELETE FROM evidence WHERE card_id = ? AND field = ?", (card_id, field))
         ref = ref or f"agent-web:{actor}"
         old_source = (
             None if stored is None else _dump({k: stored[k] for k in ("kind", "ref", "by", "at")})
@@ -1533,7 +1639,7 @@ class BiStore:
             db.execute("DELETE FROM field_states WHERE card_id = ? AND field = ?", (card_id, field))
         db.execute(
             "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, import_id, "
-            "reason, old_source) VALUES (?, ?, ?, ?, 'human', ?, ?, ?, ?, ?, ?)",
+            "reason, old_source, old_evidence) VALUES (?, ?, ?, ?, 'human', ?, ?, ?, ?, ?, ?, ?)",
             (
                 card_id,
                 field,
@@ -1545,6 +1651,7 @@ class BiStore:
                 import_id,
                 reason,
                 old_source,
+                old_evidence,
             ),
         )
         db.execute(
@@ -1552,6 +1659,35 @@ class BiStore:
             "AND status = 'pending'",
             (card_id, field),
         )
+
+    @staticmethod
+    def _proposal_evidence(db: sqlite3.Connection, proposal: sqlite3.Row) -> None:
+        """An accepted proposal's evidence, as its field's. With none, the field has none."""
+        items = [] if proposal["evidence"] is None else _load(proposal["evidence"])
+        if not items:
+            return
+        card_id, field = proposal["card_id"], proposal["field"]
+        record = db.execute(
+            "SELECT run_id FROM imports WHERE id = ?", (proposal["import_id"],)
+        ).fetchone()
+        values = {
+            r["field"]: _load(r["value"])
+            for r in db.execute(
+                "SELECT field, value FROM fields WHERE card_id = ? AND field IN "
+                "('source_date', 'date')",
+                (card_id,),
+            )
+        }
+        for item in items:
+            insert_planned_evidence(
+                db,
+                card_id,
+                field,
+                item,
+                values=values,
+                run_id=str((record["run_id"] if record else "") or ""),
+                at=proposal["at"],
+            )
 
     def rename_card(
         self,
@@ -1637,9 +1773,11 @@ class BiStore:
         base_version: int,
         actor: str,
         reason: str = "",
+        proposal_id: int | None = None,
     ) -> int:
-        """A person's value, internally: accepting a proposal, or a migration they
-        confirmed. Refused as `stale_edit` when the card moved on.
+        """A person's value, internally: accepting a proposal (`proposal_id`: its evidence
+        becomes the field's, and the field's goes to history), or a migration they
+        confirmed (the field's evidence stays). Refused as `stale_edit` when the card moved on.
 
         Returns the card's new version. The current value again (compared as
         stored JSON, as an import compares) is no change (owner 2026-10-24):
@@ -1648,7 +1786,14 @@ class BiStore:
         if not self.exists:
             raise BiStoreError("card_unknown", "找不到這張卡片")
         with self._db(write=True) as db:
-            return self._write_field(
+            proposal = (
+                None
+                if proposal_id is None
+                else db.execute(
+                    "SELECT * FROM proposals WHERE id = ? AND card_id = ?", (proposal_id, card_id)
+                ).fetchone()
+            )
+            version = self._write_field(
                 db,
                 card_id,
                 field,
@@ -1658,7 +1803,11 @@ class BiStore:
                 reason=reason,
                 ref=f"agent-web:{actor}",
                 at=now(),
+                moves_evidence=proposal is not None,
             )
+            if proposal is not None and version != base_version:
+                self._proposal_evidence(db, proposal)
+            return version
 
     def correct(
         self,
@@ -1701,6 +1850,7 @@ class BiStore:
                 ref=ref,
                 at=at,
                 import_id=import_id,
+                moves_evidence=True,
             )
             if state is not None:
                 if version == base_version:
@@ -1788,6 +1938,7 @@ class BiStore:
         ref: str,
         at: str,
         import_id: str | None = None,
+        moves_evidence: bool = False,
     ) -> int:
         card = db.execute("SELECT * FROM cards WHERE id = ?", (card_id,)).fetchone()
         if card is None:
@@ -1802,7 +1953,17 @@ class BiStore:
         ):
             return int(card["version"])
         self._write_person_value(
-            db, card_id, field, value, stored, actor, at, reason, ref=ref, import_id=import_id
+            db,
+            card_id,
+            field,
+            value,
+            stored,
+            actor,
+            at,
+            reason,
+            ref=ref,
+            import_id=import_id,
+            moves_evidence=moves_evidence,
         )
         version = int(card["version"]) + 1
         db.execute("UPDATE cards SET version = ?, updated = ? WHERE id = ?", (version, at, card_id))
@@ -1837,6 +1998,14 @@ class BiStore:
                 if later is not None:
                     continue  # someone changed it since: keep theirs
                 touched.add(change["card_id"])
+                if change["old_evidence"] is not None:
+                    # The value comes back, and what it rested on with it.
+                    db.execute(
+                        "DELETE FROM evidence WHERE card_id = ? AND field = ?",
+                        (change["card_id"], change["field"]),
+                    )
+                    for item in _load(change["old_evidence"]):
+                        insert_evidence_unit(db, change["card_id"], change["field"], item)
                 if change["old"] is None:
                     db.execute(
                         "DELETE FROM fields WHERE card_id = ? AND field = ?",
