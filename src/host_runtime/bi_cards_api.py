@@ -60,6 +60,7 @@ from capabilities.bi_cards import (
     catalog,
     correction,
     evidence_review,
+    homes,
     importer,
     methods,
     migrate,
@@ -247,7 +248,10 @@ def _route(
             # The Dashboard is the analyses: a vault's own, else the built-in pack (BI P3, P5);
             # other parameters as `param.<name>`.
             given = {k[len("param.") :]: str(v) for k, v in query.items() if k.startswith("param.")}
-            drawn = board.board(workspace, store, domain, sample, given)
+            home = query.get("home") or None
+            if home is not None and homes.home_problem(home):
+                return _error(400, "home_invalid", "領域必須是應用資料夾或 library 的項目")
+            drawn = board.board(workspace, store, domain, sample, given, home)
             # An old domain configuration still to move (BI D4): the page offers the migration.
             return 200, {**drawn, "domains_left": migrate.has_legacy(store)}
         if path == "/api/bi/proposals":
@@ -721,7 +725,7 @@ def _session_write(
         return 200, {"ok": True, "session": turned}
     if session["kind"] == "analysis" and action == "apply":
         saved = analysis_session.apply_suggestion(
-            workspace, dataset, session_id, given.get("turn"), who
+            workspace, dataset, session_id, given.get("turn"), who, given.get("home")
         )
         return 200, {"ok": True, **saved}
     if session["kind"] == "questions" and action == "turns":

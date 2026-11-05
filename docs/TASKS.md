@@ -4309,3 +4309,4 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 
 - [x] 2026-11-05, Claude Code: A source that repeats a value adds its citation, marked 新增出處, with no version change, once per place (`bi-repeat-evidence`, `docs/DECISIONS.md` 2026-11-05). A replay that lost the field no longer leaves its citation on the winning value.
 - [x] 2026-11-05, Claude Code: BI page: each domain has its own questions, run and report; untagged questions show apart; 全部領域 is a read-only overview (`docs/phases/BI_PAGE_SIMPLE.md` §11). Each domain's dashboard not yet.
+- [x] 2026-11-05, Claude Code: BI page: each domain's own Dashboard (`meta:dashboard:<home>`, `docs/phases/BI_PAGE_SIMPLE.md` §12), and a dry-run list with a one-step apply for assigning existing questions and analyses (`domain_assign.py`). `tests/test_bi_domain_dashboard.py`, `tests/test_bi_domain_dashboard_ui.py`.

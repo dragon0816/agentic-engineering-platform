@@ -6530,3 +6530,14 @@ The owner: 「每個領域也要有各自的benchmark 問題和dashboard」, 「
 - **專人 is a working arrangement, not access control.** AEP adds no file permissions; IT decides through SharePoint. No owner field blocks anyone, and there is no login check.
 - **A question belongs to one domain; an untagged one is waiting for a domain** and runs in no domain's test, only in the overview's. Rejected: running untagged questions in every domain, which puts market-intel's 12 in front of everyone and is what the owner objected to.
 - **全部領域 is a read-only overview.** Rejected: letting it add a question with no owner, which would make more of what is being assigned away.
+
+## 2026-11-05: Each BI domain has its own Dashboard, on the analyses they share
+
+The owner: 「每個領域也要有各自的benchmark 問題和dashboard」. Design: `docs/phases/BI_PAGE_SIMPLE.md` §12.
+
+- **A home's Dashboard is its own unit, `meta:dashboard:<home>`; `meta:dashboard` stays the vault's.** Old commits, published snapshots, the feed and Atlas read what they read, and the feed goldens need no change. Rejected: nesting homes inside `meta:dashboard`, where two domains' people would conflict on one unit and the feed's reader would have to change.
+- **An analysis is shared and a Dashboard chooses,** since an analysis that takes `domain` already gives each its own numbers. Rejected: a copy per domain, which would drift.
+- **A domain's starts empty.** The vault's still shows everything not hidden.
+- **A panel that does not read `domain` is labelled 全庫資料.** Declaring the parameter is not enough: the code must read it.
+- **Published readers see no per-domain Dashboard:** the feed stays the vault's. Rejected for now: a per-domain feed, which is a contract change for Atlas.
+- **Assigning what exists is a dry run, then one step on an approved list.** Nothing is written until a person approves, and it stages changes for their commit.

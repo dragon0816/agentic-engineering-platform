@@ -257,10 +257,10 @@ def _dashboard_suggestion(workspace: Path, vault_id: str, answer: dict[str, Any]
 
 
 def _apply_dashboard(
-    workspace: Path, vault_id: str, dashboard: dict[str, Any]
+    workspace: Path, vault_id: str, dashboard: dict[str, Any], home: Any = None
 ) -> tuple[list[str], dict[str, Any]]:
-    """Stage every proposed analysis, then `meta:dashboard`: the order, and
-    the vault's other analyses hidden. Checked before anything is staged."""
+    """Stage every proposed analysis, then the Dashboard of the vault or `home`: the order,
+    and the vault's other analyses hidden. Checked before anything is staged."""
     proposed = list(dashboard.get("analyses") or [])
     order = list(dashboard.get("order") or [])
     saved = [a["slug"] for a in analyses.listing(workspace, vault_id)["analyses"]]
@@ -279,22 +279,23 @@ def _apply_dashboard(
     units = [analyses.save(workspace, vault_id, item)["unit"] for item in proposed]
     every = list(dict.fromkeys([*saved, *fresh]))
     hidden = [s for s in every if s not in order]
-    listed = analyses.set_dashboard(workspace, vault_id, {"order": order, "hidden": hidden})
-    return [*units, analyses.DASHBOARD_UNIT], listed
+    listed = analyses.set_dashboard(workspace, vault_id, {"order": order, "hidden": hidden}, home)
+    return [*units, analyses.dashboard_unit(home or None)], listed
 
 
 def apply_suggestion(
-    workspace: Path, dataset: str, session_id: str, turn: Any, actor: str
+    workspace: Path, dataset: str, session_id: str, turn: Any, actor: str, home: Any = None
 ) -> dict[str, Any]:
-    """「存成分析」: stage the proposed analysis (run again on the data now);
-    for a dashboard, 「套用」 stages its analyses and the order in one step."""
+    """「存成分析」: stage the proposed analysis (run again on the data now), and put a new one
+    on the Dashboard of the working domain `home`; for a dashboard, 「套用」 stages its analyses
+    and the order in one step."""
     vault_id = _vault_id(dataset)
     staging = Staging(workspace, dataset)
     session = sessions.load(staging, session_id, "analysis")
     found, index = sessions.assistant_turn(staging, session, turn)
     dashboard = found["suggestion"].get("dashboard")
     if dashboard is not None:
-        units, listed = _apply_dashboard(workspace, vault_id, dashboard)
+        units, listed = _apply_dashboard(workspace, vault_id, dashboard, home)
         sessions.mark_applied(staging, session, index, {"units": units, "at": now(), "by": actor})
         return {"session": session, "units": units, **listed}
     proposed = found["suggestion"].get("analysis")
@@ -305,6 +306,8 @@ def apply_suggestion(
         raise BiStoreError("analysis_unchanged", "這個提案和現有的分析一樣，沒有要改的")
     _refuse_moved(workspace, vault_id, str(proposed.get("slug")), edit)
     saved = analyses.save(workspace, vault_id, proposed)
+    if home and edit is None:
+        analyses.add_to_home(workspace, vault_id, str(proposed.get("slug")), home)
     sessions.mark_applied(
         staging, session, index, {"unit": saved["unit"], "at": now(), "by": actor}
     )

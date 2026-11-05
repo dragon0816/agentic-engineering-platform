@@ -62,13 +62,13 @@ def _run(db: Path, item: dict[str, Any], values: dict[str, Any]) -> dict[str, An
 
 
 def _items(
-    workspace: Path, store: BiStore, registry: Any
+    workspace: Path, store: BiStore, registry: Any, home: str | None = None
 ) -> tuple[list[dict[str, Any]], Path, str]:
     """(the analyses to draw in order, the database they read, where they come from)."""
     if store.vault_id is not None:
         from capabilities.bi_cards import vault
 
-        listed = analyses.listing(workspace, store.vault_id)
+        listed = analyses.listing(workspace, store.vault_id, home)
         by_slug = {a["slug"]: a for a in listed["analyses"]}
         found = [by_slug[s] for s in listed["order"]]
         return found, vault.Vault(workspace, store.vault_id).db_path, "vault"
@@ -149,12 +149,15 @@ def board(
     domain: str,
     include_sample: bool,
     given: dict[str, str],
+    home: str | None = None,
 ) -> dict[str, Any]:
-    """The Dashboard of a BI dataset, drawn from its analyses."""
+    """The Dashboard of a BI dataset, drawn from its analyses: the vault's, or a home's, whose
+    panels ask with its domain. What shows the whole vault whichever domain asks says so."""
     from capabilities.bi_cards import quality
 
     registry = catalog.for_store(store)
-    items, db, source = _items(workspace, store, registry)
+    home = home if store.vault_id is not None else None
+    items, db, source = _items(workspace, store, registry, home)
     today = date.today().isoformat()
     names = _names(store)
     shared: dict[str, Any] = {"domain": domain, "include_sample": include_sample, **given}
@@ -165,13 +168,18 @@ def board(
             values = analyses.resolve_params(
                 declared, {k: v for k, v in shared.items() if k in declared}, registry, today=today
             )
-            return _section(item, _run(db, item, values), "", names)
+            drawn_one = _section(item, _run(db, item, values), "", names)
+            if home and not analyses.uses_domain(item):
+                drawn_one["title"] = f"{drawn_one['title']}（全庫資料）"
+                drawn_one["whole_vault"] = True
+            return drawn_one
         except BiStoreError as failure:
             return _section(item, None, failure.message)
 
     with ThreadPoolExecutor(max_workers=WORKERS) as pool:
         drawn = list(pool.map(draw, items)) if db.is_file() else []
-    checked = quality.section(quality.check(store, registry))
+    # Data quality looks at the whole vault, so it is the vault's Dashboard's, not a domain's.
+    checked = None if home else quality.section(quality.check(store, registry))
     # What the schema keeps off this board: said, not silently dropped.
     not_shown = (
         [
@@ -179,13 +187,15 @@ def board(
             for a in analyses.listing(workspace, store.vault_id)["analyses"]
             if not a["offered"]
         ]
-        if store.vault_id is not None
+        if store.vault_id is not None and not home
         else []
     )
-    flags = [f for s in [*drawn, checked] for f in s["flags"]]
+    sections = [*drawn, *([checked] if checked else [])]
+    flags = [f for s in sections for f in s["flags"]]
     stale = next((len(s["rows"]) for s in drawn if s["id"] == "stale"), 0)
     return {
         "domain": domain,
+        "home": home,
         "include_sample": include_sample,
         "source": source,
         "ordered": True,
@@ -195,7 +205,7 @@ def board(
             "warn": sum(1 for f in flags if f["level"] != "red"),
             "stale": stale,
         },
-        "sections": [*drawn, checked],
+        "sections": sections,
         "not_shown": not_shown,
     }
 
