@@ -121,7 +121,7 @@ def test_many_sources_stay_in_their_scroller_and_the_markdown_opens_beside_them(
             page.wait("!document.getElementById('bi-b-md').hidden")
             page.see("bi-b-md-h", FAR)
             assert _in_view(page, "#bi-b-md-h"), "the pane is out of view"
-            assert _in_view(page, "#bi-b-md-text")
+            assert _in_view(page, "#bi-b-md-view")
             pane = _top_rect(page, "#bi-b-src-pane")
             assert pane["left"] > _top_rect(page, "#bi-b-sources")["left"]
             assert "第一份" in str(page.run("document.getElementById('bi-b-md-text').value"))

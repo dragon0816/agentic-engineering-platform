@@ -101,6 +101,14 @@ def test_source_markdown_and_search_in_a_browser(served: Any, tmp_path: Path) ->
         table = str(run("document.getElementById('bi-b-md-text').value"))
         assert table.startswith("| 技術 | 領域 | 成熟度 |") and "| TSN |" in table
         assert "轉檔" in text_of("bi-b-md-info")
+        # It opens on the preview; the table is a table there, and editing is a choice.
+        wait("document.querySelectorAll('#bi-b-md-view table').length === 1")
+        assert run("document.getElementById('bi-b-md-mode').value") == "view"
+        run(
+            "{ const s = document.getElementById('bi-b-md-mode'); s.value = 'edit';"
+            " s.dispatchEvent(new Event('change')); }"
+        )
+        wait("!document.getElementById('bi-b-md-edit').hidden")
         run(
             "{ const box = document.getElementById('bi-b-md-text');"
             " box.value = box.value.replace('| TSN |', '| TSN-2026 |'); }"

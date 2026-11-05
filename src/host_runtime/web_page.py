@@ -1311,6 +1311,47 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
   .bi-cards { max-height: none; }
 }
 /* A list and what it opens, side by side at one height, each scrolling on its own. */
+.bi-src-row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; }
+.bi-src-row > div { flex: 1 1 200px; min-width: 0; }
+.bi-src-row > div:has(.bi-file) { flex: 2 1 260px; }
+.bi-src-row > div:last-child { flex: 0 0 auto; }
+.bi-src-row > [hidden] { display: none; }
+.bi-src-row > :last-child .go { min-width: 110px; }
+.bi-src-row select { width: 100%; }
+.bi-pane .bi-label { display: block; font-size: 12px; color: var(--dim); margin: 0 0 4px; }
+.bi-md-bar { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: flex-end; }
+.bi-md-bar > div:first-child { flex: 1 1 160px; min-width: 0; }
+.bi-md-bar > div:first-child select { width: 100%; }
+.bi-file-input { position: absolute; width: 1px; height: 1px; min-height: 0; opacity: 0;
+  overflow: hidden; }
+.bi-file { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px 0 4px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px; cursor: pointer;
+  font: 14px "Segoe UI", system-ui, sans-serif; transition: border-color 150ms ease; }
+.bi-file:hover { border-color: var(--accent); }
+.bi-file-input:focus-visible + .bi-file { outline: 3px solid var(--accent); outline-offset: 2px; }
+.bi-file-pick { flex: none; padding: 5px 12px; border-radius: 6px; background: var(--accent-soft);
+  color: var(--ink); font-weight: 600; }
+.bi-file-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--dim); }
+.bi-md-view { margin-top: 10px; max-height: none; overflow-wrap: anywhere; line-height: 1.55; }
+.bi-md-view > :first-child { margin-top: 0; }
+.bi-md-view h1 { font-size: 18px; } .bi-md-view h2 { font-size: 16px; }
+.bi-md-view h3, .bi-md-view h4, .bi-md-view h5, .bi-md-view h6 { font-size: 14px; }
+.bi-md-view pre { padding: 10px; overflow-x: auto; background: var(--bg);
+  border: 1px solid var(--line); border-radius: 8px; }
+.bi-md-view .table-scroll { max-width: 100%; margin: 8px 0 14px; overflow-x: auto;
+  border: 1px solid var(--line); border-radius: 8px; }
+.bi-md-view table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.bi-md-view th, .bi-md-view td { padding: 6px 9px; text-align: left; vertical-align: top;
+  border-bottom: 1px solid var(--line); overflow-wrap: normal; word-break: normal; }
+.bi-md-view th { background: var(--accent-soft); white-space: nowrap; }
+.bi-md-view tbody tr:last-child td { border-bottom: 0; }
+.bi-md-view .bi-md-front th { width: 1%; }
+.bi-md-view .bi-md-front td { overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+  .bi-src-row { grid-template-columns: minmax(0, 1fr); }
+  .bi-src-row > :last-child .go { width: 100%; }
+}
 .bi-src-split { display: grid; gap: 14px;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
 .bi-src-split .bi-scroller { max-height: 50vh; overflow: auto; }
@@ -2575,7 +2616,7 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
             <button class="bi-btn" id="bi-b-ro-cards" type="button">看卡片</button>
             <button class="bi-btn" id="bi-b-ro-dash" type="button">看 Dashboard</button>
           </div>
-          <div class="bi-step-grid" id="bi-b-src-input">
+          <div class="bi-src-row" id="bi-b-src-input">
             <div id="bi-b-src-folder-box" hidden>
               <label class="bi-label" for="bi-b-src-folder">領域</label>
               <select id="bi-b-src-folder"></select></div>
@@ -2585,9 +2626,12 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
                 <option value="UNCLASSIFIED">UNCLASSIFIED</option>
                 <option value="CONFIDENTIAL">CONFIDENTIAL</option>
                 <option value="RESTRICTED">RESTRICTED</option></select></div>
-            <div><label class="bi-label" for="bi-b-file">來源檔</label>
-              <input id="bi-b-file" type="file" multiple
-                accept=".csv,.tsv,.xlsx,.xlsm,.pdf,.docx,.pptx,.md,.markdown,.txt,text/csv,text/markdown,text/plain"></div>
+            <div><span class="bi-label" id="bi-b-file-h">來源檔</span>
+              <input id="bi-b-file" class="bi-file-input" type="file" multiple
+                aria-labelledby="bi-b-file-h"
+                accept=".csv,.tsv,.xlsx,.xlsm,.pdf,.docx,.pptx,.md,.markdown,.txt,text/csv,text/markdown,text/plain">
+              <label class="bi-file" for="bi-b-file"><span class="bi-file-pick">選檔</span>
+                <span id="bi-b-file-name" class="bi-file-name">還沒有選檔</span></label></div>
             <div><button class="go" id="bi-b-upload" type="button" disabled>轉檔</button></div>
           </div>
           <p class="bi-warn" id="bi-b-src-cloud" role="status" hidden></p>
@@ -2612,19 +2656,27 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
           <div id="bi-b-md" role="region" aria-labelledby="bi-b-md-h" hidden>
             <h4 id="bi-b-md-h"></h4>
             <p class="bi-meta" id="bi-b-md-info"></p>
-            <div class="bi-step-grid">
+            <div class="bi-md-bar">
               <div><label class="bi-label" for="bi-b-md-rev">看哪一版</label>
                 <select id="bi-b-md-rev"></select></div>
-            </div>
-            <label class="bi-label" for="bi-b-md-text">
-              Markdown（修改後存成新的版次；原始檔不會改）</label>
-            <textarea id="bi-b-md-text" class="bi-input" rows="16" spellcheck="false"></textarea>
-            <div class="bi-step-grid">
-              <div><label class="bi-label" for="bi-b-md-note">這一版的說明</label>
-                <input id="bi-b-md-note" class="bi-input" maxlength="300"
-                  placeholder="例如：修正表格欄位名稱"></div>
-              <div><button class="go" id="bi-b-md-save" type="button">存成新版次</button></div>
+              <div><label class="bi-label" for="bi-b-md-mode">顯示</label>
+                <select id="bi-b-md-mode">
+                  <option value="view">預覽</option>
+                  <option value="edit">編輯</option></select></div>
               <div><button class="bi-btn" id="bi-b-md-close" type="button">關閉</button></div>
+            </div>
+            <div id="bi-b-md-view" class="kp-markdown bi-md-view" tabindex="0"
+              role="region" aria-label="Markdown 預覽"></div>
+            <div id="bi-b-md-edit" hidden>
+              <label class="bi-label" for="bi-b-md-text">
+                Markdown（修改後存成新的版次；原始檔不會改）</label>
+              <textarea id="bi-b-md-text" class="bi-input" rows="16" spellcheck="false"></textarea>
+              <div class="bi-step-grid">
+                <div><label class="bi-label" for="bi-b-md-note">這一版的說明</label>
+                  <input id="bi-b-md-note" class="bi-input" maxlength="300"
+                    placeholder="例如：修正表格欄位名稱"></div>
+                <div><button class="go" id="bi-b-md-save" type="button">存成新版次</button></div>
+              </div>
             </div>
             <div id="bi-b-md-msg" role="status" aria-live="polite"></div>
           </div>
@@ -15029,6 +15081,51 @@ function biShowMarkdownPane() {
     {block: stacked ? "start" : "nearest"});
 }
 
+function biMdFront(markdown) {
+  // YAML-looking lines at the very top; what they say is only shown, never interpreted.
+  const lines = markdown.replace(/\r\n?/g, "\n").split("\n");
+  if (lines[0].trim() !== "---") return {rows: [], body: markdown};
+  const end = lines.findIndex((line, index) => index > 0 && line.trim() === "---");
+  if (end < 0) return {rows: [], body: markdown};
+  const rows = [];
+  for (const line of lines.slice(1, end)) {
+    const pair = /^([^\s:][^:]*):\s*(.*)$/.exec(line);
+    if (pair) rows.push([pair[1].trim(), pair[2].trim()]);
+    else if (line.trim() && rows.length) {
+      rows[rows.length - 1][1] = (rows[rows.length - 1][1] + " " + line.trim()).trim();
+    }
+  }
+  return {rows, body: lines.slice(end + 1).join("\n")};
+}
+
+function biMdRender() {
+  // Through renderMarkdown, as a chat answer: elements and text only, so a source's own
+  // HTML shows as words, nothing runs, and there are no images to fetch from anywhere.
+  const front = biMdFront(el("bi-b-md-text").value), box = el("bi-b-md-view");
+  box.replaceChildren(renderMarkdown(front.body));
+  for (const wrap of box.querySelectorAll(".table-scroll")) {
+    wrap.setAttribute("aria-label", "表格");
+  }
+  if (front.rows.length) {
+    const body = document.createElement("tbody");
+    for (const [name, value] of front.rows) {
+      const head = bh("th", "", name); head.scope = "row";
+      body.append(bh("tr", "", head, bh("td", "", value)));
+    }
+    const table = bh("table", "bi-md-front"); table.append(body);
+    const wrap = bh("div", "table-scroll", table);
+    wrap.setAttribute("aria-label", "文件資訊");
+    box.prepend(wrap);
+  }
+  if (!box.childNodes.length) box.append(bh("p", "bi-empty", "這一版沒有內容。"));
+}
+
+function biMdMode(mode) {
+  el("bi-b-md-mode").value = mode;
+  el("bi-b-md-edit").hidden = mode !== "edit"; el("bi-b-md-view").hidden = mode === "edit";
+  if (mode !== "edit") biMdRender();
+}
+
 function biPickSource(source) {
   bi.build.sourceId = source.id; el("bi-b-next1").disabled = false; biBuildSave();
   biFollowSourceFolder();
@@ -15080,6 +15177,9 @@ async function biBuildMarkdown(sourceId, rev) {
   pick.value = String(r.rev || "");
   el("bi-b-md-text").value = view.markdown || "";
   el("bi-b-md-note").value = "";
+  // Opens on the preview; choosing another revision stays where the person is, and with
+  // nothing to preview there is only pasting a first revision.
+  biMdMode(!view.markdown ? "edit" : rev ? el("bi-b-md-mode").value : "view");
   const old = Boolean(view.current_rev) && r.rev !== view.current_rev;
   el("bi-b-md-save").disabled = old;
   if (old) msg.append(bh("p", "bi-meta", "這是舊版次，只能看；要改請先選目前的版次。"));
@@ -15088,6 +15188,7 @@ async function biBuildMarkdown(sourceId, rev) {
 el("bi-b-md-rev").addEventListener("change", () => {
   if (bi.build.md) biBuildMarkdown(bi.build.md.source.id, el("bi-b-md-rev").value);
 });
+el("bi-b-md-mode").addEventListener("change", () => biMdMode(el("bi-b-md-mode").value));
 el("bi-b-md-close").addEventListener("click", () => {
   el("bi-b-md").hidden = true; el("bi-b-md-empty").hidden = false;
 });
@@ -15124,9 +15225,14 @@ function biReadFile(file, binary) {
   });
 }
 
-el("bi-b-file").addEventListener("change", () => {
-  el("bi-b-upload").disabled = !el("bi-b-file").files.length;
-});
+function biFileChosen() {
+  const files = el("bi-b-file").files, name = el("bi-b-file-name");
+  el("bi-b-upload").disabled = !files.length;
+  name.textContent = !files.length ? "還沒有選檔"
+    : files.length === 1 ? files[0].name : files.length + " 個檔案";
+  name.title = [...files].map((file) => file.name).join("\n");
+}
+el("bi-b-file").addEventListener("change", biFileChosen);
 // -- Obsidian card pages (BI_CARD_PAGE_IMPORT): preview, then apply ---------------
 const BI_PAGES_MAX = 7 * 1024 * 1024;
 
@@ -15227,7 +15333,7 @@ el("bi-b-upload").addEventListener("click", async () => {
       const reply = await biCall("/api/bi/sources", body);
       bi.build.sourceId = reply.source.id;
     }
-    el("bi-b-file").value = "";
+    el("bi-b-file").value = ""; biFileChosen();
     await biBuildSources(); biBuildSave();
     biStatus("bi-status-build", "");
     const added = bi.build.sources.find((source) => source.id === bi.build.sourceId);
