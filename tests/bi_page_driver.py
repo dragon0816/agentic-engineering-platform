@@ -51,25 +51,30 @@ class BiPage:
 
     def __enter__(self) -> BiPage:
         self.browser.start()
-        self.browser.page().call(
-            "Emulation.setDeviceMetricsOverride",
-            width=1366,
-            height=1000,
-            deviceScaleFactor=1,
-            mobile=False,
-        )
-        self.browser.page().call("Page.enable")
-        # Named in the host's write log (`host_runtime.write_log`), a label and no more.
-        self.browser.page().call("Network.enable")
-        self.browser.page().call(
-            "Network.setExtraHTTPHeaders", headers={"X-AEP-Client": "tests/bi_page_driver"}
-        )
-        self.browser.page().call("Page.addScriptToEvaluateOnNewDocument", source=_WATCH)
-        self.browser.navigate(self.address)
-        self.wait('!document.getElementById("send").disabled')
-        self.click("#nav-knowledge")
-        self.click("#kn-tabs [data-kn=bi]")
-        self.wait("document.getElementById('bi-status-bar').hidden")
+        try:
+            self.browser.page().call(
+                "Emulation.setDeviceMetricsOverride",
+                width=1366,
+                height=1000,
+                deviceScaleFactor=1,
+                mobile=False,
+            )
+            self.browser.page().call("Page.enable")
+            # Named in the host's write log (`host_runtime.write_log`), a label and no more.
+            self.browser.page().call("Network.enable")
+            self.browser.page().call(
+                "Network.setExtraHTTPHeaders", headers={"X-AEP-Client": "tests/bi_page_driver"}
+            )
+            self.browser.page().call("Page.addScriptToEvaluateOnNewDocument", source=_WATCH)
+            self.browser.navigate(self.address)
+            self.wait('!document.getElementById("send").disabled')
+            self.click("#nav-knowledge")
+            self.click("#kn-tabs [data-kn=bi]")
+            self.wait("document.getElementById('bi-status-bar').hidden")
+        except BaseException:
+            # `__exit__` does not run for a failed `__enter__`: the browser would stay up.
+            self.browser.close()
+            raise
         return self
 
     def __exit__(self, *_exc: object) -> None:

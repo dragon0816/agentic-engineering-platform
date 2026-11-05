@@ -7359,8 +7359,8 @@ class AgentWebServer(ThreadingHTTPServer):
 
     daemon_threads = True
     allow_reuse_address = False
-    # The default of 5 refused connections when a page reloaded during a burst of reads on a
-    # large BI vault, and a page whose first requests are refused stays unusable.
+    #: The page opens about 20 requests at once. With the default of 5, Windows refuses the
+    #: rest whenever the accepting thread falls behind on a loaded PC.
     request_queue_size = 128
 
     def __init__(

@@ -13,6 +13,7 @@ the engine decides every workflow, and the Agent decides who may ask.
 """
 
 import os
+import time
 from collections.abc import Callable, Mapping
 from functools import partial
 from pathlib import Path
@@ -333,7 +334,7 @@ from host_runtime.profiles import (
 from host_runtime.reference_sets import REFERENCE_SETS_FILE, ReferenceItem, ReferenceSetStore
 from host_runtime.runtime import inspect_host
 from host_runtime.session_artifacts import SessionArtifacts
-from host_runtime.state import SqliteLocalState
+from host_runtime.state import LocalStateBusy, SqliteLocalState
 from host_runtime.sync import PlatformClient
 from host_runtime.task_artifacts import LocalTaskArtifacts
 from host_runtime.team_membership import TeamMembershipStore
@@ -415,12 +416,19 @@ HostErrorCode = Literal[
     "models_invalid",
     "knowledge_invalid",
     "profile_invalid",
+    "state_busy",
     "state_unavailable",
     "dut_skill_missing",
     "dut_driver_missing",
 ]
 
 ContractT = TypeVar("ContractT", bound=Contract)
+
+
+#: How long a start waits for a busy `state.sqlite`. Holders keep it for moments, so this is
+#: generous; the starting page's patience (`launcher.START_WAIT_SECONDS`) leaves room for it.
+STATE_BUSY_WAIT_SECONDS = 30.0
+STATE_BUSY_POLL_SECONDS = 0.25
 
 
 class HostError(Exception):
@@ -2269,6 +2277,23 @@ def model_condenser(gateway: Any) -> Callable[[str], list[str]]:
     return condense
 
 
+def _open_state(path: Path, bridge_id: str) -> SqliteLocalState:
+    """The state file for a host that is starting. A second writer is refused rather than
+    waited for, and that stays the rule while a host runs (`state.py`'s `timeout=0`). A
+    start is different: two starts can meet on the file, and exiting over a moment's lock
+    is worse than waiting it out. A file that is broken, or another device's, fails at once."""
+    deadline = time.monotonic() + STATE_BUSY_WAIT_SECONDS
+    while True:
+        try:
+            return SqliteLocalState(path, bridge_id=bridge_id)
+        except LocalStateBusy as error:
+            if time.monotonic() >= deadline:
+                raise HostError("state_busy", path) from error
+            time.sleep(STATE_BUSY_POLL_SECONDS)
+        except (LocalStateError, OSError, ValueError) as error:
+            raise HostError("state_unavailable", path) from error
+
+
 def build_runtime(
     config: CompanyHostConfiguration,
     *,
@@ -2359,10 +2384,7 @@ def build_runtime(
     # An installed Workflow run from the chat with incomplete values becomes
     # its form (owner 2026-10-15), as on the Gateway's own Workflow tools.
     chat_authoring.form_offer = lambda identity, values: _chat_form_offer(gateway, identity, values)
-    try:
-        state = SqliteLocalState(place.state, bridge_id=checked.device.bridge_id)
-    except (LocalStateError, OSError, ValueError) as error:
-        raise HostError("state_unavailable", place.state) from error
+    state = _open_state(place.state, checked.device.bridge_id)
     try:
         agent = LocalAgent(
             membership,

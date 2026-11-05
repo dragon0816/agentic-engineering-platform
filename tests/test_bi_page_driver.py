@@ -12,6 +12,8 @@ import pytest
 from bi_page_driver import BiPage, browser_missing
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
+from integrations.browser import Browser
+
 
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
 def test_a_failed_wait_reports_the_pages_requests_and_errors(tmp_path: Path) -> None:
@@ -32,3 +34,27 @@ def test_a_failed_wait_reports_the_pages_requests_and_errors(tmp_path: Path) -> 
     assert "fictional page error" in message
     assert "/no/such/route" in message and "x=1" not in message
     assert "requests still open:" in message and "visible stage:" in message
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_a_page_that_never_opens_leaves_no_browser_behind(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    closed: list[bool] = []
+    real_close = Browser.close
+
+    def counted(self: Browser) -> None:
+        closed.append(True)
+        real_close(self)
+
+    def never(self: BiPage, expression: str, seconds: float = 240) -> None:
+        raise AssertionError(expression)
+
+    monkeypatch.setattr(Browser, "close", counted)
+    monkeypatch.setattr(BiPage, "wait", never)
+    config, layout = _bi_host(tmp_path)
+    with _served(config, layout, _Model("none", {})) as server:
+        with pytest.raises(AssertionError):
+            with BiPage(tmp_path / "browser", server.address):
+                pass
+    assert closed
