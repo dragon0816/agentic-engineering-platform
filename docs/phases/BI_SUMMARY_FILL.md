@@ -4,7 +4,7 @@ Owner's rules (2026-11-05, through the orchestrator): through ingest, not a side
 
 Status: run `e3de934115f0` is staged on the real vault, nothing committed; it waits for the owner's review.
 
-**Owner's decisions (2026-11-05, through the orchestrator):** `scope` is not filled. The 13 demo cards are not filled for now. Nothing was said about marking those cards as sample, so they are not marked. The vault's 4 uncommitted changes stay untouched until the owner answers about them.
+**Owner's decisions (2026-11-05, through the orchestrator):** `scope` is not filled. The 13 demo cards are not filled, and were later marked as samples by the owner's decision (commits of 2026-11-05, `擁有者決定標成範例資料-*.csv`), with one more, `大銀 直驅馬達伺服模組`. 99 samples of 760. The vault's 4 uncommitted changes stay untouched until the owner answers about them.
 
 ## Cause
 
@@ -54,7 +54,7 @@ Round 3 per call: 507 tokens in, 497 out, 7.6 s.
 
 ## Also found
 
-- 13 cards are not marked sample though their text says fictional or demonstration, such as `Account-A` and `Cert-Lab-B` (first counted as 11); `sample_not_marked` only reads the `SAMPLE-` name.
+- 13 cards were not marked sample though their text said fictional or demonstration, such as `Account-A` and `Cert-Lab-B` (first counted as 11). Marked since; `sample_not_marked` now reads a card's own text.
 - Several page sources have garbled names, such as `暾餅絲` for `鴻海`: the card matches by frontmatter, the source's name is wrong.
 
 ## The run

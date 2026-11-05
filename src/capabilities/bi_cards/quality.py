@@ -19,9 +19,16 @@ from typing import Any
 
 from capabilities.bi_cards.extract import number_written
 from capabilities.bi_cards.schema import Registry
-from capabilities.bi_cards.store import BiStore
+from capabilities.bi_cards.staging import Staging
+from capabilities.bi_cards.store import BiStore, BiStoreError
 
 SAMPLE_PREFIX = "SAMPLE-"
+#: What a card's own text says when it is not about anything real. Not 範例, which a real
+#: page's prose uses too; a page's body never reaches the card's mark at import.
+SAID_NOT_REAL = re.compile(r"虛構|示範")
+#: A source's first such line by its id, a hash of its bytes: a source never changes, and
+#: this runs with every Dashboard.
+_PAGE_SAYS: dict[str, str] = {}
 #: A blank source date the body explains (the manager's convention).
 DATE_PENDING = "來源日期待補"
 MAX_ITEMS = 200
@@ -31,7 +38,7 @@ CHECKS = (
     ("link_wrong_type", "連結到的卡片類型不對", "issue"),
     ("same_name", "同一個名字出現在兩種類型", "issue"),
     ("key_conflict", "兩張卡片用了同一個名字", "issue"),
-    ("sample_not_marked", "SAMPLE 卡沒有標成示範資料", "issue"),
+    ("sample_not_marked", "看起來是範例，卻沒有標成示範資料", "issue"),
     ("evidence_source", "A/B 級證據缺來源或來源日期", "issue"),
     ("number_ungrounded", "數字不在引用的原文裡", "issue"),
     ("revenue_layer", "收入事實的層級與客戶不一致或缺來源", "issue"),
@@ -46,6 +53,41 @@ def _list(value: Any) -> list[Any]:
     return list(value) if isinstance(value, list) else [value]
 
 
+def _page_says(staging: Staging, source: dict[str, Any], stored: str) -> str:
+    """The line of a card page's body that says it is not real, or nothing. A report is many
+    cards' source, so what it says is about none of them."""
+    source_id = str(source["id"])
+    if source_id not in _PAGE_SAYS:
+        from capabilities.bi_cards.reading_runs import readable_lines
+
+        said = ""
+        if str(source["name"]).lower().endswith(".md"):
+            try:
+                raw = staging.read_stored(stored).decode("utf-8-sig", "replace")
+            except (BiStoreError, OSError):
+                return ""
+            if raw.startswith("---"):
+                said = next((x for x in readable_lines(raw) if SAID_NOT_REAL.search(x)), "")
+        _PAGE_SAYS[source_id] = said
+    return _PAGE_SAYS[source_id]
+
+
+def _said_not_real(store: BiStore) -> dict[str, str]:
+    """Per card, what its own pages say that makes it look like an example."""
+    staging = Staging(store.workspace, store.dataset)
+    if not staging.exists:
+        return {}
+    sources = {s["id"]: s for s in staging.sources()}
+    stored = staging.stored_paths()
+    found: dict[str, str] = {}
+    for card_id, source_id in store.evidence_sources():
+        if card_id not in found and source_id in sources and source_id in stored:
+            said = _page_says(staging, sources[source_id], stored[source_id])
+            if said:
+                found[card_id] = said
+    return found
+
+
 def _ref(card: Any) -> dict[str, str]:
     return {
         "card_id": card["id"],
@@ -54,15 +96,18 @@ def _ref(card: Any) -> dict[str, str]:
     }
 
 
-def check(store: BiStore, reg: Registry) -> dict[str, Any]:
+def check(store: BiStore, reg: Registry, *, read_pages: bool = False) -> dict[str, Any]:
     """Every check's findings: `{"checks": [{"id", "title", "level", "count",
-    "items": [{"card", "message"}]}], "totals": {"issue", "warn"}}`."""
+    "items": [{"card", "message"}]}], "totals": {"issue", "warn"}}`. `read_pages` also reads
+    the card pages, for the report a person opens: never with every Dashboard, since on a
+    colleague's PC each may be a file OneDrive has to fetch."""
     rows = store.card_rows()
     values = {
         card_id: {k: v["value"] for k, v in fields.items()}
         for card_id, fields in store.all_fields().items()
     }
     excerpts = store.fact_excerpts()
+    not_real = _said_not_real(store) if read_pages else {}
     found: dict[str, list[dict[str, Any]]] = {cid: [] for cid, _, _ in CHECKS}
 
     def add(check_id: str, card: Any, message: str) -> None:
@@ -119,6 +164,16 @@ def check(store: BiStore, reg: Registry) -> dict[str, Any]:
                     )
         if card["name"].startswith(SAMPLE_PREFIX) and not card["synthetic"]:
             add("sample_not_marked", card, "名稱是 SAMPLE-，但沒有標成示範資料，可能被當成真實資料")
+        elif not card["synthetic"] and (
+            said := not_real.get(card["id"])
+            or next((x for x in [str(mine.get("body") or "")] if SAID_NOT_REAL.search(x)), "")
+        ):
+            add(
+                "sample_not_marked",
+                card,
+                f"內容寫著「{said[:60]}」，但沒有標成示範資料，可能被當成事實；"
+                "如果真的是範例，請用 CSV 匯入一列註明虛構範例來標記",
+            )
         if mine.get("evidence_grade") in ("A", "B"):
             if entity.get("source") is not None and not mine.get("source"):
                 add("evidence_source", card, f"{mine['evidence_grade']} 級證據沒有來源（source）")

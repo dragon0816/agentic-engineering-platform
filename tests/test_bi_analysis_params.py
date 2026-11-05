@@ -14,9 +14,11 @@ import shutil
 from pathlib import Path
 from typing import Any
 
+import pytest
 from test_bi_vault import _call, _ok, _refused
 
-from capabilities.bi_cards import feed, vault
+from capabilities.bi_cards import analyses, feed, vault
+from capabilities.bi_cards.store import BiStoreError
 from scripts import bi_feed_fixtures as fixtures
 
 URL = f"/api/bi/vaults/{fixtures.VAULT_ID}/analyses"
@@ -95,3 +97,13 @@ def analyses_run_default(ws: Path) -> dict[str, Any]:
     from capabilities.bi_cards import analyses
 
     return dict(analyses.run_saved(ws, fixtures.VAULT_ID, "accounts-by-region")["table"])
+
+
+def test_an_enum_value_is_matched_without_case_and_given_as_the_schema_spells_it() -> None:
+    # The page sends `aidc`; on market-intel, 30 of 37 panels failed to draw for its `AIDC`.
+    declared = {"domain": {"type": "enum", "values": ["wireless", "AIDC"], "default": "wireless"}}
+    values = analyses.resolve_params(declared, {"domain": "aidc"}, None, today="2026-11-05")
+    assert values["domain"] == "AIDC"
+    assert analyses.resolve_params(declared, {}, None, today="2026-11-05")["domain"] == "wireless"
+    with pytest.raises(BiStoreError):
+        analyses.resolve_params(declared, {"domain": "nowhere"}, None, today="2026-11-05")

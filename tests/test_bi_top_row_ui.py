@@ -1,0 +1,170 @@
+"""The BI page's first row: the vault, then the working domain, above every tab.
+
+Owner, 2026-11-05: 「第一件事情是選擇vault，或者是新增一個vault，接著再選domain」. The working
+domain sets what the Dashboard and the card tab read. A real browser on fictional data.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+
+import pytest
+from bi_page_driver import BiPage, browser_missing
+from test_bi_vault import _call, _ok
+from test_vault_asking_e2e import _bi_host, _Model, _served
+
+from capabilities.bi_cards.store import BiStore
+
+AIDC = "applications/aidc/sources"
+QUIET = "window.__aepWatch.open.length === 0"
+VISIBLE = (
+    "(id) => { const e = document.getElementById(id); return !!e && e.offsetParent !== null; }"
+)
+
+
+def _tops(page: BiPage, *selectors: str) -> list[float]:
+    found = page.run(
+        f"JSON.stringify({json.dumps(selectors)}.map((s) =>"
+        " document.querySelector(s).getBoundingClientRect().top))"
+    )
+    return [float(x) for x in json.loads(str(found))]
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_someone_with_no_vault_starts_at_creating_one(tmp_path: Path) -> None:
+    config, layout = _bi_host(tmp_path / "pc")
+    shots = os.environ.get("AEP_UI_SHOTS")
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(
+            tmp_path / "browser", server.address, Path(shots) / "top" if shots else None
+        ) as page:
+            page.wait(QUIET, 60)
+            assert "go" in str(page.run("document.getElementById('bi-b-v-new').className"))
+            assert page.run("document.getElementById('bi-b-src-folder-box').hidden")
+            assert page.run(f"({VISIBLE})('bi-b-v-new')")
+            page.shoot("first-time")
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_the_row_is_first_on_every_tab_and_the_tabs_read_under_it(tmp_path: Path) -> None:
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    BiStore(workspace, "demo").create("bi.schema/v1.1")
+    shared = tmp_path / "shared"
+    shared.mkdir()
+    made = _ok(
+        _call(
+            workspace,
+            "POST",
+            "/api/bi/vaults",
+            {"path": str(shared), "title": "Market", "schema": "bi.schema/v1.1",
+             "author": "alice", "default_pack": False},
+        )
+    )  # fmt: skip
+    dataset = str(made["vault"]["dataset"])
+    shots = os.environ.get("AEP_UI_SHOTS")
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(
+            tmp_path / "browser", server.address, Path(shots) / "top" if shots else None
+        ) as page:
+            page.choose("bi-dataset", dataset)
+            page.wait("document.getElementById('bi-b-src-folder').options.length > 1", 60)
+            page.wait(QUIET, 60)
+            assert "go" not in str(page.run("document.getElementById('bi-b-v-new').className"))
+
+            # -- on the one row, vault then domain, above the tabs, above the stepper ---------
+            page.click("#bi-views [data-bi-view=build]")
+            vault_y, domain_y, tabs_y, steps_y = _tops(
+                page, "#bi-dataset", "#bi-b-src-folder", "#bi-views", "#bi-stepper"
+            )
+            assert abs(vault_y - domain_y) < 4, (vault_y, domain_y)
+            assert domain_y < tabs_y < steps_y
+            lefts = page.run(
+                "document.getElementById('bi-dataset').getBoundingClientRect().left"
+                " < document.getElementById('bi-b-src-folder').getBoundingClientRect().left"
+            )
+            assert lefts
+            # New and join are out of the fold; the rest of it stays folded.
+            assert page.run(f"({VISIBLE})('bi-b-v-new') && ({VISIBLE})('bi-b-v-join')")
+            assert not page.run("document.getElementById('bi-b-v-menu').open")
+            # Step 1 starts at the files.
+            assert page.run(
+                "document.querySelector('.kp-stage[data-stage=source] #bi-b-class') !== null"
+                " && document.querySelector('.kp-stage[data-stage=source] #bi-dataset') === null"
+            )
+            page.shoot("build")
+
+            # -- the status line goes with the vault, on every tab ----------------------------
+            page.wait("document.getElementById('bi-b-v-state').textContent.includes('張卡片')", 60)
+
+            # -- the Dashboard: the working domain decides, so there is nothing to choose -----
+            page.choose("bi-b-src-folder", "sources")
+            page.click("#bi-views [data-bi-view=dashboard]")
+            page.wait(QUIET, 60)
+            assert page.run(f"({VISIBLE})('bi-dataset') && ({VISIBLE})('bi-b-src-folder')")
+            assert page.run(f"({VISIBLE})('bi-domain')"), "全部領域 still chooses a domain here"
+            page.shoot("dashboard-all")
+            page.choose("bi-b-src-folder", AIDC)
+            page.wait(QUIET, 60)
+            assert not page.run(f"({VISIBLE})('bi-domain')")
+            assert str(page.run("document.getElementById('bi-domain').value")).lower() == "aidc"
+            page.shoot("dashboard-aidc")
+
+            # -- the card tab: its filter starts on the working domain, and stays changeable --
+            page.click("#bi-views [data-bi-view=cards]")
+            page.wait(QUIET, 60)
+            assert (
+                str(page.run("document.getElementById('bi-card-domain').value")).lower() == "aidc"
+            )
+            assert page.run(f"({VISIBLE})('bi-card-domain')")
+            page.shoot("cards-aidc")
+            page.choose("bi-card-domain", "")
+            page.wait(QUIET, 60)
+            assert page.run("document.getElementById('bi-card-domain').value") == ""
+            # The next choice of domain sets it again; back to 全部領域, every domain.
+            page.choose("bi-b-src-folder", "applications/wireless/sources")
+            page.wait(QUIET, 60)
+            assert (
+                str(page.run("document.getElementById('bi-card-domain').value")).lower()
+                == "wireless"
+            )
+            page.choose("bi-b-src-folder", "sources")
+            page.wait(QUIET, 60)
+            assert page.run("document.getElementById('bi-card-domain').value") == ""
+
+            # -- a plain dataset has no domain part, and the vault part stays ----------------
+            page.choose("bi-dataset", "demo")
+            page.wait("document.getElementById('bi-b-src-folder-box').hidden", 60)
+            assert page.run(f"({VISIBLE})('bi-dataset') && ({VISIBLE})('bi-b-v-new')")
+
+            # -- sticky: both stay when the page scrolls --------------------------------------
+            page.choose("bi-dataset", dataset)
+            page.wait("!document.getElementById('bi-b-src-folder-box').hidden", 60)
+            page.click("#bi-views [data-bi-view=build]")
+            page.wait(QUIET, 60)
+            page.run(
+                "document.querySelector('.kp-stage[data-stage=source]')"
+                ".scrollIntoView({block: 'end'})"
+            )
+            assert page.run(
+                "(() => { const r = document.getElementById('bi-dataset').getBoundingClientRect();"
+                " return r.top >= 0 && r.bottom <= innerHeight; })()"
+            )
+
+            # -- a phone: stacked, nothing pushes the page sideways ---------------------------
+            page.browser.page().call(
+                "Emulation.setDeviceMetricsOverride",
+                width=390,
+                height=844,
+                deviceScaleFactor=1,
+                mobile=True,
+            )
+            page.wait(
+                "document.documentElement.scrollWidth <= document.documentElement.clientWidth"
+            )
+            vault_y, domain_y = _tops(page, "#bi-dataset", "#bi-b-src-folder")
+            assert domain_y > vault_y
+            page.run("window.scrollTo(0, 0)")
+            page.shoot("phone")

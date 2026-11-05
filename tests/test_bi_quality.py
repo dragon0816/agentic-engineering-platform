@@ -156,3 +156,51 @@ def test_an_import_marks_sample_rows_as_samples(tmp_path: Path) -> None:
     assert rows == {"SAMPLE-Fake Co": 1, "Real Co": 0}
     report = _call(tmp_path, "GET", "/api/bi/quality", dataset="m")
     assert not _messages(report)["sample_not_marked"]
+
+
+DEMO_PAGE = """---
+type: account
+name: {name}
+---
+
+## 客戶概述
+{text}
+
+```dataview
+TABLE x FROM "BI/虛構不算"
+```
+"""
+
+
+def test_a_card_whose_own_text_says_it_is_an_example_is_found(tmp_path: Path) -> None:
+    said = {"FAKE-A": "(虛構範例客戶)手機廠。", "FAKE-B": "示範失單。", "FAKE-C": "真實的手機廠。"}
+    pages = [
+        {"path": f"BI/Account/{name}.md", "text": DEMO_PAGE.format(name=name, text=text)}
+        for name, text in said.items()
+    ]
+    store = BiStore(tmp_path, "demo")
+    store.create("bi.schema/v1.1")
+    plan = _call(
+        tmp_path, "POST", "/api/bi/import/pages/preview", {"dataset": "demo", "pages": pages}
+    )
+    _call(tmp_path, "POST", "/api/bi/import/pages/apply", {"preview_id": plan["preview_id"]})
+
+    def found() -> list[dict[str, Any]]:
+        checks = _call(tmp_path, "GET", "/api/bi/quality", dataset="demo")["checks"]
+        return list(next(c for c in checks if c["id"] == "sample_not_marked")["items"])
+
+    assert sorted(i["card"]["label"] for i in found()) == ["FAKE-A", "FAKE-B"]
+    assert "虛構範例客戶" in next(i["message"] for i in found() if i["card"]["label"] == "FAKE-A")
+    # The Dashboard's copy of the check reads no page: it may be a file to fetch from the cloud.
+    quick = quality.check(store, catalog.for_store(store))["checks"]
+    assert next(c for c in quick if c["id"] == "sample_not_marked")["count"] == 0
+
+    # Marked the way the message says, by a CSV row: found no more, and nothing else moved.
+    csv = "name,sample_note\nFAKE-A,虛構範例\n"
+    body = {"dataset": "demo", "entity_type": "Account", "filename": "m.csv", "csv_text": csv}
+    preview = _call(tmp_path, "POST", "/api/bi/import/preview", body)
+    assert [r["action"] for r in preview["rows"]] == ["unchanged"]
+    _call(tmp_path, "POST", "/api/bi/import/apply", {"preview_id": preview["preview_id"]})
+    assert [i["card"]["label"] for i in found()] == ["FAKE-B"]
+    card = store.find("Account", "FAKE-A")
+    assert card is not None and card["synthetic"] == 1
