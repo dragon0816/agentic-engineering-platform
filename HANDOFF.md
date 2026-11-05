@@ -4,7 +4,7 @@
 
 Branch `bi-repeat-evidence` off main `16a08e5e`, not pushed. `docs/DECISIONS.md` 2026-11-05, last entry. Real vault not touched.
 
-**Next:** merge. The real run's candidates get `citations` only when evaluated again: a run staged earlier shows none until a decision or reload re-evaluates it.
+**Next:** merge. The real run's candidates get `citations` only when evaluated again: a run staged earlier shows none until a decision on that candidate re-evaluates it; a reload does not.
 
 ## BI page: create a domain done; ownership slices next (2026-11-05, Claude Code)
 
