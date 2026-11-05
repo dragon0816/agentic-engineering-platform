@@ -1,5 +1,13 @@
 # Handoff
 
+## Example skills for the five BI domains (2026-11-05, Claude Code) — waiting for the owner to read them
+
+**Where.** Branch `bi-skill-examples`, not pushed, not merged. Files: `docs/examples/bi-skills/`, `docs/guides/BI_SKILL_EXAMPLES.zh-TW.md`, `tests/test_bi_skill_examples.py`.
+
+**Verified.** See the commit and the orchestrator's report for the checks run. Trials: 74 on a deleted temp copy of `market-intel`, real model. Not done: the page's form in a browser; mobile (no folder, no sources); AIDC's three-source set on the corrected `card_types` (only the long report was rerun).
+
+**Next action.** The owner reads the examples and decides which go in the vault. Nothing was added to it.
+
 ## Filling card summaries (2026-11-05, Claude Code worker D) — run staged, waiting for the owner's review
 
 Run `e3de934115f0` on the real `market-intel`: 144 candidates (140 summaries, 12 usages), 101 cards empty, 0 failed. Nothing committed; numbers and sample in `docs/phases/BI_SUMMARY_FILL.md`. The review entry in the page is a page worker's. The 13 demo cards and garbled records wait for the owner.
