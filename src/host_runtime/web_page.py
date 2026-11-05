@@ -13230,9 +13230,47 @@ function biFieldRow(card, item) {
   if (!biReadOnly()) {  // a subscribed copy is read-only: no note form at all
     foot.append(biButton("提更正單", () => biEditField(card, item, row), "bi-btn",
       "提「" + (item.label || item.field) + "」的更正單"));
+    if (biVaultOf(biDataset())) {
+      foot.append(biButton("定案", () => biFinalField(card, item, row), "bi-btn",
+        "定案「" + (item.label || item.field) + "」"));
+    }
   }
   row.append(foot);
   return row;
+}
+
+function biFinalField(card, item, row) {
+  // After a meeting: this value wins, and the old one, who and why stay in history.
+  const old = row.querySelector(".bi-final");
+  if (old) { old.remove(); return; }
+  const spec = biSchemaField(card.entity_type, item.field) || {};
+  const form = bh("form", "bi-edit bi-final"); form.noValidate = true;
+  const value = document.createElement("input"); value.className = "bi-input";
+  value.setAttribute("aria-label", "定案的值");
+  value.value = Array.isArray(item.value) ? item.value.join("、")
+    : item.value == null ? "" : String(item.value);
+  const reason = document.createElement("input"); reason.className = "bi-input";
+  reason.setAttribute("aria-label", "定案的理由");
+  reason.placeholder = "理由（必填），例如哪一次會議決定的";
+  const error = bh("div", "bi-err"); error.setAttribute("role", "alert");
+  const go = bh("button", "go", "確認定案"); go.type = "submit";
+  form.append(bh("label", "bi-label", "定案的值" + (spec.list ? "（多個值用「、」分隔）" : "")),
+    value, bh("label", "bi-label", "理由"), reason, error, bh("div", "bi-actions", go));
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault(); error.replaceChildren(); go.disabled = true;
+    try {
+      const vault = biVaultOf(biDataset());
+      const reply = await biCall("/api/bi/vaults/" + vault.id + "/finalize",
+        {card: card.id, field: item.field, value: value.value, reason: reason.value});
+      biNotice(true, "已定案「" + (item.label || item.field) + "」"
+        + (reply.closed ? "，關閉 " + reply.closed + " 筆待審提議" : "")
+        + "。commit 並 push 後大家才會看到。");
+      await biOpenCard(card.id);
+    } catch (failure) {
+      error.append(bh("p", "bi-err", "沒有定案：" + failure.message + "。")); go.disabled = false;
+    }
+  });
+  row.append(form);
 }
 
 function biEditField(card, item, row) {
@@ -13917,6 +13955,9 @@ function biBenchReport(report, standing) {
   for (const line of (standing || {}).blocking || []) {
     box.append(bh("p", "bi-warn", "Push 會被擋：" + line));
   }
+  // A colleague's failure shows whether or not this domain has run anything yet.
+  const notes = (standing || {}).notes || [], elsewhere = (line) => line.startsWith("其他領域");
+  for (const line of notes.filter(elsewhere)) box.append(bh("p", "bi-meta", line));
   if (!report) {
     box.append(bh("p", "bi-meta", biScope() ? "這個領域還沒有跑過測試。" : "還沒有跑過測試。"));
     return;
@@ -13927,7 +13968,7 @@ function biBenchReport(report, standing) {
   box.append(bh("h5", "", head));
   box.append(bh("p", "bi-meta", (report.scope ? "涵蓋 " + report.scope + " "
     : "涵蓋全部 ") + (report.total || 0) + " 題"));
-  for (const line of (standing || {}).notes || []) box.append(bh("p", "bi-meta", line));
+  for (const line of notes.filter((n) => !elsewhere(n))) box.append(bh("p", "bi-meta", line));
   if (report.error) box.append(bh("p", "bi-warn", "停在：" + report.error));
   if (report.status !== "running") {
     const parts = ["題目：工作版本 " + report.working_score + "/" + report.total

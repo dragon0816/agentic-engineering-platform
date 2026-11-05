@@ -6558,3 +6558,13 @@ The owner: 「每個領域也要有各自的benchmark 問題和dashboard」. Des
 - **A panel that does not read `domain` is labelled 全庫資料.** Declaring the parameter is not enough: the code must read it.
 - **Published readers see no per-domain Dashboard:** the feed stays the vault's. Rejected for now: a per-domain feed, which is a contract change for Atlas.
 - **Assigning what exists is a dry run, then one step on an approved list.** Nothing is written until a person approves, and it stages changes for their commit.
+
+## 2026-11-06: A BI push is held back by what it touches, and 定案 settles a field
+
+The owner: 「這是一個多人合作的平台，但為了不彼此干擾，每一個domain會有專人來處理」, and on 定案, confirmed through the orchestrator: after a meeting, the person responsible settles a field. Design: `docs/phases/BI_PAGE_SIMPLE.md` §14. This replaces the same week's decision that a person in one domain is blocked by a regression in another, which the owner's sentence overrides.
+
+- **A regression blocks a push only in the domains it touches;** elsewhere it is a note. What cannot be placed soundly blocks, as before. Accepted cost: an aidc push can break a wireless answer that reads an aidc card, and nobody is stopped until wireless is tested.
+- **A test counts per domain:** its units and the shared ones. Rejected: the whole-vault digest, under which any colleague's push voids everyone's run.
+- **定案 is an ordinary change with a reason,** built on `set_field`, closing proposals, and `resolve`. Not a Git force push: commits are immutable. No access control. Rejected: a new unit kind for final values, since the field's own history already holds who and why.
+- **Commit stays whole for now,** though `only` makes limiting it cheap. The owner has not asked, and the warning covers it.
+- **The owner's rule for a card two domains reach is recorded, not built:** it needs a merge rule in the engine's conflict path. Findings in §14.
