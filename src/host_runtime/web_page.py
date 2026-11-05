@@ -13494,11 +13494,23 @@ async function biBuildLoad() {
     return;
   }
   const stored = biBuildStored();
-  const load = bi.build.load = (bi.build.load || 0) + 1, moves = bi.build.moves;
+  const load = bi.build.load = (bi.build.load || 0) + 1;
+  // The step comes back at once where it needs no source; its data follows.
+  if (["schema", "test"].includes(stored.stage) && bi.build.stage !== stored.stage) {
+    biBuildStage(stored.stage, false);
+  }
+  const moves = bi.build.moves;
   const schema = bi.schema || {};
   el("bi-b-target").textContent = "寫入目的地：資料集「" + biDataset() + "」・schema "
     + (schema.ref || schema.schema_id || "—") + "。";
-  biBuildVault().catch((failure) => biNotice(false, "知識庫狀態沒有載入：" + failure.message));
+  // After the sources: on market-intel the dozen reads this starts took them from 5 s to 12 s,
+  // and they serve the steps not showing yet.
+  let vaultAsked = false;
+  const askVault = () => {
+    if (vaultAsked || load !== bi.build.load) return;
+    vaultAsked = true;
+    biBuildVault().catch((failure) => biNotice(false, "知識庫狀態沒有載入：" + failure.message));
+  };
   const select = el("bi-b-entity"), keep = select.value;
   select.replaceChildren(bh("option", "", "自動判斷"));
   select.firstChild.value = "";
@@ -13510,11 +13522,13 @@ async function biBuildLoad() {
   biStatus("bi-status-build", "loading", "載入中…");
   try {
     await biBuildSources();
+    askVault();
     if (stored.runId) await biBuildFetchRun(stored.runId);
     bi.build.runLoading = null;
     await biBuildRuns();
     biStatus("bi-status-build", "");
   } catch (failure) {
+    askVault();
     biStatus("bi-status-build", "error", "載入失敗：" + failure.message + "。", biBuildLoad);
   }
   if (load !== bi.build.load) return;  // a newer load ends this
