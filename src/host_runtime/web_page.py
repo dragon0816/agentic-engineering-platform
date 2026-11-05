@@ -13516,7 +13516,7 @@ async function biBuildLoad() {
     return;
   }
   const stored = biBuildStored();
-  const load = bi.build.load = (bi.build.load || 0) + 1;
+  const load = bi.build.load = (bi.build.load || 0) + 1, dataset = biDataset();
   // The step comes back at once where it needs no source; its data follows.
   if (["schema", "test"].includes(stored.stage) && bi.build.stage !== stored.stage) {
     biBuildStage(stored.stage, false);
@@ -13553,7 +13553,9 @@ async function biBuildLoad() {
     askVault();
     biStatus("bi-status-build", "error", "載入失敗：" + failure.message + "。", biBuildLoad);
   }
-  if (load !== bi.build.load) return;  // a newer load ends this
+  // A newer load ends this. So does a dataset chosen since, whose load has not started yet:
+  // the step below would be saved as that dataset's.
+  if (load !== bi.build.load || dataset !== biDataset()) return;
   // A step the person opened meanwhile stays open.
   if (moves === bi.build.moves) biBuildStage(stored.stage || "source", false);
   else if (bi.build.stage === "review") biBuildRenderRun();
