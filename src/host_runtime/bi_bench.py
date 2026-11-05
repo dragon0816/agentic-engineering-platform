@@ -35,6 +35,7 @@ from typing import Any, Literal
 from capabilities.bi_cards import (
     ai_runs,
     benchmark,
+    domain_reach,
     error_class,
     schema_versions,
     vault,
@@ -198,6 +199,7 @@ def run(
         "finished_at": None,
         "by": actor,
         "units_sha256": units_digest(units),
+        "digests": domain_reach.digests(units, _question_homes(units)),
         "scope": home or "",
         "not_covered": sorted(left),
         "total": len(graded),
@@ -314,25 +316,52 @@ def latest_for(workspace: Path, vault_id: str, home: str | None) -> dict[str, An
     return None
 
 
+def _question_homes(units: Mapping[str, Any]) -> list[str]:
+    return sorted({q["home"] for q in vault_checks.questions(units) if q["home"]})
+
+
 def gate(workspace: Path, before: Mapping[str, Any], after: Mapping[str, Any]) -> CheckReport:
-    """The BI vault push check (`vault.set_benchmark`)."""
-    del before  # a run compared the working copy with the published version
+    """The BI vault push check (`vault.set_benchmark`). A verdict counts while what its
+    question's domain stands on is unchanged, so a colleague's push in another domain does not
+    void it. A regression blocks a push that touches its domain; one elsewhere is a note
+    (`docs/phases/BI_PAGE_SIMPLE.md` §14)."""
     digest = units_digest(after)
+    current = domain_reach.digests(after, _question_homes(after))
     runs = [
         r
         for path in sorted((workspace / "bi" / "vaults").glob(f"*/{BENCH_DIR}"))
         for r in reports(workspace, path.parent.name)
-        if r.get("units_sha256") == digest and r.get("status") == "finished"
+        if r.get("status") == "finished"
     ]
-    if not runs:
+    runs.sort(key=lambda r: (str(r.get("finished_at") or ""), r.get("finished_ns") or 0))
+
+    def home_of(unit: str) -> str | None:
+        value = after.get(unit)
+        home = value.get("home") if isinstance(value, dict) else None
+        return str(home) if home else None
+
+    def counts(run_: Mapping[str, Any], unit: str) -> bool:
+        if run_.get("units_sha256") == digest:
+            return True
+        home = home_of(unit)
+        return home is not None and (run_.get("digests") or {}).get(home) == current.get(home)
+
+    # Each question's newest verdict that still counts: a run of one home says nothing of
+    # another's questions.
+    verdicts: dict[str, Any] = {}
+    newest = None
+    for run_ in runs:
+        for item in run_.get("results") or []:
+            if counts(run_, item["unit"]):
+                verdicts[item["unit"]] = item
+                newest = run_
+        if run_.get("units_sha256") == digest:
+            newest = run_
+    if newest is None:
         return CheckReport(
             blocking=[],
             notes=["這次 push 的內容沒有跑過測試（可以先在步驟 3 跑一次再 push）"],
         )
-    runs.sort(key=lambda r: (str(r.get("finished_at") or ""), r.get("finished_ns") or 0))
-    newest = runs[-1]
-    # Each question's newest verdict: a run of one home says nothing of another's questions.
-    verdicts = {item["unit"]: item for run_ in runs for item in run_.get("results") or []}
     passed = [_passed(item, "working") for item in verdicts.values()]
     published = [_passed(item, "published") for item in verdicts.values()]
     note = (
@@ -348,16 +377,20 @@ def gate(workspace: Path, before: Mapping[str, Any], after: Mapping[str, Any]) -
         note += f"；擷取 {extract.get('score')} 分"
 
     def where(unit: str) -> str:
-        value = after.get(unit)
-        home = value.get("home") if isinstance(value, dict) else None
+        home = home_of(unit)
         return f"（{home}）" if home else ""
 
-    blocking = [
-        f"測試退步{where(unit)}：「{item['question']}」發佈版本答得對，這次的內容答錯"
-        for unit, item in verdicts.items()
-        if _passed(item, "published") and not _passed(item, "working")
-    ]
-    return CheckReport(blocking=blocking, notes=[note])
+    reached = domain_reach.touched(before, after)
+    blocking: list[str] = []
+    elsewhere: list[str] = []
+    for unit, item in verdicts.items():
+        if _passed(item, "published") and not _passed(item, "working"):
+            line = f"測試退步{where(unit)}：「{item['question']}」發佈版本答得對，這次的內容答錯"
+            home = home_of(unit)
+            mine = "*" in reached or home is None or home in reached
+            (blocking if mine else elsewhere).append(line)
+    notes = [note, *(f"其他領域，不擋這次 push：{line}" for line in elsewhere)]
+    return CheckReport(blocking=blocking, notes=notes)
 
 
 def _passed(item: Mapping[str, Any], side: Side) -> bool:
@@ -367,8 +400,8 @@ def _passed(item: Mapping[str, Any], side: Side) -> bool:
 def standing(workspace: Path, vault_id: str) -> dict[str, list[str]]:
     """What the push check says of the working copy today, for a person to see before
     pressing push: a regression stands in every working domain."""
-    units = vault.Vault(workspace, vault_id).repo.working_units()
-    report = gate(workspace, {}, units)
+    target = vault.Vault(workspace, vault_id).repo
+    report = gate(workspace, target.units(), target.working_units())
     return {"blocking": list(report.blocking), "notes": list(report.notes)}
 
 

@@ -18,6 +18,7 @@ from typing import Any
 
 from capabilities.bi_cards import (
     analyses,
+    correction,
     domain_assign,
     homes,
     migrate,
@@ -165,6 +166,8 @@ def route(
         return 200, {"ok": True, **vault.commit(workspace, vault_id, given)}
     if action == "push":
         return 200, {"ok": True, **vault.push(workspace, vault_id)}
+    if action == "finalize":
+        return 200, {"ok": True, **correction.finalize(workspace, vault_id, given, actor)}
     if action == "resolve":
         return 200, {"ok": True, **vault.resolve(workspace, vault_id, given)}
     if action == "fill-domains":
