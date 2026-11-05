@@ -1,5 +1,11 @@
 # Handoff
 
+## A run's commit replacing a value follows the citation rule (2026-11-05, Claude Code) — built, not merged
+
+Branch `bi-replaced-evidence` off main `2d291f29`, not pushed. Decision and what is left: `docs/DECISIONS.md` 2026-11-05, last entry. Real vault not touched. No `MODEL_VERSION` bump beyond 10: conflict proposals and history rows come from the same rebuild.
+
+**Next:** merge; the owner says whether a second source that only repeats a value should add a citation.
+
 ## BI page: working domain, Markdown preview, file row (2026-11-05, Claude Code) — built, not merged
 
 Branch `bi-step1-domain`, with main `c0bb678d` merged in, not pushed. Design `docs/phases/BI_PAGE_SIMPLE.md` §9; decision `docs/DECISIONS.md` 2026-11-05; contract `docs/CONTRACTS.md`, BI benchmark section.
