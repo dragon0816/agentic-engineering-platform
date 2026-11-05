@@ -9,6 +9,15 @@ Branch `bi-step1-domain`, with main `4a8d8515` merged in, not pushed. Design `do
 **Open, for the orchestrator:** existing questions cannot be given a home in the page. The API takes `home`, and new and AI-made questions get the working domain. The question editor needs a 領域 combobox; it was left out because step 3's markup is Lane D's. Until then, today's questions all count as 全庫 and run in every domain. The branch for a vault with no homes (adding still works, into `sources`) was not driven in a browser: every vault made here has homes.
 
 **Next:** merge; restart Agent Web on this code once `/api/tasks` is quiet; on the real vault, choose a domain and look at the three steps.
+## Example skills in `market-intel` for review (2026-11-05, Claude Code) — waiting for colleagues to read them
+
+**Where.** Vault commit `011125aaec19`, pushed, published stays `2026q4-r6.2`. Files `library/skill-review/skills/<domain>-extract-review/`. Repository: `docs/examples/bi-skills/`, `docs/guides/BI_SKILL_EXAMPLES.zh-TW.md`, `tests/test_bi_skill_examples.py`, branch `bi-skill-examples`, not pushed.
+
+**Why it cannot change an ingest.** `skill_for` picks by `applies_to` only; these name `library/skill-review/sources`, which has no source. A source put there would get one of them.
+
+**Not done.** The real page was not opened in a browser, and delivery to a colleague's PC was not checked. Skill-AI trials on these are expected to be refused (`run_folder_mismatch`), from reading the code. The next bench run needs the new units.
+
+**Next action.** The owner and colleagues read them and decide which become real skills.
 
 ## Review table (2026-11-05, Claude Code) — built, not merged
 
