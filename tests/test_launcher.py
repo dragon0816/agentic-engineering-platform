@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
+import sys
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -16,13 +18,17 @@ import pytest
 from host_runtime.launcher import (
     NOT_READY_PREFIX,
     SLOW_START_SECONDS,
+    START_RECORD,
+    START_WAIT_SECONDS,
     STARTING_HTML,
+    STARTING_PAGE,
     STARTING_STATUS,
     LauncherError,
     StartState,
     clear_record,
     console_python,
     open_agent,
+    process_alive,
     read_record,
     record_path,
     refreshed_environment,
@@ -279,6 +285,109 @@ def test_the_page_says_what_a_server_that_stopped_said_about_why(tmp_path: Path)
 def test_the_page_does_not_promise_a_short_start_and_offers_a_second_try() -> None:
     assert "10\u201330" not in STARTING_HTML and "a few minutes" in STARTING_HTML
     assert "a second try may work" in STARTING_HTML
+
+
+def _start_record(tmp_path: Path, pid: int, age_seconds: float = 0.0) -> None:
+    started_ms = int((time.time() - age_seconds) * 1000)
+    (tmp_path / START_RECORD).write_text(
+        json.dumps({"pid": pid, "started_ms": started_ms}), encoding="utf-8"
+    )
+
+
+def _gone_pid() -> int:
+    finished = subprocess.Popen([sys.executable, "-c", ""])
+    finished.wait()
+    return finished.pid
+
+
+def test_a_process_is_told_apart_from_one_that_ended() -> None:
+    assert process_alive(os.getpid())
+    assert not process_alive(_gone_pid())
+
+
+def test_a_second_click_joins_a_start_under_way_and_starts_nothing(tmp_path: Path) -> None:
+    keeper = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+    try:
+        _start_record(tmp_path, keeper.pid)
+        before = (tmp_path / START_RECORD).read_text(encoding="utf-8")
+        started: list[int] = []
+        shown: list[str] = []
+        with pytest.raises(LauncherError) as failed:
+            open_agent(
+                tmp_path,
+                tmp_path / "host.json",
+                start=lambda: started.append(1),
+                opener=shown.append,
+                wait_seconds=0.2,
+                poll=0.01,
+            )
+    finally:
+        keeper.kill()
+        keeper.wait()
+    assert started == []
+    assert failed.value.code == "agent_web_not_started"
+    assert len(shown) == 1 and STARTING_PAGE in shown[0]
+    assert (tmp_path / START_RECORD).read_text(encoding="utf-8") == before
+
+
+def test_a_joined_start_that_stops_is_reported_and_keeps_the_reason_given(tmp_path: Path) -> None:
+    keeper = subprocess.Popen([sys.executable, "-c", ""])
+    _start_record(tmp_path, keeper.pid)
+    alive = {"yes": True}
+
+    def stop_it(_seconds: float) -> None:
+        keeper.wait()
+        write_start_status(tmp_path, "failed", started_ms=1, message="the reason given")
+        alive["yes"] = False
+
+    with pytest.raises(LauncherError) as failed:
+        open_agent(
+            tmp_path,
+            tmp_path / "host.json",
+            start=lambda: pytest.fail("a second server was started"),
+            opener=lambda _: True,
+            sleep=stop_it,
+            poll=0.01,
+        )
+    assert failed.value.code == "agent_web_exited"
+    assert alive["yes"] is False
+    assert _status(tmp_path)["message"] == "the reason given"
+
+
+@pytest.mark.parametrize(
+    "age_seconds",
+    [0.0, START_WAIT_SECONDS + 1],
+    ids=["its process ended", "too old"],
+)
+def test_a_start_that_is_over_does_not_stop_a_new_one(tmp_path: Path, age_seconds: float) -> None:
+    pid = os.getpid() if age_seconds else _gone_pid()
+    _start_record(tmp_path, pid, age_seconds)
+    started: list[int] = []
+
+    class Exited:
+        def poll(self) -> int:
+            started.append(1)
+            return 3
+
+    with pytest.raises(LauncherError):
+        open_agent(tmp_path, tmp_path / "host.json", start=Exited, opener=lambda _: True, poll=0.01)
+    assert started
+
+
+def test_a_server_that_lost_the_port_to_one_that_answers_is_not_a_failure(
+    tmp_path: Path, server: Any
+) -> None:
+    class Exited:
+        def poll(self) -> int:
+            write_record(tmp_path, address(server), server.server_address[1])
+            return 1
+
+    assert (
+        open_agent(
+            tmp_path, tmp_path / "host.json", start=Exited, opener=lambda _: False, poll=0.01
+        )
+        == "started"
+    )
 
 
 # --- the starting page in a real browser --------------------------------------------

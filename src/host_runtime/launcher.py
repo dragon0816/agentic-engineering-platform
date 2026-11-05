@@ -24,10 +24,15 @@ carries the address, the same one `agent-web.json` already holds and the
 browser was given before; the page then goes there. After `HANDOFF_SECONDS`
 the launcher rewrites the status without it, so the address is left in no
 other file. The page itself never holds the address.
+
+A second click while a start is under way joins it instead of starting another server
+(`agent-web-start.json` holds the process being waited for): two servers starting together
+meet on the state file and the port, and on 2026-11-05 one of them exited over it.
 """
 
 from __future__ import annotations
 
+import ctypes
 import json
 import os
 import subprocess
@@ -51,6 +56,7 @@ DEFAULT_PORT = 53583
 START_WAIT_SECONDS = 300.0
 STARTING_PAGE = "agent-web-starting.html"
 STARTING_STATUS = "agent-web-starting.js"
+START_RECORD = "agent-web-start.json"
 #: How long the status keeps the address for the starting page to pick up.
 HANDOFF_SECONDS = 15.0
 #: After this long the starting page says it is taking too long, and where the log is.
@@ -359,6 +365,57 @@ def console_python(executable: str = sys.executable) -> str:
     return executable
 
 
+def process_alive(pid: int) -> bool:
+    """Whether a process runs. Never `os.kill` on Windows, where signal 0 is a Ctrl+C."""
+    if sys.platform != "win32":
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            return False
+        except OSError:
+            return True
+        return True
+    from ctypes import wintypes
+
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.OpenProcess.restype = wintypes.HANDLE
+    kernel32.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
+    kernel32.GetExitCodeProcess.argtypes = (wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD))
+    kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
+    query_limited_information, still_active = 0x1000, 259
+    handle = kernel32.OpenProcess(query_limited_information, False, pid)
+    if not handle:
+        return False
+    try:
+        code = wintypes.DWORD()
+        return bool(kernel32.GetExitCodeProcess(handle, ctypes.byref(code))) and (
+            code.value == still_active
+        )
+    finally:
+        kernel32.CloseHandle(handle)
+
+
+def start_underway(workspace_root: Path, wait_seconds: float) -> dict[str, int] | None:
+    """The start another `open` is waiting for: recent, and its process still runs."""
+    try:
+        found = json.loads((workspace_root / START_RECORD).read_text(encoding="utf-8"))
+        pid, started_ms = int(found["pid"]), int(found["started_ms"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+    age = time.time() - started_ms / 1000
+    if not 0 <= age < wait_seconds or not process_alive(pid):
+        return None
+    return {"pid": pid, "started_ms": started_ms}
+
+
+def _start_failed_already(workspace_root: Path) -> bool:
+    try:
+        text = (workspace_root / STARTING_STATUS).read_text(encoding="utf-8")
+    except OSError:
+        return False
+    return '"state": "failed"' in text
+
+
 def start_server(
     config_path: Path, port: int, logs: Path, schedules: bool = True
 ) -> subprocess.Popen[bytes]:
@@ -440,11 +497,20 @@ def open_agent(
         return "opened"
     if record is not None:
         record_path(workspace_root).unlink(missing_ok=True)  # left by a server that died
-    started_ms = int(time.time() * 1000)
-    write_start_status(workspace_root, "starting", started_ms=started_ms)
+    underway = start_underway(workspace_root, wait_seconds)
+    joined = underway["pid"] if underway is not None else None
+    started_ms = underway["started_ms"] if underway is not None else int(time.time() * 1000)
+    if underway is None:
+        write_start_status(workspace_root, "starting", started_ms=started_ms)
     shown = opener(write_starting_page(workspace_root).as_uri()) is not False
     launch = start or (lambda: start_server(config_path, port, workspace_root / "logs", schedules))
-    process = launch()
+    process = launch() if underway is None else None
+    own_pid = getattr(process, "pid", None)
+    if isinstance(own_pid, int):
+        write_atomically(
+            workspace_root / START_RECORD,
+            json.dumps({"pid": own_pid, "started_ms": started_ms}).encode("utf-8"),
+        )
     deadline = time.monotonic() + wait_seconds
     while time.monotonic() < deadline:
         record = read_record(workspace_root)
@@ -457,9 +523,18 @@ def open_agent(
             sleep(handoff_seconds)
             write_start_status(workspace_root, "opened", started_ms=started_ms)
             return "started"
+        if joined is not None and not process_alive(joined):
+            sleep(poll)  # the launcher that started it says why, when it is still there
+            message = "The start already under way stopped."
+            if not _start_failed_already(workspace_root):
+                write_start_status(workspace_root, "failed", started_ms=started_ms, message=message)
+            raise LauncherError("agent_web_exited", f"{message} See the newest agent-web-*.err.log")
         exited = getattr(process, "poll", None)
         code = exited() if callable(exited) else None
         if code is not None:
+            record = read_record(workspace_root)
+            if record is not None and answers(str(record["address"])):
+                continue  # another server won the port; this one has nothing to report
             message = f"Agent Web stopped while starting (exit code {code})."
             reason = _stated_reason(process)
             if reason:
