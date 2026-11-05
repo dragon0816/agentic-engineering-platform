@@ -14950,7 +14950,7 @@ async function biBuildSources() {
   const reply = await call("/api/bi/sources?dataset=" + encodeURIComponent(listed));
   await biSourceFolders().catch(() => {});
   if (seq !== bi.sourcesSeq || listed !== biDataset()) return;
-  bi.build.sources = reply.sources || [];
+  bi.build.sources = reply.sources || []; bi.build.sourcesFor = listed;
   const cloud = bi.build.sources.filter((s) => s.shared === "cloud_only").length;
   const waiting = (reply.waiting || []).length;
   const warn = el("bi-b-src-cloud");
@@ -14981,7 +14981,12 @@ function biRenderSources() {
     radio.checked = source.id === bi.build.sourceId;
     radio.setAttribute("aria-label", "使用 " + source.name);
     radio.disabled = !source.format;
-    radio.addEventListener("change", () => biPickSource(source));
+    radio.addEventListener("change", () => {
+      // A row of the dataset just left would be dropped as soon as the new list arrives, and
+      // the steps after this one would quietly stay shut.
+      if (bi.build.sourcesFor !== biDataset()) { radio.checked = false; return; }
+      biPickSource(source);
+    });
     const format = {table: "表格（預設表格規則）", document: "文件（預設 AI 擷取）",
       text: "文字（預設 AI 擷取）"};
     const md = source.convert_error
