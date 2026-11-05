@@ -13,7 +13,9 @@ nothing here restarts Agent Web.
 from __future__ import annotations
 
 import json
+import logging
 import shutil
+import time
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -38,6 +40,9 @@ PREFIX = "/api/knowledge/askable"
 PAGE_SESSION = "knowledge-page"
 MAX_BODY_BYTES = 64 * 1024
 VERSION = "1.0.0"
+#: Tries of a read that Windows refuses while another process briefly holds a file.
+_READ_ATTEMPTS = 3
+_LOG = logging.getLogger(__name__)
 #: The values the model may give, by alias.
 FIELDS = {
     "action": "action",
@@ -405,6 +410,19 @@ def route(web: Any, method: str, path: str, given: Any) -> tuple[int, dict[str, 
     return 404, {"ok": False, "code": "route_unknown", "message": "沒有這個路徑"}
 
 
+def _route_waiting(web: Any, method: str, path: str, given: Any) -> tuple[int, dict[str, Any]]:
+    """`route`, with a read asked again when a file is held for a moment (just after a push, a
+    drive client or a scanner may hold what a repository's status reads). A write is not."""
+    for attempt in range(_READ_ATTEMPTS):
+        try:
+            return route(web, method, path, given)
+        except PermissionError:
+            if method != "GET" or attempt == _READ_ATTEMPTS - 1:
+                raise
+            time.sleep(0.2 * (attempt + 1))
+    raise AssertionError("the loop returns or raises")
+
+
 def handle(handler: Any, method: str, parsed: ParseResult) -> bool:
     """Serve an `/api/knowledge/askable` request on `handler` (already
     token-checked); False when the path is not ours."""
@@ -426,8 +444,10 @@ def handle(handler: Any, method: str, parsed: ParseResult) -> bool:
             handler._json(400, {"ok": False, "code": "json_invalid", "message": "不是有效的 JSON"})
             return True
     try:
-        status, payload = route(handler.server.web, method, parsed.path, body)
+        status, payload = _route_waiting(handler.server.web, method, parsed.path, body)
     except Exception as failure:  # noqa: BLE001 - the page shows every failure
+        # The page says only the kind of error: the trace goes to the host's error log.
+        _LOG.exception("%s %s failed", method, parsed.path)
         status, payload = (
             500,
             {
