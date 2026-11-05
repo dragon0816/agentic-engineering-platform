@@ -373,7 +373,7 @@ Status: built on `bi-step1-domain`, 2026-11-05. **The owner, verbatim:** 「每�
 
 **An analysis is shared; each Dashboard chooses.** An analysis stays one `analysis:<slug>` unit, so a fix reaches every Dashboard using it. Rejected: a copy per domain, which would drift. A domain's panels ask with its domain, so an analysis that takes `domain` gives that domain's numbers.
 
-**Truthful panels.** `analyses.uses_domain`: it declares `domain` and its code reads it. Anything else shows the whole vault whichever domain asks, so in a domain it carries 全庫資料, in the list and on the panel's title. A person may still choose one.
+**Truthful panels.** `analyses.uses_domain`: it declares `domain` and its code uses it. Passing it to a function that never looks at it does not count: `pending-links` and `same-names` take `d` and ignore it, so they show the same rows in every domain. Anything else shows the whole vault whichever domain asks, so in a domain it carries 全庫資料, in the list and on the panel's title. A person may still choose one.
 
 **A new domain starts empty,** unlike the vault's Dashboard, which also shows every analysis not hidden: only what a domain chose is on it. It says what to press: 和 AI 做新分析, or 加到這個領域 on an analysis listed apart. A new analysis made in a domain goes on its Dashboard.
 

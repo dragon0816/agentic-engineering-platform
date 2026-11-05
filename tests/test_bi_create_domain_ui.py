@@ -23,6 +23,7 @@ NEW = "applications/automotive/sources"
 # 虛構範例.
 QUESTIONS = {"aidc-q": "aidc", "wl-q": "wireless"}
 TIMES_OUT = 60
+QUIET_READS = "window.__aepWatch.open.length === 0"
 
 
 def _labels(page: BiPage) -> list[str]:
@@ -138,7 +139,43 @@ def test_a_domain_is_created_in_the_row_and_becomes_the_working_domain(tmp_path:
             rows = page.text_of("bi-b-bq-list")
             assert "虛構題 wl-q" in rows and "虛構題 aidc-q" not in rows
             assert page.text_of("bi-b-bench-state").startswith("1 題")
+
+            # -- a read from before a save does not close the question being edited ------------
+            # It used to clear the editor, so that saving next made a second question.
             page.run("window.__hold = { push: (go) => go(), length: 0, splice: () => [] }")
+            page.wait(QUIET_READS, TIMES_OUT)
+            page.run(
+                "(() => { const was = call; call = async (path, body) => {"
+                " const reply = await was(path, body);"
+                " if (!body && path.includes('/checks') && !window.__oldRead) {"
+                " await new Promise((go) => { window.__oldRead = go; }); }"
+                " if (path.endsWith('/status') && !window.__status) {"
+                " await new Promise((go) => { window.__status = go; }); }"
+                " return reply; }; })()"
+            )
+            page.run("biBench(bi.verVault)")
+            page.wait("!!window.__oldRead", TIMES_OUT)
+            page.run(
+                "biBenchSave({question: '虛構題 剛存的？', must: '好', home: 'wireless',"
+                " slug: 'fresh'}).then((reply) => { window.__saved = reply.unit; })"
+            )
+            # Saved, and its own read of the list has not started yet.
+            page.wait("!!window.__status", TIMES_OUT)
+            page.run(
+                "biBqPick({unit: 'check:question:main/fresh', slug: 'fresh', set: 'main',"
+                " question: '虛構題 剛存的？', must: ['好'], must_not: [], home: 'wireless'})"
+            )
+            # The read from before the save answers now: it is read again, not drawn.
+            page.run("window.__oldRead()")
+            page.wait(
+                "document.getElementById('bi-b-bq-list').textContent.includes('虛構題 剛存的')",
+                TIMES_OUT,
+            )
+            assert page.run("bi.bqSel && bi.bqSel.slug === 'fresh'")
+            page.run("window.__status()")
+            page.wait("!!window.__saved", TIMES_OUT)
+            page.wait(QUIET_READS, TIMES_OUT)
+            assert page.run("bi.bqSel && bi.bqSel.slug === 'fresh'")
 
             # -- a new domain has no questions: nothing is borrowed from another ------------
             page.choose("bi-b-src-folder", NEW)

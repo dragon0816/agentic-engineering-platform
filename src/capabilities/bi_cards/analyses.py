@@ -47,6 +47,7 @@ from capabilities.bi_cards.store import BiStoreError
 
 PREFIX = "analysis:"
 _PRELUDE_DOMAIN = 'D = str(PARAMS.get("domain") or "robotics")'
+_CALLS_WITH_DOMAIN = re.compile(r"^result = .*?\b(\w+)\(cards\(\), D\b", re.M)
 _READS_DOMAIN = re.compile(":domain\\b|PARAMS(?:\\.get\\(|\\[)\\s*[\"']domain[\"']|\\bD\\b")
 DASHBOARD_UNIT = "meta:dashboard"
 NAME_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,59}$")
@@ -637,9 +638,21 @@ def uses_domain(item: Mapping[str, Any]) -> bool:
     as `D`, set in the helpers put before its code, so that line alone does not count."""
     if "domain" not in (item.get("params") or {}):
         return False
-    return (
-        _READS_DOMAIN.search(str(item.get("code") or "").replace(_PRELUDE_DOMAIN, "")) is not None
-    )
+    code = str(item.get("code") or "").replace(_PRELUDE_DOMAIN, "")
+    return _READS_DOMAIN.search(code) is not None and not _passes_domain_unused(code)
+
+
+def _passes_domain_unused(code: str) -> bool:
+    """A built-in analysis calls its function with `D`: `result = out(f(cards(), D))`. Two of
+    them take it as `d` and never look at it, so they show the whole vault in every domain."""
+    call = _CALLS_WITH_DOMAIN.search(code)
+    if call is None:
+        return False
+    start = re.search(rf"^def {call.group(1)}\(", code, re.M)
+    if start is None:
+        return False
+    signature_end = code.find(":\n", code.find(") ->", start.end()))
+    return re.search(r"\bd\b", code[signature_end : call.start()]) is None
 
 
 def dashboard_layout(units: Mapping[str, Any], home: str | None = None) -> dict[str, list[str]]:

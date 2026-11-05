@@ -110,12 +110,19 @@ def test_whether_an_analysis_narrows_to_a_domain(params: bool, code: str, reads:
     assert analyses.uses_domain(item) is reads
 
 
-def test_every_built_in_analysis_that_takes_a_domain_is_seen_to_read_it() -> None:
-    # The one the pack declares for every card is the exception it names.
+def test_a_built_in_analysis_counts_as_narrowing_only_if_it_uses_the_domain() -> None:
+    # On market-intel these two gave the same rows in every domain: their code takes `d` and
+    # never looks at it. The rest that gave the same rows do filter, and had no rows to differ.
     pack = packs.default_pack()["analyses"]
     declared = [a for a in pack if "domain" in (a.get("params") or {})]
     assert declared
-    assert [a["slug"] for a in declared if not analyses.uses_domain(a)] == []
+    assert sorted(a["slug"] for a in declared if not analyses.uses_domain(a)) == [
+        "pending-links",
+        "same-names",
+    ]
+    by_slug = {a["slug"]: a for a in pack}
+    for slug in ("chain-overlap", "roadmap-gaps", "stale"):
+        assert analyses.uses_domain(by_slug[slug]), slug
 
 
 def test_a_panel_asks_with_the_domain_and_one_that_cannot_says_so(tmp_path: Path) -> None:

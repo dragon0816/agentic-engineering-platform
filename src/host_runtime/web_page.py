@@ -13951,10 +13951,13 @@ function biBenchReport(report, standing) {
 async function biBench(vaultId) {
   // The newest read wins: an older reply arriving late must not cancel the polling of a run.
   const seq = bi.benchSeq = (bi.benchSeq || 0) + 1;
-  const asked = biScope();
+  const asked = biScope(), writes = bi.benchWrites || 0;
   const reply = await call("/api/bi/vaults/" + vaultId + "/checks"
     + (asked ? "?home=" + encodeURIComponent(asked) : ""));
   if (seq !== bi.benchSeq || vaultId !== bi.verVault) return;
+  // Read before a save landed, it would take the saved question away, and clear the editor if
+  // that is the one open: what the person saved next would then become a new question.
+  if (writes !== (bi.benchWrites || 0)) { await biBench(vaultId); return; }
   reply.home = asked;
   bi.benchReply = {vaultId, reply};
   biBenchDraw(reply);
@@ -14061,6 +14064,7 @@ function biBqHomes() {
 
 async function biBenchSave(body) {
   const reply = await biCall("/api/bi/vaults/" + bi.verVault + "/checks", body);
+  bi.benchWrites = (bi.benchWrites || 0) + 1;
   biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
   biNotice(true, body.delete ? "已刪除（commit 並 push 後大家才會少這個測試）。"
     : body.slug ? "已存（commit 並 push 後大家才會用到）。"
