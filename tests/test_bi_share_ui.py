@@ -448,6 +448,8 @@ def test_bi_sharing_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None
         click_in(f"#bi-subs-list li[data-sub='{ROBOTICS}'] button", "開啟")
         wait(f"document.getElementById('bi-dataset').value === '{ROBOTICS}'")
         wait("!document.getElementById('bi-ro').hidden")
+        # A subscribed copy is only read: there is no working domain to choose.
+        assert run("document.getElementById('bi-b-src-folder-box').hidden")
         assert content("bi-ro-title") == "唯讀：leo.chi 發佈的 v1.2.0"
         assert hidden("bi-demo") and hidden("bi-publish")
         assert content("bi-pub-state") == ""

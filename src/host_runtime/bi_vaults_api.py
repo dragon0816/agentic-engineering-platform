@@ -18,6 +18,7 @@ from typing import Any
 
 from capabilities.bi_cards import (
     analyses,
+    homes,
     migrate,
     packs,
     profile_merge,
@@ -42,12 +43,26 @@ def _error(status: int, code: str, message: str) -> Answer:
 
 
 def _start_bench(
-    workspace: Path, actor: str, vault_id: str, bench: bi_bench.BenchRuntime | None
+    workspace: Path,
+    actor: str,
+    vault_id: str,
+    bench: bi_bench.BenchRuntime | None,
+    home: Any = None,
 ) -> dict[str, Any]:
     vault.Vault(workspace, vault_id)._require_folder()
+    home = home or None
+    if home is not None and homes.home_problem(home):
+        raise BiStoreError("home_invalid", "領域必須是應用資料夾或 library 的項目")
     listed = vault_checks.listing(workspace, vault_id)
-    if not listed["questions"] and not listed["cases"]:
-        raise BiStoreError("bench_empty", "這個知識庫還沒有測試題或擷取測試，請先新增")
+    if not any(vault_checks.in_scope(home, q["home"]) for q in listed["questions"]) and not any(
+        vault_checks.in_scope(home, vault_checks.case_home(c)) for c in listed["cases"]
+    ):
+        raise BiStoreError(
+            "bench_empty",
+            f"「{home}」還沒有測試題或擷取測試，請先新增"
+            if home
+            else "這個知識庫還沒有測試題或擷取測試，請先新增",
+        )
     if any(r.get("status") == "running" for r in bi_bench.reports(workspace, vault_id)[:1]):
         raise BiStoreError("bench_running", "上一次測試還在跑")
     if bench is None:
@@ -56,7 +71,9 @@ def _start_bench(
     ask, extract = bench.ask_for(vault_id, actor), bench.extract_for(vault_id, actor)
 
     def work() -> None:
-        bi_bench.run(workspace, vault_id, ask=ask, extract=extract, actor=actor, run_id=run_id)
+        bi_bench.run(
+            workspace, vault_id, ask=ask, extract=extract, actor=actor, run_id=run_id, home=home
+        )
 
     bench.background(f"BI 測試：{vault_id}", work)
     return {"run_id": run_id}
@@ -92,9 +109,16 @@ def route(
         if len(parts) == 2 and parts[1] == "profiles":
             return 200, vault.profiles(workspace, parts[0])
         if len(parts) == 2 and parts[1] == "checks":
+            latest = bi_bench.latest(workspace, parts[0])
+            # The page reads this every 2 s during a run; a run changes nothing about it until
+            # it ends, and on a real vault the digest costs a second each time.
+            running = latest is not None and latest.get("status") == "running"
             return 200, {
                 **vault_checks.listing(workspace, parts[0]),
-                "latest": bi_bench.latest(workspace, parts[0]),
+                "latest": latest,
+                "standing": {"blocking": [], "notes": []}
+                if running
+                else bi_bench.standing(workspace, parts[0]),
             }
         if len(parts) == 2 and parts[1] == "analyses":
             return 200, analyses.listing(workspace, parts[0])
@@ -181,7 +205,10 @@ def route(
             return 200, {"ok": True, **vault_checks.save_case(workspace, vault_id, given)}
         return 200, {"ok": True, **vault_checks.save_question(workspace, vault_id, given)}
     if action == "bench":
-        return 200, {"ok": True, **_start_bench(workspace, actor, vault_id, bench)}
+        return 200, {
+            "ok": True,
+            **_start_bench(workspace, actor, vault_id, bench, given.get("home")),
+        }
     if action == "migrate-domains":
         # BI D3/D4: a dry run unless `apply` with the dry run's token.
         dataset = vault.dataset_name(vault_id)

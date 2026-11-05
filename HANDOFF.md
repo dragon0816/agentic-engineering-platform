@@ -1,5 +1,14 @@
 # Handoff
 
+## BI page: working domain, Markdown preview, file row (2026-11-05, Claude Code) — built, not merged
+
+Branch `bi-step1-domain`, with main `c0bb678d` merged in, not pushed. Design `docs/phases/BI_PAGE_SIMPLE.md` §9; decision `docs/DECISIONS.md` 2026-11-05; contract `docs/CONTRACTS.md`, BI benchmark section.
+
+**Checked on a copy of `market-intel`, no model:** `docs/phases/BI_PAGE_SIMPLE.md` §9.6. **Not checked:** a real model; the real vault itself.
+
+**Open:** the branch for a vault with no homes (adding still works, into `sources`) was not driven in a browser.
+
+**Next:** merge; restart Agent Web on this code once `/api/tasks` is quiet; on the real vault, choose a domain and look at the three steps.
 ## Example skills in `market-intel` for review (2026-11-05, Claude Code) — waiting for colleagues to read them
 
 **Where.** Vault commit `011125aaec19`, pushed, published stays `2026q4-r6.2`. Files `library/skill-review/skills/<domain>-extract-review/`. Repository: `docs/examples/bi-skills/`, `docs/guides/BI_SKILL_EXAMPLES.zh-TW.md`, `tests/test_bi_skill_examples.py`, branch `bi-skill-examples`, not pushed.

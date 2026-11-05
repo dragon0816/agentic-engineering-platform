@@ -3,9 +3,10 @@
 `docs/phases/BI_TEST_AND_TOOLS.md` §3.1. Two unit kinds, committed and pushed
 like cards and skills, never rows of `bi.sqlite`:
 
-- `check:question:<set>/<slug>` = `{"question", "must", "must_not"}`, graded as
-  a wiki question (`knowledge.questions`): case-insensitive terms; a question
-  with no terms is listed as ungraded.
+- `check:question:<set>/<slug>` = `{"question", "must", "must_not", "home"?}`, graded
+  as a wiki question (`knowledge.questions`): case-insensitive terms; a question
+  with no terms is listed as ungraded. `home` is the working domain it belongs to
+  (`docs/phases/BI_PAGE_SIMPLE.md` §9); without it, the whole vault's.
 - `check:extract:<slug>` = `{"note", "folder", "expected"}`: a short source text,
   the vault folder that picks its extract skill, and what extraction must find
   (`aep.bi.benchmark.expected/v1`, `benchmark.py`).
@@ -19,7 +20,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import benchmark, vault_skills
+from capabilities.bi_cards import benchmark, homes, vault_skills
 from capabilities.bi_cards.store import BiStoreError
 
 PREFIX = "check:"
@@ -59,6 +60,8 @@ def unit_problem(key: str, value: Any) -> str | None:
             return "question needs text"
         if _terms(value.get("must")) is None or _terms(value.get("must_not")) is None:
             return "must and must_not must be lists of short terms"
+        if "home" in value and homes.home_problem(value["home"]):
+            return "home must be <application> or library/<entry>"
         return None
     if key.startswith(EXTRACT_PREFIX):
         if not NAME_RE.match(key[len(EXTRACT_PREFIX) :]):
@@ -99,9 +102,20 @@ def questions(units: Mapping[str, Any]) -> list[dict[str, Any]]:
                     "question": value.get("question"),
                     "must": list(value.get("must") or []),
                     "must_not": list(value.get("must_not") or []),
+                    "home": value.get("home") or None,
                 }
             )
     return found
+
+
+def case_home(case: Mapping[str, Any]) -> str | None:
+    return homes.home_of(str(case.get("folder") or ""))
+
+
+def in_scope(home: str | None, own: str | None) -> bool:
+    """Whether a check of the home `own` runs in the working domain `home`: no working
+    domain runs everything, and a check of no home is the whole vault's, so it always runs."""
+    return not home or not own or own == home
 
 
 def cases(units: Mapping[str, Any]) -> list[dict[str, Any]]:
@@ -136,10 +150,15 @@ def checked_question(given: Mapping[str, Any]) -> tuple[str, dict[str, Any]]:
     slug = str(given.get("slug") or _slug(question)).strip()
     if not NAME_RE.match(group) or not NAME_RE.match(slug):
         raise BiStoreError("question_invalid", "題組與代號只能用小寫英數字與 -")
+    home = given.get("home") or None
+    if home is not None and homes.home_problem(home):
+        raise BiStoreError("question_invalid", "領域必須是應用資料夾或 library 的項目")
+    # Absent, not null, on a question of no home: its unit stays what it was.
     return f"{QUESTION_PREFIX}{group}/{slug}", {
         "question": question,
         "must": must,
         "must_not": must_not,
+        **({"home": home} if home else {}),
     }
 
 

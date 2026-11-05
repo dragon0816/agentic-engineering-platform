@@ -205,10 +205,16 @@ def session_turn(
 
 
 def apply_suggestion(
-    workspace: Path, dataset: str, session_id: str, turn: Any, picks: Any, actor: str
+    workspace: Path,
+    dataset: str,
+    session_id: str,
+    turn: Any,
+    picks: Any,
+    actor: str,
+    home: Any = None,
 ) -> dict[str, Any]:
-    """「加入測試題」: stage the questions the person ticked (by index); nothing
-    else changes, and they reach others only by commit and push."""
+    """「加入測試題」: stage the questions the person ticked (by index), of the working
+    domain `home` if any; nothing else changes, and they reach others only by commit and push."""
     vault_id = _vault_id(dataset)
     staging = Staging(workspace, dataset)
     staging.store.refuse_write()
@@ -236,6 +242,7 @@ def apply_suggestion(
                 "must_not": item["must_not"],
                 "set": group,
                 "slug": slug,
+                "home": home,
             },
         )
         units.append(saved["unit"])

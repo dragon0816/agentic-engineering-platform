@@ -675,6 +675,8 @@ def _session_write(
 ) -> Answer:
     dataset = _dataset(given.get("dataset"))
     session = sessions.load(Staging(workspace, dataset), session_id)
+    if action == "turns" and given.get("scope"):
+        given = {**given, "message": sessions.scoped(given.get("message"), given["scope"])}
     if session["kind"] == "method" and action == "turns":
         turned = methods.session_turn(
             workspace,
@@ -735,7 +737,13 @@ def _session_write(
         return 200, {"ok": True, "session": turned}
     if session["kind"] == "questions" and action == "apply":
         added = questions_session.apply_suggestion(
-            workspace, dataset, session_id, given.get("turn"), given.get("picks"), who
+            workspace,
+            dataset,
+            session_id,
+            given.get("turn"),
+            given.get("picks"),
+            who,
+            given.get("home"),
         )
         return 200, {"ok": True, **added}
     if session["kind"] == "skill" and action == "turns":
