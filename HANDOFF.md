@@ -1,5 +1,11 @@
 # Handoff
 
+## The sample mark and the default pack (2026-11-05, Claude Code worker D) — waiting for a decision
+
+Branch `bi-sample-check` off main `eb551cb6`, not pushed: `sample_not_marked` reads a card's pages in the quality report; `askable` retries a held file and logs its trace. `market-intel`: 14 demo cards marked, pushed, 99 samples of 760, not published. Staged run `e3de934115f0` unchanged.
+
+**Not done on purpose:** the pack's exclusion by `synthetic`. Patch: `.scratch/n2.py`, comparison: `.scratch/n1.json` and `n5.json`, all git-ignored. The saved analyses in a vault carry their own copy of the prelude, so a vault needs its pack imported again for any new rule to reach it.
+
 ## A source that repeats a value adds its citation (2026-11-05, Claude Code) — built, not merged
 
 Branch `bi-repeat-evidence` off main `16a08e5e`, not pushed. `docs/DECISIONS.md` 2026-11-05, last entry. Real vault not touched.

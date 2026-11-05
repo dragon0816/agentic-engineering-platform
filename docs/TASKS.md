@@ -4309,3 +4309,5 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 
 - [x] 2026-11-05, Claude Code: A source that repeats a value adds its citation, marked 新增出處, with no version change, once per place (`bi-repeat-evidence`, `docs/DECISIONS.md` 2026-11-05). A replay that lost the field no longer leaves its citation on the winning value.
 - [x] 2026-11-05, Claude Code (worker D): 14 demonstration cards of `market-intel` marked as samples through CSV import, on the owner's word, pushed, not tagged or published: 99 samples of 760, only those cards' `synthetic` moved. `sample_not_marked` now reads a card's own text. Branch `bi-sample-check`.
+- [x] 2026-11-05, Claude Code (worker D): `/api/knowledge/askable` asks a read again when a file is held for a moment, and keeps the trace of a failure in the host's error log.
+- [ ] 2026-11-05, Claude Code (worker D): The default pack by the `synthetic` mark, not the `SAMPLE-` name: measured, not changed (`docs/phases/BI_CARD_PAGE_IMPORT.md`); waits for a decision on the demo seed and on 7 cards marked only by 「待查證」.
