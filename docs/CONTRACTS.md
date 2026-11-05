@@ -6826,6 +6826,10 @@ Decision: `docs/DECISIONS.md` 2026-11-05 "Accepting a proposal moves the citatio
 
 **`GET /api/bi/proposals`:** a `conflict` proposal's `evidence` is the lost value's, from its commit, where it had any.
 
+**A candidate** has `citations`, the fields whose value it repeats from a place not yet cited. With `action: "unchanged"` and `citations` not empty, it is accepted and committed like any other, writes only those `evidence` rows and leaves the card's `version` and `updated`. `summary.citations` counts them, and so does a commit's `applied.citations`.
+
+**The local database reads a lost commit's evidence as it was:** `evidence` may differ from the `evidence:` unit where that commit lost the field. The unit is unchanged.
+
 **Not changed.** The feed and its goldens, and the published snapshot's format.
 
 ## BI schema changes that merge (2026-11-05)

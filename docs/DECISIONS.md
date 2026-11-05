@@ -6509,6 +6509,20 @@ Two designs landed on the same day: `meta:home:<id>` widening the registry when 
 
 **Cost.** A created domain makes what the vault reads `<version>+<digest>`, so a snapshot of it is refused by the platform's 2026-10-22 reader until that is redeployed. A new domain flags no skill, even one whose text names it.
 
+**A source that only repeats a value** adds its citation: decided in the entry below.
+
+## 2026-11-05: A source that repeats a value adds its citation, and leaves the card's version alone
+
+The owner: 「證具, raw data連結就append上去」. A candidate whose values all match the card used to be `unchanged` and was not written, so the second source of a fact left no trace.
+
+**Decided.** Such a candidate stays `unchanged`, with `citations` naming the fields whose value it repeats and does not cite yet. It shows as 新增出處 in review; accepted, it writes only the evidence. Undo removes it.
+
+**The card's version does not move, nor `updated`.** Nothing the card says changed. A raised version would make every other run and open review of that card stale (`cards_changed`) for a citation. A vault derives its version from field changes, so raising it locally would not survive a rebuild anyway.
+
+**Not twice.** A row's identity on a field is its `reference_id`, the source and the place in it. A source read again adds nothing, and is not offered as 新增出處. A different place in the same source is a different citation.
+
+**A replay that lost the field.** Field and evidence are separate units, so a commit could lose the field and still apply its evidence, and the winning value showed a citation of text it does not hold. `vault._evidence_read` now reads the evidence as it stood before that commit, as long as no later commit changed it. The unit itself stays as it was, on every PC: this is how the card reads it. The lost value's citation comes back with it if the conflict is accepted.
+
 ## 2026-11-05: Each BI domain owns its questions, and each has its own person
 
 The owner: 「每個領域也要有各自的benchmark 問題和dashboard」, 「這是一個多人合作的平台，但為了不彼此干擾，每一個domain會有專人來處理」. Design: `docs/phases/BI_PAGE_SIMPLE.md` §11. This replaces the same day's decision that a working domain runs its own questions and the untagged ones.
