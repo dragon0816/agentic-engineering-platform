@@ -494,6 +494,17 @@ def impact(store: BiStore, current: Registry, target: Registry) -> dict[str, Any
         of_type = [c for c in cards if c["entity_type"] == type_name]
         old_type = current.types.get(type_name)
         new_type = target.types.get(type_name)
+        for used in old_type.fields if old_type is not None else ():
+            moved_to = renames.get(type_name, {}).get(used.name)
+            gone = new_type is None or new_type.get(moved_to or used.name) is None
+            if used.used_by and gone:
+                blocked.append(
+                    {
+                        "code": "field_used_by",
+                        "message": f"{type_name}.{used.name} 還有 {'、'.join(used.used_by)} "
+                        "在用，不能移除；要先和他們談過",
+                    }
+                )
         entry: dict[str, Any] = {
             "type": type_name,
             "cards": len(of_type),
@@ -634,4 +645,11 @@ def upgrade_apply(workspace: Path, dataset: str, to: Any, token: Any, actor: str
         actor=actor,
         totals=found["totals"],
     )
-    return {"from": current.ref, "to": target.ref, "moved": moved, **found}
+    # In a vault the version it ends on is its own: additions are units, and a new version
+    # is numbered from its content (`Vault._schema_units`).
+    return {
+        "from": current.ref,
+        "to": BiStore(workspace, dataset).schema_ref(),
+        "moved": moved,
+        **found,
+    }

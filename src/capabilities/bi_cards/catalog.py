@@ -42,7 +42,8 @@ EXAMPLE_CSVS = (
 )
 MAX_SCHEMA_BYTES = 1024 * 1024
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,39}(/[a-z0-9][a-z0-9._-]{0,39}){0,2}$")
-VERSION_RE = re.compile(r"^(0|[1-9]\d{0,5})\.(0|[1-9]\d{0,5})\.(0|[1-9]\d{0,5})$")
+#: `+<digest>` names a version plus changes merged on top of it (`schema_merge`).
+VERSION_RE = re.compile(r"^(0|[1-9]\d{0,5})\.(0|[1-9]\d{0,5})\.(0|[1-9]\d{0,5})(\+[0-9a-f]{12})?$")
 TYPE_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_]{0,39}$")
 FIELD_RE = re.compile(r"^[a-z][a-z0-9_]{0,59}$")
 KINDS = ("str", "int", "float", "bool", "date", "enum", "list", "link", "linklist")
@@ -112,8 +113,18 @@ def _strings(value: Any) -> bool:
     return isinstance(value, list) and all(_text(v) for v in value)
 
 
+def base_version(version: str) -> str:
+    """`5.0.0+a1b2c3d4e5f6` -> `5.0.0`."""
+    return str(version).partition("+")[0]
+
+
+def base_ref(ref: str) -> str:
+    """A schema ref without the digest of changes merged on top of it."""
+    return str(ref).partition("+")[0]
+
+
 def _version_tuple(text: str) -> tuple[int, ...]:
-    return tuple(int(p) for p in str(text).split(".") if p.isdigit())
+    return tuple(int(p) for p in base_version(text).split(".") if p.isdigit())
 
 
 def bi_problems(document: dict[str, Any]) -> list[dict[str, str]]:
@@ -131,7 +142,11 @@ def bi_problems(document: dict[str, Any]) -> list[dict[str, str]]:
         )
         return problems
     version = str(document.get("version") or "")
-    if VERSION_RE.match(version) and _version_tuple(version) <= _version_tuple(base.version):
+    if (
+        VERSION_RE.match(version)
+        and "+" not in version  # additions on a version, whichever it is
+        and _version_tuple(version) <= _version_tuple(base.version)
+    ):
         problems.append(
             {"path": "version", "message": f"必須比內建的 {base.version} 新，例如 1.2.0"}
         )
@@ -548,6 +563,8 @@ def resolve(workspace: Path, ref: str) -> Registry:
     matches = [r for r in available(workspace) if r.schema_id == schema_id]
     if version:
         matches = [r for r in matches if r.version == version]
+    else:  # a bare id is a version someone chose, not one this PC derived
+        matches = [r for r in matches if "+" not in r.version]
     if not matches:
         raise BiStoreError("schema_unknown", f"找不到 schema「{text}」；先安裝，或選一個已有的")
     return max(matches, key=_version_key)
@@ -578,6 +595,7 @@ def listing(workspace: Path) -> list[dict[str, Any]]:
             "dashboard": reg.is_bi,
         }
         for reg in available(workspace)
+        if "+" not in reg.version  # what a vault derived is not a version to choose
     ]
 
 

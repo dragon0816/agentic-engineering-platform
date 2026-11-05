@@ -6430,3 +6430,22 @@ The owner's click after a reboot ended in 「Agent Web stopped while starting (e
 - Only opening at start waits: up to 30 s for a busy file (`LocalStateBusy`, still code `unavailable` to everyone else), then `state_busy`. A broken file or another device's fails at once. Rejected: a global busy timeout, which would make every write of a running host able to stall.
 - A second `open` joins a start under way (`agent-web-start.json`) rather than starting another server. Two servers starting together would otherwise now both pass the state file and meet on the port.
 - The page stops promising 10–30 s: measured here 72 s and more than 155 s on a loaded PC after a reboot. Its wait goes from 180 s to 300 s, which amends the 2026-10-16 decision, since 155 s plus the 30 s wait would pass 180 s.
+
+## 2026-11-05 — Schema changes merge when they do not overlap, and only touched skills are flagged
+
+Owner, relayed by the BI orchestrator. Design: `docs/phases/BI_CARD_MODEL.md` §4.3.
+
+**Decided.** One unit per compatible change, on top of the version the `schema` unit names, read as `<base>+<digest>`. Overlap stays for a person.
+
+**Rejected: a three-way merge on sync.** `apply_ops` is pure and every op carries only the hash of its base, so it would need the base document, file reads inside the replay, a merged file that no commit names, and a hook in the generic engine. Units give the same result with the engine as it is: order independence comes from a set of keys, and same key with another value is already a conflict.
+
+**Rejected: a digest in every version.** It would change every ref and the feed goldens' shape. A number from the content for real new versions is enough: `5.1.<patch>`. Two contents can collide only at 1 in about a million, and then `path_taken` refuses the push.
+
+**Also decided.**
+- `+<12 hex>` is added to `catalog.VERSION_RE`: a schema's identity must include its content, since "the same id@version with other content" is `schema_conflict`.
+- `_same_schema` compares base refs, so a colleague's addition no longer invalidates a run under review. An addition can make no candidate wrong.
+- `meta:schema_history` is not written for additions: no version moved, and two PCs' lists would conflict.
+- An unedited generated classify is read current at run time rather than regenerated. Two PCs regenerating it for their own additions conflicted on the skill.
+- `MODEL_VERSION` stays: what a rebuild makes changes only for a vault with these units, and those did not exist before.
+
+**Accepted limits.** An older AEP refuses a vault with these units at sync. The platform's 2026-10-22 reader refuses a snapshot whose schema carries `+`. A later version taking in a change counts as possibly breaking for that type's skills: what the change said is no longer known.

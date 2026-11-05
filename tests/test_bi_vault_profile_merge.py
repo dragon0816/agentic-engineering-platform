@@ -147,10 +147,13 @@ def test_an_invalid_definition_changes_nothing(tmp_path: Path) -> None:
 
 def test_a_written_skill_is_named_when_the_merge_leaves_it_behind(tmp_path: Path) -> None:
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
-    rule = {"name": "power-extract", "role": "extract", "body": "虛構規則。", "home": "aidc"}
+    rule = {"name": "power-extract", "role": "extract", "body": "記得填 cooling。", "home": "aidc"}
     _ok(_call(a, "POST", f"/api/bi/vaults/{vault_id}/skills", rule))
+    other = {"name": "other-extract", "role": "extract", "body": "虛構規則。", "home": "wireless"}
+    _ok(_call(a, "POST", f"/api/bi/vaults/{vault_id}/skills", other))
     _propose(a, vault_id, _proposal())
     done = _ok(_decide(a, vault_id))
+    # Only the skill the new field touches: an addition elsewhere flags nothing (§4.3).
     assert done["skills_need_update"] == ["aidc/power-extract"]
     target = vault.Vault(a, vault_id)
     assert "skill:aidc/power-extract" in target.repo.working_units()

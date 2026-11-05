@@ -1,5 +1,13 @@
 # Handoff
 
+## Schema changes that merge (2026-11-05, Claude Code) — branch `bi-schema-merge`, not merged
+
+**Done.** Compatible schema changes are units on the version; overlap stops for a person; only touched skills are flagged. Design `docs/phases/BI_CARD_MODEL.md` §4.3, decision `docs/DECISIONS.md` 2026-11-05.
+
+**Not done.** `web_page.py`: a place for `status.schema_conflicts`, and the line 「修改並儲存後才會再使用」 is wrong when `update_blocks` is false. A real vault has not used this; older AEPs and the platform's 2026-10-22 reader refuse these units or `+` versions, so colleagues need the release first.
+
+**Next action.** Orchestrator: merge, then a page slice for the two lines above.
+
 ## BI page: working domain, Markdown preview, file row (2026-11-05, Claude Code) — built, not merged
 
 Branch `bi-step1-domain`, with main `c0bb678d` merged in, not pushed. Design `docs/phases/BI_PAGE_SIMPLE.md` §9; decision `docs/DECISIONS.md` 2026-11-05; contract `docs/CONTRACTS.md`, BI benchmark section.

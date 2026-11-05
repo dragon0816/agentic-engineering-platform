@@ -543,7 +543,8 @@ def _schema(value: Any) -> dict[str, Any]:
     block = _exact(value, _SCHEMA_KEYS, "schema")
     schema_id = _str(block["id"], "schema.id")
     version = _str(block["version"], "schema.version")
-    if block["ref"] != f"{schema_id}@{version}" or not SEMVER.match(version):
+    # A vault's schema may have changes merged on its version (`schema_merge`).
+    if block["ref"] != f"{schema_id}@{version}" or not SEMVER.match(version.partition("+")[0]):
         raise _invalid("schema.ref")
     if block["source"] not in ("shipped", "installed"):
         raise _invalid("schema.source")

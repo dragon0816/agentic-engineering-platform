@@ -6794,3 +6794,15 @@ Design: proposal §8.1. Code: `capabilities/bi_cards/schema_fit.py`. In a vault,
 ## BI vault sync with nothing new (2026-11-05)
 
 `POST /api/bi/vaults/<id>/sync`: the answer's `sync` gains `moved`: whether the local database was rebuilt or the version the feed shows changed. A quiet sync reads no commit file (`Repository._commits_stamp`: names, sizes and times; each file a commit names is still checked by stat), rebuilds nothing unless `Repository.fingerprint` (applied and local commits, uncommitted changes, conflicts, withdrawals) or `card_model.MODEL_VERSION` differs from the last build, and queues no feed work. Concurrent `vault.sync` calls for one vault share one run and its answer or failure. The page shows the local copy first and syncs behind it, redrawing only for what came from outside (commits applied, a rebuild from them, or a changed version it reads).
+
+## BI schema changes that merge (2026-11-05)
+
+Design: `docs/phases/BI_CARD_MODEL.md` §4.3. Code: `capabilities/bi_cards/schema_merge.py`.
+
+- **Units:** `schema_change:{domain,type,field,enum,label,used_by}:...`, values in §4.3. The `schema` unit keeps naming the base version.
+- **Version text:** `<major>.<minor>.<patch>` or, read by a vault with such units, `<major>.<minor>.<patch>+<12 hex>`. `catalog.base_ref` and `catalog.base_version` strip it; `/api/bi/schemas` does not list derived versions; `store.schema_ref()` returns what the vault reads.
+- **`GET /api/bi/vaults/<id>/status`** adds `schema_conflicts`: `[{"kind": "clash"|"race", "unit", "label", "reason", "value", "current"?}]`.
+- **`POST /api/bi/vaults/<id>/schema-conflicts`** `{unit, choice}`: `drop` a change, `keep` what stands, `take` the one that lost (`race` only). Staged for the person's commit. `schema_conflict_unknown`, `choice_invalid`.
+- **`POST /api/bi/vaults/<id>/push`** answers `blocked` when the commits would make a change clash that was not clashing on the head.
+- **`upgrade_preview`** `blocked` adds code `field_used_by`.
+- **`GET /api/bi/vaults/<id>/skills`** items add `update_blocks` and `update_reason`. `skill_needs_update` is raised only when `update_blocks` is true. A skill unit may add `schema_seen`. A repository type may provide `skill_binding` and `skill_review`; the wiki type does not, and keeps its rule.
