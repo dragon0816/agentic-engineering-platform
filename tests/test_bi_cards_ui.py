@@ -700,15 +700,15 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
             " d.dispatchEvent(new Event('change')); }"
         )
         wait("document.querySelectorAll('#bi-dash-sections details').length === 4")
-        # a card link opens the card detail
+        # a card link opens the card beside the Dashboard, with no change of tab
         click_text("#bi-dash-sections .bi-link", "WiFi7-MLO互通與吞吐量驗證")
-        wait("!document.getElementById('bi-view-cards').hidden")
+        wait("!document.getElementById('bi-card-peek').hidden")
+        assert run("bi.view") == "dashboard"
+        assert run("!document.getElementById('bi-view-dashboard').hidden")
         wait(
             "document.getElementById('bi-detail-title')"
             " && (document.getElementById('bi-detail-title')?.textContent || '').includes('WiFi7')"
         )
-        cards_query = [body for _m, route, body in stub.calls if route == "/api/bi/cards"][-1]
-        assert not cards_query.get("domain")  # the card list starts on every domain
         # -- card detail: classes, sources, links, proposals, history ------------------------
         detail = "document.getElementById('bi-detail-body').textContent"
         wait(f"{detail}.includes('王經理')")
@@ -727,6 +727,17 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
             assert expected in text, expected
         wait("document.getElementById('bi-history').textContent.includes('3→4')")
         shoot("card-detail")
+        # the cards tab has its own list, and takes the pane back beside it
+        run("document.querySelector('#bi-views [data-bi-view=cards]').click()")
+        wait("!document.getElementById('bi-view-cards').hidden")
+        wait("document.getElementById('bi-card-peek').hidden")
+        assert run(
+            "document.getElementById('bi-card-split').contains("
+            "document.getElementById('bi-detail'))"
+        )
+        wait("document.querySelectorAll('#bi-cards [data-card]').length > 0")
+        cards_query = [body for _m, route, body in stub.calls if route == "/api/bi/cards"][-1]
+        assert not cards_query.get("domain")  # the card list starts on every domain
         # filter and search
         run(
             "{ const t = document.getElementById('bi-type'); t.value = 'TestSolution';"
