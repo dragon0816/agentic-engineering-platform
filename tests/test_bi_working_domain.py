@@ -92,18 +92,15 @@ def test_a_home_that_is_no_home_is_refused(tmp_path: Path, home: str) -> None:
 # -- a bench of one domain -------------------------------------------------------------------
 
 
-def test_a_bench_of_a_home_covers_it_and_the_whole_vaults_and_says_what_it_left(
-    tmp_path: Path,
-) -> None:
+def test_a_bench_of_a_home_covers_only_its_own_and_says_what_it_left(tmp_path: Path) -> None:
+    # Owner: 「每個領域也要有各自的benchmark 問題」. A question with no home is no domain's.
     _drive, vault_id, _dataset, a, _b = _two_pcs(tmp_path)
     _three(a, vault_id)
     report = _bench(a, vault_id, (), "aidc")
     assert report["scope"] == "aidc"
-    assert sorted(r["question"] for r in report["results"]) == sorted(
-        [AIDC_Q["question"], WHOLE_Q["question"]]
-    )
-    assert report["total"] == 2
-    assert [u.rpartition("/")[2] for u in report["not_covered"]] == ["wl"]
+    assert [r["question"] for r in report["results"]] == [AIDC_Q["question"]]
+    assert report["total"] == 1
+    assert sorted(u.rpartition("/")[2] for u in report["not_covered"]) == ["whole", "wl"]
 
     whole = _bench(a, vault_id, (), None)
     assert whole["scope"] == "" and whole["not_covered"] == [] and whole["total"] == 3
@@ -122,13 +119,44 @@ def test_a_case_counts_for_the_home_of_its_folder(tmp_path: Path) -> None:
         {"note": "虛構", "folder": homes.sources_dir("wireless"), "expected": expected},
     )
     report = _bench(a, vault_id, (), "aidc")
-    assert sorted(c["slug"] for c in report["cases"]) == ["mine", "other"]
-    assert report["not_covered"] == ["check:extract:theirs"]
+    assert [c["slug"] for c in report["cases"]] == ["mine"]
+    assert report["not_covered"] == ["check:extract:other", "check:extract:theirs"]
+
+
+def test_a_domain_sees_the_newest_report_saying_something_of_it(tmp_path: Path) -> None:
+    _drive, vault_id, _dataset, a, _b = _two_pcs(tmp_path)
+    _three(a, vault_id)
+    whole = _bench(a, vault_id, ("wireless",), None)
+
+    def latest(home: str) -> Any:
+        return _ok(_call(a, "GET", f"/api/bi/vaults/{vault_id}/checks", home=home))["latest"]
+
+    # A whole-vault run, as far as each domain goes: its own rows and its own score.
+    mine = latest("aidc")
+    assert mine["run_id"] == whole["run_id"] and mine["scope"] == "aidc"
+    assert [r["question"] for r in mine["results"]] == [AIDC_Q["question"]]
+    assert (mine["total"], mine["working_score"], mine["regressions"]) == (1, 1, [])
+    theirs = latest("wireless")
+    assert (theirs["working_score"], len(theirs["regressions"])) == (0, 1)
+    assert latest("robotics") is None
+
+    # A run of another domain says nothing of this one, and is still the newest overall.
+    other = _bench(a, vault_id, (), "wireless")
+    assert latest("aidc")["run_id"] == whole["run_id"]
+    assert latest("wireless")["run_id"] == other["run_id"]
+    listed = _checks(a, vault_id)
+    assert listed["newest"]["run_id"] == other["run_id"]
+    assert listed["latest"]["run_id"] == other["run_id"]
+
+    # Its own run comes first once there is one.
+    own = _bench(a, vault_id, (), "aidc")
+    assert latest("aidc")["run_id"] == own["run_id"]
 
 
 def test_starting_a_bench_with_nothing_in_that_home_says_so(tmp_path: Path) -> None:
     _drive, vault_id, _dataset, a, _b = _two_pcs(tmp_path)
     _ok(_save(a, vault_id, WIRELESS_Q))
+    _ok(_save(a, vault_id, WHOLE_Q))  # waiting for a domain, so not aidc's either
     refused = _call(a, "POST", f"/api/bi/vaults/{vault_id}/bench", {"home": "aidc"})
     _refused(refused, 400, "bench_empty")
     _refused(
@@ -186,7 +214,8 @@ def test_a_regression_clears_only_when_that_question_passes_again(tmp_path: Path
     assert _checks(a, vault_id)["standing"]["blocking"] == []
     pushed = _push(a, vault_id)
     assert pushed["status"] == "pushed"
-    assert any("3/3 題通過" in note for note in pushed["notes"]), pushed["notes"]
+    # Asked: wireless and aidc, one each. The question of no home was in no run.
+    assert any("2/2 題通過" in note and "另有 1 題" in note for note in pushed["notes"]), pushed
 
 
 def test_a_later_regression_in_the_same_question_blocks_again(tmp_path: Path) -> None:
@@ -215,7 +244,7 @@ def test_a_push_after_part_of_the_questions_goes_with_a_note_of_how_many_were_no
     pushed = _push(a, vault_id)
     assert pushed["status"] == "pushed"
     note = " ".join(pushed["notes"])
-    assert "2/2 題通過" in note and "1 題" in note and "沒有測" in note
+    assert "1/1 題通過" in note and "另有 2 題" in note and "沒有測" in note
 
 
 def test_a_colleagues_content_makes_an_earlier_run_not_count(tmp_path: Path) -> None:

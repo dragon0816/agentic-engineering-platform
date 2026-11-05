@@ -113,9 +113,10 @@ def case_home(case: Mapping[str, Any]) -> str | None:
 
 
 def in_scope(home: str | None, own: str | None) -> bool:
-    """Whether a check of the home `own` runs in the working domain `home`: no working
-    domain runs everything, and a check of no home is the whole vault's, so it always runs."""
-    return not home or not own or own == home
+    """Whether a check of the home `own` is the working domain `home`'s. Each domain has its
+    own; no working domain is the overview, which has them all. A check of no home is waiting
+    to be given one and belongs to no domain (`docs/phases/BI_PAGE_SIMPLE.md` §11)."""
+    return not home or own == home
 
 
 def cases(units: Mapping[str, Any]) -> list[dict[str, Any]]:

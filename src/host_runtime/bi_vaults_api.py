@@ -109,13 +109,16 @@ def route(
         if len(parts) == 2 and parts[1] == "profiles":
             return 200, vault.profiles(workspace, parts[0])
         if len(parts) == 2 and parts[1] == "checks":
-            latest = bi_bench.latest(workspace, parts[0])
+            newest = bi_bench.latest(workspace, parts[0])
             # The page reads this every 2 s during a run; a run changes nothing about it until
             # it ends, and on a real vault the digest costs a second each time.
-            running = latest is not None and latest.get("status") == "running"
+            running = newest is not None and newest.get("status") == "running"
             return 200, {
                 **vault_checks.listing(workspace, parts[0]),
-                "latest": latest,
+                "latest": bi_bench.latest_for(workspace, parts[0], query.get("home") or None),
+                "newest": None
+                if newest is None
+                else {k: newest.get(k) for k in ("run_id", "status", "error")},
                 "standing": {"blocking": [], "notes": []}
                 if running
                 else bi_bench.standing(workspace, parts[0]),

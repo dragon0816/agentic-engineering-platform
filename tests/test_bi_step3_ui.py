@@ -60,6 +60,9 @@ def test_step_3(
         page.click("#bi-views [data-bi-view=build]")
         page.click("#bi-stepper [data-stage=test]")
         page.wait("!document.querySelector('#bi-view-build .kp-stage[data-stage=test]').hidden")
+        # A question and a panel belong to a domain: 全部領域 only reads.
+        page.wait("(bi.build.homes || []).length > 0")
+        page.choose("bi-b-src-folder", str(page.run("bi.build.homes[0].folder")))
 
         # -- two collapsed sections with a status; the button in view without opening them --
         page.wait("document.getElementById('bi-b-an-state').textContent.includes('個分析')")
@@ -87,7 +90,7 @@ def test_step_3(
         page.see("bi-b-bq-list", "FicTech 是什麼")
         page.see("bi-b-bench-state", "1 題")
         page.wait(f"!{run_button}.disabled")
-        assert page.text_of("bi-b-run-why") == ""
+        assert "這次跑" in page.text_of("bi-b-run-why")
         (unit,) = _questions(workspace)
         page.click("#bi-b-bq-list tbody tr")
         page.see("bi-b-bq-title", "修改題目")

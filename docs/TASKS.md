@@ -4308,3 +4308,5 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [x] 2026-11-05, Claude Code: Schema changes merge when they do not overlap (`schema_merge.py`, `BI_CARD_MODEL.md` §4.3): compatible changes are units on a version, two PCs' land byte-identically in any order, overlap stops for a person, and only touched skills are flagged. Not on the page yet: `schema_conflicts` and the wording for a flag that still runs. Branch `bi-schema-merge`.
 
 - [x] 2026-11-05, Claude Code: A source that repeats a value adds its citation, marked 新增出處, with no version change, once per place (`bi-repeat-evidence`, `docs/DECISIONS.md` 2026-11-05). A replay that lost the field no longer leaves its citation on the winning value.
+
+- [x] 2026-11-05, Claude Code: BI page: each domain has its own questions, run and report; untagged questions show apart; 全部領域 is a read-only overview (`docs/phases/BI_PAGE_SIMPLE.md` §11). Each domain's dashboard not yet.

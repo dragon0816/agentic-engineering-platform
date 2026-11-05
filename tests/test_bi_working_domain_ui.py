@@ -110,6 +110,25 @@ def test_one_working_domain_carries_through_the_three_steps(tmp_path: Path) -> N
             assert not page.run("document.getElementById('bi-b-scope-need').hidden")
             page.shoot("first-visit")
 
+            # -- 全部領域 is an overview: everything shows, nothing is added, no source ingested --
+            page.choose_row_source("aidc.md")
+            assert page.run("document.getElementById('bi-b-next1').disabled")
+            shut = page.run(
+                "[...document.querySelectorAll('#bi-substeps [data-stage=method]')]"
+                ".every((b) => b.disabled)"
+            )
+            assert shut
+            page.stage("test")
+            page.wait("document.querySelectorAll('#bi-b-bq-list tbody tr').length === 3")
+            for ident in ("bi-b-bq-add", "bi-b-qa-open", "bi-b-an-new", "bi-b-bq-pane"):
+                assert page.run(f"document.getElementById({ident!r}).hidden"), ident
+            assert not page.run("document.getElementById('bi-b-overview').hidden")
+            assert "這次跑全部 3 題" in page.text_of("bi-b-run-why")
+            page.run("document.querySelector('#bi-b-bq-list tbody tr').click()")
+            assert page.run("!bi.bqSel")
+            page.shoot("overview-step3")
+            page.stage("source")
+
             # -- a domain: step 1 follows, the file goes to it -----------------------------
             page.choose("bi-b-src-folder", AIDC)
             page.wait("document.getElementById('bi-b-src-count').textContent === '顯示 1／3 份'")
@@ -164,11 +183,17 @@ def test_one_working_domain_carries_through_the_three_steps(tmp_path: Path) -> N
             page.wait("document.getElementById('bi-b-bench-report').textContent.includes('涵蓋')")
             page.wait("document.getElementById('bi-b-bq-list').textContent.includes('虛構題 mine')")
             questions = page.text_of("bi-b-bq-list")
-            assert "虛構題 whole" in questions and "全庫" in questions
             assert "虛構題 theirs" not in questions
-            assert "顯示 2／3 題" in questions
+            # What has no domain yet shows apart, closed, and is not this domain's.
+            assert page.run(
+                "!document.getElementById('bi-b-bq-waiting').open"
+                " && document.getElementById('bi-b-bq-waiting').textContent"
+                ".includes('虛構題 whole')"
+            )
+            assert page.text_of("bi-b-bench-state").startswith("1 題")
+            assert "這次跑 aidc 的 1 題" in page.text_of("bi-b-run-why")
             report = page.text_of("bi-b-bench-report")
-            assert "涵蓋 aidc 與全庫 2 題" in report and "沒測 1 項" in report
+            assert "涵蓋 aidc 1 題" in report
             assert "Push 會被擋" in report and "（wireless）" in report
             assert "虛構題 theirs" in report
             page.shoot("step3")

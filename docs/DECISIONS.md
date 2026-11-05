@@ -6522,3 +6522,11 @@ The owner: 「證具, raw data連結就append上去」. A candidate whose values
 **Not twice.** A row's identity on a field is its `reference_id`, the source and the place in it. A source read again adds nothing, and is not offered as 新增出處. A different place in the same source is a different citation.
 
 **A replay that lost the field.** Field and evidence are separate units, so a commit could lose the field and still apply its evidence, and the winning value showed a citation of text it does not hold. `vault._evidence_read` now reads the evidence as it stood before that commit, as long as no later commit changed it. The unit itself stays as it was, on every PC: this is how the card reads it. The lost value's citation comes back with it if the conflict is accepted.
+
+## 2026-11-05: Each BI domain owns its questions, and each has its own person
+
+The owner: 「每個領域也要有各自的benchmark 問題和dashboard」, 「這是一個多人合作的平台，但為了不彼此干擾，每一個domain會有專人來處理」. Design: `docs/phases/BI_PAGE_SIMPLE.md` §11. This replaces the same day's decision that a working domain runs its own questions and the untagged ones.
+
+- **專人 is a working arrangement, not access control.** AEP adds no file permissions; IT decides through SharePoint. No owner field blocks anyone, and there is no login check.
+- **A question belongs to one domain; an untagged one is waiting for a domain** and runs in no domain's test, only in the overview's. Rejected: running untagged questions in every domain, which puts market-intel's 12 in front of everyone and is what the owner objected to.
+- **全部領域 is a read-only overview.** Rejected: letting it add a question with no owner, which would make more of what is being assigned away.
