@@ -6522,3 +6522,7 @@ The owner: 「證具, raw data連結就append上去」. A candidate whose values
 **Not twice.** A row's identity on a field is its `reference_id`, the source and the place in it. A source read again adds nothing, and is not offered as 新增出處. A different place in the same source is a different citation.
 
 **A replay that lost the field.** Field and evidence are separate units, so a commit could lose the field and still apply its evidence, and the winning value showed a citation of text it does not hold. `vault._evidence_read` now reads the evidence as it stood before that commit, as long as no later commit changed it. The unit itself stays as it was, on every PC: this is how the card reads it. The lost value's citation comes back with it if the conflict is accepted.
+
+## 2026-11-05: 14 demonstration cards marked as samples, through a CSV import
+
+The owner decided to mark 14 cards of `market-intel` whose pages say fictional or demonstration, 13 and then one the wider check found, with the marks in `card:` units so every PC rebuilds them. No new route: the CSV import already applies `FICTIONAL` to a row and keeps a mark once set, and on a row with no changed value it moves nothing else. Rejected: a dedicated mark route, not needed for this; the page import, which by design never changes a mark; and renaming them `SAMPLE-`, which would change their keys, links and identities. Consequence: these 14 are `synthetic` without the prefix, 21 such cards in all.

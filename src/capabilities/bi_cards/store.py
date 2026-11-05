@@ -1270,6 +1270,17 @@ class BiStore:
             except sqlite3.OperationalError:  # a dataset from before ingest runs
                 return set()
 
+    def evidence_sources(self) -> list[tuple[str, str]]:
+        """Each (card id, source id) with evidence, for the quality checks."""
+        if not self.exists:
+            return []
+        with self._db() as db:
+            try:
+                rows = db.execute("SELECT DISTINCT card_id, source_id FROM evidence").fetchall()
+            except sqlite3.OperationalError:  # a dataset from before ingest runs
+                return []
+        return [(str(r["card_id"]), str(r["source_id"])) for r in rows]
+
     def fact_excerpts(self) -> dict[tuple[str, str], list[str]]:
         """Every fact excerpt per (card id, field), for the quality checks (V13)."""
         if not self.exists:

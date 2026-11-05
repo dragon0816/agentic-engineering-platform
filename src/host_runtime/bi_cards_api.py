@@ -254,7 +254,7 @@ def _route(
             return 200, {"proposals": _pending_proposals(store)}
         if path == "/api/bi/quality":
             # Quality checks (BI vault V13), read only.
-            return 200, quality.check(store, catalog.for_store(store))
+            return 200, quality.check(store, catalog.for_store(store), read_pages=True)
         if path == "/api/bi/sources":
             staging = Staging(workspace, store.dataset)
             repo = staging._vault_repo()
