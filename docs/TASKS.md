@@ -4331,3 +4331,4 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [ ] BI: each domain's person owns a name dictionary, after the Dashboard slice (owner).
 
 - [x] 2026-11-06, Claude Code (worker D): `market-intel` sample marks settled on the owner's word, pushed, not published: 3 TestSolutions marked again, 4 Technologies stay cleared, 95 samples of 760. Only those marks moved; run `e3de934115f0` unchanged. `docs/phases/BI_SUMMARY_FILL.md`.
+- [x] 2026-11-06, Claude Code: Acceptance F11, Ingest over several sources: step 1 ticks sources (全選 for the rows shown), step 2b says 「這次 Ingest：N 份來源」, and Ingest runs one run per source in turn, with progress, 停止 and a failure not stopping the rest (`bi-batch-ingest`, `tests/test_bi_batch_ingest_ui.py`). No 「這批全部」 view: each run is picked in 待審核的執行.
