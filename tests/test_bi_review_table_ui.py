@@ -357,3 +357,240 @@ def test_with_no_run_the_step_stays_shut_until_a_source_is_chosen(tmp_path: Path
             assert page.run(
                 "document.querySelector('#bi-build-steps [data-stage=review]').disabled"
             )
+
+
+def _hold(page: BiPage, part: str) -> None:
+    """Requests naming `part` wait until `_free`."""
+    page.run(
+        "(() => { const real = window.__realFetch = window.fetch; let free;"
+        " const gate = new Promise((go) => { free = go; }); window.__free = free;"
+        " window.fetch = async (u, o) => {"
+        f" if (String(u).includes({json.dumps(part)})) await gate; return real(u, o); }}; }})()"
+    )
+
+
+def _free(page: BiPage) -> None:
+    page.run("window.__free(); window.fetch = window.__realFetch")
+
+
+def _row(name: str) -> str:
+    """An expression for the row of the card named `name`."""
+    return (
+        "[...document.querySelectorAll('#bi-b-cands tbody tr')]"
+        f".find((r) => r.textContent.includes({json.dumps(name)}))"
+    )
+
+
+def _colour(page: BiPage, selector: str) -> str:
+    return str(page.run(f"getComputedStyle(document.querySelector({json.dumps(selector)})).color"))
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_a_decision_shows_at_once_stays_after_a_reload_and_a_failure_says_so(
+    tmp_path: Path,
+) -> None:
+    """Owner: 「按接受沒反應，是不是可以有藍色小勾勾之類的東西，來代表被接受過」."""
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    dataset = _vault(tmp_path, workspace, [_page(i) for i in range(40, 46)])
+    _reading(workspace, dataset, kind="ingest")
+    shots = os.environ.get("AEP_UI_SHOTS")
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(
+            tmp_path / "browser", server.address, Path(shots) / "review-table" if shots else None
+        ) as page:
+            _review(page, dataset)
+            _shown(page, 6)
+            page.click("#bi-b-cands tbody tr[data-candidate]:nth-child(2) button")
+            page.see("bi-b-cand", "FAKE-041")
+
+            # -- with the request still out, the row already says so, and moving on is shut ----
+            _hold(page, "/candidates/")
+            _press(page, "接受")
+            assert page.run(f"!!{_row('FAKE-041')}.querySelector('.bi-state-accepted')")
+            assert "已接受" in str(page.run(f"{_row('FAKE-041')}.textContent"))
+            assert "✓" in str(page.run(f"{_row('FAKE-041')}.textContent"))
+            assert "FAKE-041" in page.text_of("bi-b-cand-last")
+            assert "已接受" in page.text_of("bi-b-cand-last")
+            assert _selected(page) == "FAKE-042"
+            assert page.run("document.getElementById('bi-b-next4').disabled")
+            _free(page)
+            page.wait("!document.getElementById('bi-b-next4').disabled")
+            page.see("bi-b-chips", "已接受 1")
+
+            # -- rejecting has its own mark; the check is blue, and neither is the other ------
+            _press(page, "拒絕")
+            page.wait(f"!!{_row('FAKE-042')}.querySelector('.bi-state-rejected')")
+            assert "✕" in str(page.run(f"{_row('FAKE-042')}.textContent"))
+            page.wait("!bi.build.saving")
+            accepted = _colour(page, "#bi-b-cands .bi-state-accepted .bi-state-icon")
+            rejected = _colour(page, "#bi-b-cands .bi-state-rejected .bi-state-icon")
+            accent = page.run(
+                "(() => { const probe = document.createElement('span');"
+                " probe.style.color = 'var(--accent)'; document.body.append(probe);"
+                " const seen = getComputedStyle(probe).color; probe.remove(); return seen; })()"
+            )
+            assert accepted == accent and rejected != accepted
+            page.shoot("decided")
+
+            # -- reopened, the pane says what was decided --------------------------------------
+            page.run(f"{_row('FAKE-041')}.querySelector('button').click()")
+            page.see("bi-b-cand", "FAKE-041")
+            assert page.run("!!document.querySelector('#bi-b-cand .bi-state-accepted')")
+            page.shoot("reopened")
+
+            # -- a real reload: the decisions, the run, the step and the row are all still there -
+            page.browser.navigate(server.address)
+            page.wait('!document.getElementById("send").disabled')
+            page.click("#nav-knowledge")
+            page.click("#kn-tabs [data-kn=bi]")
+            page.click("#bi-views [data-bi-view=build]")
+            _stage_shown(page, "review")
+            _shown(page, 6)
+            assert page.run(f"!!{_row('FAKE-041')}.querySelector('.bi-state-accepted')")
+            assert page.run(f"!!{_row('FAKE-042')}.querySelector('.bi-state-rejected')")
+            page.wait(f"{_row('FAKE-041')}.getAttribute('aria-selected') === 'true'")
+            page.see("bi-b-cand", "FAKE-041")
+            assert page.run("!!document.querySelector('#bi-b-cand .bi-state-accepted')")
+            page.shoot("reloaded")
+
+            # -- a decision the server refused is not left looking made ------------------------
+            page.run(f"{_row('FAKE-043')}.querySelector('button').click()")
+            page.see("bi-b-cand", "FAKE-043")
+            page.run(
+                "(() => { const real = window.fetch; window.__realFetch = real;"
+                " window.fetch = (u, o) => String(u).includes('/candidates/')"
+                ' ? Promise.resolve(new Response(\'{"code":"boom","message":"存不了"}\','
+                " {status: 500})) : real(u, o); })()"
+            )
+            _press(page, "接受")
+            page.notice("存不了")
+            page.run("window.fetch = window.__realFetch")
+            assert not page.run(f"!!{_row('FAKE-043')}.querySelector('.bi-state-accepted')")
+            assert _selected(page) == "FAKE-043"
+            assert "待決定 4" in page.text_of("bi-b-cand-count")
+
+
+LINKED_NOTE = "# 會議\n\n前面的文字。\n客戶提到 FAKE-040 正在評估。\n" + "後面的文字。\n" * 40
+LINKED = {
+    "candidates": [
+        {
+            "entity_type": "Signal",
+            "name": f"訊號-{index}",
+            "fields": {
+                "summary": {
+                    "value": f"摘要 {index}",
+                    "basis": "fact",
+                    "quote": "客戶提到 FAKE-040 正在評估",
+                },
+                "source": {"value": "會議", "basis": "fact", "quote": "前面的文字"},
+                "related": {
+                    "value": ["FAKE-040", "沒有這張卡"],
+                    "basis": "fact",
+                    "quote": "FAKE-040",
+                },
+            },
+        }
+        for index in range(30)
+    ]
+}
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_links_in_the_card_under_review_open_beside_it_and_keep_the_place(tmp_path: Path) -> None:
+    """Owner: 「卡片中要有連結，以方便使用者review」; the table and the row stay as they were."""
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    dataset = _vault(tmp_path, workspace, [_page(40), _page(41)])
+    source = Staging(workspace, dataset).add_source(
+        "會議.md", text=LINKED_NOTE, actor="alice", folder=FOLDER
+    )
+    jobs = Jobs()
+    body = {"dataset": dataset, "kind": "ingest", "source_id": source["id"], "path": "ai"}
+    ai = _runtime(Scripted(LINKED), jobs)
+    _ok(route(workspace, "alice", "POST", "/api/bi/runs", {}, body, None, ai))
+    jobs.run_all()
+    target = "FAKE-040"
+    shots = os.environ.get("AEP_UI_SHOTS")
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(
+            tmp_path / "browser", server.address, Path(shots) / "review-table" if shots else None
+        ) as page:
+            _review(page, dataset)
+            _shown(page, 30)
+            page.run(f"{_row('訊號-20')}.querySelector('button').click()")
+            page.wait("!!document.querySelector('#bi-b-cand-src mark')")
+            place = "document.querySelector('#bi-b-review-split .bi-scroller').scrollTop"
+            page.run(f"{place} = 400; 0")
+
+            def in_place() -> None:
+                assert _selected(page) == "訊號-20"
+                assert page.run(f"{place}") == 400
+                assert not page.run(
+                    "document.querySelector('#bi-view-build .kp-stage[data-stage=review]').hidden"
+                )
+
+            # -- a value naming a card links to it; one naming no card stays plain text --------
+            links = "[...document.querySelectorAll('#bi-b-cand .bi-card-link')]"
+            page.wait(f"{links}.length === 1")
+            assert page.run(f"{links}[0].textContent") == target
+            assert "沒有這張卡" in page.text_of("bi-b-cand")
+
+            # -- it opens beside the table, with a way back --------------------------------------
+            page.run(f"{links}[0].click()")
+            page.wait("!!document.getElementById('bi-b-peek')")
+            page.see("bi-b-peek", target)
+            page.see("bi-b-peek", "回到候選卡")
+            in_place()
+            page.shoot("linked-card")
+            page.click("#bi-b-peek-back")
+            page.see("bi-b-cand", "訊號-20")
+            page.wait("!!document.querySelector('#bi-b-cand-src mark')")
+            assert not page.run("!!document.getElementById('bi-b-peek')")
+            in_place()
+
+            # -- the card under review is new here, so no link to a card that is not there -------
+            assert not page.run("!!document.getElementById('bi-b-cand-current')")
+
+            # -- a source's name opens that source, at that field's quote -------------------------
+            sources = "[...document.querySelectorAll('#bi-b-cand .bi-source-link')]"
+            page.wait(f"{sources}.length >= 2")
+            assert page.run(f"{sources}.every((b) => b.textContent === '會議.md')")
+            page.run(
+                f"{sources}.find((b) => b.closest('td').textContent.includes('前面的文字')).click()"
+            )
+            page.wait("document.querySelector('#bi-b-cand-src mark').textContent === '前面的文字'")
+            page.see("bi-b-cand", "原文：會議.md")
+            in_place()
+            page.shoot("source-link")
+
+            # -- pressing another row while a card is open goes to that row, no dead end ---------
+            page.run(f"{links}[0].click()")
+            page.wait("!!document.getElementById('bi-b-peek')")
+            page.run(f"{_row('訊號-21')}.querySelector('button').click()")
+            page.see("bi-b-cand", "訊號-21")
+            assert not page.run("!!document.getElementById('bi-b-peek')")
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_a_card_being_updated_links_to_itself_as_it_stands_now(tmp_path: Path) -> None:
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    dataset = _vault(tmp_path, workspace, [_page(40), _page(41)])
+    _reading(workspace, dataset, kind="ingest")
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(tmp_path / "browser", server.address) as page:
+            _review(page, dataset)
+            _shown(page, 2)
+            page.click("#bi-b-cands button")
+            page.wait("!!document.getElementById('bi-b-cand-current')")
+            page.click("#bi-b-cand-current")
+            page.wait("!!document.getElementById('bi-b-peek')")
+            page.see("bi-b-peek", "FAKE-040")
+            # Its page came in as a source: that opens here as well, back still there.
+            page.wait("!!document.querySelector('#bi-b-peek .bi-source-link')")
+            page.click("#bi-b-peek .bi-source-link")
+            page.wait("!!document.getElementById('bi-b-cand-src')")
+            page.see("bi-b-cand-src", "虛構項目 40")
+            assert page.run("!!document.getElementById('bi-b-peek-back')")
+            assert _selected(page) == "FAKE-040"
