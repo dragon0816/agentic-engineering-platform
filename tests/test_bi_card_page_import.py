@@ -338,7 +338,7 @@ def test_a_sample_row_never_marks_a_real_card_nor_a_real_row_clears_a_sample(
 ) -> None:
     ws, dataset = _dataset(tmp_path)
     _merge(ws, dataset, "real.md", BASE_A)
-    worded = "---\ntype: technology\nname: FAKE-MERGE\nspec_milestones: [待查證]\n---\n"
+    worded = "---\ntype: technology\nname: FAKE-MERGE\nspec_milestones: [虛構範例]\n---\n"
     answer, _ = _merge(ws, dataset, "worded.md", worded)
     (conflict,) = answer["mark_conflicts"]
     assert conflict["card_is_sample"] is False and conflict["row_is_sample"] is True
@@ -476,7 +476,7 @@ def test_the_default_pack_drops_sample_names_and_says_when_other_samples_may_cou
 ) -> None:
     ws, dataset = _dataset(tmp_path)
     # Marked by its wording, not ticked: no prefix, so it can count in an analysis.
-    csv = "名稱,標準組織,備註,領域\nFAKE-MARKED,IETF,(待查證),wireless\n"
+    csv = "名稱,標準組織,備註,領域\nFAKE-MARKED,IETF,(虛構範例),wireless\n"
     pages = [*PAGES, {"path": "x/technology.csv", "text": csv}]
     _apply(ws, _preview(ws, dataset, pages)["preview_id"])
     store = BiStore(ws, dataset)
