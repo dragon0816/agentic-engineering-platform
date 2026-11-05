@@ -1243,7 +1243,8 @@ tr:last-child td { border-bottom: none; }
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; }
 #bi-b-test-dash { max-height: 76vh; overflow: auto; }
 #bi-b-bq-split { height: auto; }
-#bi-b-bq-list { max-height: 56vh; overflow: auto; }
+/* Sized by its rows: without the editor beside it (全部領域) nothing else gives it a height. */
+#bi-b-bq-list { flex: 0 1 auto; max-height: 56vh; overflow: auto; }
 #bi-b-bq-list tbody tr { cursor: pointer; }
 #bi-b-bq-list tbody tr[aria-selected="true"] { box-shadow: inset 3px 0 0 var(--accent); }
 #bi-b-bq-form textarea { width: 100%; }

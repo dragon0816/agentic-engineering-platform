@@ -126,6 +126,13 @@ def test_one_working_domain_carries_through_the_three_steps(tmp_path: Path) -> N
             assert "這次跑全部 3 題" in page.text_of("bi-b-run-why")
             page.run("document.querySelector('#bi-b-bq-list tbody tr').click()")
             assert page.run("!bi.bqSel")
+            # The table can be seen: with no editor beside it, it once had no height at all.
+            page.run("document.getElementById('bi-b-bench').open = true")
+            assert page.run(
+                "document.querySelector('#bi-b-bq-list tbody tr').offsetHeight > 0"
+                " && document.getElementById('bi-b-bq-list').getBoundingClientRect().height > 60"
+            )
+            page.run("document.getElementById('bi-b-bench').open = false")
             page.shoot("overview-step3")
             page.stage("source")
 
