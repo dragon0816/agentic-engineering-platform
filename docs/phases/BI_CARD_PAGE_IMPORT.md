@@ -71,7 +71,7 @@ Nothing here reaches a model, and nothing is written before the apply.
 
 ## 5. Samples
 
-**The mark already exists:** a card's `synthetic`. `importer.FICTIONAL` sets it from any value matching `虛構|範例|示範|待…驗證|待查證|^SAMPLE-`,
+**The mark already exists:** a card's `synthetic`. `importer.FICTIONAL` sets it from any value matching `虛構|範例|示範|^SAMPLE-` (until 2026-11-05 also `待…驗證|待查證`, which marked real cards),
 and a synthetic card is never `trusted`. Pages get the same rule. `samples: true` marks every row of a request, for files like
 `tools/samples` whose rows do not all say so; the person ticks it on the page. **A ticked row also gets the `SAMPLE-` name prefix**, never
 twice (owner, 2026-11-03), so the default pack leaves it out unless `include_sample`. A link from one such row to another follows the
@@ -96,9 +96,6 @@ An answer carries one note per dataset: the count of sample cards its searches r
 its wording, with no `SAMPLE-` name, **still counts in a built-in analysis**, and the host's line says it may.
 
 Measured again on 2026-11-05, on the real `market-intel` and on this rule moved to `synthetic`: 20 of its 31 pack analyses move, robotics' demo seed loses 29 tables, and 7 cards marked only by 「待查證」 leave, such as `WiFi-7`, that 29 real cards link to. Not changed; the decision is the owner's.
-
-Known consequence, for the owner: `FICTIONAL` also matches 「待查證」 in a value, so a real card whose page says 「(待查證)」 is marked as a
-sample, as it would be from a CSV. The dry run reports how many that is per base.
 
 ## 6. Page
 

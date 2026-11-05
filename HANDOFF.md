@@ -1,5 +1,9 @@
 # Handoff
 
+## Clearing sample marks (2026-11-05, Claude Code worker D) — waiting for the merge
+
+Branch `bi-unmark`, not pushed. After the merge and a restart (`MODEL_VERSION` 11 rebuilds each `bi.sqlite` once): clear on `market-intel` `WiFi-7`, `6G`, `5G-NR-FR2`, `NTN-Satellite`, `WiFi7-MLO互通與吞吐量方案`, `NTN衛星通道模擬方案`, `FR2-AiP-OTA緊縮場方案`, idle and `pending` empty first, snapshot, label `d-mark-samples`, commit, push, no tag or publish. Expect 92 samples of 760 and run `e3de934115f0` unchanged. The pack's rule follows after the GUI.
+
 ## The sample mark and the default pack (2026-11-05, Claude Code worker D) — waiting for a decision
 
 Branch `bi-sample-check` off main `eb551cb6`, not pushed: `sample_not_marked` reads a card's pages in the quality report; `askable` retries a held file and logs its trace. `market-intel`: 14 demo cards marked, pushed, 99 samples of 760, not published. Staged run `e3de934115f0` unchanged.

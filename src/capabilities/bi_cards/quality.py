@@ -108,6 +108,8 @@ def check(store: BiStore, reg: Registry, *, read_pages: bool = False) -> dict[st
     }
     excerpts = store.fact_excerpts()
     not_real = _said_not_real(store) if read_pages else {}
+    # A person has said these are real: their text no longer asks the question.
+    told_real = store.marks_cleared()
     found: dict[str, list[dict[str, Any]]] = {cid: [] for cid, _, _ in CHECKS}
 
     def add(check_id: str, card: Any, message: str) -> None:
@@ -164,9 +166,13 @@ def check(store: BiStore, reg: Registry, *, read_pages: bool = False) -> dict[st
                     )
         if card["name"].startswith(SAMPLE_PREFIX) and not card["synthetic"]:
             add("sample_not_marked", card, "名稱是 SAMPLE-，但沒有標成示範資料，可能被當成真實資料")
-        elif not card["synthetic"] and (
-            said := not_real.get(card["id"])
-            or next((x for x in [str(mine.get("body") or "")] if SAID_NOT_REAL.search(x)), "")
+        elif (
+            not card["synthetic"]
+            and card["id"] not in told_real
+            and (
+                said := not_real.get(card["id"])
+                or next((x for x in [str(mine.get("body") or "")] if SAID_NOT_REAL.search(x)), "")
+            )
         ):
             add(
                 "sample_not_marked",

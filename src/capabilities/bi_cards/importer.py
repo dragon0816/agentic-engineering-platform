@@ -33,8 +33,9 @@ from capabilities.bi_cards.store import ApplyResult, BiStore, PlannedRow, new_st
 #: What a card ticked as a sample is named with, so the default pack leaves it out.
 SAMPLE_PREFIX = "SAMPLE-"
 #: The fixture marks example data in the text (「(虛構範例)」, 「[範例資料,待業務/FAE
-#: 驗證]」); such a card is synthetic and never trusted (DQ-1).
-FICTIONAL = re.compile(r"虛構|範例|示範|待[^,，。]{0,10}驗證|待查證|^SAMPLE-")
+#: 驗證]」); such a card is synthetic and never trusted (DQ-1). 「待查證」 is not here: it says
+#: a value still needs checking, on a card that may be real, as `WiFi-7`'s was.
+FICTIONAL = re.compile(r"虛構|範例|示範|^SAMPLE-")
 MAX_PREVIEWS = 50
 
 

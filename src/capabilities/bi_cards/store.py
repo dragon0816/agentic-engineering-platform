@@ -206,6 +206,12 @@ CREATE TABLE IF NOT EXISTS card_names (
   kind TEXT NOT NULL,
   PRIMARY KEY (card_id, name, kind)
 );
+CREATE TABLE IF NOT EXISTS card_marks (
+  card_id TEXT PRIMARY KEY,
+  at TEXT NOT NULL,
+  by TEXT NOT NULL,
+  reason TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS card_app_folders (
   card_id TEXT NOT NULL,
   application TEXT NOT NULL,
@@ -896,7 +902,7 @@ class BiStore:
         if not self.exists:
             return []
         with self._db() as db:
-            return [
+            rows = [
                 {
                     "field": r["field"],
                     "old": _load(r["old"]),
@@ -916,6 +922,61 @@ class BiStore:
                     "SELECT * FROM history WHERE card_id = ? ORDER BY seq", (card_id,)
                 )
             ]
+        cleared = self.marks_cleared().get(card_id)
+        if cleared is not None:
+            rows.append(
+                {
+                    "field": "synthetic",
+                    "old": True,
+                    "new": False,
+                    "source": {"kind": "human", "ref": f"agent-web:{cleared['by']}"},
+                    "at": cleared["at"],
+                    "by": cleared["by"],
+                    "reason": cleared["reason"],
+                }
+            )
+        return rows
+
+    def clear_sample_mark(
+        self, card_id: str, *, base_version: int, actor: str, reason: str
+    ) -> None:
+        """A person says this card is real: its mark goes, and who and why stay on its
+        `card:` unit, so every PC has them. A `SAMPLE-` name says otherwise, so such a card
+        must be renamed first. Its values and version do not move."""
+        self.refuse_write()
+        with self._db(write=True) as db:
+            card = db.execute("SELECT * FROM cards WHERE id = ?", (card_id,)).fetchone()
+            if card is None:
+                raise BiStoreError("card_unknown", "找不到這張卡片")
+            if int(card["version"]) != int(base_version):
+                raise BiStoreError(
+                    "stale_edit",
+                    "這張卡片在你開啟後已被修改，請重新載入",
+                    version=int(card["version"]),
+                )
+            if not card["synthetic"]:
+                raise BiStoreError("not_a_sample", "這張卡片沒有標成範例資料")
+            if str(card["name"]).startswith("SAMPLE-"):
+                raise BiStoreError(
+                    "sample_by_name", "名稱是 SAMPLE- 開頭，先把卡片改名，才能解除範例資料標記"
+                )
+            db.execute("UPDATE cards SET synthetic = 0 WHERE id = ?", (card_id,))
+            db.execute(
+                "INSERT OR REPLACE INTO card_marks (card_id, at, by, reason) VALUES (?, ?, ?, ?)",
+                (card_id, now(), actor, reason),
+            )
+
+    def marks_cleared(self) -> dict[str, dict[str, str]]:
+        """Who said which cards are real, and why, by card id."""
+        if not self.exists:
+            return {}
+        with self._db() as db:
+            if not db.execute("SELECT 1 FROM sqlite_master WHERE name = 'card_marks'").fetchone():
+                return {}  # a database from before the marks could be cleared
+            return {
+                r["card_id"]: {"at": r["at"], "by": r["by"], "reason": r["reason"]}
+                for r in db.execute("SELECT * FROM card_marks")
+            }
 
     def history_counts(self, card_id: str) -> dict[str, int]:
         if not self.exists:
@@ -1119,6 +1180,7 @@ class BiStore:
                 created = False
                 if planned.synthetic and not existing["synthetic"]:
                     db.execute("UPDATE cards SET synthetic = 1 WHERE id = ?", (card_id,))
+                    db.execute("DELETE FROM card_marks WHERE card_id = ?", (card_id,))
             changed = False
             current = {
                 r["field"]: r
