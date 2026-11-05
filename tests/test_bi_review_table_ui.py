@@ -854,3 +854,49 @@ def test_the_page_says_when_a_value_comes_with_no_citation_and_history_keeps_the
             assert LONG_BODY[:20] in old and "舊值的出處：長40.md" in old
             page.run("document.getElementById('bi-history').scrollIntoView(); 0")
             page.shoot("history-old-citation")
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_a_candidate_that_only_adds_a_citation_says_so_and_writes_only_that(tmp_path: Path) -> None:
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    dataset = _vault(tmp_path, workspace, [_page(40)])
+    _written_run(workspace, dataset, "一.md", f"# 一\n\n{SHORT_BODY}\n", _replacing(40, SHORT_BODY))
+    source = Staging(workspace, dataset).add_source(
+        "二.md", text=f"# 二\n\n{SHORT_BODY}\n\n二\n", actor="alice", folder=FOLDER
+    )
+    jobs = Jobs()
+    body = {"dataset": dataset, "kind": "ingest", "source_id": source["id"], "path": "ai"}
+    ai = _runtime(Scripted(_replacing(40, SHORT_BODY)), jobs)
+    _ok(route(workspace, "alice", "POST", "/api/bi/runs", {}, body, None, ai))
+    jobs.run_all()
+    store = BiStore(workspace, dataset)
+    found = store.find("Technology", "FAKE-040")
+    assert found is not None
+    card, version = str(found["id"]), found["version"]
+    shots = os.environ.get("AEP_UI_SHOTS")
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(
+            tmp_path / "browser", server.address, Path(shots) / "review-table" if shots else None
+        ) as page:
+            _review(page, dataset)
+            _shown(page, 1)
+            assert "新增出處" in page.text_of("bi-b-cands")
+            assert "不變" not in page.text_of("bi-b-cands")
+            page.see("bi-b-chips", "新增出處 1")
+            page.click("#bi-b-cands button")
+            page.see("bi-b-cand", "新增出處")
+            page.shoot("adds-citation")
+            _press(page, "接受")
+            page.wait("!document.getElementById('bi-b-next4').disabled")
+            page.click("#bi-b-next4")
+            _stage_shown(page, "commit")
+            page.see("bi-b-summary", "新增出處 1 張")
+            assert not page.run("document.getElementById('bi-b-commit-go').disabled")
+            page.click("#bi-b-commit-go")
+            _stage_shown(page, "result")
+            page.see("bi-b-done", "新增出處 1")
+    cited = sorted(e["source_name"] for e in store.evidence(card) if e["field"] == "body")
+    assert cited == ["一.md", "二.md"]
+    again = store.find("Technology", "FAKE-040")
+    assert again is not None and again["version"] == version

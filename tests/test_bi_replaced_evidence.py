@@ -8,6 +8,7 @@ reached from two domains. Undo gives back what it took. Fictional data.
 from __future__ import annotations
 
 import sqlite3
+import time
 from contextlib import closing
 from pathlib import Path
 from typing import Any
@@ -55,6 +56,7 @@ def _answer(**fields: Any) -> dict[str, Any]:
 
 
 def _start(ws: Path, dataset: str, name: str, text: str, answer: Any = None) -> str:
+    """A run of the source, asking the model anew: the same text would repeat a kept answer."""
     source = Staging(ws, dataset).add_source(name, text=text, actor="alice", folder=FOLDER)
     jobs = Jobs()
     body = {
@@ -62,6 +64,7 @@ def _start(ws: Path, dataset: str, name: str, text: str, answer: Any = None) -> 
         "kind": "ingest",
         "source_id": source["id"],
         "path": "ai" if answer is not None else "rules",
+        "fresh": True,
     }
     ai = _runtime(None if answer is None else Scripted(answer), jobs)
     run = _ok(route(ws, "alice", "POST", "/api/bi/runs", {}, body, None, ai))["run"]
@@ -160,8 +163,7 @@ def test_taking_the_new_value_in_review_replaces_its_citation(tmp_path: Path) ->
 
 
 def test_a_second_source_of_the_same_value_adds_to_the_citations(tmp_path: Path) -> None:
-    """One card reached from two domains. The second run must write something else too: a
-    candidate with nothing new is `unchanged`, and is not written at all."""
+    """One card reached from two domains, whose second run writes something else too."""
     _, _, dataset, a, _, card = _vault(tmp_path)
     first = _answer(body=("同樣的內容", "同樣的內容"))
     _commit_run(a, dataset, _start(a, dataset, "一.md", "# 一\n\n同樣的內容\n", first))
@@ -303,3 +305,123 @@ def test_a_review_goes_with_its_row_and_a_moved_row_cannot_be_reviewed(tmp_path:
     fresh = next(e for e in BiStore(a, dataset).evidence(card) if e["field"] == "body")
     assert not (fresh.get("assessment") or {}).get("current")
     assert _ok(_call(a, "POST", "/api/bi/evidence-reviews/preview", current))["text"]
+
+
+def _repeat(ws: Path, dataset: str, name: str, text: str, value: str) -> str:
+    return _start(ws, dataset, name, text, _answer(body=(value, value)))
+
+
+def test_a_source_that_only_repeats_a_value_adds_its_citation_and_nothing_else(
+    tmp_path: Path,
+) -> None:
+    """Owner: 「證具, raw data連結就append上去」. The card's version stays: nothing it says
+    changed, so nobody's review of it goes stale. On another PC and after a rebuild, the same."""
+    drive, vault_id, dataset, a, b, card = _vault(tmp_path)
+    same = "同樣的內容"
+    _commit_run(a, dataset, _repeat(a, dataset, "一.md", f"# 一\n\n{same}\n", same))
+    store = BiStore(a, dataset)
+    before = (store.card(card)["version"], store.card(card)["updated"], store.history(card))  # type: ignore[index]
+
+    run = _repeat(a, dataset, "二.md", f"# 二\n\n{same}\n\n二\n", same)
+    found = _ok(_call(a, "GET", f"/api/bi/runs/{run}", dataset=dataset))
+    candidate = found["candidates"][0]
+    assert candidate["action"] == "unchanged" and candidate["citations"] == ["body"]
+    assert found["run"]["summary"]["citations"] == 1
+
+    second = _commit_run(a, dataset, run)
+    assert _cited(a, dataset, card, "body") == ["一.md", "二.md"]
+    store = BiStore(a, dataset)
+    after = (store.card(card)["version"], store.card(card)["updated"], store.history(card))  # type: ignore[index]
+    assert after == before
+    page = _page(a, dataset, card)
+    assert "一.md" in page and "二.md" in page
+
+    _push(a, vault_id)
+    drive.deliver("a", "b", vault_id)
+    _sync(b, vault_id)
+    assert _cited(b, dataset, card, "body") == ["一.md", "二.md"]
+    assert BiStore(b, dataset).card(card)["version"] == before[0]  # type: ignore[index]
+    vault.Vault(a, vault_id).rebuild()
+    assert _cited(a, dataset, card, "body") == ["一.md", "二.md"]
+
+    # Undo takes only the citation.
+    _undo(a, dataset, second)
+    assert _value(a, dataset, card, "body") == same
+    assert _cited(a, dataset, card, "body") == ["一.md"]
+    assert BiStore(a, dataset).card(card)["version"] == before[0]  # type: ignore[index]
+
+
+def test_reading_the_same_source_again_adds_nothing_twice(tmp_path: Path) -> None:
+    drive, vault_id, dataset, a, _, card = _vault(tmp_path)
+    same = "同樣的內容"
+    text = f"# 一\n\n{same}\n\nIEEE\n"
+    _commit_run(a, dataset, _repeat(a, dataset, "一.md", text, same))
+    units = vault.Vault(a, vault_id).repo.working_units
+    rows = units()[f"evidence:{card}:body"]
+
+    # Nothing new: not offered as a citation, and there is nothing to write.
+    run = _start(a, dataset, "一.md", text, _answer(body=(same, same)))
+    found = _ok(_call(a, "GET", f"/api/bi/runs/{run}", dataset=dataset))
+    assert found["candidates"][0]["action"] == "unchanged"
+    assert found["candidates"][0]["citations"] == []
+    assert found["run"]["summary"]["citations"] == 0
+
+    # With something else to write, its repeated citation still goes in once.
+    more = _answer(body=(same, same), standard_body=("IEEE", "IEEE"))
+    _commit_run(a, dataset, _start(a, dataset, "一.md", text, more))
+    assert _value(a, dataset, card, "standard_body") == "IEEE"
+    assert units()[f"evidence:{card}:body"] == rows
+    assert _cited(a, dataset, card, "body") == ["一.md"]
+
+
+def test_a_replay_that_loses_the_field_does_not_leave_its_citation_on_the_winner(
+    tmp_path: Path,
+) -> None:
+    """Field and evidence are separate units. The other side changed only the field, so this
+    side's evidence applied while its value lost: the winning value showed a citation of
+    text it does not hold, until a person decided. Now the lost commit's evidence is not read,
+    and it comes back with its value when the conflict is accepted."""
+    drive, vault_id, dataset, a, b, card = _vault(tmp_path)
+    old = "舊的內容"
+    _commit_run(a, dataset, _repeat(a, dataset, "舊.md", f"# 舊\n\n{old}\n", old))
+    _push(a, vault_id)
+    drive.deliver("a", "b", vault_id)
+    _sync(b, vault_id)
+
+    # PC b changes only the field, and is first; PC a takes a new value with its citation.
+    bob = BiStore(b, dataset)
+    held = bob.card(card)
+    assert held is not None
+    bob.set_field(card, "body", "B 的內容", base_version=int(held["version"]), actor="bob")
+    _commit(b, vault_id, "只改值")
+    assert _push(b, vault_id)["status"] == "pushed"
+    time.sleep(1.1)  # commits replay in time order
+    new = "新的內容"
+    run = _repeat(a, dataset, "新.md", f"# 新\n\n{new}\n", new)
+    _commit_run(a, dataset, run, take_new={"body": True})
+    assert _push(a, vault_id)["status"] == "pushed"
+    drive.deliver("a", "b", vault_id)
+    drive.deliver("b", "a", vault_id)
+    _sync(a, vault_id)
+    _sync(b, vault_id)
+
+    for ws in (a, b):
+        assert _value(ws, dataset, card, "body") == "B 的內容"
+        assert "新.md" not in _cited(ws, dataset, card, "body")
+        assert "新.md" not in _page(ws, dataset, card)
+        vault.Vault(ws, vault_id).rebuild()
+        assert "新.md" not in _cited(ws, dataset, card, "body")
+
+    # Nothing is staged by reading it differently from its unit.
+    assert vault.Vault(a, vault_id).repo.status()["uncommitted"] == 0
+
+    # Accepted, the lost value comes back with its own citation.
+    pending = _ok(_call(a, "GET", "/api/bi/proposals", dataset=dataset))["proposals"]
+    lost = next(p for p in pending if p["field"] == "body" and p["source"]["kind"] == "conflict")
+    assert lost["value"] == new and [e["source_name"] for e in lost["evidence"]] == ["新.md"]
+    _ok(
+        _call(a, "POST", f"/api/bi/cards/{card}/proposals/{lost['id']}",
+              {"dataset": dataset, "action": "accept", "base_version": lost["version"]})
+    )  # fmt: skip
+    assert _value(a, dataset, card, "body") == new
+    assert _cited(a, dataset, card, "body") == ["新.md"]
