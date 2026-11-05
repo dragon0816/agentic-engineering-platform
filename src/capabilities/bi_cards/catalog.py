@@ -21,8 +21,10 @@ which a dataset upgrade uses to move values (§5.3).
 
 from __future__ import annotations
 
+import copy
 import json
 import re
+from collections.abc import Iterable
 from importlib import resources
 from pathlib import Path
 from typing import Any
@@ -553,11 +555,23 @@ def resolve(workspace: Path, ref: str) -> Registry:
     return max(matches, key=_version_key)
 
 
+def with_home_domains(reg: Registry, extra: Iterable[str]) -> Registry:
+    """The schema plus the domains of homes a vault created (`docs/phases/BI_PAGE_SIMPLE.md`
+    §10): a card there can carry its home's domain with no new schema version, so nobody's
+    skills turn 「需要更新」 because a colleague added a domain. The schema itself is untouched."""
+    added = [d for d in extra if not any(d.lower() == have.lower() for have in reg.domains)]
+    if not added:
+        return reg
+    widened = copy.copy(reg)
+    widened.domains = (*reg.domains, *added)
+    return widened
+
+
 def for_store(store: BiStore) -> Registry:
     """The registry of the schema the dataset is bound to."""
     ref = store.schema_ref()
     try:
-        return resolve(store.workspace, ref)
+        return with_home_domains(resolve(store.workspace, ref), store.home_domains())
     except BiStoreError:
         raise BiStoreError(
             "schema_missing",

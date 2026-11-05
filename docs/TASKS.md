@@ -4299,3 +4299,5 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [x] 2026-11-05, Claude Code: A desktop start no longer exits with code 2 over a briefly busy `state.sqlite`: it waits up to 30 s, then `state_busy`; the message names the file and says a second try may help, and the starting page shows it. A second click joins a start under way. `timeout=0` stays, `docs/DECISIONS.md` 2026-11-05. Branch `web-start-retry`.
 
 - [x] 2026-11-05, Claude Code: Accepting a proposal moves the citations with the value, carried by units (`bi-accept-evidence`, `docs/DECISIONS.md` 2026-11-05); `MODEL_VERSION` 10, so a local `bi.sqlite` rebuilds once. Correction notes follow the rule too. Open: a run's commit that replaces a value directly still adds beside the old.
+
+- [x] 2026-11-05, Claude Code: BI page: create a domain (`docs/phases/BI_PAGE_SIMPLE.md` §10) with its folders by the one rule, readable names in the combobox, and switching domain redraws at once with no stale rows, held reply tested. `tests/test_bi_create_domain.py`, `tests/test_bi_create_domain_ui.py`.

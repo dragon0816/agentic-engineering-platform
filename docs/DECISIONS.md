@@ -6451,3 +6451,13 @@ The owner's decision: a card's value and its citations must match. Before, accep
 - Evidence review works on the field's current evidence: a moved row's reviews stay readable in `old_evidence`, and it cannot be reviewed further.
 
 **Rejected.** Keeping both on the field with a mark on the old one: every reader of `evidence` (the card page, the review, the chat) would need to learn the mark, and a miss cites text the card no longer holds. Deriving old evidence from the commit's `evidence:` change: it ties history to which commit touched which unit, where the field's own `history` already travels.
+
+- **Commit and push stay whole-vault for now.** The page says which homes a commit touches. Rejected: committing part of the changes by domain, which changes the repository model. The owner has not asked for that, and it is what publishing or blocking domains separately would need.
+
+## 2026-11-05: A person can create a BI domain, with no schema version
+
+The owner: 「需要讓使用者可以create domain」, 「新增domain時，需要可以按照規則生成相對應的檔案folder結構」. Design: `docs/phases/BI_PAGE_SIMPLE.md` §10.
+
+- **A created home is one unit, `meta:home:<id>`, and its domain widens the vault's schema when read.** Cards of it can carry the domain, and no skill turns 需要更新. Rejected: a new schema version per domain, since a draft, a publish and 需要更新 on every edited skill would disturb everyone for one person's folder; a home with no card domain, whose cards would silently lose it; appending to `meta:vault_segments`, where two people adding different homes would conflict.
+- **The folders come from the unit, with no placeholder file.** Each PC makes them on push and sync through the one definition, `homes.HOME_FOLDERS`. Rejected: a placeholder, which would need excluding everywhere sources, skills and tools are listed.
+- **The list of homes is built from units only.** An empty folder makes no home, so `library/skill-review` stays out. Accepted cost: a PC on an older AEP drops a created domain from its cards, with the existing warning.
