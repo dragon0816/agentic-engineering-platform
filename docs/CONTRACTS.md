@@ -5923,7 +5923,7 @@ skill AI: owner decisions". Code `capabilities/bi_cards/vault_checks.py`, `host_
   evidence is not in the note). Pending changes label them 「測試題「…」」 and 「擷取測試「…」」.
 - `GET /api/bi/vaults/<id>/checks` → `{"questions": [{"unit", "set", "slug", "question", "must", "must_not", "home"}],
   "cases": [{"unit", "slug", "note", "folder", "expected"}], "latest": <report>|null, "standing": {"blocking":
-  [str], "notes": [str]}}`. `standing` is the push check's answer for the working copy today.
+  [str], "notes": [str]}}`. `standing` is the push check's answer for the working copy today, empty while a run is going.
 - `POST /api/bi/vaults/<id>/checks`: `{"question", "must"?, "must_not"? (list or comma text), "set"? ("main"),
   "slug"?, "home"?}` stages a question (`question_invalid` 400); `{"kind": "case", "slug", "note", "expected",
   "folder"?}` stages a case (`case_invalid` 400); `{"delete": <unit>}` removes one (`check_unknown` 404). Answer

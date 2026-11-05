@@ -279,6 +279,18 @@ No backend change: a run's home comes from its source's folder, in the page.
 
 **The owner's goal does not need the repository model changed.** What this does not give: one person's work cannot be held out of another's push once both are in the same commit history, and a person cannot push only one domain. If the owner wants domains published or blocked separately, that is a repository redesign, not this slice.
 
-### 9.6 The AI panel
+### 9.6 Measured on a copy of `market-intel`
+
+No model, 2026-11-05; the real vault, its staging and its shared folder were compared before and after and did not change. 481 sources, 12 questions, 7 skills, 37 Dashboard sections, 760 cards.
+
+- **Opening step 3:** the questions and the report show at once, since they are already loaded. The Dashboard took 13 to 16 s, because entering the step started about ten reads alongside it; alone its route takes 2 to 4 s. Those reads now wait for it: **2.2 s from a fresh load.** Entering with reads still under way from a moment before, it was 8.6 to 9.5 s, down from 17 to 25 s.
+- **Opening the build tab:** 23 s on this vault, most of it reads of whole-vault state. Not changed here.
+- **A change of domain:** the source table in 0.14 s, the skill list in 0.11 s from what is already loaded.
+- **Questions:** all 12 are 全庫 until someone gives them a domain in the editor. Their text already names one (「wireless：…」), but nothing reads it.
+- **`library/skill-review`** has skills and no sources, is not in `meta:vault_library`, and is not a working domain. Its five review skills show under 全部領域 and not under a domain.
+- **A reload during many reads** left the page unusable in 3 of 12 tries with the server's default listen queue of 5, and in 0 of 15 with 128. The cause is inferred from that, not observed. Six tries on main's code, which has no `standing` read, did not show it.
+- **Reading the standing answer costs about a second** on this vault, so `/checks` leaves it out while a run is going, when the page reads it every 2 s. The push check itself is unaffected.
+
+### 9.7 The AI panel
 
 The panel's line about what it is working on names the working domain. Each turn sends `scope`, and the route puts one line naming the home and folder in front of the message, for all five kinds. It is checked with `home_problem`, so only a home's name can arrive. The line is kept with the turn, since it was sent, and the log does not show it. Accepting AI questions tags them with that home. A panel closes when the working domain changes, so a session never talks across two.

@@ -164,6 +164,18 @@ def test_a_run_of_one_domain_does_not_hide_a_regression_in_another(tmp_path: Pat
     assert _checks(a, vault_id)["latest"]["run_id"] == newer["run_id"]
 
 
+def test_while_a_run_is_going_the_standing_answer_is_left_out(tmp_path: Path) -> None:
+    _drive, vault_id, _dataset, a, _b = _two_pcs(tmp_path)
+    _pushable(a, vault_id)
+    _bench(a, vault_id, ("wireless",), None)
+    assert _checks(a, vault_id)["standing"]["blocking"]
+    report = {"run_id": "bibench-running", "status": "running", "started_at": "9999"}
+    bi_bench._save(a, vault_id, report)
+    assert _checks(a, vault_id)["standing"] == {"blocking": [], "notes": []}
+    # The push check itself does not take a day off.
+    assert _push(a, vault_id)["status"] == "blocked"
+
+
 def test_a_regression_clears_only_when_that_question_passes_again(tmp_path: Path) -> None:
     _drive, vault_id, _dataset, a, _b = _two_pcs(tmp_path)
     _pushable(a, vault_id)
@@ -215,6 +227,14 @@ def test_a_colleagues_content_makes_an_earlier_run_not_count(tmp_path: Path) -> 
     standing = _checks(a, vault_id)["standing"]
     assert standing["blocking"] == []
     assert any("沒有跑過測試" in note for note in standing["notes"])
+
+
+def test_the_web_server_keeps_a_queue_for_a_page_reloaded_during_many_reads() -> None:
+    # On a copy of market-intel, a reload during ten reads left the page unusable in 3 of 12
+    # tries with the default queue of 5, and in 0 of 15 with this one.
+    from host_runtime.web import AgentWebServer
+
+    assert AgentWebServer.request_queue_size >= 64
 
 
 # -- which homes a change touches --------------------------------------------------------------

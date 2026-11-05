@@ -12286,7 +12286,7 @@ function biDashHome() {
   const inStep = bi.view === "build" && bi.build && bi.build.stage === "test";
   const home = el(inStep ? "bi-b-test-dash" : "bi-view-dashboard");
   if (el("bi-dash-block").parentElement !== home) home.append(el("bi-dash-block"));
-  if (inStep && !bi.loaded.dashboard) biLoadDashboard();
+  if (inStep && !bi.loaded.dashboard) bi.dashLoad = biLoadDashboard();
 }
 
 async function biShowView(name) {
@@ -13390,8 +13390,12 @@ function biBuildStage(name, focus = true) {
   if (stage === "result") biBuildResult();
   if (stage === "test" && biVaultOf(biDataset())) {
     // What steps 1 and 2 changed (cards written, skills, schema) waits to be committed here.
-    call("/api/bi/vaults/" + biVaultOf(biDataset()).id + "/status").then(biVaultState)
-      .catch((failure) => biNotice(false, "讀不到知識庫的狀態：" + failure.message));
+    // After the Dashboard: on market-intel the ten reads this starts took it from 4 s to 13 s,
+    // and the tables they refresh are already drawn.
+    const vaultId = biVaultOf(biDataset()).id;
+    Promise.resolve(bi.dashLoad).finally(() => call("/api/bi/vaults/" + vaultId + "/status")
+      .then((state) => { if (vaultId === (biVaultOf(biDataset()) || {}).id) biVaultState(state); })
+      .catch((failure) => biNotice(false, "讀不到知識庫的狀態：" + failure.message)));
   }
   if (focus) {
     const title = document.querySelector('#bi-view-build .kp-stage[data-stage="' + stage
@@ -14641,6 +14645,10 @@ function biVerConflicts(vaultId, conflicts) {
 async function biSkills(vaultId) {
   const reply = await call("/api/bi/vaults/" + vaultId + "/skills");
   bi.skills = reply;
+  biSkillsDraw(reply);
+}
+
+function biSkillsDraw(reply) {
   const box = el("bi-b-sk-list"); box.replaceChildren();
   const list = biListTable(["規則", "種類", "版本", "套用到", "狀態", "動作"]);
   const scope = biScope();
@@ -15270,6 +15278,8 @@ function biScopeChanged() {
   biScopeFollowed(); biFileChosen(); biRenderSources(); biBuildRunPick();
   biBuildStage(bi.build.stage, false);
   biDashHome();
+  // What is already here redraws at once; the reads below take seconds on a real vault.
+  if (bi.skills) biSkillsDraw(bi.skills);
   if (!bi.verVault) return;
   biBench(bi.verVault).catch((failure) => biNotice(false, "讀不到測試：" + failure.message));
   biVersions(bi.verVault).catch((failure) => biNotice(false, failure.message));
