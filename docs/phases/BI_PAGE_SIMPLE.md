@@ -204,3 +204,81 @@ Brief from the orchestrator, 2026-11-05. D's `bi-summary-fill` adds a reading ru
 - **180 must be workable,** including `#bi-b-accept-clean`. Measure the draw, as `test_bi_many_sources_ui` does.
 - **Test with a reading run:** nothing built for ordinary runs may trip. Read `biBuildAllowed`, which allows `commit` only when `run.kind === "ingest"`, and `biBuildRenderRun`, which returns early for any other kind. Check what `kind` a reading run has.
 - **Tests that use the list today:** `#bi-b-cands button` in `test_bi_build_flow_ui`, `test_bi_build_ui`, `test_bi_vault_ui` and others. Rewrite them to the table; do not weaken them.
+
+## 9. The working domain (工作領域)
+
+Status: designed 2026-11-05, decision `docs/DECISIONS.md` 2026-11-05. **The owner, verbatim:** 「我們要支援多人開發一個vault，所以這個頁面不是應該要選擇要編輯的domain，例如aidc，之後的修改，就依選擇的domain來做後續的ingest和testing」.
+
+One combobox says which part of the vault this person is working on. Steps 1, 2 and 3 follow it. **It narrows what a person sees and what they add. It is not isolation and not a permission:** content, commit, push and the bench gate stay whole-vault.
+
+### 9.1 What a folder, a domain and a home are
+
+The code already has the relation; nothing new is invented.
+
+| Word | What it is | Where |
+|---|---|---|
+| **home** | `<application>` or `library/<entry>`, the short form. It owns sources, skills, tools and a profile | `homes.home_of`, `vault_skills.home_list` |
+| **domain** | A coarse label on a card; a card may hold several | The schema's `domains`, the `domain` field |
+| **home to domain** | The schema domain of the same name, ignoring case: `aidc` is `AIDC`. A library entry spans domains, so it has none | `homes.domain_of_folder`, already used by ingest |
+
+**The working domain is a home.** On screen it is 工作領域, the word the owner uses. So:
+
+- `aidc`, `aerospace`, `robotics`, `wireless` each have a card domain as well.
+- `library/products`, `library/technologies`, `library/competitors` are chosen the same way, for people keeping shared reference data. They have sources, skills and questions, and no card domain, so the Dashboard's domain does not move for them.
+- **`mobile` has no folder, so it cannot be chosen.** Its cards are still read through the Cards and Dashboard filters. Creating `applications/mobile` is a vault decision and is not done here.
+- **A card is not in one domain.** An ingest in `aidc` can touch a card also holding `wireless`. Nothing stops it, and the commit list says which homes the change touches (§9.5).
+
+### 9.2 The combobox
+
+`#bi-b-src-folder` keeps its id and its values (a home's `sources` folder, `sources` for everything) and moves out of step 1's row to one line above the stepper, labelled 工作領域. It is in sight on all three steps. The options come from a new `homes` list in the vault's skills reply: the vault's homes, plus any home found among its folders and sources. Subfolders are no longer options, and a source in one counts for its home.
+
+- **全部領域 replaces 「不指定資料夾」.** **A person can look with no domain and cannot add with none:** every list shows everything, waiting runs can be reviewed, and a bench covers the whole vault, but 轉檔 and 放進共用資料夾 wait for a choice, with a short line saying so. A file added to no home gets no extract skill and no profile, which is the failure this request is about. Old sources sitting in `sources` stay visible under 全部領域 and can still be ingested. The API is unchanged and still accepts `sources`; the guard is the page's.
+- **Kept per person and per PC:** `localStorage`, key `bi-scope-<dataset>`, like `bi-build-<dataset>`. A stored home that no longer exists falls back to 全部領域.
+- **First visit:** 全部領域, nothing hidden. Choosing for someone could put a file in the wrong folder.
+- **A vault with no homes** shows only 全部領域, and adding works as it does today, into `sources`.
+- **A plain dataset and a read-only copy** do not show the combobox: a dataset has no homes, and a subscribed copy is only read.
+
+Changing it deselects a source outside the new scope, closes the AI panel, and redraws the lists below. The tab 卡片 and its filter do not follow: that filter starts on every domain, because the owner found cards missing when it did not.
+
+### 9.3 Step 2
+
+| Thing | In a working domain |
+|---|---|
+| Skills | Those applying to its folders, and those applying to everything (`classify`). A count says how many are hidden. A new rule starts on its folder |
+| Tools | Those of its home (`tool:<home>/<name>`) |
+| Profile | The 進階 picker starts on its home |
+| Ingest | The sources table shows only its sources, so the run takes that source's folder and skill as it does now. `run_folder_mismatch` still refuses a mismatch |
+| Review | `#bi-b-run-pick` lists this domain's runs and runs with no home first (a reading run spans the vault), and the rest in an option group 其他領域. **Runs from elsewhere stay one choice away and are never opened by themselves.** |
+
+No backend change: a run's home comes from its source's folder, in the page.
+
+### 9.4 Step 3
+
+**What has a domain today (checked):** a question has only a `set`. An extraction case has a `folder`. A bench run has neither. An analysis has none, but takes a `domain` parameter, and the Dashboard passes one.
+
+- **A question gets one optional field, `home`.** Absent means it belongs to the whole vault (全庫). Every question today is that, so nothing moves. The unit's digest is unchanged for an untagged question, and an older AEP ignores the field. New questions and AI suggestions take the working domain. The table gets a 領域 column.
+- **A working domain shows its own questions and the 全庫 ones.** The 全庫 questions also run, because they are the vault's general checks. 全部領域 shows and runs all of them.
+- **A case's home is its folder's.** One with no folder counts as 全庫.
+- **`POST .../bench` takes an optional `home`.** Absent is the whole vault, as today. The report records `scope` and `not_covered`. **The report says what it covered:** 「涵蓋 aidc 與全庫 5 題；沒測 7 題」.
+- **Dashboard and analyses:** no new field. Choosing a home with a domain sets the Dashboard's domain and the default of an analysis's `domain` parameter. A person can still change either.
+
+### 9.5 The gate, and several people
+
+`bi_bench.gate` read only the newest finished run on the same content. With scoped runs that would be a hole: **a whole-vault run finds a wireless regression, then a newer aidc run on the same content hides it.** So:
+
+- **The gate takes each question's newest verdict across all finished runs on that content.** A regression stands until a later run on the same content passes that question. A whole-vault run as the newest behaves exactly as today, including a rerun clearing a regression.
+- **The block names the question and its domain:** 「測試退步（wireless）：…」. A question's domain does not exempt anyone: **a person in `aidc` is blocked by a wireless regression**, because the push carries the whole vault.
+- **They see it before pressing push.** `GET .../checks` adds `standing`, the gate's answer for the working copy, drawn in step 3 in every scope. Without it a green aidc report could sit above a push that will be refused. To clear it: fix it, ask the colleague who owns it, or rerun in that domain or in 全部領域.
+- **A push with some questions untested stays allowed, as a push with none is (§7), and the note says how many were not tested.** This is not weaker than today, when a person could push with no test at all.
+
+**Commit and push stay whole-vault units.**
+
+- **Commit carries every uncommitted change on this PC, in any domain.** `pending` adds `homes` to each change, and the list starts with a count per home: 「aidc 5 項・wireless 2 項・其他 1 項」. A warning appears when some are outside the working domain. Discard also covers everything, as it says today. Choosing part of a change set is not offered: it would be a change to the repository's model.
+- **When a colleague's work arrives** through sync, as today: the status line counts it, their sources join the list and are hidden from this scope's rows but counted (「顯示 2／15 份」), and their commits show in the history. **Their arrival changes the content's digest, so an earlier bench no longer applies:** the note goes back to 「沒有跑過測試」. That is the existing rule, and it matters more with several people.
+- A card's homes come from `card_app_folders`. A card with none counts as 其他.
+
+**The owner's goal does not need the repository model changed.** What this does not give: one person's work cannot be held out of another's push once both are in the same commit history, and a person cannot push only one domain. If the owner wants domains published or blocked separately, that is a repository redesign, not this slice.
+
+### 9.6 The AI panel
+
+The panel's line about what it is working on names the working domain. Each turn sends `scope`, and the route puts one line naming the home and folder in front of the message, for all five kinds. It is checked with `home_problem`, so only a home's name can arrive. The line is kept with the turn, since it was sent, and the log does not show it. Accepting AI questions tags them with that home. A panel closes when the working domain changes, so a session never talks across two.

@@ -6408,3 +6408,13 @@ The owner's rules: through ingest, only the card's own source text, fill only, r
 ## 2026-11-05: Agent Web records write requests, without what they say
 
 Four uncommitted changes appeared on the real `market-intel` on 2026-11-04 at 21:25 and nobody could be found: Agent Web logged no requests, by design, since a request carries the team's own words. The owner said yes to a record of writes only: time, method, path without query, status, `User-Agent`, `Referer` without query, the client's address, and an `X-AEP-Client` label. Rejected: bodies or query strings, which would undo why `log_message` is silent; reads, which are many and change nothing; a label as identity, since any process with the token can send any label. It is a queue and one thread, so a slow or unwritable log costs a line and never a request. It cannot answer who: it can answer which client said what, and when.
+
+## 2026-11-05: The BI page has a working domain, and it is a home
+
+The owner: 「我們要支援多人開發一個vault，所以這個頁面不是應該要選擇要編輯的domain，例如aidc，之後的修改，就依選擇的domain來做後續的ingest和testing」. Design: `docs/phases/BI_PAGE_SIMPLE.md` §9.
+
+- **The working domain is a home (`aidc`, `library/products`), per person and per PC,** in one combobox above the stepper. A home with a schema domain of its name also sets the Dashboard's domain, by the existing `homes.domain_of_folder`. Rejected: choosing a schema domain, because `mobile` has no folder and a library entry has no domain, and a domain owns no sources or skills.
+- **A person can look with no domain and cannot add with none.** 全部領域 replaces 「不指定資料夾」 and is the first-visit default. Rejected: defaulting to a domain, which could put a file in the wrong folder; removing the no-domain view, which is how a whole-vault bench and old root sources stay reachable.
+- **A question gets an optional `home`; absent means the whole vault.** A working domain runs its own questions and the untagged ones. Rejected: using the question set's name as the domain, since a set name cannot hold `library/products` and a set is the team's own grouping.
+- **The bench gate takes each question's newest verdict across every finished run on the same content.** Reading only the newest run would let a domain's run hide another domain's regression. A person in one domain is still blocked by a regression in another, and the page shows it before they press push, because the push carries the whole vault. Rejected: a gate per domain, which would weaken it.
+- **Commit and push stay whole-vault.** The page says which homes a commit touches. Rejected: committing part of the changes by domain, which changes the repository model. The owner has not asked for that, and it is what publishing or blocking domains separately would need.
