@@ -440,6 +440,11 @@ def reference_parts(
     )
 
 
+def _only_adds(old: Any, new: Any) -> bool:
+    """Whether `new` keeps all of `old`: a list that only grew replaced nothing."""
+    return isinstance(old, list) and isinstance(new, list) and all(v in new for v in old)
+
+
 def evidence_reference(row: sqlite3.Row) -> dict[str, Any]:
     """The reference parts an evidence unit's row holds. A row written before the
     card model holds none and has no `reference_at`: its id is computed at each
@@ -1135,6 +1140,13 @@ class BiStore:
                     if stored is None
                     else _dump({k: stored[k] for k in ("kind", "ref", "by", "at")})
                 )
+                # A value replaced takes its citations to history; one that a list only
+                # grows still rests on them (one card reached from two domains).
+                old_evidence = (
+                    self._move_evidence(db, card_id, name)
+                    if stored is not None and not _only_adds(_load(stored["value"]), value)
+                    else None
+                )
                 db.execute(
                     "INSERT OR REPLACE INTO fields (card_id, field, value, kind, ref, by, at) "
                     "VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -1142,7 +1154,7 @@ class BiStore:
                 )
                 db.execute(
                     "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, "
-                    "import_id, old_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "import_id, old_source, old_evidence) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (
                         card_id,
                         name,
@@ -1154,6 +1166,7 @@ class BiStore:
                         at,
                         result.import_id,
                         old_source,
+                        old_evidence,
                     ),
                 )
                 db.execute(
@@ -1616,14 +1629,7 @@ class BiStore:
         goes to this history row, readable with the old value. The caller then adds the new
         value's own, if it has any (`docs/DECISIONS.md` 2026-11-05)."""
         new = _dump(value)
-        old_evidence = None
-        if moves_evidence:
-            rows = db.execute(
-                "SELECT * FROM evidence WHERE card_id = ? AND field = ? ORDER BY seq",
-                (card_id, field),
-            ).fetchall()
-            old_evidence = _dump([evidence_unit(r) for r in rows])
-            db.execute("DELETE FROM evidence WHERE card_id = ? AND field = ?", (card_id, field))
+        old_evidence = BiStore._move_evidence(db, card_id, field) if moves_evidence else None
         ref = ref or f"agent-web:{actor}"
         old_source = (
             None if stored is None else _dump({k: stored[k] for k in ("kind", "ref", "by", "at")})
@@ -1659,6 +1665,15 @@ class BiStore:
             "AND status = 'pending'",
             (card_id, field),
         )
+
+    @staticmethod
+    def _move_evidence(db: sqlite3.Connection, card_id: str, field: str) -> str:
+        """Take a field's evidence off it, as text for the history row of the change."""
+        rows = db.execute(
+            "SELECT * FROM evidence WHERE card_id = ? AND field = ? ORDER BY seq", (card_id, field)
+        ).fetchall()
+        db.execute("DELETE FROM evidence WHERE card_id = ? AND field = ?", (card_id, field))
+        return _dump([evidence_unit(r) for r in rows])
 
     @staticmethod
     def _proposal_evidence(db: sqlite3.Connection, proposal: sqlite3.Row) -> None:
@@ -1989,6 +2004,7 @@ class BiStore:
                 )
             )
             touched: set[str] = set()
+            kept: set[tuple[str, str]] = set()
             for change in changes:
                 later = db.execute(
                     "SELECT 1 FROM history WHERE card_id = ? AND field = ? AND seq > ? AND "
@@ -1996,6 +2012,7 @@ class BiStore:
                     (change["card_id"], change["field"], change["seq"], import_id),
                 ).fetchone()
                 if later is not None:
+                    kept.add((change["card_id"], change["field"]))
                     continue  # someone changed it since: keep theirs
                 touched.add(change["card_id"])
                 if change["old_evidence"] is not None:
@@ -2039,6 +2056,20 @@ class BiStore:
                         at,
                         "復原整批匯入",
                     ),
+                )
+            if record["run_id"]:
+                # What the undone run cited goes with it, also where it only added a citation
+                # to a value that stays. A field changed since has what that change gave it.
+                db.executemany(
+                    "DELETE FROM evidence WHERE seq = ?",
+                    [
+                        (r["seq"],)
+                        for r in db.execute(
+                            "SELECT seq, card_id, field FROM evidence WHERE run_id = ? AND at = ?",
+                            (record["run_id"], record["at"]),
+                        ).fetchall()
+                        if (r["card_id"], r["field"]) not in kept
+                    ],
                 )
             # A state has no import id: it holds the import's time and author.
             db.execute(
