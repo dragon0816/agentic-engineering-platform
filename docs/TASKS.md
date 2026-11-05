@@ -4321,3 +4321,4 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [x] 2026-11-05, Claude Code: Merging the commit list with the top row left `biRenderCounts` reading `keep`, so the BI page did not load on `d8c229cf`: fixed on `bi-merge-fix`. A vault says its count on its status line (`bi-b-v-count`), with sources while it has no cards; a plain dataset says it in the bar beside the tabs.
 
 - [x] 2026-11-05, Claude Code (worker D): `POST /api/bi/cards/<id>/unmark` clears a sample mark, in units, with a reason in history; `FICTIONAL` no longer matches 「待查證」 or 「待…驗證」. `MODEL_VERSION` 11. Branch `bi-unmark`; clearing the 7 on the real vault follows the merge.
+- [x] 2026-11-05, Claude Code (worker D): The 7 real cards cleared on `market-intel` on the owner's word, pushed, not published: 92 samples of 760, run `e3de934115f0` unchanged.
