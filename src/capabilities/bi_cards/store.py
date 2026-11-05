@@ -1045,7 +1045,17 @@ class BiStore:
                 for name, items in planned.evidence.items():
                     if stored.get(name) != _dump(planned.values.get(name)):
                         continue  # kept a person's value: the evidence is in the proposal
+                    held = {
+                        r["reference_id"]
+                        for r in db.execute(
+                            "SELECT reference_id FROM evidence WHERE card_id = ? AND field = ?",
+                            (card["id"], name),
+                        )
+                    }
                     for item in items:
+                        # A place already cited, as when a source is read again: not twice.
+                        if reference_parts(item, planned.values, at)[0] in held:
+                            continue
                         insert_planned_evidence(
                             db,
                             card["id"],

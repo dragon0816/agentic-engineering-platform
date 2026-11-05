@@ -690,6 +690,31 @@ def _fill_homes(
         )
 
 
+def _evidence_read(
+    units: Mapping[str, Any],
+    entries: list[dict[str, Any]],
+    conflicts: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """The evidence units as a card reads them. Field and evidence are separate units, so a
+    commit can lose the field and still apply its evidence; the winning value must not show a
+    citation of the lost one, which comes back with its value if the conflict is accepted.
+    The unit stays as it is: `units_from_db` compares what this reads with itself."""
+    read = {k: v for k, v in units.items() if k.startswith("evidence:")}
+    last: dict[str, tuple[str, Any]] = {}
+    for entry in entries:
+        for change in entry["changes"]:
+            unit = str(change["unit"])
+            if change["applied"] and unit.startswith("evidence:"):
+                last[unit] = (str(entry["group"]), change["before"])
+    for conflict in conflicts:
+        unit = f"evidence:{str(conflict['unit']).removeprefix('field:')}"
+        if str(conflict["unit"]).startswith("field:") and unit in last:
+            group, before = last[unit]
+            if group == conflict["commit_id"]:
+                read[unit] = before or []
+    return read
+
+
 def materialize(
     db: sqlite3.Connection,
     units: Mapping[str, Any],
@@ -786,12 +811,6 @@ def materialize(
                         source.get("at") or stamp,
                     ),
                 )
-            elif key.startswith("evidence:"):
-                _, cid, name = key.split(":", 2)
-                if cid not in present:
-                    continue
-                for item in value:
-                    insert_evidence_unit(db, cid, name, item)
             elif key.startswith(card_model.STATE_PREFIX):
                 _, cid, name = key.split(":", 2)
                 if cid not in present:
@@ -810,6 +829,11 @@ def materialize(
                         value.get("at"),
                     ),
                 )
+        for key, value in sorted(_evidence_read(units, entries, conflicts).items()):
+            _, cid, name = key.split(":", 2)
+            if cid in present:
+                for item in value:
+                    insert_evidence_unit(db, cid, name, item)
         for row in history:
             # Only fields that are units: a field a revert removed keeps no
             # history, or the rows would read back as a cleared field.

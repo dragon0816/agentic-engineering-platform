@@ -216,6 +216,22 @@ def mark_pair_repeats(store: BiStore, reg: Registry, candidates: list[dict[str, 
                 candidate["review"] = "pending"
 
 
+def _new_citations(store: BiStore, card: Any, candidate: dict[str, Any]) -> list[str]:
+    """The fields whose value this source repeats and does not cite yet: it adds its citation
+    (owner: 「證具, raw data連結就append上去」). A place already cited adds nothing twice."""
+    held = {(e["field"], e["reference_id"]) for e in store.evidence(card["id"])}
+    return [
+        item["field"]
+        for item in candidate["fields"]
+        if item.get("change") == "same"
+        and item.get("merge") in (None, "same")
+        and any(
+            (item["field"], reference_id(e["source_id"], e.get("locator") or {})) not in held
+            for e in item.get("evidence") or ()
+        )
+    ]
+
+
 def evaluate(store: BiStore, reg: Registry, candidate: dict[str, Any]) -> dict[str, Any]:
     """Recompute match, base version, per-field diff, action and errors
     against the cards now; the review state and edits are kept."""
@@ -326,6 +342,7 @@ def evaluate(store: BiStore, reg: Registry, candidate: dict[str, Any]) -> dict[s
     else:
         action = "update" if changes else "unchanged"
     candidate["action"] = action
+    candidate["citations"] = [] if card is None else _new_citations(store, card, candidate)
     if candidate.get("pair_repeats") and not choice:
         errors.append(
             {
@@ -698,6 +715,7 @@ def summary(candidates: list[dict[str, Any]]) -> dict[str, int]:
         "create": 0,
         "update": 0,
         "unchanged": 0,
+        "citations": 0,
         "skip": 0,
         "accepted": 0,
         "rejected": 0,
@@ -707,6 +725,8 @@ def summary(candidates: list[dict[str, Any]]) -> dict[str, int]:
     }
     for candidate in candidates:
         counts[candidate["action"]] += 1
+        if candidate["action"] == "unchanged" and candidate.get("citations"):
+            counts["citations"] += 1
         counts[candidate["review"]] += 1
         counts["errors"] += len(candidate["errors"])
         counts["warnings"] += len(candidate["warnings"])
@@ -1058,7 +1078,12 @@ def commit(workspace: Path, dataset: str, run_id: str, *, actor: str) -> dict[st
         found_earlier = {"import_id": earlier, "at": now(), "by": actor}
         staging.set_status(run_id, "committed", commit_result=found_earlier)
         return _committed(staging, run_id, found_earlier, counts, already=True)
-    chosen = [c for c in found if c["review"] == "accepted" and c["action"] in WRITABLE]
+    # A candidate that only adds a citation writes that and nothing else.
+    chosen = [
+        c
+        for c in found
+        if c["review"] == "accepted" and (c["action"] in WRITABLE or c.get("citations"))
+    ]
     invalid = [c for c in chosen if c["errors"]]
     if invalid:
         raise BiStoreError(
@@ -1087,6 +1112,7 @@ def commit(workspace: Path, dataset: str, run_id: str, *, actor: str) -> dict[st
         "created": applied.created,
         "updated": applied.updated,
         "unchanged": applied.unchanged,
+        "citations": sum(1 for c in chosen if c["action"] not in WRITABLE),
         "proposals": applied.proposals,
         "at": now(),
         "by": actor,
@@ -1203,7 +1229,10 @@ def _committed(
     return {
         "run": run_view(staging, run_id),
         "import_id": result["import_id"],
-        "applied": {k: result.get(k, 0) for k in ("created", "updated", "unchanged", "proposals")},
+        "applied": {
+            k: result.get(k, 0)
+            for k in ("created", "updated", "unchanged", "citations", "proposals")
+        },
         "skipped": counts["skipped"],
         "pending": counts["pending"],
         "index": index_state(staging.store),

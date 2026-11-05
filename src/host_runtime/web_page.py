@@ -16252,6 +16252,7 @@ function biRunChips(run) {
   const s = run.summary || {};
   return [biBadge("候選 " + (s.candidates || 0), "dim"), biBadge("新建 " + (s.create || 0), "good"),
     biBadge("更新 " + (s.update || 0), "dim"), biBadge("略過 " + (s.skip || 0), "dim"),
+    ...(s.citations ? [biBadge("新增出處 " + s.citations, "accent")] : []),
     biBadge("錯誤 " + (s.errors || 0), s.errors ? "bad" : "dim"),
     biBadge("警告 " + (s.warnings || 0), s.warnings ? "warn" : "dim"),
     biBadge("已接受 " + (s.accepted || 0), "good"), ...biRunMerge(run)];
@@ -16695,6 +16696,12 @@ el("bi-b-start").addEventListener("click", async () => {
 
 function biRunReading(run) { return run.method_ref === "llm:reading"; }
 
+function biCandAction(candidate) {
+  // Nothing it says changes; a source that repeats a value adds its citation, and only that.
+  if (candidate.action === "unchanged" && (candidate.citations || []).length) return "新增出處";
+  return BI_RUN_ACTION[candidate.action] || candidate.action;
+}
+
 function biRunReviewable(run) {
   // A page's trial is read in its own step; a reading run's has nowhere else to be read.
   return !!run && (run.kind === "ingest" || biRunReading(run));
@@ -16863,7 +16870,7 @@ function biBuildCandRows() {
       + (fields.length > 2 ? " 等 " + fields.length + " 欄" : "");
     const cells = [
       ["卡片", [open, bh("div", "bi-meta", biTypeLabel(candidate.entity_type) + "・"
-        + (BI_RUN_ACTION[candidate.action] || candidate.action))]],
+        + biCandAction(candidate))]],
       ["欄位", [labels]],
       ["提議值", [bh("div", "bi-cand-value", first ? biValue(first.value) : "—")]],
       ["狀態", [biDecisionMark(candidate.review), " ",
@@ -16919,7 +16926,7 @@ function biBuildRenderRun(detail = true) {
   }
   // What decides the next press on the line; the rest of the run's counts folded.
   const chips = [biBadge("執行 " + run.id + "・" + run.status, "dim"), ...biRunChips(run)];
-  const main = chips.filter((chip) => /^(候選|錯誤|警告|已接受)/.test(chip.textContent));
+  const main = chips.filter((chip) => /^(候選|錯誤|警告|已接受|新增出處)/.test(chip.textContent));
   const more = chips.filter((chip) => !main.includes(chip));
   const left = (run.warnings || []).filter((w) => w.code === "reading_left_empty")
     .map((w) => bh("p", "bi-meta", w.message));
@@ -17072,8 +17079,13 @@ function biBuildShowCandidate(candidateId) {
   const current = candidate.match === "existing" && selfIds.length
     ? biButton("目前的卡片", () => biBuildPeek(selfIds[0]), "bi-link") : null;
   if (current) current.id = "bi-b-cand-current";
-  parts.push(bh("p", "bi-meta", match + "・" + (BI_RUN_ACTION[candidate.action]
-    || candidate.action), current ? "・" : "", current || ""));
+  parts.push(bh("p", "bi-meta", match + "・" + biCandAction(candidate),
+    current ? "・" : "", current || ""));
+  if (candidate.action === "unchanged" && (candidate.citations || []).length) {
+    parts.push(bh("p", "bi-meta", "內容不變。接受後只把這份來源加進這些欄位的出處："
+      + candidate.citations.map((name) => (biSchemaField(candidate.entity_type, name) || {}).label
+        || name).join("、") + "。"));
+  }
   if (candidate.errors.length) {
     parts.push(bh("ul", "bi-err", ...candidate.errors.map((e) => bh("li", "", e.message))));
   }
@@ -17280,14 +17292,18 @@ function biBuildSummary() {
   const s = run.summary || {};
   const accepted = bi.build.candidates.filter((c) => c.review === "accepted");
   const count = (action) => accepted.filter((c) => c.action === action).length;
+  const citing = accepted.filter((c) => c.action === "unchanged"
+    && (c.citations || []).length).length;
   box.append(bh("p", "", "目的地：資料集「" + biDataset() + "」・schema " + run.schema_ref),
     bh("ul", "", bh("li", "", "新建 " + count("create") + " 張"),
       bh("li", "", "更新 " + count("update") + " 張"),
+      ...(citing ? [bh("li", "", "新增出處 " + citing + " 張（內容不變）")] : []),
       bh("li", "", "拒絕或略過 " + ((s.rejected || 0) + (s.skip || 0)) + " 張"),
       bh("li", "", "還沒決定 " + (s.pending || 0) + " 張（不會寫入）")),
     bh("p", "bi-meta", "按「確認匯入」後，所有已接受的候選卡一次寫入；有任何卡片在審核後被改過，"
       + "就一張都不寫，請重新檢查。寫入後可以整批復原。"));
-  el("bi-b-commit-go").disabled = !accepted.some((c) => ["create", "update"].includes(c.action));
+  el("bi-b-commit-go").disabled = !accepted.some((c) => ["create", "update"].includes(c.action)
+    || (c.citations || []).length);
 }
 
 el("bi-b-commit-go").addEventListener("click", async () => {
@@ -17323,6 +17339,7 @@ function biBuildResult() {
     bh("ul", "", bh("li", "", "新建 " + (applied.created || 0)),
       bh("li", "", "更新 " + (applied.updated || 0)),
       bh("li", "", "不變 " + (applied.unchanged || 0)),
+      ...(applied.citations ? [bh("li", "", "新增出處 " + applied.citations)] : []),
       bh("li", "", "成為待審提議 " + (applied.proposals || 0)),
       done.skipped != null ? bh("li", "", "略過 " + done.skipped) : "",
       done.pending != null ? bh("li", "", "未決定、沒有寫入 " + done.pending) : ""),
