@@ -740,6 +740,15 @@ def test_accepting_a_proposal_shows_what_it_loses_and_then_that_it_was_done(
             assert not page.run("document.getElementById('bi-b-props').hidden")
             assert page.run(f"!!{row}.querySelector('.bi-state-accepted')")
 
+            # -- nothing left to decide: the step stays open, and coming back finds the marks ----
+            step = "document.querySelector('#bi-build-steps [data-stage=review]')"
+            assert not page.run(f"{step}.disabled")
+            page.stage("schema")
+            assert not page.run(f"{step}.disabled")
+            page.stage("review")
+            assert page.run(f"!!{row}.querySelector('.bi-state-accepted')")
+            assert page.run(f"!!{last}.querySelector('.bi-state-rejected')")
+
             # -- a failure says so in the row, and nothing looks done ----------------------------
             page.run(
                 "(() => { const real = window.fetch; window.__realFetch = real;"

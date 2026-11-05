@@ -6445,9 +6445,7 @@ The owner's decision: a card's value and its citations must match. Before, accep
 **A card keeps its home.** `card_app_folders` also counts `old_evidence`'s sources: replacing a value does not move a card out of a home.
 
 **Known limits.**
-- A run's commit that replaces a value directly (a rules run, and 改用新值 in review) still adds its evidence beside the old. Not in this decision's scope; the same rule would apply.
 - A push conflict where only the field conflicts, because the other side changed it without touching evidence (a rename's name field, a migration): choosing theirs still pushes my evidence unit.
-- A conflict proposal (`kind: conflict`, from a lost replay) carries no evidence, so accepting it leaves the field with none.
 - Evidence review works on the field's current evidence: a moved row's reviews stay readable in `old_evidence`, and it cannot be reviewed further.
 
 **Rejected.** Keeping both on the field with a mark on the old one: every reader of `evidence` (the card page, the review, the chat) would need to learn the mark, and a miss cites text the card no longer holds. Deriving old evidence from the commit's `evidence:` change: it ties history to which commit touched which unit, where the field's own `history` already travels.
@@ -6469,6 +6467,16 @@ The BI build tab took 14-17 s to show its source table on `market-intel`, and mo
 - **Only for what reads and hands nothing on.** `state_at`, `log` and `sync` still read the files, because a caller may change the values they return, and a kept scan must not be what it changes. Rejected: keeping every scan, with a deep copy per call, which costs about what it saves.
 - **A scan with a bad or half-arrived file is not kept,** since its next read may differ with the stamp unchanged.
 - **One scan per folder stays in memory** in Agent Web, tens of MB on a large repository (estimated, not measured). Accepted.
+
+## 2026-11-05: A run's commit that replaces a value follows the same rule
+
+The owner, through the orchestrator: a rules run, or 改用新值 in review, that replaces a value replaces its citations, and the old go to history with the old value. **Only for a replaced value:** where a value stays and another source adds to it, evidence appends, as for one card reached from two domains. A list that only grows counts as staying (`store._only_adds`).
+
+**Undo.** A replaced value comes back with what it rested on. New here: undoing a run also takes what that run cited on fields it filled or only added to, which it left behind before, except on a field changed since. A row is the run's by `run_id` and the import's time, so an earlier accepted proposal from the same run stays.
+
+**A conflict proposal** now carries the lost value's evidence, from its commit (`vault.materialize`), derived at each rebuild and not a unit.
+
+**Known, not changed.** A candidate whose values are all the same as the card's is `unchanged` and is not written, so a second source that only repeats a value adds no citation. It adds one only when that candidate writes something else too. Whether it should is the owner's to say.
 
 ## 2026-11-05: Each BI domain owns its questions, and each has its own person
 

@@ -4302,4 +4302,6 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 
 - [x] 2026-11-05, Claude Code: BI page: create a domain (`docs/phases/BI_PAGE_SIMPLE.md` §10) with its folders by the one rule, readable names in the combobox, and switching domain redraws at once with no stale rows, held reply tested. `tests/test_bi_create_domain.py`, `tests/test_bi_create_domain_ui.py`.
 - [x] 2026-11-05, Claude Code: BI build tab on a copy of `market-intel`: source table and combobox from 14-17 s to 3-4 s, measured back to back. `Repository.status` and `history` keep their scan of the commit files while those are unchanged, and the page asks for the sources before the reads for other steps. `tests/test_knowledge_repo_scan_kept.py`, `tests/test_bi_build_tab_order_ui.py`.
+
+- [x] 2026-11-05, Claude Code: A run's commit that replaces a value replaces its citations; where a value stays they append; undo gives back what it took (`bi-replaced-evidence`, `docs/DECISIONS.md` 2026-11-05). A conflict proposal brings the lost value's evidence. 審核 stays open and keeps its marks after the last proposal.
 - [x] 2026-11-05, Claude Code: BI page: each domain has its own questions, run and report; untagged questions show apart; 全部領域 is a read-only overview (`docs/phases/BI_PAGE_SIMPLE.md` §11). Each domain's dashboard not yet.
