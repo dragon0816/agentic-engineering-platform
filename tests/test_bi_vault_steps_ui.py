@@ -129,13 +129,13 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
         # -- K1: the analysis AI's Dashboard, applied in one step -----------------------------
         page.wait("!document.getElementById('bi-b-an').hidden")
         page.click("#bi-b-an-new")
-        page.wait("!document.getElementById('bi-b-ana').hidden")
-        page.set_value("bi-b-ana-msg", "幫我排一個 Dashboard")
-        page.click("#bi-b-ana-send")
-        page.see("bi-b-ana-log", "套用 Dashboard")
-        assert page.run("!!document.querySelector('#bi-b-ana-log svg.bi-chart')")  # its preview
+        page.ai_opened("analysis")
+        page.set_value("bi-ai-msg", "幫我排一個 Dashboard")
+        page.click("#bi-ai-send")
+        page.see("bi-ai-log", "套用 Dashboard")
+        assert page.run("!!document.querySelector('#bi-ai-log svg.bi-chart')")  # its preview
         assert "by-type" not in _layout(workspace)["order"]  # nothing before the click
-        page.click_text("#bi-b-ana-log", "套用 Dashboard")
+        page.click_text("#bi-ai-log", "套用 Dashboard")
         page.notice("已套用 Dashboard")
         page.see("bi-b-an-list", "各類型的卡片數")
         page.see("bi-b-ver-pending", "分析")

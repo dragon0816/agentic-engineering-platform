@@ -78,7 +78,8 @@ MAIN_PATH = (
     # Step 2: skills and tools, ingest, the cards.
     "bi-b-sk-list",
     "bi-b-tl-list",
-    "bi-b-ska",
+    "bi-b-sk-new",
+    "bi-ai",
     "bi-b-start",
     "bi-b-cands",
     "bi-b-commit-go",
@@ -109,10 +110,9 @@ ADVANCED = (
     "bi-b-pages",
     "bi-b-profile",
     "bi-b-rerun",
-    "bi-b-sk-new",
     "bi-b-sk-form",
     "bi-b-tl-save",
-    "bi-b-sa",
+    "bi-b-sa-open",
     "bi-b-draft-new",
     "bi-b-versions",
     "bi-b-upgrade",
@@ -122,7 +122,7 @@ ADVANCED = (
     "bi-b-instr",
     "bi-b-trial",
     "bi-b-cmp-go",
-    "bi-b-sb",
+    "bi-b-sb-open",
     "bi-b-an-pack",
     "bi-b-atl",
     "bi-b-bc-list",
@@ -236,3 +236,11 @@ def test_a_read_filter_sits_beside_what_it_filters() -> None:
         assert ("div", "bi-view-dashboard") in PANE.around[ident], ident
     assert ("div", "bi-view-cards") in PANE.around["bi-card-domain"]
     assert '"&domain=" + encodeURIComponent(el("bi-card-domain").value)' in PAGE
+
+
+def test_one_ai_panel_and_none_of_the_five() -> None:
+    assert PAGE.count('class="bi-ai-panel"') == 1
+    for gone in ("bi-b-sa-log", "bi-b-sb-log", "bi-b-ska-log", "bi-b-ana-log", "bi-b-qa-log"):
+        assert gone not in PAGE
+    for word in ("（Session A）", "（Session B）", "和對話同一套 harness"):
+        assert word not in PAGE

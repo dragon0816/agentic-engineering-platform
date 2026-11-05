@@ -1,6 +1,6 @@
 # The BI Knowledge page, redesigned to be simple
 
-Status: S1 done, 2026-11-05; S2–S8 not started. Decision `docs/DECISIONS.md` 2026-11-05. Base `main` 86a7d614, branch `bi-page-simple`.
+Status: S1 and S3 done, 2026-11-05; S2, S4–S8 not started. Decision `docs/DECISIONS.md` 2026-11-05. Base `main` 86a7d614, branch `bi-page-simple`.
 
 **The owner's rule, verbatim:** 「ui請以簡單為主，善用table，menu/comobox」.
 
@@ -123,7 +123,7 @@ Advanced is a `<details>`, closed by default. Anything opened from elsewhere in 
 |---|---|
 | `bi-b-fit` | 進階, until S2's button replaces it; then removed |
 | `bi-b-skills` list, `bi-b-tl-list`, `bi-b-ska` | Main path, part 2 |
-| `bi-b-sk-new`, `bi-b-sk-form` | 進階 until S3 makes adding go through the AI panel |
+| `bi-b-sk-new`, `bi-b-sk-form` | **S3:** `bi-b-sk-new` is on the main path and opens the AI panel: name, folder, and the first sentence, saved as revision 1 (staged) so the session has a rule to talk about. `bi-b-sk-form` stays in 進階, only for a row's direct edit |
 | `bi-b-profile`, `bi-b-rerun`, tool code form | 進階. Tool approval renders in `bi-b-tl-list`, which stays on the main path |
 | `bi-b-sa` (Session A), drafts, `bi-b-versions`, `bi-b-upgrade` | 進階, with schema publish and upgrade reachable there |
 | `bi-b-m-pick` | Main path, part 3 |
@@ -155,7 +155,7 @@ The estimates are agent hours of work plus test runs, unmeasured, from the size 
 |---|---|---|---|
 | S1 | **The restructure.** §3 and §4: one selection, no trap, stepper of three, advanced areas, paragraphs out, ingest button in part 3. No new feature | None | 8–12 h, about half of it tests in 23 files |
 | S2 | **The suggest button.** A run that asks only the fit question over the newly added sources, answered as a table: class, why, how many items. It costs model output (recorded earlier as 40–50% more on an ingest), so it is a press, not automatic. Adopting a suggestion opens Session A with it. Remove `bi-b-fit` | A fit-only route or kind. Must work for a custom method, which today skips it | 6–10 h |
-| S3 | **One AI panel.** One component on the page for the five session kinds: a side panel opened from the row or button it concerns, with one log and one input. Removes the five panels | None expected; sessions are separate by kind already | 8–14 h. **Touches every step** |
+| S3 | **One AI panel. Done.** `#bi-ai` in `kn-pane-bi`: fixed at the right at full height (the page makes room beside it), the lower part on a phone. Opened from the row or button it concerns, with one log and one input; closes on a dataset change. `biAiOpen(spec)`: a kind gives its title, what it is about, what goes to the model, and how to get ready to send. Removes the five panels | None | Done |
 | S4 | **Batch.** Tick several sources; ingest runs them; review across them. Recommended: one run per source, a batch id grouping them, the review table reading all of them, and one apply. Rejected unless it proves needed: one run over many sources, because `_extract` and the source evidence assume one | Batch grouping; apply over several runs | 10–16 h |
 | S5 | **Step 3.** Question table with an editor on the right (save by `set` and `slug`; changing `set` is delete plus save); dashboard embedded; a results view for the commit decision, side by side with the dashboard. Decide then whether the Dashboard tab stays | None for questions; to check for the embedded dashboard | 10–14 h |
 | S6 | **Share.** Commit then push, tag, publish as one step with a confirmation. Stops on `blocked` or `conflicts`, showing why; shows "這次內容沒有跑過測試" from the gate's note. **Does not weaken the gate**: the gate stays in `repo.push`. An untested push stays allowed, with the note (the owner, §7) | A thin route, or none if the page sequences it. The tag name is a proposed date, editable | 4–8 h |
