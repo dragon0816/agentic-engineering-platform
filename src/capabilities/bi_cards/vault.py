@@ -2014,6 +2014,10 @@ def unit_label(units: Mapping[str, Any], key: str) -> str:
         return f"{card()} 的 {field} 證據"
     if kind == "state":
         return f"{card()} 的 {field} 狀態"
+    if key.startswith(analyses.DASHBOARD_UNIT + ":"):
+        return f"「{key[len(analyses.DASHBOARD_UNIT) + 1 :]}」的 Dashboard"
+    if key.startswith(vault_skills.HOME_PREFIX):
+        return f"領域「{key[len(vault_skills.HOME_PREFIX) :]}」"
     if kind == "meta":
         return {"domains": "領域設定", "dashboard": "Dashboard 的順序"}.get(rest, f"設定 {rest}")
     if key == repo_engine.SCHEMA_UNIT:
@@ -2062,6 +2066,10 @@ def unit_homes(
     if kind == "source" and isinstance(value, dict):
         home = homes.home_of(str(value.get("folder") or ""))
         return [home] if home else []
+    if key.startswith(analyses.DASHBOARD_UNIT + ":"):
+        return [key[len(analyses.DASHBOARD_UNIT) + 1 :]]
+    if key.startswith(vault_skills.HOME_PREFIX):
+        return [key[len(vault_skills.HOME_PREFIX) :]]
     if kind in ("skill", "tool"):
         home = rest.rpartition("/")[0]
         return [home] if home and not homes.home_problem(home) else []

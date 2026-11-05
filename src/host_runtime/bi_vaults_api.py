@@ -18,6 +18,7 @@ from typing import Any
 
 from capabilities.bi_cards import (
     analyses,
+    domain_assign,
     homes,
     migrate,
     packs,
@@ -124,7 +125,9 @@ def route(
                 else bi_bench.standing(workspace, parts[0]),
             }
         if len(parts) == 2 and parts[1] == "analyses":
-            return 200, analyses.listing(workspace, parts[0])
+            return 200, analyses.listing(workspace, parts[0], query.get("home"))
+        if len(parts) == 2 and parts[1] == "assign-plan":
+            return 200, domain_assign.plan(workspace, parts[0])
         if len(parts) == 2 and parts[1] == "packs":
             return 200, packs.summary(workspace, parts[0])
         if len(parts) == 2 and parts[1] == "atlas-dashboards":
@@ -203,6 +206,8 @@ def route(
         published = vault.publish(workspace, vault_id, given)
         bi_feed_api.refresh(workspace, vault_id)
         return 200, {"ok": True, **published}
+    if action == "assign":
+        return 200, {"ok": True, **domain_assign.apply(workspace, vault_id, given)}
     if action == "homes":
         return 200, {"ok": True, **vault.create_home(workspace, vault_id, given)}
     if action == "checks":
@@ -238,7 +243,9 @@ def route(
         if "dashboard" in given:
             return 200, {
                 "ok": True,
-                **analyses.set_dashboard(workspace, vault_id, given["dashboard"]),
+                **analyses.set_dashboard(
+                    workspace, vault_id, given["dashboard"], given.get("home")
+                ),
             }
         params = given.get("params") if isinstance(given.get("params"), dict) else {}
         ran = analyses.run_saved(workspace, vault_id, given.get("run"), params)

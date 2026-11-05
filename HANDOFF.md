@@ -17,6 +17,7 @@ Branch `bi-repeat-evidence` off main `16a08e5e`, not pushed. `docs/DECISIONS.md`
 **Next:** merge. The real run's candidates get `citations` only when evaluated again: a run staged earlier shows none until a decision on that candidate re-evaluates it; a reload does not.
 
 ## BI page: create a domain done; ownership slices next (2026-11-05, Claude Code)
+## BI page: each domain's questions done; push check and dashboards next (2026-11-05, Claude Code)
 
 Branch `bi-step1-domain`, not pushed, with main `4558b988` merged in. Design `docs/phases/BI_PAGE_SIMPLE.md` §9, §10. Earlier slices of this work are already on main.
 

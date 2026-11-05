@@ -336,7 +336,10 @@ def test_the_whole_build_flow(
         page.see("bi-ai-log", "套用 Dashboard")
         page.click_text("#bi-ai-log", "套用 Dashboard")
         page.notice("已套用 Dashboard")
-        layout = analyses.dashboard_layout(vault.Vault(workspace, vault_id).repo.working_units())
+        # Applied in a working domain, it is that domain's Dashboard.
+        layout = analyses.dashboard_layout(
+            vault.Vault(workspace, vault_id).repo.working_units(), str(page.run("biScope()"))
+        )
         assert layout["order"] == ["by-type"]
 
         # -- step 3: the bench run, working vs published --------------------------------------

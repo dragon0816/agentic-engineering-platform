@@ -365,3 +365,22 @@ One row at the very top of the BI page, on every tab: 知識庫 with 新增知�
 
 - **Dashboard:** the working domain decides. A working domain with a card domain hides the Dashboard's own 領域, since there is nothing to choose. Under 全部領域, or a library entry, which has no card domain, it stays.
 - **卡片:** the filter starts on the working domain's card domain and stays the person's to change, since a card can hold several domains and looking across them is what this tab is for. The next choice of working domain sets it again; 全部領域 sets it to every domain.
+## 12. Each domain has its own Dashboard
+
+Status: built on `bi-step1-domain`, 2026-11-05. **The owner, verbatim:** 「每個領域也要有各自的benchmark 問題和dashboard」.
+
+**One unit per Dashboard.** `meta:dashboard` stays what it is: the vault's Dashboard, shown under 全部領域 and read by the feed and Atlas. A home's is a new unit, `meta:dashboard:<home>`, in the same shape `{"order", "hidden"}`. So nothing an old commit, a published snapshot or the feed reads changes, the feed goldens need no change, and a colleague gets a domain's Dashboard through sync like any unit. Two people working on different domains never meet on this unit.
+
+**An analysis is shared; each Dashboard chooses.** An analysis stays one `analysis:<slug>` unit, so a fix reaches every Dashboard using it. Rejected: a copy per domain, which would drift. A domain's panels ask with its domain, so an analysis that takes `domain` gives that domain's numbers.
+
+**Truthful panels.** `analyses.uses_domain`: it declares `domain` and its code uses it. Passing it to a function that never looks at it does not count: `pending-links` and `same-names` take `d` and ignore it, so they show the same rows in every domain. Anything else shows the whole vault whichever domain asks, so in a domain it carries 全庫資料, in the list and on the panel's title. A person may still choose one.
+
+**A new domain starts empty,** unlike the vault's Dashboard, which also shows every analysis not hidden: only what a domain chose is on it. It says what to press: 和 AI 做新分析, or 加到這個領域 on an analysis listed apart. A new analysis made in a domain goes on its Dashboard.
+
+**Data quality** looks at the whole vault, so its section stays on the vault's Dashboard.
+
+**全部領域** shows the vault's Dashboard, as today. Its order and hidden state can still be changed there, because that is what the feed and Atlas read and it has no other place; it adds nothing new. A home with no card domain (`library/*`) passes the Dashboard's current domain to a panel that takes one: known, and left until someone uses one that way.
+
+**Published.** A snapshot holds `meta:dashboard:<home>` as rows of `meta`, and a published version still reads. **Readers and the Agent see no per-domain Dashboard after publish:** the feed and Atlas show the vault's Dashboard, and `bi__query` is unchanged. A per-domain feed is a contract change, not made here.
+
+**Assigning what exists: a dry run, then one step.** `GET .../assign-plan` writes nothing. For each question: a suggested domain and its basis, from the name its text starts with or names, else none. For each analysis: `shared` when it filters by domain, one home when its title names one and it does not filter, else whole-vault. `POST .../assign` applies an approved list: a question gets its `home`, and an analysis goes last on each home's Dashboard chosen. A whole-vault panel stays on the vault's Dashboard. It stages changes only; commit and push remain the person's.

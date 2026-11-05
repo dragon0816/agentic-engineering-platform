@@ -4322,3 +4322,7 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 
 - [x] 2026-11-05, Claude Code (worker D): `POST /api/bi/cards/<id>/unmark` clears a sample mark, in units, with a reason in history; `FICTIONAL` no longer matches 「待查證」 or 「待…驗證」. `MODEL_VERSION` 11. Branch `bi-unmark`; clearing the 7 on the real vault follows the merge.
 - [x] 2026-11-05, Claude Code (worker D): The 7 real cards cleared on `market-intel` on the owner's word, pushed, not published: 92 samples of 760, run `e3de934115f0` unchanged.
+
+- [x] 2026-11-05, Claude Code: BI page: each domain has its own questions, run and report; untagged questions show apart; 全部領域 is a read-only overview (`docs/phases/BI_PAGE_SIMPLE.md` §11). Each domain's dashboard not yet.
+- [x] 2026-11-05, Claude Code: BI page: each domain's own Dashboard (`meta:dashboard:<home>`, `docs/phases/BI_PAGE_SIMPLE.md` §12), and a dry-run list with a one-step apply for assigning existing questions and analyses (`domain_assign.py`). `tests/test_bi_domain_dashboard.py`, `tests/test_bi_domain_dashboard_ui.py`.
+- [x] 2026-11-05, Claude Code: BI page: a read from before a save could close the question being edited, so that saving next made a second question (seen as an intermittent `test_bi_step3_ui` failure). A read overtaken by a save is read again; the test fails without the fix.

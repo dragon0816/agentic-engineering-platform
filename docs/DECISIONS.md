@@ -6546,3 +6546,15 @@ The owner: 「第一件事情是選擇vault，或者是新增一個vault，接�
 ## 2026-11-05: A sample mark can be cleared, and 「待查證」 no longer sets one
 
 Seven real cards, such as `WiFi-7`, were marked as samples only because a field said 「(待查證)」, which says a value needs checking, not that a card is made up; 29 real cards link to marked cards. The owner confirmed the seven are real. A mark was one way until now. `POST /api/bi/cards/<id>/unmark` clears it with a reason, kept on the `card:` unit as `mark_cleared` and in a small table, since history is otherwise derived from `field:` units and a card's mark is not one. Rejected: a pseudo field for the mark, which schema and pages would have to hide, and clearing through an import, where a row saying nothing cannot mean "real". A `SAMPLE-` name cannot be cleared this way: it would stay left out by name while claiming to be real, so such a card is renamed first. The rule for the default pack is unchanged and follows later.
+
+
+## 2026-11-05: Each BI domain has its own Dashboard, on the analyses they share
+
+The owner: 「每個領域也要有各自的benchmark 問題和dashboard」. Design: `docs/phases/BI_PAGE_SIMPLE.md` §12.
+
+- **A home's Dashboard is its own unit, `meta:dashboard:<home>`; `meta:dashboard` stays the vault's.** Old commits, published snapshots, the feed and Atlas read what they read, and the feed goldens need no change. Rejected: nesting homes inside `meta:dashboard`, where two domains' people would conflict on one unit and the feed's reader would have to change.
+- **An analysis is shared and a Dashboard chooses,** since an analysis that takes `domain` already gives each its own numbers. Rejected: a copy per domain, which would drift.
+- **A domain's starts empty.** The vault's still shows everything not hidden.
+- **A panel that does not read `domain` is labelled 全庫資料.** Declaring the parameter is not enough: the code must read it.
+- **Published readers see no per-domain Dashboard:** the feed stays the vault's. Rejected for now: a per-domain feed, which is a contract change for Atlas.
+- **Assigning what exists is a dry run, then one step on an approved list.** Nothing is written until a person approves, and it stages changes for their commit.

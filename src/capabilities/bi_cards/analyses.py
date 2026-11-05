@@ -42,9 +42,13 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from capabilities.bi_cards import homes
 from capabilities.bi_cards.store import BiStoreError
 
 PREFIX = "analysis:"
+_PRELUDE_DOMAIN = 'D = str(PARAMS.get("domain") or "robotics")'
+_CALLS_WITH_DOMAIN = re.compile(r"^result = .*?\b(\w+)\(cards\(\), D\b", re.M)
+_READS_DOMAIN = re.compile(":domain\\b|PARAMS(?:\\.get\\(|\\[)\\s*[\"']domain[\"']|\\bD\\b")
 DASHBOARD_UNIT = "meta:dashboard"
 NAME_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,59}$")
 KINDS = ("sql", "python")
@@ -622,9 +626,38 @@ def _db(workspace: Path, vault_id: str) -> Path:
     return vault.Vault(workspace, vault_id).db_path
 
 
-def dashboard_layout(units: Mapping[str, Any]) -> dict[str, list[str]]:
-    """`meta:dashboard` = `{"order": [slug], "hidden": [slug]}` (JSON text)."""
-    raw = units.get(DASHBOARD_UNIT)
+def dashboard_unit(home: str | None = None) -> str:
+    """The vault's own Dashboard, which the feed and Atlas read, or a home's
+    (`docs/phases/BI_PAGE_SIMPLE.md` §12)."""
+    return f"{DASHBOARD_UNIT}:{home}" if home else DASHBOARD_UNIT
+
+
+def uses_domain(item: Mapping[str, Any]) -> bool:
+    """Whether an analysis narrows to a domain: it declares the parameter and its code reads
+    it. Otherwise it shows the whole vault, whichever domain asks. A built-in analysis reads it
+    as `D`, set in the helpers put before its code, so that line alone does not count."""
+    if "domain" not in (item.get("params") or {}):
+        return False
+    code = str(item.get("code") or "").replace(_PRELUDE_DOMAIN, "")
+    return _READS_DOMAIN.search(code) is not None and not _passes_domain_unused(code)
+
+
+def _passes_domain_unused(code: str) -> bool:
+    """A built-in analysis calls its function with `D`: `result = out(f(cards(), D))`. Two of
+    them take it as `d` and never look at it, so they show the whole vault in every domain."""
+    call = _CALLS_WITH_DOMAIN.search(code)
+    if call is None:
+        return False
+    start = re.search(rf"^def {call.group(1)}\(", code, re.M)
+    if start is None:
+        return False
+    signature_end = code.find(":\n", code.find(") ->", start.end()))
+    return re.search(r"\bd\b", code[signature_end : call.start()]) is None
+
+
+def dashboard_layout(units: Mapping[str, Any], home: str | None = None) -> dict[str, list[str]]:
+    """A Dashboard's unit = `{"order": [slug], "hidden": [slug]}` (JSON text)."""
+    raw = units.get(dashboard_unit(home))
     try:
         value = json.loads(raw) if isinstance(raw, str) else {}
     except ValueError:
@@ -637,18 +670,31 @@ def dashboard_layout(units: Mapping[str, Any]) -> dict[str, list[str]]:
     }
 
 
-def order(units: Mapping[str, Any], slugs: list[str]) -> list[str]:
-    """The Dashboard's order: the vault's order, then the rest by slug; hidden left out."""
-    layout = dashboard_layout(units)
+def order(units: Mapping[str, Any], slugs: list[str], home: str | None = None) -> list[str]:
+    """A Dashboard's order. The vault's: its order, then the rest by slug. A home's: only what
+    it chose, so a new domain starts empty and nothing is borrowed. Hidden left out."""
+    layout = dashboard_layout(units, home)
     hidden = set(layout["hidden"])
     listed = [s for s in dict.fromkeys(layout["order"]) if s in slugs and s not in hidden]
+    if home:
+        return listed
     return listed + sorted(s for s in slugs if s not in hidden and s not in listed)
 
 
-def listing(workspace: Path, vault_id: str) -> dict[str, Any]:
+def _checked_home(home: Any) -> str | None:
+    if not home:
+        return None
+    if homes.home_problem(home):
+        raise BiStoreError("home_invalid", "領域必須是應用資料夾或 library 的項目")
+    return str(home)
+
+
+def listing(workspace: Path, vault_id: str, home: Any = None) -> dict[str, Any]:
     """The working copy's analyses, each with its parameter `inputs` (enum
-    values resolved), whether the schema `offered` it and what it is `missing`;
-    `order` is the Dashboard's (offered, not hidden) and `dashboard` the stored layout."""
+    values resolved), whether the schema `offered` it, what it is `missing` and whether it
+    `filters_domain`; `order` is the Dashboard's (offered, not hidden) and `dashboard` the
+    stored layout, the vault's or `home`'s."""
+    home = _checked_home(home)
     from capabilities.bi_cards import vault
 
     units = vault.Vault(workspace, vault_id).repo.working_units()
@@ -661,16 +707,40 @@ def listing(workspace: Path, vault_id: str) -> dict[str, Any]:
                 "inputs": described_params(item.get("params"), registry),
                 "offered": requires_met(item.get("requires"), registry),
                 "missing": requires_missing(item.get("requires"), registry),
+                "filters_domain": uses_domain(item),
             }
         )
     offered = [a["slug"] for a in found if a["offered"]]
-    return {"analyses": found, "order": order(units, offered), "dashboard": dashboard_layout(units)}
+    return {
+        "analyses": found,
+        "order": order(units, offered, home),
+        "dashboard": dashboard_layout(units, home),
+        "home": home,
+    }
 
 
-def set_dashboard(workspace: Path, vault_id: str, given: Any) -> dict[str, Any]:
-    """Stage the Dashboard's order and hidden analyses (`meta:dashboard`)."""
+def add_to_home(workspace: Path, vault_id: str, slug: str, home: Any) -> dict[str, Any]:
+    """Put an analysis on a home's Dashboard, last, shown."""
     from capabilities.bi_cards import vault
 
+    home = _checked_home(home)
+    layout = dashboard_layout(vault.Vault(workspace, vault_id).repo.working_units(), home)
+    return set_dashboard(
+        workspace,
+        vault_id,
+        {
+            "order": [*[s for s in layout["order"] if s != slug], slug],
+            "hidden": [s for s in layout["hidden"] if s != slug],
+        },
+        home,
+    )
+
+
+def set_dashboard(workspace: Path, vault_id: str, given: Any, home: Any = None) -> dict[str, Any]:
+    """Stage a Dashboard's order and hidden analyses: `meta:dashboard`, or a home's."""
+    from capabilities.bi_cards import vault
+
+    home = _checked_home(home)
     if not isinstance(given, dict):
         raise BiStoreError("dashboard_invalid", "dashboard 必須是 {order, hidden}")
     layout = {}
@@ -683,8 +753,8 @@ def set_dashboard(workspace: Path, vault_id: str, given: Any) -> dict[str, Any]:
         layout[key] = list(dict.fromkeys(slugs))
     target = vault._vault(workspace, vault_id)
     with target.lock, vault._repo_errors():
-        target.repo.stage(DASHBOARD_UNIT, json.dumps(layout, ensure_ascii=False))
-    return listing(workspace, vault_id)
+        target.repo.stage(dashboard_unit(home), json.dumps(layout, ensure_ascii=False))
+    return listing(workspace, vault_id, home)
 
 
 def _registry(workspace: Path, vault_id: str) -> Any | None:

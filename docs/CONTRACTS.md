@@ -5963,6 +5963,14 @@ skill AI: owner decisions". Code `capabilities/bi_cards/vault_checks.py`, `host_
   `home_reserved`, `home_exists` (a name, folder, case variant or schema alias of a home). Push and sync make the
   folders in the shared folder from the unit; no file marks them. The domain widens the vault's schema when read
   (`catalog.with_home_domains`); the schema file does not change.
+- **A domain's Dashboard** (`docs/phases/BI_PAGE_SIMPLE.md` §12): `meta:dashboard:<home>` = JSON text `{"order", "hidden"}`, as
+  `meta:dashboard`, which stays the vault's and the only one the feed reads. `GET .../analyses?home=` answers for that home,
+  whose `order` holds only what it chose, and every analysis gains `filters_domain`. `POST .../analyses` `{"dashboard", "home"?}`.
+  `GET /api/bi/dashboard?home=` draws it: no data-quality section, and a panel that does not read `domain` has `whole_vault: true`
+  and 「（全庫資料）」 on its title. `apply` on an `analysis` session takes optional `"home"`.
+- **Assigning what exists:** `GET .../assign-plan` writes nothing → `{"homes", "questions": [{"unit", "question", "home", "suggested",
+  "basis"}], "analyses": [{"slug", "title", "on_vault_dashboard", "filters_domain", "suggested": [home], "kind": shared|one_domain|whole_vault,
+  "basis"}]}`. `POST .../assign` `{"questions": {unit: home}, "analyses": {slug: [home]}}` stages the list, checked first (`assign_invalid` 400).
 - **Working domain** (`docs/phases/BI_PAGE_SIMPLE.md` §9): `GET /api/bi/vaults/<id>/skills` adds `"default_types"` and `"homes":
   [{"home", "label", "folder", "domain": str|null}]`, built from units only: the vault's lists, created homes and homes
   holding a source. An empty folder makes no home. `GET .../pending` adds `"homes": [home]` to each uncommitted

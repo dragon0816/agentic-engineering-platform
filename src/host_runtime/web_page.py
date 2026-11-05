@@ -12503,6 +12503,7 @@ async function biLoadDashboard() {
   try {
     reply = await biCall("/api/bi/dashboard?dataset=" + encodeURIComponent(biDataset())
       + "&domain=" + encodeURIComponent(biDomain())
+      + (biScope() ? "&home=" + encodeURIComponent(biScope()) : "")
       + (el("bi-sample").checked ? "&include_sample=1" : "") + extra);
   } catch (failure) {
     if (seq !== bi.dashSeq) return;
@@ -12594,6 +12595,11 @@ function biRenderDashboard(reply) {
         + "「卡片」瀏覽並提更正單，也可以在「建立與匯入」加入資料。"),
       bh("div", "bi-actions", biButton("看卡片", () => biJump("cards"), "go"),
         biButton("建立與匯入", () => biJump("build"), "bi-btn"))));
+    return;
+  }
+  if (!sections.length && reply.home) {
+    holder.append(bh("p", "bi-empty", "這個領域的 Dashboard 還是空的："
+      + "按「和 AI 做新分析」，或從「Dashboard」區塊把現有的分析加進來。"));
     return;
   }
   if (!sections.length) {
@@ -13972,10 +13978,13 @@ function biBenchReport(report, standing) {
 async function biBench(vaultId) {
   // The newest read wins: an older reply arriving late must not cancel the polling of a run.
   const seq = bi.benchSeq = (bi.benchSeq || 0) + 1;
-  const asked = biScope();
+  const asked = biScope(), writes = bi.benchWrites || 0;
   const reply = await call("/api/bi/vaults/" + vaultId + "/checks"
     + (asked ? "?home=" + encodeURIComponent(asked) : ""));
   if (seq !== bi.benchSeq || vaultId !== bi.verVault) return;
+  // Read before a save landed, it would take the saved question away, and clear the editor if
+  // that is the one open: what the person saved next would then become a new question.
+  if (writes !== (bi.benchWrites || 0)) { await biBench(vaultId); return; }
   reply.home = asked;
   bi.benchReply = {vaultId, reply};
   biBenchDraw(reply);
@@ -14082,6 +14091,7 @@ function biBqHomes() {
 
 async function biBenchSave(body) {
   const reply = await biCall("/api/bi/vaults/" + bi.verVault + "/checks", body);
+  bi.benchWrites = (bi.benchWrites || 0) + 1;
   biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
   biNotice(true, body.delete ? "已刪除（commit 並 push 後大家才會少這個測試）。"
     : body.slug ? "已存（commit 並 push 後大家才會用到）。"
@@ -14357,17 +14367,21 @@ async function biRunInto(vaultId, item, state, out) {
 }
 
 async function biSaveDashboard(vaultId, layout) {
-  await biCall("/api/bi/vaults/" + vaultId + "/analyses", {dashboard: layout});
+  await biCall("/api/bi/vaults/" + vaultId + "/analyses",
+    {dashboard: layout, home: biScope()});
   biVaultState(await call("/api/bi/vaults/" + vaultId + "/status"));
   await biAnalyses(vaultId);
   biNotice(true, "已改 Dashboard 的順序（commit 並 push 後大家才會看到）。");
 }
 
 async function biAnalyses(vaultId) {
-  const reply = await call("/api/bi/vaults/" + vaultId + "/analyses");
-  if (vaultId !== bi.verVault) return;
+  // The newest read wins: a reply for the domain left must not draw over this one's.
+  const seq = bi.anSeq = (bi.anSeq || 0) + 1, scope = biScope();
+  const reply = await call("/api/bi/vaults/" + vaultId + "/analyses"
+    + (scope ? "?home=" + encodeURIComponent(scope) : ""));
+  if (vaultId !== bi.verVault || seq !== bi.anSeq) return;
   // What the Dashboard shows may have changed: drawn again when opened, or now in step 3.
-  const seen = JSON.stringify([reply.order, reply.dashboard,
+  const seen = JSON.stringify([reply.home, reply.order, reply.dashboard,
     reply.analyses.map((a) => [a.slug, a.digest])]);
   if (seen !== bi.anSeen) {
     bi.anSeen = seen;
@@ -14387,8 +14401,11 @@ async function biAnalyses(vaultId) {
     [order[at], order[at + step]] = [order[at + step], order[at]];
     return biSaveDashboard(vaultId, {order, hidden: [...hidden]});
   };
-  el("bi-b-an-state").textContent = reply.analyses.length + " 個分析・Dashboard 顯示 "
-    + items.filter((a) => a.offered && !hidden.has(a.slug)).length + " 個";
+  // A domain's Dashboard is what it chose; the vault's is every analysis not hidden.
+  const onIt = (a) => a.offered && !hidden.has(a.slug) && (!scope || reply.order.includes(a.slug));
+  el("bi-b-an-state").textContent = scope
+    ? items.filter(onIt).length + " 個分析"
+    : reply.analyses.length + " 個分析・Dashboard 顯示 " + items.filter(onIt).length + " 個";
   const heads = ["分析", "類型", "Dashboard", "動作"];
   const onBoard = biListTable(heads), offBoard = biListTable(heads);
   let off = 0;
@@ -14396,17 +14413,23 @@ async function biAnalyses(vaultId) {
     const state = biAnState(vaultId, item.slug), out = biAnOut("list", item, state);
     const where = !item.offered
       ? "schema 沒有它需要的 " + (item.missing || []).join("、") + "，Dashboard 不顯示"
-      : hidden.has(item.slug) ? "Dashboard 不顯示" : "Dashboard 第 " + (rank(item) + 1) + " 個";
-    const shown = hidden.has(item.slug)
+      : !onIt(item) ? "Dashboard 不顯示" : "Dashboard 第 " + (rank(item) + 1) + " 個";
+    const shown = scope && !onIt(item)
+      ? biButton("加到這個領域", () => biSaveDashboard(vaultId,
+        {order: [...reply.order, item.slug], hidden: [...hidden].filter((s) => s !== item.slug)}),
+      "bi-btn", "把分析 " + item.title + " 加到這個領域的 Dashboard")
+      : hidden.has(item.slug)
       ? biButton("在 Dashboard 顯示", () => biSaveDashboard(vaultId, {order: reply.order,
         hidden: [...hidden].filter((s) => s !== item.slug)}), "bi-btn",
         "在 Dashboard 顯示分析 " + item.title)
       : biButton("在 Dashboard 隱藏", () => biSaveDashboard(vaultId, {order: reply.order,
         hidden: [...hidden, item.slug]}), "bi-btn", "在 Dashboard 隱藏分析 " + item.title);
-    const shownOn = item.offered && !hidden.has(item.slug);
+    const shownOn = onIt(item);
     if (!shownOn) off += 1;
     const table = shownOn ? onBoard : offBoard;
     const title = [bh("strong", "", item.title)];
+    // It would show the same numbers in any domain, and must not pass for this one's.
+    if (scope && !item.filters_domain) title.push(" ", biBadge("全庫資料", "dim"));
     if (item.question) title.push(bh("div", "bi-meta", item.question));
     const row = biRow(table, [title, (item.kind === "sql" ? "SQL" : "Python") + "・"
       + item.chart.type, where, ""]);
@@ -14436,8 +14459,13 @@ async function biAnalyses(vaultId) {
         }, "bi-btn", "刪除分析 " + item.title)));
   }
   if (off < items.length) box.append(onBoard.box);
+  else if (scope) {
+    box.append(bh("p", "bi-meta",
+      "這個領域的 Dashboard 還是空的：按「和 AI 做新分析」，或從下面加入。"));
+  }
   if (off) {
-    box.append(bh("details", "bi-manage", bh("summary", "", "不在 Dashboard 的分析（" + off + "）"),
+    box.append(bh("details", "bi-manage", bh("summary", "", (scope
+      ? "還沒放進這個領域的分析（" : "不在 Dashboard 的分析（") + off + "）"),
       offBoard.box));
   }
 }
@@ -14488,7 +14516,7 @@ function biAnalysisSuggestion(session, turn, index) {
   } else {
     parts.push(bh("div", "bi-actions", biButton(edit ? "套用修改" : "存成分析", async () => {
       const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
-        {dataset: bi.ai.dataset, turn: index});
+        {dataset: bi.ai.dataset, turn: index, home: bi.ai.scope});
       biAiShow(reply.session);
       biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
       biNotice(true, (edit ? "已套用修改「" : "已存成分析「") + s.analysis.title
@@ -14523,7 +14551,7 @@ function biDashboardSuggestion(session, turn, index) {
   }
   parts.push(bh("div", "bi-actions", biButton("套用 Dashboard", async () => {
     const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
-      {dataset: bi.ai.dataset, turn: index});
+      {dataset: bi.ai.dataset, turn: index, home: bi.ai.scope});
     biAiShow(reply.session);
     biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
     biNotice(true, "已套用 Dashboard：" + d.analyses.length + " 個分析與順序；"
@@ -15668,6 +15696,11 @@ el("bi-b-home-form").addEventListener("submit", async (event) => {
 function biScopeChanged() {
   try { localStorage.setItem(biScopeKey(), el("bi-b-src-folder").value); } catch (e) { /* */ }
   biAiClose(); biBqPick(null); biOverviewApply();
+  // Another domain's panels: nothing of the one left stays in sight while they load.
+  if (bi.loaded) bi.loaded.dashboard = false;
+  bi.anSeen = null;
+  el("bi-b-an-list").replaceChildren(bh("p", "bi-meta", "載入中…"));
+  el("bi-b-an-state").textContent = "";
   const picked = (bi.build.sources || []).find((s) => s.id === bi.build.sourceId);
   if (picked && !biSourceInScope(picked)) {
     bi.build.sourceId = null; el("bi-b-next1").disabled = true;
