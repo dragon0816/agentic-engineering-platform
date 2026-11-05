@@ -333,4 +333,4 @@ Nothing marks the folders, so nothing can be taken for a source, skill or tool. 
 
 **Switching** redraws skills, tools and questions at once from what is loaded. Every reply is drawn for the domain chosen by then, so a late reply cannot bring old rows back; tested with a held reply. The Dashboard still follows after its read, and §9's rows for it change with per-domain dashboards.
 
-Measured on a copy of `market-intel`: creating a domain takes about 12 s, nearly all of it rebuilding the local database for 760 cards.
+Measured on a copy of `market-intel`: creating a domain took 5 to 12 s; the step that can take that long is rebuilding the local database for 760 cards, which was not timed apart.

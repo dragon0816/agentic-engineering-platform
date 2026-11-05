@@ -1,5 +1,20 @@
 # Handoff
 
+## BI page: create a domain done; ownership slices next (2026-11-05, Claude Code)
+
+Branch `bi-step1-domain`, not pushed, with main `4558b988` merged in. Design `docs/phases/BI_PAGE_SIMPLE.md` §9, §10. Earlier slices of this work are already on main.
+
+**Verified, on fictional data unless marked:** browser and backend files listed in `docs/TASKS.md`, one at a time; a copy of `market-intel` with no model (§9.6, §10). **Not run:** the full suite, a real model.
+
+**Not built, agreed order with the orchestrator:**
+3. Questions owned by a domain, 全庫 shown apart, 全部領域 read-only, a report per domain.
+4. Push check by the domains a change touches; per-domain digest; the owner's rule for a card two domains reach, findings only (「關於同一張卡，概述應該不會變，證具, raw data連結就append上去，時間也是取合集」); what still interferes.
+5. A dashboard per domain, with a dry-run list assigning `market-intel`'s 12 questions and 36 analyses. Stop and ask before changing `meta:dashboard` in a way the 17 feed goldens cannot hold.
+
+**Known and not fixed:** a new domain's step 3 still lists the whole vault's analyses until slice 5. The commit list prints raw JSON for sources and skills. The build tab takes 23-43 s to open on `market-intel`.
+
+**Next:** slice 3. Nothing is written to the real vault; the copy driver is git-ignored, `.scratch/real_check.py`, and it removes its copy.
+
 ## BI page: working domain, Markdown preview, file row (2026-11-05, Claude Code) — built, not merged
 
 Branch `bi-step1-domain`, with main `c0bb678d` merged in, not pushed. Design `docs/phases/BI_PAGE_SIMPLE.md` §9; decision `docs/DECISIONS.md` 2026-11-05; contract `docs/CONTRACTS.md`, BI benchmark section.
