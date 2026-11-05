@@ -12,7 +12,7 @@
 
 ## Review table (2026-11-05, Claude Code) — built with `bi-ai-panel` merged in, not merged to main
 
-Branch `bi-review-table`, with main `f39699ec` and `bi-ai-panel` merged in, not pushed. Design and measurements `docs/phases/BI_PAGE_SIMPLE.md` §8; the two intermittent failures found and fixed: `docs/TASKS.md`, last row.
+Branch `bi-review-table`, with main `c0bb678d` merged in, not pushed. Design and measurements `docs/phases/BI_PAGE_SIMPLE.md` §8; the two intermittent failures found and fixed: `docs/TASKS.md`, last row.
 
 **Not checked:** the real run on `market-intel`; only fictional data was used. Reading the real vault's database directly was refused by the session's permission check, and the brief allows it only through a copy. **Open:** `test_bi_cards_ui` failed once with `navigation_failed` under heavy load, then passed 4 of 4 alone; cause not proved.
 
