@@ -4329,3 +4329,5 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [x] 2026-11-06, Claude Code: BI push check by the domains a change touches, per-domain test validity, and 定案 (`docs/phases/BI_PAGE_SIMPLE.md` §14, `domain_reach.py`). `tests/test_bi_domain_gate.py`, `tests/test_bi_finalize_ui.py`.
 - [ ] BI: the owner's rule for a card two domains reach (merge rule at push: summary first-wins, evidence and source append, time). Findings in `docs/phases/BI_PAGE_SIMPLE.md` §14; awaits the orchestrator.
 - [ ] BI: each domain's person owns a name dictionary, after the Dashboard slice (owner).
+
+- [x] 2026-11-06, Claude Code (worker D): `market-intel` sample marks settled on the owner's word, pushed, not published: 3 TestSolutions marked again, 4 Technologies stay cleared, 95 samples of 760. Only those marks moved; run `e3de934115f0` unchanged. `docs/phases/BI_SUMMARY_FILL.md`.
