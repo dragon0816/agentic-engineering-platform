@@ -12,9 +12,10 @@ workspace, which is under the Windows user's own profile:
 - `aep-host shortcut` puts an "AEP Agent" shortcut on the desktop and in the
   Start menu that runs `open` without a console window.
 
-Starting takes 10-30 seconds, and a click that shows nothing for that long
-looks broken (owner 2026-10-16). So when `open` has to start the server it
-first opens a static page from the workspace, `agent-web-starting.html`
+Starting takes from 10 seconds to a few minutes right after a reboot, and a click
+that shows nothing for that long looks broken (owner 2026-10-16). So when `open`
+has to start the server it first opens a static page from the workspace,
+`agent-web-starting.html`
 (no server behind it): a spinner and the elapsed time. The page loads
 `agent-web-starting.js`, which this launcher rewrites as the start goes
 (`starting`, `ready`, `failed`, `opened`), every second with a `<script>`
@@ -23,10 +24,15 @@ carries the address, the same one `agent-web.json` already holds and the
 browser was given before; the page then goes there. After `HANDOFF_SECONDS`
 the launcher rewrites the status without it, so the address is left in no
 other file. The page itself never holds the address.
+
+A second click while a start is under way joins it instead of starting another server
+(`agent-web-start.json` holds the process being waited for): two servers starting together
+meet on the state file and the port, and on 2026-11-05 one of them exited over it.
 """
 
 from __future__ import annotations
 
+import ctypes
 import json
 import os
 import subprocess
@@ -45,13 +51,20 @@ from host_runtime.workspace import write_atomically
 
 ADDRESS_FILE = "agent-web.json"
 DEFAULT_PORT = 53583
-START_WAIT_SECONDS = 180.0
+#: A loaded PC just after a reboot was seen 155 s into a start (2026-11-05), and the start
+#: itself may wait 30 s for the state file (`host.STATE_BUSY_WAIT_SECONDS`).
+START_WAIT_SECONDS = 300.0
 STARTING_PAGE = "agent-web-starting.html"
 STARTING_STATUS = "agent-web-starting.js"
+START_RECORD = "agent-web-start.json"
 #: How long the status keeps the address for the starting page to pick up.
 HANDOFF_SECONDS = 15.0
 #: After this long the starting page says it is taking too long, and where the log is.
 SLOW_START_SECONDS = 120
+#: Where `start_server` leaves its error log on the process it returns.
+ERR_LOG_ATTRIBUTE = "aep_err_log"
+#: How `cli.not_ready_message` begins.
+NOT_READY_PREFIX = "this host is not ready:"
 StartState = Literal["starting", "ready", "failed", "opened"]
 # Environment the server needs that may have been set after this logon.
 REFRESHED_PREFIXES = ("AEP_", "LITELLM_", "ARTIFACTORY_", "OPS_")
@@ -139,7 +152,8 @@ code { font-family: Consolas, ui-monospace, monospace; word-break: break-all; }
   <div id="spinner" role="progressbar" aria-label="Starting"></div>
   <h1 id="title">AEP Agent is starting…</h1>
   <p lang="zh-TW">AEP Agent 啟動中，請稍候</p>
-  <p id="note">This usually takes 10–30 seconds. Agent Web opens here by itself.</p>
+  <p id="note">This usually takes under a minute, and can take a few minutes right after the
+    computer restarts. Agent Web opens here by itself.</p>
   <p>Elapsed <span id="elapsed">0:00</span></p>
   <div id="slow" class="box" role="status">
     <strong>This is taking longer than usual.</strong>
@@ -148,7 +162,9 @@ code { font-family: Consolas, ui-monospace, monospace; word-break: break-all; }
   </div>
   <div id="failed" class="box" role="alert">
     <strong>AEP Agent did not start.</strong> <span id="reason"></span>
-    See the newest <code>agent-web-*.err.log</code> in <code class="logs"></code>.
+    Click the AEP Agent shortcut to try again; a second try may work.
+    If it does not, send the newest <code>agent-web-*.err.log</code> in
+    <code class="logs"></code> to whoever supports AEP.
   </div>
 </main>
 <script>
@@ -349,6 +365,57 @@ def console_python(executable: str = sys.executable) -> str:
     return executable
 
 
+def process_alive(pid: int) -> bool:
+    """Whether a process runs. Never `os.kill` on Windows, where signal 0 is a Ctrl+C."""
+    if sys.platform != "win32":
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            return False
+        except OSError:
+            return True
+        return True
+    from ctypes import wintypes
+
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.OpenProcess.restype = wintypes.HANDLE
+    kernel32.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
+    kernel32.GetExitCodeProcess.argtypes = (wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD))
+    kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
+    query_limited_information, still_active = 0x1000, 259
+    handle = kernel32.OpenProcess(query_limited_information, False, pid)
+    if not handle:
+        return False
+    try:
+        code = wintypes.DWORD()
+        return bool(kernel32.GetExitCodeProcess(handle, ctypes.byref(code))) and (
+            code.value == still_active
+        )
+    finally:
+        kernel32.CloseHandle(handle)
+
+
+def start_underway(workspace_root: Path, wait_seconds: float) -> dict[str, int] | None:
+    """The start another `open` is waiting for: recent, and its process still runs."""
+    try:
+        found = json.loads((workspace_root / START_RECORD).read_text(encoding="utf-8"))
+        pid, started_ms = int(found["pid"]), int(found["started_ms"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+    age = time.time() - started_ms / 1000
+    if not 0 <= age < wait_seconds or not process_alive(pid):
+        return None
+    return {"pid": pid, "started_ms": started_ms}
+
+
+def _start_failed_already(workspace_root: Path) -> bool:
+    try:
+        text = (workspace_root / STARTING_STATUS).read_text(encoding="utf-8")
+    except OSError:
+        return False
+    return '"state": "failed"' in text
+
+
 def start_server(
     config_path: Path, port: int, logs: Path, schedules: bool = True
 ) -> subprocess.Popen[bytes]:
@@ -374,11 +441,12 @@ def start_server(
             | subprocess.DETACHED_PROCESS
             | subprocess.CREATE_NO_WINDOW
         )
+    err_log = logs / f"agent-web-{stamp}.err.log"
     with (
         (logs / f"agent-web-{stamp}.out.log").open("wb") as out,
-        (logs / f"agent-web-{stamp}.err.log").open("wb") as err,
+        err_log.open("wb") as err,
     ):
-        return subprocess.Popen(
+        process = subprocess.Popen(
             args,
             stdout=out,
             stderr=err,
@@ -387,6 +455,22 @@ def start_server(
             creationflags=flags,
             close_fds=True,
         )
+    setattr(process, ERR_LOG_ATTRIBUTE, err_log)  # noqa: B010 - not a Popen attribute
+    return process
+
+
+def _stated_reason(process: object) -> str:
+    """What a server that stopped said about why, when it said so in words for a person
+    (`cli.not_ready_message`). A traceback stays in the log the page names."""
+    err_log = getattr(process, ERR_LOG_ATTRIBUTE, None)
+    if not isinstance(err_log, Path):
+        return ""
+    try:
+        text = err_log.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
+    start = text.rfind(NOT_READY_PREFIX)
+    return " ".join(text[start:].split()) if start >= 0 else ""
 
 
 def open_agent(
@@ -413,11 +497,20 @@ def open_agent(
         return "opened"
     if record is not None:
         record_path(workspace_root).unlink(missing_ok=True)  # left by a server that died
-    started_ms = int(time.time() * 1000)
-    write_start_status(workspace_root, "starting", started_ms=started_ms)
+    underway = start_underway(workspace_root, wait_seconds)
+    joined = underway["pid"] if underway is not None else None
+    started_ms = underway["started_ms"] if underway is not None else int(time.time() * 1000)
+    if underway is None:
+        write_start_status(workspace_root, "starting", started_ms=started_ms)
     shown = opener(write_starting_page(workspace_root).as_uri()) is not False
     launch = start or (lambda: start_server(config_path, port, workspace_root / "logs", schedules))
-    process = launch()
+    process = launch() if underway is None else None
+    own_pid = getattr(process, "pid", None)
+    if isinstance(own_pid, int):
+        write_atomically(
+            workspace_root / START_RECORD,
+            json.dumps({"pid": own_pid, "started_ms": started_ms}).encode("utf-8"),
+        )
     deadline = time.monotonic() + wait_seconds
     while time.monotonic() < deadline:
         record = read_record(workspace_root)
@@ -430,10 +523,22 @@ def open_agent(
             sleep(handoff_seconds)
             write_start_status(workspace_root, "opened", started_ms=started_ms)
             return "started"
+        if joined is not None and not process_alive(joined):
+            sleep(poll)  # the launcher that started it says why, when it is still there
+            message = "The start already under way stopped."
+            if not _start_failed_already(workspace_root):
+                write_start_status(workspace_root, "failed", started_ms=started_ms, message=message)
+            raise LauncherError("agent_web_exited", f"{message} See the newest agent-web-*.err.log")
         exited = getattr(process, "poll", None)
         code = exited() if callable(exited) else None
         if code is not None:
+            record = read_record(workspace_root)
+            if record is not None and answers(str(record["address"])):
+                continue  # another server won the port; this one has nothing to report
             message = f"Agent Web stopped while starting (exit code {code})."
+            reason = _stated_reason(process)
+            if reason:
+                message = f"{message} {reason}"
             write_start_status(workspace_root, "failed", started_ms=started_ms, message=message)
             raise LauncherError(
                 "agent_web_exited",

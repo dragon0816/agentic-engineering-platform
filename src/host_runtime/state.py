@@ -81,6 +81,24 @@ _SCHEMA = (
 _NOT_COMMITTED = frozenset({"SQLITE_BUSY", "SQLITE_LOCKED"})
 
 
+class LocalStateBusy(LocalStateError):
+    """Another connection held the file at that moment. Still `unavailable` to everyone
+    who handles that; a host start tells it apart, because a second try can work."""
+
+    def __init__(self) -> None:
+        super().__init__("unavailable")
+
+
+def _refusal(error: sqlite3.Error) -> LocalStateError:
+    """The closed answer to a SQLite failure, with nothing of its message."""
+    name = getattr(error, "sqlite_errorname", "")
+    return (
+        LocalStateBusy()
+        if name.startswith(("SQLITE_BUSY", "SQLITE_LOCKED"))
+        else LocalStateError("unavailable")
+    )
+
+
 class SqliteLocalState:
     """One process, one owning thread, one file, one device. The file records
     which Bridge it belongs to on first open and refuses another, so a state
@@ -111,7 +129,7 @@ class SqliteLocalState:
             # not a SQLite exception escaping into a caller that promised not
             # to echo one.
             if isinstance(error, sqlite3.Error):
-                raise LocalStateError("unavailable") from None
+                raise _refusal(error) from None
             raise
 
     def _connect(self) -> sqlite3.Connection:
@@ -200,8 +218,8 @@ class SqliteLocalState:
             conn = self._connection()
             try:
                 conn.execute("BEGIN IMMEDIATE")
-            except sqlite3.Error:
-                raise LocalStateError("unavailable") from None
+            except sqlite3.Error as error:
+                raise _refusal(error) from None
             try:
                 yield conn
             except BaseException as error:
@@ -209,14 +227,14 @@ class SqliteLocalState:
                 if isinstance(error, LocalStateError):
                     raise
                 if isinstance(error, sqlite3.Error):
-                    raise LocalStateError("unavailable") from None
+                    raise _refusal(error) from None
                 raise
             try:
                 conn.execute("COMMIT")
             except sqlite3.Error as error:
                 self._rollback()
                 if getattr(error, "sqlite_errorname", "") in _NOT_COMMITTED:
-                    raise LocalStateError("unavailable") from None
+                    raise _refusal(error) from None
                 # The commit may or may not have reached the file; never guess.
                 raise LocalStateError("commit_unknown") from None
 
@@ -235,9 +253,10 @@ class SqliteLocalState:
             conn = self._connection()
             try:
                 yield conn
-            except (sqlite3.Error, ValidationError):
-                # A locked file or an undecodable record is unusable evidence;
-                # fail closed rather than guess or echo it.
+            except sqlite3.Error as error:
+                # A locked file is unusable evidence; fail closed rather than guess or echo it.
+                raise _refusal(error) from None
+            except ValidationError:
                 raise LocalStateError("unavailable") from None
 
     def installed(self) -> tuple[InstalledAsset, ...]:
