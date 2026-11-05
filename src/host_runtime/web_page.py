@@ -1382,6 +1382,7 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
   border-radius: 10px; background: var(--panel); }
 #bi-b-src-split { margin-top: 10px; }
 .bi-split { margin-bottom: 14px; }
+.bi-ver-changes { max-height: 50vh; overflow: auto; }
 #bi-b-cands tbody tr { cursor: pointer; }
 #bi-b-cands tbody tr[aria-selected="true"] { box-shadow: inset 3px 0 0 var(--accent); }
 #bi-b-cands .bi-cand-value { display: -webkit-box; -webkit-box-orient: vertical;
@@ -12091,6 +12092,15 @@ function biButton(label, onClick, cls, aria) {
 
 function biBadge(label, cls) { return bh("span", "bi-badge " + (cls || ""), label); }
 
+// A word on what was just done is old by the next press. Capture runs before the press's
+// own handler, so what that says stays. A failure stays until something replaces it.
+for (const type of ["click", "change"]) {
+  el("kn-pane-bi").addEventListener(type, (event) => {
+    if (type === "click" && !event.target.closest("button, a, summary, [role=tab]")) return;
+    if (el("bi-notice").classList.contains("good")) biNotice(true, "");
+  }, true);
+}
+
 function biNotice(ok, message) {
   const box = el("bi-notice"); box.replaceChildren();
   box.className = "mem-notice" + (message ? (ok ? " good" : " bad") : "");
@@ -12282,11 +12292,16 @@ function biRenderBar() {
   select.append(mine);
   if (subscribed.children.length) select.append(subscribed);
   select.value = keep;
-  const current = bi.datasets.find((item) => item.name === keep);
+  biRenderCounts();
+}
+
+function biRenderCounts() {
+  const current = bi.datasets.find((item) => item.name === biDataset());
   const counts = el("bi-counts"); counts.replaceChildren();
   counts.append(bh("strong", "", String(current ? current.cards : 0)), text("張卡片"));
+  const sources = (bi.build.sourcesFor === biDataset() && bi.build.sources || []).length;
   counts.append(bh("span", "", current && current.updated ? "· 更新於 " + biTime(current.updated)
-    : "· 尚未載入資料"));
+    : sources ? "· " + sources + " 份來源，還沒有卡片" : "· 還沒有資料"));
 }
 
 function biRenderTypes() {
@@ -14596,16 +14611,50 @@ function biVerValue(value) {
   return shown.length > 200 ? shown.slice(0, 200) + "…" : shown;
 }
 
+const BI_UNIT_KIND = {card: "卡片", field: "欄位", evidence: "出處", state: "欄位狀態",
+  source: "來源", skill: "判讀規則", check: "測試題", analysis: "分析", proposal: "待審提議",
+  import: "匯入紀錄", decision: "衝突決定", meta: "設定", schema: "schema", profile: "profile",
+  tool: "資料處理程式", relation: "關聯", relation_evidence: "關聯出處"};
+
+function biVerWords(value) {
+  // A value in words, or nothing where it has none: an object is never shown as JSON.
+  if (value === null || value === undefined || value === "") return "（空）";
+  if (Array.isArray(value)) {
+    return value.every((item) => typeof item !== "object") ? value.join("、") : null;
+  }
+  if (typeof value === "object") return null;
+  const shown = String(value);
+  return shown.length > 80 ? shown.slice(0, 80) + "…" : shown;
+}
+
+function biVerChange(change) {
+  const {before, after} = change;
+  if (before === null || before === undefined) return "新增";
+  if (after === null || after === undefined) return "移除";
+  if (Array.isArray(before) && Array.isArray(after) && change.unit.startsWith("evidence:")) {
+    return before.length + " → " + after.length + " 筆";
+  }
+  const inner = (value) => (typeof value === "object" && !Array.isArray(value) && "value" in value
+    ? value.value : value);
+  const old = biVerWords(inner(before)), now = biVerWords(inner(after));
+  return old === null || now === null || old === now ? "修改" : old + " → " + now;
+}
+
+function biHomeLabel(home) {
+  const item = (bi.build.homes || []).find((found) => found.home === home);
+  return item ? item.label : home;
+}
+
 function biVerChanges(changes) {
-  const list = bh("ul", "bi-log");
-  for (const change of changes.slice(0, 50)) {
-    list.append(bh("li", "", bh("strong", "", change.label || change.unit), "：",
-      biVerValue(change.before), " → ", biVerValue(change.after)));
+  const table = biListTable(["名稱", "種類", "領域", "改動"]);
+  for (const change of changes) {
+    const unit = String(change.unit), kind = unit.split(":", 1)[0];
+    const homes = (change.homes || []).map(biHomeLabel).join("、");
+    biRow(table, [change.label || unit, BI_UNIT_KIND[kind] || kind, homes || "其他",
+      biVerChange(change)]);
   }
-  if (changes.length > 50) {
-    list.append(bh("li", "bi-meta", "還有 " + (changes.length - 50) + " 項"));
-  }
-  return list;
+  table.box.classList.add("bi-scroller", "bi-ver-changes");
+  return table.box;
 }
 
 // A list as a table, its row's actions as a menu (the owner: 善用 table, menu).
@@ -14695,7 +14744,7 @@ async function biVersions(vaultId) {
     }
     box.append(bh("p", "", "還沒 commit 的改動 " + changes.length + " 項："),
       bh("p", "bi-meta",
-        [...counts].map(([home, count]) => home + " " + count + " 項").join("・")));
+        [...counts].map(([home, count]) => biHomeLabel(home) + " " + count + " 項").join("・")));
     // Commit carries all of it, whichever domain is chosen.
     const scope = biScope();
     if (scope && changes.some((c) => (c.homes || []).length && !c.homes.includes(scope))) {
@@ -14860,7 +14909,11 @@ function biFolderName(folder) {
   // A folder by the name people know it by; one outside the homes as it is.
   const home = biFolderHome(folder);
   const item = (bi.build.homes || []).find((found) => found.home === home);
-  return item ? item.label : folder;
+  if (item) return item.label;
+  // Not a home of this vault: its own name, without the folders around it.
+  const parts = String(folder).split("/").filter((part) => part
+    && !["sources", "applications", "library"].includes(part));
+  return parts.length ? parts.join(" / ") : "所有來源";
 }
 
 function biSkillsDraw(reply) {
@@ -14873,7 +14926,10 @@ function biSkillsDraw(reply) {
     || item.applies_to.some((folder) => biFolderHome(folder) === scope));
   for (const item of skills) {
     const where = (item.applies_to || []).length
-      ? item.applies_to.map(biFolderName).join("、") : "所有來源";
+      ? item.applies_to.flatMap((folder, at) => {
+        const name = bh("span", "", biFolderName(folder)); name.title = folder;
+        return at ? ["、", name] : [name];
+      }) : "所有來源";
     const state = [];
     if (item.generated) state.push(biBadge("依 schema 產生", "dim"));
     if (item.needs_update && item.update_blocks === false) {
@@ -15629,6 +15685,7 @@ async function biBuildSources() {
   await biSourceFolders().catch(() => {});
   if (seq !== bi.sourcesSeq || listed !== biDataset()) return;
   bi.build.sources = reply.sources || []; bi.build.sourcesFor = listed;
+  biRenderCounts();
   const cloud = bi.build.sources.filter((s) => s.shared === "cloud_only").length;
   const waiting = (reply.waiting || []).length;
   const warn = el("bi-b-src-cloud");
@@ -15902,6 +15959,7 @@ function biPagesPlan(plan) {
       folder: biVaultOf(biDataset()) ? el("bi-b-src-folder").value : undefined});
     box.replaceChildren();
     await biBuildSources();
+    bi.loaded = {}; bi.loaded.build = true; await biRefreshCounts();
     biNotice(true, "已匯入卡片頁：新增 " + (done.applied ? done.applied.created : 0) + " 張、更新 "
       + (done.applied ? done.applied.updated : 0) + " 張。");
   }, "go", "確認匯入這些卡片頁")));
