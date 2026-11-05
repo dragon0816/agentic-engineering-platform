@@ -6820,4 +6820,8 @@ Decision: `docs/DECISIONS.md` 2026-11-05 "Accepting a proposal moves the citatio
 - `GET /api/bi/cards/<id>/history`: a row may hold `old_evidence`. The key is absent otherwise.
 - `POST /api/bi/vaults/<id>/resolve` on a `field:` unit with `mine` or `theirs` also decides its `evidence:` unit.
 
-**Not changed.** The feed and its goldens, the published snapshot's format, and `GET /api/bi/proposals`.
+**A run's commit** (`POST /api/bi/runs/<id>/commit`, `POST /api/bi/import/...`): a value it replaces takes its evidence to `old_evidence`, and the run's own replaces it. A value that stays, or a list that only grows, appends. `POST /api/bi/import/undo` restores `old_evidence` and removes what the run cited, except on a field changed since.
+
+**`GET /api/bi/proposals`:** a `conflict` proposal's `evidence` is the lost value's, from its commit, where it had any.
+
+**Not changed.** The feed and its goldens, and the published snapshot's format.

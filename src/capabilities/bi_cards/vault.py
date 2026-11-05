@@ -864,6 +864,20 @@ def materialize(
                 ),
             )
             db.execute("INSERT INTO vault_keys VALUES (?, ?)", (cursor.lastrowid, key))
+        # What a lost value rested on: its commit's evidence, itself lost or applied.
+        cited = {
+            (e["group"], str(c["unit"])): c["after"]
+            for e in entries
+            for c in e["changes"]
+            if c["applied"] and str(c["unit"]).startswith("evidence:")
+        }
+        cited.update(
+            {
+                (c["commit_id"], str(c["unit"])): c["value"]
+                for c in conflicts
+                if str(c["unit"]).startswith("evidence:")
+            }
+        )
         for conflict in conflicts:
             unit = str(conflict["unit"])
             if not unit.startswith("field:"):
@@ -874,9 +888,10 @@ def materialize(
             key = f"conflict:{conflict['commit_id']}:{unit}"
             decided = units.get(f"decision:{_short(key)}")
             lost = conflict["value"] or {}
+            rested = cited.get((conflict["commit_id"], f"evidence:{cid}:{name}"))
             cursor = db.execute(
                 "INSERT INTO proposals (card_id, field, value, kind, ref, at, import_id, status, "
-                "reason) VALUES (?, ?, ?, 'conflict', ?, ?, NULL, ?, ?)",
+                "reason, evidence) VALUES (?, ?, ?, 'conflict', ?, ?, NULL, ?, ?, ?)",
                 (
                     cid,
                     name,
@@ -885,6 +900,7 @@ def materialize(
                     (lost.get("history") or {}).get("at") or stamp,
                     decided["status"] if decided else "pending",
                     decided.get("reason") if decided else None,
+                    _dump(rested) if rested else None,
                 ),
             )
             db.execute("INSERT INTO vault_keys VALUES (?, ?)", (cursor.lastrowid, key))

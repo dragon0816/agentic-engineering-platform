@@ -13392,7 +13392,7 @@ function biBuildAllowed() {
   // proposals are decided in the same step.
   return {source: true, schema: true, method: has,
     review: has || !!run || (bi.build.waiting || []).length > 0
-      || (bi.proposals || []).length > 0,
+      || (bi.proposals || []).length > 0 || (bi.proposalsDecided || []).length > 0,
     commit: !!accepted && !bi.build.accepting && !bi.build.saving,
     result: !!(run && run.status === "committed"),
     test: true};
