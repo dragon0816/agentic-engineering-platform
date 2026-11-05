@@ -37,6 +37,11 @@ OLD_APPLICATIONS = "sources/applications"
 DOMAINS_UNIT = "meta:domains"  # the old domain configuration (retired, BI D4)
 SEGMENTS_UNIT = "meta:vault_segments"
 LIBRARY_UNIT = "meta:vault_library"
+#: A home a person created: one unit each, so two people adding different homes never meet
+#: and two adding the same one write the same key (`docs/phases/BI_PAGE_SIMPLE.md` §10).
+HOME_PREFIX = "meta:home:"
+MAX_HOME_LABEL = 40
+MAX_HOME_ID = 40
 
 
 def _schema_ref(units: Mapping[str, Any]) -> str:
@@ -61,12 +66,91 @@ def _library(units: Mapping[str, Any]) -> list[str]:
     return found if isinstance(found, list) else list(homes.LIBRARY_ENTRIES)
 
 
+def created_homes(units: Mapping[str, Any]) -> list[dict[str, str]]:
+    """The applications people created: `{"home", "label", "domain"}`, the domain empty when
+    the schema already has the home's own (`mobile`)."""
+    found = []
+    for key, value in sorted(units.items()):
+        if not key.startswith(HOME_PREFIX) or not isinstance(value, str):
+            continue
+        try:
+            document = json.loads(value)
+        except ValueError:
+            continue
+        home = key[len(HOME_PREFIX) :]
+        if isinstance(document, dict) and homes.id_problem(home) is None:
+            found.append(
+                {
+                    "home": home,
+                    "label": str(document.get("label") or home),
+                    "domain": str(document.get("domain") or ""),
+                }
+            )
+    return found
+
+
+def created_domains(units: Mapping[str, Any]) -> list[str]:
+    return [item["domain"] for item in created_homes(units) if item["domain"]]
+
+
 def home_list(units: Mapping[str, Any]) -> list[dict[str, str]]:
     """The vault's applications and library entries, by their short forms."""
-    return [
+    listed = [
         *({"home": s["folder"], "label": s.get("label") or s["folder"]} for s in _segments(units)),
+        *({"home": item["home"], "label": item["label"]} for item in created_homes(units)),
         *({"home": f"{homes.LIBRARY}/{e}", "label": e} for e in _library(units)),
     ]
+    return list({item["home"]: item for item in reversed(listed)}.values())[::-1]
+
+
+def _same(text: Any) -> str:
+    """What makes two names one: `AIDC`, `aidc` and `a-idc` are the same domain."""
+    return re.sub(r"[\s_-]+", "", str(text)).casefold()
+
+
+def new_home(
+    given: Mapping[str, Any], units: Mapping[str, Any], reg: Registry | None
+) -> dict[str, str]:
+    """A new application's `{"home", "label", "domain"}`, or why not. A name, a case variant
+    or an alias of what exists is that one, so a vault cannot hold it twice."""
+    label = str(given.get("name") or "").strip()
+    if not label:
+        raise BiStoreError("home_name_missing", "請寫領域名稱")
+    if len(label) > MAX_HOME_LABEL or any(ord(c) < 32 or c in "/\\" for c in label):
+        raise BiStoreError("home_name_invalid", f"領域名稱最多 {MAX_HOME_LABEL} 字，不能有斜線")
+    folder = str(given.get("folder") or "").strip().lower() or _slug(label)
+    domains = reg.domains if reg is not None else ()
+    aliases = reg.enum_aliases.get("domain", {}) if reg is not None else {}
+    meant = {_same(d): d for d in domains} | {
+        _same(alias): domain for alias, domain in aliases.items()
+    }
+    # The schema already knows this word, so it is that domain, whatever folder was typed.
+    known = meant.get(_same(label)) or meant.get(_same(folder))
+    if known:
+        folder = _slug(known)
+    if not folder:
+        raise BiStoreError(
+            "home_folder_needed", "中文名稱要另外寫資料夾名稱（小寫英數字與 -），例如 automotive"
+        )
+    if homes.id_problem(folder) or len(folder) > MAX_HOME_ID:
+        raise BiStoreError(
+            "home_folder_invalid", f"資料夾名稱只能用小寫英數字與 -，最多 {MAX_HOME_ID} 字"
+        )
+    if folder in homes.RESERVED_APPLICATIONS:
+        raise BiStoreError("home_reserved", f"「{folder}」保留給系統，請換一個名稱")
+    for item in home_list(units):
+        short = item["home"].rpartition("/")[2]
+        if {_same(short), _same(item["label"])} & {_same(label), _same(folder)}:
+            raise BiStoreError(
+                "home_exists", f"已經有領域「{item['label']}」（{item['home']}）", home=item["home"]
+            )
+    return {"home": folder, "label": label, "domain": "" if known else folder}
+
+
+def home_unit(item: Mapping[str, str]) -> tuple[str, str]:
+    return f"{HOME_PREFIX}{item['home']}", json.dumps(
+        {"label": item["label"], "domain": item["domain"]}, ensure_ascii=False, sort_keys=True
+    )
 
 
 def _card_type_lines(reg: Registry) -> list[str]:

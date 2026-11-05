@@ -34,6 +34,23 @@ HOME_FOLDERS = (SOURCES, SKILLS, TOOLS, PROFILE)
 LIBRARY_ENTRIES = ("products", "technologies", "competitors")
 #: `library/skills/` holds what spans every home, so no entry can have that name.
 RESERVED_ENTRY = SKILLS
+#: What a new application may not be called: the layout's own words, the review copies'
+#: folder (`docs/examples/bi-skills/`), and what Windows will not make a folder of.
+RESERVED_APPLICATIONS = frozenset(
+    {
+        APPLICATIONS,
+        LIBRARY,
+        *HOME_FOLDERS,
+        "skill-review",
+        "corrections",
+        "con",
+        "prn",
+        "aux",
+        "nul",
+        *(f"com{n}" for n in range(1, 10)),
+        *(f"lpt{n}" for n in range(1, 10)),
+    }
+)
 
 _ID = r"[a-z0-9]+(?:-[a-z0-9]+)*"
 _AUTHOR = r"[a-z0-9]+(?:[._-][a-z0-9]+)*"
@@ -92,6 +109,11 @@ def sources_dir(home: str) -> str:
 def skills_dir(home: str) -> str:
     """Where `home`'s skills go; no home is `library/skills`, what spans them all."""
     return f"{home_dir(home)}/{SKILLS}" if home else f"{LIBRARY}/{SKILLS}"
+
+
+def home_folders(home: str) -> tuple[str, ...]:
+    """The folders a home is made of, by the one rule (`HOME_FOLDERS`)."""
+    return tuple(f"{home_dir(home)}/{name}" for name in HOME_FOLDERS)
 
 
 def tool_path(home: str, name: str, revision: int, author: str, suffix: str) -> str:

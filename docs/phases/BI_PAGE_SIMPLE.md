@@ -1,6 +1,6 @@
 # The BI Knowledge page, redesigned to be simple
 
-Status: S1 and S3 done, 2026-11-05; the working domain (§9) built on `bi-step1-domain`; S2, S4–S8 not started. Decision `docs/DECISIONS.md` 2026-11-05. Base `main` 86a7d614, branch `bi-page-simple`.
+Status: S1 and S3 done, 2026-11-05; the working domain (§9) and creating one (§10) built on `bi-step1-domain`; S2, S4–S8 not started. Decision `docs/DECISIONS.md` 2026-11-05. Base `main` 86a7d614, branch `bi-page-simple`.
 
 **The owner's rule, verbatim:** 「ui請以簡單為主，善用table，menu/comobox」.
 
@@ -294,3 +294,37 @@ No model, 2026-11-05; the real vault, its staging and its shared folder were com
 ### 9.7 The AI panel
 
 The panel's line about what it is working on names the working domain. Each turn sends `scope`, and the route puts one line naming the home and folder in front of the message, for all five kinds. It is checked with `home_problem`, so only a home's name can arrive. The line is kept with the turn, since it was sent, and the log does not show it. Accepting AI questions tags them with that home. A panel closes when the working domain changes, so a session never talks across two.
+
+## 10. Creating a domain
+
+Status: built on `bi-step1-domain`, 2026-11-05, decision `docs/DECISIONS.md` 2026-11-05. **The owner, verbatim:** 「需要讓使用者可以create domain」, 「新增domain時，需要可以按照規則生成相對應的檔案folder結構」.
+
+新增領域 beside the combobox opens a name, and a folder when the name has no Latin letters. The new home becomes the working domain.
+
+**What a domain is made of, and why no schema version.** A home is its folders and its entry in a list. Its cards need a `domain` the schema accepts, or a new home's cards silently lose it (`domain_unknown`, 「已略過」). A new schema version would do that, but it passes through a draft and a publish and turns every edited skill 「需要更新」, so one person's new domain would disturb everyone's. Instead:
+
+- **Each created home is its own unit,** `meta:home:<id>` = `{"label", "domain"}`. `meta:` is already a text unit older AEP accepts, and it reaches the `meta` table of every database built from units, published ones too.
+- **A vault's created domains widen its schema when it is read** (`catalog.with_home_domains`), in `Vault._schema_of`, `Vault._registry` and `catalog.for_store`. The schema file does not change, so no skill turns 需要更新. `homes.domain_of_folder` resolves as for any other home.
+- **A name the schema already has needs no widening:** `mobile` gets a folder and `domain` stays empty. That is how `mobile` becomes selectable.
+- **Costs:** the schema file is no longer the whole list of a vault's domains. A PC on an older AEP drops the new domain from its cards, with the existing warning, so everyone needs this release. A Session A draft adding the same name later is harmless: the widening skips what the schema has.
+
+**Names.** The folder is safe by the existing `homes.id_problem`: lowercase Latin letters, digits and `-`. A display name can be Chinese; its folder is then asked for. Refused: a name, folder, case variant or spacing of an existing home (`AIDC`, `a-idc`), or an alias the schema gives for one (`無線`); the layout's words, `skill-review`, and what Windows will not make a folder of. An alias of a domain with no folder creates that domain's home.
+
+**The structure has one definition,** `homes.HOME_FOLDERS` through `homes.home_folders`, also used when a vault is created. Empty folders are not carried by commits and may not survive a transfer, so **no placeholder file**: each PC makes the folders from the unit.
+
+| When | This PC's working copy (`knowledge-repos/<id>/work/files`) | The shared folder | Colleagues |
+|---|---|---|---|
+| Created | Folders; the home is listed; an uncommitted change | Nothing | Nothing |
+| Committed | Same | Nothing | Nothing |
+| Pushed | Same | The folders, made by the push | The unit, once OneDrive delivers it |
+| Colleague syncs or joins | | Made on their PC if missing | Home listed, same folders |
+
+Nothing marks the folders, so nothing can be taken for a source, skill or tool. An empty folder makes no home: the list is built from units only, so `library/skill-review` and a stray folder stay out.
+
+**Two people.** The same name writes the same key with the same value, and both push with no conflict; tested. Different names never meet: that is why each home is a unit, where appending to `meta:vault_segments` would conflict. Two people choosing different folders for one idea (`auto`, `automotive`) before either has pushed cannot be detected here and makes two homes. Removing a domain is not built.
+
+**Empty.** A domain with no extract skill says so under the combobox: AI extraction looks only for `extract.DEFAULT_TYPES`, with 和 AI 新增規則 or the review examples in `library/skill-review` as the way on. Its question list is empty; nothing is borrowed. `classify` still applies, but it does not list a created home, so a generated `classify` is not rewritten and nobody's skill changes.
+
+**Switching** redraws skills, tools and questions at once from what is loaded. Every reply is drawn for the domain chosen by then, so a late reply cannot bring old rows back; tested with a held reply. The Dashboard still follows after its read, and §9's rows for it change with per-domain dashboards.
+
+Measured on a copy of `market-intel`: creating a domain takes about 12 s, nearly all of it rebuilding the local database for 760 cards.

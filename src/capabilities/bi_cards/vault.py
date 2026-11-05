@@ -56,6 +56,7 @@ from capabilities.bi_cards import (
     card_markdown,
     card_model,
     catalog,
+    extract,
     homes,
     names,
     profile,
@@ -1327,6 +1328,8 @@ class Vault:
                 report = self.repo.sync()
                 built = self._is_built()
                 reads = self.reads()
+            if report.get("applied") or not built:
+                self.ensure_home_folders()
             if not built:
                 vault_sources.sync_staging(self.repo, self.workspace, self.dataset)
                 self.rebuild()
@@ -1338,6 +1341,18 @@ class Vault:
             state.write_text(json.dumps({"at": now(), "reads": reads}), encoding="utf-8")
             # A first sync on this PC only records what it reads: nothing moved.
             return {**report, "moved": not built or (known is not None and known != reads)}
+
+    def ensure_home_folders(self) -> None:
+        """The folders of every pushed home a person created, in the shared folder. No file
+        marks them: each PC makes them from the unit on push and sync, so nothing here can be
+        taken for a source, skill or tool, and a folder lost in transfer comes back. Only an
+        empty folder is at stake, so a refusal is not worth stopping a sync for."""
+        for item in vault_skills.created_homes(self.repo.units()):
+            for folder in homes.home_folders(item["home"]):
+                try:
+                    repo_engine.long_path(self.folder / folder).mkdir(parents=True, exist_ok=True)
+                except OSError:
+                    continue
 
     @contextmanager
     def capture(self, store: BiStore) -> Iterator[sqlite3.Connection]:
@@ -1410,14 +1425,21 @@ class Vault:
     def _schema_of(self, units: Mapping[str, Any]) -> Registry | None:
         """The schema these units are on; None when this PC has not got it."""
         try:
-            return self._registry(str(units.get(repo_engine.SCHEMA_UNIT) or ""))
+            return catalog.with_home_domains(
+                self._registry(str(units.get(repo_engine.SCHEMA_UNIT) or "")),
+                vault_skills.created_domains(units),
+            )
         except BiStoreError:
             return None
 
     def _registry(self, ref: str | None = None) -> Registry:
         """The schema `ref`, by default the working copy's."""
         if ref is None:
-            ref = str(self.repo.working_units().get(repo_engine.SCHEMA_UNIT) or "")
+            units = self.repo.working_units()
+            return catalog.with_home_domains(
+                catalog.resolve(self.workspace, str(units.get(repo_engine.SCHEMA_UNIT) or "")),
+                vault_skills.created_domains(units),
+            )
         return catalog.resolve(self.workspace, ref)
 
     def _stage_schema(self, ref: str) -> None:
@@ -1593,8 +1615,8 @@ def _new_vault(
         )
     (repo.folder / homes.skills_dir("")).mkdir(parents=True, exist_ok=True)
     for home in (*(s["folder"] for s in segments), *(f"{homes.LIBRARY}/{e}" for e in library)):
-        for name in homes.HOME_FOLDERS:
-            (repo.folder / homes.home_dir(home) / name).mkdir(parents=True, exist_ok=True)
+        for folder in homes.home_folders(home):
+            (repo.folder / folder).mkdir(parents=True, exist_ok=True)
     _register(
         workspace, {"id": vault_id, "path": str(repo.folder), "author": author, "joined": now()}
     )
@@ -2118,6 +2140,7 @@ def push(workspace: Path, vault_id: str) -> dict[str, Any]:
             result = vault.repo.push()
             if result["status"] == "pushed":
                 readme.write_readme(vault.repo)
+                vault.ensure_home_folders()
         if result["status"] == "conflicts":
             units = vault.repo.working_units()
             shown = card_model.card_names_of(units)
@@ -2270,24 +2293,43 @@ def skills(workspace: Path, vault_id: str) -> dict[str, Any]:
         "skills": found,
         "schema": str(units.get(repo_engine.SCHEMA_UNIT) or ""),
         "folders": ["sources", *folders],
-        "homes": _working_domains(vault, units, folders),
+        "homes": _working_domains(vault, units),
+        "default_types": [t for t in extract.DEFAULT_TYPES],
         "roles": ["classify", "extract"],
         "tools": vault_tools.current_tools(units),
     }
 
 
-def _working_domains(
-    vault: Vault, units: Mapping[str, Any], folders: list[str]
-) -> list[dict[str, Any]]:
+def create_home(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
+    """Stage a new application (`docs/phases/BI_PAGE_SIMPLE.md` §10). Uncommitted like any
+    change; its folders exist in this PC's working copy now and in the shared one after push."""
+    vault = _vault(workspace, vault_id)
+    with vault.lock:
+        units = vault.repo.working_units()
+        item = vault_skills.new_home(given, units, vault._schema_of(units))
+        key, value = vault_skills.home_unit(item)
+        with _repo_errors():
+            vault.repo.stage(key, value)
+        for folder in homes.home_folders(item["home"]):
+            repo_engine.long_path(vault.repo.work / "files" / folder).mkdir(
+                parents=True, exist_ok=True
+            )
+        vault.rebuild()
+        units = vault.repo.working_units()
+        return {"home": item["home"], "homes": _working_domains(vault, units)}
+
+
+def _working_domains(vault: Vault, units: Mapping[str, Any]) -> list[dict[str, Any]]:
     """What a person can work on (`docs/phases/BI_PAGE_SIMPLE.md` §9): the vault's homes and any
-    other its folders and sources are in, each with its folder and its schema domain."""
+    other its sources are in, each with its folder and its schema domain. An empty folder makes
+    no home: `library/skill-review` holds review copies and is not a place to work."""
     listed = {item["home"]: item["label"] for item in vault_skills.home_list(units)}
     source_folders = [
         str(value.get("folder") or "")
         for key, value in units.items()
         if key.startswith("source:") and isinstance(value, dict)
     ]
-    for folder in (*folders, *source_folders):
+    for folder in source_folders:
         home = homes.home_of(folder)
         if home is not None:
             listed.setdefault(home, home)

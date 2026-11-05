@@ -1,0 +1,149 @@
+"""Creating a domain in the page, and switching with no stale rows.
+
+`docs/phases/BI_PAGE_SIMPLE.md` §9, §10. Owner, 2026-11-05: 「需要讓使用者可以create domain」;
+「切到ingest, testing時，也要帶出這個domain相關的skill, tool, benchmark question, dashboard」.
+A real browser on fictional data.
+"""
+
+from __future__ import annotations
+
+import os
+from pathlib import Path
+
+import pytest
+from bi_page_driver import BiPage, browser_missing
+from test_bi_vault import _call, _ok
+from test_vault_asking_e2e import _bi_host, _Model, _served
+
+from capabilities.bi_cards.store import BiStore
+
+AIDC = "applications/aidc/sources"
+WIRELESS = "applications/wireless/sources"
+NEW = "applications/automotive/sources"
+# 虛構範例.
+QUESTIONS = {"aidc-q": "aidc", "wl-q": "wireless"}
+TIMES_OUT = 60
+
+
+def _labels(page: BiPage) -> list[str]:
+    found = page.run(
+        "[...document.getElementById('bi-b-src-folder').options].map((o) => o.textContent)"
+        ".join('|')"
+    )
+    return str(found).split("|")
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_a_domain_is_created_in_the_row_and_becomes_the_working_domain(tmp_path: Path) -> None:
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    BiStore(workspace, "demo").create("bi.schema/v1.1")
+    shared = tmp_path / "shared"
+    shared.mkdir()
+    made = _ok(
+        _call(
+            workspace,
+            "POST",
+            "/api/bi/vaults",
+            {"path": str(shared), "title": "Market", "schema": "bi.schema/v1.1",
+             "author": "alice"},
+        )
+    )  # fmt: skip
+    dataset, vault_id = str(made["vault"]["dataset"]), str(made["vault"]["id"])
+    for slug, home in QUESTIONS.items():
+        body = {"question": f"虛構題 {slug}？", "must": ["好"], "slug": slug, "home": home}
+        _ok(_call(workspace, "POST", f"/api/bi/vaults/{vault_id}/checks", body))
+    shots = os.environ.get("AEP_UI_SHOTS")
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(
+            tmp_path / "browser", server.address, Path(shots) / "create" if shots else None
+        ) as page:
+            page.choose("bi-dataset", dataset)
+            page.click("#bi-views [data-bi-view=build]")
+            page.wait("(bi.build.homes || []).length > 0")
+
+            # -- readable names, the values stay ------------------------------------------
+            labels = _labels(page)
+            assert labels[:2] == ["全部領域", "AIDC"]
+            assert not any("/" in label or "（" in label for label in labels)
+            assert page.run(
+                f"[...document.getElementById('bi-b-src-folder').options]"
+                f".find((o) => o.textContent === 'AIDC').value === '{AIDC}'"
+            )
+
+            # -- a name that exists says so; nothing is made ------------------------------
+            page.click("#bi-b-home-new")
+            assert not page.run("document.getElementById('bi-b-home-form').hidden")
+            page.set_value("bi-b-home-name", "aidc")
+            page.click("#bi-b-home-go")
+            page.see("bi-b-home-err", "已經有領域")
+            assert len(_labels(page)) == len(labels)
+            page.shoot("exists")
+
+            # -- a Chinese name needs a folder, and then shows ----------------------------
+            page.set_value("bi-b-home-name", "車用電子")
+            page.click("#bi-b-home-go")
+            page.see("bi-b-home-err", "資料夾名稱")
+            page.set_value("bi-b-home-folder", "automotive")
+            page.click("#bi-b-home-go")
+            page.wait(f"document.getElementById('bi-b-src-folder').value === '{NEW}'")
+            assert "車用電子" in _labels(page)
+            assert page.run("document.getElementById('bi-b-home-form').hidden")
+            assert not page.run("document.getElementById('bi-b-home-new').hidden")
+            assert page.run("biScope()") == "automotive"
+            page.see("bi-notice", "還沒 commit")
+            assert "applications/automotive/" in page.text_of("bi-notice")
+
+            # -- it is empty, and says what that means ------------------------------------
+            page.wait("!document.getElementById('bi-b-scope-empty').hidden")
+            empty = page.text_of("bi-b-scope-empty")
+            assert "Signal" in empty and "library/skill-review" in empty
+            page.shoot("created")
+
+            # -- a file goes to it at once -------------------------------------------------
+            page.upload("car.md", "# 虛構\n", "text/markdown")
+            assert page.run("bi.build.sources.find((s) => s.name === 'car.md').folder") == NEW
+
+            # -- kept across a reload ------------------------------------------------------
+            page.reload()
+            page.choose("bi-dataset", dataset)
+            page.click("#bi-views [data-bi-view=build]")
+            page.wait(f"document.getElementById('bi-b-src-folder').value === '{NEW}'", TIMES_OUT)
+
+            # -- switching: at once, and an old reply cannot bring old rows back ------------
+            page.choose("bi-b-src-folder", AIDC)
+            page.stage("test")
+            page.see("bi-b-bq-list", "虛構題 aidc-q")
+            page.wait("!!bi.benchReply")
+            page.wait("window.__aepWatch.open.length === 0", TIMES_OUT)
+            # The next read of the questions answers only when told, after the switch.
+            page.run(
+                "(() => { const was = window.fetch; window.__hold = [];"
+                " window.fetch = async (...args) => { const reply = await was(...args);"
+                " if (String(args[0]).endsWith('/checks')) {"
+                " await new Promise((go) => window.__hold.push(go)); }"
+                " return reply; }; })()"
+            )
+            page.run("biBench(bi.verVault)")
+            page.wait("window.__hold.length === 1", TIMES_OUT)
+            page.choose("bi-b-src-folder", WIRELESS)
+            # No wait: it was drawn inside the change.
+            rows = page.text_of("bi-b-bq-list")
+            assert "虛構題 wl-q" in rows and "虛構題 aidc-q" not in rows
+            assert page.text_of("bi-b-bench-state").startswith("1 題")
+            assert "wireless" in page.text_of("bi-b-run-why")
+            page.wait("window.__hold.length === 2", TIMES_OUT)
+            page.run("window.__hold.splice(0).forEach((go) => go())")
+            page.wait("window.__aepWatch.open.length === 0", TIMES_OUT)
+            rows = page.text_of("bi-b-bq-list")
+            assert "虛構題 wl-q" in rows and "虛構題 aidc-q" not in rows
+            assert page.text_of("bi-b-bench-state").startswith("1 題")
+            page.run("window.__hold = { push: (go) => go(), length: 0, splice: () => [] }")
+
+            # -- a new domain has no questions: nothing is borrowed from another ------------
+            page.choose("bi-b-src-folder", NEW)
+            rows = page.text_of("bi-b-bq-list")
+            assert "虛構題" not in rows
+            assert page.text_of("bi-b-bench-state").startswith("0 題")
+            assert page.run("document.getElementById('bi-b-bench-run').disabled")
+            page.shoot("empty-step3")

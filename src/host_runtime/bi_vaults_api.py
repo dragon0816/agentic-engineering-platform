@@ -198,6 +198,8 @@ def route(
         published = vault.publish(workspace, vault_id, given)
         bi_feed_api.refresh(workspace, vault_id)
         return 200, {"ok": True, **published}
+    if action == "homes":
+        return 200, {"ok": True, **vault.create_home(workspace, vault_id, given)}
     if action == "checks":
         if given.get("delete"):
             return 200, {"ok": True, **vault_checks.delete(workspace, vault_id, given["delete"])}

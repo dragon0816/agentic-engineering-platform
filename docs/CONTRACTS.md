@@ -5951,8 +5951,16 @@ skill AI: owner decisions". Code `capabilities/bi_cards/vault_checks.py`, `host_
   a run of one home cannot hide what another run found. Each regression is a blocking line naming the question's
   home if it has one (push `status: "blocked"`), and blocks in every working domain. The note says how many
   questions no run covered. Without such a run the push goes ahead with the note 「這次 push 的內容沒有跑過測試」.
-- **Working domain** (`docs/phases/BI_PAGE_SIMPLE.md` §9): `GET /api/bi/vaults/<id>/skills` adds `"homes":
-  [{"home", "label", "folder", "domain": str|null}]`. `GET .../pending` adds `"homes": [home]` to each uncommitted
+- **Creating a domain** (`docs/phases/BI_PAGE_SIMPLE.md` §10): `POST /api/bi/vaults/<id>/homes` `{"name", "folder"?}`
+  stages `meta:home:<id>` = JSON text `{"label", "domain"}` (`domain` empty when the schema has the home's own) and
+  makes `applications/<id>/{sources,skills,tools,profile}` in the working copy → `{"ok", "home", "homes"}`. Refused 400:
+  `home_name_missing`, `home_name_invalid`, `home_folder_needed` (no Latin letters in the name), `home_folder_invalid`,
+  `home_reserved`, `home_exists` (a name, folder, case variant or schema alias of a home). Push and sync make the
+  folders in the shared folder from the unit; no file marks them. The domain widens the vault's schema when read
+  (`catalog.with_home_domains`); the schema file does not change.
+- **Working domain** (`docs/phases/BI_PAGE_SIMPLE.md` §9): `GET /api/bi/vaults/<id>/skills` adds `"default_types"` and `"homes":
+  [{"home", "label", "folder", "domain": str|null}]`, built from units only: the vault's lists, created homes and homes
+  holding a source. An empty folder makes no home. `GET .../pending` adds `"homes": [home]` to each uncommitted
   change, empty for what spans the vault. `POST /api/bi/sessions/<id>/turns` takes optional `"scope": <home>` for
   every kind (`home_invalid` 400): the turn starts with a line naming it. `apply` on a `questions` session takes
   optional `"home"`.

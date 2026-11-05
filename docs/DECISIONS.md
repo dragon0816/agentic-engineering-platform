@@ -6417,4 +6417,12 @@ The owner: 「我們要支援多人開發一個vault，所以這個頁面不是�
 - **A person can look with no domain and cannot add with none.** 全部領域 replaces 「不指定資料夾」 and is the first-visit default. Rejected: defaulting to a domain, which could put a file in the wrong folder; removing the no-domain view, which is how a whole-vault bench and old root sources stay reachable.
 - **A question gets an optional `home`; absent means the whole vault.** A working domain runs its own questions and the untagged ones. Rejected: using the question set's name as the domain, since a set name cannot hold `library/products` and a set is the team's own grouping.
 - **The bench gate takes each question's newest verdict across every finished run on the same content.** Reading only the newest run would let a domain's run hide another domain's regression. A person in one domain is still blocked by a regression in another, and the page shows it before they press push, because the push carries the whole vault. Rejected: a gate per domain, which would weaken it.
-- **Commit and push stay whole-vault.** The page says which homes a commit touches. Rejected: committing part of the changes by domain, which changes the repository model. The owner has not asked for that, and it is what publishing or blocking domains separately would need.
+- **Commit and push stay whole-vault for now.** The page says which homes a commit touches. Rejected: committing part of the changes by domain, which changes the repository model. The owner has not asked for that, and it is what publishing or blocking domains separately would need.
+
+## 2026-11-05: A person can create a BI domain, with no schema version
+
+The owner: 「需要讓使用者可以create domain」, 「新增domain時，需要可以按照規則生成相對應的檔案folder結構」. Design: `docs/phases/BI_PAGE_SIMPLE.md` §10.
+
+- **A created home is one unit, `meta:home:<id>`, and its domain widens the vault's schema when read.** Cards of it can carry the domain, and no skill turns 需要更新. Rejected: a new schema version per domain, since a draft, a publish and 需要更新 on every edited skill would disturb everyone for one person's folder; a home with no card domain, whose cards would silently lose it; appending to `meta:vault_segments`, where two people adding different homes would conflict.
+- **The folders come from the unit, with no placeholder file.** Each PC makes them on push and sync through the one definition, `homes.HOME_FOLDERS`. Rejected: a placeholder, which would need excluding everywhere sources, skills and tools are listed.
+- **The list of homes is built from units only.** An empty folder makes no home, so `library/skill-review` stays out. Accepted cost: a PC on an older AEP drops a created domain from its cards, with the existing warning.
