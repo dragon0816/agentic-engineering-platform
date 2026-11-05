@@ -86,3 +86,36 @@ def test_an_example_saved_in_a_vault_is_what_a_run_of_its_folder_reads(
     rules = vault_skills.run_rules(vault.Vault(workspace, vault_id).repo, homes.sources_dir(domain))
     assert example.body in rules["text"]
     assert rules["card_types"] == list(example.card_types)
+
+
+def test_a_review_copy_in_a_folder_with_no_sources_is_nobody_s_default(tmp_path: Path) -> None:
+    """`market-intel` keeps the examples for colleagues to read this way
+    (`docs/guides/BI_SKILL_EXAMPLES.zh-TW.md`): no run of any folder may pick them."""
+    workspace = tmp_path / "workspace"
+    shared = tmp_path / "shared"
+    shared.mkdir()
+    made = vault.create(
+        workspace,
+        {"path": str(shared), "title": "T", "purpose": "fictional", "schema": SCHEMA["schema_id"]},
+        "alice",
+    )
+    vault_id = made["vault"]["id"]
+    for domain in DOMAINS:
+        example = skills.parse_skill(_text(domain), layout=homes.LAYOUT)
+        vault.save_skill(
+            workspace,
+            vault_id,
+            {
+                "name": f"library/skill-review/{example.name}-review",
+                "role": "extract",
+                "applies_to": ["library/skill-review/sources"],
+                "card_types": list(example.card_types),
+                "body": example.body,
+            },
+        )
+    target = vault.Vault(workspace, vault_id)
+    for home in (*DOMAINS, "library/products"):
+        rules = vault_skills.run_rules(target.repo, homes.sources_dir(home))
+        assert [item["role"] for item in rules["skills"]] == ["classify"]
+        assert rules["card_types"] == []
+    assert "library/skill-review/sources" not in vault.skills(workspace, vault_id)["folders"]
