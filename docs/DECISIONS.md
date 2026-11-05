@@ -6476,4 +6476,16 @@ The owner, through the orchestrator: a rules run, or 改用新值 in review, tha
 
 **A conflict proposal** now carries the lost value's evidence, from its commit (`vault.materialize`), derived at each rebuild and not a unit.
 
-**Known, not changed.** A candidate whose values are all the same as the card's is `unchanged` and is not written, so a second source that only repeats a value adds no citation. It adds one only when that candidate writes something else too. Whether it should is the owner's to say.
+**A source that only repeats a value** adds its citation: decided in the entry below.
+
+## 2026-11-05: A source that repeats a value adds its citation, and leaves the card's version alone
+
+The owner: 「證具, raw data連結就append上去」. A candidate whose values all match the card used to be `unchanged` and was not written, so the second source of a fact left no trace.
+
+**Decided.** Such a candidate stays `unchanged`, with `citations` naming the fields whose value it repeats and does not cite yet. It shows as 新增出處 in review; accepted, it writes only the evidence. Undo removes it.
+
+**The card's version does not move, nor `updated`.** Nothing the card says changed. A raised version would make every other run and open review of that card stale (`cards_changed`) for a citation. A vault derives its version from field changes, so raising it locally would not survive a rebuild anyway.
+
+**Not twice.** A row's identity on a field is its `reference_id`, the source and the place in it. A source read again adds nothing, and is not offered as 新增出處. A different place in the same source is a different citation.
+
+**A replay that lost the field.** Field and evidence are separate units, so a commit could lose the field and still apply its evidence, and the winning value showed a citation of text it does not hold. `vault._evidence_read` now reads the evidence as it stood before that commit, as long as no later commit changed it. The unit itself stays as it was, on every PC: this is how the card reads it. The lost value's citation comes back with it if the conflict is accepted.
