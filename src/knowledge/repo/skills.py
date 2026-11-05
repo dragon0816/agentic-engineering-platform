@@ -245,6 +245,8 @@ def current_skills(
     units = repo.working_units() if units is None else units
     schema = units.get(SCHEMA_UNIT)
     schema_ref = schema.get("ref") if isinstance(schema, dict) else schema
+    # A type may tell which skills a schema change really touches; by default all of them.
+    review = getattr(repo.kind, "skill_review", None)
     found = []
     for key in sorted(units):
         if not key.startswith(SKILL_UNIT_PREFIX):
@@ -261,6 +263,11 @@ def current_skills(
                 "role": value.get("role"),
                 "applies_to": list(value.get("applies_to") or []),
                 "needs_update": bool(schema_ref) and value.get("schema") != schema_ref,
+                **(
+                    {}
+                    if review is None
+                    else review(repo, key.removeprefix(SKILL_UNIT_PREFIX), value, units)
+                ),
             }
         )
     return found
@@ -292,6 +299,10 @@ def stage_skill(repo: Repository, skill: Skill) -> dict[str, Any]:
     current = units.get(skill_unit(skill.unit_name))
     revision = int(current.get("revision") or 0) + 1 if isinstance(current, dict) else 1
     revised = replace(skill, revision=revision)
+    # A type may say what a revision is written against; by default the schema it names.
+    binding = getattr(repo.kind, "skill_binding", None)
+    extra = dict(binding(units, revised.schema)) if binding is not None else {}
+    revised = replace(revised, schema=str(extra.pop("schema", revised.schema)))
     text = render_skill(revised)
     parse_skill(text, layout=layout)  # the file reads back as written
     path = revised.path(repo.author, area)
@@ -302,7 +313,7 @@ def stage_skill(repo: Repository, skill: Skill) -> dict[str, Any]:
         repo.stage_file(path, draft)
     finally:
         draft.unlink(missing_ok=True)
-    value = revised.unit_value(repo.author, area)
+    value = {**revised.unit_value(repo.author, area), **extra}
     repo.stage(skill_unit(skill.unit_name), value)
     return value
 
@@ -341,7 +352,7 @@ def runnable(repo: Repository, name: str, units: Mapping[str, Any] | None = None
     item = next((s for s in current_skills(repo, units) if s["name"] == name), None)
     if item is None:
         raise RepoError("skill_unknown", f"知識庫裡沒有 skill「{name}」")
-    if item["needs_update"]:
+    if item["needs_update"] and item.get("update_blocks", True):
         schema = units.get(SCHEMA_UNIT)
         current = schema.get("ref") if isinstance(schema, dict) else schema
         raise RepoError(

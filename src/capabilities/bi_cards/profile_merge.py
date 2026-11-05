@@ -4,8 +4,8 @@ A new name is compatible: the reviewer's confirmation merges it into a new schem
 version, through the same drafts, diff and upgrade as any schema change, with no
 second step. The same name with another definition stops as `schema_conflict` for
 a person. Either way the schema's `used_by` records the home, and the profile gets
-a new revision saying what became of the proposal. Two PCs merging at once conflict
-on the `schema` unit, as any two schema changes do.
+a new revision saying what became of the proposal. Two PCs merging different fields
+both land (`schema_merge`).
 """
 
 from __future__ import annotations

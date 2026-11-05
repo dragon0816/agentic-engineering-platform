@@ -6478,6 +6478,37 @@ The owner, through the orchestrator: a rules run, or 改用新值 in review, tha
 
 **Known, not changed.** A candidate whose values are all the same as the card's is `unchanged` and is not written, so a second source that only repeats a value adds no citation. It adds one only when that candidate writes something else too. Whether it should is the owner's to say.
 
+## 2026-11-05 — Schema changes merge when they do not overlap, and only touched skills are flagged
+
+Owner, relayed by the BI orchestrator. Design: `docs/phases/BI_CARD_MODEL.md` §4.3.
+
+**Decided.** One unit per compatible change, on top of the version the `schema` unit names, read as `<base>+<digest>`. Overlap stays for a person.
+
+**Rejected: a three-way merge on sync.** `apply_ops` is pure and every op carries only the hash of its base, so it would need the base document, file reads inside the replay, a merged file that no commit names, and a hook in the generic engine. Units give the same result with the engine as it is: order independence comes from a set of keys, and same key with another value is already a conflict.
+
+**Rejected: a digest in every version.** It would change every ref and the feed goldens' shape. A number from the content for real new versions is enough: `5.1.<patch>`. Two contents can collide only at 1 in about a million, and then `path_taken` refuses the push.
+
+**Also decided.**
+- `+<12 hex>` is added to `catalog.VERSION_RE`: a schema's identity must include its content, since "the same id@version with other content" is `schema_conflict`.
+- `_same_schema` compares base refs, so a colleague's addition no longer invalidates a run under review. An addition can make no candidate wrong.
+- `meta:schema_history` is not written for additions: no version moved, and two PCs' lists would conflict.
+- An unedited generated classify is read current at run time rather than regenerated. Two PCs regenerating it for their own additions conflicted on the skill.
+- `MODEL_VERSION` stays: what a rebuild makes changes only for a vault with these units, and those did not exist before.
+
+**Accepted limits.** An older AEP refuses a vault with these units at sync. The platform's 2026-10-22 reader refuses a snapshot whose schema carries `+`. A later version taking in a change counts as possibly breaking for that type's skills: what the change said is no longer known.
+
+## 2026-11-05 — One owner for a created domain in the schema
+
+Two designs landed on the same day: `meta:home:<id>` widening the registry when read (`catalog.with_home_domains`), and `schema_change:domain:<name>`. `market-intel` holds neither, in any of its 45 commits (checked read-only), so no vault needs both read.
+
+**Decided.** `meta:home:<id>` stays and keeps `{label, domain}`, because the folder and label need it. `schema_merge.changes_of` reads that domain into what the vault reads; `with_home_domains`, `BiStore.home_domains` and the `schema_change:domain` unit are gone. A bare domain in a draft, with no home, is a new version.
+
+**Why not keep the widening:** `reg.domains` said more than `reg.document`, under one ref, so one id@version could mean two things. A snapshot carries the document and not `meta:home`, so a reader's copy would not have known the domain.
+
+**Why not keep the unit:** a home needs its unit anyway, so a create would write two units that must agree, and an AEP older than this refuses `schema_change:` units at sync. `meta:` it accepts.
+
+**Cost.** A created domain makes what the vault reads `<version>+<digest>`, so a snapshot of it is refused by the platform's 2026-10-22 reader until that is redeployed. A new domain flags no skill, even one whose text names it.
+
 ## 2026-11-05: Each BI domain owns its questions, and each has its own person
 
 The owner: 「每個領域也要有各自的benchmark 問題和dashboard」, 「這是一個多人合作的平台，但為了不彼此干擾，每一個domain會有專人來處理」. Design: `docs/phases/BI_PAGE_SIMPLE.md` §11. This replaces the same day's decision that a working domain runs its own questions and the untagged ones.

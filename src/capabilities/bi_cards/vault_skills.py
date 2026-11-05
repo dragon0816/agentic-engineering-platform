@@ -22,6 +22,7 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Mapping
+from dataclasses import replace
 from typing import Any
 
 from capabilities.bi_cards import homes, profile
@@ -352,6 +353,15 @@ def _runnable(repo: Repository, name: str, units: Mapping[str, Any]) -> skills.S
         raise BiStoreError(failure.code, failure.message, **failure.detail) from None
 
 
+def _still_generated(skill: skills.Skill, current: str) -> bool:
+    """Whether a classify skill holds only what generating it says, the schema's name
+    aside: additions add lines, and a line of a person's own means it was edited."""
+    if skill.role != "classify" or skill.extra.get("generated") != "true":
+        return False
+    known = set(current.splitlines())
+    return all(line in known for line in skill.body.splitlines()[1:])
+
+
 def run_rules(
     repo: Repository,
     folder: str,
@@ -384,6 +394,10 @@ def run_rules(
     if from_profile.get("profile") and reg is not None:
         generated = classify_body(reg, _segments(units), _library(units)).strip()
         used = [s for s in used if s.role != "classify" or s.body.strip() != generated]
+    if reg is not None:
+        # Two PCs' merged additions never write this file, so nobody edited it means now.
+        current = classify_body(reg, _segments(units), _library(units))
+        used = [replace(s, body=current) if _still_generated(s, current) else s for s in used]
     parts = [
         f"{'Classification' if s.role == 'classify' else 'Extraction'} "
         f"(skill {s.unit_name}, revision {s.revision}):\n{s.body.strip()}"

@@ -179,9 +179,56 @@ A field or type not listed is not asked for there, and reads as unknown; only a 
 - **Review:** the category explanation shows beside the candidates.
 - Seed and page imports do not read the profile, except for a stated `not_applicable`.
 
-### 4.3 A new field (D7)
+### 4.3 A new field (D7), and schema changes that merge
 
-Profile proposal → reviewed → merged into a new schema version with `used_by`. A new name is compatible and merges by the reviewer's confirmation, with no second step. The same name with another definition stops as `schema_conflict` for a person. It reuses `schema_versions` drafts, diff and upgrade. Two PCs merging at once conflict on the `schema` unit, as any two schema changes do today.
+Profile proposal → reviewed → merged by the reviewer's confirmation, with no second step. The same name with another definition stops as `schema_conflict` for a person. It reuses `schema_versions` drafts, diff and upgrade.
+
+**Owner, 2026-11-05: schema changes merge automatically when they don't overlap, and only skills really affected are flagged.** Decision `docs/DECISIONS.md` 2026-11-05; code `schema_merge.py`.
+
+**Units on a version.** The `schema` unit still names one immutable version, the base. A vault's compatible change is not a new version: it is a unit of its own, so two PCs' changes are two units, and the engine conflicts only on the same key with another value.
+
+| Change | Unit | Value |
+|---|---|---|
+| New domain | none of its own: `meta:home:<id>`'s `domain`, read here (`BI_PAGE_SIMPLE.md` §10) | |
+| New type | `schema_change:type:<Type>` | the type |
+| New field, not required | `schema_change:field:<Type>.<field>` | the field, without `used_by` |
+| Added enum value | `schema_change:enum:<Type>.<field>:<value>` | `{"value"}` |
+| Label of a type or field | `schema_change:label:<Type>[.<field>]` | `{"label"}` |
+| A home uses a field | `schema_change:used_by:<Type>.<field>:<home>` | `{"home"}` |
+
+Every path stays as it is: draft, publish, upgrade. `Vault.capture` compares the published target with what the vault reads. Only additions (`changes_between`) become units, and the target's number is given back, since it was never pushed. Anything more is a new version.
+
+A domain has one owner. `meta:home:<id>` keeps a created home's label, folder and domain, because a domain without a home has nowhere for its sources; `schema_merge.changes_of` reads that domain into the schema, with every other change. A bare domain in a draft is a new version.
+
+**Determinism.** `overlay` applies units by kind, then by key, so the result depends only on the set of units. What a vault reads is `<base>+<first 12 hex of the units' digest>`, for example `5.0.0+a1b2c3d4e5f6`, generated on each PC and installed locally, never pushed. So every PC has byte-identical schema, in any arrival order, and an addition takes no number. Tests: two PCs in both orders and a real race, then a third PC joining.
+
+**A new version's number** is `<major>.<minor>.<patch from its content>`, so two people's different versions are two refs and conflict on the `schema` unit, where before they were one number with two contents. It takes in the change units it was drafted from; another PC's units stay on top of it.
+
+**Old data.** No change unit means no `+`: old commits, old vaults and feed fixtures build as before, so `MODEL_VERSION` stays. A published version reads its own state's units. **An older AEP refuses a vault with these units at sync** (`unit_problem`), as with every new unit, and a snapshot of a merged schema needs a reader that takes `+`: 141's platform does not until it is redeployed (`BI_PLATFORM_RELEASE.md` R9).
+
+**Overlap stops for a person:**
+
+| Overlap | When | How it looks on the page |
+|---|---|---|
+| Same field or label, other value | At push | The existing list, `bi-b-ver-conflicts`: 「沒有送出：有 N 個地方別人也改了」, one row 「schema 的欄位 Technology.cooling」, 你的 and 別人已 push 的 side by side, choose one |
+| Two different new versions | At push | The same list, 「schema 版本」, each side showing its ref |
+| A new version against someone's unit, such as removing a field another just extended | At push (`new_schema_clashes`) | The existing notice: 「沒有送出：schema 的允許值 Technology.stage:pilot：欄位 Technology.stage 已經不在這個版本」 |
+| Removing a field with `used_by` | At preview and apply | `blocked` with code `field_used_by`: the upgrade does not apply |
+| Any of these in a real race, neither PC able to see the other | At sync | The same list, under 「schema 的改動有 N 個要決定」: `status.schema_conflicts`, the same on every PC, and `POST /api/bi/vaults/<id>/schema-conflicts`. A clashing unit is left out of the schema until decided |
+
+**Skills.** A skill revision records its version and the change units it saw (`schema_seen`). `skill_verdict` flags it only when the change touches it:
+
+| Change | Skill with `card_types` | Skill without |
+|---|---|---|
+| Addition to a type it lists, or named in its text | Flagged, still runs | Flagged only if its text names it, still runs |
+| Addition elsewhere | Not flagged | Not flagged |
+| What can lose meaning, on its type or named | Flagged, stops | Flagged, stops, since it reads every type |
+| What can lose meaning, elsewhere | Not flagged | Flagged, stops |
+| Cannot be worked out: file unreadable, another top-level key moved | Flagged, stops | Flagged, stops |
+
+"Names" covers type and field names, labels and enum values. A new domain flags nothing, even when a skill's text names it. A change a later version took in counts as possibly losing meaning, for its own type, because what it said is no longer known. An unedited generated classify is read as the schema is now, so additions never flag it. The list gains `update_blocks` and `update_reason`.
+
+**On the page:** `schema_conflicts` is in the push conflict list, `bi-b-ver-conflicts`: a clash offers 放棄這個改動, a race 留下現在的 and 改用另一個, each staged for the person's commit. A flag with `update_blocks: false` says what changed and that the rule keeps working.
 
 ## 5. Editing (D4)
 

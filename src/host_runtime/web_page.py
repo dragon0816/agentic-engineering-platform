@@ -13795,6 +13795,8 @@ function biProposalRow(item, dataset) {
 function biVaultState(state) {
   const box = el("bi-b-v-state"), v = state.vault || {};
   box.replaceChildren();
+  bi.verSchemaConflicts = state.schema_conflicts || [];
+  if (v.id) biVerConflictList(v.id);
   // Whatever moved the vault (a sync, an import, a commit) may have moved its proposals.
   biProposals().catch((failure) => { el("bi-b-props-list").textContent = failure.message; });
   const open = (state.conflicts || []).filter((c) => c.open).length;
@@ -14767,8 +14769,50 @@ function biVerHistory(vaultId, history) {
 }
 
 function biVerConflicts(vaultId, conflicts) {
+  bi.verPushConflicts = conflicts;
+  biVerConflictList(vaultId);
+}
+
+function biVerSchemaConflicts(vaultId, list) {
+  // Schema changes that landed with nobody to stop them (`BI_CARD_MODEL.md` §4.3).
+  if (!list.length) return null;
+  const rows = bh("ul", "bi-log");
+  const decide = async (conflict, choice, done) => {
+    try {
+      const reply = await biCall("/api/bi/vaults/" + vaultId + "/schema-conflicts",
+        {unit: conflict.unit, choice});
+      biNotice(true, done + "commit 並 push 後大家才會用到。");
+      biVaultState(reply.status);
+    } catch (failure) { biNotice(false, "沒有決定：" + failure.message); }
+  };
+  for (const conflict of list) {
+    const label = conflict.label || conflict.unit;
+    const row = bh("li", "", bh("strong", "", label), bh("p", "bi-meta", conflict.reason || ""),
+      biVerValue(conflict.value));
+    const actions = bh("div", "bi-actions");
+    if (conflict.kind === "clash") {
+      actions.append(biButton("放棄這個改動", () => decide(conflict, "drop", "已放棄這個改動；"),
+        "bi-btn", "放棄這個改動：" + label));
+    } else {
+      row.append(bh("div", "bi-meta", "現在的"), biVerValue(conflict.current));
+      actions.append(
+        biButton("留下現在的", () => decide(conflict, "keep", "已留下現在的；"),
+          "bi-btn", "留下現在的：" + label),
+        biButton("改用另一個", () => decide(conflict, "take", "已改用另一個；"),
+          "bi-btn", "改用另一個：" + label));
+    }
+    row.append(actions); rows.append(row);
+  }
+  return [bh("p", "bi-warn", "schema 的改動有 " + list.length + " 個要決定：已經送出的改動"
+    + "互相衝突，決定之前，這些改動不會生效。"), rows];
+}
+
+function biVerConflictList(vaultId) {
   // Push conflicts side by side: nothing was written until each is decided.
   const box = el("bi-b-ver-conflicts"); box.replaceChildren();
+  const landed = biVerSchemaConflicts(vaultId, bi.verSchemaConflicts || []);
+  if (landed) box.append(...landed);
+  const conflicts = bi.verPushConflicts || [];
   if (!conflicts.length) return;
   const decided = {};
   box.append(bh("p", "bi-warn", "沒有送出：有 " + conflicts.length + " 個地方別人也改了。"
@@ -14832,9 +14876,12 @@ function biSkillsDraw(reply) {
       ? item.applies_to.map(biFolderName).join("、") : "所有來源";
     const state = [];
     if (item.generated) state.push(biBadge("依 schema 產生", "dim"));
-    if (item.needs_update) {
-      state.push(biBadge("需要更新", "warn"), bh("p", "bi-meta", "知識庫現在用 " + reply.schema
-        + "；修改並儲存後才會再使用"));
+    if (item.needs_update && item.update_blocks === false) {
+      state.push(biBadge("可以看一下", "dim"), bh("p", "bi-meta", item.update_reason || ""));
+    } else if (item.needs_update) {
+      state.push(biBadge("需要更新", "warn"), bh("p", "bi-meta", (item.update_reason
+        ? item.update_reason + "；" : "知識庫現在用 " + reply.schema + "；")
+        + "修改並儲存後才會再使用"));
     }
     if (item.problem) state.push(bh("p", "bi-warn", item.problem));
     const edit = bh("button", "bi-btn", "修改");
@@ -15183,7 +15230,8 @@ async function biSkillAi(item, from) {
   const name = item.name;
   await biAiOpen({...biSkillSpec("vault-" + bi.verVault), name, from, ref: "skill:" + name,
     about: "規則「" + name + "」第 " + item.revision + " 版"
-      + (item.needs_update ? "（需要更新：寫給 " + item.schema + "，AI 會一起更新）" : "") + "。",
+      + (item.needs_update && item.update_blocks !== false
+        ? "（需要更新：寫給 " + item.schema + "，AI 會一起更新）" : "") + "。",
     sessionTarget: () => name});
 }
 
