@@ -6568,3 +6568,25 @@ The owner: 「這是一個多人合作的平台，但為了不彼此干擾，每
 - **定案 is an ordinary change with a reason,** built on `set_field`, closing proposals, and `resolve`. Not a Git force push: commits are immutable. No access control. Rejected: a new unit kind for final values, since the field's own history already holds who and why.
 - **Commit stays whole for now,** though `only` makes limiting it cheap. The owner has not asked, and the warning covers it.
 - **The owner's rule for a card two domains reach is recorded, not built:** it needs a merge rule in the engine's conflict path. Findings in §14.
+
+## 2026-11-06: One unit name sits at one level for a company
+
+Acceptance walk of the business cards (orchestrator, for the colleague release): the printed
+光學事業處 was read as the 事業群 on one card and as the 處 on a colleague's, and the org chart
+showed 光學事業處 > 光學事業處 > 研發部. The orchestrator asked that one name not occupy two levels
+for one company, existing duplicates fixed when a card updates. Rule in
+`docs/phases/BUSINESS_CARDS.md` §2 (Host checks on a reading).
+
+- **The name's own level word decides first** (…事業群 → business group, …處 → division, the
+  mapping the spec and the Skill already give), then the company's majority, a tie the first
+  stored person's level. Rejected: always the majority, which makes the first misreading the
+  company's rule; and always the name, which cannot place English or unmarked names.
+- **Only when the company has the name at both levels.** A name read at one level stays where
+  it was read: nothing contradicts it.
+- **Stored people are re-placed inside the card's change** with their value's source kept, so
+  undo of that card reverts it. A value the person set is never moved (the rule that only new
+  evidence touches the person's values), and a level holding another name is never overwritten.
+  Rejected: a one-time migration, which would not catch the next card read the other way.
+- **The chart also drops a unit nested in itself**, so a store not yet re-placed draws right.
+- **Chart file names use local time**, as the page does (a UTC stamp named the previous day in
+  the Taipei morning).
