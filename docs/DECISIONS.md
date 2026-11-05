@@ -6403,3 +6403,8 @@ Owner's bugs, relayed by the BI orchestrator: no Signal card could be found thou
 ## 2026-11-05: Empty reading fields are filled by a run over each card's own text
 
 The owner's rules: through ingest, only the card's own source text, fill only, reviewed. A run of its own, one call per card, whose candidates go through the existing review, merge and commit. Headings and evidence notes reach the model, since removing them made a card's unconfirmed supply link read as fact. Quotes are checked word for word in code. Rejected: another AI ingest of each page, whose full extraction would raise proposals on fields nobody asked about; and page import calling a model, which is what keeps it free and predictable. `scope` waits for the owner: a third of its values were true but no scope.
+
+
+## 2026-11-05: Agent Web records write requests, without what they say
+
+Four uncommitted changes appeared on the real `market-intel` on 2026-11-04 at 21:25 and nobody could be found: Agent Web logged no requests, by design, since a request carries the team's own words. The owner said yes to a record of writes only: time, method, path without query, status, `User-Agent`, `Referer` without query, the client's address, and an `X-AEP-Client` label. Rejected: bodies or query strings, which would undo why `log_message` is silent; reads, which are many and change nothing; a label as identity, since any process with the token can send any label. It is a queue and one thread, so a slow or unwritable log costs a line and never a request. It cannot answer who: it can answer which client said what, and when.

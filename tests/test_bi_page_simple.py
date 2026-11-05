@@ -84,9 +84,6 @@ MAIN_PATH = (
     "bi-b-cands",
     "bi-b-commit-go",
     # Step 3: dashboard, questions, the test run, its result, and what follows it.
-    "bi-b-an-list",
-    "bi-b-bq-list",
-    "bi-b-qa-open",
     "bi-b-bench-run",
     "bi-b-bench-report",
     "bi-b-ver-commit",
@@ -239,8 +236,40 @@ def test_a_read_filter_sits_beside_what_it_filters() -> None:
 
 
 def test_one_ai_panel_and_none_of_the_five() -> None:
-    assert PAGE.count('class="bi-ai-panel"') == 1
+    assert PAGE.count('<aside id="bi-ai" class="bi-ai-panel"') == 1
     for gone in ("bi-b-sa-log", "bi-b-sb-log", "bi-b-ska-log", "bi-b-ana-log", "bi-b-qa-log"):
         assert gone not in PAGE
     for word in ("（Session A）", "（Session B）", "和對話同一套 harness"):
         assert word not in PAGE
+
+
+@pytest.mark.parametrize(
+    ("ident", "section"),
+    [
+        ("bi-b-bq-list", "bi-b-bench"),
+        ("bi-b-bq-form", "bi-b-bench"),
+        ("bi-b-qa-open", "bi-b-bench"),
+        ("bi-b-an-list", "bi-b-an"),
+        ("bi-b-an-new", "bi-b-an"),
+    ],
+)
+def test_step_3_edits_in_its_two_sections(ident: str, section: str) -> None:
+    """Owner, 2026-11-05: collapsed by default, not under 進階, with 跑測試 below them."""
+    assert ("details", section) in PANE.around[ident]
+    assert not _in_advanced(ident)
+
+
+def test_the_two_sections_are_collapsed_by_default() -> None:
+    for section in ("bi-b-bench", "bi-b-an"):
+        assert f'<details id="{section}" class="card bi-sec" hidden>' in PAGE
+    assert (
+        PAGE.index('id="bi-b-bench"')
+        < PAGE.index('id="bi-b-an"')
+        < PAGE.index('id="bi-b-bench-run"')
+    )
+
+
+def test_every_jump_to_another_tab_has_a_way_back() -> None:
+    script = PAGE[PAGE.index("function biBackHide") :]
+    jumps = [line for line in script.splitlines() if 'biShowView("' in line]
+    assert jumps == []

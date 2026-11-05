@@ -6717,6 +6717,16 @@ An AI run never writes `confidence: verified`, on a new card or an empty field: 
 **An identical request reuses its answer** (`capabilities/bi_cards/answer_cache.py`), per PC in `<dataset>/answer_cache/`, keyed by messages, model alias, output limit and contract; failures and wrong shapes are not kept, and a withdrawn source clears them. `POST /api/bi/runs` takes `fresh: true` to ask anyway. `run.answers`: `{reused, asked, input_tokens, output_tokens}`.
 
 **A domain from the application.** `POST /api/bi/import/pages/preview` takes `folder`: a row with no domain takes that application's, marked `inference`, and merges as any value; a one-domain card that holds one keeps it; a library folder gives none. `POST /api/bi/vaults/<id>/fill-domains {confirm?}` → `{fill, by_domain, left, applied, purpose?}` gives cards with no domain their applications' domains in one commit; without `confirm` it writes nothing.
+## Agent Web's record of write requests (2026-11-05)
+
+`<workspace>/logs/agent-web-writes.log`, `host_runtime/write_log.py`. One JSON line per POST, PUT, PATCH or DELETE that reaches Agent Web, refused ones included, in order of their status being known: `at` (when the request was read, local time), `method`, `path`, `status` (0: it ended with no response), `client` (the peer's address), `label` (`X-AEP-Client`), `user_agent`, `referer`. Rotated at about 5 MB, keeping 3 older files as `.1` to `.3`, about 20 MB in all. A line `{"dropped": n}` says how many were lost.
+
+**Never recorded:** bodies, query strings, fragments, cookies, `Authorization`, other headers, the user part of a `Referer`. **Not recorded at all:** reads, so GET and HEAD. `log_message` stays silent, and nothing goes to the console.
+
+**What it does not prove.** `X-AEP-Client`, `User-Agent` and `Referer` are what the client says, and `client` is 127.0.0.1 for everything on this PC. Any process with the token can send any label, or none. A line says a request was made and what it called itself, not who made it. The page sends no `Referer`, and a browser sends no label unless told to, so a person at the page and a script without a label look alike but for `User-Agent`.
+
+**Limits.** A request reaches the file only after its status is known, so a long request in progress when the process stops leaves no line. The writing is a queue and one thread: a request never waits on it, and a log that cannot be written, or a queue of more than 2,000 lines, loses lines and costs no request. Those who label themselves: `tests/bi_page_driver.py`, `aep-assistant-bridge`.
+
 ## BI: a run that fills empty reading fields (2026-11-05)
 
 Design and measurements: `docs/phases/BI_SUMMARY_FILL.md`. Code: `capabilities/bi_cards/reading_runs.py`. A page import uses no model, so it leaves `summary` and `usage` empty; a page's body stays a source of its card.

@@ -115,6 +115,7 @@ from host_runtime import (
     multi_agent_switch,
     telemetry_api,
     wiki_bench,
+    write_log,
 )
 from host_runtime.agent_mail import AgentMail
 from host_runtime.agent_mode import AgentMode
@@ -6254,6 +6255,49 @@ class _Handler(BaseHTTPRequestHandler):
         """Nothing. A request here carries the team's own words."""
         return None
 
+    # -- the record of write requests (`write_log`) ------------------------------
+
+    _write_noted = False
+    _write_at: str | None = None
+
+    def parse_request(self) -> bool:
+        self._write_noted = False
+        self._write_at = datetime.now().astimezone().isoformat(timespec="milliseconds")
+        return bool(super().parse_request())
+
+    def send_response(self, code: int, message: str | None = None) -> None:
+        self._note_write(code)
+        super().send_response(code, message)
+
+    def handle_one_request(self) -> None:
+        self._write_noted = True  # until a request line says otherwise
+        try:
+            super().handle_one_request()
+        finally:
+            self._note_write(0)  # 0: it ended with no response
+
+    def _note_write(self, status: int) -> None:
+        """Once per request, when its status is first known; never raises."""
+        if self._write_noted or self.command not in write_log.METHODS:
+            return
+        self._write_noted = True
+        try:
+            headers = self.headers
+            self.server.write_log.note(
+                write_log.entry(
+                    method=str(self.command),
+                    target=self.path,
+                    status=status,
+                    user_agent=headers.get("User-Agent") or "",
+                    referer=headers.get("Referer") or "",
+                    client=str(self.client_address[0]),
+                    label=headers.get("X-AEP-Client") or "",
+                    at=self._write_at,
+                )
+            )
+        except Exception:  # noqa: BLE001, S110 - no request ever fails for its log line
+            pass
+
     # -- the guards ----------------------------------------------------
 
     def _host_is_loopback(self) -> bool:
@@ -7335,6 +7379,10 @@ class AgentWebServer(ThreadingHTTPServer):
         # standing key to this machine's Agent lying in somebody's history.
         self.token = token if token is not None else secrets.token_urlsafe(32)
         self._page = page
+        runtime = getattr(web, "runtime", None)
+        layout = getattr(runtime, "layout", None)
+        root = getattr(layout, "workspace_root", None)
+        self.write_log = write_log.WriteLog(root / "logs" if isinstance(root, Path) else None)
         super().__init__(("127.0.0.1", port), _Handler)
         # The Copilot agent mode reaches the assistant tools on this server.
         backends = getattr(web, "backends", None)
@@ -7343,6 +7391,10 @@ class AgentWebServer(ThreadingHTTPServer):
                 f"http://127.0.0.1:{self.server_address[1]}/mcp",
                 web.assistant_token,
             )
+
+    def server_close(self) -> None:
+        super().server_close()
+        self.write_log.close()
 
     def page(self) -> bytes:
         if self._page is not None:

@@ -60,6 +60,11 @@ class BiPage:
                 mobile=False,
             )
             self.browser.page().call("Page.enable")
+            # Named in the host's write log (`host_runtime.write_log`), a label and no more.
+            self.browser.page().call("Network.enable")
+            self.browser.page().call(
+                "Network.setExtraHTTPHeaders", headers={"X-AEP-Client": "tests/bi_page_driver"}
+            )
             self.browser.page().call("Page.addScriptToEvaluateOnNewDocument", source=_WATCH)
             self.browser.navigate(self.address)
             self.wait('!document.getElementById("send").disabled')

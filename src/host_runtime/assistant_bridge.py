@@ -122,7 +122,11 @@ class Bridge:
                 raw = self._post(
                     url,
                     body,
-                    {"Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+                    {
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {token}",
+                        "X-AEP-Client": "aep-assistant-bridge",
+                    },
                     CALL_TIMEOUT_SECONDS,
                 )
                 reply = json.loads(raw)
