@@ -145,16 +145,33 @@ def test_the_removed_controls_are_gone_from_markup_and_script(ident: str) -> Non
     assert f'"{ident}"' not in PAGE
 
 
-def test_there_is_one_selection_and_it_is_step_1s() -> None:
+def test_there_is_one_selection_above_every_tab_vault_then_domain() -> None:
+    # Owner: 「第一件事情是選擇vault，或者是新增一個vault，接著再選domain」.
     assert PANE.tags["bi-dataset"] == "select"
-    assert ("section", "") in PANE.around["bi-dataset"]
-    assert ("div", "bi-view-build") in PANE.around["bi-dataset"]
+    assert ("div", "bi-view-build") not in PANE.around["bi-dataset"]
+    assert ("div", "bi-view-build") not in PANE.around["bi-b-src-folder"]
+    assert ("div", "bi-top-row") in PANE.around["bi-dataset"]
+    assert ("div", "bi-top-row") in PANE.around["bi-b-src-folder"]
+    order = [
+        'id="bi-dataset"',
+        'id="bi-b-v-new"',
+        'id="bi-b-v-join"',
+        'id="bi-b-src-folder"',
+        'id="bi-b-home-new"',
+        'id="bi-views"',
+        'id="bi-stepper"',
+        'id="bi-b-class"',
+    ]
+    at = [PAGE.index(mark, PAGE.index('<div id="kn-pane-bi"')) for mark in order]
+    assert at == sorted(at), order
     assert "bi-bar" not in PAGE[PAGE.index('<div id="kn-pane-bi"') :].split("<section")[0]
 
 
-def test_create_and_join_are_a_menu_beside_the_selection() -> None:
-    for ident in ("bi-b-v-new", "bi-b-v-join", "bi-b-v-sync"):
-        assert ("details", "bi-b-v-menu") in PANE.around[ident], ident
+def test_create_and_join_sit_beside_the_selection_and_the_rest_is_folded() -> None:
+    for ident in ("bi-b-v-new", "bi-b-v-join"):
+        assert ("details", "bi-b-v-menu") not in PANE.around[ident], ident
+        assert ("div", "bi-top-row") in PANE.around[ident], ident
+    assert ("details", "bi-b-v-menu") in PANE.around["bi-b-v-sync"]
     # Their form is not in the menu, or closing the menu would hide it.
     assert not any(tag == "details" for tag, _name in PANE.around["bi-b-v-form"])
 

@@ -354,3 +354,14 @@ Status: questions built on `bi-step1-domain`, 2026-11-05; each domain's dashboar
 | 3 | Lists every question, and 跑測試 runs them all, the only way to run what has no domain. No 新增題目, 和 AI 一起出題 or 和 AI 做新分析, and no editor |
 
 The API still accepts a question with no `home`, and a vault with no homes keeps working as before: it has no other view.
+
+## 13. The first row: the vault, then the working domain
+
+**The owner, verbatim:** 「目前我覺得順序有點錯亂，在BI Knowledge頁面，第一件事情是選擇vault，或者是新增一個vault，接著再選domain」. This replaces where §3 and §9.2 put these controls.
+
+One row at the very top of the BI page, on every tab: 知識庫 with 新增知識庫 and 加入 beside it, and 管理 folded for the rest; then 工作領域 with 新增領域; then the tabs and the stepper. The vault's status line sits under the row. Step 1 starts at 機密等級 and the files. A plain dataset and a read-only copy have no domain part. Someone with no vault sees 新增知識庫 as the main button. The row stays in sight when the page scrolls, except on a phone, where it stacks and would fill the screen.
+
+**One relationship between the working domain and each tab's filter:**
+
+- **Dashboard:** the working domain decides. A working domain with a card domain hides the Dashboard's own 領域, since there is nothing to choose. Under 全部領域, or a library entry, which has no card domain, it stays.
+- **卡片:** the filter starts on the working domain's card domain and stays the person's to change, since a card can hold several domains and looking across them is what this tab is for. The next choice of working domain sets it again; 全部領域 sets it to every domain.

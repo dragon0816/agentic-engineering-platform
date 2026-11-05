@@ -1325,12 +1325,29 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
   .bi-cards { max-height: none; }
 }
 /* A list and what it opens, side by side at one height, each scrolling on its own. */
-.bi-scope { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 10px;
-  margin-bottom: 10px; padding: 6px 0; background: var(--bg); }
-.bi-scope .bi-label { margin: 0; font-size: 14px; font-weight: 600; color: var(--ink); }
-.bi-scope { flex-wrap: wrap; }
+/* What the whole page is about, first, and in sight while it scrolls. */
+/* No box of its own: a sticky row sticks only inside its parent, and this must span the page. */
+.bi-top { display: contents; }
+#bi-b-v-state:not(:empty) { margin-bottom: 8px; }
+.bi-top-row { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap;
+  align-items: flex-end; gap: 8px 10px; padding: 6px 0; background: var(--bg); }
+.bi-top-pick { flex: 0 1 300px; min-width: 0; }
+.bi-top-pick select { width: 100%; }
+.bi-top-row > .bi-menu { margin-bottom: 8px; }
+.bi-counts[hidden] { display: none; }
+.bi-scope { display: grid; grid-template-columns: minmax(140px, 220px) auto; gap: 0 10px;
+  align-items: end; margin-left: 6px; padding-left: 14px; border-left: 1px solid var(--line); }
+.bi-scope[hidden] { display: none; }
+.bi-scope .bi-label { grid-column: 1 / -1; }
+.bi-scope select { width: 100%; }
+.bi-scope .bi-scope-form { grid-column: 1 / -1; }
+@media (max-width: 760px) {
+  .bi-top-row { position: static; flex-direction: column; align-items: stretch; }
+  .bi-top-pick { flex: 0 0 auto; }
+  .bi-scope { grid-template-columns: minmax(0, 1fr) auto; margin-left: 0; padding-left: 0;
+    border-left: 0; }
+}
 #bi-b-bq-split:has(> #bi-b-bq-pane[hidden]) { grid-template-columns: minmax(0, 1fr); }
-.bi-scope select { flex: 0 1 320px; min-width: 0; }
 .bi-scope-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .bi-scope-form[hidden] { display: none; }
 .bi-scope-form .bi-input { width: 210px; }
@@ -2477,10 +2494,71 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
           <div class="bi-actions">
             <button class="go" id="bi-ai-send" type="button">送出</button></div>
         </aside>
+      <div id="bi-b-vault" class="bi-top" role="region" aria-label="知識庫與工作領域">
+        <div class="bi-top-row" id="bi-top-row">
+          <div class="bi-top-pick"><label class="bi-label" for="bi-dataset">知識庫</label>
+            <select id="bi-dataset"><option value="demo">demo</option></select></div>
+          <button class="bi-btn" id="bi-b-v-new" type="button" data-mode="new"
+            aria-expanded="false" aria-controls="bi-b-v-form">新增知識庫</button>
+          <button class="bi-btn" id="bi-b-v-join" type="button" data-mode="join"
+            aria-expanded="false" aria-controls="bi-b-v-form">加入</button>
+          <details class="bi-manage bi-menu" id="bi-b-v-menu"><summary>管理</summary>
+            <button class="bi-btn" id="bi-b-v-sync" type="button" hidden>立即同步</button>
+          </details>
+        <div class="bi-scope" id="bi-b-src-folder-box" hidden>
+          <label class="bi-label" for="bi-b-src-folder">工作領域</label>
+          <select id="bi-b-src-folder"></select>
+          <button class="bi-btn" id="bi-b-home-new" type="button">新增領域</button>
+          <form id="bi-b-home-form" class="bi-scope-form" hidden novalidate>
+            <input id="bi-b-home-name" class="bi-input" maxlength="40" autocomplete="off"
+              aria-label="領域名稱" placeholder="領域名稱，例如 Automotive">
+            <input id="bi-b-home-folder" class="bi-input" maxlength="40" autocomplete="off"
+              spellcheck="false" aria-label="資料夾名稱"
+              placeholder="資料夾（中文名稱才要填）">
+            <button class="go" id="bi-b-home-go" type="submit">建立</button>
+            <button class="bi-btn" id="bi-b-home-cancel" type="button">取消</button>
+          </form>
+        </div>
+        </div>
+        <p class="bi-err" id="bi-b-home-err" role="alert" hidden></p>
+        <p class="bi-warn" id="bi-b-scope-empty" role="status" hidden></p>
+        <div id="bi-b-v-state" role="status" aria-live="polite"></div>
+            <form id="bi-b-v-form" class="bi-step" hidden novalidate>
+              <h4 id="bi-b-v-form-h"></h4>
+              <div class="bi-step-grid">
+                <div data-for="new"><label class="bi-label" for="bi-b-v-title">知識庫名稱</label>
+                  <input id="bi-b-v-title" class="bi-input" maxlength="120"
+                    placeholder="例如：市場訊號與產品對應"></div>
+                <div data-for="new"><label class="bi-label" for="bi-b-v-id">
+                  知識庫 id（資料夾名稱，之後不能改；留空由名稱產生）</label>
+                  <input id="bi-b-v-id" class="bi-input" maxlength="40" spellcheck="false"
+                    placeholder="例如：market-intel"></div>
+                <div data-for="new convert"><label class="bi-label" for="bi-b-v-purpose">
+                  目的（Agent 依這段話判斷什麼問題該查它）</label>
+                  <input id="bi-b-v-purpose" class="bi-input" maxlength="1000"
+                    placeholder="例如：看市場需求與訊號，對應我們的產品與業務策略"></div>
+                <div data-for="new"><label class="bi-label" for="bi-b-v-schema">Schema</label>
+                  <select id="bi-b-v-schema"></select></div>
+                <div data-for="new convert join"><label class="bi-label" for="bi-b-v-path"
+                  id="bi-b-v-path-label">資料夾</label>
+                  <input id="bi-b-v-path" class="bi-input" maxlength="1000" spellcheck="false"
+                    placeholder="C:\Users\你\OneDrive - 公司\…"></div>
+                <div data-for="new convert join"><label class="bi-label" for="bi-b-v-author">
+                  你的作者名稱（變更檔放在這個名稱的資料夾；留空用登入名稱）</label>
+                  <input id="bi-b-v-author" class="bi-input" maxlength="40"></div>
+                <div data-for="join"><label><input id="bi-b-v-resume" type="checkbox">
+                  接續（我本人換電腦，沿用同一個作者名稱）</label></div>
+              </div>
+              <div class="bi-actions">
+                <button class="go" id="bi-b-v-go" type="submit">建立</button>
+                <button class="bi-btn" id="bi-b-v-cancel" type="button">取消</button></div>
+              <div id="bi-b-v-err" role="alert"></div>
+            </form>
+      </div>
         <div class="bi-empty-state" id="bi-empty-state" role="note" hidden>
           <p class="bi-meta">這台電腦還沒有 BI 資料集。</p>
           <div class="bi-actions">
-            <button class="go" id="bi-empty-demo" type="button">載入示範資料</button>
+            <button class="bi-btn" id="bi-empty-demo" type="button">載入示範資料</button>
             <button class="bi-btn" id="bi-empty-new" type="button">新增資料集</button>
           </div>
         </div>
@@ -2586,22 +2664,6 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
         </div>
       </div>
       <div id="bi-view-build" role="tabpanel" aria-label="建立與匯入">
-        <div class="bi-scope" id="bi-b-src-folder-box" hidden>
-          <label class="bi-label" for="bi-b-src-folder">工作領域</label>
-          <select id="bi-b-src-folder"></select>
-          <button class="bi-btn" id="bi-b-home-new" type="button">新增領域</button>
-          <form id="bi-b-home-form" class="bi-scope-form" hidden novalidate>
-            <input id="bi-b-home-name" class="bi-input" maxlength="40" autocomplete="off"
-              aria-label="領域名稱" placeholder="領域名稱，例如 Automotive">
-            <input id="bi-b-home-folder" class="bi-input" maxlength="40" autocomplete="off"
-              spellcheck="false" aria-label="資料夾名稱"
-              placeholder="資料夾（中文名稱才要填）">
-            <button class="go" id="bi-b-home-go" type="submit">建立</button>
-            <button class="bi-btn" id="bi-b-home-cancel" type="button">取消</button>
-          </form>
-        </div>
-        <p class="bi-err" id="bi-b-home-err" role="alert" hidden></p>
-        <p class="bi-warn" id="bi-b-scope-empty" role="status" hidden></p>
         <div id="bi-build-steps">
         <nav id="bi-stepper" class="kp-stepper" aria-label="建立與匯入步驟">
           <ol>
@@ -2629,51 +2691,6 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
         <div class="mem-status" id="bi-status-build" role="status" aria-live="polite" hidden></div>
         <section class="kp-stage card bi-step" data-stage="source" aria-labelledby="bi-b-source">
           <h3 class="kp-stage-title" id="bi-b-source" tabindex="-1">步驟 1／3・輸入與轉檔</h3>
-          <div id="bi-b-vault" role="region" aria-label="知識庫">
-          <div class="bi-step-grid">
-            <div><label class="bi-label" for="bi-dataset">知識庫</label>
-            <select id="bi-dataset"><option value="demo">demo</option></select></div>
-            <details class="bi-manage bi-menu" id="bi-b-v-menu"><summary>管理</summary>
-              <button class="bi-btn" id="bi-b-v-sync" type="button" hidden>立即同步</button>
-              <button class="bi-btn" id="bi-b-v-new" type="button" data-mode="new"
-                aria-expanded="false" aria-controls="bi-b-v-form">建立共用知識庫（vault）</button>
-              <button class="bi-btn" id="bi-b-v-join" type="button" data-mode="join"
-                aria-expanded="false" aria-controls="bi-b-v-form">加入既有的 vault</button>
-            </details>
-          </div>
-            <div id="bi-b-v-state" role="status" aria-live="polite"></div>
-            <form id="bi-b-v-form" class="bi-step" hidden novalidate>
-              <h4 id="bi-b-v-form-h"></h4>
-              <div class="bi-step-grid">
-                <div data-for="new"><label class="bi-label" for="bi-b-v-title">知識庫名稱</label>
-                  <input id="bi-b-v-title" class="bi-input" maxlength="120"
-                    placeholder="例如：市場訊號與產品對應"></div>
-                <div data-for="new"><label class="bi-label" for="bi-b-v-id">
-                  知識庫 id（資料夾名稱，之後不能改；留空由名稱產生）</label>
-                  <input id="bi-b-v-id" class="bi-input" maxlength="40" spellcheck="false"
-                    placeholder="例如：market-intel"></div>
-                <div data-for="new convert"><label class="bi-label" for="bi-b-v-purpose">
-                  目的（Agent 依這段話判斷什麼問題該查它）</label>
-                  <input id="bi-b-v-purpose" class="bi-input" maxlength="1000"
-                    placeholder="例如：看市場需求與訊號，對應我們的產品與業務策略"></div>
-                <div data-for="new"><label class="bi-label" for="bi-b-v-schema">Schema</label>
-                  <select id="bi-b-v-schema"></select></div>
-                <div data-for="new convert join"><label class="bi-label" for="bi-b-v-path"
-                  id="bi-b-v-path-label">資料夾</label>
-                  <input id="bi-b-v-path" class="bi-input" maxlength="1000" spellcheck="false"
-                    placeholder="C:\Users\你\OneDrive - 公司\…"></div>
-                <div data-for="new convert join"><label class="bi-label" for="bi-b-v-author">
-                  你的作者名稱（變更檔放在這個名稱的資料夾；留空用登入名稱）</label>
-                  <input id="bi-b-v-author" class="bi-input" maxlength="40"></div>
-                <div data-for="join"><label><input id="bi-b-v-resume" type="checkbox">
-                  接續（我本人換電腦，沿用同一個作者名稱）</label></div>
-              </div>
-              <div class="bi-actions">
-                <button class="go" id="bi-b-v-go" type="submit">建立</button>
-                <button class="bi-btn" id="bi-b-v-cancel" type="button">取消</button></div>
-              <div id="bi-b-v-err" role="alert"></div>
-            </form>
-          </div>
           <div class="bi-actions" id="bi-b-ro-links" hidden>
             <button class="bi-btn" id="bi-b-ro-cards" type="button">看卡片</button>
             <button class="bi-btn" id="bi-b-ro-dash" type="button">看 Dashboard</button>
@@ -12180,7 +12197,12 @@ async function biLoad() {
   biRenderSchema(); biRenderTypes(); biRenderReadOnly();
   biLoadSubs(); biLoadPublishState();
   bi.loaded = {};
+  // The working domain first: every tab reads under it.
+  await biSourceFolders().catch(() => {});
   await biShowView(bi.view);
+  // The build tab asks for the vault's status itself, after what its step needs. Here it is
+  // only the line under the row, and must not take the notice from what this tab is doing.
+  if (bi.view !== "build") biBuildVault().catch(() => {});
 }
 
 // A dataset whose schema is not bi.schema/* has no Dashboard and no chat query.
@@ -12220,8 +12242,8 @@ function biDomainOptions(domains) {
 function biRenderSchema() {
   const isBi = biIsBi(), schema = bi.schema || {};
   el("bi-demo").hidden = !isBi;
-  el("bi-domain-box").hidden = Array.isArray(schema.domains) && !schema.domains.length;
-  el("bi-card-domain-box").hidden = el("bi-domain-box").hidden;
+  el("bi-card-domain-box").hidden = Array.isArray(schema.domains) && !schema.domains.length;
+  biDashDomainBox();
   biDomainOptions(schema.domains || []);
   const note = el("bi-schema-note"); note.replaceChildren();
   if (!schema.ref) return;
@@ -12281,9 +12303,13 @@ function biRenderBar() {
   }
   select.append(mine);
   if (subscribed.children.length) select.append(subscribed);
+  // Someone with no vault yet starts here.
+  el("bi-b-v-new").className = (bi.vaults || []).length ? "bi-btn" : "go";
   select.value = keep;
   const current = bi.datasets.find((item) => item.name === keep);
   const counts = el("bi-counts"); counts.replaceChildren();
+  // A vault's status line, under the row, already says how many.
+  counts.hidden = Boolean(biVaultOf(keep));
   counts.append(bh("strong", "", String(current ? current.cards : 0)), text("張卡片"));
   counts.append(bh("span", "", current && current.updated ? "· 更新於 " + biTime(current.updated)
     : "· 尚未載入資料"));
@@ -15459,8 +15485,16 @@ function biScopeDomain() {
   return item ? item.domain : null;
 }
 
+function biDashDomainBox() {
+  // A working domain with a card domain decides the Dashboard's, so there is nothing to choose.
+  const schema = bi.schema || {};
+  el("bi-domain-box").hidden = Boolean(biScopeDomain())
+    || (Array.isArray(schema.domains) && !schema.domains.length);
+}
+
 function biScopeFollowed() {
-  // The Dashboard's domain follows once per choice; afterwards it is the person's to change.
+  // The tabs follow once per choice. The Dashboard's domain is the working domain's; the card
+  // tab's filter starts on it and stays the person's to change, until the next choice.
   const chosen = el("bi-b-src-folder").value;
   if (bi.build.scopeSet === chosen) return;
   bi.build.scopeSet = chosen;
@@ -15470,6 +15504,14 @@ function biScopeFollowed() {
     el("bi-domain").value = option.value;
     if (bi.loaded) bi.loaded.dashboard = false;
   }
+  const filter = el("bi-card-domain");
+  const own = [...filter.options].find((o) => o.value && o.value.toLowerCase() === wanted);
+  const next = own ? own.value : "";
+  if (filter.value !== next) {
+    filter.value = next;
+    if (bi.loaded) bi.loaded.cards = false;
+  }
+  biDashDomainBox();
 }
 
 async function biSourceFolders() {
@@ -15563,6 +15605,11 @@ function biScopeChanged() {
   biScopeFollowed(); biFileChosen(); biRenderSources(); biBuildRunPick();
   biBuildStage(bi.build.stage, false);
   biDashHome();
+  // The tab showing follows too; biDashHome has already moved and asked for a Dashboard in step 3.
+  if (bi.view !== "build") {
+    if (bi.loaded) bi.loaded[bi.view] = false;
+    biShowView(bi.view);
+  }
   // What is already here redraws at once; the reads below take seconds on a real vault, and
   // whichever reply comes last, it is drawn for the domain chosen by then.
   if (bi.skills) biSkillsDraw(bi.skills);
@@ -15626,7 +15673,8 @@ async function biBuildSources() {
   // Newest call only: an older list arriving late must not drop the source just added.
   const seq = bi.sourcesSeq = (bi.sourcesSeq || 0) + 1, listed = biDataset();
   const reply = await call("/api/bi/sources?dataset=" + encodeURIComponent(listed));
-  await biSourceFolders().catch(() => {});
+  // Read once with the page (`biLoad`); here only if that failed or this dataset is new to it.
+  if (!(bi.build.homes || []).length) await biSourceFolders().catch(() => {});
   if (seq !== bi.sourcesSeq || listed !== biDataset()) return;
   bi.build.sources = reply.sources || []; bi.build.sourcesFor = listed;
   const cloud = bi.build.sources.filter((s) => s.shared === "cloud_only").length;

@@ -6534,3 +6534,11 @@ The owner: 「每個領域也要有各自的benchmark 問題和dashboard」, 「
 ## 2026-11-05: 14 demonstration cards marked as samples, through a CSV import
 
 The owner decided to mark 14 cards of `market-intel` whose pages say fictional or demonstration, 13 and then one the wider check found, with the marks in `card:` units so every PC rebuilds them. No new route: the CSV import already applies `FICTIONAL` to a row and keeps a mark once set, and on a row with no changed value it moves nothing else. Rejected: a dedicated mark route, not needed for this; the page import, which by design never changes a mark; and renaming them `SAMPLE-`, which would change their keys, links and identities. Consequence: these 14 are `synthetic` without the prefix, 21 such cards in all.
+
+## 2026-11-05: The BI page leads with the vault, then the working domain
+
+The owner: 「第一件事情是選擇vault，或者是新增一個vault，接著再選domain」. Design: `docs/phases/BI_PAGE_SIMPLE.md` §13.
+
+- **One row above every tab,** since the vault is what the whole page reads. Rejected: keeping the vault in step 1, which is what the owner found backwards.
+- **The working domain decides the Dashboard's domain, and only starts the card tab's filter.** Rejected: hiding the card filter too, since a person often needs to look across domains there; two filters that could silently disagree on the Dashboard, where one panel set has one domain.
+- **Sticky on a desktop only.** On a phone the stacked row would cover the page.
