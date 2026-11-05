@@ -58,7 +58,29 @@ DEPENDENCIES = (
 MANUAL = "INSTALL.zh-TW.md"
 #: The complete guide to every setting and feature, shipped beside the manual.
 GUIDE = "USER_GUIDE.zh-TW.md"
+#: The BI guides, from `docs/guides`, in one folder of the release: the SOP's images keep their
+#: relative paths, and the guides link each other by name.
+BI_FOLDER = "BI_SOP"
+BI_GUIDES = ("BI_SOP.zh-TW.md", "BI_BUILD.zh-TW.md", "BI_SKILL_EXAMPLES.zh-TW.md")
+BI_IMAGES = "images/bi-sop"
 LATEST = "latest.json"
+
+
+def copy_bi_guides(source: Path, folder: Path) -> Path:
+    """The BI guides and the SOP's screenshots into `folder/BI_SOP`. A missing guide stops
+    the release: colleagues are trained from them."""
+    guides = source / "docs" / "guides"
+    missing = [name for name in BI_GUIDES if not (guides / name).is_file()]
+    if missing:
+        raise ReleaseError("BI guide missing: " + ", ".join(missing))
+    target = folder / BI_FOLDER
+    target.mkdir(parents=True, exist_ok=True)
+    for name in BI_GUIDES:
+        shutil.copy2(guides / name, target / name)
+    images = guides / BI_IMAGES
+    if images.is_dir():
+        shutil.copytree(images, target / BI_IMAGES, dirs_exist_ok=True)
+    return target
 
 
 class ReleaseError(Exception):
@@ -110,6 +132,8 @@ def release_notes(
         "- Update: close Agent Web, unzip the new release, run `update.cmd` (settings kept).",
         f"- Details: `{MANUAL}` (install, update, uninstall) and `{GUIDE}` (every setting "
         "and feature) in this folder and inside the zip.",
+        f"- BI knowledge base: `{BI_FOLDER}\\{BI_GUIDES[0]}`, step by step with screenshots, "
+        f"and `{BI_FOLDER}\\{BI_GUIDES[1]}`, in this folder.",
         "- LLM gateway: installed and started at sign-in unless `-NoGateway`; read "
         '"設定 LLM gateway（最重要）" (chapter 1 of the guide) first (token renewal needs the '
         "company domain sign-in).",
@@ -264,6 +288,7 @@ def main() -> int:
             )
             for document in (MANUAL, GUIDE):
                 shutil.copy2(source / "deploy" / "windows-preview" / document, folder / document)
+            copy_bi_guides(source, folder)
         digest = sha256(archive)
         (folder / "SHA256SUMS.txt").write_text(f"{digest}  {archive.name}\n", encoding="utf-8")
         previous = args.notes_since or previous_revision(releases)

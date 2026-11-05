@@ -12,9 +12,14 @@ import pytest
 from host_runtime import launcher
 from scripts.build_windows_preview import REQUIRED_OPERATOR_GUIDES, SECRET_ASSIGNMENT
 from scripts.release_windows import (
+    BI_FOLDER,
+    BI_GUIDES,
+    BI_IMAGES,
     DEPENDENCIES,
     GUIDE,
     MANUAL,
+    ReleaseError,
+    copy_bi_guides,
     previous_revision,
     release_notes,
 )
@@ -147,3 +152,33 @@ def test_the_shortcut_carries_the_aep_icon(tmp_path: Path, monkeypatch: pytest.M
         tmp_path / "Desktop" / "AEP Agent.lnk"
     ]
     assert seen[0]["AEP_ICON"] == str(icon)
+
+
+def test_the_bi_guides_go_into_their_own_folder_with_the_sops_images(tmp_path: Path) -> None:
+    source, folder = tmp_path / "repo", tmp_path / "release"
+    guides = source / "docs" / "guides"
+    (guides / BI_IMAGES).mkdir(parents=True)
+    for name in BI_GUIDES:
+        (guides / name).write_text(f"# {name}\n", encoding="utf-8")
+    (guides / BI_IMAGES / "01-start.png").write_bytes(b"png")
+    target = copy_bi_guides(source, folder)
+    assert target == folder / BI_FOLDER
+    assert sorted(p.name for p in target.glob("*.md")) == sorted(BI_GUIDES)
+    # The SOP links its images by this relative path.
+    assert (target / BI_IMAGES / "01-start.png").read_bytes() == b"png"
+    assert BI_FOLDER in release_notes(
+        release="r", revision="x", previous=None, commits=[], created="t"
+    )
+
+
+def test_a_missing_bi_guide_stops_the_release(tmp_path: Path) -> None:
+    guides = tmp_path / "repo" / "docs" / "guides"
+    guides.mkdir(parents=True)
+    (guides / BI_GUIDES[1]).write_text("# x\n", encoding="utf-8")
+    with pytest.raises(ReleaseError, match=BI_GUIDES[0]):
+        copy_bi_guides(tmp_path / "repo", tmp_path / "release")
+
+
+def test_the_repositorys_bi_guides_are_all_there() -> None:
+    guides = Path(__file__).resolve().parents[1] / "docs" / "guides"
+    assert all((guides / name).is_file() for name in BI_GUIDES)
