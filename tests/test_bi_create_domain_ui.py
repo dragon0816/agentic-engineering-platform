@@ -120,7 +120,7 @@ def test_a_domain_is_created_in_the_row_and_becomes_the_working_domain(tmp_path:
             page.run(
                 "(() => { const was = window.fetch; window.__hold = [];"
                 " window.fetch = async (...args) => { const reply = await was(...args);"
-                " if (String(args[0]).endsWith('/checks')) {"
+                " if (String(args[0]).includes('/checks')) {"
                 " await new Promise((go) => window.__hold.push(go)); }"
                 " return reply; }; })()"
             )

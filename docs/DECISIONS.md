@@ -6469,3 +6469,11 @@ The BI build tab took 14-17 s to show its source table on `market-intel`, and mo
 - **Only for what reads and hands nothing on.** `state_at`, `log` and `sync` still read the files, because a caller may change the values they return, and a kept scan must not be what it changes. Rejected: keeping every scan, with a deep copy per call, which costs about what it saves.
 - **A scan with a bad or half-arrived file is not kept,** since its next read may differ with the stamp unchanged.
 - **One scan per folder stays in memory** in Agent Web, tens of MB on a large repository (estimated, not measured). Accepted.
+
+## 2026-11-05: Each BI domain owns its questions, and each has its own person
+
+The owner: 「每個領域也要有各自的benchmark 問題和dashboard」, 「這是一個多人合作的平台，但為了不彼此干擾，每一個domain會有專人來處理」. Design: `docs/phases/BI_PAGE_SIMPLE.md` §11. This replaces the same day's decision that a working domain runs its own questions and the untagged ones.
+
+- **專人 is a working arrangement, not access control.** AEP adds no file permissions; IT decides through SharePoint. No owner field blocks anyone, and there is no login check.
+- **A question belongs to one domain; an untagged one is waiting for a domain** and runs in no domain's test, only in the overview's. Rejected: running untagged questions in every domain, which puts market-intel's 12 in front of everyone and is what the owner objected to.
+- **全部領域 is a read-only overview.** Rejected: letting it add a question with no owner, which would make more of what is being assigned away.

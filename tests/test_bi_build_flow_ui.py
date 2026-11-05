@@ -279,6 +279,9 @@ def test_the_whole_build_flow(
             },
             {"text": "出了兩題。"},
         )
+        # A question belongs to a domain: 全部領域 only reads.
+        page.wait("(bi.build.homes || []).length > 0")
+        page.choose("bi-b-src-folder", str(page.run("bi.build.homes[0].folder")))
         page.click("#bi-b-qa-open")
         page.ai_opened("questions")
         # The questions stay beside the AI, and 跑測試 is not pushed down by it.

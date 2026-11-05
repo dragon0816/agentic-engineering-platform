@@ -410,6 +410,13 @@ def test_vault_panel_and_dashboard_in_a_browser(
         wait("!document.getElementById('bi-b-bench').hidden")
         assert "還沒有跑過測試" in text_of("bi-b-bench-report")
         assert run("document.getElementById('bi-b-bench-run').disabled")
+        # A question belongs to a domain: 全部領域 only reads.
+        wait("(bi.build.homes || []).length > 0")
+        run(
+            "(() => { const s = document.getElementById('bi-b-src-folder');"
+            " s.value = bi.build.homes[0].folder; s.dispatchEvent(new Event('change')); })()"
+        )
+        wait("!document.getElementById('bi-b-bq-pane').hidden")
         set_value("bi-b-bq-q", "TSN 的標準組織是誰？")
         set_value("bi-b-bq-must", "IEEE")
         click("#bi-b-bq-form button[type=submit]")

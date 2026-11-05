@@ -334,3 +334,23 @@ Nothing marks the folders, so nothing can be taken for a source, skill or tool. 
 **Switching** redraws skills, tools and questions at once from what is loaded. Every reply is drawn for the domain chosen by then, so a late reply cannot bring old rows back; tested with a held reply. The Dashboard still follows after its read, and §9's rows for it change with per-domain dashboards.
 
 Measured on a copy of `market-intel`: creating a domain took 5 to 12 s; the step that can take that long is rebuilding the local database for 760 cards, which was not timed apart.
+
+## 11. Each domain has its own questions, and 全部領域 is an overview
+
+Status: questions built on `bi-step1-domain`, 2026-11-05; each domain's dashboard is slice 5. **The owner, verbatim:** 「每個領域也要有各自的benchmark 問題和dashboard」, 「這是一個多人合作的平台，但為了不彼此干擾，每一個domain會有專人來處理」. This replaces §9.4's 「a working domain shows its own questions and the 全庫 ones」: that was a filter, and the owner asks for ownership. 專人 is a working arrangement, not access control: no owner field blocks anyone.
+
+- **A question belongs to one domain.** A new one goes to the working domain; the editor's combobox can change it.
+- **全庫 is a waiting state, not a kind of question.** An untagged question shows apart in a closed section, 還沒指定領域的題目, and is in no domain's count and no domain's run. Choosing a row there opens it in the editor to be given a domain. Only the overview runs them.
+- **跑測試 runs this domain's questions and cases only,** and the line beside it says so. A case with no folder is waiting like an untagged question.
+- **A domain's report** is the newest run saying something of it: its own run, or a whole-vault run cut down to its questions by what they belong to now. A run of another domain says nothing of it. `/checks?home=` answers this; `newest` still names the newest run of any kind, since one run goes at a time on a PC.
+- **A new domain** has no questions and says what to press. Nothing is borrowed.
+
+**全部領域 is a read-only overview.**
+
+| Step | Under 全部領域 |
+|---|---|
+| 1 | Browse every source. Nothing can be added |
+| 2 | Lists every skill and tool. A source in a home cannot go to Ingest until a domain is chosen. An old source in no home can, since it has no domain to choose. Review stays open, because a reading run spans the vault and other domains' runs must stay reachable |
+| 3 | Lists every question, and 跑測試 runs them all, the only way to run what has no domain. No 新增題目, 和 AI 一起出題 or 和 AI 做新分析, and no editor |
+
+The API still accepts a question with no `home`, and a vault with no homes keeps working as before: it has no other view.

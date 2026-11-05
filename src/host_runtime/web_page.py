@@ -1329,6 +1329,7 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
   margin-bottom: 10px; padding: 6px 0; background: var(--bg); }
 .bi-scope .bi-label { margin: 0; font-size: 14px; font-weight: 600; color: var(--ink); }
 .bi-scope { flex-wrap: wrap; }
+#bi-b-bq-split:has(> #bi-b-bq-pane[hidden]) { grid-template-columns: minmax(0, 1fr); }
 .bi-scope select { flex: 0 1 320px; min-width: 0; }
 .bi-scope-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .bi-scope-form[hidden] { display: none; }
@@ -2692,7 +2693,8 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
                 <span id="bi-b-file-name" class="bi-file-name">還沒有選檔</span></label></div>
             <div><button class="go" id="bi-b-upload" type="button" disabled>轉檔</button></div>
           </div>
-          <p class="bi-warn" id="bi-b-scope-need" hidden>先在上面選工作領域，才能加入檔案。</p>
+          <p class="bi-warn" id="bi-b-scope-need" hidden>
+            先在上面選工作領域，才能加入檔案或 Ingest。</p>
           <p class="bi-warn" id="bi-b-src-cloud" role="status" hidden></p>
           <div class="bi-step" id="bi-b-src-withdraw" role="region" aria-label="撤回來源"
             hidden></div>
@@ -3011,6 +3013,8 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
         <section class="kp-stage card bi-step" data-stage="test" aria-labelledby="bi-b-test"
           hidden>
           <h3 class="kp-stage-title" id="bi-b-test" tabindex="-1">步驟 3／3・測試</h3>
+          <p class="bi-meta" id="bi-b-overview" hidden>
+            全部領域只能看：選工作領域才能新增題目或分析。</p>
           <p class="bi-meta" id="bi-b-ver-none" hidden>只在這台電腦：確認寫入後就生效。</p>
           <details id="bi-b-bench" class="card bi-sec" hidden>
             <summary><span class="bi-sec-title"><strong>Benchmark</strong></span>
@@ -13385,7 +13389,10 @@ function biBuildAllowed() {
     return {source: true, schema: false, method: false, review: false, commit: false,
       result: false, test: false};
   }
-  const run = bi.build.run, has = !!bi.build.sourceId;
+  // Ingest belongs to a working domain; an old source in no home has none to choose.
+  const chosen = (bi.build.sources || []).find((s) => s.id === bi.build.sourceId);
+  const run = bi.build.run, has = !!bi.build.sourceId
+    && !(biOverview() && chosen && biFolderHome(chosen.folder));
   const open = run && run.kind === "ingest" && ["review", "partial"].includes(run.status);
   const accepted = open && run.summary && run.summary.accepted > 0;
   // A run may wait for review with no source chosen, one started through the API; and
@@ -13845,14 +13852,16 @@ function biBenchReport(report, standing) {
   for (const line of (standing || {}).blocking || []) {
     box.append(bh("p", "bi-warn", "Push 會被擋：" + line));
   }
-  if (!report) { box.append(bh("p", "bi-meta", "還沒有跑過測試。")); return; }
+  if (!report) {
+    box.append(bh("p", "bi-meta", biScope() ? "這個領域還沒有跑過測試。" : "還沒有跑過測試。"));
+    return;
+  }
   const state = {running: "測試中…", finished: "完成", failed: "沒有跑完"}[report.status]
     || report.status;
   const head = "最近一次測試（" + biTime(report.started_at) + "，" + state + "）";
   box.append(bh("h5", "", head));
-  const left = (report.not_covered || []).length;
-  box.append(bh("p", "bi-meta", (report.scope ? "涵蓋 " + report.scope + " 與全庫 "
-    : "涵蓋全部 ") + (report.total || 0) + " 題" + (left ? "；沒測 " + left + " 項" : "")));
+  box.append(bh("p", "bi-meta", (report.scope ? "涵蓋 " + report.scope + " "
+    : "涵蓋全部 ") + (report.total || 0) + " 題"));
   for (const line of (standing || {}).notes || []) box.append(bh("p", "bi-meta", line));
   if (report.error) box.append(bh("p", "bi-warn", "停在：" + report.error));
   if (report.status !== "running") {
@@ -13905,56 +13914,71 @@ function biBenchReport(report, standing) {
 async function biBench(vaultId) {
   // The newest read wins: an older reply arriving late must not cancel the polling of a run.
   const seq = bi.benchSeq = (bi.benchSeq || 0) + 1;
-  const reply = await call("/api/bi/vaults/" + vaultId + "/checks");
+  const asked = biScope();
+  const reply = await call("/api/bi/vaults/" + vaultId + "/checks"
+    + (asked ? "?home=" + encodeURIComponent(asked) : ""));
   if (seq !== bi.benchSeq || vaultId !== bi.verVault) return;
+  reply.home = asked;
   bi.benchReply = {vaultId, reply};
   biBenchDraw(reply);
   clearTimeout(bi.benchTimer);
-  // A run just started may not have written its first report yet: keep reading until it has.
-  const unseen = bi.benchWatch && (!reply.latest || reply.latest.run_id !== bi.benchWatch);
-  if (unseen || (reply.latest && reply.latest.status === "running")) {
+  // By the newest run of any domain: only one runs at a time on this PC. A run just started may
+  // not have written its first report yet: keep reading until it has.
+  const newest = reply.newest;
+  const unseen = bi.benchWatch && (!newest || newest.run_id !== bi.benchWatch);
+  if (unseen || (newest && newest.status === "running")) {
     bi.benchTimer = setTimeout(() => biBench(vaultId).catch(() => {}), unseen ? 300 : 2000);
-  } else if (reply.latest && bi.benchWatch === reply.latest.run_id) {
+  } else if (newest && bi.benchWatch === newest.run_id) {
     bi.benchWatch = null;
-    biNotice(reply.latest.status === "finished", reply.latest.status === "finished"
-      ? "測試跑完了。" : "測試沒有跑完：" + (reply.latest.error || ""));
+    biNotice(newest.status === "finished", newest.status === "finished"
+      ? "測試跑完了。" : "測試沒有跑完：" + (newest.error || ""));
   }
 }
 
 function biBenchDraw(reply) {
   el("bi-b-bench").hidden = false;
   const questions = el("bi-b-bq-list"); questions.replaceChildren();
-  const shown = reply.questions.filter((q) => biInScope(q.home));
-  const shownCases = reply.cases.filter((c) => biInScope(biFolderHome(c.folder)));
-  if (biScope() && shown.length < reply.questions.length) {
-    questions.append(bh("p", "bi-meta", "顯示 " + shown.length + "／" + reply.questions.length
-      + " 題：" + biScope() + " 與全庫。其他領域的題目這裡不跑。"));
-  }
-  if (!shown.length) questions.append(bh("p", "bi-meta", "還沒有測試題。"));
-  else {
+  // A domain has its own; what no domain has yet shows apart and is not this domain's.
+  const scope = biScope();
+  const shown = reply.questions.filter((q) => !scope || q.home === scope);
+  const waiting = scope ? reply.questions.filter((q) => !q.home) : [];
+  const shownCases = reply.cases.filter((c) => !scope || biFolderHome(c.folder) === scope);
+  const table = (items) => {
     const list = biListTable(["題目", "必須提到", "不可以說", "題組", "領域"]);
-    for (const q of shown) {
+    for (const q of items) {
       const row = biRow(list, [q.question, q.must.join("、") || "—",
         q.must_not.join("、") || "—", q.set, q.home || "全庫"]);
-      row.tabIndex = 0;
       row.dataset.unit = q.unit;
+      // The overview only reads.
+      if (biOverview()) continue;
+      row.tabIndex = 0;
       row.setAttribute("aria-selected", String(!!bi.bqSel && bi.bqSel.unit === q.unit));
       row.addEventListener("click", () => biBqPick(q));
       row.addEventListener("keydown", (event) => {
         if (event.key === "Enter") { event.preventDefault(); biBqPick(q); }
       });
     }
-    questions.append(list.box);
+    return list.box;
+  };
+  questions.append(shown.length ? table(shown) : bh("p", "bi-meta", scope
+    ? "這個領域還沒有測試題：按「新增題目」或「和 AI 一起出題」。" : "還沒有測試題。"));
+  if (waiting.length) {
+    const apart = bh("details", "bi-manage", bh("summary", "",
+      "還沒指定領域的題目 " + waiting.length + " 題（全庫）：不是這個領域的，選一列指定領域。"),
+    table(waiting));
+    apart.id = "bi-b-bq-waiting";
+    apart.open = Boolean(bi.bqSel && waiting.some((q) => q.unit === bi.bqSel.unit));
+    questions.append(apart);
   }
   // The question being edited may be gone (deleted here, or by a colleague's commit).
-  if (bi.bqSel && !shown.some((q) => q.unit === bi.bqSel.unit)) biBqPick(null);
+  if (bi.bqSel && ![...shown, ...waiting].some((q) => q.unit === bi.bqSel.unit)) biBqPick(null);
   el("bi-b-bq-sets").replaceChildren(...[...new Set(reply.questions.map((q) => q.set))]
     .map((name) => { const o = document.createElement("option"); o.value = name; return o; }));
   el("bi-b-bench-state").textContent = shown.length + " 題"
     + (shownCases.length ? "・擷取測試 " + shownCases.length + " 個" : "");
   el("bi-b-run-why").textContent = !shown.length && !shownCases.length
     ? "還沒有測試題：展開 Benchmark 新增。"
-    : biScope() ? "這次跑 " + biScope() + " 與全庫 " + shown.length + " 題" : "";
+    : "這次跑" + (scope ? " " + scope + " 的 " : "全部 ") + shown.length + " 題";
   const cases = el("bi-b-bc-list"); cases.replaceChildren();
   if (!shownCases.length) cases.append(bh("p", "bi-meta", "還沒有擷取測試。"));
   for (const c of shownCases) {
@@ -13964,9 +13988,11 @@ function biBenchDraw(reply) {
       bh("div", "bi-actions", biButton("刪除", () => biBenchSave({delete: c.unit}), "bi-btn",
         "刪除擷取測試 " + c.slug))));
   }
-  biBenchReport(reply.latest, reply.standing);
+  // A reply for the domain left says nothing of this one; the read under way will.
+  if (reply.home === scope) biBenchReport(reply.latest, reply.standing);
+  else el("bi-b-bench-report").replaceChildren();
   el("bi-b-bench-run").disabled = !(shown.length || shownCases.length)
-    || (reply.latest && reply.latest.status === "running");
+    || Boolean(reply.newest && reply.newest.status === "running");
 }
 
 function biBqPick(q) {
@@ -15414,7 +15440,20 @@ async function biSourceFolders() {
   let stored = current;
   try { stored = current || localStorage.getItem(biScopeKey()) || ""; } catch (e) { /* */ }
   pick.value = bi.build.homes.some((item) => item.folder === stored) ? stored : "sources";
-  biScopeFollowed(); biFileChosen(); biBqHomes();
+  biScopeFollowed(); biFileChosen(); biBqHomes(); biOverviewApply();
+}
+
+function biOverview() {
+  // 全部領域 reads everything and adds nothing. A vault with no homes has no other view.
+  return !biScope() && Boolean((bi.build.homes || []).length);
+}
+
+function biOverviewApply() {
+  const overview = biOverview();
+  for (const id of ["bi-b-bq-add", "bi-b-qa-open", "bi-b-an-new", "bi-b-bq-pane"]) {
+    el(id).hidden = overview;
+  }
+  el("bi-b-overview").hidden = !overview;
 }
 
 function biScopeEmpty() {
@@ -15466,7 +15505,7 @@ el("bi-b-home-form").addEventListener("submit", async (event) => {
 
 function biScopeChanged() {
   try { localStorage.setItem(biScopeKey(), el("bi-b-src-folder").value); } catch (e) { /* */ }
-  biAiClose(); biBqPick(null);
+  biAiClose(); biBqPick(null); biOverviewApply();
   const picked = (bi.build.sources || []).find((s) => s.id === bi.build.sourceId);
   if (picked && !biSourceInScope(picked)) {
     bi.build.sourceId = null; el("bi-b-next1").disabled = true;
@@ -15665,7 +15704,8 @@ function biMdMode(mode) {
 }
 
 function biPickSource(source) {
-  bi.build.sourceId = source.id; el("bi-b-next1").disabled = false; biBuildSave();
+  bi.build.sourceId = source.id; biBuildSave();
+  el("bi-b-next1").disabled = biOverview() && Boolean(biFolderHome(source.folder));
   biFollowSourceFolder();
   biBuildSteps();
   for (const row of el("bi-b-sources").tBodies[0].rows) {

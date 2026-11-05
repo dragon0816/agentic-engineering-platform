@@ -179,7 +179,7 @@ def run(
     home: str | None = None,
 ) -> dict[str, Any]:
     """Run the vault's questions and cases on its working copy (synchronous): all of them,
-    or `home`'s and the whole vault's."""
+    or only `home`'s."""
     units = vault.Vault(workspace, vault_id).repo.working_units()
     every_question = vault_checks.questions(units)
     every_case = vault_checks.cases(units)
@@ -274,6 +274,44 @@ def reports(workspace: Path, vault_id: str) -> list[dict[str, Any]]:
 def latest(workspace: Path, vault_id: str) -> dict[str, Any] | None:
     found = reports(workspace, vault_id)
     return found[0] if found else None
+
+
+def _for_home(report: Mapping[str, Any], home: str, units: Mapping[str, Any]) -> dict[str, Any]:
+    """A whole-vault report as far as `home` goes, by what its questions and cases belong to
+    now, so a question given a domain after the run counts for that domain."""
+    own = {q["unit"] for q in vault_checks.questions(units) if q["home"] == home}
+    mine = {c["unit"] for c in vault_checks.cases(units) if vault_checks.case_home(c) == home}
+    results = [r for r in report.get("results") or [] if r["unit"] in own]
+    return {
+        **report,
+        "scope": home,
+        "results": results,
+        "cases": [c for c in report.get("cases") or [] if c["unit"] in mine],
+        "total": len(results),
+        "working_score": sum(1 for r in results if _passed(r, "working")),
+        "published_score": sum(1 for r in results if _passed(r, "published")),
+        "regressions": [
+            r["unit"] for r in results if _passed(r, "published") and not _passed(r, "working")
+        ],
+        "not_covered": [],
+    }
+
+
+def latest_for(workspace: Path, vault_id: str, home: str | None) -> dict[str, Any] | None:
+    """The newest report saying something of `home`: its own run, or a whole-vault run as far
+    as it goes. With no home, the newest run of any kind."""
+    found = reports(workspace, vault_id)
+    if not home:
+        return found[0] if found else None
+    units = vault.Vault(workspace, vault_id).repo.working_units()
+    for report in found:
+        if report.get("scope") == home:
+            return report
+        if not report.get("scope"):
+            narrowed = _for_home(report, home, units)
+            if narrowed["results"] or narrowed["cases"]:
+                return narrowed
+    return None
 
 
 def gate(workspace: Path, before: Mapping[str, Any], after: Mapping[str, Any]) -> CheckReport:

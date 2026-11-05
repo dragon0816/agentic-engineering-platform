@@ -5926,15 +5926,17 @@ skill AI: owner decisions". Code `capabilities/bi_cards/vault_checks.py`, `host_
   evidence is not in the note). Pending changes label them 「測試題「…」」 and 「擷取測試「…」」.
 - `GET /api/bi/vaults/<id>/checks` → `{"questions": [{"unit", "set", "slug", "question", "must", "must_not", "home"}],
   "cases": [{"unit", "slug", "note", "folder", "expected"}], "latest": <report>|null, "standing": {"blocking":
-  [str], "notes": [str]}}`. `standing` is the push check's answer for the working copy today, empty while a run is going.
+  [str], "notes": [str]}}`. `standing` is the push check's answer for the working copy today, empty while a run is going. `?home=<home>` makes
+  `latest` the newest report saying something of it: its own run, or a whole-vault run cut down to its questions and
+  cases, or null. `newest` = `{"run_id", "status", "error"}` of the newest run of any kind, or null.
 - `POST /api/bi/vaults/<id>/checks`: `{"question", "must"?, "must_not"? (list or comma text), "set"? ("main"),
   "slug"?, "home"?}` stages a question (`question_invalid` 400); `{"kind": "case", "slug", "note", "expected",
   "folder"?}` stages a case (`case_invalid` 400); `{"delete": <unit>}` removes one (`check_unknown` 404). Answer
   `{"ok", "unit"?, "questions", "cases"}`.
 - `POST /api/bi/vaults/<id>/bench` with optional `{"home"}` starts a run as an Agent Web background task
   (`bi-benchmark`) → `{"ok", "run_id"}`; `bench_empty` 400 (no checks, or none for that home), `home_invalid` 400,
-  `bench_running` 400, `bench_unavailable` 400 (no runtime). With `home` it runs that home's checks and the whole
-  vault's (a question with no `home`, a case whose folder is in no home); without it, all of them.
+  `bench_running` 400, `bench_unavailable` 400 (no runtime). With `home` it runs that home's checks only; without
+  it, all of them, those of no home included.
   `GET /api/bi/vaults/<id>/bench?run=<run id>` → `{"report"}` (`run_unknown` 404).
 - **A run.** Each graded question is asked twice through `Gateway.converse` as a Host sub-run
   (`running_sub_run("bi-benchmark")`: no memory, no session), `allowed_tools={"bi__query"}`, a role naming the
