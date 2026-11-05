@@ -1,5 +1,11 @@
 # Handoff
 
+## BI commit list as a table (2026-11-05, Claude Code) — built, not merged
+
+Branch `bi-commit-list`, not pushed. What changed: `docs/TASKS.md`, last row. `vault.pending` now compares with what this PC has committed, not the pushed head.
+
+**Next:** merge. One-step share (S6) waits for the platform plan.
+
 ## A source that repeats a value adds its citation (2026-11-05, Claude Code) — built, not merged
 
 Branch `bi-repeat-evidence` off main `16a08e5e`, not pushed. `docs/DECISIONS.md` 2026-11-05, last entry. Real vault not touched.

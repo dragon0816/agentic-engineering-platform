@@ -140,12 +140,8 @@ def test_the_commit_list_is_a_table_with_no_json_and_no_empty_rows(tmp_path: Pat
                 page.run("biVerChange({unit: 'evidence:c:f', before: [{}], after: [{}, {}]})")
                 == "1 → 2 筆"
             )
-            assert (
-                page.run(
-                    "biVerChange({unit: 'field:c:f', before: {value: ['a']}, after: {value: ['a', 'b']}})"
-                )
-                == "a → a、b"
-            )
+            grown = "{unit: 'field:c:f', before: {value: ['a']}, after: {value: ['a', 'b']}}"
+            assert page.run(f"biVerChange({grown})") == "a → a、b"
 
             # -- 套用到: names people know, the value itself kept --------------------------------
             page.wait(
