@@ -1361,6 +1361,21 @@ def _cards_import(args: argparse.Namespace) -> int:
     return 0
 
 
+#: What a person can do about a host that did not start, by code.
+NOT_READY_HINTS = {
+    "state_busy": "Another AEP program kept this file busy for too long. "
+    "Close other AEP windows and try again; a second try usually works.",
+    "state_unavailable": "AEP could not open this file. Try again, as a second try may work; "
+    "if it keeps failing, send this message to whoever supports AEP.",
+}
+
+
+def not_ready_message(error: HostError) -> str:
+    line = f"this host is not ready: {error.code} ({error.path})"
+    hint = NOT_READY_HINTS.get(error.code)
+    return f"{line}\n{hint}" if hint else line
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     _write_in_utf8()
     args = _parser().parse_args(argv)
@@ -1415,7 +1430,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         runtime = build_runtime(config, layout=layout)
     except HostError as error:
-        print(f"this host is not ready: {error.code} ({error.path})", file=sys.stderr)
+        print(not_ready_message(error), file=sys.stderr)
         return 2
     with runtime:
         if args.command in ("ask", "run-task", "chat", "web", "telegram", "jobs", "schedules"):

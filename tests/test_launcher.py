@@ -14,6 +14,7 @@ from typing import Any
 import pytest
 
 from host_runtime.launcher import (
+    NOT_READY_PREFIX,
     SLOW_START_SECONDS,
     STARTING_HTML,
     STARTING_STATUS,
@@ -253,6 +254,31 @@ def test_a_server_that_exits_while_starting_is_reported_at_once(tmp_path: Path) 
     assert failed.value.code == "agent_web_exited" and "exit code 3" in str(failed.value)
     status = _status(tmp_path)
     assert status["state"] == "failed" and "exit code 3" in status["message"]
+
+
+def test_the_page_says_what_a_server_that_stopped_said_about_why(tmp_path: Path) -> None:
+    err_log = tmp_path / "agent-web.err.log"
+    err_log.write_text(
+        f"{NOT_READY_PREFIX} state_busy (C:\\w\\state.sqlite)\nClose other AEP windows.\n",
+        encoding="utf-8",
+    )
+
+    class Exited:
+        aep_err_log = err_log
+
+        def poll(self) -> int:
+            return 2
+
+    with pytest.raises(LauncherError):
+        open_agent(tmp_path, tmp_path / "host.json", start=Exited, opener=lambda _: True, poll=0.01)
+    message = _status(tmp_path)["message"]
+    assert "exit code 2" in message and "state_busy" in message and "state.sqlite" in message
+    assert "Close other AEP windows." in message
+
+
+def test_the_page_does_not_promise_a_short_start_and_offers_a_second_try() -> None:
+    assert "10\u201330" not in STARTING_HTML and "a few minutes" in STARTING_HTML
+    assert "a second try may work" in STARTING_HTML
 
 
 # --- the starting page in a real browser --------------------------------------------

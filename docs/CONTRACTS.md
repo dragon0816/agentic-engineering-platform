@@ -1409,7 +1409,10 @@ the `LocalAgent`, the `SqliteLocalState` and the optional `TelegramIngress`;
 closing it closes the state file. It raises `HostError` with a closed code
 (`membership_missing`, `membership_invalid`, `membership_mismatch`,
 `grants_invalid`, `asset_invalid`, `telegram_invalid`, `credential_unmapped`,
-`state_unavailable`) and the path at fault, never its contents. A membership
+`state_busy`, `state_unavailable`) and the path at fault, never its contents. At start, a
+state file another connection holds is waited for up to 30 s, then is `state_busy`; a file that
+is broken or another device's is `state_unavailable` at once. Once running, a second writer is
+still refused rather than waited for. A membership
 record that describes another device is refused rather than reconciled.
 
 `build_gateway` registers the one capability handler this package ships
