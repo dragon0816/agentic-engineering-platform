@@ -6461,3 +6461,11 @@ The owner: 「需要讓使用者可以create domain」, 「新增domain時，需
 - **A created home is one unit, `meta:home:<id>`, and its domain widens the vault's schema when read.** Cards of it can carry the domain, and no skill turns 需要更新. Rejected: a new schema version per domain, since a draft, a publish and 需要更新 on every edited skill would disturb everyone for one person's folder; a home with no card domain, whose cards would silently lose it; appending to `meta:vault_segments`, where two people adding different homes would conflict.
 - **The folders come from the unit, with no placeholder file.** Each PC makes them on push and sync through the one definition, `homes.HOME_FOLDERS`. Rejected: a placeholder, which would need excluding everywhere sources, skills and tools are listed.
 - **The list of homes is built from units only.** An empty folder makes no home, so `library/skill-review` stays out. Accepted cost: a PC on an older AEP drops a created domain from its cards, with the existing warning.
+
+## 2026-11-05: A repository's status keeps its scan of the commit files
+
+The BI build tab took 14-17 s to show its source table on `market-intel`, and most of that was `Repository.scan` reading and checking 46 commit files, twice per status. `status` and `history` now use a scan kept while `_commits_stamp` is unchanged, the same names, sizes and times a sync already trusts to say nothing arrived. This is in the engine, so wiki repositories get it too.
+
+- **Only for what reads and hands nothing on.** `state_at`, `log` and `sync` still read the files, because a caller may change the values they return, and a kept scan must not be what it changes. Rejected: keeping every scan, with a deep copy per call, which costs about what it saves.
+- **A scan with a bad or half-arrived file is not kept,** since its next read may differ with the stamp unchanged.
+- **One scan per folder stays in memory** in Agent Web, tens of MB on a large repository (estimated, not measured). Accepted.

@@ -290,7 +290,7 @@ No backend change: a run's home comes from its source's folder, in the page.
 No model, 2026-11-05; the real vault, its staging and its shared folder were compared before and after and did not change. 481 sources, 12 questions, 7 skills, 37 Dashboard sections, 760 cards.
 
 - **Opening step 3:** the questions and the report show at once, since they are already loaded. The Dashboard took 13 to 16 s, because entering the step started about ten reads alongside it; alone its route takes 2 to 4 s. Those reads now wait for it: **2.2 s from a fresh load.** Entering with reads still under way from a moment before, it was 8.6 to 9.5 s, down from 17 to 25 s.
-- **Opening the build tab:** 23 s on this vault, most of it reads of whole-vault state. Not changed here.
+- **Opening the build tab,** entering the page with it showing, measured back to back on a copy: the source table and the combobox **from 14-17 s to 3-4 s**; everything settled from 14-17 s to about 10-15 s. The rest serve steps not showing yet. Two causes: a status read and checked all 46 commit files twice, so `Repository.status` and `history` now keep their scan while the files' names, sizes and times stay; and about twenty reads started at once, so the page now asks for the sources first and the rest after.
 - **A change of domain:** the source table in 0.14 s, the skill list in 0.11 s from what is already loaded.
 - **Questions:** all 12 are 全庫 until someone gives them a domain in the editor. Their text already names one (「wireless：…」), but nothing reads it.
 - **`library/skill-review`** has skills and no sources, is not in `meta:vault_library`, and is not a working domain. Its five review skills show under 全部領域 and not under a domain.

@@ -494,6 +494,11 @@ class Scan:
     names: dict[str, set[int]] = field(default_factory=dict)  # every seq file per author
 
 
+#: The last read-only scan of each repository folder, with the stamp it was made at.
+_SCANS: dict[str, tuple[str, Scan]] = {}
+_SCANS_LOCK = threading.Lock()
+
+
 def apply_ops(units: dict[str, Any], ops: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
     """Apply unit operations to `units` in place; return the ones not applied
     because the unit changed under them (each as a conflict)."""
@@ -698,6 +703,23 @@ class Repository:
                     continue
                 found.append((author, seq, raw, data))
         return found, scan
+
+    def _read_only_scan(self) -> Scan:
+        """`scan` for what only reads it, kept while the commit files' names, sizes and times
+        stay (`_commits_stamp`, what a sync trusts too): a status on a large repository read and
+        checked every commit twice, seconds each. Never for what hands on a commit's values,
+        which a caller may change, and never a scan with a bad or half-arrived file, whose
+        next read may differ with the stamp unchanged."""
+        stamp, key = self._commits_stamp(), str(self.folder)
+        with _SCANS_LOCK:
+            known = _SCANS.get(key)
+        if stamp and known is not None and known[0] == stamp:
+            return known[1]
+        scan = self.scan()
+        if stamp and not scan.bad and not scan.incomplete:
+            with _SCANS_LOCK:
+                _SCANS[key] = (stamp, scan)
+        return scan
 
     def scan(self) -> Scan:
         """Every commit file of the folder, valid ones in order."""
@@ -1133,7 +1155,7 @@ class Repository:
 
     def history(self, limit: int = 50) -> list[dict[str, Any]]:
         """Applied commits, newest first, with their purpose."""
-        commits = {c.name: c for c in self.scan().commits}
+        commits = {c.name: c for c in self._read_only_scan().commits}
         rows = []
         for name, _ in reversed(self._ordered()):
             commit = commits.get(name)
@@ -1642,7 +1664,7 @@ class Repository:
     def status(self) -> dict[str, Any]:
         """The repository header: behind, ahead, uncommitted, conflicts, waiting."""
         with self.lock:
-            scan = self.scan()
+            scan = self._read_only_scan()
             with closing(self._connect()) as db:
                 applied = {r["file"] for r in db.execute("SELECT file FROM applied")}
                 waiting = []
