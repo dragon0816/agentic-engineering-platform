@@ -1,5 +1,15 @@
 # Handoff
 
+## BI page: working domain, Markdown preview, file row (2026-11-05, Claude Code) — built, not merged
+
+Branch `bi-step1-domain`, with main `4a8d8515` merged in, not pushed. Design `docs/phases/BI_PAGE_SIMPLE.md` §9; decision `docs/DECISIONS.md` 2026-11-05; contract `docs/CONTRACTS.md`, BI benchmark section.
+
+**Not checked:** real data. Every run used fictional vaults. A real model was not used: bench answers and the AI asker were stand-ins. `market-intel`'s questions were not read, so how many are untagged there is not known; run `e3de934115f0` was not opened. Not run: the full suite and the BI browser files outside the row in `docs/TASKS.md`.
+
+**Open, for the orchestrator:** existing questions cannot be given a home in the page. The API takes `home`, and new and AI-made questions get the working domain. The question editor needs a 領域 combobox; it was left out because step 3's markup is Lane D's. Until then, today's questions all count as 全庫 and run in every domain. The branch for a vault with no homes (adding still works, into `sources`) was not driven in a browser: every vault made here has homes.
+
+**Next:** merge; restart Agent Web on this code once `/api/tasks` is quiet; on the real vault, choose a domain and look at the three steps.
+
 ## Review table (2026-11-05, Claude Code) — built, not merged
 
 Branch `bi-review-table` off main `aba2c203`, not pushed. Design and measurements `docs/phases/BI_PAGE_SIMPLE.md` §8; the two intermittent failures found and fixed: `docs/TASKS.md`, last row.

@@ -13796,10 +13796,11 @@ async function biBench(vaultId) {
   if (bi.bqSel && !reply.questions.some((q) => q.unit === bi.bqSel.unit)) biBqPick(null);
   el("bi-b-bq-sets").replaceChildren(...[...new Set(reply.questions.map((q) => q.set))]
     .map((name) => { const o = document.createElement("option"); o.value = name; return o; }));
-  el("bi-b-bench-state").textContent = reply.questions.length + " 題"
-    + (reply.cases.length ? "・擷取測試 " + reply.cases.length + " 個" : "");
-  el("bi-b-run-why").textContent = reply.questions.length || reply.cases.length ? ""
-    : "還沒有測試題：展開 Benchmark 新增。";
+  el("bi-b-bench-state").textContent = shown.length + " 題"
+    + (shownCases.length ? "・擷取測試 " + shownCases.length + " 個" : "");
+  el("bi-b-run-why").textContent = !shown.length && !shownCases.length
+    ? "還沒有測試題：展開 Benchmark 新增。"
+    : biScope() ? "這次跑 " + biScope() + " 與全庫 " + shown.length + " 題" : "";
   const cases = el("bi-b-bc-list"); cases.replaceChildren();
   if (!shownCases.length) cases.append(bh("p", "bi-meta", "還沒有擷取測試。"));
   for (const c of shownCases) {
@@ -15227,16 +15228,16 @@ async function biSourceFolders() {
   const listed = biDataset(), reply = await call("/api/bi/vaults/" + vault.id + "/skills");
   if (listed !== biDataset()) return;
   bi.build.homes = reply.homes || [];
-  const pick = el("bi-b-src-folder");
+  const pick = el("bi-b-src-folder"), current = pick.value;
   const all = bh("option", "", "全部領域"); all.value = "sources";
   pick.replaceChildren(all, ...bi.build.homes.map((item) => {
     const named = item.label === item.home ? item.home : item.label + "（" + item.home + "）";
     const option = bh("option", "", named); option.value = item.folder; return option;
   }));
-  let stored = "";
-  try { stored = localStorage.getItem(biScopeKey()) || ""; } catch (e) { /* */ }
-  const kept = bi.build.homes.some((item) => item.folder === stored) ? stored : "sources";
-  pick.value = kept;
+  // A list read again keeps the choice; only a dataset just opened goes back to what was kept.
+  let stored = current;
+  try { stored = current || localStorage.getItem(biScopeKey()) || ""; } catch (e) { /* */ }
+  pick.value = bi.build.homes.some((item) => item.folder === stored) ? stored : "sources";
   biScopeFollowed(); biFileChosen();
 }
 
@@ -15251,6 +15252,7 @@ function biScopeChanged() {
   }
   biScopeFollowed(); biFileChosen(); biRenderSources(); biBuildRunPick();
   biBuildStage(bi.build.stage, false);
+  biDashHome();
   if (!bi.verVault) return;
   biBench(bi.verVault).catch((failure) => biNotice(false, "讀不到測試：" + failure.message));
   biVersions(bi.verVault).catch((failure) => biNotice(false, failure.message));

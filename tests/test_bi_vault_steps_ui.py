@@ -102,7 +102,9 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
             return set((copy / "commits").rglob("*.json"))
 
         commits = shared_commits()
-        page.choose("bi-b-src-folder", "applications/aidc/sources")
+        # This old vault has its own applications: a file goes to one the vault lists.
+        page.wait("(bi.build.homes || []).length > 0")
+        page.choose("bi-b-src-folder", str(page.run("bi.build.homes[0].folder")))
         page.upload("tech.csv", TECH_CSV, "text/csv")
         page.stage("method")
         page.click("#bi-b-trial")

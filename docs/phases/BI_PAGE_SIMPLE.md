@@ -1,6 +1,6 @@
 # The BI Knowledge page, redesigned to be simple
 
-Status: S1 and S3 done, 2026-11-05; S2, S4–S8 not started. Decision `docs/DECISIONS.md` 2026-11-05. Base `main` 86a7d614, branch `bi-page-simple`.
+Status: S1 and S3 done, 2026-11-05; the working domain (§9) built on `bi-step1-domain`; S2, S4–S8 not started. Decision `docs/DECISIONS.md` 2026-11-05. Base `main` 86a7d614, branch `bi-page-simple`.
 
 **The owner's rule, verbatim:** 「ui請以簡單為主，善用table，menu/comobox」.
 
@@ -230,7 +230,7 @@ The code already has the relation; nothing new is invented.
 
 ### 9.2 The combobox
 
-`#bi-b-src-folder` keeps its id and its values (a home's `sources` folder, `sources` for everything) and moves out of step 1's row to one line above the stepper, labelled 工作領域. It is in sight on all three steps. The options come from a new `homes` list in the vault's skills reply: the vault's homes, plus any home found among its folders and sources. Subfolders are no longer options, and a source in one counts for its home.
+`#bi-b-src-folder` keeps its id and its values (a home's `sources` folder, `sources` for everything) and moves out of step 1's row to one line above the stepper, labelled 工作領域. It is in sight on all three steps and stays at the top when the page scrolls. The options come from a new `homes` list in the vault's skills reply: the vault's homes, plus any home found among its folders and sources. Subfolders are no longer options, and a source in one counts for its home.
 
 - **全部領域 replaces 「不指定資料夾」.** **A person can look with no domain and cannot add with none:** every list shows everything, waiting runs can be reviewed, and a bench covers the whole vault, but 轉檔 and 放進共用資料夾 wait for a choice, with a short line saying so. A file added to no home gets no extract skill and no profile, which is the failure this request is about. Old sources sitting in `sources` stay visible under 全部領域 and can still be ingested. The API is unchanged and still accepts `sources`; the guard is the page's.
 - **Kept per person and per PC:** `localStorage`, key `bi-scope-<dataset>`, like `bi-build-<dataset>`. A stored home that no longer exists falls back to 全部領域.
