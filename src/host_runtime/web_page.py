@@ -14629,14 +14629,15 @@ function biVerWords(value) {
 
 function biVerChange(change) {
   const {before, after} = change;
-  if (before === null || before === undefined) return "新增";
-  if (after === null || after === undefined) return "移除";
+  const inner = (value) => (value && typeof value === "object" && !Array.isArray(value)
+    && "value" in value ? value.value : value);
+  const old = biVerWords(inner(before)), now = biVerWords(inner(after));
+  const said = (word, value) => (value && value !== "（空）" ? word + "：" + value : word);
+  if (before === null || before === undefined) return said("新增", now);
+  if (after === null || after === undefined) return said("移除", old);
   if (Array.isArray(before) && Array.isArray(after) && change.unit.startsWith("evidence:")) {
     return before.length + " → " + after.length + " 筆";
   }
-  const inner = (value) => (typeof value === "object" && !Array.isArray(value) && "value" in value
-    ? value.value : value);
-  const old = biVerWords(inner(before)), now = biVerWords(inner(after));
   return old === null || now === null || old === now ? "修改" : old + " → " + now;
 }
 
