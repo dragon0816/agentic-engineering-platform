@@ -6531,6 +6531,7 @@ The owner: 「每個領域也要有各自的benchmark 問題和dashboard」, 「
 - **A question belongs to one domain; an untagged one is waiting for a domain** and runs in no domain's test, only in the overview's. Rejected: running untagged questions in every domain, which puts market-intel's 12 in front of everyone and is what the owner objected to.
 - **全部領域 is a read-only overview.** Rejected: letting it add a question with no owner, which would make more of what is being assigned away.
 
+
 ## 2026-11-05: Each BI domain has its own Dashboard, on the analyses they share
 
 The owner: 「每個領域也要有各自的benchmark 問題和dashboard」. Design: `docs/phases/BI_PAGE_SIMPLE.md` §12.
