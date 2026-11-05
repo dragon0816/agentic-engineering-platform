@@ -13226,7 +13226,9 @@ async function biLoadHistory() {
       bh("span", "", biValue(item.old)), bh("span", "bi-arrow", "→"),
       bh("span", "", biValue(item.new)), bh("div", "bi-meta", biTime(item.at) + " · "
         + (item.by || "—") + " · " + biSource(item.source ? {...item.source, at: null} : null)
-        + (item.reason ? " · 理由：" + item.reason : ""))));
+        + (item.reason ? " · 理由：" + item.reason : "")),
+      ...(item.old_evidence || []).map((e) => bh("div", "bi-meta bi-old-evidence", "舊值的出處："
+        + (e.source_name || "") + (e.excerpt ? "「" + e.excerpt + "」" : "")))));
   }
   box.append(ul);
 }
@@ -13560,6 +13562,7 @@ function biProposalsAll(action) {
   }
   const left = shown.length - chosen.length;
   const losing = chosen.filter((item) => biProposalLoss(item)).length;
+  const bare = chosen.filter((item) => !(item.evidence || []).length).length;
   const yes = biButton("確定" + (action === "accept" ? "接受 " : "否決 ") + chosen.length + " 筆",
     async () => {
       yes.disabled = true;
@@ -13584,6 +13587,8 @@ function biProposalsAll(action) {
     + " 筆提案" + (left ? "；另有 " + left + " 筆 confidence 或 evidence_grade 不包含在內，"
       + "要先篩選到那個欄位" : "") + "。"
     + (action === "accept" && losing ? "其中 " + losing + " 筆會用短很多的文字取代目前的長文。"
+      : "")
+    + (action === "accept" && bare ? "其中 " + bare + " 筆沒有出處，接受後那些欄位就沒有出處。"
       : "")),
   yes,
   biButton("取消", () => box.replaceChildren(), "bi-btn"));
@@ -13672,9 +13677,10 @@ function biProposalRow(item, dataset) {
     biProposalSides(item),
     loss ? bh("p", "bi-warn bi-prop-loss", "接受會用 " + loss.now + " 字取代目前的 " + loss.old
       + " 字。") : "",
-    item.current !== null ? bh("p", "bi-meta", "接受後這個欄位算人工的值。"
-      + (cited ? "目前值的出處會留在卡片上，但說的是舊的內容；" : "")
-      + "提議的出處不會帶到卡片。舊值留在卡片的歷史裡。") : "",
+    (item.evidence || []).length ? bh("p", "bi-meta",
+      "接受後這個欄位算人工的值，提議的出處成為它的出處。" + (cited ? "目前值的出處移到卡片的歷史，和舊值放在一起。" : ""))
+      : bh("p", "bi-warn bi-prop-bare", "這筆提議沒有出處：接受後這個欄位就沒有出處。"
+        + (cited ? "目前值的出處移到卡片的歷史，和舊值放在一起。" : "")),
     bh("div", "bi-meta", "提議來源：" + (item.source.ref || item.source.kind)),
     ...facts, actions, error);
   box.dataset.proposal = item.id;

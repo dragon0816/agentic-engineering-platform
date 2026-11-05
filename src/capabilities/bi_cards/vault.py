@@ -13,7 +13,8 @@ A vault registered on this PC is the dataset `vault-<vault id>` (registry
     schema                       the schema version (`<id>@<version>`)
     meta:<key>                   any other dataset meta (domain configuration …)
     card:<card id>               {"type", "key", "name", "synthetic"}
-    field:<card id>:<field>      {"value", "source", "history"}; value null = cleared
+    field:<card id>:<field>      {"value", "source", "history"}; value null = cleared;
+                                 `history.old_evidence`: what a replaced value rested on
     evidence:<card id>:<field>   [evidence rows]
     proposal:<key>               {"card", "field", "value", "kind", "ref", "at", "import_id",
                                   "status"}
@@ -80,6 +81,8 @@ from capabilities.bi_cards.store import (
     PlannedRow,
     add_missing_columns,
     card_id_for,
+    evidence_unit,
+    insert_evidence_unit,
     is_subscribed,
     now,
     vault_registry,
@@ -350,7 +353,9 @@ def _tables(db: sqlite3.Connection) -> set[str]:
     return {r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
 
 
-def _history_value(row: Mapping[str, Any]) -> dict[str, Any]:
+def _history_value(row: sqlite3.Row) -> dict[str, Any]:
+    # Only when the change moved it, so a unit from before this stays as it was.
+    moved = row["old_evidence"] if "old_evidence" in row.keys() else None  # noqa: SIM118
     return {
         "kind": row["kind"],
         "ref": row["ref"],
@@ -358,20 +363,8 @@ def _history_value(row: Mapping[str, Any]) -> dict[str, Any]:
         "at": row["at"],
         "import_id": row["import_id"],
         "reason": row["reason"],
+        **({} if moved is None else {"old_evidence": _load(moved)}),
     }
-
-
-def _reference_of(row: sqlite3.Row) -> dict[str, Any]:
-    """The reference parts an evidence unit's row holds. A row written before the
-    card model holds none and has no `reference_at`: its id is computed at each
-    rebuild, so its unit stays as it was and a capture does not diff it."""
-    if "reference_at" not in row.keys() or row["reference_at"] is None:
-        return {}
-    parts = ("reference_id", "stance", "reference_at", "reference_time_basis")
-    found = {k: row[k] for k in parts if row[k] is not None}
-    if "assessment" in row.keys() and row["assessment"] is not None:
-        found["assessment"] = _load(row["assessment"])
-    return found
 
 
 def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str, Any]:
@@ -438,16 +431,7 @@ def units_from_db(db: sqlite3.Connection, *, keep_ids: bool = False) -> dict[str
             if r["card_id"] not in ids:
                 continue
             units.setdefault(f"evidence:{ids[r['card_id']]}:{r['field']}", []).append(
-                {
-                    "run_id": r["run_id"],
-                    "source_id": r["source_id"],
-                    "source_name": r["source_name"],
-                    "locator": _load(r["locator"]),
-                    "excerpt": r["excerpt"],
-                    "basis": r["basis"],
-                    "at": r["at"],
-                    **_reference_of(r),
-                }
+                evidence_unit(r)
             )
     if "field_states" in tables:
         for r in db.execute("SELECT * FROM field_states WHERE origin = 'unit'"):
@@ -537,6 +521,7 @@ def _field_history(
                     "import_id": history.get("import_id"),
                     "reason": history.get("reason"),
                     "old_source": None if before is None else before.get("source"),
+                    "old_evidence": history.get("old_evidence"),
                 }
             )
     return rows, cards
@@ -659,10 +644,17 @@ def _fill_homes(
         if key.startswith(vault_sources.PREFIX) and isinstance(value, dict)
     }
     belongs: dict[str, set[str]] = {}
-    for row in db.execute("SELECT DISTINCT card_id, source_id FROM evidence").fetchall():
-        home = homes.home_of(folders.get(str(row[1]), ""))
+    gave = {(str(r[0]), str(r[1])) for r in db.execute(
+        "SELECT DISTINCT card_id, source_id FROM evidence").fetchall()}  # fmt: skip
+    # What a replaced value rested on gave evidence too: replacing it does not move the card.
+    for row in db.execute(
+        "SELECT card_id, old_evidence FROM history WHERE old_evidence IS NOT NULL"
+    ).fetchall():
+        gave.update((str(row[0]), str(item["source_id"])) for item in _load(row[1]))
+    for card, source in sorted(gave):
+        home = homes.home_of(folders.get(source, ""))
         if home is not None:
-            belongs.setdefault(str(row[0]), set()).add(home)
+            belongs.setdefault(card, set()).add(home)
     db.executemany(
         "INSERT INTO card_app_folders (card_id, application) VALUES (?, ?)",
         [(card, home) for card, found in sorted(belongs.items()) for home in sorted(found)],
@@ -798,29 +790,7 @@ def materialize(
                 if cid not in present:
                     continue
                 for item in value:
-                    db.execute(
-                        "INSERT INTO evidence (card_id, field, run_id, source_id, source_name, "
-                        "locator, excerpt, basis, at, reference_id, stance, reference_at, "
-                        "reference_time_basis, assessment) "
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        (
-                            cid,
-                            name,
-                            item["run_id"],
-                            item["source_id"],
-                            item["source_name"],
-                            _dump(item["locator"]),
-                            item["excerpt"],
-                            item["basis"],
-                            item["at"],
-                            item.get("reference_id")
-                            or card_model.reference_id(item["source_id"], item["locator"]),
-                            item.get("stance") or card_model.SUPPORTS,
-                            item.get("reference_at"),
-                            item.get("reference_time_basis"),
-                            None if item.get("assessment") is None else _dump(item["assessment"]),
-                        ),
-                    )
+                    insert_evidence_unit(db, cid, name, item)
             elif key.startswith(card_model.STATE_PREFIX):
                 _, cid, name = key.split(":", 2)
                 if cid not in present:
@@ -849,7 +819,7 @@ def materialize(
                 continue
             db.execute(
                 "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, import_id, "
-                "reason, old_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "reason, old_source, old_evidence) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     row["card_id"],
                     row["field"],
@@ -866,6 +836,7 @@ def materialize(
                     row["import_id"],
                     row["reason"],
                     None if row["old_source"] is None else _dump(row["old_source"]),
+                    None if row["old_evidence"] is None else _dump(row["old_evidence"]),
                 ),
             )
         proposals = sorted(
@@ -2090,10 +2061,12 @@ def push(workspace: Path, vault_id: str) -> dict[str, Any]:
 
 def resolve(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
     vault = _vault(workspace, vault_id)
+    unit, choice = str(given.get("unit") or ""), str(given.get("choice") or "")
     with _repo_errors():
-        vault.repo.resolve(
-            str(given.get("unit") or ""), str(given.get("choice") or ""), given.get("value")
-        )
+        vault.repo.resolve(unit, choice, given.get("value"))
+        if unit.startswith("field:") and choice in ("mine", "theirs"):
+            # The citations go with the value chosen; the person can still choose otherwise.
+            vault.repo.resolve(f"evidence:{unit.removeprefix('field:')}", choice)
     return {"resolved": True}
 
 
