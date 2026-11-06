@@ -6675,3 +6675,15 @@ Acceptance findings F5, F6 and F8 on step 2a. The owner's flow: 「根據新增�
 - **The draft on the main path is a table of its changes,** with the AI to edit it and 套用到資料集; its JSON, revisions and trial stay under 進階.
 - **`bi-b-fit` stays under 進階** for now; S2 planned to remove it once this button exists. That waits for the owner.
 
+
+## 2026-11-06: The BI script guard stays on whatever a script reaches
+
+A finding before release: on a PC with numpy (the release bundle carries it), the tool runner's pre-import of openpyxl loaded numpy and so ctypes, and a tool's `import ctypes` then came from `sys.modules` with no audit event. Measured with real attempts (`tests/test_bi_guard_attacks.py`): ctypes still refused `ctypes.dlopen` and `ctypes.dlsym`, but a ctypes Union of a pointer and an address wrote process memory with no event. Wider, and with or without numpy, in tools and analyses alike: a script could switch the guard off in one line (`__main__._ready = False`, a frame's `f_globals`, `gc.get_objects()`), empty its lists, or replace a builtin or `ntpath` function it called, and then write outside its folder or open a socket.
+
+The design of 2026-10-31 stays: guarded, not sandboxed, and a person reading the code (a tool by its hash) is the real control. Within it:
+
+- **The guard is a closure installed right before the script,** keeping its own copies of the lists, builtins and functions it calls; no flag, and nothing left in `__main__`. Rejected: deleting modules from `sys.modules`, since attribute paths (`numpy.ctypeslib.ctypes`) still reach them.
+- **It refuses to start when a module it denies is already loaded** (except `_winapi`, which shutil imports on Windows and whose process calls raise events it refuses). The tool runner keeps numpy out of its pre-imports, so openpyxl reads without it. Rejected: loading openpyxl lazily inside the hook's rules, which would let a tool's own import pull numpy in under different rules.
+- **Frames, the garbage collector and tracing are refused** (`sys._getframe`, `gc.get_objects`, `sys.settrace`, …).
+- **On Windows the write check resolves paths through `nt`'s own functions,** captured at install; `os.path.realpath` is Python that reads its module's globals at each call.
+- **What it still cannot close:** a determined script may find a CPython flaw, and it can read any file the user can. The page's approval step and the user guide (6.8.3) now say what approving means. A real boundary (AppContainer or a job object) remains the later replacement.
