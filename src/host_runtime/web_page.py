@@ -14055,6 +14055,11 @@ async function biBench(vaultId) {
     bi.benchWatch = null;
     biNotice(newest.status === "finished", newest.status === "finished"
       ? "測試跑完了。" : "測試沒有跑完：" + (newest.error || ""));
+    // What the share step says of each domain's tests changed with this run.
+    if (vaultId === bi.verVault) {
+      biShareLoad(vaultId)
+        .catch((failure) => biNotice(false, "讀不到分享的內容：" + failure.message));
+    }
   }
 }
 
