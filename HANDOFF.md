@@ -1,5 +1,15 @@
 # Handoff
 
+## BI script guard (2026-11-06, Claude Code worker D) — built, not merged
+
+Branch `tool-guard-preimport` from main 6c76f533, not pushed. Decision `docs/DECISIONS.md` 2026-11-06 (the guard stays on whatever a script reaches). Code `analyses.GUARD` (`_install`), `tool_runs.RUNNER`. Tests `tests/test_bi_guard_attacks.py` (real attempts; numpy cases skip without numpy).
+
+**Verified:** ruff and mypy like CI; guard, tool-run and analysis tests with numpy 1.26.4 present and absent (numpy then removed from this venv again); `test_bi_tools_ui`; `test_bundled_skills`, `test_bi_page_simple`. **Not run:** the full suite.
+
+**Open:** it is still not a sandbox: a CPython flaw or reading the user's files remains possible; the real control is the person's review. `test_bi_cards_ui` passed 3/3 on ba383242 but failed 2/3 on `bi-schema-suggest`: not investigated.
+
+**Next:** orchestrator merges.
+
 ## Step 2a's schema: suggest, readable versions, draft table (2026-11-06, Claude Code worker D) — built, sweep running
 
 Acceptance F5, F6, F8. Branch `bi-schema-suggest`, with main 98b2f182 merged in, not pushed. Design `docs/phases/BI_PAGE_SIMPLE.md` §15; decision `docs/DECISIONS.md` 2026-11-06; contract `docs/CONTRACTS.md`, "BI schema drafts and dataset upgrade" (建議 schema, schema state). Code `src/capabilities/bi_cards/schema_suggest.py`, `schema_versions.state`, `schema_merge.version_label`/`keeps`.
