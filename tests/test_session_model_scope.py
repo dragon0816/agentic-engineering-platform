@@ -80,19 +80,22 @@ def knowledge(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Agent
 # -- one switch for every client ------------------------------------------------
 
 
-def test_the_router_and_every_drafting_client_share_one_switch(knowledge: AgentWeb) -> None:
+def test_the_router_and_every_drafting_client_follow_one_switch(knowledge: AgentWeb) -> None:
     gateway = knowledge.runtime.agent.gateway
     switch = gateway.router.model.client  # type: ignore[union-attr]
     assert isinstance(switch, SelectableModelClient)
+    # Agent Web gave the router's switch the Gateway's list once.
+    assert switch.approved == knowledge.conversation_models.approved
+    switch.approved = lambda: ["claude-opus"]
     for identity in (KNOWLEDGE_QUERY_SPEC.identity, DRAFT_SPEC.identity):
         installed = gateway.bridge.installed.get(identity)
         assert installed is not None
         model = installed.handler.model  # type: ignore[attr-defined]
-        # Each is still wrapped by the data approval, around the same switch.
+        # Each is still wrapped by the data approval, around a switch with the drafting
+        # timeout (2026-11-06) that follows the router's list of approved models.
         assert type(model).__name__ == "ApprovedModelClient"
-        assert model.client is switch
-    # Agent Web gave the shared switch the Gateway's list once.
-    assert switch.approved == knowledge.conversation_models.approved
+        assert isinstance(model.client, SelectableModelClient)
+        assert list(model.client.approved()) == ["claude-opus"]
 
 
 # -- the Knowledge answer ---------------------------------------------------------

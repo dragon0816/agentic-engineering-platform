@@ -143,6 +143,9 @@ $aep = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\preview-0.1.0\.venv\Scripts
 | `rejected the Windows ticket (401)` | 公司登入網站不在「近端內部網路」區域 | 請 IT 確認；`klist purge` 後登出再登入 |
 | **Test** 按鈕是灰的 | gateway 不在 `Running` | 先 **Start**，等狀態變 `Running` |
 | **Start / Restart / Refresh token** 是灰的 | 這台電腦的 gateway 設成「只顯示、不管理」（自己架的 gateway） | 用你自己的方式管理那個 gateway |
+| 「公司的模型服務現在沒有回應（HTTP 503）」 | gateway 在跑，但公司那邊的模型服務沒有回應（例如維護中） | 不是你的設定問題；等一下按回答下方的 **重試**，一直這樣請通知管理員 |
+| 「模型 3 分鐘內沒有回應（逾時）」 | 一次模型呼叫超過 `host.json` 的 `models.call_timeout_seconds`（預設 180 秒） | 按 **重試**；常常發生時，看上一列或 **Settings → LLM gateway → Test** |
+| 重新整理後 **Send** 是灰的，下方寫「正在檢查可用的對話後端與模型…」 | 正在檢查 Codex、Claude Code、Copilot 的登入狀態與 gateway | 等它好（可能要一分鐘）；不要一直重新整理 |
 
 ---
 

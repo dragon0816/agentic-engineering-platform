@@ -144,9 +144,7 @@ def harness_asker(
     clock: Callable[[], float] = time.monotonic,
 ) -> skill_session.Asker:
     vault_id = dataset[len(VAULT_PREFIX) :]
-    now_ai = ai_runs.AiRuntime(
-        model=ai.model, background=lambda _title, work: work(), approved=ai.approved
-    )
+    now_ai = bi_harness.turn_ai(gateway, ai)
 
     def asker(
         context: str,

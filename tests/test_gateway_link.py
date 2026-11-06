@@ -107,7 +107,7 @@ def test_a_401_says_the_token_has_probably_expired(tmp_path: Path) -> None:
     [
         None,
         Failure(code="model_output_truncated", message="cut"),
-        Failure(code="model_http_error", message="503: busy"),
+        Failure(code="model_http_error", message="429: busy"),
     ],
 )
 def test_other_failures_keep_their_own_answer(tmp_path: Path, failure: Failure | None) -> None:
@@ -117,6 +117,18 @@ def test_other_failures_keep_their_own_answer(tmp_path: Path, failure: Failure |
         )
         is None
     )
+
+
+def test_a_model_service_that_does_not_answer_is_said_in_chinese(tmp_path: Path) -> None:
+    # Acceptance F20 (2026-11-06): a 5xx reached the person as an English line with no cause.
+    text = explain_model_failure(
+        default_fragment_config(),
+        Failure(code="model_http_error", message="503: busy"),
+        paths=GatewayPaths(tmp_path),
+        probe=lambda p: True,
+    )
+    assert text is not None and "模型服務現在沒有回應" in text and "HTTP 503" in text
+    assert "重試" in text
 
 
 def test_a_model_not_on_this_computer_is_not_explained_by_the_gateway(tmp_path: Path) -> None:

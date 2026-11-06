@@ -1510,6 +1510,7 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
           aria-label="語音輸入" aria-pressed="false"
           title="語音輸入：錄音後轉成文字放進輸入框，確認後再送出">🎤</button>
         <span id="mic-status" class="mic-status" role="status" hidden></span>
+        <span id="send-wait" class="mic-status" role="status" hidden></span>
         <div class="model-control" id="model-control">
           <label class="visually-hidden" for="conversation-model">LLM model</label>
           <select id="conversation-model" aria-describedby="model-state" hidden></select>
@@ -4253,6 +4254,19 @@ function renderConversation(record) {
       // A Telegram conversation is read here: nothing to rate or reply to.
       if (record.source === "telegram") said.parentNode.dataset.messageId = replied.message_id;
       else attachTurnControls(said.parentNode, asked.text, replied);
+      if (replied.status === "failed" && record.source !== "telegram"
+        && index + 2 >= record.messages.length) {
+        // The newest answer failed (a model timeout, a stopped gateway): one press sends the
+        // same question again (acceptance F20). Its attached files are not sent again.
+        const again = document.createElement("button");
+        again.type = "button"; again.className = "link-button retry-turn";
+        again.textContent = "重試"; again.title = "再送一次同樣的問題";
+        again.addEventListener("click", () => {
+          el("message").value = asked.text;
+          if (!el("send").disabled) el("ask").requestSubmit();
+        });
+        said.parentNode.append(again);
+      }
       const installForm = replied.workflow_form
         && replied.workflow_form.origin === "install";
       if (replied.workflow_form && !installForm) {
@@ -5265,8 +5279,24 @@ async function chooseBackend(name) {
 }
 
 async function loadChat(selectId) {
-  await loadBackends();
-  await loadConversations(selectId);
+  // After a reload Send waits for the check of the conversation backends (Codex, Claude
+  // Code and Copilot sign-in, the gateway), which can take about a minute (acceptance F20):
+  // the person is told why rather than facing a grey button.
+  const wait = send.disabled ? setTimeout(() => sendWait(true), 1500) : null;
+  try {
+    await loadBackends();
+    await loadConversations(selectId);
+  } finally {
+    if (wait) clearTimeout(wait);
+    sendWait(false);
+  }
+}
+
+function sendWait(on) {
+  const note = el("send-wait");
+  note.hidden = !on;
+  note.textContent = on ? "正在檢查可用的對話後端與模型（Codex、Claude Code、Copilot 的登入狀態"
+    + "與 LLM gateway），可能要一分鐘；好了就能送出。" : "";
 }
 
 el("session-search").addEventListener("input", () => {
@@ -16895,6 +16925,14 @@ function biBuildSessionLog(target, session, renderSuggestion) {
     }
     const item = bh("li", "", bh("p", "bi-meta", biSentLine(turn.sent || {})));
     if (turn.error) item.append(bh("p", "bi-err", turn.error.message));
+    const asked = index > 0 ? turns[index - 1] : null;
+    if (turn.error && target === "bi-ai-log" && index === turns.length - 1 && asked) {
+      // The last turn failed: send the same request again (acceptance F16/F20).
+      item.append(bh("div", "bi-actions", biButton("重試", () => {
+        el("bi-ai-msg").value = String(asked.text).replace(/^工作領域：[^\n]*\n\n/, "");
+        el("bi-ai-send").click();
+      }, "bi-btn", "再送一次同樣的要求")));
+    }
     if (turn.suggestion) item.append(...renderSuggestion(session, turn, index));
     log.append(item);
   });

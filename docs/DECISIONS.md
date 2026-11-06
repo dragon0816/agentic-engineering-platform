@@ -6602,3 +6602,27 @@ types were typed. Spec: `docs/phases/BI_TEST_AND_TOOLS.md` §4.
 - **The skill AI must give `card_types` when its text names types a run would not make;** the
   check names them. Types the profile leaves out are not demanded, since the rule cannot add them.
 
+## 2026-11-06: One model call has its own timeout, and a down model service is said at once
+
+Acceptance F16/F20 (orchestrator): with the company model backend down, one call held a BI AI
+turn 6 and 10 minutes whatever its budget (a turn's clock is checked only between calls; the
+client's timeout was a fixed 600 s), and a chat turn took about 4 minutes to say 「The configured
+model could not answer this turn.」 with no cause or 重試.
+
+- **`models.call_timeout_seconds` (default 180) for the conversation:** chat turns and the BI AI
+  sessions on the harness. **`models.batch_timeout_seconds` (default 600) for the drafting
+  clients:** Knowledge answers and ingest, Workflow drafts and BI card extraction runs, whose
+  one call may write a long answer; trial runs inside a BI AI turn use the conversation's client
+  and its 180 s (orchestrator). Both in host.json,
+  10–3600. The router gets its own clients; the drafting switch follows the models the page
+  approves on the router's. Rejected: one timeout for both, which either cuts extraction or
+  leaves chat hanging 10 minutes.
+- **A model call's 5xx is explained before anything else, in Chinese,** naming that the model
+  service is not answering, with 重試; a timeout says how long it waited. The minutes of a 503
+  are spent inside the gateway (LiteLLM), not in AEP: AEP asks at most twice (stub test), and one
+  call measured 359 s before its 503. LiteLLM's retries live in the owner's gateway repository;
+  not changed here (the orchestrator tells the owner).
+- **The newest failed chat answer gets a 重試 button** (the same question again; attached files
+  are not sent again), and a failed BI AI turn too.
+- **Send waiting after a reload says why** (the conversation backends' sign-in check).
+
