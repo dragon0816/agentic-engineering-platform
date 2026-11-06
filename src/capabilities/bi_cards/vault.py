@@ -47,6 +47,7 @@ import tempfile
 import threading
 import time
 import uuid
+from collections import ChainMap
 from collections.abc import Callable, Iterator, Mapping
 from contextlib import closing, contextmanager
 from dataclasses import dataclass, field, replace
@@ -58,6 +59,7 @@ from capabilities.bi_cards import (
     card_markdown,
     card_model,
     catalog,
+    domain_reach,
     extract,
     homes,
     names,
@@ -2111,6 +2113,66 @@ def pending(workspace: Path, vault_id: str) -> dict[str, Any]:
             "files": sorted(work["files"]),
             "commits": vault.repo.local_commits(),
         }
+
+
+#: The commits a share lists at most; older ones are counted, not listed.
+MAX_SHARED = 50
+
+
+def share_plan(workspace: Path, vault_id: str) -> dict[str, Any]:
+    """What a share would carry (`docs/phases/BI_PAGE_SIMPLE.md` S6): the commits since the
+    published version, pushed or only on this PC, newest first, each with its author and the
+    domains it reaches (`*` for the whole vault); the uncommitted changes' domains; the tags
+    taken."""
+    vault = _vault(workspace, vault_id)
+    with vault.lock, _repo_errors():
+        repo = vault.repo
+        ordered = [cid for _, cid in repo._ordered()]
+        published = repo.published()
+        start = published["commit"] if published and published["commit"] in ordered else None
+        units = repo.state_at(start) if start else {}
+        by_id = {c.data["id"]: c.data for c in repo.scan().commits}
+        later = ordered[ordered.index(start) + 1 :] if start else ordered
+        records = [
+            *({**by_id[cid], "pushed": True} for cid in later if cid in by_id),
+            # Only on this PC: no id yet, and the author is this PC's.
+            *(
+                {**record, "id": None, "author": repo.author, "pushed": False}
+                for record in repo.local_commits()
+            ),
+        ]
+        commits = []
+        for record in records:
+            keys = {str(op["unit"]) for op in record["ops"]}
+            before = {k: units.get(k) for k in keys}
+            repo_engine.apply_ops(units, record["ops"])
+            reached = domain_reach.touched(ChainMap(before, units), units, keys)
+            commits.append(
+                {
+                    "id": record["id"],
+                    "purpose": record["purpose"],
+                    "author": record["author"],
+                    "created": record["created"],
+                    "pushed": record["pushed"],
+                    "units": len(keys),
+                    "homes": sorted(reached),
+                }
+            )
+        head = repo.working_units(pending=False)
+        working = repo.working_units()
+        uncommitted = sum(
+            repo_engine.canonical(head.get(k)) != repo_engine.canonical(working.get(k))
+            for k in set(head) | set(working)
+        )
+    commits.reverse()
+    return {
+        "published": published,
+        "commits": commits[:MAX_SHARED],
+        "older": max(0, len(commits) - MAX_SHARED),
+        "uncommitted": uncommitted,
+        "uncommitted_homes": sorted(domain_reach.touched(head, working)),
+        "tags": [t["name"] for t in repo.tags()],
+    }
 
 
 def relation_ends(store: BiStore, item: Mapping[str, Any]) -> tuple[str, str] | None:

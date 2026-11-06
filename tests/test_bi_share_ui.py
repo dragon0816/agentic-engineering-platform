@@ -516,13 +516,19 @@ def test_bi_sharing_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None
         assert small_buttons() == "", small_buttons()
         shoot("subscriptions-dark-390")
 
-        # -- 取消訂閱 asks first ---------------------------------------------------------------
-        run("window.confirm = () => false;")
-        click_in(f"#bi-subs-list li[data-sub='{OLD}'] button", "取消訂閱")
+        # -- 取消訂閱 asks first, on the page (acceptance F14): 取消 sends nothing --------------
+        run("window.confirm = () => { throw new Error('the browser dialog was used'); };")
+        row = f"#bi-subs-list li[data-sub='{OLD}']"
+        click_in(f"{row} button", "取消訂閱")
+        wait(f"!!document.querySelector({json.dumps(row + ' .bi-confirm')})")
+        asked = run(f"document.querySelector({json.dumps(row + ' .bi-confirm')}).textContent")
+        assert "取消訂閱「" in str(asked)
+        click_in(f"{row} .bi-confirm button", "取消")
         time.sleep(0.3)
         assert posted("/api/bi/subscriptions/unsubscribe") == []
-        run("window.confirm = () => true;")
-        click_in(f"#bi-subs-list li[data-sub='{OLD}'] button", "取消訂閱")
+        assert run(f"!document.querySelector({json.dumps(row + ' .bi-confirm')})")
+        click_in(f"{row} button", "取消訂閱")
+        click_in(f"{row} .bi-confirm button", "確定取消訂閱")
         wait("document.getElementById('bi-subs-count').textContent === '2'")
         assert posted("/api/bi/subscriptions/unsubscribe") == [{"dataset": OLD}]
         assert "已取消訂閱" in content("bi-notice")

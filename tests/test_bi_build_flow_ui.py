@@ -5,7 +5,8 @@ with a temporary folder as the shared folder and scripted Agent and extractor
 models: upload → Markdown → convert to a vault → Session A's suggestion, applied,
 published and the vault moved to it → Session B's suggestion applied → ingest
 trial, review and write → AI benchmark questions → AI dashboard (K1) → bench run
-working vs published → commit → push → publish, ending with what the Agent reads.
+working vs published → 分享 (commit, push, tag, publish in one step), ending with what the
+Agent reads.
 Each AI step gets its next replies just before the person sends the message. All
 data is fictional. Screenshots in `.scratch/bi-flow/` with `AEP_UI_SHOTS`.
 """
@@ -15,6 +16,7 @@ from __future__ import annotations
 import os
 import threading
 from collections.abc import Iterator
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -357,35 +359,26 @@ def test_the_whole_build_flow(
         assert "工作版本 1/1、發佈版本 0/1" in report and "退步" not in report.replace("退步 0", "")
         page.shoot("3-bench")
 
-        # -- step 3: commit → push → publish ----------------------------------------------------
-        page.set_value("bi-b-ver-purpose", "加入客戶訊號、測試題與 Dashboard")
-        page.click("#bi-b-ver-commit")
-        page.notice("已 commit")
-        page.wait("!document.getElementById('bi-b-ver-push').disabled")
+        # -- step 3: 分享, one step: commit → push → tag → publish ----------------------------
         latest = bi_bench.latest(workspace, vault_id)
         assert latest is not None and latest["units_sha256"] == bi_bench.units_digest(
             vault.Vault(workspace, vault_id).repo.working_units()
-        )  # the push's content is exactly what was tested
-        page.click("#bi-b-ver-push")
-        page.notice("已 push")
-        page.see("bi-b-ver-history", "加入客戶訊號")
-        page.run(
-            "[...document.querySelectorAll('#bi-b-ver-history tbody tr:first-child button')]"
-            ".find((b) => b.textContent === '加 tag').click()"
-        )
-        page.run("document.querySelector('#bi-b-ver-history .bi-ver-ask input').value = 'v1'")
-        page.click("#bi-b-ver-history .bi-ver-ask button.go")
-        page.notice("已建立 tag「v1」")
-        page.run("window.confirm = () => true")
+        )  # the share's content is exactly what was tested
+        page.see("bi-b-share-list", "還沒 commit 的改動")
+        page.see("bi-b-share-tests", "通過")
+        today = date.today().isoformat()
+        assert page.run("document.getElementById('bi-b-share-tag').value") == today
+        page.set_value("bi-b-ver-purpose", "加入客戶訊號、測試題與 Dashboard")
+        page.click("#bi-b-share-go")
+        page.wait("!!document.querySelector('#bi-b-share-act .bi-confirm')")
+        page.click_text("#bi-b-share-act .bi-confirm", "確定分享")
         page.wait(
-            "[...document.querySelectorAll('#bi-b-ver-history button')]"
-            ".some((b) => b.textContent === '發佈 v1')"
+            "[...document.querySelectorAll('#bi-b-share-progress li')]"
+            ".every((li) => li.dataset.state === 'done')"
         )
-        page.run(
-            "[...document.querySelectorAll('#bi-b-ver-history button')]"
-            ".find((b) => b.textContent === '發佈 v1').click()"
-        )
-        page.see("bi-b-ver-reads", "發佈版本「v1」")
+        page.see("bi-b-ver-reads", "發佈版本「" + today + "」")
+        page.see("bi-b-ver-history", "加入客戶訊號")
+        page.see("bi-b-share-list", "沒有新的內容")
         page.shoot("3-published")
 
     # -- what users get: the published version has it all ------------------------------------

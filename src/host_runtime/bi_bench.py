@@ -320,11 +320,21 @@ def _question_homes(units: Mapping[str, Any]) -> list[str]:
     return sorted({q["home"] for q in vault_checks.questions(units) if q["home"]})
 
 
-def gate(workspace: Path, before: Mapping[str, Any], after: Mapping[str, Any]) -> CheckReport:
-    """The BI vault push check (`vault.set_benchmark`). A verdict counts while what its
-    question's domain stands on is unchanged, so a colleague's push in another domain does not
-    void it. A regression blocks a push that touches its domain; one elsewhere is a note
-    (`docs/phases/BI_PAGE_SIMPLE.md` §14)."""
+@dataclass(frozen=True)
+class _Verdicts:
+    """Each question's newest verdict that still counts for `after`, and the newest run."""
+
+    by_unit: dict[str, Any]
+    newest: Mapping[str, Any] | None
+    after: Mapping[str, Any]
+
+    def home_of(self, unit: str) -> str | None:
+        value = self.after.get(unit)
+        home = value.get("home") if isinstance(value, dict) else None
+        return str(home) if home else None
+
+
+def _verdicts(workspace: Path, after: Mapping[str, Any]) -> _Verdicts:
     digest = units_digest(after)
     current = domain_reach.digests(after, _question_homes(after))
     runs = [
@@ -334,11 +344,7 @@ def gate(workspace: Path, before: Mapping[str, Any], after: Mapping[str, Any]) -
         if r.get("status") == "finished"
     ]
     runs.sort(key=lambda r: (str(r.get("finished_at") or ""), r.get("finished_ns") or 0))
-
-    def home_of(unit: str) -> str | None:
-        value = after.get(unit)
-        home = value.get("home") if isinstance(value, dict) else None
-        return str(home) if home else None
+    home_of = _Verdicts({}, None, after).home_of
 
     def counts(run_: Mapping[str, Any], unit: str) -> bool:
         if run_.get("units_sha256") == digest:
@@ -357,6 +363,20 @@ def gate(workspace: Path, before: Mapping[str, Any], after: Mapping[str, Any]) -
                 newest = run_
         if run_.get("units_sha256") == digest:
             newest = run_
+    return _Verdicts(verdicts, newest, after)
+
+
+def _regressed(item: Mapping[str, Any]) -> bool:
+    return _passed(item, "published") and not _passed(item, "working")
+
+
+def gate(workspace: Path, before: Mapping[str, Any], after: Mapping[str, Any]) -> CheckReport:
+    """The BI vault push check (`vault.set_benchmark`). A verdict counts while what its
+    question's domain stands on is unchanged, so a colleague's push in another domain does not
+    void it. A regression blocks a push that touches its domain; one elsewhere is a note
+    (`docs/phases/BI_PAGE_SIMPLE.md` §14)."""
+    found = _verdicts(workspace, after)
+    verdicts, newest = found.by_unit, found.newest
     if newest is None:
         return CheckReport(
             blocking=[],
@@ -377,20 +397,46 @@ def gate(workspace: Path, before: Mapping[str, Any], after: Mapping[str, Any]) -
         note += f"；擷取 {extract.get('score')} 分"
 
     def where(unit: str) -> str:
-        home = home_of(unit)
+        home = found.home_of(unit)
         return f"（{home}）" if home else ""
 
     reached = domain_reach.touched(before, after)
     blocking: list[str] = []
     elsewhere: list[str] = []
     for unit, item in verdicts.items():
-        if _passed(item, "published") and not _passed(item, "working"):
+        if _regressed(item):
             line = f"測試退步{where(unit)}：「{item['question']}」發佈版本答得對，這次的內容答錯"
-            home = home_of(unit)
+            home = found.home_of(unit)
             mine = "*" in reached or home is None or home in reached
             (blocking if mine else elsewhere).append(line)
     notes = [note, *(f"其他領域，不擋這次 push：{line}" for line in elsewhere)]
     return CheckReport(blocking=blocking, notes=notes)
+
+
+def domain_states(workspace: Path, after: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Each domain's test state for `after`, as the push check reads it: `regressed` when a
+    counting verdict regressed, `passed` when verdicts count and none regressed, `untested`
+    when none counts. Questions with no domain are listed under home `""`
+    (`docs/phases/BI_PAGE_SIMPLE.md` S6)."""
+    found = _verdicts(workspace, after)
+    graded = [q for q in vault_checks.questions(after) if q["must"] or q["must_not"]]
+    states = []
+    for home in sorted({str(q["home"] or "") for q in graded}):
+        units = {q["unit"] for q in graded if str(q["home"] or "") == home}
+        items = [found.by_unit[u] for u in sorted(units) if u in found.by_unit]
+        regressed = [item["question"] for item in items if _regressed(item)]
+        state = "regressed" if regressed else "passed" if items else "untested"
+        states.append(
+            {
+                "home": home,
+                "state": state,
+                "questions": len(units),
+                "tested": len(items),
+                "passed": sum(_passed(item, "working") for item in items),
+                "regressed": regressed,
+            }
+        )
+    return states
 
 
 def _passed(item: Mapping[str, Any], side: Side) -> bool:
