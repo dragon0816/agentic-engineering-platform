@@ -6684,6 +6684,18 @@ Acceptance findings F5, F6 and F8 on step 2a. The owner's flow: 「根據新增�
 - **F12. Commit and push are reachable from the status line under the top row,** from any tab: 「還沒 commit 的改動 N 個」 and 「你還沒 push 的 commit N 個」 are links to 版本 in step 3. No new place for 版本.
 - **F19. An import commits its own units and what they cannot go without.** Its own: what the import staged, read from the pending changes before and after it. What they need, of what else waits: a created home whose domain its cards carry, and a schema addition (type, field, allowed value) they use, since a colleague given the cards without them reads values their schema lacks. A skill, a question, a label, an unused addition and the rest stay for the person's own commit and purpose. Sources added still commit first in their own 「加入來源」 commit, all of them, as before: an import's evidence needs its source, and a source added but not imported is labelled as what it is. Rejected: one commit of everything under the import's purpose (the finding).
 
+## 2026-11-06: The BI script guard stays on whatever a script reaches
+
+A finding before release: on a PC with numpy (the release bundle carries it), the tool runner's pre-import of openpyxl loaded numpy and so ctypes, and a tool's `import ctypes` then came from `sys.modules` with no audit event. Measured with real attempts (`tests/test_bi_guard_attacks.py`): ctypes still refused `ctypes.dlopen` and `ctypes.dlsym`, but a ctypes Union of a pointer and an address wrote process memory with no event. Wider, and with or without numpy, in tools and analyses alike: a script could switch the guard off in one line (`__main__._ready = False`, a frame's `f_globals`, `gc.get_objects()`), empty its lists, or replace a builtin or `ntpath` function it called, and then write outside its folder or open a socket.
+
+The design of 2026-10-31 stays: guarded, not sandboxed, and a person reading the code (a tool by its hash) is the real control. Within it:
+
+- **The guard is a closure installed right before the script,** keeping its own copies of the lists, builtins and functions it calls; no flag, and nothing left in `__main__`. Rejected: deleting modules from `sys.modules`, since attribute paths (`numpy.ctypeslib.ctypes`) still reach them.
+- **It refuses to start when a module it denies is already loaded** (except `_winapi`, which shutil imports on Windows and whose process calls raise events it refuses). The tool runner keeps numpy out of its pre-imports, so openpyxl reads without it. Rejected: loading openpyxl lazily inside the hook's rules, which would let a tool's own import pull numpy in under different rules.
+- **Frames, the garbage collector and tracing are refused** (`sys._getframe`, `gc.get_objects`, `sys.settrace`, …).
+- **On Windows the write check resolves paths through `nt`'s own functions,** captured at install; `os.path.realpath` is Python that reads its module's globals at each call.
+- **What it still cannot close:** a determined script may find a CPython flaw, and it can read any file the user can. The page's approval step and the user guide (6.8.3) now say what approving means. A real boundary (AppContainer or a job object) remains the later replacement.
+
 ## 2026-11-06 — BI 分享: the page sequences it, the route only reads (acceptance F13-F15)
 
 - **One 分享 step runs commit, push, tag and publish through their existing routes**, in order, stopping at the first failure. A new route reads what a share would carry. Rejected: one server route doing all four (it would duplicate the push gate's path and hide which step failed).

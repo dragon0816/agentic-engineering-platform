@@ -15468,6 +15468,11 @@ function biToolsDraw(vaultId, reply) {
     // Code waiting for approval is shown open: approving means having read it.
     const shown = bh("details", "", bh("summary", "", "程式碼"), code);
     shown.open = Boolean(item.code && !item.approved);
+    if (shown.open) {
+      // The person's reading is the real control; the guard only catches mistakes.
+      shown.append(bh("p", "bi-meta", "核准＝你讀過並信任這段程式。執行時的防護只擋常見的失誤，"
+        + "不是沙箱；看不懂或來源不明的程式，不要核准。"));
+    }
     biRowDetail(list).cell.append(shown);
   };
   const scope = biScope();
