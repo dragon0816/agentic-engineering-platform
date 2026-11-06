@@ -1474,6 +1474,7 @@ class Vault:
                 return
             self._links_by_id(changed, after, targets)
             with _repo_errors():
+                waiting = self.repo._pending()
                 moved = changed.get(repo_engine.SCHEMA_UNIT)
                 old = None
                 if moved and before.get(repo_engine.SCHEMA_UNIT):
@@ -1500,8 +1501,12 @@ class Vault:
                     if k.startswith("import:") and v and k not in before
                 ]
                 if imports:
+                    # The import's own units, and what they cannot go without; whatever else
+                    # waits stays for the person's own commit, with its own purpose (F19).
+                    own = _staged_since(waiting, self.repo._pending())
+                    own |= _needed_by(self.repo.working_units(), own, self.repo._pending())
                     vault_sources.commit_split(
-                        self.repo, _PURPOSE.get() or _draft(imports, changed)
+                        self.repo, _PURPOSE.get() or _draft(imports, changed), only=own.__contains__
                     )
             self.rebuild()
 
@@ -1711,6 +1716,53 @@ class Vault:
             "author": self.author,
             "reachable": bool(document),
         }
+
+
+def _staged_since(before: Mapping[str, Any], after: Mapping[str, Any]) -> set[str]:
+    """The units and files staged between two reads of the pending changes."""
+    return {
+        key
+        for part in ("sets", "files")
+        for key, value in after[part].items()
+        if key not in before[part]
+        or repo_engine.canonical(before[part][key]) != repo_engine.canonical(value)
+    }
+
+
+def _needed_by(units: Mapping[str, Any], own: set[str], pending: Mapping[str, Any]) -> set[str]:
+    """Of the other changes waiting, those an import's units cannot go without (acceptance
+    F19): the created home whose domain its cards carry, and a schema addition they use: a
+    type, a field, or an allowed value. A colleague given the cards without them would read
+    values their schema does not have. A skill, a question, a label and the rest stay."""
+    kinds = {str((units.get(k) or {}).get("type") or "") for k in own if k.startswith("card:")}
+    used: dict[tuple[str, str], set[str]] = {}
+    for key in own:
+        if not key.startswith("field:"):
+            continue
+        _, cid, name = key.split(":", 2)
+        kind = str((units.get(f"card:{cid}") or {}).get("type") or "")
+        value = (units.get(key) or {}).get("value")
+        values = value if isinstance(value, list) else [value]
+        used.setdefault((kind, name), set()).update(str(v) for v in values if v is not None)
+    domains = {v.lower() for (_, name), found in used.items() if name == "domain" for v in found}
+    needed: set[str] = set()
+    for key in pending["sets"]:
+        if key in own or not key.startswith(schema_merge.PREFIX):
+            continue
+        kind, _, rest = key[len(schema_merge.PREFIX) :].partition(":")
+        where, _, value = rest.partition(":")
+        type_name, _, field_name = where.partition(".")
+        if (
+            (kind == "type" and where in kinds)
+            or (kind == "field" and (type_name, field_name) in used)
+            or (kind == "enum" and value in used.get((type_name, field_name), ()))
+        ):
+            needed.add(key)
+    for item in vault_skills.created_homes(units):
+        key = vault_skills.home_unit(item)[0]
+        if key in pending["sets"] and str(item["domain"]).lower() in domains:
+            needed.add(key)
+    return needed
 
 
 def _draft(imports: list[dict[str, Any]], changed: Mapping[str, Any]) -> str:
