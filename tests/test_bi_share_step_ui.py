@@ -214,9 +214,10 @@ def test_one_share_step_carries_commit_push_tag_and_publish(tmp_path: Path) -> N
             assert vault.Vault(workspace, vault_id).reads()["tag"] == today + "-2"
 
             # -- acceptance F24: the run before this publish is an old result, said plainly ---
-            page.see("bi-b-bench-report", "舊結果")
+            # Already old before (its content changed); the publish adds its own reason.
+            page.see("bi-b-bench-report", "之後發佈了「" + today + "-2」")
             report = page.text_of("bi-b-bench-report")
-            assert "之後發佈了「" + today + "-2」" in report, report
+            assert "舊結果" in report, report
             assert "[object" not in report, report
             heading = page.run(
                 "document.querySelector('#bi-b-bench-report h5 .bi-badge').textContent"
