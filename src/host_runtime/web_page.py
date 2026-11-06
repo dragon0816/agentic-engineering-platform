@@ -3523,7 +3523,10 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
 "use strict";
 const TOKEN = new URLSearchParams(location.search).get("token") || "";
 // Taken out of the address bar at once: a token left in the URL is a token in
-// the history, in a screenshot and in anything that syncs tabs.
+// the history, in a screenshot and in anything that syncs tabs. The tab keeps
+// it, so a reload brings the page back (the server's RELOAD_PAGE): it goes with
+// the tab and the next run's token is a new one.
+try { if (TOKEN) sessionStorage.setItem("aep-page-token", TOKEN); } catch (e) { /* none */ }
 history.replaceState(null, "", location.pathname);
 
 async function call(path, body) {

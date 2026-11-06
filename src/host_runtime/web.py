@@ -22,7 +22,9 @@ not -- any process on the machine, and any page open in the browser. So:
 1. It listens on the loopback address only. Nothing on the network can reach
    it, which is the owner's decision of 2026-09-24.
 2. Every request carries `Authorization: Bearer <token>`, where the token is
-   made afresh each run and printed once. A page on another origin cannot set
+   made afresh each run and printed once. The page keeps it in its tab's
+   `sessionStorage`, so a reload finds it again (`RELOAD_PAGE`); never a cookie,
+   which a browser would send for any site. A page on another origin cannot set
    that header without a preflight, and this server answers no preflight and
    sends no cross-origin header, so it cannot be driven from another site.
 3. The `Host` header must name the loopback address, which is what stops a
@@ -452,6 +454,20 @@ HTML_SUFFIXES = frozenset({".html", ".htm"})
 #: The sandboxed viewer's policy: scripts and styles inside the file only, no
 #: network, no forms, no plugins, an opaque origin (the CSP `sandbox` also
 #: applies when the address is opened in its own tab), framed only by Agent Web.
+#: What a reload gets: the page took the token out of the address, and the tab kept it in
+#: `sessionStorage`, which only this origin's scripts can read and which goes with the tab.
+#: Nothing here is secret. A token from an earlier run is tried once: its address is refused.
+RELOAD_PAGE = (
+    "<!DOCTYPE html><meta charset=utf-8><title>AEP Agent</title>"
+    "<p id=say>Open the address this command printed.</p>"
+    "<script>(() => { let t = ''; try { t = sessionStorage.getItem('aep-page-token') || '';"
+    " sessionStorage.removeItem('aep-page-token'); } catch (e) {}"
+    " if (t) { location.replace(location.pathname + '?token=' + encodeURIComponent(t)"
+    " + location.hash); return; }"
+    " document.getElementById('say').textContent = '請從桌面或開始功能表的「AEP Agent」重新開啟。'"
+    " + ' Open AEP Agent from its shortcut again.'; })();</script>"
+).encode()
+
 FILE_VIEW_CSP = (
     "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; "
     "img-src data:; font-src data:; form-action 'none'; base-uri 'none'; "
@@ -6481,6 +6497,11 @@ class _Handler(BaseHTTPRequestHandler):
             # a browser cannot be asked to set a header on its first visit.
             # Everything the page then asks for needs the header.
             given = parse_qs(parsed.query).get("token", [""])[0]
+            if not given:
+                # A reload: the page took the token out of the address. This page holds no
+                # secret; the tab's own copy, which only this origin can read, brings it back.
+                self._send(401, RELOAD_PAGE, "text/html; charset=utf-8")
+                return
             if not hmac.compare_digest(given, self.server.token):
                 self._send(401, b"Open the address this command printed.", "text/plain")
                 return

@@ -4331,6 +4331,7 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [ ] BI: each domain's person owns a name dictionary, after the Dashboard slice (owner).
 
 - [x] 2026-11-06, Claude Code (worker D): `market-intel` sample marks settled on the owner's word, pushed, not published: 3 TestSolutions marked again, 4 Technologies stay cleared, 95 samples of 760. Only those marks moved; run `e3de934115f0` unchanged. `docs/phases/BI_SUMMARY_FILL.md`.
+- [x] 2026-11-06, Claude Code (cards worker): business cards acceptance walk fixes: one unit name at one level per company, re-placed on each card and undone with it; the chart never nests a unit in itself; chart file names in local time. `tests/test_business_cards_units.py`.
 - [x] 2026-11-06, Claude Code (cards worker): acceptance F16, skill AI budget per turn (3 trials, 6 minutes, best draft on stop), Chinese stop messages for BI sessions, a new rule saved only when applied. `tests/test_bi_skill_budget.py`, `tests/test_bi_vault_ui.py`.
 - [ ] BI: the schema, questions and analysis AIs have no trial cap or best-draft fallback (F16 follow-up); awaits the orchestrator.
 - [x] 2026-11-06, Claude Code (cards worker): acceptance F17, one decision for a run's card types (rule, profile, defaults), shown in the skills list and form, and the skill AI gives card_types for a rule about other types. `tests/test_bi_skill_types.py`.
