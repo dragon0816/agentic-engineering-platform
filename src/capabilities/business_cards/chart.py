@@ -143,7 +143,12 @@ def _paths(people: Sequence[sqlite3.Row]) -> dict[str, list[str]]:
             if known is not None and len(known) == 1 and not all(row[:depth]):
                 filled = next(iter(known))
                 row[:depth] = [row[i] or filled[i] for i in range(depth)]
-        paths[person["person_id"]] = [label for label in row if label] or [UNLABELLED]
+        # A unit is never nested in itself (one name stored at two levels).
+        path: list[str] = []
+        for label in row:
+            if label and (not path or path[-1] != label):
+                path.append(label)
+        paths[person["person_id"]] = path or [UNLABELLED]
     return paths
 
 

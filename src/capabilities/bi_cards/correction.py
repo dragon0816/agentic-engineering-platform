@@ -10,7 +10,9 @@ with the note's line as its evidence. Direct edits of a card are gone.
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from capabilities.bi_cards import card_model, vault
@@ -161,6 +163,37 @@ def checked_field(reg: Registry, entity_type: str, name: str) -> FieldDef:
     if item.klass == "derived":
         raise BiStoreError("field_derived", f"{item.label} 是推導欄位，不能直接修改")
     return item
+
+
+def finalize(
+    workspace: Path, vault_id: str, given: Mapping[str, Any], actor: str
+) -> dict[str, Any]:
+    """定案 (owner 2026-11-05, `docs/phases/BI_PAGE_SIMPLE.md` §14): after a meeting, the person
+    responsible settles a field with a final value and a reason. It wins over a differing value
+    and a racing edit, and related proposals and conflicts close. It is a normal change: the old
+    value, who and why stay in history, nobody's commits are touched, and it goes through commit
+    and push and their test check. Nothing checks who may do it: that is the working arrangement."""
+    store = BiStore(workspace, vault.dataset_name(vault_id))
+    card_id, name = str(given.get("card") or ""), str(given.get("field") or "")
+    card = store.card(card_id)
+    if card is None:
+        raise BiStoreError("card_unknown", "找不到這張卡片")
+    reason = str(given.get("reason") or "").strip()
+    if not reason:
+        raise BiStoreError("reason_required", "定案要寫理由，例如哪一次會議決定的")
+    reg = for_store(store)
+    item = checked_field(reg, card["entity_type"], name)
+    value = checked_value(reg, item, given.get("value"))
+    why = f"定案：{reason}"
+    open_ones = [(card_id, int(p["id"])) for p in store.proposals(card_id) if p["field"] == name]
+    store.set_field(
+        card_id, name, value, base_version=int(card["version"]), actor=actor, reason=why
+    )
+    if open_ones:
+        store.decide_proposals(open_ones, "reject", why, actor)
+    # A colleague's edit that races this one, pushed before it: this value is the decision.
+    vault.resolve(workspace, vault_id, {"unit": f"field:{card_id}:{name}", "choice": "mine"})
+    return {"card": card_id, "field": name, "closed": len(open_ones)}
 
 
 def checked_value(reg: Registry, item: FieldDef, raw: Any) -> Any:

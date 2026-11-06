@@ -5986,11 +5986,15 @@ skill AI: owner decisions". Code `capabilities/bi_cards/vault_checks.py`, `host_
   "question", "working": {"ok", "grade": {"passed", "missing", "forbidden"}, "answer", "calls": [{"arguments", "status", "total"}] (what the model asked of `bi__query` and how many cards came back), "errors": [{"term", "kind": "missing" | "forbidden", "class", "why"}]}, "published": {...}}],
   "cases": [{"unit", "slug", "result"?: <benchmark.score>, "error"?}], "working_score", "published_score",
   "regressions": [unit], "error_classes": {class: count, on the working side}, "extract": <benchmark.summarize without notes>|null, "error"}`. `class` (`capabilities/bi_cards/error_class.py`, 2026-11-05) is `retrieval`, `relation`, `extraction`, `evidence`, `generation` or `unknown`; it never changes pass, fail, a regression or the push check.
-- **Push check** (`vault.set_benchmark(partial(bi_bench.gate, workspace))`, set in `build_runtime`): the finished
-  runs whose `units_sha256` equals the units being pushed, taking each question's newest verdict across them, so
-  a run of one home cannot hide what another run found. Each regression is a blocking line naming the question's
-  home if it has one (push `status: "blocked"`), and blocks in every working domain. The note says how many
-  questions no run covered. Without such a run the push goes ahead with the note 「這次 push 的內容沒有跑過測試」.
+- **Push check** (`vault.set_benchmark(partial(bi_bench.gate, workspace))`, set in `build_runtime`): each question's newest
+  verdict from a finished run that still counts: the same `units_sha256`, or the same `digests[home]` for its home (`domain_reach`:
+  the home's units and the shared ones). A regression blocks if the push touches its home, it has no home, or the push touches
+  something shared; otherwise it is a note 「其他領域，不擋這次 push：…」. A report has `"digests": {home: sha256}`; one without counts only
+  for identical content. `standing` answers the same for the working copy against the head. Without a counting run: the note
+  「這次 push 的內容沒有跑過測試」.
+- **定案:** `POST /api/bi/vaults/<id>/finalize` `{"card", "field", "value", "reason"}` → `{"ok", "card", "field", "closed"}`; `reason_required`
+  400, `card_unknown` 404. Writes the value as a person's, with 「定案：<reason>」 in its history, closes open proposals on the field, and
+  decides a push conflict on it as `mine`. Uncommitted, then ordinary commit and push.
 - **Creating a domain** (`docs/phases/BI_PAGE_SIMPLE.md` §10): `POST /api/bi/vaults/<id>/homes` `{"name", "folder"?}`
   stages `meta:home:<id>` = JSON text `{"label", "domain"}` (`domain` empty when the schema has the home's own) and
   makes `applications/<id>/{sources,skills,tools,profile}` in the working copy → `{"ok", "home", "homes"}`. Refused 400:

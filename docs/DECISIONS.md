@@ -6559,6 +6559,38 @@ The owner: 「每個領域也要有各自的benchmark 問題和dashboard」. Des
 - **Published readers see no per-domain Dashboard:** the feed stays the vault's. Rejected for now: a per-domain feed, which is a contract change for Atlas.
 - **Assigning what exists is a dry run, then one step on an approved list.** Nothing is written until a person approves, and it stages changes for their commit.
 
+## 2026-11-06: A BI push is held back by what it touches, and 定案 settles a field
+
+The owner: 「這是一個多人合作的平台，但為了不彼此干擾，每一個domain會有專人來處理」, and on 定案, confirmed through the orchestrator: after a meeting, the person responsible settles a field. Design: `docs/phases/BI_PAGE_SIMPLE.md` §14. This replaces the same week's decision that a person in one domain is blocked by a regression in another, which the owner's sentence overrides.
+
+- **A regression blocks a push only in the domains it touches;** elsewhere it is a note. What cannot be placed soundly blocks, as before. Accepted cost: an aidc push can break a wireless answer that reads an aidc card, and nobody is stopped until wireless is tested.
+- **A test counts per domain:** its units and the shared ones. Rejected: the whole-vault digest, under which any colleague's push voids everyone's run.
+- **定案 is an ordinary change with a reason,** built on `set_field`, closing proposals, and `resolve`. Not a Git force push: commits are immutable. No access control. Rejected: a new unit kind for final values, since the field's own history already holds who and why.
+- **Commit stays whole for now,** though `only` makes limiting it cheap. The owner has not asked, and the warning covers it.
+- **The owner's rule for a card two domains reach is recorded, not built:** it needs a merge rule in the engine's conflict path. Findings in §14.
+
+## 2026-11-06: One unit name sits at one level for a company
+
+Acceptance walk of the business cards (orchestrator, for the colleague release): the printed
+光學事業處 was read as the 事業群 on one card and as the 處 on a colleague's, and the org chart
+showed 光學事業處 > 光學事業處 > 研發部. The orchestrator asked that one name not occupy two levels
+for one company, existing duplicates fixed when a card updates. Rule in
+`docs/phases/BUSINESS_CARDS.md` §2 (Host checks on a reading).
+
+- **The name's own level word decides first** (…事業群 → business group, …處 → division, the
+  mapping the spec and the Skill already give), then the company's majority, a tie the first
+  stored person's level. Rejected: always the majority, which makes the first misreading the
+  company's rule; and always the name, which cannot place English or unmarked names.
+- **Only when the company has the name at both levels.** A name read at one level stays where
+  it was read: nothing contradicts it.
+- **Stored people are re-placed inside the card's change** with their value's source kept, so
+  undo of that card reverts it. A value the person set is never moved (the rule that only new
+  evidence touches the person's values), and a level holding another name is never overwritten.
+  Rejected: a one-time migration, which would not catch the next card read the other way.
+- **The chart also drops a unit nested in itself**, so a store not yet re-placed draws right.
+- **Chart file names use local time**, as the page does (a UTC stamp named the previous day in
+  the Taipei morning).
+
 ## 2026-11-06: 建議 schema is its own press, and a version reads as 「5.0 加 N 項新增」
 
 Acceptance findings F5, F6 and F8 on step 2a. The owner's flow: 「根據新增的資料來建議是否要在schema新增類別，做法可以讓使用者按一個button，系統給出建議」. Design: `docs/phases/BI_PAGE_SIMPLE.md` S2; contract `docs/CONTRACTS.md`, "BI schema drafts and dataset upgrade".

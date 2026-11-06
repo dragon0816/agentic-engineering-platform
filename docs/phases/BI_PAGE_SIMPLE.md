@@ -154,7 +154,7 @@ The estimates are agent hours of work plus test runs, unmeasured, from the size 
 | # | Slice | Backend | Estimate |
 |---|---|---|---|
 | S1 | **The restructure.** §3 and §4: one selection, no trap, stepper of three, advanced areas, paragraphs out, ingest button in part 3. No new feature | None | 8–12 h, about half of it tests in 23 files |
-| S2 | **The suggest button. Built, 2026-11-06, branch `bi-schema-suggest`** (§14). A run that asks only the fit question over the newly added sources, answered as a table: class, why, how many items. It costs model output (recorded earlier as 40–50% more on an ingest), so it is a press, not automatic. Adopting a suggestion opens Session A with it. Remove `bi-b-fit` | A fit-only route or kind. Must work for a custom method, which today skips it | 6–10 h |
+| S2 | **The suggest button. Built, 2026-11-06, branch `bi-schema-suggest`** (§15). A run that asks only the fit question over the newly added sources, answered as a table: class, why, how many items. It costs model output (recorded earlier as 40–50% more on an ingest), so it is a press, not automatic. Adopting a suggestion opens Session A with it. Remove `bi-b-fit` | A fit-only route or kind. Must work for a custom method, which today skips it | 6–10 h |
 | S3 | **One AI panel. Done.** `#bi-ai` in `kn-pane-bi`: fixed at the right at full height (the page makes room beside it), the lower part on a phone. Opened from the row or button it concerns, with one log and one input; closes on a dataset change. `biAiOpen(spec)`: a kind gives its title, what it is about, what goes to the model, and how to get ready to send. Removes the five panels | None | Done |
 | S4 | **Batch.** Tick several sources; ingest runs them; review across them. Recommended: one run per source, a batch id grouping them, the review table reading all of them, and one apply. Rejected unless it proves needed: one run over many sources, because `_extract` and the source evidence assume one | Batch grouping; apply over several runs | 10–16 h |
 | S5 | **Step 3. Done, 2026-11-05.** Owner: 跑測試 is the most important thing here. `bi-b-bench` and `bi-b-an` are sections collapsed by default, with a status; `bi-b-bench-run` is below them, outside any section; below it the report beside the Dashboard, then `bi-b-ver-*`. Question table with an editor on the right (same `set` and `slug` overwrites; another `set` is save plus delete). `#bi-dash-block` is one element, moved between its tab and step 3. **Navigation:** a card opens in `#bi-card-peek` beside what it came from; `biJump` (every button that goes to another tab) leaves `#bi-back`; `biShowView` keeps each view's scroll. The Dashboard tab stays, for colleagues who only read | None | Done |
@@ -385,7 +385,51 @@ Status: built on `bi-step1-domain`, 2026-11-05. **The owner, verbatim:** 「每�
 
 **Assigning what exists: a dry run, then one step.** `GET .../assign-plan` writes nothing. For each question: a suggested domain and its basis, from the name its text starts with or names, else none. For each analysis: `shared` when it filters by domain, one home when its title names one and it does not filter, else whole-vault. `POST .../assign` applies an approved list: a question gets its `home`, and an analysis goes last on each home's Dashboard chosen. A whole-vault panel stays on the vault's Dashboard. It stages changes only; commit and push remain the person's.
 
-## 14. Step 2a's schema: suggest, the AI, the draft as a table (acceptance F5, F6, F8)
+## 14. Each domain has its own person: what stops disturbing whom
+
+Status: built on `bi-step1-domain`, 2026-11-06, decision `docs/DECISIONS.md`. **The owner, verbatim:** 「這是一個多人合作的平台，但為了不彼此干擾，每一個domain會有專人來處理」. 專人 is a working arrangement: AEP adds no file permission, no owner field blocks anyone, and IT decides access through SharePoint. This replaces §9.5 on what blocks a push and what makes a test count.
+
+**What a unit reaches** (`domain_reach`). Every push check and every digest asks one question of a unit: which homes.
+
+| Unit | Reaches |
+|---|---|
+| `card:`, `field:`, `evidence:`, `state:`, `proposal:` | The homes of the card's `domain` values, before and after, so moving a card reaches both |
+| `relation:` | Both ends' homes |
+| `source:`, `check:`, `skill:`, `tool:`, `profile:`, `meta:dashboard:<home>`, `meta:home:<home>` | Its home |
+| `import:` | Nothing: a record changes no answer |
+| A library entry's, `schema`, `schema_change:`, `analysis:`, `meta:dashboard`, other `meta:`, `decision:`, `relation_evidence:`, a question of no domain, a card with no placeable domain, anything unknown | **Every domain**, as a whole-vault change always did |
+
+On `market-intel`, all 760 cards and 15,000+ of their units place in a domain, and 16,201 of 16,271 units are in one to three homes. What is shared: 36 analyses, 6 skills, 3 `meta` and `schema`.
+
+**The push check.** A regression blocks a push only if the push touches its question's domain, the question has no domain, or the push touches something shared. A regression elsewhere is a note: 「其他領域，不擋這次 push：…」. Step 3 shows this for the changes waiting. 定案 goes through the same check.
+
+**A test counts for its domain's content.** A report records a digest per domain: its units and the shared ones. A verdict counts while that digest is unchanged, or while the whole vault is. So a colleague's push in another domain leaves it counting. A report from before this has no digests and counts only for identical content.
+
+**定案** is what the owner calls force push, and it is not a Git force push. On a card's field, a value and a required reason: the value wins over a differing one and over a racing edit already in the shared folder, open proposals on that field close, and the old value, who and why stay in history. Commits stay immutable, and it goes through commit, push and the test check. A colleague who edited the same field and has not pushed yet gets a conflict at their push, and decides as usual.
+
+**Commit limited to a domain: cheap, not built.** `Repository.commit` already takes `only`, and `domain_reach` says what is whose, so a tick 「只 commit 這個領域」 is small and no redesign. The warning stays for now. Not built without the owner's word, since a commit that leaves part behind is a new thing to explain.
+
+**What still interferes, plainly:**
+
+- **Two people's edits to the same card field** conflict at the second push, whichever domains they work in. Measured: a differing single value, `updated`, an empty summary filled twice, one file added under two domains. Evidence is one unit per field, so two appends conflict too (from reading `apply_ops`; not measured).
+- **Answers can depend on another domain's cards.** A wireless question can read an aidc card through a link, and an aidc person's push changes it: it does not void the wireless run and does not block on it. This is the cost of the owner's rule. A regression shows only when wireless is tested again.
+- **Shared things reach everyone:** a schema change, a change in `library`, an analysis, or a question with no domain voids every domain's run and can be blocked by any regression.
+- **Publish is whole-vault,** and who publishes is the owner's to say: not built around.
+- **Sync brings colleagues' work:** their sources and commits are counted and listed, and a conflict on a shared card appears here.
+- **A run is one at a time per PC,** and `bench_running` covers all domains.
+
+**The owner's rule for a card two domains reach, verbatim:** 「關於同一張卡，概述應該不會變，證具, raw data連結就append上去，時間也是取合集」. Findings, not built:
+
+| The rule | Today | What it would take |
+|---|---|---|
+| Summary, usage, scope stay as first written | A reading run fills only empty fields. A table import with another summary **replaces it silently unless a person set it** (measured); a person's value makes a proposal | Treat these as fill-only on every path; a differing value becomes a proposal, adding to the 346 pending |
+| Evidence and source links append | Evidence is one unit per field, a list, compared whole, so two appends conflict. A `source:<sha256>` carries its folder, so one file in two domains conflicts (measured) | A merge rule at push for these two: union by `reference_id`; a source in several homes needs `folder` to become a list, a contract change |
+| Time is the union | `reference_at` is per evidence row, so it unions with evidence. `updated` is one value: two differ and conflict (measured) | At merge, the later date wins. "Union" for one value can only mean this, or dropping it for the evidence's range |
+| Two people fill one empty summary | Conflict at the second push (measured) | With first-wins it settles itself: first pushed stays, the second becomes a proposal |
+
+All of it fits one hook: a merge rule per unit kind where `push` meets a conflict. **It touches the engine's conflict path, so it needs its own slice and tests.**
+
+## 15. Step 2a's schema: suggest, the AI, the draft as a table (acceptance F5, F6, F8)
 
 Status: built on `bi-schema-suggest`, 2026-11-06. Decision `docs/DECISIONS.md` 2026-11-06; contract `docs/CONTRACTS.md`, "BI schema drafts and dataset upgrade". **The owner, verbatim:** 「根據新增的資料來建議是否要在schema新增類別，做法可以讓使用者按一個button，系統給出建議」.
 
