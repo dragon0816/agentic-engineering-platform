@@ -4357,8 +4357,10 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [ ] BI: one identical source file imported into two homes still conflicts on `source:` folder metadata. Define multi-home source identity separately; outside same-card field merge.
 
 - [x] 2026-11-06, Codex: align the card model staging test with F19 import isolation; assert unrelated relation/state stay pending and travel only after the person commits. Already failed on main 7be9daaa; 20 file tests pass; commit 398dbad2.
-- [ ] Release test maintenance: migrate-domains content-derived schema version, Atlas vault-title citation, and F26 early-send follow-up hooks; assigned by BI orchestrator, separate commits on bi-same-card.
+- [x] Release test maintenance: migrate-domains content-derived schema version (3 passed), Atlas vault-title citation (54 passed with the assigned Atlas checkout), and F26 early-send follow-up hooks (6 passed); separate commits on bi-same-card, assigned by BI orchestrator.
 
 - [x] 2026-11-06, Codex: migrate-domains vault test pins the content-derived 5.1.118005 version and identical schema refs on both PCs (BI_CARD_MODEL section 4.3), retaining the direct-dataset 5.1.0 assertion. Whole file: 3 passed.
 
 - [x] 2026-11-06, Codex: Atlas framed-answer test asserts the configured vault title plus version, preserving citation strictness after 7c6a5e04. Whole file: 54 passed with AEP_ATLAS_REPO pointing at atlas-embed, including browser cases.
+
+- [x] 2026-11-06, Codex: update the Agent Web follow-up source hook for F26 (3b5c460a), asserting readiness, queuing before clearing the message, and eventual submit. Whole file: 6 passed; browser files ran sequentially with worker-specific basetemp directories. Final Ruff format/check and mypy src/tests pass.

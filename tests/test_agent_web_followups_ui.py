@@ -38,7 +38,12 @@ COMPANY = "範例科技股份有限公司"
 def test_the_page_carries_the_follow_up_hooks() -> None:
     for hook in (
         "let startingSession = false;",
-        "uploadingFiles > 0 || startingSession",
+        # F26 (3b5c460a): early sends wait in the queue, then target the ready session.
+        "return !send.disabled && !!activeConversation "
+        "&& !startingSession && uploadingFiles === 0;",
+        "let sendQueued = false;",
+        'queueSend(uploadingFiles > 0 ? "附件還在上傳" : "對話還在準備中")',
+        "form.requestSubmit();",
         '"整理回答中…"',
         'id="team-unused"',
         'placeholder="for example: engineering, qa"',
@@ -47,6 +52,14 @@ def test_the_page_carries_the_follow_up_hooks() -> None:
         '"/api/memory/health/undo"',
     ):
         assert hook in PAGE, hook
+    submit = PAGE.split('form.addEventListener("submit", (event) => {', 1)[1].split("\n});", 1)[0]
+    assert (
+        "if (!sendReady()) {\n"
+        '    queueSend(uploadingFiles > 0 ? "附件還在上傳" : "對話還在準備中");\n'
+        "    return;\n"
+        "  }"
+    ) in submit
+    assert submit.index("if (!sendReady())") < submit.index('field.value = "";')
 
 
 def _seed(web: AgentWeb) -> dict[str, str]:
