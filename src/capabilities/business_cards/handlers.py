@@ -58,6 +58,7 @@ from capabilities.business_cards.contracts import (
 )
 from capabilities.business_cards.manifest import CARDS_SKILL
 from capabilities.business_cards.store import (
+    LOCAL_ZONE,
     CardStore,
     CardStoreError,
     EditOutcome,
@@ -840,7 +841,9 @@ class OrgChartHandler(_Harvesting):
         company = store.resolve_company(request.company) or people[0]["company"] or request.company
         folder = store_dir(self.workspace_root, context.actor) / "charts"
         now = datetime.now(UTC)
-        stamp = f"{now:%Y%m%d-%H%M%S}"
+        # The local time the page shows (2026-11-06 walk: a UTC stamp named
+        # the previous day in the Taipei morning).
+        stamp = f"{now.astimezone(LOCAL_ZONE):%Y%m%d-%H%M%S}"
         safe = "".join(ch if ch.isalnum() else "-" for ch in request.company)[:40] or "company"
         png = folder / f"org-{safe}-{stamp}.png"
         page = folder / f"org-{safe}-{stamp}.html"

@@ -130,6 +130,37 @@ NEWER_RULE_ACTOR = "AEP (rule 2026-10-20)"
 NEWER_RULE_REASON = "older than the person's change, rule 2026-10-20"
 
 
+#: The two levels one unit name may be read at (2026-11-06 walk: the same
+#: printed 光學事業處 was the 事業群 on one card and the 處 on another).
+UNIT_LEVELS: tuple[FieldName, ...] = ("business_group", "division")
+_LEVEL_TAIL = re.compile(r"[\s0-9IVXivx\u2160-\u216b]+$")
+
+
+def unit_level_by_name(name: str) -> FieldName | None:
+    """The level a unit's own name states: …事業群 is a business group, a
+    name ending in 處 (研展處 I, 光學事業處) a division; otherwise none."""
+    text = _LEVEL_TAIL.sub("", name.strip())
+    if "事業群" in text:
+        return "business_group"
+    if text.endswith("處"):
+        return "division"
+    return None
+
+
+def place_units(values: dict[str, str], levels: Mapping[str, FieldName]) -> None:
+    """Moves each unit name in `values` to the level `levels` gives it, when
+    that level is empty or holds the same name; a level holding another
+    name is never overwritten."""
+    for level in UNIT_LEVELS:
+        name = values.get(level, "").strip()
+        target = levels.get(name)
+        if not name or target is None or target == level:
+            continue
+        if not values.get(target) or _same(values[target], name):
+            values[target] = name
+            values[level] = ""
+
+
 def _newer(evidence: str, statement: str) -> bool:
     """Whether dated evidence is after the day of the person's statement."""
     return evidence[:10] > statement[:10]
@@ -842,6 +873,10 @@ class CardStore:
             recorded_by=actor,
             change_id=change_id,
         )
+        if clean["company"]:
+            # The observation keeps the reading as read; the person gets each
+            # unit name at the company's one level for it.
+            place_units(clean, self._unit_levels(tx, clean["company"], clean))
         if row is None:
             stamp = _now()
             tx.con.execute(
@@ -875,6 +910,7 @@ class CardStore:
                 f"UPDATE {PEOPLE} SET email_key = ? WHERE person_id = ?",
                 (names.email_key(clean["email"]), person_id),
             )
+            self._place_stored_units(tx, change_id, actor, clean["company"])
             needs = self._needs(tx, person_id)
             return AddResult(
                 person_id=person_id,
@@ -908,6 +944,8 @@ class CardStore:
         moved = self._tidy_notes(tx, change_id, actor, person_id)
         if moved is not None:
             merge.changes.append(moved)
+        placed = self._place_stored_units(tx, change_id, actor, row["company"] or clean["company"])
+        merge.changes.extend(placed.get(person_id, []))
         if merge.changes:
             tx.con.execute(
                 f"UPDATE {PEOPLE} SET updated_at = ? WHERE person_id = ?", (_now(), person_id)
@@ -1079,6 +1117,108 @@ class CardStore:
                 )
             )
         return merge
+
+    def _unit_levels(
+        self, tx: SpaceTx, company: str, reading: Mapping[str, str] | None = None
+    ) -> dict[str, FieldName]:
+        """One level per unit name the company uses at both levels (with the
+        reading being stored): the level its name states, otherwise where
+        most of the company's people have it; a tie keeps the level of the
+        person stored first."""
+        member, _ = self._in_company(tx, company)
+        rows = sorted(
+            (row for row in self._people(tx) if member(row)), key=lambda row: row["created_at"]
+        )
+        entries: list[Mapping[str, str]] = [
+            {level: str(row[level] or "") for level in UNIT_LEVELS} for row in rows
+        ]
+        if reading is not None:
+            entries.append(reading)
+        held: dict[str, dict[FieldName, int]] = {}
+        for entry in entries:
+            for level in UNIT_LEVELS:
+                name = str(entry.get(level, "") or "").strip()
+                if name:
+                    counts = held.setdefault(name, {})
+                    counts[level] = counts.get(level, 0) + 1
+        levels: dict[str, FieldName] = {}
+        for name, counts in held.items():
+            if len(counts) < 2:
+                continue
+            stated = unit_level_by_name(name)
+            if stated is not None:
+                levels[name] = stated
+                continue
+            group, division = counts["business_group"], counts["division"]
+            if group != division:
+                levels[name] = "business_group" if group > division else "division"
+            else:
+                # A tie: the level first seen, the person stored first.
+                levels[name] = next(iter(counts))
+        return levels
+
+    def _place_stored_units(
+        self, tx: SpaceTx, change_id: str, actor: str, company: str
+    ) -> dict[str, list[FieldChange]]:
+        """Re-places the company's stored people after a card: a unit name
+        at the other level moves to its one level (`_unit_levels`), keeping
+        the value's source, in this change's history so undoing the card
+        puts it back. A value the person set, or a level holding another
+        name, is left as it is."""
+        if not company.strip():
+            return {}
+        levels = self._unit_levels(tx, company)
+        if not levels:
+            return {}
+        member, _ = self._in_company(tx, company)
+        moved: dict[str, list[FieldChange]] = {}
+        for row in self._people(tx):
+            if not member(row):
+                continue
+            person_id = row["person_id"]
+            sources = tx.provenance(person_id)
+            for level in UNIT_LEVELS:
+                current = self._person(tx, person_id)
+                assert current is not None
+                name = str(current[level] or "").strip()
+                target = levels.get(name)
+                if not name or target is None or target == level:
+                    continue
+                own = sources.get(level)
+                kept = sources.get(target)
+                if own is not None and own["source_kind"] == "user":
+                    continue
+                if current[target] and not _same(current[target], name):
+                    continue
+                if not current[target] and kept is not None and kept["source_kind"] == "user":
+                    continue
+                common: dict[str, Any] = {
+                    "source": own["source_kind"] if own is not None else "card",
+                    "source_date": own["source_date"] if own is not None else _now()[:10],
+                    "observation_id": own["observation_id"] if own is not None else None,
+                    "reason": f"one level per unit: {name}",
+                    "origin": own["origin"] or None if own is not None else None,
+                }
+                changes = moved.setdefault(person_id, [])
+                if not current[target]:
+                    changes.append(
+                        self._set_field(
+                            tx, change_id, actor, current, target, name, previous=kept, **common
+                        )
+                    )
+                    current = self._person(tx, person_id)
+                    assert current is not None
+                changes.append(
+                    self._set_field(
+                        tx, change_id, actor, current, level, "", previous=own, **common
+                    )
+                )
+        stamp = _now()
+        for person_id in moved:
+            tx.con.execute(
+                f"UPDATE {PEOPLE} SET updated_at = ? WHERE person_id = ?", (stamp, person_id)
+            )
+        return moved
 
     def _tidy_notes(
         self, tx: SpaceTx, change_id: str, actor: str, person_id: str
