@@ -158,7 +158,7 @@ The estimates are agent hours of work plus test runs, unmeasured, from the size 
 | S3 | **One AI panel. Done.** `#bi-ai` in `kn-pane-bi`: fixed at the right at full height (the page makes room beside it), the lower part on a phone. Opened from the row or button it concerns, with one log and one input; closes on a dataset change. `biAiOpen(spec)`: a kind gives its title, what it is about, what goes to the model, and how to get ready to send. Removes the five panels | None | Done |
 | S4 | **Batch.** Tick several sources; ingest runs them; review across them. Recommended: one run per source, a batch id grouping them, the review table reading all of them, and one apply. Rejected unless it proves needed: one run over many sources, because `_extract` and the source evidence assume one | Batch grouping; apply over several runs | 10–16 h |
 | S5 | **Step 3. Done, 2026-11-05.** Owner: 跑測試 is the most important thing here. `bi-b-bench` and `bi-b-an` are sections collapsed by default, with a status; `bi-b-bench-run` is below them, outside any section; below it the report beside the Dashboard, then `bi-b-ver-*`. Question table with an editor on the right (same `set` and `slug` overwrites; another `set` is save plus delete). `#bi-dash-block` is one element, moved between its tab and step 3. **Navigation:** a card opens in `#bi-card-peek` beside what it came from; `biJump` (every button that goes to another tab) leaves `#bi-back`; `biShowView` keeps each view's scroll. The Dashboard tab stays, for colleagues who only read | None | Done |
-| S6 | **Share.** Commit then push, tag, publish as one step with a confirmation. Stops on `blocked` or `conflicts`, showing why; shows "這次內容沒有跑過測試" from the gate's note. **Does not weaken the gate**: the gate stays in `repo.push`. An untested push stays allowed, with the note (the owner, §7) | A thin route, or none if the page sequences it. The tag name is a proposed date, editable | 4–8 h |
+| S6 | **Share. Done, 2026-11-06 (acceptance F13-F15).** Commit then push, tag, publish as one step with a confirmation. Stops on `blocked` or `conflicts`, showing why; shows "這次內容沒有跑過測試" from the gate's note. **Does not weaken the gate**: the gate stays in `repo.push`. An untested push stays allowed, with the note (the owner, §7) | A thin route, or none if the page sequences it. The tag name is a proposed date, editable | 4–8 h |
 | S7 | **Tables everywhere left.** Skills and tools; candidate review; cards; history. Menus for row actions | None | 6–10 h |
 | S8 | **Final pass.** Screenshots at 1366 and 390 px, wording, accessibility, the whole-flow browser test, user guide and install docs, the full suite | None | 4–8 h |
 
@@ -176,6 +176,14 @@ The file has one big block of markup and one of script, so edits collide by regi
 - **S8 is last and alone.**
 
 Every slice may add to `tests/bi_page_driver.py`; those are small rebases.
+
+### S6 as built (2026-11-06)
+
+- `GET /api/bi/vaults/<id>/share` reads only: the commits since the published version, pushed or only on this PC, with author and the domains each reaches (`domain_reach.touched` over its own units), the uncommitted count and domains, the tags taken, and `bi_bench.domain_states`: each domain with graded questions as the push check reads it. The page sequences commit, push, tag and publish through their own routes, so `repo.push` keeps the gate.
+- One confirm on the page before the four steps; none more for a regression in another domain (the owner). A regression in a domain the share touches disables 分享 with the reason, and the push would block anyway. An untested share is allowed and shows the gate's note.
+- A stop names the step, its reason, what is done and what is not. Pressed again, it picks up: nothing to commit is skipped, a push with nothing new passes, a taken tag name gets the next suffix.
+- `confirm()` is gone from the BI page (`biConfirm`: publish, discard, unsubscribe). **Still on the wiki side, not replaced (not small):** `kpVerHistory` publish, `kp-ver-discard`, re-ingest, sandbox push, stage as the Agent's next version, publish a candidate, write index pages, adopt Raw, discard a sandbox.
+- Rows: Dashboard shows 執行 and 上移, versions 看改動 and 發佈 <tag>, skills 修改 and 和 AI 一起修改; the rest is under 更多. A late redraw of the history table drops an open confirm there; pressing again brings it back.
 
 ## 6. Tests
 

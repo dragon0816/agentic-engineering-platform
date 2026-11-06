@@ -6590,3 +6590,10 @@ for one company, existing duplicates fixed when a card updates. Rule in
 - **The chart also drops a unit nested in itself**, so a store not yet re-placed draws right.
 - **Chart file names use local time**, as the page does (a UTC stamp named the previous day in
   the Taipei morning).
+
+## 2026-11-06 — BI 分享: the page sequences it, the route only reads (acceptance F13-F15)
+
+- **One 分享 step runs commit, push, tag and publish through their existing routes**, in order, stopping at the first failure. A new route reads what a share would carry. Rejected: one server route doing all four (it would duplicate the push gate's path and hide which step failed).
+- **One confirm, on the page, before the four steps;** no extra confirm for a regression in another domain (the owner). A regression in a domain the share touches disables the button with the reason; `repo.push` still blocks it.
+- **Tag name: today's local date, `-2`, `-3` when taken,** editable. A name taken between loading and pressing stops at the tag step; the next load proposes the next suffix.
+- **`confirm()` leaves the BI page** for an inline confirm the tests can press. The wiki side's nine stay for now, listed in `docs/phases/BI_PAGE_SIMPLE.md` S6.
