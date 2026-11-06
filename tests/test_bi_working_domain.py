@@ -309,7 +309,11 @@ def test_each_kind_of_unit_has_its_homes() -> None:
 
 
 def test_the_vault_lists_its_homes_with_their_folder_and_domain(tmp_path: Path) -> None:
-    _drive, vault_id, _dataset, a, _b = _two_pcs(tmp_path)
+    _drive, vault_id, dataset, a, _b = _two_pcs(tmp_path)
+    # Listed once something is in it (acceptance F22).
+    source = {"dataset": dataset, "name": "n.md", "text": "# 虛構\n",
+              "folder": "library/products/sources"}  # fmt: skip
+    _ok(_call(a, "POST", "/api/bi/sources", source))
     reply = _ok(_call(a, "GET", f"/api/bi/vaults/{vault_id}/skills"))
     listed = {item["home"]: item for item in reply["homes"]}
     assert listed["library/products"]["folder"] == "library/products/sources"

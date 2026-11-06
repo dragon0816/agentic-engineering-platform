@@ -179,7 +179,9 @@ def listed(repo: Any, sources: list[dict[str, Any]]) -> dict[str, Any]:
         else:
             state = "pushed"
         folder = value.get("folder") if isinstance(value, dict) else None
-        found.append({**source, "shared": state, "folder": folder})
+        # Who put it in the shared folder, as its unit says: a joiner's copy is not theirs.
+        added_by = str(value.get("by") or "") if isinstance(value, dict) else ""
+        found.append({**source, "shared": state, "folder": folder, "added_by": added_by})
     waiting = sorted({f for item in repo.status()["waiting"] for f in item["files"]})
     withdrawn = [
         {"file": path, **item}

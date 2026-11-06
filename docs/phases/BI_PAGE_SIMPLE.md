@@ -92,7 +92,7 @@ Advanced is a `<details>`, closed by default. Anything opened from elsewhere in 
 | `bi-publish`, publish panel, result, `bi-pub-state` | `#bi-advanced` |
 | `bi-manage`, `bi-new`, `bi-install`, `bi-demo` and panels | `#bi-advanced` |
 | `bi-schema-note` | `#bi-advanced` |
-| `bi-empty-state` | Stays above the tabs, a line and two buttons |
+| `bi-empty-state` | With no dataset on the PC, the only thing under the top row: a line and a small 載入示範資料 link. The select, the tabs and the steps wait for a vault or dataset; 新增資料集 is under `#bi-advanced` (acceptance F2, 2026-11-06) |
 | `bi-ro` | Stays above the tabs |
 | `bi-subs` | `#bi-advanced` |
 | `bi-hint`, `bi-ask` 到對話中問 | **Removed** |

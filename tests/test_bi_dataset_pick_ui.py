@@ -111,15 +111,24 @@ def test_the_bi_area_opens_on_a_dataset_that_exists(served: Any, tmp_path: Path)
             run("[...document.getElementById('bi-dataset').options].map(o => o.value).join()")
         )
 
-        # Nothing at all: `demo` with an empty state offering both ways in.
+        # Nothing at all (acceptance F2): 新增知識庫 leads, 加入 beside it, a small demo link,
+        # and no select, tabs or steps for a dataset that does not exist.
         stub.own = []
         stub.subs.clear()
         assert open_bi() == "demo"
         wait("!document.getElementById('bi-empty-state').hidden")
         state = str(run("document.getElementById('bi-empty-state').textContent"))
-        assert "還沒有 BI 資料集" in state
-        assert "載入示範資料" in state and "新增資料集" in state
-        run("document.getElementById('bi-empty-new').click()")
+        assert "還沒有知識庫" in state and "載入示範資料" in state
+        assert "新增資料集" not in state
+        shown = "(id) => document.getElementById(id).offsetParent !== null"
+        for gone in ("bi-dataset", "bi-views", "bi-view-build", "bi-counts", "bi-b-v-state"):
+            assert not run(f"({shown})('{gone}')"), gone
+        for kept in ("bi-b-v-new", "bi-b-v-join", "bi-empty-demo", "bi-advanced"):
+            assert run(f"({shown})('{kept}')"), kept
+        assert "go" in str(run("document.getElementById('bi-b-v-new').className"))
+        # 新增資料集 is under 進階.
+        run("document.getElementById('bi-advanced').open = true")
+        run("document.getElementById('bi-new').click()")
         wait("!document.getElementById('bi-new-panel').hidden")
     finally:
         browser.close()

@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import json
 import re
-from collections.abc import Mapping
+from collections.abc import Collection, Mapping
 from dataclasses import replace
 from typing import Any
 
@@ -110,10 +110,15 @@ def _same(text: Any) -> str:
 
 
 def new_home(
-    given: Mapping[str, Any], units: Mapping[str, Any], reg: Registry | None
+    given: Mapping[str, Any],
+    units: Mapping[str, Any],
+    reg: Registry | None,
+    in_use: Collection[str] | None = None,
 ) -> dict[str, str]:
     """A new application's `{"home", "label", "domain"}`, or why not. A name, a case variant
-    or an alias of what exists is that one, so a vault cannot hold it twice."""
+    or an alias of what exists is that one, so a vault cannot hold it twice. An application of
+    the vault's default list with nothing in it (`in_use` lacks it) is not listed, so naming it
+    takes it up instead (acceptance F22)."""
     label = str(given.get("name") or "").strip()
     if not label:
         raise BiStoreError("home_name_missing", "請寫領域名稱")
@@ -140,6 +145,8 @@ def new_home(
     if folder in homes.RESERVED_APPLICATIONS:
         raise BiStoreError("home_reserved", f"「{folder}」保留給系統，請換一個名稱")
     for item in home_list(units):
+        if in_use is not None and item["home"] == folder and folder not in in_use:
+            continue
         short = item["home"].rpartition("/")[2]
         if {_same(short), _same(item["label"])} & {_same(label), _same(folder)}:
             raise BiStoreError(

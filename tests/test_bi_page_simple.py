@@ -247,6 +247,8 @@ def test_the_knowledge_page_opens_on_bi_unless_another_tab_was_chosen() -> None:
     opening = PAGE[PAGE.index("async function loadKnowledgeTab()") :]
     opening = opening[: opening.index("function knShow")]
     assert 'call("/api/bi/datasets")' in opening and 'knShow("bi")' in opening
+    # With no wiki pipeline, or nothing in it, there is nothing else to open on (F1).
+    assert 'call("/api/knowledge/pipeline")' in opening and "!info.enabled" in opening
     # Only a person's click on a tab counts as a choice.
     assert 'localStorage.setItem("kn-pane-chosen"' in PAGE
 

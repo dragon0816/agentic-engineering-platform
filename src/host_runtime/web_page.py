@@ -1192,6 +1192,9 @@ tr:last-child td { border-bottom: none; }
 .bi-empty-state { flex: 1 1 100%; padding: 8px 12px; border: 1px dashed var(--line);
   border-radius: 8px; overflow-wrap: anywhere; }
 .bi-empty-state[hidden] { display: none; }
+.bi-empty-state .bi-link { min-height: 0; padding: 0; margin-left: 4px; }
+#kn-pane-bi.bi-none :is(.bi-top-pick, #bi-b-v-menu, #bi-b-v-state, .bi-views-row, #bi-back,
+  #bi-view-build, #bi-view-dashboard, #bi-view-cards) { display: none; }
 .bi-empty-state p { margin: 0 0 6px; }
 .bi-errors { margin: 6px 0 0; padding-left: 18px; color: var(--bad); font-size: 13px; }
 .bi-errors li { overflow-wrap: anywhere; margin: 2px 0; }
@@ -1332,6 +1335,12 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
 #bi-b-v-state:not(:empty) { margin-bottom: 8px; }
 #bi-b-v-state .bi-link { min-height: 0; padding: 0; }
 #bi-b-ver { scroll-margin-top: calc(var(--bi-top-h, 0px) + var(--bi-steps-h, 0px) + 8px); }
+/* The step bar sticks just under the top row instead of sliding half under it (acceptance
+   F4); the row's height is measured into --bi-top-h. */
+#bi-build-steps { position: sticky; top: var(--bi-top-h, 0px); z-index: 4; background: var(--bg); }
+#bi-view-build .kp-stage-title {
+  scroll-margin-top: calc(var(--bi-top-h, 0px) + var(--bi-steps-h, 0px) + 8px); }
+#bi-b-v-path-suggest:empty { display: none; }
 .bi-top-row { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap;
   align-items: flex-end; gap: 8px 10px; padding: 6px 0; background: var(--bg); }
 .bi-top-pick { flex: 0 1 300px; min-width: 0; }
@@ -2535,19 +2544,22 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
                   <input id="bi-b-v-title" class="bi-input" maxlength="120"
                     placeholder="例如：市場訊號與產品對應"></div>
                 <div data-for="new"><label class="bi-label" for="bi-b-v-id">
-                  知識庫 id（資料夾名稱，之後不能改；留空由名稱產生）</label>
+                  知識庫 id（資料夾名稱，之後不能改；中文名稱才要填）</label>
                   <input id="bi-b-v-id" class="bi-input" maxlength="40" spellcheck="false"
                     placeholder="例如：market-intel"></div>
                 <div data-for="new convert"><label class="bi-label" for="bi-b-v-purpose">
                   目的（Agent 依這段話判斷什麼問題該查它）</label>
                   <input id="bi-b-v-purpose" class="bi-input" maxlength="1000"
                     placeholder="例如：看市場需求與訊號，對應我們的產品與業務策略"></div>
-                <div data-for="new"><label class="bi-label" for="bi-b-v-schema">Schema</label>
-                  <select id="bi-b-v-schema"></select></div>
                 <div data-for="new convert join"><label class="bi-label" for="bi-b-v-path"
                   id="bi-b-v-path-label">資料夾</label>
                   <input id="bi-b-v-path" class="bi-input" maxlength="1000" spellcheck="false"
-                    placeholder="C:\Users\你\OneDrive - 公司\…"></div>
+                    placeholder="C:\Users\你\OneDrive - 公司\…">
+                  <p class="bi-meta" id="bi-b-v-path-check" role="status" aria-live="polite"></p>
+                  <div class="bi-actions" id="bi-b-v-path-suggest"></div></div>
+                <details class="bi-adv" data-for="new"><summary>進階：Schema 版本</summary>
+                  <label class="bi-label" for="bi-b-v-schema">Schema（預設最新版）</label>
+                  <select id="bi-b-v-schema"></select></details>
                 <div data-for="new convert join"><label class="bi-label" for="bi-b-v-author">
                   你的作者名稱（變更檔放在這個名稱的資料夾；留空用登入名稱）</label>
                   <input id="bi-b-v-author" class="bi-input" maxlength="40"></div>
@@ -2561,11 +2573,8 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
             </form>
       </div>
         <div class="bi-empty-state" id="bi-empty-state" role="note" hidden>
-          <p class="bi-meta">這台電腦還沒有 BI 資料集。</p>
-          <div class="bi-actions">
-            <button class="bi-btn" id="bi-empty-demo" type="button">載入示範資料</button>
-            <button class="bi-btn" id="bi-empty-new" type="button">新增資料集</button>
-          </div>
+          <p class="bi-meta">還沒有知識庫：新增一個，或加入同事的。
+            <button class="bi-link" id="bi-empty-demo" type="button">載入示範資料</button></p>
         </div>
       <div class="bi-ro" id="bi-ro" role="note" hidden>
         <strong id="bi-ro-title"></strong>
@@ -12087,6 +12096,13 @@ async function loadKnowledgeTab() {
     if (knChosen) return;  // they chose a tab while this was being read
     if ((found.datasets || []).length) { knShow("bi"); return; }
   }
+  // A PC installed from the package has no wiki pipeline: it would open on "not configured"
+  // (acceptance F1). With no pipeline or nothing in it, BI is where to start.
+  const info = await call("/api/knowledge/pipeline").catch(() => null);
+  if (knChosen) return;
+  if (!info || !info.enabled || !((info.bases || []).length || (info.repos || []).length)) {
+    knShow("bi"); return;
+  }
   knShow("pipeline", false);
   await loadKnowledge(); knPipelineLoaded = true;
 }
@@ -12358,7 +12374,11 @@ function biRenderBar() {
   const names = bi.datasets.map((item) => item.name);
   const empty = !names.includes(keep);
   if (empty) names.unshift(keep); else biRemember(keep);
-  el("bi-empty-state").hidden = !(empty && !bi.datasets.length);
+  // Nothing on this PC yet (acceptance F2): the row's 新增知識庫 and 加入, and no steps
+  // for a dataset that does not exist. 新增資料集 stays under 進階.
+  const none = empty && !bi.datasets.length;
+  el("bi-empty-state").hidden = !none;
+  el("kn-pane-bi").classList.toggle("bi-none", none);
   // Two groups: the datasets this PC keeps, then read-only subscribed copies.
   const mine = document.createElement("optgroup"); mine.label = "我的資料集";
   const subscribed = document.createElement("optgroup"); subscribed.label = "已訂閱";
@@ -12378,8 +12398,10 @@ function biRenderBar() {
   }
   select.append(mine);
   if (subscribed.children.length) select.append(subscribed);
-  // Someone with no vault yet starts here.
+  // Someone with no vault yet starts here: creating one or joining a colleague's, as many
+  // do one as the other (acceptance F21).
   el("bi-b-v-new").className = (bi.vaults || []).length ? "bi-btn" : "go";
+  el("bi-b-v-join").className = el("bi-b-v-new").className;
   select.value = keep;
   biRenderCounts();
 }
@@ -12495,7 +12517,11 @@ el("bi-dataset").addEventListener("change", () => {
   biRemember(el("bi-dataset").value); biLeaveDataset(); biBuildFollowDataset(); biLoad();
 });
 el("bi-empty-demo").addEventListener("click", () => el("bi-demo").click());
-el("bi-empty-new").addEventListener("click", () => biOpenNew());
+const biStuck = new ResizeObserver(() => {
+  el("kn-pane-bi").style.setProperty("--bi-top-h", el("bi-top-row").offsetHeight + "px");
+  el("kn-pane-bi").style.setProperty("--bi-steps-h", el("bi-build-steps").offsetHeight + "px");
+});
+biStuck.observe(el("bi-top-row")); biStuck.observe(el("bi-build-steps"));
 el("bi-card-domain").addEventListener("change", () => {
   bi.cardId = null; biLoadCards();
 });
@@ -15651,13 +15677,37 @@ function biVaultForm(mode) {
   // A new vault starts on the newest shipped version, not the dataset shown or the oldest.
   const newest = (bi.schemas || []).filter((s) => s.source === "shipped").pop();
   if (newest) schema.value = newest.ref;
+  biVaultPathCheck();
   el(mode === "new" ? "bi-b-v-title" : "bi-b-v-path").focus();
+}
+
+async function biVaultPathCheck() {
+  // The folder as typed, checked here, with this PC's OneDrive to pick (acceptance F3).
+  const mode = el("bi-b-v-form").dataset.mode, typed = el("bi-b-v-path").value.trim();
+  const seq = bi.pathSeq = (bi.pathSeq || 0) + 1;
+  const reply = await call("/api/bi/vaults/folder-check?mode=" + encodeURIComponent(mode)
+    + "&path=" + encodeURIComponent(typed)).catch(() => null);
+  if (!reply || seq !== bi.pathSeq) return;
+  const line = el("bi-b-v-path-check"), suggest = el("bi-b-v-path-suggest");
+  line.className = reply.ok ? "bi-meta" : "bi-warn";
+  line.textContent = !typed ? "" : reply.ok
+    ? (mode === "join" ? "可以用：這是一個 BI 知識庫。"
+      : "可以用：知識庫會建成這個資料夾裡的一個新資料夾。")
+      + (reply.shared || !reply.suggest.length ? "" : "這裡不在 OneDrive 裡，同事收不到。")
+    : reply.problem + "。";
+  suggest.replaceChildren(...(mode === "join" || reply.shared ? [] : reply.suggest)
+    .map((folder) => biButton("用 OneDrive：" + folder, () => {
+      el("bi-b-v-path").value = folder; biVaultPathCheck();
+    }, "bi-link")));
 }
 
 for (const id of ["bi-b-v-new", "bi-b-v-join", "bi-b-v-convert"]) {
   el(id).addEventListener("click", () => biVaultForm(el(id).dataset.mode));
 }
 el("bi-b-v-cancel").addEventListener("click", () => biVaultForm(el("bi-b-v-form").dataset.mode));
+el("bi-b-v-path").addEventListener("input", () => {
+  clearTimeout(bi.pathTimer); bi.pathTimer = setTimeout(biVaultPathCheck, 300);
+});
 el("bi-b-v-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const mode = el("bi-b-v-form").dataset.mode, err = el("bi-b-v-err"); err.replaceChildren();
@@ -15669,6 +15719,12 @@ el("bi-b-v-form").addEventListener("submit", async (event) => {
     if (!body.title) { err.append(bh("p", "bi-err", "請填知識庫名稱。")); return; }
     const id = el("bi-b-v-id").value.trim();
     if (id) body.id = id;
+    // A name with no letters would become an id like vault-199bbd (acceptance F4).
+    const slug = body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    if (!id && !slug) {
+      err.append(bh("p", "bi-err", "名稱是中文：請填知識庫 id（英數字與 -，例如 market-intel）。"));
+      el("bi-b-v-id").focus(); return;
+    }
   }
   if (mode === "convert") {
     Object.assign(body, {dataset: biDataset(), purpose: el("bi-b-v-purpose").value.trim()});
@@ -15693,6 +15749,7 @@ el("bi-b-v-form").addEventListener("submit", async (event) => {
           JSON.stringify({stage: "source", sourceId: bi.build.sourceId, runId: null}));
       } catch (e) { /* no storage */ }
     }
+    if (mode !== "convert") bi.vaultArrived = reply.vault.dataset;
     bi.want = reply.vault.dataset; await biLoad();
   } catch (failure) {
     err.append(bh("p", "bi-err", failure.message + "。"));
@@ -15789,6 +15846,19 @@ async function biSourceFolders() {
   try { stored = current || localStorage.getItem(biScopeKey()) || ""; } catch (e) { /* */ }
   pick.value = bi.build.homes.some((item) => item.folder === stored) ? stored : "sources";
   biScopeFollowed(); biFileChosen(); biBqHomes(); biOverviewApply();
+  // Just joined or created (acceptance F22): one domain is chosen, several are asked for.
+  if (bi.vaultArrived !== listed) return;
+  bi.vaultArrived = null;
+  if (bi.build.homes.length === 1) {
+    pick.value = bi.build.homes[0].folder; pick.dispatchEvent(new Event("change"));
+  } else if (bi.build.homes.length) {
+    pick.focus();
+    try { pick.showPicker(); } catch (e) { /* a picker opens only on a person's click */ }
+    biNotice(true, "選一個工作領域：新增、Ingest 和測試都在那個領域裡做。");
+  } else {
+    el("bi-b-home-new").focus();
+    biNotice(true, "這個知識庫還沒有領域：按「新增領域」建一個。");
+  }
 }
 
 function biOverview() {
@@ -15913,7 +15983,12 @@ function biWithdrawForm(source) {
   reason.className = "bi-input"; reason.maxLength = 300; reason.id = "bi-b-src-withdraw-reason";
   reason.setAttribute("aria-label", "撤回的原因");
   box.hidden = false;
+  // Anyone may withdraw any source (no access control); someone else's says so (F23).
+  const by = source.added_by || "", me = (vault && vault.author) || "";
+  const mine = !by || by === me || by.split(" ")[0] === me;
   box.replaceChildren(bh("h4", "", "撤回「" + source.name + "」"),
+    bh("p", mine ? "" : "bi-warn", (mine ? "" : "這是 " + by + " 放進共用資料夾的來源，不是你的；"
+      + "最好先跟對方說一聲。") + "撤回是對所有人：每位同事的電腦同步後都看不到這份來源。"),
     bh("p", "", "共用資料夾的檔案和它的 Markdown 會移除，各台電腦下次同步時移除 AEP 裡的副本；"
       + "這份來源還沒寫入的候選資料會移除，已寫入的擷取紀錄留下但清空摘錄。"),
     bh("p", "bi-warn", "OneDrive／SharePoint 可能還保留版本紀錄和資源回收筒裡的檔案，"

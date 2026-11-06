@@ -15,6 +15,7 @@ from bi_page_driver import BiPage, browser_missing
 from test_bi_vault import _call, _ok
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
+from capabilities.bi_cards import vault
 from capabilities.bi_cards.store import BiStore
 
 AIDC = "applications/aidc/sources"
@@ -33,18 +34,129 @@ def _tops(page: BiPage, *selectors: str) -> list[float]:
 
 
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
-def test_someone_with_no_vault_starts_at_creating_one(tmp_path: Path) -> None:
+def test_someone_with_no_vault_starts_at_creating_one(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     config, layout = _bi_host(tmp_path / "pc")
+    # A fictional OneDrive, so that nothing of this PC's own shows (acceptance F3).
+    profile = tmp_path / "profile"
+    onedrive = profile / "OneDrive - Fake Co"
+    onedrive.mkdir(parents=True)
+    # The variables are read in `test_bi_vault_folder_check`; the browser needs the real profile.
+    monkeypatch.setattr(vault, "onedrive_folders", lambda: [str(onedrive)])
+    # A colleague's vault holding only 海事, for this PC to join (second-PC finding F22).
+    _other_config, other_layout = _bi_host(tmp_path / "other")
+    other, shared = other_layout.workspace_root, tmp_path / "shared"
+    shared.mkdir()
+    made = _ok(
+        _call(
+            other,
+            "POST",
+            "/api/bi/vaults",
+            {"path": str(shared), "title": "Marine", "schema": "bi.schema/v1.1",
+             "author": "bob", "default_pack": False},
+        )
+    )  # fmt: skip
+    theirs = str(made["vault"]["id"])
+    home = {"name": "海事", "folder": "marine"}
+    _ok(_call(other, "POST", f"/api/bi/vaults/{theirs}/homes", home))
+    _ok(_call(other, "POST", f"/api/bi/vaults/{theirs}/commit", {"purpose": "新增領域"}))
+    _ok(_call(other, "POST", f"/api/bi/vaults/{theirs}/push", {}))
     shots = os.environ.get("AEP_UI_SHOTS")
     with _served(config, layout, _Model("none", {})) as server:
         with BiPage(
             tmp_path / "browser", server.address, Path(shots) / "top" if shots else None
         ) as page:
             page.wait(QUIET, 60)
+            # Knowledge opens here by itself on a PC with no wiki pipeline (acceptance F1).
+            page.run(
+                "localStorage.removeItem('kn-pane-chosen'); knChosen = false;"
+                " knShow('pipeline', false); loadKnowledgeTab()"
+            )
+            page.wait(
+                "!document.getElementById('kn-pane-bi').hidden"
+                " && document.getElementById('kn-pane-pipeline').hidden",
+                60,
+            )
+            page.wait(QUIET, 60)
             assert "go" in str(page.run("document.getElementById('bi-b-v-new').className"))
+            # Joining is as much a first step as creating (F21).
+            assert "go" in str(page.run("document.getElementById('bi-b-v-join').className"))
             assert page.run("document.getElementById('bi-b-src-folder-box').hidden")
             assert page.run(f"({VISIBLE})('bi-b-v-new')")
             page.shoot("first-time")
+
+            # -- the form: the schema under 進階 on the newest, the folder checked ------------
+            page.click("#bi-b-v-new")
+            page.wait("!document.getElementById('bi-b-v-form').hidden")
+            assert page.run(
+                "(() => { const d = document.getElementById('bi-b-v-schema').closest('details');"
+                " return !!d && !d.open && d.textContent.includes('進階'); })()"
+            )
+            assert page.run(
+                "document.getElementById('bi-b-v-schema').value"
+                " === bi.schemas.filter((s) => s.source === 'shipped').pop().ref"
+            )
+            page.wait(
+                "[...document.querySelectorAll('#bi-b-v-path-suggest button')]"
+                ".some((b) => b.textContent.includes('OneDrive - Fake Co'))",
+                60,
+            )
+            typed = json.dumps(str(tmp_path / "nowhere"))
+            page.run(
+                f"{{ const p = document.getElementById('bi-b-v-path'); p.value = {typed};"
+                " p.dispatchEvent(new Event('input')); }"
+            )
+            page.see("bi-b-v-path-check", "找不到資料夾")
+            page.run("document.querySelector('#bi-b-v-path-suggest button').click()")
+            page.see("bi-b-v-path-check", "可以用")
+            assert page.run("document.getElementById('bi-b-v-path').value") == str(onedrive)
+            page.shoot("new-vault-form")
+
+            # -- a Chinese name asks for an id instead of making vault-xxxxxx (F4) -----------
+            page.set_value("bi-b-v-title", "海事市場")
+            page.click("#bi-b-v-go")
+            page.see("bi-b-v-err", "請填知識庫 id")
+            assert page.run("document.activeElement.id") == "bi-b-v-id"
+            page.set_value("bi-b-v-id", "marine-intel")
+            page.click("#bi-b-v-go")
+            page.see("bi-notice", "已建立")
+            assert (onedrive / "marine-intel" / "repo.json").is_file()
+            # A new vault has no domain in use: it says so and points at 新增領域 (F22).
+            page.see("bi-notice", "還沒有領域")
+            page.wait("document.activeElement.id === 'bi-b-home-new'", 60)
+            assert page.run("bi.build.homes.length") == 0
+
+            # -- joining a vault of one domain starts in it (F22) ---------------------------
+            page.click("#bi-b-v-join")
+            page.wait("!document.getElementById('bi-b-v-form').hidden")
+            page.set_value("bi-b-v-path", str(shared / theirs))
+            page.set_value("bi-b-v-author", "carol")
+            # The button waits until the page has loaded the vault just created.
+            page.wait("!document.getElementById('bi-b-v-go').disabled", 120)
+            page.click("#bi-b-v-go")
+            page.wait(
+                "document.getElementById('bi-b-src-folder').value"
+                " === 'applications/marine/sources'"
+                " || document.getElementById('bi-b-v-err').textContent !== ''",
+                60,
+            )
+            assert page.text_of("bi-b-v-err") == ""
+            assert page.run("biVaultOf(biDataset()).id") == theirs
+            labels = page.run(
+                "[...document.getElementById('bi-b-src-folder').options]"
+                ".map((o) => o.textContent).join('|')"
+            )
+            assert labels == "全部領域|海事"
+            page.shoot("joined")
+
+            # -- withdrawing a colleague's source says whose and for whom (F23) --------------
+            page.run("biWithdrawForm({id: 'x', name: 'fake.md', added_by: 'bob'})")
+            withdraw = page.text_of("bi-b-src-withdraw")
+            assert "bob" in withdraw and "不是你的" in withdraw and "所有人" in withdraw
+            page.run("biWithdrawForm({id: 'y', name: 'own.md', added_by: 'carol'})")
+            assert "不是你的" not in page.text_of("bi-b-src-withdraw")
+            assert "所有人" in page.text_of("bi-b-src-withdraw")
 
 
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
@@ -63,7 +175,11 @@ def test_the_row_is_first_on_every_tab_and_the_tabs_read_under_it(tmp_path: Path
              "author": "alice", "default_pack": False},
         )
     )  # fmt: skip
-    dataset = str(made["vault"]["dataset"])
+    dataset, vault_id = str(made["vault"]["dataset"]), str(made["vault"]["id"])
+    # Domains are listed when something is in them (F22): a question each.
+    for slug, home in (("aidc-q", "aidc"), ("wl-q", "wireless")):
+        body = {"question": f"虛構題 {slug}？", "must": ["好"], "slug": slug, "home": home}
+        _ok(_call(workspace, "POST", f"/api/bi/vaults/{vault_id}/checks", body))
     shots = os.environ.get("AEP_UI_SHOTS")
     with _served(config, layout, _Model("none", {})) as server:
         with BiPage(
@@ -95,6 +211,17 @@ def test_the_row_is_first_on_every_tab_and_the_tabs_read_under_it(tmp_path: Path
                 " && document.querySelector('.kp-stage[data-stage=source] #bi-dataset') === null"
             )
             page.shoot("build")
+
+            # -- scrolled, the step bar stays whole under the row (acceptance F4) ------------
+            page.run("biScroller().scrollTop = 900")
+            assert float(page.run("biScroller().scrollTop")) > 100
+            assert page.run(
+                "(() => { const r = document.getElementById('bi-top-row').getBoundingClientRect(),"
+                " s = document.getElementById('bi-stepper').getBoundingClientRect();"
+                " return s.top >= r.bottom - 1 && s.bottom < r.bottom + 120; })()"
+            )
+            page.shoot("build-scrolled")
+            page.run("biScroller().scrollTop = 0")
 
             # -- the status line goes with the vault, on every tab ----------------------------
             page.wait("document.getElementById('bi-b-v-state').textContent.includes('張卡片')", 60)
