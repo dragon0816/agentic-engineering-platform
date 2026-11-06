@@ -57,6 +57,23 @@ class Asked:
     attempts: int
     problems: list[str] = field(default_factory=list)
     failure: str | None = None
+    #: The turn's budget and what it used, shown with the turn (F16).
+    budget: dict[str, Any] | None = None
+
+
+#: What a turn that ended without an answer says, by the harness's stop code: in
+#: Chinese and with what to do, never the code itself (acceptance F16).
+STOPPED = {
+    "turn_time_limit": "這一輪超過時間上限還沒有結果，也沒有可用的草稿。"
+    "請把要求寫得更具體一點，例如指定一個來源或卡片類型，再送一次。",
+    "tool_loop_limit": "AI 這一輪試了太多步還沒有結果，也沒有可用的草稿。"
+    "請把要求寫得更具體一點，例如指定一個來源或卡片類型，再送一次。",
+    "tool_repeat_limit": "AI 一直重複同一個動作，沒有進展，也沒有可用的草稿。"
+    "請換個說法或指定一個來源，再送一次。",
+    "model_timeout": "模型太久沒有回應（逾時），這一輪沒有完成，也沒有可用的草稿。"
+    "按「重試」再送一次；一直這樣的話，到 Settings > LLM gateway 看狀態。",
+}
+STOPPED_OTHER = "模型這一輪沒有回應。請稍後再送一次；一直這樣的話，到 Settings 檢查模型。"
 
 
 def trace() -> TraceIdentifiers:
@@ -86,11 +103,18 @@ def model_state(ai: Any) -> dict[str, Any]:
 # -- storage -----------------------------------------------------------------
 
 
-def create(staging: Staging, *, kind: str, target_ref: str, actor: str) -> dict[str, Any]:
+def create(
+    staging: Staging,
+    *,
+    kind: str,
+    target_ref: str,
+    actor: str,
+    new: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     if kind not in KINDS:
         raise BiStoreError("session_kind_invalid", "kind 只能是 method、schema、skill 或 analysis")
     staging.store.refuse_write()
-    return staging.create_session(kind=kind, target_ref=target_ref, actor=actor)
+    return staging.create_session(kind=kind, target_ref=target_ref, actor=actor, new=new)
 
 
 def load(staging: Staging, session_id: str, kind: str | None = None) -> dict[str, Any]:
@@ -286,7 +310,11 @@ def record(
     session["turns"].append({"role": "user", "text": message, "at": now(), "by": actor})
     error = None
     if asked.failure is not None:
-        error = {"code": "model_unavailable", "message": f"模型沒有回應（{asked.failure}）"}
+        error = {
+            "code": "model_unavailable",
+            "message": STOPPED.get(asked.failure, STOPPED_OTHER),
+            "cause": asked.failure,
+        }
     elif suggestion is None:
         error = {
             "code": "model_output_invalid",

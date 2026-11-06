@@ -289,12 +289,16 @@ def draft(workspace: Path, draft_id: str, rev: int | None = None) -> dict[str, A
         _, base = base_document(workspace, meta["base_ref"])
     except BiStoreError:
         base = None
+    from capabilities.bi_cards import schema_merge
+
     return {
         "draft": meta,
         "revision": number,
         "document": document,
         "errors": _check(document),
         "diff": diff(base, document) if base is not None else [],
+        # Only additions: in a vault it becomes units on the version, not a new version.
+        "additive": base is not None and schema_merge.changes_between(base, document) is not None,
     }
 
 
@@ -622,17 +626,96 @@ def _target(workspace: Path, store: BiStore, to: Any) -> tuple[Registry, Registr
         )
     if target.version == current.version:
         raise BiStoreError("schema_same", f"資料集已經使用 {current.ref}")
+    units = _units(store)
+    if units and not _offered(workspace, target.ref, current.ref, units):
+        # Moving back stays possible for a plain dataset; a vault's additions must not go
+        # unless a person made this version from what the vault reads now.
+        raise BiStoreError(
+            "schema_drops_additions",
+            f"{target.ref} 沒有這個知識庫已加入的 schema 項目，移過去會丟掉它們",
+        )
     return current, target
+
+
+def _offered(workspace: Path, ref: str, current_ref: str, units: dict[str, Any]) -> bool:
+    """Whether a vault may move to `ref`: it keeps every addition the units hold, or it was
+    published from a draft of the schema the vault reads now, whose removals are a person's."""
+    from capabilities.bi_cards import schema_merge
+
+    if schema_merge.keeps(base_document(workspace, ref)[1], units):
+        return True
+    return any(
+        d["base_ref"] == current_ref and any(p.get("ref") == ref for p in d.get("published") or [])
+        for d in _draft_metas(workspace)
+    )
+
+
+def _draft_metas(workspace: Path) -> list[dict[str, Any]]:
+    root = drafts_root(workspace)
+    return [_read_json(path) for path in root.glob(f"*/{DRAFT_FILE}")] if root.is_dir() else []
+
+
+def _units(store: BiStore) -> dict[str, Any]:
+    """A vault's working units; nothing for a plain dataset."""
+    if store.vault_id is None:
+        return {}
+    from capabilities.bi_cards import vault
+
+    return dict(vault.Vault(store.workspace, store.vault_id).repo.working_units())
+
+
+def _upgrades(workspace: Path, store: BiStore, current: Registry) -> list[str]:
+    """The versions a dataset may move to: newer than its base, and, in a vault, keeping
+    every addition its units hold (a new version absorbs them, owner F6 2026-11-06)."""
+    units = _units(store)
+    floor = catalog._version_tuple(current.version)  # noqa: SLF001
+    found = []
+    for reg in catalog.available(workspace):
+        if reg.schema_id != current.schema_id or "+" in reg.version:
+            continue
+        if catalog._version_tuple(reg.version) <= floor:  # noqa: SLF001
+            continue
+        if units and not _offered(workspace, reg.ref, current.ref, units):
+            continue
+        found.append(reg.ref)
+    return found
+
+
+def state(workspace: Path, dataset: str) -> dict[str, Any]:
+    """A dataset's schema as a person reads it: `5.0 加 1 項新增`, what was added, and
+    which versions it may upgrade to."""
+    from capabilities.bi_cards import schema_merge
+
+    store = BiStore(workspace, dataset)
+    current = catalog.for_store(store)
+    changes = schema_merge.changes_of(_units(store))
+    return {
+        "ref": current.ref,
+        "label": schema_merge.version_label(current.version, len(changes)),
+        "additions": [schema_merge.describe(key) for key in changes],
+        "upgrades": [
+            {"ref": ref, "label": schema_merge.version_label(ref.partition("@")[2])}
+            for ref in _upgrades(workspace, store, current)
+        ],
+    }
 
 
 def upgrade_preview(workspace: Path, dataset: str, to: Any) -> dict[str, Any]:
     store = BiStore(workspace, dataset)
     current, target = _target(workspace, store, to)
     found = impact(store, current, target)
+    from capabilities.bi_cards import schema_merge
+
     return {
         "from": current.ref,
         "to": target.ref,
         "diff": diff(current.document, target.document),
+        # In a vault only additions take no version: they become units (`Vault._schema_units`).
+        "additive": store.vault_id is not None
+        and schema_merge.changes_between(
+            base_document(workspace, current.ref)[1], base_document(workspace, target.ref)[1]
+        )
+        is not None,
         **found,
         "preview_token": _token(current.ref, target.ref, store.change_marker()),
     }

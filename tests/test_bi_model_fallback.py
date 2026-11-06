@@ -22,6 +22,7 @@ from test_host_models import GatewayReply, binding, endpoint
 from test_host_wiring import ready
 
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
+from capabilities.workflow_author.handlers import DRAFT_SPEC
 from host_runtime import bi_cards_api, skill_packs
 from host_runtime.assets import shipped
 from host_runtime.host import HostRuntime, build_runtime
@@ -170,8 +171,13 @@ def test_the_client_is_the_approved_one_and_never_a_raw_client(make_host: Any) -
     chosen = ai.model()
     assert chosen is not None
     assert isinstance(chosen[0], ApprovedModelClient) and chosen[1] == "company"
-    # A client without the approval wrapper is not used.
-    host.runtime.agent.gateway.router.model = host.gateway
+    # A client without the approval wrapper is not used: neither the drafting client
+    # (extraction's first choice, 2026-11-06) nor the conversation's.
+    gateway = host.runtime.agent.gateway
+    drafting = gateway.bridge.installed.get(DRAFT_SPEC.identity)
+    if drafting is not None:
+        drafting.handler.model = host.gateway
+    gateway.router.model = host.gateway
     assert ai.model() is None
 
 

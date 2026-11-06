@@ -48,10 +48,16 @@ def test_vault_panel_and_dashboard_in_a_browser(
     # A skill's AI session is answered by a scripted model (no tools, one call): first the
     # rule being added, then a change to it.
     model = Scripted(
-        {"reply": "這條規則可以先這樣用。", "reasons": []},
+        {
+            "reply": "這條規則可以先這樣用。",
+            "changes": {"body": "虛構電源廠是 Account。", "card_types": ["Account"]},
+        },
         {
             "reply": "把虛構電源廠的規則寫清楚。",
-            "changes": {"body": "虛構電源廠是 Account；額定功率放在 specs。"},
+            "changes": {
+                "body": "虛構電源廠是 Account；額定功率放在 specs。",
+                "card_types": ["Account"],
+            },
             "reasons": ["規格表常寫額定功率"],
         },
     )
@@ -310,11 +316,16 @@ def test_vault_panel_and_dashboard_in_a_browser(
             " s.value = 'applications/aidc/sources'; }"
         )
         click("#bi-ai-send")
+        # Nothing is saved until the person applies the AI's draft (acceptance F16).
+        wait("document.getElementById('bi-ai-log').textContent.includes('這條規則可以先這樣用')")
+        assert "power-extract" not in text_of("bi-b-sk-list")
+        assert "power-extract" not in text_of("bi-b-ver-pending")
+        assert run("document.getElementById('bi-ai-new').hidden")
+        click("#bi-ai-log button.go")
+        wait("document.getElementById('bi-notice').textContent.includes('存成第 1 版')")
         wait("document.getElementById('bi-b-ver-pending').textContent.includes('power-extract')")
         wait("document.getElementById('bi-b-sk-list').textContent.includes('power-extract')")
-        wait("document.getElementById('bi-ai-log').textContent.includes('這條規則可以先這樣用')")
         assert "power-extract" in text_of("bi-ai-target") and "第 1 版" in text_of("bi-ai-target")
-        assert run("document.getElementById('bi-ai-new').hidden")
         # The panel stays on this page, beside the table it came from, and fits the window.
         assert run(
             "(() => { const r = (i) => document.getElementById(i).getBoundingClientRect();"

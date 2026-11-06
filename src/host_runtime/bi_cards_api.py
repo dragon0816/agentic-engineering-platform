@@ -73,6 +73,7 @@ from capabilities.bi_cards import (
     runs,
     schema_fit,
     schema_session,
+    schema_suggest,
     schema_versions,
     search_index,
     service,
@@ -225,7 +226,17 @@ def _route(
         if path == "/api/bi/schema":
             # No dataset: the shipped bi.schema/v1.1, as before per-dataset schemas.
             given_dataset = "dataset" in query
-            return 200, service.schema_api(catalog.for_store(store) if given_dataset else None)
+            if not given_dataset:
+                return 200, service.schema_api(None)
+            readable = schema_versions.state(workspace, store.dataset)
+            return 200, {
+                **service.schema_api(catalog.for_store(store)),
+                "label": readable["label"],
+                "additions": readable["additions"],
+                "upgrades": readable["upgrades"],
+            }
+        if path == "/api/bi/schema-suggest":
+            return 200, {"suggestion": schema_suggest.view(workspace, store.dataset)}
         if path == "/api/bi/schemas":
             return 200, {"schemas": catalog.listing(workspace)}
         if path == "/api/bi/schemas/example":
@@ -453,6 +464,26 @@ def _route(
         return _session_create(workspace, who, given)
     if len(parts) == 6 and parts[:4] == ["", "api", "bi", "sessions"]:
         return _session_write(workspace, who, parts[4], parts[5], given, ai, bench, actor)
+    if path == "/api/bi/schema-suggest":
+        # 建議 schema (BI_PAGE_SIMPLE.md S2): the fit question alone, on a press.
+        started = schema_suggest.start(
+            workspace,
+            _dataset(given.get("dataset")),
+            ai,
+            source_ids=given.get("source_ids"),
+            only_new=given.get("only_new"),
+            actor=who,
+        )
+        return 200, {"ok": True, "suggestion": started}
+    if path in ("/api/bi/schema-suggest/apply", "/api/bi/schema-suggest/reject"):
+        dataset = _dataset(given.get("dataset"))
+        if path.endswith("/apply"):
+            done = schema_suggest.apply(workspace, dataset, given.get("id"), given.get("row"), who)
+            return 200, {"ok": True, **done}
+        state = schema_suggest.reject(
+            workspace, dataset, given.get("id"), given.get("row"), given.get("reason"), who
+        )
+        return 200, {"ok": True, "suggestion": state}
     if path == "/api/bi/schema-drafts":
         made = schema_versions.create_draft(
             workspace, str(given.get("base") or ""), given.get("title"), who
@@ -470,7 +501,8 @@ def _route(
             done = schema_versions.upgrade_apply(
                 workspace, parts[4], given.get("to"), given.get("preview_token"), who
             )
-            return 200, {"ok": True, **done}
+            # What really happened, readable: additions on the same version, or a new one.
+            return 200, {"ok": True, **done, "schema": schema_versions.state(workspace, parts[4])}
     if path == "/api/bi/proposals/decide":
         return _decide_shown_proposals(workspace, who, given)
     if path == "/api/bi/reruns/preview":
@@ -656,7 +688,7 @@ def _session_create(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
         made = schema_session.create_session(workspace, dataset, target, who)
         return 200, {"ok": True, "session": made}
     if kind == "skill":
-        made = skill_session.create_session(workspace, dataset, target, who)
+        made = skill_session.create_session(workspace, dataset, target, who, given.get("new"))
         return 200, {"ok": True, "session": made}
     if kind == "analysis":
         made = analysis_session.create_session(workspace, dataset, target, who)
@@ -880,6 +912,9 @@ CONFLICTS = {
     "markdown_stale",
     "domains_stale",
     "meta_stale",
+    "suggest_running",
+    "suggest_stale",
+    "suggest_row_decided",
 }
 
 #: The GET routes that read one dataset (besides `/api/bi/cards/<id>[/history]`).
@@ -887,6 +922,7 @@ DATASET_READS = (
     "/api/bi/cards",
     "/api/bi/dashboard",
     "/api/bi/schema",
+    "/api/bi/schema-suggest",
     "/api/bi/quality",
     "/api/bi/index",
     "/api/bi/search",
@@ -1450,6 +1486,7 @@ def web_ai_runtime(web: Any) -> ai_runs.AiRuntime:
     for AI runs: a run is a background task, so `/api/activity` shows it before
     an Agent Web restart."""
     from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
+    from capabilities.workflow_author.handlers import DRAFT_SPEC
 
     def model() -> Any:
         gateway = web.runtime.agent.gateway
@@ -1459,8 +1496,14 @@ def web_ai_runtime(web: Any) -> ai_runs.AiRuntime:
         if client is not None and alias is not None:
             return client, str(alias)
         # Not every host binds a wiki Knowledge asset (owner 2026-11-03). The
-        # conversation's client then, and only behind the host's data approval.
+        # host's drafting client then (its per-call timeout is the batch one,
+        # `batch_timeout_seconds`: an extraction call may write a long answer),
+        # else the conversation's, and only behind the host's data approval.
         router = gateway.router
+        drafting = getattr(gateway.bridge.installed.get(DRAFT_SPEC.identity), "handler", None)
+        drafted = getattr(drafting, "model", None)
+        if isinstance(drafted, ApprovedModelClient):
+            return drafted, str(router.model_alias or getattr(drafting, "model_alias", ""))
         return (
             (router.model, router.model_alias)
             if isinstance(router.model, ApprovedModelClient)

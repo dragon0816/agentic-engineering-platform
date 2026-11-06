@@ -101,9 +101,7 @@ def harness_asker(
     actor: str,
     namespace: str,
 ) -> schema_session.Asker:
-    now_ai = ai_runs.AiRuntime(
-        model=ai.model, background=lambda _title, work: work(), approved=ai.approved
-    )
+    now_ai = bi_harness.turn_ai(gateway, ai)
 
     def latest() -> tuple[Any, int]:
         view = schema_versions.draft(workspace, draft_id)

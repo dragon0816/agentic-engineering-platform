@@ -6568,3 +6568,118 @@ The owner: 「這是一個多人合作的平台，但為了不彼此干擾，每
 - **定案 is an ordinary change with a reason,** built on `set_field`, closing proposals, and `resolve`. Not a Git force push: commits are immutable. No access control. Rejected: a new unit kind for final values, since the field's own history already holds who and why.
 - **Commit stays whole for now,** though `only` makes limiting it cheap. The owner has not asked, and the warning covers it.
 - **The owner's rule for a card two domains reach is recorded, not built:** it needs a merge rule in the engine's conflict path. Findings in §14.
+
+## 2026-11-06: One unit name sits at one level for a company
+
+Acceptance walk of the business cards (orchestrator, for the colleague release): the printed
+光學事業處 was read as the 事業群 on one card and as the 處 on a colleague's, and the org chart
+showed 光學事業處 > 光學事業處 > 研發部. The orchestrator asked that one name not occupy two levels
+for one company, existing duplicates fixed when a card updates. Rule in
+`docs/phases/BUSINESS_CARDS.md` §2 (Host checks on a reading).
+
+- **The name's own level word decides first** (…事業群 → business group, …處 → division, the
+  mapping the spec and the Skill already give), then the company's majority, a tie the first
+  stored person's level. Rejected: always the majority, which makes the first misreading the
+  company's rule; and always the name, which cannot place English or unmarked names.
+- **Only when the company has the name at both levels.** A name read at one level stays where
+  it was read: nothing contradicts it.
+- **Stored people are re-placed inside the card's change** with their value's source kept, so
+  undo of that card reverts it. A value the person set is never moved (the rule that only new
+  evidence touches the person's values), and a level holding another name is never overwritten.
+  Rejected: a one-time migration, which would not catch the next card read the other way.
+- **The chart also drops a unit nested in itself**, so a store not yet re-placed draws right.
+- **Chart file names use local time**, as the page does (a UTC stamp named the previous day in
+  the Taipei morning).
+
+## 2026-11-06: A reload keeps Agent Web open; the token stays in the tab
+
+A reload (F5) gave 「Open the address this command printed.」: the page takes `?token=` out of the address and the server lets the page in only with it. Colleagues had to reopen from the shortcut.
+
+**Decided.** The page keeps this run's token in its tab's `sessionStorage`. An address with no token gets `RELOAD_PAGE`, a short page with no secret, which reads the tab's copy, removes it, and opens the address with it. The page then keeps it again. A token from an earlier run is refused once, and the copy is gone, so it is not tried again. A new tab, a bookmark or another run still needs the shortcut.
+
+**What the token guards, checked.**
+- **Another local user:** `sessionStorage` is per browser profile and tab, so they cannot read it. The address without the token gives them a page with no secret, and every API still needs the `Authorization` header.
+- **A website (CSRF):** nothing is sent automatically, there is no cookie, and its scripts cannot read another origin's `sessionStorage`. No preflight is answered.
+- **DNS rebinding:** the `Host` check is unchanged, so a rebound name is refused before any of this.
+- **The in-chat HTML viewer:** an opaque-origin sandbox (`FILE_VIEW_CSP`, no `allow-same-origin`), so it cannot read the tab's storage.
+- **The token itself:** it still changes every run, and `sessionStorage` goes when the tab closes.
+
+**Rejected.** An `HttpOnly; SameSite=Strict` cookie for this run's token: a cookie is sent by the browser on its own, so every GET route would need a second check against CSRF, and the decision of 2026-10-08 already turned down a cookie.
+
+## 2026-11-06: The skill AI has a budget per turn and always leaves something to read
+
+Acceptance F16 (orchestrator, for the colleague release): one message in 和 AI 新增規則 ran 25 minutes
+and 9 trials, ended with 「模型沒有回應（turn_time_limit）」 and no suggestion, while the person's
+sentence had already been saved as revision 1. Spec: `docs/phases/BI_TEST_AND_TOOLS.md` §4.
+
+- **3 trials within 6 minutes, turn limit 10 minutes.** Trials are what takes minutes; counting them
+  bounds the turn better than the tool-call cap. Rejected: only a shorter wall clock, which cuts the
+  model off before it can suggest.
+- **Out of budget, the last draft that tried well comes back as the suggestion,** marked in its
+  limits as not finally checked by the AI. Rejected: an error with the drafts hidden in the log.
+- **Stop codes become Chinese sentences with what to do** in the shared session record, so every
+  BI session kind gets them; the code stays in `error.cause`.
+- **A new rule lives in its session until applied** (`new` in the session body). Rejected: saving a
+  placeholder revision, which is a rule nobody approved.
+- **Not changed:** the schema and questions AIs (15 minutes, 40 tool calls, no trial cap or
+  fallback) and the analysis AI (10 minutes, 30 calls) have the same shape; left for a decision.
+
+## 2026-11-06: An empty card_types means the domain profile's types, else the defaults
+
+Acceptance F17 (orchestrator): the skill form said 「只產生這些卡片類型（留空＝不限）」, but empty meant
+Signal, Technology and Application, so a rule about customers and supply links did nothing until the
+types were typed. Spec: `docs/phases/BI_TEST_AND_TOOLS.md` §4.
+
+- **Empty falls back to the domain's profile types when it has a profile, otherwise to the
+  defaults.** This is what runs already did; it is now one function and said on the page. Rejected:
+  empty = every schema type, which matches the old words but makes every run ask for all twelve
+  types (slower, noisier review) and changes every existing rule's output at once.
+- **The page says what a run produces** in the list and live in the form, and the label says what
+  empty means. Rejected: only rewording the label, which still hides the profile's effect.
+- **The skill AI must give `card_types` when its text names types a run would not make;** the
+  check names them. Types the profile leaves out are not demanded, since the rule cannot add them.
+
+## 2026-11-06: One model call has its own timeout, and a down model service is said at once
+
+Acceptance F16/F20 (orchestrator): with the company model backend down, one call held a BI AI
+turn 6 and 10 minutes whatever its budget (a turn's clock is checked only between calls; the
+client's timeout was a fixed 600 s), and a chat turn took about 4 minutes to say 「The configured
+model could not answer this turn.」 with no cause or 重試.
+
+- **`models.call_timeout_seconds` (default 180) for the conversation:** chat turns and the BI AI
+  sessions on the harness. **`models.batch_timeout_seconds` (default 600) for the drafting
+  clients:** Knowledge answers and ingest, Workflow drafts and BI card extraction runs, whose
+  one call may write a long answer; trial runs inside a BI AI turn use the conversation's client
+  and its 180 s (orchestrator). Both in host.json,
+  10–3600. The router gets its own clients; the drafting switch follows the models the page
+  approves on the router's. Rejected: one timeout for both, which either cuts extraction or
+  leaves chat hanging 10 minutes.
+- **A model call's 5xx is explained before anything else, in Chinese,** naming that the model
+  service is not answering, with 重試; a timeout says how long it waited. The minutes of a 503
+  are spent inside the gateway (LiteLLM), not in AEP: AEP asks at most twice (stub test), and one
+  call measured 359 s before its 503. LiteLLM's retries live in the owner's gateway repository;
+  not changed here (the orchestrator tells the owner).
+- **The newest failed chat answer gets a 重試 button** (the same question again; attached files
+  are not sent again), and a failed BI AI turn too.
+- **Send waiting after a reload says why** (the conversation backends' sign-in check).
+
+## 2026-11-06: 建議 schema is its own press, and a version reads as 「5.0 加 N 項新增」
+
+Acceptance findings F5, F6 and F8 on step 2a. The owner's flow: 「根據新增的資料來建議是否要在schema新增類別，做法可以讓使用者按一個button，系統給出建議」. Design: `docs/phases/BI_PAGE_SIMPLE.md` S2; contract `docs/CONTRACTS.md`, "BI schema drafts and dataset upgrade".
+
+- **The suggestion asks the schema-fit question alone, on its own path** (`schema_suggest`), with `schema_fit`'s rules and checks. It reads the domain's sources no ingest read, or the one picked in step 1, and works whatever extraction method the ingest will use. Rejected: running it as an ingest run with the fit tick, which writes candidates, costs the extraction, and is skipped by a custom method.
+- **Every row has a quote found in the source.** What the model could not quote is counted and left out; a type or field the schema has becomes a question. 「不用改」 is a valid answer, shown as one.
+- **A field or allowed value is added through draft, publish and upgrade,** which a vault already turns into units on its version (`schema_merge`). The draft is removed afterwards. Rejected: staging `schema_change:` units directly, a second way in beside the one that checks and renumbers. A type, a synonym or an enum field with no values goes to the AI panel with the row written: they need a definition a person agrees.
+- **A version is shown as 「5.0」 or 「5.0 加 N 項新增」, never its digest,** and the notice after an upgrade says whether it was additions or a new version.
+- **預覽升級 offers only versions newer than the base that keep the vault's additions,** and the server refuses a move that would drop them (`schema_drops_additions`), unless the version was published from a draft of the current schema, which is a person's own removal. Rejected: refusing every move back, which plain datasets use by design.
+- **The draft on the main path is a table of its changes,** with the AI to edit it and 套用到資料集; its JSON, revisions and trial stay under 進階.
+- **`bi-b-fit` stays under 進階** for now; S2 planned to remove it once this button exists. That waits for the owner.
+
+
+
+## 2026-11-06: Acceptance fixes F9, F10, F12, F19 (BI orchestrator)
+
+- **F9. Every list of homes reads the units, uncommitted ones too.** The folders a rule may apply to came from the shared folder on disk, so a domain created and not yet pushed was missing and 和 AI 新增規則 fell back to aerospace. They now add each home's sources folder from the units; the select starts on the working domain, and under 全部領域 a person must pick one. Rejected: an empty choice meaning every source, which is how a rule silently lands in the wrong place.
+- **F10. A new card from a reading run takes its source folder's domain, and the model's stays as a proposal.** This replaces the 2026-11-04 R6 rule (commit `7653aeee`, `docs/CONTRACTS.md` "AI runs, from the first R6 run") under which a domain the model gave, if the schema knew it, beat the folder's. Measured: a source in a created domain's folder resolves to that domain at run time, so the wrong domain came from the model's guess winning, not from `homes.domain_of_folder`. The model's value goes to the field's `alternatives`, which a run's commit already writes as a pending proposal with its evidence, also on a new card; so a wireless fact in a marine source still reaches wireless's person. Rejected: adding it to a list-valued `domain`, which would put the card in a domain nobody chose, and the owner's rule for shared cards is not built; dropping it, which loses what the source says. Existing cards are not re-domained. A run already in review keeps its candidates: run it again.
+- **F12. Commit and push are reachable from the status line under the top row,** from any tab: 「還沒 commit 的改動 N 個」 and 「你還沒 push 的 commit N 個」 are links to 版本 in step 3. No new place for 版本.
+- **F19. An import commits its own units and what they cannot go without.** Its own: what the import staged, read from the pending changes before and after it. What they need, of what else waits: a created home whose domain its cards carry, and a schema addition (type, field, allowed value) they use, since a colleague given the cards without them reads values their schema lacks. A skill, a question, a label, an unused addition and the rest stay for the person's own commit and purpose. Sources added still commit first in their own 「加入來源」 commit, all of them, as before: an import's evidence needs its source, and a source added but not imported is labelled as what it is. Rejected: one commit of everything under the import's purpose (the finding).

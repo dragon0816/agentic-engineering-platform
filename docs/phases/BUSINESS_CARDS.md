@@ -153,6 +153,16 @@ keys (`said_by`, `set_by`, `actor`, ...) from a model's arguments.
   out of the notes with a history row. Decision `docs/DECISIONS.md` 2026-10-20 "Degrees and the
   unified business number are contact fields".
 - Division and department text is never normalised: 研展處 I and 研展處 II are two boxes.
+- **One unit name, one level, per company** (acceptance walk 2026-11-06: the same printed
+  光學事業處 was the 事業群 on one card and the 處 on a colleague's, and the chart nested it in
+  itself). A name the company has both as `business_group` and as `division` goes to one level:
+  the one its name states (…事業群 a business group; a name ending in 處, roman numerals aside, a
+  division), otherwise where most of the company's people have it (a tie keeps the level of the
+  person stored first). The reading is placed before it is merged (the observation keeps it as
+  read), and every card for the company re-places the people already stored, keeping each value's
+  source, in the card's change, so undoing the card puts them back. A value the person set, or a
+  level holding another name, is not moved. The chart never nests a unit in itself.
+- The chart's files are named by the local (Asia/Taipei) time the page shows.
 
 ## 3. Operations (Bridge capabilities, namespace `business-cards`, version 1.0.0)
 

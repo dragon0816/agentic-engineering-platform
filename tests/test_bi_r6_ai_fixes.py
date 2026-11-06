@@ -142,13 +142,17 @@ def test_a_domain_the_model_invented_is_dropped_and_a_new_card_takes_its_homes(
     assert stored == "AIDC" or stored == ["AIDC"]
 
 
-def test_a_domain_the_schema_knows_stays(tmp_path: Path) -> None:
+def test_the_folders_domain_wins_over_one_the_schema_knows(tmp_path: Path) -> None:
+    # Acceptance F10 (2026-11-06) reverses R6's rule that a model's known domain stays: the
+    # folder a person put the source in decides a new card's domain.
     _, _, dataset, a, _ = _two_pcs(tmp_path)
     given = _answer(domain={"value": "robotics", "basis": "inference", "reason": "原文"})
     run_id = _run_in(a, dataset, "applications/aidc/sources", given)
     item = _field(a, dataset, run_id, "domain")
     assert item is not None
-    assert "robotics" in str(item["value"]) and "AIDC" not in str(item["value"])
+    assert "AIDC" in str(item["value"]) and "robotics" not in str(item["value"])
+    # What the model read is kept, as a proposal for a person (BI orchestrator, 2026-11-06).
+    assert "robotics" in str(item.get("alternatives"))
 
 
 def test_a_library_source_gives_no_domain_and_no_error(tmp_path: Path) -> None:

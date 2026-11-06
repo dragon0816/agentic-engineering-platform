@@ -22,7 +22,7 @@ person may send a table source here too (`path: "ai"`, owner 2026-10-28).
 
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -87,6 +87,26 @@ def _types(reg: Registry, given: Any) -> list[str]:
     return list(dict.fromkeys(given))
 
 
+def run_types(
+    reg: Registry, chosen: Any, rule: Sequence[str], profile_types: Iterable[str] | None
+) -> tuple[list[str], str]:
+    """The card types a run produces and where they come from (acceptance F17: the
+    form said empty meant 不限 while it meant the defaults): the person's choice
+    (`person`); else the rule's `card_types`, narrowed to the domain profile's types
+    when there is a profile (`skill`); else the profile's types (`profile`); else
+    `extract.DEFAULT_TYPES` in the schema (`default`)."""
+    if chosen not in (None, []):
+        return _types(reg, chosen), "person"
+    own = list(dict.fromkeys(t for t in rule if t in reg.types))
+    used = [t for t in (profile_types or []) if t in reg.types]
+    if used:
+        narrowed = [t for t in own if t in used]
+        return (narrowed, "skill") if narrowed else (used, "profile")
+    if own:
+        return own, "skill"
+    return _types(reg, None), "default"
+
+
 def start(
     workspace: Path,
     dataset: str,
@@ -140,15 +160,13 @@ def start(
             "run_folder_mismatch", f"這份來源在 {actual}，不能用 {folder} 的規則判讀"
         )
     rules = _vault_rules(staging, folder or actual, skill_draft)
-    chosen_types = types not in (None, [])  # a person's choice stands, marked in the review
-    if rules is not None and not chosen_types and rules["card_types"]:
-        types = [t for t in rules["card_types"] if t in reg.types] or None
-    used = (rules.get("profile") or {}).get("types") if rules is not None else None
-    if used and not chosen_types:
-        types = [t for t in (types or used) if t in used and t in reg.types] or [
-            t for t in used if t in reg.types
-        ]
-    scope = _types(reg, types)
+    # A person's choice stands, marked in the review; else the rule's, the profile's, the defaults.
+    scope, _ = run_types(
+        reg,
+        types,
+        rules["card_types"] if rules is not None else [],
+        (rules.get("profile") or {}).get("types") if rules is not None else None,
+    )
     edited = isinstance(instructions, str) and instructions.strip()
     text = str(instructions).strip() if edited else extract.DEFAULT_INSTRUCTIONS
     if len(text) > MAX_INSTRUCTIONS:
@@ -216,16 +234,27 @@ def _usable_answer(response: Any) -> bool:
 
 
 def _default_domain(reg: Registry, candidate: dict[str, Any], domain: str) -> bool:
-    """Give a new card with no domain its source's; whether it did."""
+    """Give a new card its source folder's domain; whether it changed. The folder wins over a
+    domain the model read (acceptance F10): the folder is where a person put the source, and a
+    guess placed a marine source's card in wireless. The model's stays as a proposal on the
+    card, with its evidence, so that a wireless fact in a marine source still reaches wireless."""
     entity = reg.types.get(str(candidate.get("entity_type")))
     item = entity.get("domain") if entity is not None else None
     if item is None or candidate.get("match") == "existing":
         return False
-    if any(f["field"] == "domain" and f["value"] for f in candidate["fields"]):
-        return False
     value, _ = reg.normalize(item, domain)
     if value is None:
         return False
+    given = [f for f in candidate["fields"] if f["field"] == "domain"]
+    if [f["value"] for f in given] == [value]:
+        return False
+    candidate["fields"] = [f for f in candidate["fields"] if f["field"] != "domain"]
+    read = [
+        {"value": f["value"], "basis": f["basis"], "evidence": f["evidence"]}
+        for f in given
+        if f["value"] not in (None, "", [])
+    ]
+    read += [a for f in given for a in f.get("alternatives") or () if a["value"] != value]
     candidate["fields"].append(
         {
             "field": "domain",
@@ -234,6 +263,7 @@ def _default_domain(reg: Registry, candidate: dict[str, Any], domain: str) -> bo
             "evidence": [],
             "current": None,
             "change": "add",
+            **({"alternatives": read} if read else {}),
         }
     )
     return True
