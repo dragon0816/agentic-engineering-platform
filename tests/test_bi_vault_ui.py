@@ -262,14 +262,22 @@ def test_vault_panel_and_dashboard_in_a_browser(
         run("document.querySelector('#bi-b-ver-history .bi-ver-ask input').value = 'v1'")
         click("#bi-b-ver-history .bi-ver-ask button.go")
         wait("document.getElementById('bi-notice').textContent.includes('已建立 tag「v1」')")
-        run("window.confirm = () => true")
+        # Publish asks on the page, not in a browser dialog (acceptance F14).
+        run("window.confirm = () => { throw new Error('the browser dialog was used'); }")
         wait(
             "[...document.querySelectorAll('#bi-b-ver-history button')]"
             ".some((b) => b.textContent === '發佈 v1')"
         )
+        # Pressed until its confirm stands: a late redraw of the history may replace it.
+        wait(
+            "(() => { if (document.querySelector('#bi-b-ver-history .bi-confirm')) return true;"
+            " [...document.querySelectorAll('#bi-b-ver-history button')]"
+            ".find((b) => b.textContent === '發佈 v1').click(); return false; })()"
+        )
+        assert "發佈 tag「v1」" in text_of("bi-b-ver-history")
         run(
-            "[...document.querySelectorAll('#bi-b-ver-history button')]"
-            ".find((b) => b.textContent === '發佈 v1').click()"
+            "[...document.querySelectorAll('#bi-b-ver-history .bi-confirm button')]"
+            ".find((b) => b.textContent === '確定發佈').click()"
         )
         wait("document.getElementById('bi-b-ver-reads').textContent.includes('發佈版本「v1」')")
         wait("document.getElementById('bi-b-ver-history').textContent.includes('發佈中')")
