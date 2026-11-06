@@ -311,3 +311,11 @@ def test_the_schema_buttons_sit_above_the_skills_table() -> None:
     start = PAGE.index('data-stage="schema"')
     at = [PAGE.index(f'id="{i}"', start) for i in ("bi-b-sg-run", "bi-b-sa-open", "bi-b-skills")]
     assert at == sorted(at)
+
+
+def test_every_bi_function_the_page_calls_is_defined() -> None:
+    # A helper removed while another branch still calls it fails only at run time, where the
+    # parse check cannot see it (biRowMenu, 2026-11-06).
+    called = set(re.findall(r"(?<![\w.])(bi[A-Z]\w*)\(", PAGE))
+    defined = set(re.findall(r"(?:function\s+|(?:const|let|var)\s+)(bi[A-Z]\w*)", PAGE))
+    assert called - defined == set()

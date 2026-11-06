@@ -14929,6 +14929,11 @@ function biRowActions(shown, ...more) {
   return box;
 }
 
+function biRowMenu(...items) {
+  // Only rarer actions, in 更多; a lone one stays a button.
+  return biRowActions([], ...items);
+}
+
 function biVerAsk(where, label, value, go, run) {
   // One inline question (a purpose, a tag name) under the row that asked it.
   where.querySelector(".bi-ver-ask")?.remove();
