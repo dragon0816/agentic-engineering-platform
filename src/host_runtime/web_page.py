@@ -13966,6 +13966,14 @@ function biBenchGrade(side) {
   return "沒通過（" + why.join("；") + "）";
 }
 
+function biBenchCompared(report) {
+  // Which two versions the run compared; a report from before this did not record it.
+  if (!("published" in report)) return "比較：工作版本與當時的發佈版本（這次測試沒有記下是哪一版）";
+  return report.published
+    ? "比較：工作版本與發佈版本「" + report.published.tag + "」"
+    : "比較：工作版本與大家已 push 的內容（當時還沒有發佈過）";
+}
+
 function biBenchReport(report, standing) {
   const box = el("bi-b-bench-report"); box.replaceChildren();
   // In every working domain: the push carries the whole vault, so it blocks everyone.
@@ -13982,7 +13990,21 @@ function biBenchReport(report, standing) {
   const state = {running: "測試中…", finished: "完成", failed: "沒有跑完"}[report.status]
     || report.status;
   const head = "最近一次測試（" + biTime(report.started_at) + "，" + state + "）";
-  box.append(bh("h5", "", head));
+  const stale = report.stale || {};
+  box.append(bh("h5", "", head, ...(stale.stale ? [" ", biBadge("舊結果", "warn")] : [])));
+  box.append(bh("p", "bi-meta", biBenchCompared(report)));
+  if (stale.stale) {
+    // Acceptance F24: an old comparison must not read as how the versions stand today.
+    const why = [];
+    if (stale.published_changed) {
+      why.push(stale.published_now ? "之後發佈了「" + stale.published_now.tag + "」"
+        : "之後發佈的版本變了");
+    }
+    if (stale.content_changed) why.push("之後內容改了");
+    box.append(bh("p", "bi-warn", "這是舊結果：" + why.join("，") + "，下面的比較不是現在的狀態。"),
+      bh("div", "bi-actions", biButton("重新跑測試", () => el("bi-b-bench-run").click(),
+        "bi-btn", "重新跑測試")));
+  }
   box.append(bh("p", "bi-meta", (report.scope ? "涵蓋 " + report.scope + " "
     : "涵蓋全部 ") + (report.total || 0) + " 題"));
   for (const line of notes.filter((n) => !elsewhere(n))) box.append(bh("p", "bi-meta", line));
@@ -14973,7 +14995,7 @@ function biVerHistory(vaultId, history) {
 const BI_SHARE_STEPS = [["commit", "Commit"], ["push", "Push 給大家"], ["tag", "建立 tag"],
   ["publish", "發佈"]];
 const BI_TEST_STATE = {passed: ["通過", "good"], regressed: ["退步", "warn"],
-  untested: ["沒有測試", "dim"]};
+  untested: ["沒有測試", "dim"], stale: ["舊結果", "warn"]};
 
 function biShareTagName(taken) {
   // Today's local date; a suffix when that tag is taken (a tag never moves).
@@ -15034,6 +15056,12 @@ async function biShareLoad(vaultId) {
       biRow(table, [item.home ? biHomeLabel(item.home) : "不分領域", said]);
     }
     tests.append(table.box);
+    if (plan.domains.some((item) => item.state === "stale")) {
+      tests.append(bh("p", "bi-meta",
+        "舊結果：之後發佈了新版本或內容改了，這些結果不是現在的狀態。"),
+        bh("div", "bi-actions", biButton("重新跑測試", () => el("bi-b-bench-run").click(),
+          "bi-btn", "重新跑測試")));
+    }
   }
   for (const line of standing.blocking || []) tests.append(bh("p", "bi-warn", line));
   for (const line of standing.notes || []) tests.append(bh("p", "bi-meta", line));

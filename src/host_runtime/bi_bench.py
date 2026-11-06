@@ -27,7 +27,7 @@ import sqlite3
 import time
 import uuid
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
@@ -181,7 +181,8 @@ def run(
 ) -> dict[str, Any]:
     """Run the vault's questions and cases on its working copy (synchronous): all of them,
     or only `home`'s."""
-    units = vault.Vault(workspace, vault_id).repo.working_units()
+    repo = vault.Vault(workspace, vault_id).repo
+    units = repo.working_units()
     every_question = vault_checks.questions(units)
     every_case = vault_checks.cases(units)
     questions = [q for q in every_question if vault_checks.in_scope(home, q["home"])]
@@ -200,6 +201,8 @@ def run(
         "by": actor,
         "units_sha256": units_digest(units),
         "digests": domain_reach.digests(units, _question_homes(units)),
+        # The version its 發佈版本 side read (None: never published, it read the pushed head).
+        "published": _compared(repo.published()),
         "scope": home or "",
         "not_covered": sorted(left),
         "total": len(graded),
@@ -316,6 +319,49 @@ def latest_for(workspace: Path, vault_id: str, home: str | None) -> dict[str, An
     return None
 
 
+def _compared(record: Mapping[str, Any] | None) -> dict[str, Any] | None:
+    return None if record is None else {k: record.get(k) for k in ("tag", "commit", "at")}
+
+
+def _when(text: Any) -> datetime | None:
+    try:
+        found = datetime.fromisoformat(str(text))
+    except ValueError:
+        return None
+    return found if found.tzinfo else found.replace(tzinfo=UTC)
+
+
+def published_changed(report: Mapping[str, Any], now: Mapping[str, Any] | None) -> bool:
+    """Whether the published version moved since `report` compared it (acceptance F24). A
+    report from before runs recorded it is judged by time: a publish after it started."""
+    if "published" in report:
+        then = report.get("published") or {}
+        return then.get("commit") != (now or {}).get("commit")
+    if now is None:
+        return False
+    started, published_at = _when(report.get("started_at")), _when(now.get("at"))
+    return started is None or published_at is None or published_at > started
+
+
+def staleness(
+    report: Mapping[str, Any], units: Mapping[str, Any], now: Mapping[str, Any] | None
+) -> dict[str, Any]:
+    """What makes `report` an old result today: a publish since, or content it did not test.
+    A run of one domain (or a whole run cut to one) goes by that domain's digest."""
+    content = report.get("units_sha256") != units_digest(units)
+    home = report.get("scope") or ""
+    if content and home and (report.get("digests") or {}).get(home):
+        content = report["digests"][home] != domain_reach.digests(units, [home])[home]
+    published = published_changed(report, now)
+    return {
+        "stale": content or published,
+        "content_changed": content,
+        "published_changed": published,
+        "compared": report.get("published"),
+        "published_now": _compared(now),
+    }
+
+
 def _question_homes(units: Mapping[str, Any]) -> list[str]:
     return sorted({q["home"] for q in vault_checks.questions(units) if q["home"]})
 
@@ -327,6 +373,9 @@ class _Verdicts:
     by_unit: dict[str, Any]
     newest: Mapping[str, Any] | None
     after: Mapping[str, Any]
+    run_of: dict[str, Mapping[str, Any]] = field(default_factory=dict)
+    #: Each question unit some finished run answered, counting or not.
+    seen: frozenset[str] = frozenset()
 
     def home_of(self, unit: str) -> str | None:
         value = self.after.get(unit)
@@ -355,15 +404,18 @@ def _verdicts(workspace: Path, after: Mapping[str, Any]) -> _Verdicts:
     # Each question's newest verdict that still counts: a run of one home says nothing of
     # another's questions.
     verdicts: dict[str, Any] = {}
+    run_of: dict[str, Mapping[str, Any]] = {}
     newest = None
     for run_ in runs:
         for item in run_.get("results") or []:
             if counts(run_, item["unit"]):
                 verdicts[item["unit"]] = item
+                run_of[item["unit"]] = run_
                 newest = run_
         if run_.get("units_sha256") == digest:
             newest = run_
-    return _Verdicts(verdicts, newest, after)
+    seen = frozenset(item["unit"] for run_ in runs for item in run_.get("results") or [])
+    return _Verdicts(verdicts, newest, after, run_of, seen)
 
 
 def _regressed(item: Mapping[str, Any]) -> bool:
@@ -413,10 +465,14 @@ def gate(workspace: Path, before: Mapping[str, Any], after: Mapping[str, Any]) -
     return CheckReport(blocking=blocking, notes=notes)
 
 
-def domain_states(workspace: Path, after: Mapping[str, Any]) -> list[dict[str, Any]]:
+def domain_states(
+    workspace: Path, after: Mapping[str, Any], published: Mapping[str, Any] | None
+) -> list[dict[str, Any]]:
     """Each domain's test state for `after`, as the push check reads it: `regressed` when a
     counting verdict regressed, `passed` when verdicts count and none regressed, `untested`
-    when none counts. Questions with no domain are listed under home `""`
+    when no run ever answered its questions. `stale` (舊結果, acceptance F24) when the version
+    was published again since its verdicts, or its content changed since a run answered them,
+    the same rule as the report. Questions with no domain are listed under home `""`
     (`docs/phases/BI_PAGE_SIMPLE.md` S6)."""
     found = _verdicts(workspace, after)
     graded = [q for q in vault_checks.questions(after) if q["must"] or q["must_not"]]
@@ -425,7 +481,13 @@ def domain_states(workspace: Path, after: Mapping[str, Any]) -> list[dict[str, A
         units = {q["unit"] for q in graded if str(q["home"] or "") == home}
         items = [found.by_unit[u] for u in sorted(units) if u in found.by_unit]
         regressed = [item["question"] for item in items if _regressed(item)]
-        state = "regressed" if regressed else "passed" if items else "untested"
+        moved = any(
+            published_changed(found.run_of[u], published) for u in units if u in found.by_unit
+        )
+        if moved or (not items and units & found.seen):
+            state = "stale"
+        else:
+            state = "regressed" if regressed else "passed" if items else "untested"
         states.append(
             {
                 "home": home,

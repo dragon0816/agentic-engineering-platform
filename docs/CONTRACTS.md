@@ -5929,14 +5929,20 @@ skill AI: owner decisions". Code `capabilities/bi_cards/vault_checks.py`, `host_
   [str], "notes": [str]}}`. `standing` is the push check's answer for the working copy today, empty while a run is going. `?home=<home>` makes
   `latest` the newest report saying something of it: its own run, or a whole-vault run cut down to its questions and
   cases, or null. `newest` = `{"run_id", "status", "error"}` of the newest run of any kind, or null.
+- A bench report records `published`: `{"tag", "commit", "at"}` of the version its 發佈版本 side read, or
+  null when the vault was never published (acceptance F24; older reports lack the key). In `GET .../checks`,
+  a finished `latest` carries `stale`: `{"stale", "content_changed", "published_changed", "compared",
+  "published_now"}`. `published_changed` compares commits, or for an older report whether a publish came after
+  it started; `content_changed` compares the working digest (a domain's run: that domain's digest). The push
+  check is unchanged.
 - `GET /api/bi/vaults/<id>/share` → what one share would carry (`docs/phases/BI_PAGE_SIMPLE.md` S6):
   `{"published": <publish record>|null, "commits": [{"id", "purpose", "author", "created", "pushed", "units",
   "homes"}], "older": int, "uncommitted": int, "uncommitted_homes": [str], "tags": [str], "running": bool,
-  "domains": [{"home", "state": "passed"|"regressed"|"untested", "questions", "tested", "passed",
+  "domains": [{"home", "state": "passed"|"regressed"|"untested"|"stale", "questions", "tested", "passed",
   "regressed": [str]}], "standing": {"blocking", "notes"}}`. `commits` are those since the published version,
   pushed or only on this PC (`id` null), newest first, at most 50 (`older` counts the rest); `homes` is what each reaches,
   `*` for the whole vault. `domains` lists each domain with graded questions (`""` for questions of no
-  domain) as the push check reads it; `domains` and `standing` are empty while a run is going. Read only: the
+  domain) as the push check reads it, `stale` (舊結果) by the same rule as the report's `stale` below; `domains` and `standing` are empty while a run is going. Read only: the
   page sequences commit, push, tag and publish through their own routes, so the push check is unchanged.
 - `POST /api/bi/vaults/<id>/checks`: `{"question", "must"?, "must_not"? (list or comma text), "set"? ("main"),
   "slug"?, "home"?}` stages a question (`question_invalid` 400); `{"kind": "case", "slug", "note", "expected",

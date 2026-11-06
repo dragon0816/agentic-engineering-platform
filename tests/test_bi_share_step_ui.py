@@ -138,8 +138,10 @@ def test_one_share_step_carries_commit_push_tag_and_publish(tmp_path: Path) -> N
             )
             assert rows[0][0] == "還沒 commit 的改動 1 項" and rows[0][2] == aidc
             assert ["題目與規則", "alice", "全部領域", "已 push"] in rows, rows
-            # Each domain's tests: wireless regressed, aidc's content changed since its run.
-            assert _states(page) == {aidc: "沒有測試", wireless: "退步"}
+            # Each domain's tests: wireless regressed; aidc's content changed since its run, so
+            # that run is an old result (acceptance F24).
+            assert _states(page) == {aidc: "舊結果", wireless: "退步"}
+            assert "比較：工作版本與大家已 push 的內容" in page.text_of("bi-b-bench-report")
             tests = page.text_of("bi-b-share-tests")
             assert "其他領域，不擋這次 push" in tests and "虛構題 theirs" in tests
             # A regression in another domain does not stop it, and asks nothing more.
@@ -203,6 +205,24 @@ def test_one_share_step_carries_commit_push_tag_and_publish(tmp_path: Path) -> N
             page.see("bi-b-share-list", "沒有新的內容")
             assert page.run("document.getElementById('bi-b-share-go').disabled")
             assert vault.Vault(workspace, vault_id).reads()["tag"] == today + "-2"
+
+            # -- acceptance F24: the run before this publish is an old result, said plainly ---
+            page.see("bi-b-bench-report", "舊結果")
+            report = page.text_of("bi-b-bench-report")
+            assert "之後發佈了「" + today + "-2」" in report, report
+            assert "[object" not in report, report
+            heading = page.run(
+                "document.querySelector('#bi-b-bench-report h5 .bi-badge').textContent"
+            )
+            assert heading == "舊結果"
+            assert _in_sight(page, "#bi-b-bench-report", "重新跑測試")
+            page.wait(
+                "[...document.querySelectorAll('#bi-b-share-tests .bi-badge')]"
+                ".every((b) => b.textContent === '舊結果')"
+            )
+            assert _in_sight(page, "#bi-b-share-tests", "重新跑測試")
+            page.run("document.getElementById('bi-b-bench-report').scrollIntoView(); 0")
+            page.shoot("old-result")
 
             # -- 進階: the history keeps 看改動 and 發佈 in the row, with the page's confirm ---
             page.wait(

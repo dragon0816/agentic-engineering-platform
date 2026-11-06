@@ -82,6 +82,17 @@ def _start_bench(
     return {"run_id": run_id}
 
 
+def _with_staleness(
+    workspace: Path, vault_id: str, report: dict[str, Any] | None, running: bool
+) -> dict[str, Any] | None:
+    """A finished report with what makes it an old result today (acceptance F24); not while a
+    run goes, as the page reads this every 2 s then."""
+    if report is None or running or report.get("status") == "running":
+        return report
+    repo = vault.Vault(workspace, vault_id).repo
+    return {**report, "stale": bi_bench.staleness(report, repo.working_units(), repo.published())}
+
+
 def route(
     workspace: Path,
     actor: str,
@@ -118,7 +129,12 @@ def route(
             running = newest is not None and newest.get("status") == "running"
             return 200, {
                 **vault_checks.listing(workspace, parts[0]),
-                "latest": bi_bench.latest_for(workspace, parts[0], query.get("home") or None),
+                "latest": _with_staleness(
+                    workspace,
+                    parts[0],
+                    bi_bench.latest_for(workspace, parts[0], query.get("home") or None),
+                    running,
+                ),
                 "newest": None
                 if newest is None
                 else {k: newest.get(k) for k in ("run_id", "status", "error")},
@@ -131,11 +147,13 @@ def route(
             # tag and publish itself, and the push check stays in `repo.push`.
             newest = bi_bench.latest(workspace, parts[0])
             running = newest is not None and newest.get("status") == "running"
-            working = vault.Vault(workspace, parts[0]).repo.working_units()
+            repo = vault.Vault(workspace, parts[0]).repo
             return 200, {
                 **vault.share_plan(workspace, parts[0]),
                 "running": running,
-                "domains": [] if running else bi_bench.domain_states(workspace, working),
+                "domains": []
+                if running
+                else bi_bench.domain_states(workspace, repo.working_units(), repo.published()),
                 "standing": {"blocking": [], "notes": []}
                 if running
                 else bi_bench.standing(workspace, parts[0]),

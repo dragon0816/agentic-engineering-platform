@@ -6612,3 +6612,8 @@ A reload (F5) gave 「Open the address this command printed.」: the page takes 
 - **One confirm, on the page, before the four steps;** no extra confirm for a regression in another domain (the owner). A regression in a domain the share touches disables the button with the reason; `repo.push` still blocks it.
 - **Tag name: today's local date, `-2`, `-3` when taken,** editable. A name taken between loading and pressing stops at the tag step; the next load proposes the next suffix.
 - **`confirm()` leaves the BI page** for an inline confirm the tests can press. The wiki side's nine stay for now, listed in `docs/phases/BI_PAGE_SIMPLE.md` S6.
+
+## 2026-11-06 — BI test results: an old comparison says so (acceptance F24)
+
+- **A result is 舊結果 when the published version's commit changed since the run, or the content it tested changed.** Publishing the same commit under another tag changes nothing the run compared, so it stays current. A report from before runs recorded the version is old when a publish came after it started.
+- **Display only: the push check is unchanged.** A regression found against an older published version still blocks a push that touches its domain, as the owner's rule in §14 says; the page marks it 舊結果 and offers 重新跑測試. Rejected: voiding verdicts in the gate on a publish (a colleague's publish would silently unblock a regression).
