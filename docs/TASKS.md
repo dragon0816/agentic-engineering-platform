@@ -4358,3 +4358,5 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 
 - [x] 2026-11-06, Codex: align the card model staging test with F19 import isolation; assert unrelated relation/state stay pending and travel only after the person commits. Already failed on main 7be9daaa; 20 file tests pass; commit 398dbad2.
 - [ ] Release test maintenance: migrate-domains content-derived schema version, Atlas vault-title citation, and F26 early-send follow-up hooks; assigned by BI orchestrator, separate commits on bi-same-card.
+
+- [x] 2026-11-06, Codex: migrate-domains vault test pins the content-derived 5.1.118005 version and identical schema refs on both PCs (BI_CARD_MODEL section 4.3), retaining the direct-dataset 5.1.0 assertion. Whole file: 3 passed.

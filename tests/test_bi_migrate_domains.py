@@ -105,7 +105,10 @@ def test_applying_makes_one_commit_that_reaches_the_other_pc(tmp_path: Path) -> 
     assert store.fields(harbor["id"])["aliases"]["value"] == ["港灣"]
     assert store.fields(gpu["id"])["chain"]["value"] == ["CMP"]
     registry = catalog.for_store(store)  # the new local version reached the other PC
-    assert registry.version == "5.1.0" and registry.types["Node"].name_pattern == r"^(L\d|X)-"
+    # Schema merge numbers a vault's new version from its content (BI_CARD_MODEL §4.3).
+    assert registry.version == "5.1.118005"
+    assert registry.ref == catalog.for_store(BiStore(a, dataset)).ref
+    assert registry.types["Node"].name_pattern == r"^(L\d|X)-"
     assert registry.enum_aliases["role"]["雲端大廠"] == "hyperscaler"
     skills = _ok(_call(b, "GET", f"/api/bi/vaults/{vault_id}/skills"))["skills"]
     assert next(s for s in skills if s["name"] == "aidc-extract")["body"] == "ODM 是 Account。"
