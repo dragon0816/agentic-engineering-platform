@@ -181,6 +181,13 @@ def test_the_page_follows_the_source_and_decides_proposals(served: Any, tmp_path
         click("#bi-b-v-sync")
         wait("document.getElementById('bi-b-props').hidden === false")
         run("biBuildSources ? biBuildSources() : null")
+        # A list read while `one` was still being written shows it too, without its folder:
+        # a click can follow the folder only once the page holds the list that knows both.
+        known = json.dumps({one: AIDC, two: ROBOTICS})
+        wait(
+            f"Object.entries({known}).every(([id, folder]) => (bi.build.sources || [])"
+            ".some((s) => s.id === id && s.folder === folder))"
+        )
         wait(f"!!document.querySelector('input[name=bi-b-source][value=\"{one}\"]')")
         wait("document.getElementById('bi-b-folder').options.length > 1")
 

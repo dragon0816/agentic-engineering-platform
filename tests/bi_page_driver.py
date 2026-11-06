@@ -169,6 +169,20 @@ class BiPage:
             " f.dispatchEvent(new Event('change')); })()"
         )
 
+    def attach_many(self, files: list[tuple[str, str, str]]) -> None:
+        """Several files chosen at once, as a person picks them in one dialog."""
+        parts = "".join(
+            f" dt.items.add(new File([{json.dumps(text)}], {json.dumps(name)},"
+            f" {{type: {json.dumps(kind)}}}));"
+            for name, text, kind in files
+        )
+        self.run(
+            "(() => { const dt = new DataTransfer();"
+            + parts
+            + " const f = document.getElementById('bi-b-file'); f.files = dt.files;"
+            " f.dispatchEvent(new Event('change')); })()"
+        )
+
     def choose(self, element_id: str, value: str) -> None:
         """Choose a combobox's option as a person does, with its change event."""
         self.wait(
@@ -184,7 +198,7 @@ class BiPage:
         self.run(
             "[...document.querySelectorAll('#bi-b-sources tbody tr')]"
             f".find((r) => r.textContent.includes({json.dumps(name)}))"
-            ".querySelector('input[type=radio]').click()"
+            ".querySelector('input[name=bi-b-source]').click()"
         )
         self.wait("bi.build.sourceId")
 

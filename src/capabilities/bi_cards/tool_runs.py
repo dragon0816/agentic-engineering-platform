@@ -48,10 +48,12 @@ MAX_PRINTED = 4000
 MAX_TRIED_TEXT = 8000
 
 RUNNER = (
-    analyses.GUARD.replace("in an analysis", "in a tool")
+    analyses.GUARD
     + r"""
-# What a tool commonly needs, imported before the guard: some of them import modules
-# it refuses (shutil imports _winapi).
+# What a tool commonly needs, imported before the guard (shutil imports _winapi). numpy is
+# kept out: openpyxl uses it when installed, and it loads ctypes, which a tool must not
+# have (the guard refuses to start with it loaded).
+sys.modules.setdefault("numpy", None)
 import csv, datetime, decimal, io, math, pathlib, re, shutil, statistics, zipfile
 import xml.etree.ElementTree
 try:
@@ -60,13 +62,12 @@ except ImportError:
     pass
 sys.dont_write_bytecode = True
 INPUT = os.path.realpath(sys.argv[1])
-OUTPUT = SCRATCH = os.path.realpath("output")
-DENIED_EVENTS = DENIED_EVENTS + ("sqlite3.connect",)
-code = open("tool.py", encoding="utf-8").read()
-sys.addaudithook(_guard)
-_ready = True
+OUTPUT = os.path.realpath("output")
+code = compile(open("tool.py", encoding="utf-8").read(), "tool.py", "exec")
 space = {"__name__": "__aep_tool__", "INPUT": INPUT, "OUTPUT": OUTPUT}
-exec(compile(code, "tool.py", "exec"), space)
+_install(OUTPUT, "a tool", DENIED_EVENTS + ("sqlite3.connect",))
+del _install
+exec(code, space)
 """
 )
 

@@ -517,6 +517,16 @@ def test_the_bi_area_is_a_knowledge_sub_tab_with_every_pane_status() -> None:
     assert "人工值保留，改成提議" in PAGE and "stale_edit" in PAGE
 
 
+#: Wraps the page's Dashboard loader to keep each call's caller, a few frames of its stack.
+DASH_LOADS = (
+    "(() => { const real = biLoadDashboard; window.__dashLoads = [];"
+    " biLoadDashboard = (...args) => { window.__dashLoads.push("
+    "String(new Error().stack || '').split(String.fromCharCode(10)).slice(2, 6)"
+    ".map((line) => line.trim().replace(/[?]token=[^:]*/, '')).join(' <- '));"
+    " return real(...args); }; })()"
+)
+
+
 def _browser_missing() -> bool:
     from integrations.browser import browser_path
 
@@ -642,6 +652,10 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
         assert "0張卡片" in shown("bi-counts").replace(" ", "")
         wait("document.getElementById('bi-dash-sections').textContent.includes('6. 缺口')")
         # -- demo load refreshes the counts ----------------------------------------------
+        # Every Dashboard load from here on, with its caller: the demo's own is the only one
+        # expected. `[]` read right after the order matched (2026-11-06, 2 of 3 on one merge)
+        # can only be another, and a failure below names it.
+        run(DASH_LOADS)
         run("document.getElementById('bi-demo').click()")
         wait("document.getElementById('bi-counts').textContent.startsWith('2')")
         assert "示範資料已載入" in shown("bi-notice")
@@ -654,9 +668,16 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
             ".map(d => [d.dataset.section, d.open]))"
         )
         expected_order = [["6", True], ["4", False], ["17", False], ["8", False]]
-        wait(f"{order_js} === JSON.stringify({json.dumps(expected_order)})")
-        order = run(order_js)
-        assert json.loads(order) == expected_order
+        try:
+            wait(f"{order_js} === JSON.stringify({json.dumps(expected_order)})")
+            order = run(order_js)
+            assert json.loads(order) == expected_order
+        except AssertionError as failure:
+            loads = json.loads(str(run("JSON.stringify(window.__dashLoads || [])")))
+            callers = "\n".join(f"  load {n}: {caller}" for n, caller in enumerate(loads, 1))
+            raise AssertionError(
+                f"{failure}\nDashboard loads since the demo was pressed ({len(loads)}):\n{callers}"
+            ) from None
         stats_js = (
             "[...document.querySelectorAll('#bi-dash-summary .bi-stat b')]"
             ".map(b => b.textContent).join(',')"

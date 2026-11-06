@@ -2738,7 +2738,9 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
                 <div class="bi-meta" id="bi-b-src-count" role="status"></div>
               </div>
               <div class="bi-scroll bi-scroller"><table class="bi-table bi-stack" id="bi-b-sources">
-                <thead><tr><th>使用</th><th>來源</th><th>格式</th><th>Markdown</th>
+                <thead><tr><th><label class="bi-meta"><input type="checkbox"
+                  id="bi-b-src-all" aria-label="全選顯示的來源"> 使用</label></th><th>來源</th>
+                  <th>格式</th><th>Markdown</th>
                   <th>機密等級</th><th>共用資料夾</th></tr></thead>
                 <tbody></tbody></table></div>
             </div>
@@ -2951,8 +2953,10 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
                 <option value="builtin:llm">AI 擷取（內建）</option>
                 <option value="builtin:rules">表格規則（內建，不用模型）</option>
               </select></div>
-            <div><button class="go" id="bi-b-start" type="button">Ingest</button></div>
+            <div><button class="go" id="bi-b-start" type="button">Ingest</button>
+              <button class="bi-btn" id="bi-b-batch-stop" type="button" hidden>停止</button></div>
           </div>
+          <div class="bi-meta" id="bi-b-batch" role="status"></div>
           <details class="bi-manage bi-adv" id="bi-b-adv-method">
             <summary>進階：擷取設定與試跑</summary>
           <div class="bi-step-grid">
@@ -13555,7 +13559,7 @@ bi.build = {stage: "source", sources: [], sourceId: null, run: null, candidates:
 function biBuildKey() { return "bi-build-" + biDataset(); }
 
 function biBuildSave() {
-  const keep = {stage: bi.build.stage, sourceId: bi.build.sourceId,
+  const keep = {stage: bi.build.stage, sourceId: bi.build.sourceId, chosen: bi.build.chosen,
     runId: bi.build.run ? bi.build.run.id : bi.build.runLoading || null,
     candidateId: bi.build.candidateId};
   try { localStorage.setItem(biBuildKey(), JSON.stringify(keep)); } catch (e) { /* */ }
@@ -13646,8 +13650,24 @@ for (const button of document.querySelectorAll("#bi-build-steps [data-stage]")) 
   button.addEventListener("click", () => biBuildStage(button.dataset.stage));
 }
 for (const button of document.querySelectorAll("#bi-view-build [data-bi-next]")) {
+  if (button.id === "bi-b-next4") continue;  // waits for the decisions being saved
   button.addEventListener("click", () => biBuildStage(button.dataset.biNext));
 }
+el("bi-b-next4").addEventListener("click", async () => {
+  // A quick hand presses as soon as 「接受所有」 is pressed: the press is kept, and goes on
+  // when the last decision is saved.
+  if (bi.build.accepting || bi.build.saving) {
+    const button = el("bi-b-next4");
+    button.textContent = "儲存完就前往確認寫入…";
+    while (bi.build.accepting || bi.build.saving) {
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+    button.textContent = "下一步：確認寫入"; biNext4();
+    // Stopped, or nothing accepted after all: the notice says why, and the step stays.
+    if (!biBuildAllowed().commit) return;
+  }
+  biBuildStage("commit");
+});
 for (const [id, view] of [["bi-b-to-cards", "cards"],
   ["bi-b-ro-dash", "dashboard"], ["bi-b-ro-cards", "cards"]]) {
   el(id).addEventListener("click", () => biJump(view));
@@ -13670,6 +13690,7 @@ function biBuildFollowDataset() {
   bi.build.dataset = biDataset();
   const stored = biBuildStored();
   bi.build.sourceId = stored.sourceId || null; bi.build.runLoading = stored.runId || null;
+  bi.build.chosen = stored.chosen || (stored.sourceId ? [stored.sourceId] : []);
   bi.build.sources = []; bi.build.run = null; bi.build.candidates = [];
   bi.build.candidateId = stored.candidateId || null; bi.build.waiting = []; bi.build.md = null;
   bi.build.cards = null; bi.build.peek = null;
@@ -15253,6 +15274,11 @@ function biToolsDraw(vaultId, reply) {
     // Code waiting for approval is shown open: approving means having read it.
     const shown = bh("details", "", bh("summary", "", "程式碼"), code);
     shown.open = Boolean(item.code && !item.approved);
+    if (shown.open) {
+      // The person's reading is the real control; the guard only catches mistakes.
+      shown.append(bh("p", "bi-meta", "核准＝你讀過並信任這段程式。執行時的防護只擋常見的失誤，"
+        + "不是沙箱；看不懂或來源不明的程式，不要核准。"));
+    }
     biRowDetail(list).cell.append(shown);
   };
   const scope = biScope();
@@ -16044,20 +16070,21 @@ function biRenderSources() {
   const words = el("bi-b-src-q").value.trim().toLowerCase();
   const shown = bi.build.sources.filter((source) => biSourceInScope(source)
     && (!words || source.name.toLowerCase().includes(words)));
-  el("bi-b-src-count").textContent = bi.build.sources.length
-    ? "顯示 " + shown.length + "／" + bi.build.sources.length + " 份" : "";
+  bi.build.shownCount = shown.length;
   const body = el("bi-b-sources").tBodies[0]; body.replaceChildren();
+  bi.build.shownSources = shown.filter((source) => source.format).map((source) => source.id);
   for (const source of shown) {
     const radio = document.createElement("input");
-    radio.type = "radio"; radio.name = "bi-b-source"; radio.value = source.id;
-    radio.checked = source.id === bi.build.sourceId;
+    radio.type = "checkbox"; radio.name = "bi-b-source"; radio.value = source.id;
+    radio.checked = biChosen().includes(source.id);
     radio.setAttribute("aria-label", "使用 " + source.name);
     radio.disabled = !source.format;
     radio.addEventListener("change", () => {
       // A row of the dataset just left would be dropped as soon as the new list arrives, and
       // the steps after this one would quietly stay shut.
       if (bi.build.sourcesFor !== biDataset()) { radio.checked = false; return; }
-      biPickSource(source);
+      biChoose([source.id], radio.checked);
+      if (radio.checked) biPickSource(source);
     });
     const format = {table: "表格（預設表格規則）", document: "文件（預設 AI 擷取）",
       text: "文字（預設 AI 擷取）"};
@@ -16086,7 +16113,50 @@ function biRenderSources() {
     body.append(bh("tr", "", bh("td", "bi-empty", bi.build.sources.length
       ? "這個領域或搜尋沒有來源。" : "還沒有來源。先選檔案，按「轉檔」。")));
   }
+  biChosenShown();
 }
+
+function biChosen() {
+  // What Ingest runs: the ticked sources still listed, in the working domain.
+  const listed = new Set(bi.build.sources.filter((source) => source.format
+    && biSourceInScope(source)).map((source) => source.id));
+  return (bi.build.chosen || []).filter((id) => listed.has(id));
+}
+
+function biChoose(ids, on) {
+  const kept = (bi.build.chosen || []).filter((id) => !ids.includes(id));
+  bi.build.chosen = on ? [...kept, ...ids] : kept;
+  const chosen = biChosen();
+  if (!on && ids.includes(bi.build.sourceId)) bi.build.sourceId = chosen.at(-1) || null;
+  if (on && !bi.build.sourceId) bi.build.sourceId = ids.at(-1);
+  biBuildSave(); biBuildSteps(); biChosenShown();
+}
+
+function biChosenShown() {
+  // The count beside the search, the header box, and step 2b's line all say the same.
+  const chosen = biChosen(), shown = bi.build.shownSources || [];
+  for (const box of el("bi-b-sources").querySelectorAll("tbody input[type=checkbox]")) {
+    box.checked = chosen.includes(box.value);
+  }
+  const all = el("bi-b-src-all"), ticked = shown.filter((id) => chosen.includes(id)).length;
+  all.checked = Boolean(shown.length) && ticked === shown.length;
+  all.indeterminate = ticked > 0 && ticked < shown.length;
+  all.disabled = !shown.length;
+  const count = el("bi-b-src-count");
+  count.textContent = bi.build.sources.length ? "顯示 " + (bi.build.shownCount || 0) + "／"
+    + bi.build.sources.length + " 份・已選 " + chosen.length + " 份" : "";
+  const names = chosen.map((id) => (bi.build.sources.find((s) => s.id === id) || {}).name);
+  const line = el("bi-b-batch");
+  line.replaceChildren(!chosen.length ? "還沒有選來源：到步驟 1 勾選「使用」。"
+    : chosen.length === 1 ? "這次 Ingest：" + names[0]
+      : bh("details", "", bh("summary", "", "這次 Ingest：" + chosen.length + " 份來源，"
+        + "一份一次，依序執行"), bh("ul", "", ...names.map((name) => bh("li", "", name)))));
+  if (!bi.build.batchRunning) el("bi-b-start").disabled = !chosen.length;
+}
+
+el("bi-b-src-all").addEventListener("change", () => {
+  biChoose(bi.build.shownSources || [], el("bi-b-src-all").checked);
+});
 
 el("bi-b-src-q").addEventListener("input", () => biRenderSources());
 el("bi-b-src-folder").addEventListener("change", biScopeChanged);
@@ -16152,11 +16222,10 @@ function biPickSource(source) {
   biFollowSourceFolder();
   biBuildSteps();
   for (const row of el("bi-b-sources").tBodies[0].rows) {
-    const picked = row.dataset.source === source.id;
-    row.setAttribute("aria-selected", String(picked));
-    const radio = row.querySelector("input[type=radio]");
-    if (radio) radio.checked = picked;
+    row.setAttribute("aria-selected", String(row.dataset.source === source.id));
   }
+  // Opening one with none ticked makes it the one Ingest reads, as a single choice did.
+  if (!biChosen().length) biChoose([source.id], true);
   biBuildMarkdown(source.id);
 }
 
@@ -16341,10 +16410,12 @@ async function biUploadFile(file) {
 el("bi-b-upload").addEventListener("click", async () => {
   const button = el("bi-b-upload"); button.disabled = true;
   biStatus("bi-status-build", "loading", "正在加入來源…");
+  const added = [];
   try {
     for (const file of el("bi-b-file").files) {
       if (file.size > BI_STREAM_FROM) {
         bi.build.sourceId = (await biUploadFile(file)).source.id;
+        added.push(bi.build.sourceId);
         continue;
       }
       const binary = /\.(xlsx|xlsm|pdf|docx|pptx)$/i.test(file.name);
@@ -16354,13 +16425,15 @@ el("bi-b-upload").addEventListener("click", async () => {
       if (biVaultOf(biDataset())) body.folder = el("bi-b-src-folder").value;
       if (binary) body.content_base64 = content; else body.text = content;
       const reply = await biCall("/api/bi/sources", body);
-      bi.build.sourceId = reply.source.id;
+      bi.build.sourceId = reply.source.id; added.push(reply.source.id);
     }
     el("bi-b-file").value = ""; biFileChosen();
+    // What was just added is what is ticked: the next Ingest reads those files.
+    bi.build.chosen = added;
     await biBuildSources(); biBuildSave();
     biStatus("bi-status-build", "");
-    const added = bi.build.sources.find((source) => source.id === bi.build.sourceId);
-    if (added && added.format) biPickSource(added);
+    const last = bi.build.sources.find((source) => source.id === bi.build.sourceId);
+    if (last && last.format) biPickSource(last);
   } catch (failure) {
     biStatus("bi-status-build", "error", "來源沒有加入：" + failure.message + "。");
   } finally { biFileChosen(); }
@@ -16862,20 +16935,21 @@ el("bi-b-draft-publish").addEventListener("click", async () => {
 });
 
 // -- steps 3-4: runs ---------------------------------------------------------
-function biRunBody(kind) {
-  const body = {dataset: biDataset(), kind, source_id: bi.build.sourceId,
+function biRunBody(kind, sourceId = bi.build.sourceId, batch = false) {
+  const body = {dataset: biDataset(), kind, source_id: sourceId,
     entity_type: el("bi-b-entity").value || null};
   const methodId = el("bi-b-m-pick").value;
   if (methodId && !methodId.startsWith("builtin:")) { body.method_id = methodId; return body; }
   // 「AI 擷取」 on a table sends its Markdown to the model (owner 2026-10-28);
   // 「表格規則」 reads the tables without a model.
-  const source = bi.build.sources.find((s) => s.id === bi.build.sourceId);
+  const source = bi.build.sources.find((s) => s.id === sourceId);
   if (methodId === "builtin:llm" && source && source.format === "table") body.path = "ai";
   if (methodId === "builtin:rules") body.path = "rules";
   if (el("bi-b-fresh").checked) body.fresh = true;
   if (el("bi-b-fit").checked && biDataset().startsWith("vault-")) body.check_fit = true;
-  // 「不指定」 sends nothing: the server then uses the source's own folder.
-  if (biDataset().startsWith("vault-") && el("bi-b-folder").value
+  // 「不指定」 sends nothing: the server then uses the source's own folder. Several sources
+  // each keep their own, so a batch never sends one.
+  if (!batch && biDataset().startsWith("vault-") && el("bi-b-folder").value
     && el("bi-b-folder").value !== "sources") {
     body.folder = el("bi-b-folder").value;
   }
@@ -16976,13 +17050,13 @@ function biRunMerge(run) {
 }
 
 // An AI run reads its source in the background: follow it until it ends.
-async function biBuildFollow(runId) {
+async function biBuildFollow(runId, where = "") {
   for (;;) {
     const detail = await call("/api/bi/runs/" + runId + "?dataset="
       + encodeURIComponent(biDataset()));
     if (detail.run.status !== "extracting") { biStatus("bi-status-build", ""); return detail; }
     const p = detail.run.progress || {};
-    biStatus("bi-status-build", "loading", "AI 判讀中…（第 " + (p.done || 0) + "／"
+    biStatus("bi-status-build", "loading", where + "AI 判讀中…（第 " + (p.done || 0) + "／"
       + (p.chunks || "?") + " 段）");
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
@@ -17016,6 +17090,7 @@ el("bi-b-trial").addEventListener("click", async () => {
 // A method is a versioned file in the dataset; Session B suggests changes (one
 // model call per turn, no tools) and only 「套用為新版次」 writes a revision.
 async function biBuildMethodStage() {
+  biChosenShown();
   // Right from the start: until the list is filled its first entry, AI, would send a table
   // to the model on a press.
   if (!bi.build.skill && !bi.build.method) el("bi-b-m-pick").value = biBuiltinFor();
@@ -17396,17 +17471,75 @@ async function biBuildFetchRun(runId) {
 }
 
 el("bi-b-start").addEventListener("click", async () => {
-  const button = el("bi-b-start"); button.disabled = true;
-  biStatus("bi-status-build", "loading", "正在產生候選卡…");
+  // One run per ticked source, one after another: each keeps its own source and folder, and
+  // one that fails does not stop the rest. 停止 cancels the run under way and starts no more.
+  const chosen = biChosen(), batch = chosen.length > 1;
+  if (!chosen.length) return;
+  const button = el("bi-b-start"), stop = el("bi-b-batch-stop");
+  const name = (id) => (bi.build.sources.find((s) => s.id === id) || {}).name || id;
+  button.disabled = true; stop.hidden = !batch; stop.disabled = false;
+  bi.build.batchRunning = true; bi.build.batchStop = false; bi.build.batchRun = null;
+  const done = [], failed = [];
   try {
-    const reply = await biCall("/api/bi/runs", biRunBody("ingest"));
-    await biBuildFollow(reply.run.id);
-    await biBuildFetchRun(reply.run.id); bi.build.candidateId = null;
-    biStatus("bi-status-build", ""); biBuildSave(); biBuildStage("review");
-  } catch (failure) {
-    biStatus("bi-status-build", "error", "沒有產生候選卡：" + failure.message + "。");
-  } finally { button.disabled = false; }
+    for (const [index, sourceId] of chosen.entries()) {
+      if (bi.build.batchStop) break;
+      const where = batch ? "第 " + (index + 1) + "／" + chosen.length + " 份「" + name(sourceId)
+        + "」：" : "";
+      biStatus("bi-status-build", "loading", where + "正在產生候選卡…");
+      try {
+        const reply = await biCall("/api/bi/runs", biRunBody("ingest", sourceId, batch));
+        bi.build.batchRun = reply.run.id;
+        if (bi.build.batchStop) {
+          await biCall("/api/bi/runs/" + reply.run.id + "/cancel", {dataset: biDataset()});
+          break;
+        }
+        const detail = await biBuildFollow(reply.run.id, where);
+        // Finished: 停止 from now on must not cancel it, its candidates wait for review.
+        bi.build.batchRun = null;
+        if (["failed", "cancelled"].includes(detail.run.status)) {
+          if (detail.run.status === "failed") {
+            failed.push(name(sourceId) + "：" + (detail.run.error || "判讀失敗"));
+          }
+        } else done.push(reply.run.id);
+      } catch (failure) { failed.push(name(sourceId) + "：" + failure.message); }
+    }
+  } finally {
+    bi.build.batchRunning = false; stop.hidden = true; button.disabled = false;
+    biChosenShown();
+  }
+  const stopped = bi.build.batchStop ? "已停止；" : "";
+  if (failed.length) {
+    biStatus("bi-status-build", "error", stopped + "產生了 " + done.length + " 次執行，"
+      + failed.length + " 份沒有成功（" + failed.join("；") + "）。");
+  } else biStatus("bi-status-build", "");
+  if (!done.length) return;
+  if (batch) {
+    biNotice(true, stopped + "產生了 " + done.length
+      + " 次執行，在「待審核的執行」一次選一個審核。");
+  }
+  await biBuildFetchRun(done[0]); bi.build.candidateId = null;
+  biBuildSave(); biBuildStage("review");
 });
+
+el("bi-b-batch-stop").addEventListener("click", async () => {
+  bi.build.batchStop = true; el("bi-b-batch-stop").disabled = true;
+  if (bi.build.batchRun) {
+    await biCall("/api/bi/runs/" + bi.build.batchRun + "/cancel", {dataset: biDataset()})
+      .catch(() => {});
+  }
+});
+
+function biNext4() {
+  // Shut only when there is nothing accepted; while decisions are saved it says so and waits.
+  const run = bi.build.run, busy = bi.build.accepting || bi.build.saving;
+  const accepted = biRunOpen(run) && run.summary && run.summary.accepted > 0;
+  const button = el("bi-b-next4");
+  button.disabled = !(biBuildAllowed().commit || busy && (accepted || bi.build.accepting));
+  if (!button.textContent.startsWith("儲存完")) {
+    const why = bi.build.acceptProgress ? "接受中 " + bi.build.acceptProgress : "儲存中…";
+    button.textContent = busy ? "下一步：確認寫入（" + why + "）" : "下一步：確認寫入";
+  }
+}
 
 function biRunReading(run) { return run.method_ref === "llm:reading"; }
 
@@ -17627,7 +17760,7 @@ function biBuildRenderRun(detail = true) {
   const run = bi.build.run, body = el("bi-b-cands").tBodies[0];
   body.replaceChildren(); el("bi-b-chips").replaceChildren();
   el("bi-b-accept-clean").disabled = !biRunOpen(run);
-  el("bi-b-next4").disabled = !biBuildAllowed().commit;
+  biNext4();
   biBuildSteps(); biBuildRunPick();
   // With no run the table is not drawn: empty, it pushed 待審提案 out of sight below it.
   el("bi-b-review-split").hidden = !biRunReviewable(run);
@@ -17697,7 +17830,7 @@ async function biBuildReview(candidateId, body, quiet = false) {
   // One at a time: each rewrites the run's candidates, and a quick hand presses faster than
   // an answer comes back. Moving on to the write waits for them.
   bi.build.saving = (bi.build.saving || 0) + 1;
-  el("bi-b-next4").disabled = true;
+  biNext4();
   const work = (bi.build.queue || Promise.resolve()).then(() => biCall("/api/bi/runs/" + run.id
     + "/candidates/" + candidateId, {dataset: biDataset(), ...body}));
   bi.build.queue = work.catch(() => {});
@@ -17742,7 +17875,7 @@ async function biBuildDecide(candidateId, review) {
     if (kept) kept.review = before;
     el("bi-b-cand-last").replaceChildren();
     show(candidateId);
-    el("bi-b-next4").disabled = !biBuildAllowed().commit;
+    biNext4();
     biNotice(false, "「" + name + "」沒有存到，還是" + BI_DECISION[before][0] + "："
       + failure.message + "。");
   }
@@ -17980,12 +18113,14 @@ el("bi-b-accept-clean").addEventListener("click", async () => {
     && biSameNameOpen(c).length).length;
   // 「下一步」 waits for all of them: moving on early wrote only the ones accepted so far.
   bi.build.accepting = true; button.disabled = true;
-  biBuildRunPick(); biBuildSteps();
+  bi.build.acceptProgress = "0／" + todo.length;
+  biBuildRunPick(); biBuildSteps(); biNext4();
   let done = 0;
   try {
     for (const candidate of todo) {
       await biBuildReview(candidate.id, {review: "accepted"}, true);
       done += 1; button.textContent = "接受中… " + done + "／" + todo.length;
+      bi.build.acceptProgress = done + "／" + todo.length; biNext4();
       biBuildCandRows();
     }
     biNotice(true, "已接受 " + todo.length + " 張沒有錯誤的候選卡。"
@@ -17993,7 +18128,7 @@ el("bi-b-accept-clean").addEventListener("click", async () => {
   } catch (failure) {
     biNotice(false, "接受到第 " + (done + 1) + " 張時停下：" + failure.message + "。");
   } finally {
-    bi.build.accepting = false; button.textContent = label;
+    bi.build.accepting = false; bi.build.acceptProgress = null; button.textContent = label;
     biBuildSave(); biBuildRenderRun();
   }
 });
