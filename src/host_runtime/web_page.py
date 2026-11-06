@@ -1338,7 +1338,9 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
 .bi-top { display: contents; }
 #bi-b-v-state:not(:empty) { margin-bottom: 8px; }
 #bi-b-v-state .bi-link { min-height: 0; padding: 0; }
-#bi-b-ver { scroll-margin-top: calc(var(--bi-top-h, 0px) + var(--bi-steps-h, 0px) + 8px); }
+#bi-b-ver { scroll-margin-top: calc(var(--bi-top-h, 0px) + var(--bi-steps-h, 0px) + 8px);
+  /* Its tables fill in after a jump to it: they must not pull the page along. */
+  overflow-anchor: none; }
 .bi-top-row { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap;
   align-items: flex-end; gap: 8px 10px; padding: 6px 0; background: var(--bg); }
 .bi-top-pick { flex: 0 1 300px; min-width: 0; }
@@ -13591,8 +13593,14 @@ async function biToVersion() {
   biBuildStage("test", false);
   const box = el("bi-b-ver");
   if (box.hidden) return;
+  // Clear of the top row while it sticks (not on a phone): its own height, as it is now.
+  const row = el("bi-top-row");
+  box.style.setProperty("--bi-top-h",
+    getComputedStyle(row).position === "sticky" ? row.offsetHeight + "px" : "0px");
   box.scrollIntoView({block: "start"});
   el("bi-b-ver-purpose").focus({preventScroll: true});
+  // What loads after this (the share step, the tests above it) moves it: place it again then.
+  bi.toVersionAt = Date.now();
 }
 
 function biBuildStage(name, focus = true) {
@@ -15156,6 +15164,10 @@ async function biShareLoad(vaultId) {
       ? "這次的內容在它改到的領域測試退步，push 會被擋下；請先修正或再跑一次測試。" : "";
   el("bi-b-share-why").textContent = why;
   el("bi-b-share-go").disabled = Boolean(why) || Boolean(bi.shareBusy);
+  if (Date.now() - (bi.toVersionAt || 0) < 10000) {
+    bi.toVersionAt = 0;
+    el("bi-b-ver").scrollIntoView({block: "start"});
+  }
 }
 
 function biShareProgress(skipCommit) {

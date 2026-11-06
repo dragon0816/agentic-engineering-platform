@@ -184,12 +184,19 @@ def test_the_page_follows_the_source_and_decides_proposals(served: Any, tmp_path
         wait(f"!!document.querySelector('input[name=bi-b-source][value=\"{one}\"]')")
         wait("document.getElementById('bi-b-folder').options.length > 1")
 
-        def choose(source: str) -> Any:
+        def choose(source: str, folder: str) -> Any:
+            # The folder follows the choice; the vault's other reads (versions, share, skills)
+            # may redraw it a moment later, so this waits for where it settles.
             click(f'input[name=bi-b-source][value="{source}"]')
+            follows = f"document.getElementById('bi-b-folder').value === {json.dumps(folder)}"
+            try:
+                wait(follows, 15)
+            except AssertionError:
+                pass
             return run("document.getElementById('bi-b-folder').value")
 
-        assert choose(one) == AIDC
-        assert choose(two) == ROBOTICS  # follows reselecting
+        assert choose(one, AIDC) == AIDC
+        assert choose(two, ROBOTICS) == ROBOTICS  # follows reselecting
         assert run("biRunBody('trial').folder") == ROBOTICS
 
         # -- deciding proposals -------------------------------------------------------------
