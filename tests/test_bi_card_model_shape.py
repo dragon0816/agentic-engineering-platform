@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from test_bi_vault import _push, _row, _sync, _two_pcs
+from test_bi_vault import _commit, _push, _row, _sync, _two_pcs
 
 from capabilities.bi_cards import card_model, catalog, schema_versions, vault
 from capabilities.bi_cards.schema import Registry
@@ -218,11 +218,28 @@ def test_new_units_travel_between_pcs_and_a_store_write_keeps_them(tmp_path: Pat
     store = BiStore(a, dataset)
     store.apply([_row("FAKE-CARD")], filename="t.csv", entity_type="Technology", actor="alice")
     assert target.repo.working_units()["relation:r1"] == RELATION
-    # A new import commits at once, with what was already staged.
+    # F19: the import commits its own units; unrelated staged work stays pending.
+    assert target.repo._pending()["sets"]["relation:r1"] == RELATION
+    assert target.repo._pending()["sets"]["state:c1:f"] == {
+        "state": "confirmed_none",
+        "reason": "fictional",
+    }
+    _push(a, vault_id)
+    drive.deliver("a", "b", vault_id)
+    _sync(b, vault_id)
+    assert "relation:r1" not in vault.Vault(b, vault_id).repo.units()
+    assert "state:c1:f" not in vault.Vault(b, vault_id).repo.units()
+    assert target.repo._pending()["sets"]["relation:r1"] == RELATION
+    # The person's next commit carries both units to their colleague.
+    _commit(a, vault_id, "Confirm the staged relation")
     _push(a, vault_id)
     drive.deliver("a", "b", vault_id)
     _sync(b, vault_id)
     assert vault.Vault(b, vault_id).repo.units()["relation:r1"] == RELATION
+    assert vault.Vault(b, vault_id).repo.units()["state:c1:f"] == {
+        "state": "confirmed_none",
+        "reason": "fictional",
+    }
     # An invalid one is refused before it is staged.
     with pytest.raises(RepoError):
         target.repo.stage("relation:r2", {"from": "aaa"})
