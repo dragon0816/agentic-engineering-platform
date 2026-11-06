@@ -13550,8 +13550,24 @@ for (const button of document.querySelectorAll("#bi-build-steps [data-stage]")) 
   button.addEventListener("click", () => biBuildStage(button.dataset.stage));
 }
 for (const button of document.querySelectorAll("#bi-view-build [data-bi-next]")) {
+  if (button.id === "bi-b-next4") continue;  // waits for the decisions being saved
   button.addEventListener("click", () => biBuildStage(button.dataset.biNext));
 }
+el("bi-b-next4").addEventListener("click", async () => {
+  // A quick hand presses as soon as 「接受所有」 is pressed: the press is kept, and goes on
+  // when the last decision is saved.
+  if (bi.build.accepting || bi.build.saving) {
+    const button = el("bi-b-next4");
+    button.textContent = "儲存完就前往確認寫入…";
+    while (bi.build.accepting || bi.build.saving) {
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+    button.textContent = "下一步：確認寫入"; biNext4();
+    // Stopped, or nothing accepted after all: the notice says why, and the step stays.
+    if (!biBuildAllowed().commit) return;
+  }
+  biBuildStage("commit");
+});
 for (const [id, view] of [["bi-b-to-cards", "cards"],
   ["bi-b-ro-dash", "dashboard"], ["bi-b-ro-cards", "cards"]]) {
   el(id).addEventListener("click", () => biJump(view));
@@ -17079,6 +17095,18 @@ el("bi-b-batch-stop").addEventListener("click", async () => {
   }
 });
 
+function biNext4() {
+  // Shut only when there is nothing accepted; while decisions are saved it says so and waits.
+  const run = bi.build.run, busy = bi.build.accepting || bi.build.saving;
+  const accepted = biRunOpen(run) && run.summary && run.summary.accepted > 0;
+  const button = el("bi-b-next4");
+  button.disabled = !(biBuildAllowed().commit || busy && (accepted || bi.build.accepting));
+  if (!button.textContent.startsWith("儲存完")) {
+    const why = bi.build.acceptProgress ? "接受中 " + bi.build.acceptProgress : "儲存中…";
+    button.textContent = busy ? "下一步：確認寫入（" + why + "）" : "下一步：確認寫入";
+  }
+}
+
 function biRunReading(run) { return run.method_ref === "llm:reading"; }
 
 function biCandAction(candidate) {
@@ -17298,7 +17326,7 @@ function biBuildRenderRun(detail = true) {
   const run = bi.build.run, body = el("bi-b-cands").tBodies[0];
   body.replaceChildren(); el("bi-b-chips").replaceChildren();
   el("bi-b-accept-clean").disabled = !biRunOpen(run);
-  el("bi-b-next4").disabled = !biBuildAllowed().commit;
+  biNext4();
   biBuildSteps(); biBuildRunPick();
   // With no run the table is not drawn: empty, it pushed 待審提案 out of sight below it.
   el("bi-b-review-split").hidden = !biRunReviewable(run);
@@ -17368,7 +17396,7 @@ async function biBuildReview(candidateId, body, quiet = false) {
   // One at a time: each rewrites the run's candidates, and a quick hand presses faster than
   // an answer comes back. Moving on to the write waits for them.
   bi.build.saving = (bi.build.saving || 0) + 1;
-  el("bi-b-next4").disabled = true;
+  biNext4();
   const work = (bi.build.queue || Promise.resolve()).then(() => biCall("/api/bi/runs/" + run.id
     + "/candidates/" + candidateId, {dataset: biDataset(), ...body}));
   bi.build.queue = work.catch(() => {});
@@ -17413,7 +17441,7 @@ async function biBuildDecide(candidateId, review) {
     if (kept) kept.review = before;
     el("bi-b-cand-last").replaceChildren();
     show(candidateId);
-    el("bi-b-next4").disabled = !biBuildAllowed().commit;
+    biNext4();
     biNotice(false, "「" + name + "」沒有存到，還是" + BI_DECISION[before][0] + "："
       + failure.message + "。");
   }
@@ -17651,12 +17679,14 @@ el("bi-b-accept-clean").addEventListener("click", async () => {
     && biSameNameOpen(c).length).length;
   // 「下一步」 waits for all of them: moving on early wrote only the ones accepted so far.
   bi.build.accepting = true; button.disabled = true;
-  biBuildRunPick(); biBuildSteps();
+  bi.build.acceptProgress = "0／" + todo.length;
+  biBuildRunPick(); biBuildSteps(); biNext4();
   let done = 0;
   try {
     for (const candidate of todo) {
       await biBuildReview(candidate.id, {review: "accepted"}, true);
       done += 1; button.textContent = "接受中… " + done + "／" + todo.length;
+      bi.build.acceptProgress = done + "／" + todo.length; biNext4();
       biBuildCandRows();
     }
     biNotice(true, "已接受 " + todo.length + " 張沒有錯誤的候選卡。"
@@ -17664,7 +17694,7 @@ el("bi-b-accept-clean").addEventListener("click", async () => {
   } catch (failure) {
     biNotice(false, "接受到第 " + (done + 1) + " 張時停下：" + failure.message + "。");
   } finally {
-    bi.build.accepting = false; button.textContent = label;
+    bi.build.accepting = false; bi.build.acceptProgress = null; button.textContent = label;
     biBuildSave(); biBuildRenderRun();
   }
 });
