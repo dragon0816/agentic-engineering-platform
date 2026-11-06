@@ -216,16 +216,27 @@ def _usable_answer(response: Any) -> bool:
 
 
 def _default_domain(reg: Registry, candidate: dict[str, Any], domain: str) -> bool:
-    """Give a new card with no domain its source's; whether it did."""
+    """Give a new card its source folder's domain; whether it changed. The folder wins over a
+    domain the model read (acceptance F10): the folder is where a person put the source, and a
+    guess placed a marine source's card in wireless. The model's stays as a proposal on the
+    card, with its evidence, so that a wireless fact in a marine source still reaches wireless."""
     entity = reg.types.get(str(candidate.get("entity_type")))
     item = entity.get("domain") if entity is not None else None
     if item is None or candidate.get("match") == "existing":
         return False
-    if any(f["field"] == "domain" and f["value"] for f in candidate["fields"]):
-        return False
     value, _ = reg.normalize(item, domain)
     if value is None:
         return False
+    given = [f for f in candidate["fields"] if f["field"] == "domain"]
+    if [f["value"] for f in given] == [value]:
+        return False
+    candidate["fields"] = [f for f in candidate["fields"] if f["field"] != "domain"]
+    read = [
+        {"value": f["value"], "basis": f["basis"], "evidence": f["evidence"]}
+        for f in given
+        if f["value"] not in (None, "", [])
+    ]
+    read += [a for f in given for a in f.get("alternatives") or () if a["value"] != value]
     candidate["fields"].append(
         {
             "field": "domain",
@@ -234,6 +245,7 @@ def _default_domain(reg: Registry, candidate: dict[str, Any], domain: str) -> bo
             "evidence": [],
             "current": None,
             "change": "add",
+            **({"alternatives": read} if read else {}),
         }
     )
     return True
