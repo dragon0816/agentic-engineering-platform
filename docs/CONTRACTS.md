@@ -6917,3 +6917,16 @@ Design: `docs/phases/BI_CARD_MODEL.md` §4.3. Code: `capabilities/bi_cards/schem
 - **`POST /api/bi/vaults/<id>/push`** answers `blocked` when the commits would make a change clash that was not clashing on the head.
 - **`upgrade_preview`** `blocked` adds code `field_used_by`.
 - **`GET /api/bi/vaults/<id>/skills`** items add `update_blocks` and `update_reason`. `skill_needs_update` is raised only when `update_blocks` is true. A skill unit may add `schema_seen`. A repository type may provide `skill_binding` and `skill_review`; the wiki type does not, and keeps its rule.
+
+
+### BI same-card operation merge (2026-11-06)
+
+BI repository types optionally project operations before the common engine applies base checks; wiki does not opt in. Every replay and push must use this one projection. Commit records are immutable; total order remains `(clock, author, seq)`.
+
+A non-human differing `summary`, `usage` or `scope` over a nonempty value produces a stable pending `proposal:` unit, including the incoming evidence. Same readings keep the first provenance. Explicit human changes retain replacement semantics. `field:<id>:updated` selects the later date, with canonical JSON as a deterministic tie breaker. Card history's derived `updated` is monotonically the maximum change date.
+
+A new BI `evidence:` operation may additionally contain `bi_evidence: {before, field, after_field}`: `before` is the prior evidence array or null, whose hash must match `base`; the two other values are nullable SHA256 hashes of the underlying field values. Only additive rows whose field is unchanged are unioned, deduplicated and ordered by `reference_id` (derived from source and locator on old rows). A duplicate reference keeps the later `reference_at` (including submission fallback), then the greater canonical row JSON. A stale addition against a replaced value conflicts. A replacement or evidence review retains ordinary base checking. An old operation with `history.old_evidence` retains replacement handling; absent enough context, it keeps the existing conflict behaviour. No silent guess is permitted.
+
+The extra key is permitted only on BI evidence operations. Old AEP versions reject commits carrying it, so collaborators must upgrade together. Old commits require no rewrite. Replay policy 1 invalidates the local sync cache once; `MODEL_VERSION = 12` rebuilds BI materialization once. Feed fixtures and goldens remain pinned and unchanged.
+
+The replay epoch is persisted in `repo.sqlite` user_version, independently of the optional clean-sync stamp: incomplete or tampered files can invalidate that stamp without triggering another migration replay. Content determinism compares the complete UTF-8 SQL iterdump, including all tables and sqlite_sequence; SQLite file header transaction counters are local and intentionally differ.

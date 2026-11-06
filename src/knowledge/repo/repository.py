@@ -452,8 +452,26 @@ def commit_problem(
     if not isinstance(ops, list):
         return "ops missing"
     for index, op in enumerate(ops):
-        if not isinstance(op, dict) or set(op) != {"unit", "value", "base"}:
+        if not isinstance(op, dict) or set(op) not in (
+            {"unit", "value", "base"},
+            {"unit", "value", "base", "bi_evidence"},
+        ):
             return f"op {index}: not a unit operation"
+        if "bi_evidence" in op:
+            if kind is None or kind.name != "bi" or not str(op["unit"]).startswith("evidence:"):
+                return f"op {index}: BI evidence context on another unit type"
+            context = op["bi_evidence"]
+            if not isinstance(context, dict) or set(context) != {"before", "field", "after_field"}:
+                return f"op {index}: invalid BI evidence context"
+            if context["before"] is not None and not isinstance(context["before"], list):
+                return f"op {index}: invalid BI evidence base"
+            if value_hash(context["before"]) != op["base"]:
+                return f"op {index}: BI evidence base hash mismatch"
+            if any(
+                v is not None and (not isinstance(v, str) or not SHA256_RE.match(v))
+                for v in (context["field"], context["after_field"])
+            ):
+                return f"op {index}: invalid BI evidence field hash"
         problem = unit_key_problem(op["unit"])
         if problem:
             return f"op {index}: {problem}"
@@ -499,9 +517,14 @@ _SCANS: dict[str, tuple[str, Scan]] = {}
 _SCANS_LOCK = threading.Lock()
 
 
-def apply_ops(units: dict[str, Any], ops: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
+def apply_ops(
+    units: dict[str, Any], ops: Iterable[Mapping[str, Any]], *, kind: RepoType | None = None
+) -> list[dict[str, Any]]:
     """Apply unit operations to `units` in place; return the ones not applied
     because the unit changed under them (each as a conflict)."""
+    prepare = getattr(kind, "prepare_ops", None)
+    if prepare is not None:
+        ops = prepare(units, list(ops))
     conflicts = []
     for op in ops:
         key, value = str(op["unit"]), op["value"]
@@ -891,7 +914,12 @@ class Repository:
             self._stamp_path().unlink(missing_ok=True)
             return
         files = {f["path"]: f["sha256"] for c in ready for f in c.data["files"]}
-        record = {"stamp": stamp, "applied": len(ready), "files": files}
+        record = {
+            "stamp": stamp,
+            "applied": len(ready),
+            "files": files,
+            "policy": getattr(self.kind, "replay_version", 0),
+        }
         # Local and under the lock: a fixed scratch name draws no random id.
         scratch = self._stamp_path().with_suffix(".tmp")
         scratch.write_text(json.dumps(record), encoding="utf-8")
@@ -903,6 +931,10 @@ class Repository:
         try:
             record = json.loads(self._stamp_path().read_text(encoding="utf-8"))
         except (OSError, ValueError):
+            return False
+        if int(db.execute("PRAGMA user_version").fetchone()[0]) != getattr(
+            self.kind, "replay_version", 0
+        ):
             return False
         if not stamp or record.get("stamp") != stamp:
             return False
@@ -981,7 +1013,8 @@ class Repository:
                 }
                 present = {c.name: c for c in ready}
                 new = [c for c in ready if c.name not in applied]
-                rebuild = any(
+                old_policy = int(db.execute("PRAGMA user_version").fetchone()[0])
+                rebuild = old_policy != getattr(self.kind, "replay_version", 0) or any(
                     name not in present or present[name].sha256 != sha
                     for name, (_, sha) in applied.items()
                 )
@@ -1014,7 +1047,7 @@ class Repository:
                     conflicts = 0
                     for commit in todo:
                         position += 1
-                        found = apply_ops(units, commit.data["ops"])
+                        found = apply_ops(units, commit.data["ops"], kind=self.kind)
                         missed = {c["unit"] for c in found}
                         for op in commit.data["ops"]:
                             if op["unit"] not in missed:
@@ -1057,6 +1090,7 @@ class Repository:
                                 "INSERT OR REPLACE INTO units VALUES (?, ?, ?)",
                                 (key, canonical(units[key]), owner.get(key, "")),
                             )
+                    db.execute(f"PRAGMA user_version = {getattr(self.kind, 'replay_version', 0)}")
                     db.execute("COMMIT")
                 except BaseException:
                     db.execute("ROLLBACK")
@@ -1104,7 +1138,7 @@ class Repository:
             commits = {c.name: c for c in self.scan().commits}
             units: dict[str, Any] = {}
             for name, cid in ordered:
-                apply_ops(units, commits[name].data["ops"])
+                apply_ops(units, commits[name].data["ops"], kind=self.kind)
                 if cid == target:
                     break
             return units
@@ -1122,7 +1156,9 @@ class Repository:
                 if commit is None:
                     continue
                 changes = []
-                for op in commit.data["ops"]:
+                prepare = getattr(self.kind, "prepare_ops", None)
+                operations = prepare(units, commit.data["ops"]) if prepare else commit.data["ops"]
+                for op in operations:
                     before = units.get(op["unit"])
                     applied = not apply_ops(units, [op])
                     changes.append(
@@ -1316,6 +1352,9 @@ class Repository:
                 for key, value in sorted(pending["sets"].items())
                 if canonical(before.get(key)) != canonical(value) and (only is None or only(key))
             ]
+            annotate = getattr(self.kind, "annotate_ops", None)
+            if annotate is not None:
+                ops = annotate(before, ops)
             files = [
                 {"path": p, **item}
                 for p, item in sorted(pending["files"].items())
@@ -1400,7 +1439,9 @@ class Repository:
             rebased: list[dict[str, Any]] = []
             for _, record in local:
                 ops = []
-                for op in record["ops"]:
+                prepare = getattr(self.kind, "prepare_ops", None)
+                prepared = prepare(state, record["ops"]) if prepare else record["ops"]
+                for op in prepared:
                     key = op["unit"]
                     current = state.get(key)
                     agreed = canonical(current) == canonical(op["value"])
@@ -1422,7 +1463,10 @@ class Repository:
                         continue
                     chosen = op["value"] if decision["choice"] == "mine" else decision["value"]
                     ops.append({"unit": key, "value": chosen, "base": value_hash(current)})
-                apply_ops(state, ops)
+                annotate = getattr(self.kind, "annotate_ops", None)
+                if annotate is not None:
+                    ops = annotate(state, ops)
+                apply_ops(state, ops, kind=self.kind)
                 if ops or record["files"]:
                     rebased.append({**record, "ops": ops})
             if conflicts:

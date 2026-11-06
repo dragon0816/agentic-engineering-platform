@@ -6521,6 +6521,8 @@ The owner: 「證具, raw data連結就append上去」. A candidate whose values
 
 **Not twice.** A row's identity on a field is its `reference_id`, the source and the place in it. A source read again adds nothing, and is not offered as 新增出處. A different place in the same source is a different citation.
 
+**2026-11-06 concurrency clarification (owner via BI orchestrator).** Concurrent additions of the same reference keep one row, independent of arrival order: later `reference_at` wins for submission-fallback timestamps, then canonical row JSON breaks ties. Rows without an explicit id use the same source-and-locator id function. The field's distinct references still union; this does not change a replacement or an evidence review into an append.
+
 **A replay that lost the field.** Field and evidence are separate units, so a commit could lose the field and still apply its evidence, and the winning value showed a citation of text it does not hold. `vault._evidence_read` now reads the evidence as it stood before that commit, as long as no later commit changed it. The unit itself stays as it was, on every PC: this is how the card reads it. The lost value's citation comes back with it if the conflict is accepted.
 
 ## 2026-11-05: Each BI domain owns its questions, and each has its own person
@@ -6731,3 +6733,14 @@ Agent Web come before the port is bound). The shortcut reported 「Agent Web did
 - **F4. The schema version is under 進階, defaulting to the newest; a name with no letters asks for an id** instead of making `vault-xxxxxx`. The step bar sticks under the top row instead of sliding half under it.
 - **F22. The working domains are the homes something is in** (a source, a card's domain, a question, a skill, a tool, a profile, a Dashboard) **and the ones created,** not the vault's default list: a vault holding only 海事 listed eight. The profile list is the same list. Naming an unused default home in 新增領域 takes it up rather than answering that it exists. After joining or creating, one domain is chosen, several are asked for, none points at 新增領域. Accepted: a vault made with the defaults lists nothing until something is put in a domain.
 - **F23. Withdrawing a colleague's source says whose it is and that it is for everyone.** No access control and no block, per the standing rule.
+
+
+## 2026-11-06: Same-card readings stay first; evidence appends and time takes the later date
+
+Owner: 「關於同一張卡，概述應該不會變，證具, raw data連結就append上去，時間也是取合集」. Chosen before release, confirmed through the BI orchestrator.
+
+- `summary`, `usage`, `scope` are fill-only for imports and runs. A differing later value becomes a pending proposal with its own evidence; explicit human corrections, accepting a proposal and 定案 still replace. Concurrent empty-field writes settle in the existing `(clock, author, seq)` replay order, never folder arrival order.
+- BI owns one optional repository-type operation projection, shared by push, sync, historical state, history and sharing. Wiki keeps its existing policy. Evidence additions union by `reference_id` (source and locator for old rows), choosing the later reference time and then canonical JSON for duplicates; field replacement keeps the existing move-to-history rule. `updated` takes the later date.
+- New BI evidence operations carry optional `bi_evidence` context: the prior evidence list and hashes of the field value before and after. Without this, a base hash alone cannot prove an append. Old commits remain readable; an ambiguous old evidence race remains a conflict. Reject silent guesses, changing immutable commits, or applying a blanket list union to replacements.
+- Older AEP rejects the extra operation key; all colleagues must use this release. BI replay policy version 1 forces one repository replay; card model 12 forces one materialization. No source files or real vaults are changed by development tests.
+- The same file imported into two homes (`source:` folder conflict) remains separate work, not part of this field-evidence policy.

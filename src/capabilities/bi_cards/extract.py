@@ -633,8 +633,6 @@ def merge(into: dict[str, Any], other: dict[str, Any]) -> None:
             continue
         if isinstance(mine["value"], list) and isinstance(item["value"], list):
             mine["value"] = [*mine["value"], *[v for v in item["value"] if v not in mine["value"]]]
-        elif item["field"] in READING_FIELDS and item["basis"] == mine["basis"] == "inference":
-            continue  # two readings of one card are not a conflict: the first stays
         elif mine["value"] != item["value"]:
             # The other value stays too: it becomes a proposal with its own evidence.
             others = mine.setdefault("alternatives", [])

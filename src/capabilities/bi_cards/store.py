@@ -1201,7 +1201,9 @@ class BiStore:
                 new = _dump(value)
                 if stored is not None and stored["value"] == new:
                     continue
-                kept = stored is not None and stored["kind"] == "human"
+                kept = stored is not None and (
+                    stored["kind"] == "human" or name in ("summary", "usage", "scope")
+                )
                 if name in planned.propose or (kept and name not in planned.overwrite):
                     self._propose(
                         db, card_id, name, new, kind, ref, at, result, planned.evidence.get(name)

@@ -65,6 +65,7 @@ from capabilities.bi_cards import (
     homes,
     names,
     profile,
+    same_card,
     schema_doc,
     schema_merge,
     schema_versions,
@@ -305,6 +306,9 @@ SNAPSHOT_DIR = "published"
 class BiType:
     """The `bi` repository type: card units and their checks."""
 
+    prepare_ops = staticmethod(same_card.prepare)
+    annotate_ops = staticmethod(same_card.annotate)
+    replay_version = same_card.VERSION
     name = REPO_TYPE
     layout = homes.LAYOUT
     #: The benchmark push check (`set_benchmark`, BI T1): (units before, units
@@ -584,7 +588,7 @@ def _field_history(
             info = cards.setdefault(
                 cid, {"created": entry["at"], "updated": entry["at"], "groups": set()}
             )
-            info["updated"] = history.get("at") or entry["at"]
+            info["updated"] = max(info["updated"], history.get("at") or entry["at"])
             info["groups"].add(entry["group"])
             info.setdefault("first_import", history.get("import_id"))
             rows.append(
@@ -1817,7 +1821,9 @@ def ensure_current(store: BiStore) -> None:
         with closing(sqlite3.connect(f"file:{store.path}?mode=ro", uri=True)) as db:
             built = int(db.execute("PRAGMA user_version").fetchone()[0])
         if built < card_model.MODEL_VERSION:
-            Vault(store.workspace, store.vault_id).rebuild()
+            target = Vault(store.workspace, store.vault_id)
+            target.repo.sync()
+            target.rebuild()
 
 
 @contextmanager
@@ -2243,7 +2249,7 @@ def share_state(workspace: Path, vault_id: str) -> ShareState:
             if reached_start:
                 pushed.append({**record, "pushed": True})
             else:
-                repo_engine.apply_ops(units, record["ops"])
+                repo_engine.apply_ops(units, record["ops"], kind=BiType())
                 reached_start = cid == start
         # Only on this PC: no id yet, the author is this PC's, applied as `working_units` does.
         local = [
@@ -2306,7 +2312,7 @@ def _apply(units: dict[str, Any], record: Mapping[str, Any]) -> None:
     """A commit's ops: an applied one as `state_at` replays it, a local one as
     `working_units` lays it on top."""
     if not record.get("forced"):
-        repo_engine.apply_ops(units, record["ops"])
+        repo_engine.apply_ops(units, record["ops"], kind=BiType())
         return
     for op in record["ops"]:
         if op["value"] is None:

@@ -1,93 +1,38 @@
 # Handoff
 
-Rewritten 2026-11-06 18:40 (Asia/Taipei) by the BI orchestrator (Claude Code), handing over to
-Codex agents because the Claude account is near its limit. Progress history is in
-`docs/TASKS.md` and decisions in `docs/DECISIONS.md`; this file only says where work stopped.
+Updated 2026-11-06 by the Codex same-card worker. This is the worker branch handoff, not a release authorization. The BI orchestrator owns integration, installer checks and publishing. Do not push.
 
-## Goal
+## Goal and branch
 
-Release a Windows installer of AEP to colleagues today (owner's word, 2026-11-06), after the BI
-Knowledge page was confirmed to work end to end through the GUI. Atlas is not in the installer.
-The owner is the only person who confirms a push to GitHub.
+Worktree: `C:/Users/Chi_L/.paseo/worktrees/2qnenase/bi-share-step`.
+Branch: `bi-same-card`, based on local main `7be9daaa` at the orchestrator's request.
+Implement the owner's same-card rule before release, then repair three outdated tests assigned by the orchestrator. Never access the owner's real vault. All work so far used synthetic data and temporary workspaces.
 
-## Where things are
+## Completed
 
-- **Local `main` = `1663447c`**, about 190 commits ahead of `origin/main` (`d8fce30f`). Not pushed.
-  It holds every acceptance fix F1-F27 (see `docs/TASKS.md` 2026-11-05/06 rows), the script-guard
-  fix, the shortcut start fix, the schema suggestion, batch ingest, the one-step share and the
-  design document `docs/design/BI_KNOWLEDGE_BASE.zh-TW.md`.
-- **Agent Web on the owner's PC** runs an older build (started 15:12 from `9d81844c`-era code on
-  port 53583). Restart only after checking `/api/activity` is idle:
-  `.venv\Scripts\python .scratch\restart_web.py` from the main checkout. Startup takes 2-6 minutes
-  on a loaded PC; `MODEL_VERSION` is 11, so the first open of each vault rebuilds `bi.sqlite` once.
-- **Full suite** was started 18:03 on `681cc1ff` in worktree
-  `C:\Users\Chi_L\.paseo\worktrees\2qnenase\installer-python-check` (detached HEAD, Python 3.12 venv),
-  log `C:\Users\Chi_L\AppData\Local\Temp\fs\full-681cc.log` (`-rfE`, so failures are named at the
-  end). `1663447c` only adds a faster share route and share-test waits on top; if the run is clean,
-  run `test_bi_share_step`, `test_bi_share_step_ui`, `test_bi_page_simple` on `1663447c`.
-  Known environment-only noise: `test_bi_atlas_file_import` has 2 setup errors (Windows env var
-  limit); earlier one-off failures that passed alone are listed in `docs/TASKS.md`.
-- **LiteLLM gateway** (`127.0.0.1:4000`, model `gpt-5.5`, key in env var `LITELLM_MASTER_KEY`, never
-  print it) was restarted by the owner at 16:25 and answered. It has hung twice today; the agent
-  cannot stop its process (permission check). If it hangs, ask the owner to end the two
-  `gateway.py` python processes and double-click
-  `C:\Users\Chi_L\Documents\claude\customized_LLM_vscode_plugin\LiteLLM_Gateway.vbs`.
+- `398dbad2`: independently fix the pre-existing card-model-shape staging test to the F19 import-isolation rule. It fails unchanged against 7be9daaa; after the fix all 20 tests in the file pass.
+- Same-card implementation: store fill-only summary/usage/scope; extraction alternatives retain evidence; one BI operation projection for push, sync, state_at, log and pushed share replay. Wiki does not opt in. New evidence ops carry optional validated context; appends merge only their new rows, preserving concurrent evidence review. Reference identity deduplicates rows; later reference time then canonical JSON is the deterministic tie-break. Stale evidence against a replaced value conflicts. Ambiguous old operations keep existing conflict handling.
+- `updated` takes the maximum; model version 12 rebuilds BI materialization. Repository replay policy 1 is persisted separately in repo.sqlite user_version, so incomplete files do not repeatedly trigger migration. Opening an old BI database first replays its repository cache.
+- Contracts, decisions (including the 11-05 reference identity clarification), card model, design same-card table and task record are updated. Source-in-two-homes folder conflict is explicitly out of scope and remains open.
 
-## What remains, in order
+## Verification
 
-1. **Full suite result** (above). Fix any real failure on a branch; rerun alone to tell flakes.
-2. **Restart Agent Web** on final `main` (check `/api/activity` first). Tokens change every start.
-3. **Re-shoot the SOP screenshots on final main**, fictional data only, no token in any shot:
-   BI walk notes and old shots are in `%TEMP%\bi-accept\sop\` (`NOTES.md`, 95 files), cards and
-   org chart in `%TEMP%\bi-accept\sop-cards\` (18 files, `NOTES.zh-TW.md`). Temp workspaces
-   `%TEMP%\bi-accept\pc1`, `pc2` can be reused (their `host.json` must keep
-   `local_owner_grants` at its default true). Real model calls take 1-4 minutes each.
-4. **Write `docs/guides/BI_SOP.zh-TW.md`** (Traditional Chinese, numbered steps, one screenshot per
-   step, what to press, what to expect, what to do on failure) with images in
-   `docs/guides/images/bi-sop/`, after reading each image for real data or tokens (public repo).
-   Branch `bi-guide` (`136e5da5`, not merged) already has the rewritten `BI_BUILD.zh-TW.md`, the
-   release-script copy of the guides into the release's `BI_SOP/` folder, and a placeholder SOP;
-   merge it with main first. Include: AI steps can take 1-4 min; approving a tool means you read
-   and trust the code (the guard is not a sandbox); F5 in the same tab is fine, a new tab needs the
-   desktop shortcut; card photos via Telegram or attach a file (no camera on the page).
-5. **Build the installer**: `scripts\release.cmd` from the main checkout on a clean tree (it runs
-   ruff, mypy and the full suite itself unless `--quick`; it tags locally, never pushes). Then
-   install the zip into a temp folder and check Agent Web starts and the BI page opens.
-6. **Owner confirms**, then push `main` (GitHub credential manager hangs; use
-   `git -c credential.helper= -c "credential.helper=!gh auth git-credential" push origin main`
-   with a timeout). The owner already said pushing is fine after the package succeeds.
-7. Atlas `bi-series` (agent "Atlas B" in the Atlas workspace) waits for the owner to say 確認 push
-   in that session; not part of this installer.
+Interpreter: `C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/.venv/Scripts/python`; `PYTHONPATH=src`.
 
-## Known limits to state in the release notes and SOP
+- Baseline 7be9daaa source archive: four import/chunk tests fail; all six original two-PC race cases fail. New duplicate-reference and stale-review cases were also observed red before their fixes.
+- `python -m pytest tests/test_bi_same_card.py tests/test_bi_extract.py tests/test_bi_cards.py tests/test_bi_vault.py tests/test_bi_accept_evidence.py tests/test_bi_replaced_evidence.py tests/test_bi_correction.py tests/test_bi_share_step.py tests/test_bi_card_model_shape.py tests/test_bi_feed_fixtures.py tests/test_bi_feed_api.py tests/test_bi_feed_server.py tests/test_knowledge_repo.py tests/test_knowledge_repo_wiki.py -q --basetemp .scratch/same-card-verified`: 228 passed (before the final reference/delta and upgrade-opening additions).
+- Latest evidence/sync group: `python -m pytest tests/test_bi_same_card.py tests/test_bi_accept_evidence.py tests/test_bi_replaced_evidence.py tests/test_bi_correction.py tests/test_bi_vault.py tests/test_bi_share_step.py -q --basetemp .scratch/same-card-dedup-final`: 109 passed.
+- Latest `python -m pytest tests/test_bi_same_card.py -q --basetemp .scratch/same-card-commit-check`: 25 passed, including complete SQL iterdump byte comparison (all tables and sqlite_sequence), visible push rebases and delayed arrivals, immutable input operations, old sequential commits, old ambiguous evidence, reference deduplication, stale-review preservation and opening an old materialization.
+- `python -m ruff format --check src tests`, `python -m ruff check src tests`, `python -m mypy src tests`: passed; mypy checked 1047 source files.
+- Feed fixtures and goldens are unchanged. The baseline validator was also run against an op with the new key: rejects with `op 0: not a unit operation`. Collaborators must use the same release.
+- Synthetic copy benchmark: 760 cards, 15,964 units including 7,600 evidence units; forced policy replay 1.461 seconds, exit 0. This measures repository replay only, not BI materialization, and is not a measurement of the owner's real vault.
+- No full repository suite or browser run for this backend slice. The release integration/full suite remains with the orchestrator. `graphify update .` was attempted but warned that pypdf was missing and did not finish; interrupted its own process. No tracked graph changes.
 
-- **Must be fixed before release (owner chose B, 2026-11-06 18:45):** the owner's same-card rule
-  for one card reached from two domains: the summary (`summary`, `usage`, `scope`) stays as first
-  written, a differing later value becomes a proposal and never replaces it silently; evidence and
-  raw-data links append; time is a union. Today a second table import replaces a summary
-  silently, two appends to one field's evidence conflict at unit level, and two `updated` values
-  conflict; two people filling the same empty summary conflict. Agent 963f49c6 measured this
-  (`docs/phases/BI_PAGE_SIMPLE.md` §14). It needs a merge rule where `push` meets a conflict and in
-  the import/run merge; commit units stay immutable and every PC must rebuild to the same result.
-- Chat has no data-class check on BI cards and analysis rows; add no source above INTERNAL.
-- Test results are local to the PC that ran them. Upload to the Shared Platform, encryption, and
-  the per-domain name dictionary are not built (`docs/phases/BI_PLATFORM_RELEASE.md` is on branch
-  `bi-platform-release`, plan only).
-- The default analysis pack excludes samples by the `SAMPLE-` name (78), while 95 cards are marked.
+## Next actions
 
-## Real data
-
-`market-intel` (shared folder `C:\Users\Chi_L\OneDrive - Rohde & Schwarz\BI_Knowledge\market-intel`)
-is pushed, 95 samples of 760, per-domain questions and dashboards assigned, published
-`2026q4-r6.2` (older than the working copy). Staged reading run `e3de934115f0` (144 summary
-candidates) waits for the owner's review in the page. Write to it only through the page or its API
-with `/api/activity` idle and `pending` empty, and never commit someone else's pending work.
-A snapshot with real data, `.scratch\bi-assign-snap-20261106-011110` under worktree
-`bi-step1-domain`, waits for the owner's word before deletion.
-
-## Rules that bind whoever continues
-
-Read `CLAUDE.md` and `AGENTS.md`. Reply to the owner in Traditional Chinese, short and plain.
-No AEP file permission controls (IT decides). Never print or commit secrets. Run browser tests one
-at a time with your own `--basetemp`, kill browsers you start, and sweep the BI browser files on the
-merged head before a restart. Don't re-ask decisions the owner made (`docs/DECISIONS.md`).
+1. Commit the verified same-card implementation on this branch (if it is not already in git log).
+2. As separate commits, repair and run each complete file requested by the orchestrator:
+   - `tests/test_bi_migrate_domains.py`: vault migration uses a content-derived schema version (BI_CARD_MODEL section 4.3), not 5.1.0.
+   - `tests/test_bi_atlas_embed.py`: citations name the vault title, per 7c6a5e04. Run with `AEP_ATLAS_REPO=C:/Users/Chi_L/.paseo/worktrees/09o4151g/atlas-embed`.
+   - `tests/test_agent_web_followups_ui.py`: F26 (3b5c460a) queues early messages; assert the readiness and queue/flush hooks rather than the retired early-return condition.
+3. Browser files run one at a time with this worker's own basetemp; close browsers started by the tests. Report commit hashes and exact results to orchestrator agent `1c2694f9-300d-4869-998b-4d33e40561e1` using Paseo send_agent_prompt. Do not push or modify any source repository or real vault.

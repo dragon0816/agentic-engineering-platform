@@ -402,3 +402,12 @@ Fixtures fictional, committed; nothing from `files\` in a commit.
 | Older AEP cannot read the vault | Runbook; Thursday's release |
 | A former name stays reserved, so a true namesake needs another name | Rare; stated in the rename reply |
 | Phase 1 gets little real-model testing before R6 | The extraction prompt changes (profile, summaries). One small real run on a fictional source, on the orchestrator's go, before merge |
+
+
+## Same-card merge amendment (2026-11-06)
+
+Owner decision: first `summary`, `usage`, `scope` stays; another automatic reading is a pending proposal with evidence. Concurrent empty-field fills use `(clock, author, seq)`; explicit human replacement still wins through the existing correction/acceptance/定案 routes.
+
+BI's `same_card` policy is the single operation projection for all repository replays and push. New evidence operations retain optional prior-row and field-hash context (`docs/CONTRACTS.md`, BI same-card operation merge), permitting append union without resurrecting a replaced value's evidence. Ambiguous old operations still conflict. Dates take the maximum. Model 12 and replay policy 1 require one rebuild/replay; older AEP refuses new context keys. Commits and feed fixtures are never rewritten.
+
+Open, outside this slice: one source file used in two homes still conflicts on its `source:` folder metadata; it needs a separate multi-home source contract.
