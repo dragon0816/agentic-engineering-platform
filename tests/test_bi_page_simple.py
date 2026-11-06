@@ -86,8 +86,13 @@ MAIN_PATH = (
     # Step 3: dashboard, questions, the test run, its result, and what follows it.
     "bi-b-bench-run",
     "bi-b-bench-report",
-    "bi-b-ver-commit",
-    "bi-b-ver-push",
+    # 分享: one step for commit, push, tag and publish (acceptance F13).
+    "bi-b-share-list",
+    "bi-b-share-tests",
+    "bi-b-ver-purpose",
+    "bi-b-share-tag",
+    "bi-b-share-go",
+    "bi-b-share-progress",
     "bi-b-ver-history",
 )
 
@@ -123,6 +128,8 @@ ADVANCED = (
     "bi-b-an-pack",
     "bi-b-atl",
     "bi-b-bc-list",
+    "bi-b-ver-commit",
+    "bi-b-ver-push",
     "bi-b-ver-discard",
 )
 
