@@ -104,6 +104,7 @@ def test_a_press_suggests_with_quotes_and_a_field_is_added_on_the_version(
 
             page.click("#bi-b-sg-run")
             page.see("bi-b-sg-sum", "看了 1 份來源")
+            page.wait("bi.build.suggest && bi.build.suggest.status === 'done'")
             summary = page.text_of("bi-b-sg-sum")
             assert "raw.md" in summary and "秒" in summary and "1 項找不到原文" in summary
             table = page.text_of("bi-b-sg-table")

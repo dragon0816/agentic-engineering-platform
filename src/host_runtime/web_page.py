@@ -16363,7 +16363,10 @@ function biSuggestSources() {
 }
 
 async function biSuggestLoad() {
+  // A read that answers after a press must not put back what the press replaced.
+  const seq = bi.sgSeq = (bi.sgSeq || 0) + 1;
   const reply = await call("/api/bi/schema-suggest?dataset=" + encodeURIComponent(biDataset()));
+  if (seq !== bi.sgSeq) return;
   biSuggestShow(reply.suggestion);
   if (reply.suggestion && reply.suggestion.status === "running") biSuggestFollow();
 }
@@ -16477,6 +16480,7 @@ el("bi-b-sg-run").addEventListener("click", async () => {
     biStatus("bi-b-sg-status", "error", el("bi-b-sg-scope").value === "picked"
       ? "先在步驟 1 選一份來源。" : "這個領域還沒有轉好的來源。"); return;
   }
+  bi.sgSeq = (bi.sgSeq || 0) + 1;
   try {
     const reply = await biCall("/api/bi/schema-suggest", {dataset: biDataset(), source_ids: ids,
       only_new: el("bi-b-sg-scope").value === "new"});
