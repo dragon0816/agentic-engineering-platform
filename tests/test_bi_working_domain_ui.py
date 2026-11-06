@@ -97,7 +97,7 @@ def test_one_working_domain_carries_through_the_three_steps(tmp_path: Path) -> N
             page.wait(f"[...bi.build.homes].some((h) => h.folder === {json.dumps(AIDC)})")
 
             # -- first visit: everything shows, and nothing can be added to no domain ------
-            assert page.text_of("bi-b-src-count") == "顯示 3／3 份"
+            assert page.text_of("bi-b-src-count").startswith("顯示 3／3 份・已選 ")
             assert page.run("document.getElementById('bi-b-src-folder').value") == "sources"
             assert (
                 page.run(
@@ -138,7 +138,10 @@ def test_one_working_domain_carries_through_the_three_steps(tmp_path: Path) -> N
 
             # -- a domain: step 1 follows, the file goes to it -----------------------------
             page.choose("bi-b-src-folder", AIDC)
-            page.wait("document.getElementById('bi-b-src-count').textContent === '顯示 1／3 份'")
+            page.wait(
+                "document.getElementById('bi-b-src-count').textContent"
+                ".startsWith('顯示 1／3 份・已選 ')"
+            )
             assert "aidc.md" in _rows(page) and "wl.csv" not in _rows(page)
             assert not page.run("document.getElementById('bi-b-upload').disabled")
             assert page.run("document.getElementById('bi-b-scope-need').hidden")
@@ -152,7 +155,10 @@ def test_one_working_domain_carries_through_the_three_steps(tmp_path: Path) -> N
             page.choose("bi-dataset", dataset)
             page.click("#bi-views [data-bi-view=build]")
             page.wait(f"document.getElementById('bi-b-src-folder').value === {json.dumps(AIDC)}")
-            page.wait("document.getElementById('bi-b-src-count').textContent === '顯示 2／4 份'")
+            page.wait(
+                "document.getElementById('bi-b-src-count').textContent"
+                ".startsWith('顯示 2／4 份・已選 ')"
+            )
 
             # -- in sight on every step -----------------------------------------------------
             page.choose_row_source("aidc.md")

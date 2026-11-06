@@ -900,3 +900,31 @@ def test_a_candidate_that_only_adds_a_citation_says_so_and_writes_only_that(tmp_
     assert cited == ["一.md", "二.md"]
     again = store.find("Technology", "FAKE-040")
     assert again is not None and again["version"] == version
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_moving_on_while_all_are_being_accepted_waits_for_them_and_says_so(
+    tmp_path: Path,
+) -> None:
+    """Acceptance F18: after 接受所有沒有錯誤的候選卡, 下一步 stayed grey for seconds and a quick
+    press did nothing. It now says why it waits, and a press goes on once all are saved."""
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    dataset = _vault(tmp_path, workspace, [_page(i) for i in range(40, 44)])
+    _reading(workspace, dataset, kind="ingest")
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(tmp_path / "browser", server.address) as page:
+            _review(page, dataset)
+            _shown(page, 4)
+            nxt = "document.getElementById('bi-b-next4')"
+            assert page.run(f"{nxt}.disabled")  # nothing accepted yet
+            _hold(page, "/candidates/")
+            page.click("#bi-b-accept-clean")
+            page.wait(f"{nxt}.textContent.includes('接受中')")
+            assert not page.run(f"{nxt}.disabled"), "a press is kept, not lost on a grey button"
+            page.click("#bi-b-next4")
+            page.wait(f"{nxt}.textContent.includes('儲存完就前往')")
+            _stage_shown(page, "review")
+            _free(page)
+            _stage_shown(page, "commit")
+            page.see("bi-b-summary", "更新 4 張")

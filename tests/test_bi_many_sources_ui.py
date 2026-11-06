@@ -106,7 +106,7 @@ def test_many_sources_stay_in_their_scroller_and_the_markdown_opens_beside_them(
             )
             print(f"one redraw of {MANY} rows: {float(drawing):.0f} ms")
             assert float(drawing) < 1000
-            assert page.text_of("bi-b-src-count") == f"顯示 {MANY}／{MANY} 份"
+            assert page.text_of("bi-b-src-count") == f"顯示 {MANY}／{MANY} 份・已選 0 份"
 
             # -- the table does not push the page ----------------------------------------
             split, scroller = _top_rect(page, "#bi-b-src-split"), _top_rect(page, "#bi-b-sources")
@@ -160,7 +160,7 @@ def test_many_sources_stay_in_their_scroller_and_the_markdown_opens_beside_them(
             page.set_value("bi-b-src-q", "來源-012")
             page.run("document.getElementById('bi-b-src-q').dispatchEvent(new Event('input'))")
             page.wait("document.querySelectorAll('#bi-b-sources tbody tr').length === 10")
-            assert page.text_of("bi-b-src-count") == f"顯示 10／{MANY} 份"
+            assert page.text_of("bi-b-src-count").startswith(f"顯示 10／{MANY} 份・已選 ")
 
 
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
@@ -197,7 +197,7 @@ def test_in_a_vault_the_table_follows_the_domain_and_converting_opens_the_result
             )
             page.wait("document.querySelectorAll('#bi-b-sources tbody tr').length === 1")
             assert "aidc.md" in page.text_of("bi-b-sources")
-            assert page.text_of("bi-b-src-count") == "顯示 1／2 份"
+            assert page.text_of("bi-b-src-count") == "顯示 1／2 份・已選 0 份"
 
             # After 轉檔 the new source is selected and its Markdown opens.
             page.upload("new.md", "# 新來源\n\n轉檔後的內容。\n", "text/markdown")
