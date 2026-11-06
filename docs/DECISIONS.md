@@ -6569,6 +6569,43 @@ The owner: 「這是一個多人合作的平台，但為了不彼此干擾，每
 - **Commit stays whole for now,** though `only` makes limiting it cheap. The owner has not asked, and the warning covers it.
 - **The owner's rule for a card two domains reach is recorded, not built:** it needs a merge rule in the engine's conflict path. Findings in §14.
 
+## 2026-11-06: One unit name sits at one level for a company
+
+Acceptance walk of the business cards (orchestrator, for the colleague release): the printed
+光學事業處 was read as the 事業群 on one card and as the 處 on a colleague's, and the org chart
+showed 光學事業處 > 光學事業處 > 研發部. The orchestrator asked that one name not occupy two levels
+for one company, existing duplicates fixed when a card updates. Rule in
+`docs/phases/BUSINESS_CARDS.md` §2 (Host checks on a reading).
+
+- **The name's own level word decides first** (…事業群 → business group, …處 → division, the
+  mapping the spec and the Skill already give), then the company's majority, a tie the first
+  stored person's level. Rejected: always the majority, which makes the first misreading the
+  company's rule; and always the name, which cannot place English or unmarked names.
+- **Only when the company has the name at both levels.** A name read at one level stays where
+  it was read: nothing contradicts it.
+- **Stored people are re-placed inside the card's change** with their value's source kept, so
+  undo of that card reverts it. A value the person set is never moved (the rule that only new
+  evidence touches the person's values), and a level holding another name is never overwritten.
+  Rejected: a one-time migration, which would not catch the next card read the other way.
+- **The chart also drops a unit nested in itself**, so a store not yet re-placed draws right.
+- **Chart file names use local time**, as the page does (a UTC stamp named the previous day in
+  the Taipei morning).
+
+## 2026-11-06: A reload keeps Agent Web open; the token stays in the tab
+
+A reload (F5) gave 「Open the address this command printed.」: the page takes `?token=` out of the address and the server lets the page in only with it. Colleagues had to reopen from the shortcut.
+
+**Decided.** The page keeps this run's token in its tab's `sessionStorage`. An address with no token gets `RELOAD_PAGE`, a short page with no secret, which reads the tab's copy, removes it, and opens the address with it. The page then keeps it again. A token from an earlier run is refused once, and the copy is gone, so it is not tried again. A new tab, a bookmark or another run still needs the shortcut.
+
+**What the token guards, checked.**
+- **Another local user:** `sessionStorage` is per browser profile and tab, so they cannot read it. The address without the token gives them a page with no secret, and every API still needs the `Authorization` header.
+- **A website (CSRF):** nothing is sent automatically, there is no cookie, and its scripts cannot read another origin's `sessionStorage`. No preflight is answered.
+- **DNS rebinding:** the `Host` check is unchanged, so a rebound name is refused before any of this.
+- **The in-chat HTML viewer:** an opaque-origin sandbox (`FILE_VIEW_CSP`, no `allow-same-origin`), so it cannot read the tab's storage.
+- **The token itself:** it still changes every run, and `sessionStorage` goes when the tab closes.
+
+**Rejected.** An `HttpOnly; SameSite=Strict` cookie for this run's token: a cookie is sent by the browser on its own, so every GET route would need a second check against CSRF, and the decision of 2026-10-08 already turned down a cookie.
+
 ## 2026-11-06: Acceptance fixes F9, F10, F12, F19 (BI orchestrator)
 
 - **F9. Every list of homes reads the units, uncommitted ones too.** The folders a rule may apply to came from the shared folder on disk, so a domain created and not yet pushed was missing and 和 AI 新增規則 fell back to aerospace. They now add each home's sources folder from the units; the select starts on the working domain, and under 全部領域 a person must pick one. Rejected: an empty choice meaning every source, which is how a rule silently lands in the wrong place.
