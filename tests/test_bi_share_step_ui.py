@@ -251,8 +251,9 @@ def test_one_share_step_carries_commit_push_tag_and_publish(tmp_path: Path) -> N
             _question(workspace, vault_id, "theirs-2", "wireless")
             bi_bench.run(workspace, vault_id, ask=_ask("theirs"), extract=lambda c: [], actor="a")
             page.run("biVersions(bi.verVault)")
-            page.wait("document.getElementById('bi-b-share-go').disabled")
-            assert "測試退步" in page.text_of("bi-b-share-why")
+            # Disabled already (nothing new): wait for the reason that this content brings.
+            page.see("bi-b-share-why", "測試退步")
+            assert page.run("document.getElementById('bi-b-share-go').disabled")
             assert "（wireless）" in page.text_of("bi-b-share-tests")
             page.run("document.getElementById('bi-b-ver').scrollIntoView(); 0")
             page.shoot("share-blocked")
