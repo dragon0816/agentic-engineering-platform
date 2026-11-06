@@ -13,7 +13,7 @@ from typing import Any
 
 import pytest
 from bi_page_driver import BiPage, browser_missing
-from test_bi_vault import _call, _ok
+from test_bi_vault import _call, _ok, _use_homes
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
 AIDC = "applications/aidc/sources"
@@ -54,6 +54,8 @@ def test_a_domain_starts_empty_chooses_its_panels_and_a_switch_leaves_nothing_be
         )
     )  # fmt: skip
     dataset, vault_id = str(made["vault"]["dataset"]), str(made["vault"]["id"])
+    # Only homes something is in are listed (acceptance F22): this test works in these.
+    _use_homes(workspace, vault_id, "AIDC", "Wireless")
     for item in (BY_DOMAIN, ALL_CARDS):
         _ok(_call(workspace, "POST", f"/api/bi/vaults/{vault_id}/analyses", {"save": item}))
     shots = os.environ.get("AEP_UI_SHOTS")

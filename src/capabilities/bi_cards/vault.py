@@ -40,6 +40,7 @@ import contextlib
 import contextvars
 import hashlib
 import json
+import os
 import re
 import shutil
 import sqlite3
@@ -48,7 +49,7 @@ import threading
 import time
 import uuid
 from collections import ChainMap
-from collections.abc import Callable, Iterator, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from contextlib import closing, contextmanager
 from dataclasses import dataclass, field, replace
 from pathlib import Path
@@ -1075,6 +1076,37 @@ def _folder(value: Any, *, must_exist: bool) -> Path:
     if must_exist and not path.is_dir():
         raise BiStoreError("path_missing", f"找不到資料夾 {path}")
     return path
+
+
+def onedrive_folders() -> list[str]:
+    """This PC's OneDrive folders, the company one first: Windows names them in these variables,
+    and each is also a `OneDrive*` folder in the profile."""
+    found: list[str] = []
+    named = [os.environ.get(n) for n in ("OneDriveCommercial", "OneDrive", "OneDriveConsumer")]
+    profile = Path.home()
+    for value in [*named, *(str(p) for p in sorted(profile.glob("OneDrive*")))]:
+        if value and Path(value).is_dir() and value not in found:
+            found.append(value)
+    return found
+
+
+def folder_check(text: str, mode: str) -> dict[str, Any]:
+    """A folder typed in the vault form, checked as it is typed (acceptance F3): whether it can be
+    used, and this PC's OneDrive folders to suggest. The server cannot show a folder dialog on
+    the person's screen in a way that can be tested, so the page checks the path instead."""
+    suggest = onedrive_folders()
+    found: dict[str, Any] = {"ok": False, "problem": "", "suggest": suggest, "shared": False}
+    try:
+        path = _folder(text, must_exist=True)
+        if mode == "join":
+            read_vault_json(path)
+    except BiStoreError as failure:
+        problem = failure.message
+        if mode == "join" and failure.code != "path_missing":
+            problem = f"這個資料夾不是 BI 知識庫（{failure.message}）：請選同事建好的知識庫資料夾"
+        return {**found, "problem": problem}
+    shared = any(path == Path(s) or Path(s) in path.parents for s in suggest)
+    return {**found, "ok": True, "shared": shared}
 
 
 def _slug(text: str, limit: int) -> str:
@@ -2762,7 +2794,8 @@ def create_home(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dic
     vault = _vault(workspace, vault_id)
     with vault.lock:
         units = vault.repo.working_units()
-        item = vault_skills.new_home(given, units, vault._schema_of(units))
+        in_use = [item["home"] for item in _working_domains(vault, units)]
+        item = vault_skills.new_home(given, units, vault._schema_of(units), in_use)
         key, value = vault_skills.home_unit(item)
         with _repo_errors():
             vault.repo.stage(key, value)
@@ -2775,11 +2808,52 @@ def create_home(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dic
         return {"home": item["home"], "homes": _working_domains(vault, units)}
 
 
+def _homes_in_use(units: Mapping[str, Any], known: Iterable[str]) -> set[str]:
+    """The homes something is in: a source, a card's domain, a question, a skill, a tool, a
+    profile or a Dashboard."""
+    by_domain = {home.casefold(): home for home in known}
+    found: set[str] = set()
+    for key, value in units.items():
+        home: Any = None
+        if key.startswith("source:") and isinstance(value, dict):
+            home = homes.home_of(str(value.get("folder") or ""))
+        elif key.startswith("field:") and key.endswith(":domain") and isinstance(value, dict):
+            named = value.get("value")
+            for name in named if isinstance(named, list) else [named]:
+                if name and str(name).casefold() in by_domain:
+                    found.add(by_domain[str(name).casefold()])
+        elif key.startswith(vault_checks.QUESTION_PREFIX) and isinstance(value, dict):
+            home = value.get("home")
+        elif key.startswith(("skill:", "tool:")):
+            home = key.partition(":")[2].rpartition("/")[0]
+        elif key.startswith("profile:"):
+            home = key.partition(":")[2]
+        elif key.startswith("meta:dashboard:"):
+            home = key[len("meta:dashboard:") :]
+        if home:
+            found.add(str(home))
+    return found
+
+
 def _working_domains(vault: Vault, units: Mapping[str, Any]) -> list[dict[str, Any]]:
-    """What a person can work on (`docs/phases/BI_PAGE_SIMPLE.md` §9): the vault's homes and any
-    other its sources are in, each with its folder and its schema domain. An empty folder makes
-    no home: `library/skill-review` holds review copies and is not a place to work."""
-    listed = {item["home"]: item["label"] for item in vault_skills.home_list(units)}
+    """What a person can work on (`docs/phases/BI_PAGE_SIMPLE.md` §9): the homes a person
+    created, the vault's other homes something is in, and any other its sources are in, each
+    with its folder and its schema domain. A home only named in the vault's default list is not
+    one (acceptance F22): a joiner of a vault holding only 海事 saw AIDC to Wireless. The library
+    entries stay listed. An empty folder makes no home either: `library/skill-review` holds review
+    copies and is not a place to work."""
+    named = vault_skills.home_list(units)
+    used = _homes_in_use(units, (item["home"] for item in named))
+    created = {item["home"] for item in vault_skills.created_homes(units)}
+    listed = {
+        item["home"]: item["label"]
+        for item in named
+        # A library entry is the vault's shared reference area, not someone's domain: it stays
+        # listed, so that its first source has somewhere to go.
+        if item["home"] in created
+        or item["home"] in used
+        or item["home"].startswith(f"{homes.LIBRARY}/")
+    }
     source_folders = [
         str(value.get("folder") or "")
         for key, value in units.items()
@@ -2798,7 +2872,8 @@ def _working_domains(vault: Vault, units: Mapping[str, Any]) -> list[dict[str, A
             "folder": homes.sources_dir(home),
             "domain": homes.domain_of_folder(domains, homes.sources_dir(home)),
         }
-        for home, label in listed.items()
+        # The library entries last: shared reference areas, after the domains.
+        for home, label in sorted(listed.items(), key=lambda i: i[0].startswith(homes.LIBRARY))
     ]
 
 
@@ -2818,7 +2893,10 @@ def profiles(workspace: Path, vault_id: str) -> dict[str, Any]:
     units = vault.repo.working_units()
     return {
         "profiles": profile.listed(vault.repo, units),
-        "homes": vault_skills.home_list(units),
+        "homes": [
+            {"home": item["home"], "label": item["label"]}
+            for item in _working_domains(vault, units)
+        ],
     }
 
 

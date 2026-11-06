@@ -6722,3 +6722,12 @@ Agent Web come before the port is bound). The shortcut reported 「Agent Web did
 
 - **A result is 舊結果 when the published version's commit changed since the run, or the content it tested changed.** Publishing the same commit under another tag changes nothing the run compared, so it stays current. A report from before runs recorded the version is old when a publish came after it started.
 - **Display only: the push check is unchanged.** A regression found against an older published version still blocks a push that touches its domain, as the owner's rule in §14 says; the page marks it 舊結果 and offers 重新跑測試. Rejected: voiding verdicts in the gate on a publish (a colleague's publish would silently unblock a regression).
+
+## 2026-11-06: The BI first view, for someone creating a vault and someone joining one (acceptance F1-F4, F21-F23)
+
+- **F1. Knowledge opens on BI when the wiki pipeline is not configured or holds nothing,** unless the person last chose the other tab. A PC installed from `deploy/windows-preview/` has no `knowledge_pipeline` in `host.json`, and opened on "not configured".
+- **F2, F21. With no dataset, the page is the top row only:** 新增知識庫 and 加入, both the lead, one line and a small 載入示範資料 link; the select, the tabs and the steps wait. 新增資料集 stays under 進階.
+- **F3. The vault form checks the folder as typed and offers this PC's OneDrive folders** (`GET /api/bi/vaults/folder-check`). No 瀏覽: the page is a browser page, and a dialog the server opens on the desktop cannot be tested and could open behind the window or on a PC nobody is at. Rejected for now, not ruled out.
+- **F4. The schema version is under 進階, defaulting to the newest; a name with no letters asks for an id** instead of making `vault-xxxxxx`. The step bar sticks under the top row instead of sliding half under it.
+- **F22. The working domains are the homes something is in** (a source, a card's domain, a question, a skill, a tool, a profile, a Dashboard) **and the ones created,** not the vault's default list: a vault holding only 海事 listed eight. The profile list is the same list. Naming an unused default home in 新增領域 takes it up rather than answering that it exists. After joining or creating, one domain is chosen, several are asked for, none points at 新增領域. Accepted: a vault made with the defaults lists nothing until something is put in a domain.
+- **F23. Withdrawing a colleague's source says whose it is and that it is for everyone.** No access control and no block, per the standing rule.

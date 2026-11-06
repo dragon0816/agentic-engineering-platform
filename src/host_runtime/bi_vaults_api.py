@@ -107,6 +107,10 @@ def route(
     if method == "GET":
         if not parts:
             return 200, {"vaults": vault.listing(workspace)}
+        if parts == ["folder-check"]:
+            return 200, vault.folder_check(
+                str(query.get("path") or ""), str(query.get("mode") or "new")
+            )
         if len(parts) == 2 and parts[1] == "status":
             return 200, vault.status(workspace, parts[0])
         if len(parts) == 2 and parts[1] == "pending":

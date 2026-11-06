@@ -300,7 +300,7 @@ def test_a_joined_bi_vault_is_answered_and_cited_from_its_published_version(
     with _served(config, layout, _bi_model(dataset)) as server:
         answer = _ask(server)
         assert "FACT-PUBLISHED" in answer
-        assert f"資料來源：知識庫 {dataset} 發佈版本 v1" in answer
+        assert "資料來源：知識庫 Market Signals 發佈版本 v1" in answer  # its name, not its id
         # A push after v1 and this PC's own uncommitted edit are not answered.
         bi._ok(bi._edit(publisher, dataset, "TSN", "standard_body", "FACT-PUSHED", "alice"))
         bi._commit(publisher, vault_id, "發佈後")
@@ -322,7 +322,7 @@ def test_a_vault_never_published_is_answered_from_the_pushed_head_and_says_so(
     with _served(config, layout, _bi_model(dataset)) as server:
         answer = _ask(server)
     assert "FACT-PUSHED" in answer
-    assert f"資料來源：知識庫 {dataset}（尚未發佈，已 push 的最新版本" in answer
+    assert "資料來源：知識庫 Market Signals（尚未發佈，已 push 的最新版本" in answer
 
 
 def test_a_bi_vault_without_the_grant_or_the_skill_answers_nothing(tmp_path: Path) -> None:
