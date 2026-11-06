@@ -87,39 +87,61 @@ sys.stdout.reconfigure(encoding="utf-8")
 sys.stderr.reconfigure(encoding="utf-8")
 SCRATCH = os.path.realpath(os.getcwd())
 DB = os.path.join(SCRATCH, "bi.sqlite")
-DENIED_IMPORTS = {"socket", "_socket", "ssl", "_ssl", "subprocess", "_posixsubprocess",
+DENIED_IMPORTS = frozenset({"socket", "_socket", "ssl", "_ssl", "subprocess", "_posixsubprocess",
     "_winapi", "ctypes", "_ctypes", "multiprocessing", "_multiprocessing", "urllib.request",
-    "http.client", "ftplib", "smtplib", "asyncio", "webbrowser"}
+    "http.client", "ftplib", "smtplib", "asyncio", "webbrowser"})
+# Frames, the garbage collector and tracing reach what the script was not given.
 DENIED_EVENTS = ("socket.", "subprocess.", "os.system", "os.exec", "os.spawn", "os.posix_spawn",
     "os.fork", "os.kill", "ctypes.", "winreg.", "_winapi.", "os.startfile", "sys.addaudithook",
-    "os.symlink", "os.link", "os.chmod", "shutil.rmtree")
+    "os.symlink", "os.link", "os.chmod", "shutil.rmtree", "sys._getframe", "sys._current_frames",
+    "sys.settrace", "sys.setprofile", "sys._settraceallthreads", "sys._setprofileallthreads",
+    "sys.monitoring", "gc.get_objects", "gc.get_referrers", "gc.get_referents")
 WRITES = ("os.remove", "os.rename", "os.mkdir", "os.rmdir", "os.truncate", "os.utime")
-_ready = False
+# Loaded before the guard and still allowed: shutil imports _winapi on Windows, and the
+# calls of it that start or open processes raise the `_winapi.` events refused below.
+PRELOADED = frozenset({"_winapi"})
 
-def _inside(path):
-    try:
-        real = os.path.realpath(os.fsdecode(path))
-    except Exception:
-        return False
-    return real == SCRATCH or real.startswith(SCRATCH + os.sep)
 
-def _guard(event, args):
-    if not _ready:
-        return
-    if event == "import" and args and (args[0] in DENIED_IMPORTS or
-                                       args[0].split(".")[0] in DENIED_IMPORTS):
-        raise PermissionError("module not allowed in an analysis: " + args[0])
-    if event.startswith(DENIED_EVENTS):
-        raise PermissionError("not allowed in an analysis: " + event)
-    if event == "open" and args:
-        path, mode = args[0], args[1] if len(args) > 1 else "r"
-        writing = isinstance(mode, str) and any(c in mode for c in "wax+")
-        if isinstance(mode, int):
-            writing = bool(mode & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_APPEND))
-        if writing and isinstance(path, (str, bytes, os.PathLike)) and not _inside(path):
-            raise PermissionError("writing outside the scratch folder is not allowed")
-    if event in WRITES and args and not all(_inside(a) for a in args[:2] if a is not None):
-        raise PermissionError("changing files outside the scratch folder is not allowed")
+def _install(scratch, where, events=DENIED_EVENTS):
+    # Turn the guard on, for good, right before the script runs. It keeps its own copies
+    # of what it reads, so the script can reach no flag, list or builtin that switches it
+    # off; and it refuses to start when anything it denies is already loaded, since a
+    # module in `sys.modules` is imported again without an `import` event.
+    loaded = sorted(n for n in DENIED_IMPORTS if n in sys.modules and n not in PRELOADED)
+    if loaded:
+        raise SystemExit("refused: loaded before the guard: " + ", ".join(loaded))
+    realpath, sep, imports, denied, writes = os.path.realpath, os.sep, DENIED_IMPORTS, \
+        tuple(events), WRITES
+    flags = os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_APPEND
+    paths, refuse, failure = (str, bytes, os.PathLike), PermissionError, Exception
+    is_a, every = isinstance, all
+
+    def inside(path):
+        try:
+            real = realpath(path.decode("utf-8", "surrogateescape")
+                            if is_a(path, bytes) else path)
+        except failure:
+            return False
+        return real == scratch or real.startswith(scratch + sep)
+
+    def guard(event, args):
+        if event == "import" and args and (args[0] in imports or
+                                           args[0].split(".")[0] in imports):
+            raise refuse("module not allowed in " + where + ": " + args[0])
+        if event.startswith(denied):
+            raise refuse("not allowed in " + where + ": " + event)
+        if event == "open" and args:
+            path, mode = args[0], args[1] if len(args) > 1 else "r"
+            writing = is_a(mode, str) and ("w" in mode or "a" in mode or "x" in mode
+                                           or "+" in mode)
+            if is_a(mode, int):
+                writing = bool(mode & flags)
+            if writing and is_a(path, paths) and not inside(path):
+                raise refuse("writing outside the scratch folder is not allowed")
+        if event in writes and args and not every(inside(a) for a in args[:2] if a is not None):
+            raise refuse("changing files outside the scratch folder is not allowed")
+
+    sys.addaudithook(guard)
 """
 
 RUNNER = (
@@ -137,11 +159,12 @@ def query(sql, params=()):
         db.close()
 
 PARAMS = json.load(open(os.path.join(SCRATCH, "params.json"), encoding="utf-8"))
-sys.addaudithook(_guard)
-code = open(os.path.join(SCRATCH, "script.py"), encoding="utf-8").read()
-_ready = True
+code = compile(open(os.path.join(SCRATCH, "script.py"), encoding="utf-8").read(), "script.py",
+               "exec")
 space = {"__name__": "__analysis__", "query": query, "DB": DB, "PARAMS": PARAMS}
-exec(compile(code, "script.py", "exec"), space)
+_install(SCRATCH, "an analysis")
+del _install
+exec(code, space)
 result = space.get("result")
 print("\n" + "@@AEP_RESULT@@" + json.dumps(result, ensure_ascii=False, default=str))
 '''
