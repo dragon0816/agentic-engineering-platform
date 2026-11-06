@@ -1330,6 +1330,8 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
 /* No box of its own: a sticky row sticks only inside its parent, and this must span the page. */
 .bi-top { display: contents; }
 #bi-b-v-state:not(:empty) { margin-bottom: 8px; }
+#bi-b-v-state .bi-link { min-height: 0; padding: 0; }
+#bi-b-ver { scroll-margin-top: calc(var(--bi-top-h, 0px) + var(--bi-steps-h, 0px) + 8px); }
 .bi-top-row { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap;
   align-items: flex-end; gap: 8px 10px; padding: 6px 0; background: var(--bg); }
 .bi-top-pick { flex: 0 1 300px; min-width: 0; }
@@ -13507,6 +13509,16 @@ function biBuildStepper(stage, allowed) {
 
 function biBuildSteps() { biBuildStepper(bi.build.stage, biBuildAllowed()); }
 
+async function biToVersion() {
+  // 版本 sits in step 3, under the tests: open it there, clear of the sticky row and steps.
+  if (bi.view !== "build") await biJump("build");
+  biBuildStage("test", false);
+  const box = el("bi-b-ver");
+  if (box.hidden) return;
+  box.scrollIntoView({block: "start"});
+  el("bi-b-ver-purpose").focus({preventScroll: true});
+}
+
 function biBuildStage(name, focus = true) {
   bi.build.moves = (bi.build.moves || 0) + 1;
   const allowed = biBuildAllowed();
@@ -13908,9 +13920,15 @@ function biVaultState(state) {
     return;
   }
   const count = bh("span", ""); count.id = "bi-b-v-count";
-  box.append(bh("p", "bi-meta", count, "・別人 push 了還沒套用的 " + state.behind
-    + " 個・你還沒 push 的 commit " + state.ahead + " 個・還沒 commit 的改動 "
-    + state.uncommitted + " 個・上次同步 " + (state.last_sync ? biTime(state.last_sync) : "—")));
+  // Something to commit or push opens 版本 from any tab, not only after a run (acceptance F12).
+  const toVersion = (words, n) => n
+    ? biButton(words + n + " 個", biToVersion, "bi-link",
+      words + n + " 個：到「版本」commit 或 push")
+    : words + n + " 個";
+  box.append(bh("p", "bi-meta", count, "・別人 push 了還沒套用的 " + state.behind + " 個・",
+    toVersion("你還沒 push 的 commit ", state.ahead), "・",
+    toVersion("還沒 commit 的改動 ", state.uncommitted),
+    "・上次同步 " + (state.last_sync ? biTime(state.last_sync) : "—")));
   const shown = bi.datasets.find((item) => item.name === biDataset());
   if (shown) shown.cards = state.cards;
   biRenderCounts();
