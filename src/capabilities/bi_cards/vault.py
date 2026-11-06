@@ -2721,8 +2721,8 @@ def _working_domains(vault: Vault, units: Mapping[str, Any]) -> list[dict[str, A
     """What a person can work on (`docs/phases/BI_PAGE_SIMPLE.md` §9): the homes a person
     created, the vault's other homes something is in, and any other its sources are in, each
     with its folder and its schema domain. A home only named in the vault's default list is not
-    one (acceptance F22): a joiner of a vault holding only 海事 saw AIDC to Wireless and the
-    library entries. An empty folder makes no home either: `library/skill-review` holds review
+    one (acceptance F22): a joiner of a vault holding only 海事 saw AIDC to Wireless. The library
+    entries stay listed. An empty folder makes no home either: `library/skill-review` holds review
     copies and is not a place to work."""
     named = vault_skills.home_list(units)
     used = _homes_in_use(units, (item["home"] for item in named))
@@ -2730,7 +2730,11 @@ def _working_domains(vault: Vault, units: Mapping[str, Any]) -> list[dict[str, A
     listed = {
         item["home"]: item["label"]
         for item in named
-        if item["home"] in created or item["home"] in used
+        # A library entry is the vault's shared reference area, not someone's domain: it stays
+        # listed, so that its first source has somewhere to go.
+        if item["home"] in created
+        or item["home"] in used
+        or item["home"].startswith(f"{homes.LIBRARY}/")
     }
     source_folders = [
         str(value.get("folder") or "")
@@ -2750,7 +2754,8 @@ def _working_domains(vault: Vault, units: Mapping[str, Any]) -> list[dict[str, A
             "folder": homes.sources_dir(home),
             "domain": homes.domain_of_folder(domains, homes.sources_dir(home)),
         }
-        for home, label in listed.items()
+        # The library entries last: shared reference areas, after the domains.
+        for home, label in sorted(listed.items(), key=lambda i: i[0].startswith(homes.LIBRARY))
     ]
 
 

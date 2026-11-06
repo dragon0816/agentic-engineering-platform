@@ -15838,9 +15838,15 @@ async function biSourceFolders() {
   bi.build.homes = reply.homes || [];
   const pick = el("bi-b-src-folder"), current = pick.value;
   const all = bh("option", "", "全部領域"); all.value = "sources";
-  pick.replaceChildren(all, ...bi.build.homes.map((item) => {
-    const option = bh("option", "", item.label); option.value = item.folder; return option;
-  }));
+  const option = (item) => {
+    const o = bh("option", "", item.label); o.value = item.folder; return o;
+  };
+  // The library entries are the vault's shared reference areas, not a domain (F22).
+  const shared = bi.build.homes.filter((item) => item.home.startsWith("library/"));
+  const library = document.createElement("optgroup"); library.label = "共用參考資料（不是領域）";
+  library.append(...shared.map(option));
+  pick.replaceChildren(all, ...bi.build.homes.filter((item) => !shared.includes(item)).map(option),
+    ...(shared.length ? [library] : []));
   // A list read again keeps the choice; only a dataset just opened goes back to what was kept.
   let stored = current;
   try { stored = current || localStorage.getItem(biScopeKey()) || ""; } catch (e) { /* */ }
@@ -15849,9 +15855,10 @@ async function biSourceFolders() {
   // Just joined or created (acceptance F22): one domain is chosen, several are asked for.
   if (bi.vaultArrived !== listed) return;
   bi.vaultArrived = null;
-  if (bi.build.homes.length === 1) {
-    pick.value = bi.build.homes[0].folder; pick.dispatchEvent(new Event("change"));
-  } else if (bi.build.homes.length) {
+  const domains = bi.build.homes.filter((item) => !item.home.startsWith("library/"));
+  if (domains.length === 1) {
+    pick.value = domains[0].folder; pick.dispatchEvent(new Event("change"));
+  } else if (domains.length) {
     pick.focus();
     try { pick.showPicker(); } catch (e) { /* a picker opens only on a person's click */ }
     biNotice(true, "選一個工作領域：新增、Ingest 和測試都在那個領域裡做。");

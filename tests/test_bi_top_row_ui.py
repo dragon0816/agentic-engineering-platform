@@ -125,7 +125,9 @@ def test_someone_with_no_vault_starts_at_creating_one(
             # A new vault has no domain in use: it says so and points at 新增領域 (F22).
             page.see("bi-notice", "還沒有領域")
             page.wait("document.activeElement.id === 'bi-b-home-new'", 60)
-            assert page.run("bi.build.homes.length") == 0
+            assert (
+                page.run("bi.build.homes.filter((h) => !h.home.startsWith('library/')).length") == 0
+            )
 
             # -- joining a vault of one domain starts in it (F22) ---------------------------
             page.click("#bi-b-v-join")
@@ -147,7 +149,10 @@ def test_someone_with_no_vault_starts_at_creating_one(
                 "[...document.getElementById('bi-b-src-folder').options]"
                 ".map((o) => o.textContent).join('|')"
             )
-            assert labels == "全部領域|海事"
+            assert str(labels).split("|")[:2] == ["全部領域", "海事"]
+            assert page.run(
+                "document.querySelector('#bi-b-src-folder optgroup').label.includes('不是領域')"
+            )
             page.shoot("joined")
 
             # -- withdrawing a colleague's source says whose and for whom (F23) --------------

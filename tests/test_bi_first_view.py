@@ -12,10 +12,19 @@ from typing import Any
 
 from test_bi_vault import _call, _commit, _ok, _push, _sync, _two_pcs
 
+LIBRARY = ["library/products", "library/technologies", "library/competitors"]
 
-def _homes(ws: Path, vault_id: str) -> list[str]:
+
+def _listed(ws: Path, vault_id: str) -> list[str]:
     reply = _ok(_call(ws, "GET", f"/api/bi/vaults/{vault_id}/skills"))
     return [str(item["home"]) for item in reply["homes"]]
+
+
+def _homes(ws: Path, vault_id: str) -> list[str]:
+    """The domains listed; the library entries are always listed, last."""
+    listed = _listed(ws, vault_id)
+    assert listed[-len(LIBRARY) :] == LIBRARY
+    return listed[: -len(LIBRARY)]
 
 
 def _profile_homes(ws: Path, vault_id: str) -> list[str]:
@@ -41,9 +50,9 @@ def test_only_homes_with_something_in_them_are_listed(tmp_path: Path) -> None:
     body = {"dataset": dataset, "name": "n.md", "text": "# 虛構\n",
             "folder": "library/products/sources"}  # fmt: skip
     _ok(_call(a, "POST", "/api/bi/sources", body))
-    assert set(_homes(a, vault_id)) == {"marine", "aidc", "library/products"}
+    assert set(_homes(a, vault_id)) == {"marine", "aidc"}
     # The profile list is the same list.
-    assert _profile_homes(a, vault_id) == _homes(a, vault_id)
+    assert _profile_homes(a, vault_id) == _listed(a, vault_id)
 
 
 def test_a_shared_source_says_who_added_it(tmp_path: Path) -> None:

@@ -138,17 +138,17 @@ def test_a_name_differing_only_in_case_or_spelling_is_the_same_domain(
         body = {"question": "虛構題？", "must": ["好"], "slug": f"q-{home}", "home": home}
         _ok(_call(a, "POST", f"/api/bi/vaults/{vault_id}/checks", body))
     _refused(_create(a, vault_id, name=name), 400, "home_exists")
-    assert len(_homes(a, vault_id)) == 3
+    assert len(_homes(a, vault_id)) == 3 + 3  # and the three library entries
 
 
 def test_naming_an_unused_default_domain_takes_it_up(tmp_path: Path) -> None:
     # Acceptance F22: the default list's AIDC with nothing in it is not listed, so 新增領域
     # 「AIDC」 must not answer that it exists.
     _drive, vault_id, _dataset, a, _b = _two_pcs(tmp_path)
-    assert _homes(a, vault_id) == {}
+    assert not [h for h in _homes(a, vault_id) if not h.startswith("library/")]
     reply = _ok(_create(a, vault_id, name="AIDC"))
     assert reply["home"] == "aidc"
-    assert list(_homes(a, vault_id)) == ["aidc"]
+    assert [h for h in _homes(a, vault_id) if not h.startswith("library/")] == ["aidc"]
     assert _homes(a, vault_id)["aidc"]["domain"] == "AIDC"
     _refused(_create(a, vault_id, name="aidc"), 400, "home_exists")
 

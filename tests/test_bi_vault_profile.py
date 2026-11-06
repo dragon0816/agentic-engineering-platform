@@ -117,14 +117,16 @@ def test_the_list_names_every_home_that_may_have_a_profile(tmp_path: Path) -> No
     # vault's whole default list.
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
     listed = _ok(_call(a, "GET", f"/api/bi/vaults/{vault_id}/profiles"))
-    assert listed["profiles"] == [] and listed["homes"] == []
+    library = ["library/products", "library/technologies", "library/competitors"]
+    assert listed["profiles"] == []
+    assert [h["home"] for h in listed["homes"]] == library
     question = {"question": "虛構題？", "must": ["好"], "slug": "q1", "home": "aidc"}
     _ok(_call(a, "POST", f"/api/bi/vaults/{vault_id}/checks", question))
     source = {"dataset": dataset, "name": "n.md", "text": "# 虛構\n",
               "folder": "library/products/sources"}  # fmt: skip
     _ok(_call(a, "POST", "/api/bi/sources", source))
     listed = _ok(_call(a, "GET", f"/api/bi/vaults/{vault_id}/profiles"))
-    assert [h["home"] for h in listed["homes"]] == ["aidc", "library/products"]
+    assert [h["home"] for h in listed["homes"]] == ["aidc", *library]
     assert listed["homes"][0]["label"] == "AIDC"
 
 
