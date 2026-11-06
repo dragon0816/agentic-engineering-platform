@@ -6591,6 +6591,21 @@ for one company, existing duplicates fixed when a card updates. Rule in
 - **Chart file names use local time**, as the page does (a UTC stamp named the previous day in
   the Taipei morning).
 
+## 2026-11-06: A reload keeps Agent Web open; the token stays in the tab
+
+A reload (F5) gave 「Open the address this command printed.」: the page takes `?token=` out of the address and the server lets the page in only with it. Colleagues had to reopen from the shortcut.
+
+**Decided.** The page keeps this run's token in its tab's `sessionStorage`. An address with no token gets `RELOAD_PAGE`, a short page with no secret, which reads the tab's copy, removes it, and opens the address with it. The page then keeps it again. A token from an earlier run is refused once, and the copy is gone, so it is not tried again. A new tab, a bookmark or another run still needs the shortcut.
+
+**What the token guards, checked.**
+- **Another local user:** `sessionStorage` is per browser profile and tab, so they cannot read it. The address without the token gives them a page with no secret, and every API still needs the `Authorization` header.
+- **A website (CSRF):** nothing is sent automatically, there is no cookie, and its scripts cannot read another origin's `sessionStorage`. No preflight is answered.
+- **DNS rebinding:** the `Host` check is unchanged, so a rebound name is refused before any of this.
+- **The in-chat HTML viewer:** an opaque-origin sandbox (`FILE_VIEW_CSP`, no `allow-same-origin`), so it cannot read the tab's storage.
+- **The token itself:** it still changes every run, and `sessionStorage` goes when the tab closes.
+
+**Rejected.** An `HttpOnly; SameSite=Strict` cookie for this run's token: a cookie is sent by the browser on its own, so every GET route would need a second check against CSRF, and the decision of 2026-10-08 already turned down a cookie.
+
 ## 2026-11-06 — BI 分享: the page sequences it, the route only reads (acceptance F13-F15)
 
 - **One 分享 step runs commit, push, tag and publish through their existing routes**, in order, stopping at the first failure. A new route reads what a share would carry. Rejected: one server route doing all four (it would duplicate the push gate's path and hide which step failed).
