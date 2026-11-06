@@ -644,12 +644,16 @@ def merge(into: dict[str, Any], other: dict[str, Any]) -> None:
                         "evidence": item["evidence"],
                     }
                 )
-            into["warnings"].append(
-                {
-                    "code": "value_conflict",
-                    "message": f"{item['field']}：另一段寫的是「{item['value']}」，保留第一段的值",
-                }
-            )
+            if not (
+                item["field"] in READING_FIELDS and item["basis"] == mine["basis"] == "inference"
+            ):
+                into["warnings"].append(
+                    {
+                        "code": "value_conflict",
+                        "message": f"{item['field']}：另一段寫的是「{item['value']}」，"
+                        "保留第一段的值",
+                    }
+                )
             continue
         mine["evidence"].extend(item["evidence"])
         if mine["basis"] != "fact" and item["basis"] == "fact":

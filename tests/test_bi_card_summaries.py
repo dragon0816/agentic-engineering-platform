@@ -95,19 +95,37 @@ def test_the_prompt_asks_only_where_the_schema_has_them(reg: Registry, tmp_path:
     assert extract.READING_RULES not in signal_only
 
 
-def test_two_chunks_keep_the_first_reading_with_no_conflict(reg: Registry) -> None:
-    first = _candidate(reg, "Technology", {"summary": {"value": "第一段", "basis": "inference"}})
-    other = _candidate(reg, "Technology", {"summary": {"value": "第二段", "basis": "inference"}})
+@pytest.mark.parametrize("name", ["summary", "usage", "scope"])
+def test_two_chunks_keep_the_first_reading_with_no_conflict(reg: Registry, name: str) -> None:
+    first = _candidate(reg, "Technology", {name: {"value": "第一段", "basis": "inference"}})
+    other = _candidate(reg, "Technology", {name: {"value": "第二段", "basis": "inference"}})
+    alternate = _field(other, name)
+    assert alternate is not None
+    alternate["evidence"] = [{"excerpt": "第二段的來源"}]
     extract.merge(first, other)
-    item = _field(first, "summary")
+    item = _field(first, name)
     assert item is not None
     assert item["value"] == "第一段"
+    assert item["alternatives"] == [
+        {"value": "第二段", "basis": "inference", "evidence": [{"excerpt": "第二段的來源"}]}
+    ]
     assert not [w for w in first["warnings"] if w["code"] == "value_conflict"]
 
 
 def test_a_different_ordinary_value_is_still_a_conflict(reg: Registry) -> None:
     first = _candidate(reg, "Technology", {"maturity": {"value": "growth", "basis": "inference"}})
     other = _candidate(reg, "Technology", {"maturity": {"value": "mature", "basis": "inference"}})
+    extract.merge(first, other)
+    assert [w for w in first["warnings"] if w["code"] == "value_conflict"]
+
+
+def test_sourced_summary_differences_still_warn(reg: Registry) -> None:
+    first = _candidate(
+        reg, "Signal", {"summary": {"value": "同步技術", "basis": "fact", "quote": "同步技術"}}
+    )
+    other = _candidate(
+        reg, "Signal", {"summary": {"value": "機器人同步", "basis": "fact", "quote": "用於機器人"}}
+    )
     extract.merge(first, other)
     assert [w for w in first["warnings"] if w["code"] == "value_conflict"]
 
