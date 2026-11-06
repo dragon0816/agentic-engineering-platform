@@ -4345,3 +4345,5 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 
 - [x] 2026-11-06, Claude Code (worker D): BI script guard (tools and analyses) holds whatever a script reaches: closure installed right before the script, refuses to start with a denied module loaded (numpy kept out of the tool pre-imports, so no ctypes), frames, gc and tracing refused, Windows path check through `nt`. Real attempts in `tests/test_bi_guard_attacks.py`, with and without numpy. Approval step and user guide 6.8.3 say what approving means. `docs/DECISIONS.md` 2026-11-06.
 - [x] 2026-11-06, Claude Code (cards worker): the AEP Agent shortcut waits for and joins a start while its server runs (up to 15 minutes), never replaces a live but slow server, starts nothing on a taken port; `aep-host web` exits at once on a taken port. `tests/test_launcher.py`.
+
+- [x] 2026-11-06, Claude Code (cards worker): acceptance F26, a message sent before the chat is ready is kept, said so and sent once ready; F27, a capability not granted names who grants it (administrator, shared platform or grants.json). `tests/test_chat_early_send_ui.py`.

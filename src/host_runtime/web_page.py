@@ -5325,6 +5325,7 @@ async function loadChat(selectId) {
   } finally {
     if (wait) clearTimeout(wait);
     sendWait(false);
+    flushQueuedSend();
   }
 }
 
@@ -5333,6 +5334,25 @@ function sendWait(on) {
   note.hidden = !on;
   note.textContent = on ? "正在檢查可用的對話後端與模型（Codex、Claude Code、Copilot 的登入狀態"
     + "與 LLM gateway），可能要一分鐘；好了就能送出。" : "";
+}
+
+// A message sent before the page could send it (acceptance F26: Enter right after the page
+// opened did nothing and left the text in the box) is kept, said so, and sent once ready.
+let sendQueued = false;
+function sendReady() {
+  return !send.disabled && !!activeConversation && !startingSession && uploadingFiles === 0;
+}
+function queueSend(why) {
+  sendQueued = true;
+  const note = el("send-wait");
+  note.hidden = false;
+  note.textContent = why + "；準備好後會自動送出這則訊息。";
+}
+function flushQueuedSend() {
+  if (!sendQueued) return;
+  if (!sendReady()) { queueSend(uploadingFiles > 0 ? "附件還在上傳" : "對話還在準備中"); return; }
+  sendQueued = false; sendWait(false);
+  form.requestSubmit();
 }
 
 el("session-search").addEventListener("input", () => {
@@ -5411,6 +5431,7 @@ el("new-conversation").addEventListener("click", async () => {
   finally {
     startingSession = false; send.removeAttribute("aria-busy");
     send.disabled = uploadingFiles > 0 || !activeConversation;
+    flushQueuedSend();
   }
 });
 
@@ -5784,6 +5805,7 @@ function renderAttachments() {
     box.append(chip);
   }
   send.disabled = uploadingFiles > 0 || !activeConversation;
+  if (sendQueued && uploadingFiles === 0) flushQueuedSend();
 }
 
 function readAsBase64(file) {
@@ -5937,10 +5959,13 @@ loadVoice();
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  if (uploadingFiles > 0 || startingSession) return;
   const files = readyFiles();
   const asked = field.value.trim() || (files.length ? "請看附件。" : "");
-  if (!asked || !activeConversation) return;
+  if (!asked) return;
+  if (!sendReady()) {
+    queueSend(uploadingFiles > 0 ? "附件還在上傳" : "對話還在準備中");
+    return;
+  }
   field.value = "";
   // A message that came from the microphone names its transcript (§3.2).
   const spoken = voiceTranscript && voiceTranscript.session === activeConversation
