@@ -66,6 +66,14 @@ def _progress(page: BiPage) -> dict[str, str]:
     )
 
 
+def _share(page: BiPage) -> None:
+    """Press 分享 once it is ready, then confirm on the page."""
+    page.wait("!document.getElementById('bi-b-share-go').disabled")
+    page.click("#bi-b-share-go")
+    page.wait("!!document.querySelector('#bi-b-share-act .bi-confirm')")
+    page.click_text("#bi-b-share-act .bi-confirm", "確定分享")
+
+
 def _in_sight(page: BiPage, scope: str, label: str) -> bool:
     """A button with this label in the row itself, not inside a closed menu."""
     return bool(
@@ -155,8 +163,7 @@ def test_one_share_step_carries_commit_push_tag_and_publish(tmp_path: Path) -> N
             assert page.run("!document.querySelector('#bi-b-share-act .bi-confirm')")
             assert page.run("document.getElementById('bi-b-share-progress').hidden")
 
-            page.click("#bi-b-share-go")
-            page.click_text("#bi-b-share-act .bi-confirm", "確定分享")
+            _share(page)
             page.notice("分享停在「建立 tag」")
             notice = page.text_of("bi-notice")
             assert "已完成：Commit、Push 給大家；沒有做：建立 tag、發佈。" in notice, notice
@@ -181,8 +188,7 @@ def test_one_share_step_carries_commit_push_tag_and_publish(tmp_path: Path) -> N
                 "document.getElementById('bi-b-share-tag').value === " + json.dumps(today + "-2")
             )
             page.see("bi-b-share-list", "aidc 的新題目")
-            page.click("#bi-b-share-go")
-            page.click_text("#bi-b-share-act .bi-confirm", "確定分享")
+            _share(page)
             page.wait(
                 "document.querySelector('#bi-b-share-progress li[data-step=publish]')"
                 ".dataset.state === 'done'"
@@ -205,18 +211,29 @@ def test_one_share_step_carries_commit_push_tag_and_publish(tmp_path: Path) -> N
             )
             assert _in_sight(page, "#bi-b-ver-history tbody tr:first-child", "看改動")
             assert _in_sight(page, "#bi-b-ver-history", "發佈 " + today)
-            assert not _in_sight(page, "#bi-b-ver-history", "加 tag")  # rarer: in 更多
+            # An older row has two rarer actions: they wait in 更多.
+            older = page.run(
+                "(() => { const row = [...document.querySelectorAll('#bi-b-ver-history tbody tr')]"
+                ".find((r) => r.textContent.includes('題目與規則'));"
+                " return [...row.querySelectorAll('button')].filter((b) => b.closest('details'))"
+                ".map((b) => b.textContent).join('|'); })()"
+            )
+            assert older == "回到這個版本|加 tag", older
             assert _in_sight(page, "#bi-b-sk-list", "修改")
             assert _in_sight(page, "#bi-b-sk-list", "和 AI 一起修改")
             publish = (
                 "[...document.querySelectorAll('#bi-b-ver-history button')]"
                 f".find((b) => b.textContent === {json.dumps('發佈 ' + today)}).click()"
             )
-            page.run(publish)
-            page.wait("!!document.querySelector('#bi-b-ver-history .bi-confirm')")
+            # Pressed until its confirm stands: a late redraw of the history may replace it.
+            asked = (
+                "(() => { if (document.querySelector('#bi-b-ver-history .bi-confirm'))"
+                f" return true; {publish}; return false; }})()"
+            )
+            page.wait(asked)
             page.click_text("#bi-b-ver-history .bi-confirm", "取消")
             assert vault.Vault(workspace, vault_id).reads()["tag"] == today + "-2"
-            page.run(publish)
+            page.wait(asked)
             page.click_text("#bi-b-ver-history .bi-confirm", "確定發佈")
             page.see("bi-b-ver-reads", "發佈版本「" + today + "」")
 
