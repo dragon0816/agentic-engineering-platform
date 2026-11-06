@@ -147,17 +147,15 @@ def route(
             # tag and publish itself, and the push check stays in `repo.push`.
             newest = bi_bench.latest(workspace, parts[0])
             running = newest is not None and newest.get("status") == "running"
-            repo = vault.Vault(workspace, parts[0]).repo
-            return 200, {
-                **vault.share_plan(workspace, parts[0]),
-                "running": running,
-                "domains": []
+            state = vault.share_state(workspace, parts[0])
+            checked = (
+                {"domains": [], "standing": {"blocking": [], "notes": []}}
                 if running
-                else bi_bench.domain_states(workspace, repo.working_units(), repo.published()),
-                "standing": {"blocking": [], "notes": []}
-                if running
-                else bi_bench.standing(workspace, parts[0]),
-            }
+                else bi_bench.share_check(
+                    workspace, state.head, state.working, state.changed, state.plan["published"]
+                )
+            )
+            return 200, {**state.plan, "running": running, **checked}
         if len(parts) == 2 and parts[1] == "analyses":
             return 200, analyses.listing(workspace, parts[0], query.get("home"))
         if len(parts) == 2 and parts[1] == "assign-plan":

@@ -2173,32 +2173,64 @@ MAX_SHARED = 50
 
 def share_plan(workspace: Path, vault_id: str) -> dict[str, Any]:
     """What a share would carry (`docs/phases/BI_PAGE_SIMPLE.md` S6): the commits since the
-    published version, pushed or only on this PC, newest first, each with its author and the
-    domains it reaches (`*` for the whole vault); the uncommitted changes' domains; the tags
-    taken."""
+    published version, pushed or only on this PC (with no id yet), newest first, each with its
+    author and the domains it reaches (`*` for the whole vault); the uncommitted changes'
+    domains; the tags taken."""
+    return share_state(workspace, vault_id).plan
+
+
+@dataclass(frozen=True)
+class ShareState:
+    """`plan`, and the states its replay arrived at, for the push check to read without
+    loading them again: the pushed head, the working copy, and the keys between them."""
+
+    plan: dict[str, Any]
+    head: dict[str, Any]
+    working: dict[str, Any]
+    changed: frozenset[str]
+
+
+def share_state(workspace: Path, vault_id: str) -> ShareState:
+    """One replay of the applied commits from the cached scan (`share_plan`): on a vault of
+    16,000 units, `state_at`, a validating scan and three working copies took ten seconds."""
     vault = _vault(workspace, vault_id)
     with vault.lock, _repo_errors():
         repo = vault.repo
-        ordered = [cid for _, cid in repo._ordered()]
+        ordered = repo._ordered()
+        data = {c.name: c.data for c in repo._read_only_scan().commits}
         published = repo.published()
-        start = published["commit"] if published and published["commit"] in ordered else None
-        units = repo.state_at(start) if start else {}
-        by_id = {c.data["id"]: c.data for c in repo.scan().commits}
-        later = ordered[ordered.index(start) + 1 :] if start else ordered
-        records = [
-            *({**by_id[cid], "pushed": True} for cid in later if cid in by_id),
-            # Only on this PC: no id yet, and the author is this PC's.
-            *(
-                {**record, "id": None, "author": repo.author, "pushed": False}
-                for record in repo.local_commits()
-            ),
+        ids = {cid for _, cid in ordered}
+        start = published["commit"] if published and published["commit"] in ids else None
+        units: dict[str, Any] = {}
+        pushed: list[dict[str, Any]] = []
+        reached_start = start is None
+        for name, cid in ordered:
+            record = data.get(name)
+            if record is None:
+                continue
+            if reached_start:
+                pushed.append({**record, "pushed": True})
+            else:
+                repo_engine.apply_ops(units, record["ops"])
+                reached_start = cid == start
+        # Only on this PC: no id yet, the author is this PC's, applied as `working_units` does.
+        local = [
+            {**record, "id": None, "author": repo.author, "pushed": False, "forced": True}
+            for record in repo.local_commits()
         ]
-        commits = []
-        for record in records:
+        sets = dict(repo._pending()["sets"])
+        last = dict(units)
+        for record in [*pushed, *local]:
+            _apply(last, record)
+        index = domain_reach.Reach(units, {**last, **sets}).by_domain
+        commits, head = [], dict(units)
+        for record in [*pushed, *local]:
             keys = {str(op["unit"]) for op in record["ops"]}
             before = {k: units.get(k) for k in keys}
-            repo_engine.apply_ops(units, record["ops"])
-            reached = domain_reach.touched(ChainMap(before, units), units, keys)
+            _apply(units, record)
+            reached = domain_reach.touched(ChainMap(before, units), units, keys, index)
+            if record["pushed"]:
+                head = dict(units)
             commits.append(
                 {
                     "id": record["id"],
@@ -2210,21 +2242,45 @@ def share_plan(workspace: Path, vault_id: str) -> dict[str, Any]:
                     "homes": sorted(reached),
                 }
             )
-        head = repo.working_units(pending=False)
-        working = repo.working_units()
-        uncommitted = sum(
-            repo_engine.canonical(head.get(k)) != repo_engine.canonical(working.get(k))
-            for k in set(head) | set(working)
-        )
+        committed = units
+        working = dict(committed)
+        for key, value in sets.items():
+            if value is None:
+                working.pop(key, None)
+            else:
+                working[key] = value
+        waiting = {
+            k
+            for k in sets
+            if repo_engine.canonical(committed.get(k)) != repo_engine.canonical(working.get(k))
+        }
+        tags = [t["name"] for t in repo.tags()]
     commits.reverse()
-    return {
+    plan = {
         "published": published,
         "commits": commits[:MAX_SHARED],
         "older": max(0, len(commits) - MAX_SHARED),
-        "uncommitted": uncommitted,
-        "uncommitted_homes": sorted(domain_reach.touched(head, working)),
-        "tags": [t["name"] for t in repo.tags()],
+        "uncommitted": len(waiting),
+        "uncommitted_homes": sorted(
+            domain_reach.touched(committed, working, waiting, index) if waiting else ()
+        ),
+        "tags": tags,
     }
+    changed = frozenset(set(sets) | {str(op["unit"]) for r in local for op in r["ops"]})
+    return ShareState(plan, head, working, changed)
+
+
+def _apply(units: dict[str, Any], record: Mapping[str, Any]) -> None:
+    """A commit's ops: an applied one as `state_at` replays it, a local one as
+    `working_units` lays it on top."""
+    if not record.get("forced"):
+        repo_engine.apply_ops(units, record["ops"])
+        return
+    for op in record["ops"]:
+        if op["value"] is None:
+            units.pop(op["unit"], None)
+        else:
+            units[op["unit"]] = op["value"]
 
 
 def relation_ends(store: BiStore, item: Mapping[str, Any]) -> tuple[str, str] | None:

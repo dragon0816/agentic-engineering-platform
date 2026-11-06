@@ -26,7 +26,7 @@ import json
 import sqlite3
 import time
 import uuid
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -427,7 +427,32 @@ def gate(workspace: Path, before: Mapping[str, Any], after: Mapping[str, Any]) -
     question's domain stands on is unchanged, so a colleague's push in another domain does not
     void it. A regression blocks a push that touches its domain; one elsewhere is a note
     (`docs/phases/BI_PAGE_SIMPLE.md` §14)."""
+    return _gate(_verdicts(workspace, after), before, after)
+
+
+def share_check(
+    workspace: Path,
+    before: Mapping[str, Any],
+    after: Mapping[str, Any],
+    changed: Iterable[str],
+    published: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    """The share step's `domains` and `standing` from one reading of the verdicts: the same
+    answers as `domain_states` and `standing`, `changed` being every key between the two."""
     found = _verdicts(workspace, after)
+    report = _gate(found, before, after, changed)
+    return {
+        "domains": _domain_states(found, after, published),
+        "standing": {"blocking": list(report.blocking), "notes": list(report.notes)},
+    }
+
+
+def _gate(
+    found: _Verdicts,
+    before: Mapping[str, Any],
+    after: Mapping[str, Any],
+    changed: Iterable[str] | None = None,
+) -> CheckReport:
     verdicts, newest = found.by_unit, found.newest
     if newest is None:
         return CheckReport(
@@ -452,7 +477,7 @@ def gate(workspace: Path, before: Mapping[str, Any], after: Mapping[str, Any]) -
         home = found.home_of(unit)
         return f"（{home}）" if home else ""
 
-    reached = domain_reach.touched(before, after)
+    reached = domain_reach.touched(before, after, changed)
     blocking: list[str] = []
     elsewhere: list[str] = []
     for unit, item in verdicts.items():
@@ -474,7 +499,12 @@ def domain_states(
     was published again since its verdicts, or its content changed since a run answered them,
     the same rule as the report. Questions with no domain are listed under home `""`
     (`docs/phases/BI_PAGE_SIMPLE.md` S6)."""
-    found = _verdicts(workspace, after)
+    return _domain_states(_verdicts(workspace, after), after, published)
+
+
+def _domain_states(
+    found: _Verdicts, after: Mapping[str, Any], published: Mapping[str, Any] | None
+) -> list[dict[str, Any]]:
     graded = [q for q in vault_checks.questions(after) if q["must"] or q["must_not"]]
     states = []
     for home in sorted({str(q["home"] or "") for q in graded}):

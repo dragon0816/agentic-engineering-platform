@@ -35,9 +35,15 @@ class Reach:
     """Answers for the units of one or two states; a card's domains in either count, so moving
     a card between domains reaches both."""
 
-    def __init__(self, *states: Mapping[str, Any]) -> None:
+    def __init__(
+        self, *states: Mapping[str, Any], by_domain: Mapping[str, str] | None = None
+    ) -> None:
+        """`by_domain` reuses another Reach's index of homes: building it reads every unit,
+        which a caller judging many commits of one range need do only once."""
         self.states = states
-        self.by_domain: dict[str, str] = {}
+        self.by_domain: dict[str, str] = dict(by_domain or {})
+        if by_domain is not None:
+            return
         for state in states:
             for item in vault_skills.home_list(state):
                 if not item["home"].startswith(_LIBRARY):
@@ -94,11 +100,14 @@ class Reach:
 
 
 def touched(
-    before: Mapping[str, Any], after: Mapping[str, Any], keys: Iterable[str] | None = None
+    before: Mapping[str, Any],
+    after: Mapping[str, Any],
+    keys: Iterable[str] | None = None,
+    by_domain: Mapping[str, str] | None = None,
 ) -> frozenset[str]:
     """What going from `before` to `after` reaches; with `keys`, looking only at those (one
-    commit's units over whole states)."""
-    reach = Reach(after, before)
+    commit's units over whole states); `by_domain` as `Reach` takes it."""
+    reach = Reach(after, before, by_domain=by_domain)
     found: set[str] = set()
     for key in set(before) | set(after) if keys is None else set(keys):
         if canonical(before.get(key)) != canonical(after.get(key)):

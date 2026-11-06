@@ -191,3 +191,37 @@ def test_content_changed_since_the_run_is_an_old_result(tmp_path: Path) -> None:
     assert stale["content_changed"] is True and stale["published_changed"] is False
     # By domain: only aidc changed.
     assert _states(_share(a, vault_id)) == {"aidc": "stale", "wireless": "passed"}
+
+
+def test_the_shares_one_replay_matches_the_repository_and_the_push_check(tmp_path: Path) -> None:
+    # The route replays the commits once instead of loading the working copy three times
+    # (ten seconds on market-intel); it must arrive at the same states and answers.
+    _drive, vault_id, _dataset, a, _b = _two_pcs(tmp_path)
+    _ready(a, vault_id)
+    _publish(a, vault_id, "2026-11-05")
+    _question(a, vault_id, "wl-2", "wireless")
+    _commit(a, vault_id, "pushed after the publish")
+    assert _push(a, vault_id)["status"] == "pushed"
+    _bench(a, vault_id, ("wl-q",))
+    _question(a, vault_id, "aidc-2", "aidc")
+    _commit(a, vault_id, "only on this PC")
+    _question(a, vault_id, "aidc-3", "aidc")  # not committed
+    _ok(
+        _call(
+            a, "POST", f"/api/bi/vaults/{vault_id}/checks", {"delete": "check:question:main/wl-q"}
+        )
+    )
+
+    repo = vault.Vault(a, vault_id).repo
+    state = vault.share_state(a, vault_id)
+    assert state.head == repo.units()
+    assert state.working == repo.working_units()
+    published = repo.published()
+    checked = bi_bench.share_check(a, state.head, state.working, state.changed, published)
+    assert checked["domains"] == bi_bench.domain_states(a, repo.working_units(), published)
+    assert checked["standing"] == bi_bench.standing(a, vault_id)
+    assert state.plan["uncommitted"] == 2
+    assert [c["purpose"] for c in state.plan["commits"]] == [
+        "only on this PC",
+        "pushed after the publish",
+    ]
