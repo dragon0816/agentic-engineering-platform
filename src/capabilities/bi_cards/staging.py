@@ -1084,10 +1084,15 @@ class Staging:
 
     # -- AI design sessions (BI ingest phases 5 and 6) ---------------------
 
-    def create_session(self, *, kind: str, target_ref: str, actor: str) -> dict[str, Any]:
+    def create_session(
+        self, *, kind: str, target_ref: str, actor: str, new: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         session_id = uuid.uuid4().hex[:12]
         at = now()
-        body = {"turns": [], "goal": "", "source_ids": []}
+        body: dict[str, Any] = {"turns": [], "goal": "", "source_ids": []}
+        if new is not None:
+            # What the session creates once the person applies a draft (F16).
+            body["new"] = new
         with self._db(write=True) as db:
             db.execute(
                 "INSERT INTO sessions (id, kind, target_ref, body, model, by, at, updated) "
@@ -1099,7 +1104,7 @@ class Staging:
         return found
 
     def put_session(self, session: dict[str, Any]) -> None:
-        body = {k: session[k] for k in ("turns", "goal", "source_ids")}
+        body = {k: session[k] for k in ("turns", "goal", "source_ids", "new") if k in session}
         with self._db(write=True) as db:
             db.execute(
                 "UPDATE sessions SET body = ?, model = ?, updated = ? WHERE id = ?",

@@ -4229,6 +4229,41 @@ schema is chosen at creation and never changed" (owner 2026-10-27): a dataset ma
     again.
   - A run made before the upgrade cannot be reviewed, rechecked or committed: 409 `schema_changed` (run
     again).
+  - **Readable and safe (acceptance F6, 2026-11-06).** The preview adds `"additive": bool`: in a vault, only
+    additions, which become `schema_change:` units and take no version. The apply adds `"schema": <schema
+    state>`. A vault refuses both with 400 `schema_drops_additions` when `to` lacks an addition its units hold,
+    unless `to` was published from a draft whose `base_ref` is the vault's current ref (a person's own new
+    version). A plain dataset may still move back.
+  - `<schema state>` = `{"ref", "label", "additions": [str], "upgrades": [{"ref", "label"}]}`. `label` reads
+    `5.0` or `5.0 加 N 項新增`, never the digest; `upgrades` are the versions newer than the base that the
+    dataset may move to. `GET /api/bi/schema?dataset=` adds `label`, `additions` and `upgrades`.
+  - A draft view adds `"additive": bool` (its diff from the base is only additions).
+- **建議 schema (acceptance F5, `BI_PAGE_SIMPLE.md` S2).** `src/capabilities/bi_cards/schema_suggest.py`.
+  The schema-fit question alone, over chosen sources, on a press; writes no card. The latest per dataset is
+  kept in `<dataset dir>/schema-suggest.json`.
+  - `POST /api/bi/schema-suggest {"dataset", "source_ids": [...], "only_new": bool}` → `{"ok": true,
+    "suggestion": <suggestion>}` with `status: "running"`; the model is asked in the background. `only_new`
+    leaves out sources an ingest run read. At most 10 sources (`left_out` counts the rest). Refusals: 400
+    `suggest_no_sources`, `model_unavailable`, `classification_not_approved`; 409 `suggest_running`,
+    `dataset_read_only`.
+  - `GET /api/bi/schema-suggest?dataset=` → `{"suggestion": <suggestion> | null}`.
+  - `<suggestion>` = `{"id", "status": "running" | "done" | "failed", "at", "by", "schema", "model",
+    "sources": [{"id", "name"}], "left_out", "done", "seconds", "answers": {"asked", "reused",
+    "input_tokens", "output_tokens"}, "items": [<row>], "fits", "unquoted", "failures": [{"source", "lines",
+    "message"}]}`. `fits` counts items that fit the schema as it is; `unquoted` counts items whose quote is not
+    in the source, which are never rows. No rows on `done` is the answer 「不用改」.
+  - `<row>` = `{"id", "kind": "extend_schema" | "dictionary_change" | "propose_type" |
+    "needs_clarification", "what", "proposal", "summary", "reason", "questions", "quote", "locator",
+    "source_id", "source", "places", "applies": bool, "status": "proposed" | "applied" | "rejected"}`. A type
+    the schema has, or a field it has, is `needs_clarification` with a question (`schema_fit`). `applies`: a
+    new field, or a new allowed value with no `maps_to`, that leaves a valid schema.
+  - `POST /api/bi/schema-suggest/apply {"dataset", "id", "row"}` → `{"ok": true, "suggestion", "schema":
+    <schema state>}`. A vault only: a draft from the current schema with the row, publish, preview and apply;
+    the vault turns it into units on the version; the draft is removed. Nothing is committed. Refusals: 400
+    `suggest_apply_vault_only`, `suggest_not_direct`, `suggest_invalid`, `suggest_field_exists`,
+    `suggest_not_enum`, `suggest_value_exists`, `suggest_row_unknown`; 409 `suggest_stale`,
+    `suggest_row_decided`.
+  - `POST /api/bi/schema-suggest/reject {"dataset", "id", "row", "reason"}` → `{"ok": true, "suggestion"}`.
 
 ## BI schema 2.0, new kinds and widening (BI vault V9, owner 2026-10-29)
 
@@ -6666,7 +6701,7 @@ Design: `docs/phases/BI_CARD_MODEL.md` §3. Values and id functions: `capabiliti
 
 **Summaries (T7).** The extraction prompt asks for `summary`, `usage` and `scope` on types where they are `judgement` fields. Whatever basis the model gives, a written one is stored as `inference`, with no evidence and no review warning; basis `unknown` or the value `unknown` writes nothing; two chunks' readings keep the first with no `value_conflict`. `Signal` and `VisitLog`, whose `summary` is sourced, are unchanged. `POST /api/bi/vaults/<id>/publish` adds `summary_missing: {total, by_type: {<type>: <cards>}}` when any card of a type having the field lacks a summary; it never blocks, and the key is absent when none does. The page's publish message mentions the total.
 
-**AI runs, from the first R6 run (2026-11-04).** A list an AI run gives that the card already holds, in any order, is `merge: same`: nothing is written or proposed, whoever set the card's list, and its evidence is still kept. A run never writes a list but the union, unless a person chose the new value. A `domain` value outside the schema's `domains` is dropped with a `domain_unknown` warning and never blocks a candidate; other fields' bad values still do. A new card with no domain takes its source's: the schema's domain named like the source's application, ignoring case (`aidc` is `AIDC`); a library entry, or an application no domain is named after, gives none. It is stored with basis `inference`. Only runs made after this change have it: a run already in review keeps its old errors, so run it again.
+**AI runs, from the first R6 run (2026-11-04).** A list an AI run gives that the card already holds, in any order, is `merge: same`: nothing is written or proposed, whoever set the card's list, and its evidence is still kept. A run never writes a list but the union, unless a person chose the new value. A `domain` value outside the schema's `domains` is dropped with a `domain_unknown` warning and never blocks a candidate; other fields' bad values still do. A new card takes its source's domain: the schema's domain named like the source's application, ignoring case (`aidc` is `AIDC`), a created domain included; a library entry, or an application no domain is named after, gives none. It is stored with basis `inference`, and wins over a domain the model gave, which becomes the field's `alternatives` and so a pending proposal on the card when the run is committed (acceptance F10, 2026-11-06; until then the model's known domain stayed). Only runs made after this change have it: a run already in review keeps its old errors, so run it again.
 
 **Same name on another type (R6).** A model's new-card candidate whose name, key or alias equals a name, key or alias of a card of another type holds `same_name: [{id, name, type}]` and a `same_name_other_type` warning naming each. Accepting it is refused with `same_name_unconfirmed` until the review sends `confirm_same_name: true` (`POST /api/bi/runs/<id>/candidates/<c>`), recorded as `same_name_confirmed`; it is never merged. A card of that name appearing later returns an accepted candidate to pending. The page lists these apart, and 「接受所有」 leaves them out. The prompt also names cards of types not asked for whose names the excerpt writes.
 **Evidence review (Phase 2-c).** `POST /api/bi/evidence-reviews/preview {dataset, target: card|relation, card, field?, relation?, reference_id?, verdict, stance?, directness?, scope?, date?, same_source?, reason, author?, base_version?}` writes nothing and returns `{statement, before, after, unchanged, folder, text, base_version}`; `.../apply {dataset, text, base_version?}` keeps the note as a source and commits, or answers `{unchanged: true}`. Vault only (400 `review_vault_only`). `base_version` is required for a card (`stale_edit` when it moved). Levels are words: `verdict` `accepted`, `pending`, `rejected`; `directness` `direct`, `indirect`, `insufficient`, `unknown`; `same_source` `independent`, `same_source`, `unknown`; `stance` as above. A review never writes a field. An `evidence:` row, and so the new `evidence.assessment` column, or a `relation_evidence:` unit may hold `assessment: {system?: {reason}, current: {directness, scope, date, same_source, verdict}, history: [{by, author, at, reason, source, before, after}]}`. On a card it also sets the row's `stance` and, for a given date, `reference_at`. On a relation the verdict sets its status (`confirmed`, `pending`, `rejected`) through `decide_relation`, which now takes `pending`; a relation with no reference links to a fixed reference id so its reviews gather. An extracted fact's `reason`, if the model gave one, is kept as `assessment.system.reason`. `GET /api/bi/cards/<id>` gains `field_states`, `rejected_relations`, `references` on each relation, and `assessment` on each `evidence` item.

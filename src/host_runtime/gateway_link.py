@@ -14,6 +14,7 @@ from __future__ import annotations
 import time
 from collections.abc import Callable
 from datetime import UTC, datetime
+from typing import Any
 from urllib.parse import urlparse
 
 from common.execution import Failure
@@ -64,6 +65,15 @@ def explain_model_failure(
     """A plain explanation, or None when the gateway does not explain it."""
     if failure is None or failure.code not in GATEWAY_FAILURE_CODES:
         return None
+    status = failure.message[:3]
+    if failure.code == "model_http_error" and status in ("500", "502", "503", "504"):
+        # The gateway runs but the company model service behind it does not answer
+        # (acceptance F20, 2026-11-06: 「Application is not available」 for every model).
+        return (
+            f"公司的模型服務現在沒有回應（HTTP {status}），這一輪沒有完成。"
+            "這不是你的設定問題；等一下再按「重試」（Telegram 請再送一次），"
+            f"一直這樣的話請通知管理員，或到 {WHERE} 看狀態。"
+        )
     port = gateway_port(config)
     if port is None:
         return None
@@ -101,6 +111,18 @@ def explain_model_failure(
             f"instead of hosted_vllm/ (the Responses API). See {WHERE}."
         )
     return None
+
+
+def timeout_reply(binding: Any) -> str:
+    """What the person reads when one model call ran past the conversation's
+    timeout (`ModelBinding.call_timeout_seconds`): in Chinese, with what to do;
+    the page offers 重試 on a failed answer."""
+    seconds = getattr(binding, "call_timeout_seconds", None) or 180
+    wait = f"{seconds // 60} 分鐘" if seconds % 60 == 0 else f"{seconds} 秒"
+    return (
+        f"模型 {wait}內沒有回應（逾時），這一輪沒有完成。按「重試」再送一次；"
+        f"一直這樣的話，到 {WHERE} 看狀態。"
+    )
 
 
 def gateway_card(

@@ -75,6 +75,21 @@ def test_a_new_domain_is_listed_with_its_domain_and_stays_local_until_pushed(
     assert all(_folders(vault.Vault(b, vault_id).folder, "automotive"))
 
 
+def test_a_rule_can_apply_to_a_new_domain_before_it_is_pushed(tmp_path: Path) -> None:
+    # Acceptance F9: the folders a rule may apply to were read from the shared folder only, so
+    # an unpushed domain was missing and the page fell back to another domain's folder.
+    _drive, vault_id, _dataset, a, _b = _two_pcs(tmp_path)
+    _ok(_create(a, vault_id, name="Marine"))
+    assert not any(_folders(_shared(a, vault_id), "marine"))
+    reply = _ok(_call(a, "GET", f"/api/bi/vaults/{vault_id}/skills"))
+    assert "applications/marine/sources" in reply["folders"]
+    assert len(reply["folders"]) == len(set(reply["folders"]))
+    body = {"name": "marine-extract", "role": "extract", "body": "虛構",
+            "applies_to": ["applications/marine/sources"], "card_types": []}  # fmt: skip
+    saved = _ok(_call(a, "POST", f"/api/bi/vaults/{vault_id}/skills", body))
+    assert saved["skill"]["applies_to"] == ["applications/marine/sources"]
+
+
 def test_someone_joining_later_gets_the_same_structure(tmp_path: Path) -> None:
     drive, vault_id, _dataset, a, _b = _two_pcs(tmp_path)
     _ok(_create(a, vault_id, name="Automotive"))

@@ -214,7 +214,7 @@ from host_runtime.experience_review import (
     review_model,
     run_review,
 )
-from host_runtime.gateway_link import explain_model_failure
+from host_runtime.gateway_link import explain_model_failure, timeout_reply
 from host_runtime.host import HostRuntime, build_telegram, choice_sources, load_authorization
 from host_runtime.identity_presets import IdentityPresets
 from host_runtime.jev_shadow import SHADOW_LOG_FILE
@@ -1264,6 +1264,8 @@ class AgentWeb:
         )
         if explained is not None:
             return explained
+        if result.failure is not None and result.failure.code == "model_timeout":
+            return timeout_reply(self.runtime.config.models)
         stopped = (
             None
             if result.failure is None

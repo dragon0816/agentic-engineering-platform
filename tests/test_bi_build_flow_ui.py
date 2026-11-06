@@ -185,16 +185,22 @@ def test_the_whole_build_flow(
         page.shoot("2a-session-a")
         page.click_text("#bi-ai-log", "套用到草稿")
         page.see("bi-b-draft-info", "第 2 版")
-        page.click("#bi-b-draft-publish")
-        page.notice("bi.schema/v1.1@5.1.0")
-        page.see("bi-b-versions", "5.1.0")
-        page.run(
-            "[...document.querySelectorAll('#bi-b-versions .bi-actions')]"
-            ".find(r => r.textContent.includes('@5.1.0')).querySelector('button').click()"
-        )
+        # The draft on the main path is a table of what changes; its JSON is under 進階 (F8).
+        page.see("bi-b-draft-table", "budget_band")
+        assert "新增欄位" in page.text_of("bi-b-draft-table")
+        assert "都是新增" in page.text_of("bi-b-draft-sum")
+        page.shoot("2a-draft-table")
+        # 套用到資料集 on the main path: publish, then the same preview and confirm.
+        page.click("#bi-b-draft-use")
         page.see("bi-b-upgrade", "套用升級")
+        assert "版本不變" in page.text_of("bi-b-upgrade")
         page.click_text("#bi-b-upgrade", "套用升級")
-        page.notice("已升級")
+        # What really happened, readable, never a digest (acceptance F6).
+        page.notice("相容的新增，不是新版本")
+        assert "5.0 加 1 項新增" in page.text_of("bi-notice")
+        page.see("bi-b-schema-now", "5.0 加 1 項新增")
+        assert "+" not in page.text_of("bi-b-schema-now")
+        assert "5.0" not in page.text_of("bi-b-versions"), "plain 5.0 would drop the addition"
         # A new field is an addition on the version, not a version of its own (§4.3).
         assert BiStore(workspace, dataset).schema_ref().startswith("bi.schema/v1.1@5.0.0+")
         assert schema_versions.drafts(workspace)  # the draft itself stays

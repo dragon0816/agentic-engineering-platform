@@ -1255,6 +1255,7 @@ def build_gateway(
     binding = config.models
     drafting_model: ModelClient | None = None
     session_selectable: SelectableModelClient | None = None
+    chat_selectable: SelectableModelClient | None = None
     if binding is not None and binding.routing_alias is not None:
         # The router creates a default environment resolver inside
         # build_router, but Knowledge and Workflow drafting are assembled
@@ -1264,6 +1265,7 @@ def build_gateway(
             binding.catalog,
             resolver=model_resolver,
             transport=model_transport,
+            timeout_s=float(binding.batch_timeout_seconds),
             options=binding.options,
         )
         chosen = drafting_clients.for_alias(binding.routing_alias)
@@ -1273,8 +1275,28 @@ def build_gateway(
             # 2026-10-22): a Knowledge answer, a Workflow draft or a card
             # read made during a session turn uses that session's model;
             # the data approval still decides each request first.
+            # The conversation has its own clients with the shorter per-call
+            # timeout (`call_timeout_seconds`); drafting keeps
+            # `batch_timeout_seconds`. Both follow the session's model and
+            # the models the page approves (set on the router's switch).
+            chat_clients = ModelClients(
+                binding.catalog,
+                resolver=model_resolver,
+                transport=model_transport,
+                timeout_s=float(binding.call_timeout_seconds),
+                options=binding.options,
+            )
+            chat_base = chat_clients.for_alias(binding.routing_alias)
+            if not isinstance(chat_base, Failure):
+                chat_selectable = SelectableModelClient(
+                    drafting_endpoint, chat_base, chat_clients.build
+                )
+            follow = chat_selectable
             session_selectable = SelectableModelClient(
-                drafting_endpoint, chosen, drafting_clients.build
+                drafting_endpoint,
+                chosen,
+                drafting_clients.build,
+                **({"approved": lambda: follow.approved()} if follow is not None else {}),
             )
             drafting_model = ApprovedModelClient(session_selectable, binding.data_approval)
     installed.register(
@@ -1412,7 +1434,7 @@ def build_gateway(
         CommandRouter(skills),
         resolver=resolver,
         transport=model_transport,
-        selectable=session_selectable,
+        selectable=chat_selectable,
     )
     # JEV Skill selection: absent unless configured, sends nothing without the
     # owner's egress approval, and in shadow mode only records its choices.
@@ -1669,6 +1691,7 @@ def build_router(
             binding.catalog,
             resolver=resolver,
             transport=transport,
+            timeout_s=float(binding.call_timeout_seconds),
             options=binding.options,
         )
         client = clients.for_alias(binding.routing_alias)

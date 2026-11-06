@@ -154,7 +154,7 @@ The estimates are agent hours of work plus test runs, unmeasured, from the size 
 | # | Slice | Backend | Estimate |
 |---|---|---|---|
 | S1 | **The restructure.** §3 and §4: one selection, no trap, stepper of three, advanced areas, paragraphs out, ingest button in part 3. No new feature | None | 8–12 h, about half of it tests in 23 files |
-| S2 | **The suggest button.** A run that asks only the fit question over the newly added sources, answered as a table: class, why, how many items. It costs model output (recorded earlier as 40–50% more on an ingest), so it is a press, not automatic. Adopting a suggestion opens Session A with it. Remove `bi-b-fit` | A fit-only route or kind. Must work for a custom method, which today skips it | 6–10 h |
+| S2 | **The suggest button. Built, 2026-11-06, branch `bi-schema-suggest`** (§15). A run that asks only the fit question over the newly added sources, answered as a table: class, why, how many items. It costs model output (recorded earlier as 40–50% more on an ingest), so it is a press, not automatic. Adopting a suggestion opens Session A with it. Remove `bi-b-fit` | A fit-only route or kind. Must work for a custom method, which today skips it | 6–10 h |
 | S3 | **One AI panel. Done.** `#bi-ai` in `kn-pane-bi`: fixed at the right at full height (the page makes room beside it), the lower part on a phone. Opened from the row or button it concerns, with one log and one input; closes on a dataset change. `biAiOpen(spec)`: a kind gives its title, what it is about, what goes to the model, and how to get ready to send. Removes the five panels | None | Done |
 | S4 | **Batch.** Tick several sources; ingest runs them; review across them. Recommended: one run per source, a batch id grouping them, the review table reading all of them, and one apply. Rejected unless it proves needed: one run over many sources, because `_extract` and the source evidence assume one | Batch grouping; apply over several runs | 10–16 h |
 | S5 | **Step 3. Done, 2026-11-05.** Owner: 跑測試 is the most important thing here. `bi-b-bench` and `bi-b-an` are sections collapsed by default, with a status; `bi-b-bench-run` is below them, outside any section; below it the report beside the Dashboard, then `bi-b-ver-*`. Question table with an editor on the right (same `set` and `slug` overwrites; another `set` is save plus delete). `#bi-dash-block` is one element, moved between its tab and step 3. **Navigation:** a card opens in `#bi-card-peek` beside what it came from; `biJump` (every button that goes to another tab) leaves `#bi-back`; `biShowView` keeps each view's scroll. The Dashboard tab stays, for colleagues who only read | None | Done |
@@ -436,3 +436,27 @@ On `market-intel`, all 760 cards and 15,000+ of their units place in a domain, a
 | Two people fill one empty summary | Conflict at the second push (measured) | With first-wins it settles itself: first pushed stays, the second becomes a proposal |
 
 All of it fits one hook: a merge rule per unit kind where `push` meets a conflict. **It touches the engine's conflict path, so it needs its own slice and tests.**
+
+## 15. Step 2a's schema: suggest, the AI, the draft as a table (acceptance F5, F6, F8)
+
+Status: built on `bi-schema-suggest`, 2026-11-06. Decision `docs/DECISIONS.md` 2026-11-06; contract `docs/CONTRACTS.md`, "BI schema drafts and dataset upgrade". **The owner, verbatim:** 「根據新增的資料來建議是否要在schema新增類別，做法可以讓使用者按一個button，系統給出建議」.
+
+What the acceptance found: 2a showed only the skills table; the schema AI sat under 進階：Schema; 預覽升級 offered 1.1 to 4.0, older than the vault's 5.0, and plain 5.0.0 beside 5.1.0 after an addition, which would drop it; the notice said 「已升級到 …@5.1.0」 while the line said 「…@5.0.0+66e6d2b79c9a」; the draft was a JSON textarea.
+
+Main path of 2a, top to bottom:
+
+| Row | What |
+|---|---|
+| `#bi-b-schema-now` | 目前的 schema：5.0 加 1 項新增・21 種卡片, with 新增了哪些 folded |
+| `#bi-b-sg-scope`, `#bi-b-sg-run`, `#bi-b-sa-open` | 看哪些來源 (this domain's sources no ingest read, or the one picked in step 1), 建議 schema, 和 AI 調整 schema |
+| `#bi-b-sg-sum`, `#bi-b-sg-table` | How many sources, which, seconds, tokens, what fits, what had no quote. Table 建議, 為什麼, 原文, 動作: 加入 schema when a press can, else 和 AI 討論 (opens the one panel with the row written), and 不要. No rows: 「不用改」 |
+| `#bi-b-draft-main` | A draft open: combobox of drafts, a table 類型, 欄位, 改動, 說明, whether it stays the version, and 套用到資料集 (publish, then the same preview and confirm) |
+| `#bi-b-upgrade` | The preview: 「加入 N 項新增到 5.0（版本不變）」 or 「升級 5.0 → 5.1」 |
+| `#bi-b-skills` | The skills table, unchanged |
+
+Under 進階：Schema: 預覽升級 (only newer versions that keep the vault's additions), new draft, drafts list, JSON, revisions, publish, trial.
+
+Measured on a real model (gpt-5.5 through the company alias, temp workspace, three fictional sources, one press each): 142, 52 and 45 s, about 8,800 to 10,100 tokens a press of one chunk. Every row's quote was in its source. A note with a missing field, a synonym, a new kind of thing and a passing mention gave four rows (a field, a synonym, a type, a question); a note that fits gave one question about the note itself saying it is fictional, and no change; a note on cooling gave two fields. One field came as an enum with no values, which could not be added: such a row now goes to the AI.
+
+Not done: `bi-b-fit` is still under 進階 (S2 said remove it); a suggestion reads at most 10 sources a press; the real vault has not used it.
+

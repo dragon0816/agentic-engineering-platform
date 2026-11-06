@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import re
 import stat
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any
 
@@ -199,16 +199,20 @@ def is_source_change(key_or_path: str) -> bool:
     return key_or_path.startswith(PREFIX) or homes.LAYOUT.is_source_path(key_or_path)
 
 
-def commit_split(repo: Any, purpose: str) -> dict[str, Any]:
+def commit_split(
+    repo: Any, purpose: str, only: Callable[[str], bool] | None = None
+) -> dict[str, Any]:
     """Commit what is staged, the sources in a commit of their own when there is
-    anything else, so a colleague's cards never wait for a slow file."""
+    anything else, so a colleague's cards never wait for a slow file. With `only`, the rest
+    is just what it picks; everything else stays uncommitted."""
     pending = repo._pending()
+    keys = [*pending["sets"], *pending["files"]]
     names = [v["name"] for k, v in pending["sets"].items() if k.startswith(PREFIX) and v]
-    sources = any(is_source_change(k) for k in (*pending["sets"], *pending["files"]))
-    others = any(not is_source_change(k) for k in (*pending["sets"], *pending["files"]))
+    sources = any(is_source_change(k) for k in keys)
+    others = any(not is_source_change(k) and (only is None or only(k)) for k in keys)
     if sources and others:
         repo.commit(_sources_purpose(names), only=is_source_change)
-    return dict(repo.commit(purpose))
+    return dict(repo.commit(purpose, only=only))
 
 
 def _sources_purpose(names: list[str]) -> str:

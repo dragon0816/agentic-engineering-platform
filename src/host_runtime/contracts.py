@@ -448,6 +448,15 @@ class ModelBinding(Contract):
     # name. Host wiring, which is why it is here and not in the catalog.
     options: dict[Symbol, dict[str, str]] = {}
     data_approval: GatewayHostApproval | None = None
+    # Seconds one model call may take before it fails `model_timeout`
+    # (acceptance F16, 2026-11-06: one hung call held a turn 6 and 10 minutes,
+    # whatever its budget, since a turn's clock is checked between calls).
+    # `call_timeout_seconds` is for the conversation: chat turns and the BI AI
+    # sessions on the harness. `batch_timeout_seconds` is for the drafting
+    # clients: Knowledge answers and ingest, Workflow drafts and BI card
+    # extraction runs, whose one call may write a long answer.
+    call_timeout_seconds: int = Field(default=180, ge=10, le=3600, strict=True)
+    batch_timeout_seconds: int = Field(default=600, ge=10, le=3600, strict=True)
 
     @model_validator(mode="after")
     def the_routing_alias_is_one_of_the_endpoints(self) -> Self:
