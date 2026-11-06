@@ -97,7 +97,7 @@ def test_one_working_domain_carries_through_the_three_steps(tmp_path: Path) -> N
             page.wait(f"[...bi.build.homes].some((h) => h.folder === {json.dumps(AIDC)})")
 
             # -- first visit: everything shows, and nothing can be added to no domain ------
-            assert page.text_of("bi-b-src-count") == "顯示 3／3 份"
+            assert page.text_of("bi-b-src-count").startswith("顯示 3／3 份・已選 ")
             assert page.run("document.getElementById('bi-b-src-folder').value") == "sources"
             assert (
                 page.run(
