@@ -10,6 +10,7 @@ from typing import Any
 import pytest
 
 from host_runtime import launcher
+from scripts import release_windows
 from scripts.build_windows_preview import REQUIRED_OPERATOR_GUIDES, SECRET_ASSIGNMENT
 from scripts.release_windows import (
     BI_FOLDER,
@@ -26,6 +27,35 @@ from scripts.release_windows import (
 
 REPO = Path(__file__).resolve().parents[1]
 TEMPLATE = REPO / "deploy" / "windows-preview"
+
+
+def test_a_failed_release_command_does_not_echo_child_output(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # Synthetic only: pytest can include an entire environment in an OS-error traceback.
+    private_output = "environ({'EXAMPLE_PRIVATE_VALUE': 'fictional-secret-123'})"
+
+    def failed(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(command, 7, private_output, private_output)
+
+    monkeypatch.setattr(subprocess, "run", failed)
+    with pytest.raises(ReleaseError) as error:
+        release_windows.run(["python", "-m", "pytest", "-x"])
+    message = str(error.value)
+    assert "pytest" in message and "exit code 7" in message
+    assert private_output not in message and "fictional-secret-123" not in message
+    captured = capsys.readouterr()
+    assert private_output not in captured.out + captured.err
+
+
+def test_a_successful_release_command_still_returns_its_output(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def succeeded(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(command, 0, "revision-for-the-export\n", "")
+
+    monkeypatch.setattr(subprocess, "run", succeeded)
+    assert release_windows.run(["git", "rev-parse", "HEAD"]) == "revision-for-the-export\n"
 
 
 def test_the_release_downloads_the_same_dependencies_as_ci() -> None:

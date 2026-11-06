@@ -1,40 +1,34 @@
-# BI SOP completed — bi-sop
+# Release blocker fixed — release-test-ids
 
-Base: `73f9145c`; branch: `bi-sop`. No push. The next action is for the BI orchestrator to review and merge this documentation commit, then package the release with its existing BI_SOP copy step.
+Base: `ce924e5b`; branch: `release-test-ids`. No push. Next action: orchestrator reviews/merges this commit, then retries the normal release verification on main. The existing leaked release log was not inspected, copied or published by this worker.
 
-## Delivered
+## Changes
 
-- `docs/guides/BI_SOP.zh-TW.md`: 98 numbered Traditional Chinese steps, exactly one screenshot per step, concrete controls, observed results and failure actions; flow index and fictional practice source text.
-- `docs/guides/images/bi-sop/`: 98 newly captured PNGs (1366 x 1000; 13,736,162 bytes). Every image was opened and visually read before copying into the public repository. Only fictional actors/companies/contacts, example email addresses and artificial phone numbers appear; no credential or token in images/address bars. No old screenshot reused, no UI image edited.
-- Real isolated headless agent-browser sessions against two independent temporary Agent Web processes on this base; gateway `127.0.0.1:4000`, model `gpt-5.5`, credential supplied only through environment. Two probes returned in 2.0 and 1.5 seconds; no gateway hang observed. Installer workspace assets were installed and `local_owner_grants` retained its default true. No runtime, contract or feed-golden change.
-- Covered new vault/domain/folders, two-file conversion and Markdown revision, schema suggestion and AI additive upgrade, Skill AI with five card types and manual v2, batch ingest and source-linked review/check marks, writes, commit via status line, manual/AI benchmark questions, AI dashboard creation/change and ordering, real benchmark, one-step share/date tag `2026-11-07`, second-PC join/cards/dashboard/questions, and chat citing that published version.
-- Business-card photo attach/save for two people; same-email update without duplicate; interactive chart/tree/group/file viewer; explicit department/title/manager updates with evidenced line; F5 and actual same-tab reload work; new conversation reads two persisted contacts and their final values.
-- Required guidance is explicit: AI 1–4 minutes, tool approval means reading/trusting code and guard is not a sandbox, same-tab F5/new-tab desktop shortcut, Telegram or file photo attachment with no page camera, everyone on same release.
+- Every parametrized case in `tests/test_bi_atlas_file_import.py` now has a short explicit ID. The 100,000-character malformed input remains intact, as do every input, test body and assertion. An AST comparison against ce924e5b, excluding only the new `ids` keyword, is identical.
+- `scripts/release_windows.py::run` no longer forwards the last 25 lines of failed child stdout/stderr into ReleaseError. It reports command and exit code; failure still stops the release, successful output still reaches internal revision/build consumers. This prevents arbitrary pytest OS tracebacks from rendering inherited environment values into release logs. No attempt to guess secret names/patterns.
+- Added synthetic-only release regressions: failure never echoes child stdout/stderr, while successful output is returned unchanged. Before implementation, the failure test failed and success test passed; both pass after the fix.
+- Audit found the sign-in test serialized the inherited environment into an assertion operand. It now computes exactly the same JSON containment predicate before asserting its boolean, so a failing check cannot print the environment string. No weakening of the condition.
+- Test helper/script searches found no other explicit whole-environment print. The restricted-runner test prints variable names only. Ordinary pytest argument rendering was the original indirect source; the release runner now excludes all failed child output.
+- Release guide explains the diagnostic behavior; DECISIONS appends the rationale and rejected pattern-redaction alternative; TASKS marks completion. No runtime/BI model/feed-golden change.
 
-## Actual failures and limits retained in the SOP
+## Verification (Windows)
 
-- CSV Signal candidate lacked required `so_what` (「所以呢」); rejected it through the GUI. Do not invent source evidence to fill a required field.
-- AI first proposed a benchmark forbidding the source's actual six-month calibration period. Pointing to the original text made it correct its latest proposal; only the corrected pair was added.
-- Benchmark `bibench-20261106T160502-2c89`: working 2/3, pre-publication shared version 0/3. Calibration question missed six months because the answer read SupplyLink and missed CustomerProduct body. Kept the correct must-include, real failed answer and screenshots; did not weaken the test or change runtime. Reported this to the orchestrator. The entirely fictional tutorial vault was shared with this known limitation explicitly in its purpose; SOP says resolve failed questions before formal sharing.
-- Skill AI used its three-trial budget despite a one-trial request, then provided a usable rule; its limits are visible. Human review remains necessary.
-- Two PCs are independent workspaces on one machine sharing a fictional local directory. This verifies joining/replay/content/version propagation, not actual OneDrive/SharePoint cloud transport. No Telegram phone interaction, fresh Windows installer execution or Atlas deployment tested. No full repository pytest suite rerun for this documentation-only change.
+Python: `C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/.venv/Scripts/python`; `PYTHONPATH=src` for pytest.
 
-## Verification
-
-Python: `C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/.venv/Scripts/python`; `PYTHONPATH=src` for tests.
-
-- `python -m pytest tests/test_release_windows.py -q --basetemp C:/Temp/bi-sop-release-tests-73`: 8 passed; after final manuscript/images, rerun with `C:/Temp/bi-sop-release-final-73`: 8 passed in 1.22s.
+- `python -m pytest tests/test_bi_atlas_file_import.py -q --tb=short --basetemp C:/Temp/release-test-ids-atlas`: 13 passed in 31.91s, including the real headless browser test, no setup/teardown errors. Browser tests ran one file at a time with private basetemps.
+- `python -m pytest tests/test_release_windows.py -q --tb=short`: 10 passed in 13.97s.
+- `python -m pytest tests/test_agent_code.py -q --tb=short --basetemp C:/Temp/release-test-ids-agent-code`: 8 passed in 48.92s, including its browser case.
+- Full repository collection through a local audit plugin: exit 0, 5,997 items, longest full node ID 316 characters, no IDs over 1,000, no collection errors. It reports test names without parameter values and numeric lengths only; does not print environment values. No other huge generated IDs found.
 - `python -m ruff check .`: passed.
 - `python -m ruff format --check .`: 1389 files already formatted.
 - `python -m mypy`: no issues in 1047 source files.
-- Also `ruff check src tests`, `ruff format --check src tests` (1093 files), `mypy src tests`: passed.
 - `python -m build`: wheel and sdist built successfully.
 - `python -m pip check`: no broken requirements.
-- `git diff --check`: passed (only normal LF/CRLF working-copy notices).
-- Documentation audit: 98 consecutive steps; 98 unique links match all public PNG filenames; every image 1366 x 1000 and byte-identical to its fresh reviewed capture; no unfinished text, credential patterns or actual gateway secret. Documentation-only final architecture review: no boundary/policy/runtime change.
+- `git diff --check`: passed.
+- An extra mypy invocation explicitly naming the script alongside src/tests reported the same module under two names (namespace scripts); the repository's configured CI command above passes. An initial scratch collection runner lacked the repository import path; corrected it and obtained the successful complete collection above. No such tooling workaround changes shipped code or tests.
 
-## Cleanup and safety
+## Scope and safety
 
-Own servers were loopback ports 65031 and 65052 only. Before stopping, authenticated `/api/activity` on each reported idle with zero items. Both named browsers (`bi-sop-73-pc1`, `bi-sop-73-pc2`) closed. Both temporary server processes shut down normally (exit 0); ports no longer listening and private endpoint files removed. The owner's Agent Web and real vault were never used or restarted.
+No full test-suite execution or actual release.cmd/package/tag/publish run here; the requested files and CI checks passed, and full collection audits all generated IDs. No credentials, environment values or incident-log content were printed; regression fixtures contain fictional text only. Own focused browser tests close their browsers normally. Owner Agent Web and real vault were not touched.
 
-Private temporary fictional workspaces/captures remain outside the commit for audit. `.scratch` contains local-only automation/verification logs and is ignored; never publish its private bootstrap logs. New work should use a new temporary runtime, not restart or attach to the owner's server. No unfinished implementation remains in this branch.
+Previous completed SOP remains in ce924e5b: 98 fresh, reviewed screenshots plus the Traditional Chinese guide. Its temporary servers/browsers were already shut down; they were not restarted for this task. Local audit/build/test artifacts stay ignored under `.scratch` or task-specific temp folders.

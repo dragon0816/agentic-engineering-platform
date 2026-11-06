@@ -143,10 +143,13 @@ def test_sign_in_stores_the_code_and_keeps_no_password_anywhere(
         _everything_written(layout.workspace_root),
         path.read_text(encoding="utf-8"),
         json.dumps(saved),
-        json.dumps(dict(os.environ)),
         caplog.text,
     ):
         assert PASSWORD not in place
+    # Keep the same JSON containment check, but expose only its boolean on failure.
+    # An assertion on the serialized string would dump the inherited environment.
+    password_in_environment = PASSWORD in json.dumps(dict(os.environ))
+    assert not password_in_environment
     # And the code itself is not in a file or a reply either.
     assert code not in json.dumps(reply) and code not in _everything_written(layout.workspace_root)
     assert code not in path.read_text(encoding="utf-8")

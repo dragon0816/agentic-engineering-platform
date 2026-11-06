@@ -93,8 +93,12 @@ def run(command: list[str], cwd: Path = REPO) -> str:
         command, cwd=cwd, text=True, encoding="utf-8", errors="replace", capture_output=True
     )
     if done.returncode != 0:
-        tail = "\n".join((done.stdout + done.stderr).strip().splitlines()[-25:])
-        raise ReleaseError(f"failed: {' '.join(command[:4])}\n{tail}")
+        # Child tracebacks can render os.environ, even without --showlocals.
+        # Never copy arbitrary child output into the release's public log.
+        raise ReleaseError(
+            f"failed: {' '.join(command[:4])} (exit code {done.returncode}); "
+            "child output withheld because it may contain credentials"
+        )
     return done.stdout
 
 

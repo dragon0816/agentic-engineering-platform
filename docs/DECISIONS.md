@@ -6754,3 +6754,21 @@ Release verification on 3167044b found two regressions from the same-card slice.
 - Latest time means the later instant, comparing ISO dates/timestamps in UTC, never lexicographic timestamp text. Date-only/naive values compare in UTC consistently on every PC. Undated legacy strings sort before valid timestamps. Equal-time evidence/updated-field units retain their canonical tie-break; derived card.updated keeps the incoming history timestamp representation on equality, preserving the pre-existing history format.
 - The coverage golden difference was four latest-update cells only: aidc-computing/high-speed-io and aidc-power/{rf,power-generic-io,emc}. 2026-11-01T01:00:00+00:00 had become 2026-11-01T09:00:00+08:00, the same instant, because string max chose commit.created over history.at. Counts, source coverage and missing-field lists did not change. Fix the comparison, not the analysis or its golden; feed and default-pack goldens remain unchanged.
 - Replay policy 2 and card model 13 replace the buggy timestamp projection/materialization once; commit records remain immutable. Tests first reproduced four timezone failures, then cover both arrival orders and equal-time history formatting.
+
+## 2026-11-07 — Keep release failures from echoing child-process output
+
+Windows pytest writes a test's node ID into `PYTEST_CURRENT_TEST`; using a 100,000-character
+adversarial JSON input as the generated parameter ID exceeded Windows' environment-variable
+limit. Its OS-error traceback also rendered the inherited environment. Keep the full input
+and strict rejection assertions, but assign each Atlas-file case a short explicit ID.
+
+The release runner now reports the failed command and exit code without copying child stdout
+or stderr into `ReleaseError`. The former last-25-lines tail could include credentials even
+when the release code never printed an environment mapping directly. Name-based or pattern
+redaction was rejected: inherited values and traceback representations need not have a
+recognizable secret name or syntax. Successful command output remains available internally
+for revision discovery and packaging; failure still stops the release. Synthetic-output
+regressions verify both behaviors. The sign-in test's existing environment containment check
+also computes a boolean before asserting, so a failure cannot print its serialized environment;
+the condition is unchanged. This changes diagnostics, not assertion strictness, runtime
+authorization or the contents of a release.

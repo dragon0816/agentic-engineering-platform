@@ -40,6 +40,11 @@ scripts\release.cmd --publish-dir "C:\Users\<你>\OneDrive - Rohde & Schwarz\AEP
    加 `--no-tag` 可以不打 tag。
 7. **（選用）`--publish-dir`**：把整個發佈資料夾複製過去，不會刪除或覆蓋舊版本。
 
+子程序失敗時，release log 只顯示失敗命令與 exit code，不轉貼標準輸出或錯誤輸出。
+pytest 的作業系統錯誤 traceback 可能連帶顯示整份環境變數；因此不保留原本的最後
+25 行輸出，也不依賴密鑰名稱清單猜測哪些值需要遮蔽。請維護者在隔離測試環境查驗，
+不要把原始環境或未檢查的 traceback 貼到共用 log 或 issue。
+
 ## 交付給同事
 
 - 把發佈資料夾（或 `--publish-dir` 那份）的位置告訴同事，並附上 `RELEASE_NOTES.md` 的

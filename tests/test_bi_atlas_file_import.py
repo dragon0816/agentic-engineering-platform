@@ -97,6 +97,15 @@ def test_the_files_other_content_goes_nowhere(tmp_path: Path) -> None:
         "[]",
         "[" * 100_000,  # too deep to parse
     ],
+    ids=[
+        "not-json",
+        "non-finite-number",
+        "duplicate-key",
+        "wrong-version",
+        "missing-panels",
+        "array-root",
+        "excessive-depth",
+    ],
 )
 def test_a_file_that_is_not_a_strict_dashboard_is_refused(tmp_path: Path, text: str) -> None:
     ws = _joined(tmp_path)
