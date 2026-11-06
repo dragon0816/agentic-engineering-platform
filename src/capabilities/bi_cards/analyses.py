@@ -115,10 +115,33 @@ def _install(scratch, where, events=DENIED_EVENTS):
     flags = os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_APPEND
     paths, refuse, failure = (str, bytes, os.PathLike), PermissionError, Exception
     is_a, every = isinstance, all
+    # On Windows, the C functions themselves: `os.path.realpath` is Python that reads its
+    # module's globals at each call, which a script can change.
+    native = sys.modules.get("nt")
+    full = getattr(native, "_getfullpathname", None)
+    final = getattr(native, "_getfinalpathname", None)
+
+    def resolved(path):
+        if full is None or final is None:
+            return realpath(path)
+        head, rest = full(path), ""
+        while True:
+            try:
+                real = final(head)
+                break
+            except failure:
+                cut = head.rstrip(sep).rfind(sep)
+                if cut < 3:
+                    return None  # nothing of it exists, not even its drive
+                rest, head = head[cut:] + rest, head[:cut]
+        real = real[4:] if real.startswith("\\\\?\\") else real
+        return (real + rest).lower()
+
+    scratch = resolved(scratch)
 
     def inside(path):
         try:
-            real = realpath(path.decode("utf-8", "surrogateescape")
+            real = resolved(path.decode("utf-8", "surrogateescape")
                             if is_a(path, bytes) else path)
         except failure:
             return False

@@ -39,6 +39,10 @@ def _attempts(outside: Path) -> dict[str, str]:
         "a function it calls": (
             f"import os\nos.path.realpath = lambda p: globals().get('OUTPUT', p)\n{escape}"
         ),
+        "the module that resolves paths": (
+            "import ntpath\nntpath._getfinalpathname = lambda p, *a: OUTPUT + '/x'\n"
+            f"ntpath._getfinalpathname_nonstrict = ntpath._getfinalpathname\n{escape}"
+        ),
         "the frame that runs the script": (
             f"import sys\nsys._getframe(1).f_globals['_ready'] = False\n{escape}"
         ),
