@@ -2533,11 +2533,51 @@ def publish(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[st
     }
 
 
+def _profile_types(vault: Vault, folder: str, units: Mapping[str, Any]) -> list[str] | None:
+    """The card types the profile of `folder`'s home uses; None without a profile."""
+    if not folder:
+        return None
+    part = profile.rules_part(vault.repo, folder, units)
+    return list((part.get("profile") or {}).get("types") or {}) or None
+
+
+def _run_types(
+    vault: Vault, units: Mapping[str, Any], reg: Registry, given: Mapping[str, Any]
+) -> tuple[list[str], str, list[str] | None]:
+    """(the card types a run with this extract skill produces, where they come from, the
+    profile's types or None), as `ai_runs.run_types` decides them for its first folder."""
+    from capabilities.bi_cards import ai_runs
+
+    applies = list(given.get("applies_to") or [])
+    used = _profile_types(vault, str(applies[0]) if applies else "", units)
+    types, origin = ai_runs.run_types(reg, None, list(given.get("card_types") or []), used)
+    return types, origin, used
+
+
+def _run_types_view(
+    vault: Vault, units: Mapping[str, Any], reg: Registry, skill: repo_skills.Skill
+) -> dict[str, Any]:
+    given = {"applies_to": list(skill.applies_to), "card_types": list(skill.card_types)}
+    types, origin, _ = _run_types(vault, units, reg, given)
+    return {"types": types, "from": origin}
+
+
+def skill_run_types(
+    workspace: Path, vault_id: str, given: Mapping[str, Any]
+) -> tuple[list[str], str, list[str] | None]:
+    """`_run_types` for a skill as given (a draft the skill AI checks, acceptance F17)."""
+    vault = _vault(workspace, vault_id)
+    return _run_types(vault, vault.repo.working_units(), vault._registry(), given)
+
+
 def skills(workspace: Path, vault_id: str) -> dict[str, Any]:
     """The vault's current skills (working copy) with their text, and the
-    source folders a skill may apply to (design §8)."""
+    source folders a skill may apply to (design §8). Each extract skill says the
+    card types a run with it produces (`run_types`), and `profile_types` the types
+    of each home with a profile, so the form can say it as the person types."""
     vault = _vault(workspace, vault_id)
     units = vault.repo.working_units()
+    reg = vault._registry()
     found = []
     with _repo_errors():
         for item in repo_skills.current_skills(vault.repo, units):
@@ -2552,6 +2592,11 @@ def skills(workspace: Path, vault_id: str) -> dict[str, Any]:
                     "card_types": list(skill.card_types),
                     "body": skill.body,
                     "generated": skill.extra.get("generated") == "true",
+                    **(
+                        {"run_types": _run_types_view(vault, units, reg, skill)}
+                        if skill.role == "extract"
+                        else {}
+                    ),
                 }
             )
     roots = [
@@ -2578,6 +2623,16 @@ def skills(workspace: Path, vault_id: str) -> dict[str, Any]:
         "folders": ["sources", *folders],
         "homes": working,
         "default_types": [t for t in extract.DEFAULT_TYPES],
+        "profile_types": {
+            key[len(card_model.PROFILE_PREFIX) :]: types
+            for key in sorted(units)
+            if key.startswith(card_model.PROFILE_PREFIX)
+            and (
+                types := _profile_types(
+                    vault, homes.sources_dir(key[len(card_model.PROFILE_PREFIX) :]), units
+                )
+            )
+        },
         "roles": ["classify", "extract"],
         "tools": vault_tools.current_tools(units),
     }

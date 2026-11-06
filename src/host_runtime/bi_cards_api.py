@@ -656,7 +656,7 @@ def _session_create(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
         made = schema_session.create_session(workspace, dataset, target, who)
         return 200, {"ok": True, "session": made}
     if kind == "skill":
-        made = skill_session.create_session(workspace, dataset, target, who)
+        made = skill_session.create_session(workspace, dataset, target, who, given.get("new"))
         return 200, {"ok": True, "session": made}
     if kind == "analysis":
         made = analysis_session.create_session(workspace, dataset, target, who)
@@ -1450,6 +1450,7 @@ def web_ai_runtime(web: Any) -> ai_runs.AiRuntime:
     for AI runs: a run is a background task, so `/api/activity` shows it before
     an Agent Web restart."""
     from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
+    from capabilities.workflow_author.handlers import DRAFT_SPEC
 
     def model() -> Any:
         gateway = web.runtime.agent.gateway
@@ -1459,8 +1460,14 @@ def web_ai_runtime(web: Any) -> ai_runs.AiRuntime:
         if client is not None and alias is not None:
             return client, str(alias)
         # Not every host binds a wiki Knowledge asset (owner 2026-11-03). The
-        # conversation's client then, and only behind the host's data approval.
+        # host's drafting client then (its per-call timeout is the batch one,
+        # `batch_timeout_seconds`: an extraction call may write a long answer),
+        # else the conversation's, and only behind the host's data approval.
         router = gateway.router
+        drafting = getattr(gateway.bridge.installed.get(DRAFT_SPEC.identity), "handler", None)
+        drafted = getattr(drafting, "model", None)
+        if isinstance(drafted, ApprovedModelClient):
+            return drafted, str(router.model_alias or getattr(drafting, "model_alias", ""))
         return (
             (router.model, router.model_alias)
             if isinstance(router.model, ApprovedModelClient)

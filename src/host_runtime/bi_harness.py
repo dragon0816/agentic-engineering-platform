@@ -20,6 +20,7 @@ from capabilities.bi_cards import ai_runs, sessions
 from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import BiStoreError
 from common.execution import Failure, RequestContext, TraceIdentifiers
+from models.approved import ApprovedModelClient
 from models.contracts import ModelMessage, ModelTool
 
 MAX_SOURCE_PIECE = 6000
@@ -57,6 +58,24 @@ def converse(
             )
         )
     return result
+
+
+def turn_ai(gateway: Any, ai: ai_runs.AiRuntime) -> ai_runs.AiRuntime:
+    """The runtime for trial runs inside a BI AI turn: run at once, on the conversation's
+    model client, so a call has the conversation's timeout (`call_timeout_seconds`, 180 s by
+    default) rather than batch extraction's (orchestrator 2026-11-06); the host's
+    extraction client when the conversation has no approved one."""
+    router = getattr(gateway, "router", None)
+    chat = getattr(router, "model", None)
+
+    def model() -> Any:
+        if isinstance(chat, ApprovedModelClient):
+            return chat, str(getattr(router, "model_alias", ""))
+        return ai.model()
+
+    return ai_runs.AiRuntime(
+        model=model, background=lambda _title, work: work(), approved=ai.approved
+    )
 
 
 def tools_used(result: GatewayConversationResult) -> list[dict[str, Any]]:

@@ -1512,6 +1512,7 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
           aria-label="語音輸入" aria-pressed="false"
           title="語音輸入：錄音後轉成文字放進輸入框，確認後再送出">🎤</button>
         <span id="mic-status" class="mic-status" role="status" hidden></span>
+        <span id="send-wait" class="mic-status" role="status" hidden></span>
         <div class="model-control" id="model-control">
           <label class="visually-hidden" for="conversation-model">LLM model</label>
           <select id="conversation-model" aria-describedby="model-state" hidden></select>
@@ -2859,9 +2860,11 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
                   <input id="bi-b-sk-applies" class="bi-input" spellcheck="false"
                     placeholder="applications/aidc/sources"></div>
                 <div><label class="bi-label" for="bi-b-sk-types">
-                  只產生這些卡片類型（逗號分隔；留空＝不限）</label>
+                  只產生這些卡片類型（逗號分隔；留空＝用領域 profile 的類型，
+                  沒有 profile 就用預設類型）</label>
                   <input id="bi-b-sk-types" class="bi-input" spellcheck="false"></div>
               </div>
+              <p class="bi-meta" id="bi-b-sk-runtypes" role="status"></p>
               <p class="bi-meta" id="bi-b-sk-folders"></p>
               <label class="bi-label" for="bi-b-sk-body">規則內容</label>
               <textarea id="bi-b-sk-body" class="bi-input" rows="6"></textarea>
@@ -4256,6 +4259,19 @@ function renderConversation(record) {
       // A Telegram conversation is read here: nothing to rate or reply to.
       if (record.source === "telegram") said.parentNode.dataset.messageId = replied.message_id;
       else attachTurnControls(said.parentNode, asked.text, replied);
+      if (replied.status === "failed" && record.source !== "telegram"
+        && index + 2 >= record.messages.length) {
+        // The newest answer failed (a model timeout, a stopped gateway): one press sends the
+        // same question again (acceptance F20). Its attached files are not sent again.
+        const again = document.createElement("button");
+        again.type = "button"; again.className = "link-button retry-turn";
+        again.textContent = "重試"; again.title = "再送一次同樣的問題";
+        again.addEventListener("click", () => {
+          el("message").value = asked.text;
+          if (!el("send").disabled) el("ask").requestSubmit();
+        });
+        said.parentNode.append(again);
+      }
       const installForm = replied.workflow_form
         && replied.workflow_form.origin === "install";
       if (replied.workflow_form && !installForm) {
@@ -5268,8 +5284,24 @@ async function chooseBackend(name) {
 }
 
 async function loadChat(selectId) {
-  await loadBackends();
-  await loadConversations(selectId);
+  // After a reload Send waits for the check of the conversation backends (Codex, Claude
+  // Code and Copilot sign-in, the gateway), which can take about a minute (acceptance F20):
+  // the person is told why rather than facing a grey button.
+  const wait = send.disabled ? setTimeout(() => sendWait(true), 1500) : null;
+  try {
+    await loadBackends();
+    await loadConversations(selectId);
+  } finally {
+    if (wait) clearTimeout(wait);
+    sendWait(false);
+  }
+}
+
+function sendWait(on) {
+  const note = el("send-wait");
+  note.hidden = !on;
+  note.textContent = on ? "正在檢查可用的對話後端與模型（Codex、Claude Code、Copilot 的登入狀態"
+    + "與 LLM gateway），可能要一分鐘；好了就能送出。" : "";
 }
 
 el("session-search").addEventListener("input", () => {
@@ -15073,6 +15105,12 @@ function biSkillsDraw(reply) {
         + "修改並儲存後才會再使用"));
     }
     if (item.problem) state.push(bh("p", "bi-warn", item.problem));
+    if (item.run_types) {
+      // What a run with it really produces (acceptance F17), whatever card_types says.
+      state.push(bh("p", "bi-meta", "產生：" + item.run_types.types.join("、")
+        + ({skill: "", profile: "（依領域 profile）", default: "（預設類型）"}[item.run_types.from]
+          || "")));
+    }
     const edit = bh("button", "bi-btn", "修改");
     edit.type = "button";
     edit.addEventListener("click", () => {
@@ -15394,10 +15432,36 @@ function biSkillForm(item) {
   el("bi-b-sk-body").value = item.body || "";
   el("bi-b-sk-folders").textContent = "可用的資料夾：" + ((bi.skills && bi.skills.folders) || [])
     .filter((f) => f !== "sources").join("、");
+  biSkillTypesNote();
   el("bi-b-sk-body").focus();
 }
 
 const biList = (text) => text.split(/[,，、\n]/).map((s) => s.trim()).filter(Boolean);
+
+function biRunTypes(role, applies, typed) {
+  // The card types a run with this rule produces, as ai_runs.run_types decides them
+  // (acceptance F17): the rule's, narrowed by the domain's profile, else the profile's,
+  // else the defaults.
+  if (role !== "extract") return null;
+  const s = bi.skills || {}, home = applies.length ? biFolderHome(applies[0]) : "";
+  const used = (s.profile_types || {})[home] || [];
+  if (used.length) {
+    const narrowed = typed.filter((t) => used.includes(t));
+    return narrowed.length ? [narrowed, "這條規則"] : [used, "領域 profile"];
+  }
+  return typed.length ? [typed, "這條規則"] : [s.default_types || [], "預設"];
+}
+
+function biSkillTypesNote() {
+  const found = biRunTypes(el("bi-b-sk-role").value, biList(el("bi-b-sk-applies").value),
+    biList(el("bi-b-sk-types").value));
+  el("bi-b-sk-runtypes").textContent = found
+    ? "用這條規則擷取會產生：" + found[0].join("、") + "（來自" + found[1] + "）"
+    : "分類規則不限定卡片類型。";
+}
+for (const id of ["bi-b-sk-role", "bi-b-sk-applies", "bi-b-sk-types"]) {
+  el(id).addEventListener("input", biSkillTypesNote);
+}
 
 el("bi-b-sk-new").addEventListener("click", () => biSkillNew()
   .catch((failure) => biNotice(false, failure.message)));
@@ -15410,7 +15474,8 @@ function biSkillSpec(dataset) {
     sends: "這條規則、卡片類型與資料夾、最近兩次試跑的候選卡", agent: true,
     label: "你想怎麼調整這條規則",
     placeholder: "例如：電源相關的規格表，額定功率一律放在 specs 欄位",
-    busy: "正在讀來源、用草稿試跑、看測試結果…（可能要幾分鐘）", render: biApplySkill,
+    busy: "正在讀來源、用草稿試跑、看測試結果…（每次最多試跑 3 次、約 6 分鐘，"
+      + "時間到會先給目前最好的草稿）", render: biApplySkill,
     turn: () => ({source_ids: bi.build.sourceId && biDataset() === dataset
       ? [bi.build.sourceId] : []})};
 }
@@ -15425,9 +15490,9 @@ async function biSkillAi(item, from) {
 }
 
 async function biSkillNew() {
-  // A rule to talk about has to exist: the first message saves it as revision 1, staged
-  // like any change, and the conversation goes on from there.
-  // The working domain's folder, never another: under 全部領域 the person picks one.
+  // The new rule is the session's until the person applies a draft (acceptance F16: the
+  // first message was saved as revision 1 that nobody approved); applying saves revision 1.
+  // The working domain's folder, never another: under 全部領域 the person picks one (F9).
   const pick = el("bi-ai-new-folder"), none = bh("option", "", "（選一個資料夾）");
   none.value = "";
   pick.replaceChildren(none, ...((bi.skills && bi.skills.folders) || [])
@@ -15438,7 +15503,7 @@ async function biSkillNew() {
   el("bi-ai-new-name").value = "";
   const spec = {...biSkillSpec("vault-" + bi.verVault), mode: "new", title: "和 AI 新增規則",
     shows: el("bi-b-sk-list"),
-    about: "第一句話會先存成第 1 版（還沒 commit），AI 再幫你改。",
+    about: "AI 會依你的描述寫出草稿並試跑；按「套用為新版本」才會存成第 1 版（還沒 commit）。",
     label: "這條規則要做什麼", placeholder: "例如：虛構電源廠是 Account",
     sessionTarget: () => spec.name,
     prepare: async (message) => {
@@ -15446,12 +15511,11 @@ async function biSkillNew() {
       const name = el("bi-ai-new-name").value.trim();
       if (!name) { el("bi-ai-new-name").focus(); throw new Error("請寫規則名稱"); }
       if (!pick.value) { pick.focus(); throw new Error("請選這條規則套用到哪個資料夾"); }
-      const reply = await biVerRun(bi.verVault, "skills", {name, role: "extract",
-        applies_to: [pick.value], card_types: [], body: message});
+      spec.session = (await biCall("/api/bi/sessions", {dataset: spec.dataset, kind: "skill",
+        target: name, new: {role: "extract", applies_to: [pick.value]}})).session;
       spec.name = name; spec.mode = null; el("bi-ai-new").hidden = true;
       spec.ref = "skill:" + name;
-      el("bi-ai-title").textContent = "和 AI 修改規則";
-      biAiTarget("規則「" + name + "」第 " + reply.skill.revision + " 版。");
+      biAiTarget("新規則「" + name + "」：套用 AI 的草稿後才會存成第 1 版（還沒 commit）。");
     }};
   await biAiOpen(spec);
 }
@@ -15720,7 +15784,8 @@ function biScopeEmpty() {
     && (item.applies_to || []).some((folder) => biFolderHome(folder) === scope));
   box.hidden = !scope || has;
   box.textContent = box.hidden ? "" : "這個領域還沒有判讀規則，AI 擷取只會找 "
-    + ((bi.skills || {}).default_types || []).join("、")
+    + (((bi.skills || {}).profile_types || {})[scope]
+      || (bi.skills || {}).default_types || []).join("、")
     + "。可以用「和 AI 新增規則」，或參考 library/skill-review 的範例。";
 }
 
@@ -16884,6 +16949,14 @@ function biBuildSessionLog(target, session, renderSuggestion) {
     }
     const item = bh("li", "", bh("p", "bi-meta", biSentLine(turn.sent || {})));
     if (turn.error) item.append(bh("p", "bi-err", turn.error.message));
+    const asked = index > 0 ? turns[index - 1] : null;
+    if (turn.error && target === "bi-ai-log" && index === turns.length - 1 && asked) {
+      // The last turn failed: send the same request again (acceptance F16/F20).
+      item.append(bh("div", "bi-actions", biButton("重試", () => {
+        el("bi-ai-msg").value = String(asked.text).replace(/^工作領域：[^\n]*\n\n/, "");
+        el("bi-ai-send").click();
+      }, "bi-btn", "再送一次同樣的要求")));
+    }
     if (turn.suggestion) item.append(...renderSuggestion(session, turn, index));
     log.append(item);
   });

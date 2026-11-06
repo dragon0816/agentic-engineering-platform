@@ -6606,6 +6606,64 @@ A reload (F5) gave 「Open the address this command printed.」: the page takes 
 
 **Rejected.** An `HttpOnly; SameSite=Strict` cookie for this run's token: a cookie is sent by the browser on its own, so every GET route would need a second check against CSRF, and the decision of 2026-10-08 already turned down a cookie.
 
+## 2026-11-06: The skill AI has a budget per turn and always leaves something to read
+
+Acceptance F16 (orchestrator, for the colleague release): one message in 和 AI 新增規則 ran 25 minutes
+and 9 trials, ended with 「模型沒有回應（turn_time_limit）」 and no suggestion, while the person's
+sentence had already been saved as revision 1. Spec: `docs/phases/BI_TEST_AND_TOOLS.md` §4.
+
+- **3 trials within 6 minutes, turn limit 10 minutes.** Trials are what takes minutes; counting them
+  bounds the turn better than the tool-call cap. Rejected: only a shorter wall clock, which cuts the
+  model off before it can suggest.
+- **Out of budget, the last draft that tried well comes back as the suggestion,** marked in its
+  limits as not finally checked by the AI. Rejected: an error with the drafts hidden in the log.
+- **Stop codes become Chinese sentences with what to do** in the shared session record, so every
+  BI session kind gets them; the code stays in `error.cause`.
+- **A new rule lives in its session until applied** (`new` in the session body). Rejected: saving a
+  placeholder revision, which is a rule nobody approved.
+- **Not changed:** the schema and questions AIs (15 minutes, 40 tool calls, no trial cap or
+  fallback) and the analysis AI (10 minutes, 30 calls) have the same shape; left for a decision.
+
+## 2026-11-06: An empty card_types means the domain profile's types, else the defaults
+
+Acceptance F17 (orchestrator): the skill form said 「只產生這些卡片類型（留空＝不限）」, but empty meant
+Signal, Technology and Application, so a rule about customers and supply links did nothing until the
+types were typed. Spec: `docs/phases/BI_TEST_AND_TOOLS.md` §4.
+
+- **Empty falls back to the domain's profile types when it has a profile, otherwise to the
+  defaults.** This is what runs already did; it is now one function and said on the page. Rejected:
+  empty = every schema type, which matches the old words but makes every run ask for all twelve
+  types (slower, noisier review) and changes every existing rule's output at once.
+- **The page says what a run produces** in the list and live in the form, and the label says what
+  empty means. Rejected: only rewording the label, which still hides the profile's effect.
+- **The skill AI must give `card_types` when its text names types a run would not make;** the
+  check names them. Types the profile leaves out are not demanded, since the rule cannot add them.
+
+## 2026-11-06: One model call has its own timeout, and a down model service is said at once
+
+Acceptance F16/F20 (orchestrator): with the company model backend down, one call held a BI AI
+turn 6 and 10 minutes whatever its budget (a turn's clock is checked only between calls; the
+client's timeout was a fixed 600 s), and a chat turn took about 4 minutes to say 「The configured
+model could not answer this turn.」 with no cause or 重試.
+
+- **`models.call_timeout_seconds` (default 180) for the conversation:** chat turns and the BI AI
+  sessions on the harness. **`models.batch_timeout_seconds` (default 600) for the drafting
+  clients:** Knowledge answers and ingest, Workflow drafts and BI card extraction runs, whose
+  one call may write a long answer; trial runs inside a BI AI turn use the conversation's client
+  and its 180 s (orchestrator). Both in host.json,
+  10–3600. The router gets its own clients; the drafting switch follows the models the page
+  approves on the router's. Rejected: one timeout for both, which either cuts extraction or
+  leaves chat hanging 10 minutes.
+- **A model call's 5xx is explained before anything else, in Chinese,** naming that the model
+  service is not answering, with 重試; a timeout says how long it waited. The minutes of a 503
+  are spent inside the gateway (LiteLLM), not in AEP: AEP asks at most twice (stub test), and one
+  call measured 359 s before its 503. LiteLLM's retries live in the owner's gateway repository;
+  not changed here (the orchestrator tells the owner).
+- **The newest failed chat answer gets a 重試 button** (the same question again; attached files
+  are not sent again), and a failed BI AI turn too.
+- **Send waiting after a reload says why** (the conversation backends' sign-in check).
+
+
 ## 2026-11-06: Acceptance fixes F9, F10, F12, F19 (BI orchestrator)
 
 - **F9. Every list of homes reads the units, uncommitted ones too.** The folders a rule may apply to came from the shared folder on disk, so a domain created and not yet pushed was missing and 和 AI 新增規則 fell back to aerospace. They now add each home's sources folder from the units; the select starts on the working domain, and under 全部領域 a person must pick one. Rejected: an empty choice meaning every source, which is how a rule silently lands in the wrong place.
