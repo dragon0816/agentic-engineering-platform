@@ -6695,3 +6695,18 @@ The design of 2026-10-31 stays: guarded, not sandboxed, and a person reading the
 - **Frames, the garbage collector and tracing are refused** (`sys._getframe`, `gc.get_objects`, `sys.settrace`, …).
 - **On Windows the write check resolves paths through `nt`'s own functions,** captured at install; `os.path.realpath` is Python that reads its module's globals at each call.
 - **What it still cannot close:** a determined script may find a CPython flaw, and it can read any file the user can. The page's approval step and the user guide (6.8.3) now say what approving means. A real boundary (AppContainer or a job object) remains the later replacement.
+
+## 2026-11-06: The shortcut waits for a start as long as its server runs
+
+On the owner's PC a server took 5.5 minutes to listen after a reboot (building the runtime and
+Agent Web come before the port is bound). The shortcut reported 「Agent Web did not answer within
+300 seconds」 at 15:17:32 and the server came up at 15:18:04 with nothing waiting for it.
+
+- **A start is waited for, and joined, while its server process runs,** up to 15 minutes
+  (`launcher.MAX_START_SECONDS`); 300 s stays the point where the page says it is slow.
+  Rejected: a longer fixed deadline only, which still fails a start that is alive and late.
+- **A record whose server runs but answers slowly is waited for,** never dropped and replaced:
+  a 3 s check on a loaded PC must not start a second server.
+- **Nothing is started while something listens on the port,** and `aep-host web --port N` exits
+  at once (code 3) when the port is taken, before the minutes of building the runtime.
+

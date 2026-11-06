@@ -1427,6 +1427,18 @@ def main(argv: Sequence[str] | None = None) -> int:
             args.output.write_text(payload, encoding="utf-8")
             print(f"wrote {args.output}")
         return 0
+    if args.command == "web" and args.port:
+        from host_runtime.launcher import port_in_use
+
+        if port_in_use(args.port):
+            # Found before the minutes a start can take (2026-11-06): a second server
+            # would only lose the port at the end, after starting everything else.
+            print(
+                f"127.0.0.1:{args.port} is already in use, probably by another Agent Web; "
+                "this one stops. Open the running one with the AEP Agent shortcut.",
+                file=sys.stderr,
+            )
+            return 3
     try:
         runtime = build_runtime(config, layout=layout)
     except HostError as error:

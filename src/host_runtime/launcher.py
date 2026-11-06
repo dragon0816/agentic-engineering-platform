@@ -28,6 +28,12 @@ other file. The page itself never holds the address.
 A second click while a start is under way joins it instead of starting another server
 (`agent-web-start.json` holds the process being waited for): two servers starting together
 meet on the state file and the port, and on 2026-11-05 one of them exited over it.
+
+A start is waited for as long as its server process runs, up to `MAX_START_SECONDS`
+(2026-11-06: a server that took 5.5 minutes to listen was reported failed at 300 s and
+came up 32 s later, with nothing left waiting for it). A server whose record is there but
+that is slow to answer is waited for, never replaced, and nothing is started while
+something already listens on the port.
 """
 
 from __future__ import annotations
@@ -54,6 +60,8 @@ DEFAULT_PORT = 53583
 #: A loaded PC just after a reboot was seen 155 s into a start (2026-11-05), and the start
 #: itself may wait 30 s for the state file (`host.STATE_BUSY_WAIT_SECONDS`).
 START_WAIT_SECONDS = 300.0
+#: How long a start whose server process still runs is waited for, and joined, at most.
+MAX_START_SECONDS = 15 * 60.0
 STARTING_PAGE = "agent-web-starting.html"
 STARTING_STATUS = "agent-web-starting.js"
 START_RECORD = "agent-web-start.json"
@@ -395,6 +403,19 @@ def process_alive(pid: int) -> bool:
         kernel32.CloseHandle(handle)
 
 
+def port_in_use(port: int, host: str = "127.0.0.1", timeout: float = 1.0) -> bool:
+    """Whether something already listens on the loopback port."""
+    if port <= 0:
+        return False
+    import socket
+
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except OSError:
+        return False
+
+
 def start_underway(workspace_root: Path, wait_seconds: float) -> dict[str, int] | None:
     """The start another `open` is waiting for: recent, and its process still runs."""
     try:
@@ -482,6 +503,7 @@ def open_agent(
     start: Callable[[], object] | None = None,
     opener: Callable[[str], object] = webbrowser.open,
     wait_seconds: float = START_WAIT_SECONDS,
+    max_seconds: float = MAX_START_SECONDS,
     poll: float = 1.0,
     handoff_seconds: float = HANDOFF_SECONDS,
     sleep: Callable[[float], None] = time.sleep,
@@ -495,24 +517,45 @@ def open_agent(
     if record is not None and answers(str(record["address"])):
         opener(str(record["address"]))
         return "opened"
-    if record is not None:
-        record_path(workspace_root).unlink(missing_ok=True)  # left by a server that died
-    underway = start_underway(workspace_root, wait_seconds)
+    running = record.get("pid") if record is not None else None
+    if isinstance(running, int) and process_alive(running):
+        # Its server runs but did not answer in time (a loaded PC): wait for it, never
+        # drop its record or start a second one (2026-11-06).
+        underway: dict[str, int] | None = {"pid": running, "started_ms": int(time.time() * 1000)}
+    else:
+        if record is not None:
+            record_path(workspace_root).unlink(missing_ok=True)  # left by a server that died
+        underway = start_underway(workspace_root, max_seconds)
+    # Something already listens on the port: a second server could only lose it.
+    occupied = underway is None and port_in_use(port)
     joined = underway["pid"] if underway is not None else None
     started_ms = underway["started_ms"] if underway is not None else int(time.time() * 1000)
     if underway is None:
         write_start_status(workspace_root, "starting", started_ms=started_ms)
     shown = opener(write_starting_page(workspace_root).as_uri()) is not False
     launch = start or (lambda: start_server(config_path, port, workspace_root / "logs", schedules))
-    process = launch() if underway is None else None
+    process = launch() if underway is None and not occupied else None
     own_pid = getattr(process, "pid", None)
     if isinstance(own_pid, int):
         write_atomically(
             workspace_root / START_RECORD,
             json.dumps({"pid": own_pid, "started_ms": started_ms}).encode("utf-8"),
         )
-    deadline = time.monotonic() + wait_seconds
-    while time.monotonic() < deadline:
+    begun = time.monotonic()
+
+    def waiting() -> bool:
+        """Within the wait, or past it while the server waited for still runs."""
+        elapsed = time.monotonic() - begun
+        if elapsed < wait_seconds:
+            return True
+        if elapsed >= max_seconds:
+            return False
+        if joined is not None:
+            return process_alive(joined)
+        exited = getattr(process, "poll", None)
+        return callable(exited) and exited() is None
+
+    while waiting():
         record = read_record(workspace_root)
         if record is not None and answers(str(record["address"])):
             address = str(record["address"])
