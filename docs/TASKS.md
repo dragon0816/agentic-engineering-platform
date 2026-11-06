@@ -4364,3 +4364,6 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [x] 2026-11-06, Codex: Atlas framed-answer test asserts the configured vault title plus version, preserving citation strictness after 7c6a5e04. Whole file: 54 passed with AEP_ATLAS_REPO pointing at atlas-embed, including browser cases.
 
 - [x] 2026-11-06, Codex: update the Agent Web follow-up source hook for F26 (3b5c460a), asserting readiness, queuing before clearing the message, and eventual submit. Whole file: 6 passed; browser files ran sequentially with worker-specific basetemp directories. Final Ruff format/check and mypy src/tests pass.
+
+
+- [x] 2026-11-06, Codex (bi-same-card-fix, base 3167044b): normal inferred chunk readings retain alternatives/evidence quietly; fact conflicts still warn. Fix timestamp max to compare UTC instants; restore the four coverage latest-update strings without changing any analysis/golden. Policy 2/model 13. Baseline two failures and four added timezone regressions reproduced. Requested pack/summary/same-card/feed group: 69 passed; final expanded summary/same-card group: 45 passed. CI checks and build recorded in HANDOFF.

@@ -6930,3 +6930,6 @@ A new BI `evidence:` operation may additionally contain `bi_evidence: {before, f
 The extra key is permitted only on BI evidence operations. Old AEP versions reject commits carrying it, so collaborators must upgrade together. Old commits require no rewrite. Replay policy 1 invalidates the local sync cache once; `MODEL_VERSION = 12` rebuilds BI materialization once. Feed fixtures and goldens remain pinned and unchanged.
 
 The replay epoch is persisted in `repo.sqlite` user_version, independently of the optional clean-sync stamp: incomplete or tampered files can invalidate that stamp without triggering another migration replay. Content determinism compares the complete UTF-8 SQL iterdump, including all tables and sqlite_sequence; SQLite file header transaction counters are local and intentionally differ.
+
+
+BI same-card release correction (2026-11-06): chunk-inferred readings retain alternatives without a conflict warning; sourced facts and ordinary fields still warn. Time maxima compare actual ISO instants in UTC (date-only/naive dates use UTC). A derived card.updated timestamp keeps history's representation on equal instants. Evidence and updated-field unit ties remain canonical and deterministic. Replay policy 2 / card model 13 supersede versions 1 / 12 for this timestamp correction; no commit or golden is rewritten.

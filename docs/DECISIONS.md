@@ -6744,3 +6744,13 @@ Owner: 「關於同一張卡，概述應該不會變，證具, raw data連結就
 - New BI evidence operations carry optional `bi_evidence` context: the prior evidence list and hashes of the field value before and after. Without this, a base hash alone cannot prove an append. Old commits remain readable; an ambiguous old evidence race remains a conflict. Reject silent guesses, changing immutable commits, or applying a blanket list union to replacements.
 - Older AEP rejects the extra operation key; all colleagues must use this release. BI replay policy version 1 forces one repository replay; card model 12 forces one materialization. No source files or real vaults are changed by development tests.
 - The same file imported into two homes (`source:` folder conflict) remains separate work, not part of this field-evidence policy.
+
+
+## 2026-11-06: Quiet chunk readings and chronological BI timestamps
+
+Release verification on 3167044b found two regressions from the same-card slice.
+
+- Within one extraction run, two inferred summary/usage/scope readings from chunks of the same source keep the first reading and retain the other as an alternative with evidence, without a value_conflict warning. Normal chunking is not a conflicting factual claim. Ordinary fields and sourced (fact) summaries still warn. Dropping the alternative or suppressing all value warnings was rejected.
+- Latest time means the later instant, comparing ISO dates/timestamps in UTC, never lexicographic timestamp text. Date-only/naive values compare in UTC consistently on every PC. Undated legacy strings sort before valid timestamps. Equal-time evidence/updated-field units retain their canonical tie-break; derived card.updated keeps the incoming history timestamp representation on equality, preserving the pre-existing history format.
+- The coverage golden difference was four latest-update cells only: aidc-computing/high-speed-io and aidc-power/{rf,power-generic-io,emc}. 2026-11-01T01:00:00+00:00 had become 2026-11-01T09:00:00+08:00, the same instant, because string max chose commit.created over history.at. Counts, source coverage and missing-field lists did not change. Fix the comparison, not the analysis or its golden; feed and default-pack goldens remain unchanged.
+- Replay policy 2 and card model 13 replace the buggy timestamp projection/materialization once; commit records remain immutable. Tests first reproduced four timezone failures, then cover both arrival orders and equal-time history formatting.

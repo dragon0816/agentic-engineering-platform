@@ -411,3 +411,6 @@ Owner decision: first `summary`, `usage`, `scope` stays; another automatic readi
 BI's `same_card` policy is the single operation projection for all repository replays and push. New evidence operations retain optional prior-row and field-hash context (`docs/CONTRACTS.md`, BI same-card operation merge), permitting append union without resurrecting a replaced value's evidence. Ambiguous old operations still conflict. Dates take the maximum. Model 12 and replay policy 1 require one rebuild/replay; older AEP refuses new context keys. Commits and feed fixtures are never rewritten.
 
 Open, outside this slice: one source file used in two homes still conflicts on its `source:` folder metadata; it needs a separate multi-home source contract.
+
+
+Release correction, 2026-11-06: normal inferred readings from chunks of one source keep the first and retain alternatives quietly. Fact conflicts still warn. Timestamp maxima use UTC instants, not text ordering; equal-time derived card.updated uses history's format. Replay policy 2 / MODEL_VERSION 13 rebuild the earlier buggy projection once. The four coverage latest-time formatting changes were reverted by fixing code; no pack/feed golden changed. See DECISIONS, "Quiet chunk readings and chronological BI timestamps".

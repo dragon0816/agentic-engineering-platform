@@ -278,7 +278,16 @@ def test_chunk_reading_keeps_alternative_evidence() -> None:
 
 
 @pytest.mark.parametrize("reverse", [False, True])
-def test_same_reference_is_one_row_with_the_later_fallback_time(reverse: bool) -> None:
+@pytest.mark.parametrize(
+    "dates",
+    [
+        ("2026-11-05", "2026-11-06"),
+        ("2026-11-06T10:00:00+08:00", "2026-11-06T03:00:00+00:00"),
+    ],
+)
+def test_same_reference_is_one_row_with_the_later_fallback_time(
+    reverse: bool, dates: tuple[str, str]
+) -> None:
     from capabilities.bi_cards import same_card, vault
     from knowledge.repo.repository import apply_ops
 
@@ -293,7 +302,7 @@ def test_same_reference_is_one_row_with_the_later_fallback_time(reverse: bool) -
             "reference_at": date,
             "reference_time_basis": "submission_fallback",
         }
-        for run, date in (("alice", "2026-11-05"), ("bob", "2026-11-06"))
+        for run, date in zip(("alice", "bob"), dates, strict=True)
     ]
     ops = [same_card.annotate(base, [{"unit": key, "value": [row], "base": None}]) for row in rows]
     units: dict[str, Any] = dict(base)
@@ -317,3 +326,40 @@ def test_an_append_does_not_reapply_a_stale_review_of_an_existing_reference() ->
     current = {field: base[field], key: [reviewed]}
     assert not apply_ops(current, ops, kind=vault.BiType())
     assert current[key] == [reviewed, addition]
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_updated_uses_chronological_time_across_offsets(reverse: bool) -> None:
+    from capabilities.bi_cards import vault
+    from knowledge.repo.repository import apply_ops
+
+    key = "field:fiction:updated"
+    values = ["2026-11-06T10:00:00+08:00", "2026-11-06T03:00:00+00:00"]
+    units: dict[str, Any] = {}
+    for value in reversed(values) if reverse else values:
+        assert not apply_ops(
+            units, [{"unit": key, "value": {"value": value}, "base": None}], kind=vault.BiType()
+        )
+    assert units[key]["value"] == values[1]
+
+
+@pytest.mark.parametrize("at", ["2026-11-06T02:00:00+00:00", "2026-11-06T03:00:00+00:00"])
+def test_card_updated_uses_chronological_time_and_history_format(at: str) -> None:
+    from capabilities.bi_cards.vault import _field_history
+
+    entry = {
+        "at": "2026-11-06T10:00:00+08:00",
+        "group": "one",
+        "ref": "one",
+        "author": "alice",
+        "changes": [
+            {
+                "unit": "field:fiction:summary",
+                "applied": True,
+                "before": None,
+                "after": {"value": "Fictional", "history": {"at": at}},
+            }
+        ],
+    }
+    _, cards = _field_history([entry])
+    assert cards["fiction"]["updated"] == at

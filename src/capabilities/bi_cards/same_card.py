@@ -4,14 +4,24 @@ from __future__ import annotations
 
 import hashlib
 from collections.abc import Mapping, Sequence
+from datetime import UTC, datetime
 from typing import Any
 
 from knowledge.repo.repository import canonical, value_hash
 
 from .card_model import reference_id
 
-VERSION = 1
+VERSION = 2
 READINGS = ("summary", "usage", "scope")
+
+
+def time_key(value: str) -> tuple[int, datetime]:
+    """Compare ISO dates/instants in UTC; legacy undated strings sort before dates."""
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError:
+        return 0, datetime.min.replace(tzinfo=UTC)
+    return 1, parsed.replace(tzinfo=UTC) if parsed.tzinfo is None else parsed.astimezone(UTC)
 
 
 def _union(rows: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -23,8 +33,8 @@ def _union(rows: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
         )
         previous = by_reference.get(identity)
 
-        def order(item: dict[str, Any]) -> tuple[str, str]:
-            return str(item.get("reference_at") or item.get("at") or ""), canonical(item)
+        def order(item: dict[str, Any]) -> tuple[tuple[int, datetime], str]:
+            return time_key(str(item.get("reference_at") or item.get("at") or "")), canonical(item)
 
         if previous is None or order(row) > order(previous):
             by_reference[identity] = row
@@ -106,7 +116,9 @@ def prepare(units: Mapping[str, Any], ops: Sequence[Mapping[str, Any]]) -> list[
         if key.endswith(":updated") and key.startswith("field:"):
             if isinstance(current, dict) and isinstance(value, dict):
                 if isinstance(current.get("value"), str) and isinstance(value.get("value"), str):
-                    item["value"] = max((current, value), key=lambda v: (v["value"], canonical(v)))
+                    item["value"] = max(
+                        (current, value), key=lambda v: (time_key(v["value"]), canonical(v))
+                    )
                     item["base"] = value_hash(current)
         if key.startswith("evidence:") and isinstance(value, list):
             field_key = "field:" + key.removeprefix("evidence:")

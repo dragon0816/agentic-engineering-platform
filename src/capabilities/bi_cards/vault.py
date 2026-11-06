@@ -588,7 +588,9 @@ def _field_history(
             info = cards.setdefault(
                 cid, {"created": entry["at"], "updated": entry["at"], "groups": set()}
             )
-            info["updated"] = max(info["updated"], history.get("at") or entry["at"])
+            at = history.get("at") or entry["at"]
+            if same_card.time_key(at) >= same_card.time_key(info["updated"]):
+                info["updated"] = at
             info["groups"].add(entry["group"])
             info.setdefault("first_import", history.get("import_id"))
             rows.append(
