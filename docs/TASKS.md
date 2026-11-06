@@ -4331,3 +4331,4 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [ ] BI: each domain's person owns a name dictionary, after the Dashboard slice (owner).
 
 - [x] 2026-11-06, Claude Code (worker D): `market-intel` sample marks settled on the owner's word, pushed, not published: 3 TestSolutions marked again, 4 Technologies stay cleared, 95 samples of 760. Only those marks moved; run `e3de934115f0` unchanged. `docs/phases/BI_SUMMARY_FILL.md`.
+- [x] 2026-11-06, Claude Code: BI acceptance F9 (rule folders include unpushed domains), F10 (a new card takes its folder's domain, the model's a proposal), F12 (status line links to 版本), F19 (an import commits only its own units and what they need). `test_bi_create_domain(_ui)`, `test_bi_folder_domain`, `test_bi_r6_ai_fixes`, `test_bi_version_link_ui`, `test_bi_import_commit_own`.
