@@ -84,6 +84,16 @@ waits, and the turn keeps `sent.budget`. A turn with nothing to show says in Chi
 it creates (`new`: role and folders, no text); the AI writes the text and 「套用為新版本」 saves
 revision 1. A failed or abandoned session leaves no rule; a name in use is `skill_exists`.
 
+**Which card types a rule produces (acceptance F17, 2026-11-06).** An empty `card_types` meant
+`extract.DEFAULT_TYPES` while the form said 「留空＝不限」, so a good rule about customers changed
+nothing. `ai_runs.run_types` decides it once: the person's choice for a run; else the rule's
+`card_types`, narrowed to the domain profile's types when the domain has a profile; else the
+profile's types; else the defaults. The skills list says per extract rule what a run produces
+(`run_types`, with where it comes from) and `profile_types` per home; the form says it as the person
+types, and its label says what empty means. The skill AI is told what a run makes now, and a draft
+whose text names card types a run would not produce is sent back to give `card_types` (a type the
+profile leaves out is not asked for, since `card_types` cannot add it).
+
 ## 5. T3: analyses (outline)
 
 An analysis conversation on the same harness with `bi_analysis__sql` (read-only connection on a copy, row and

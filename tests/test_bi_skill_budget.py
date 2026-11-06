@@ -258,7 +258,13 @@ def test_a_new_rule_is_saved_only_when_the_person_applies_a_draft(tmp_path: Path
             "tools": [
                 (
                     "bi_skill__try",
-                    {"source_id": source, "changes": {"body": "虛構電源廠一律是 Account。"}},
+                    {
+                        "source_id": source,
+                        "changes": {
+                            "body": "虛構電源廠一律是 Account。",
+                            "card_types": ["Account"],
+                        },
+                    },
                 )
             ]
         },
@@ -266,7 +272,13 @@ def test_a_new_rule_is_saved_only_when_the_person_applies_a_draft(tmp_path: Path
             "tools": [
                 (
                     "bi_skill__suggest",
-                    {"reply": "新規則。", "changes": {"body": "虛構電源廠一律是 Account。"}},
+                    {
+                        "reply": "新規則。",
+                        "changes": {
+                            "body": "虛構電源廠一律是 Account。",
+                            "card_types": ["Account"],
+                        },
+                    },
                 )
             ]
         },
@@ -274,7 +286,10 @@ def test_a_new_rule_is_saved_only_when_the_person_applies_a_draft(tmp_path: Path
     )
     turn = _turn(config, layout, ws, dataset, session["id"], ai, model, "虛構電源廠是 Account")
     assert turn["error"] is None, turn
-    assert turn["suggestion"]["changes"] == {"body": "虛構電源廠一律是 Account。"}
+    assert turn["suggestion"]["changes"] == {
+        "body": "虛構電源廠一律是 Account。",
+        "card_types": ["Account"],
+    }
     assert "power-vendors" not in names()
     shown = _ok(_call(ws, "GET", f"/api/bi/sessions/{session['id']}", dataset=dataset))
     index = len(shown["session"]["turns"]) - 1
@@ -291,6 +306,7 @@ def test_a_new_rule_is_saved_only_when_the_person_applies_a_draft(tmp_path: Path
     saved = next(s for s in listed["skills"] if s["name"] == "power-vendors")
     assert saved["body"].strip() == "虛構電源廠一律是 Account。"
     assert saved["applies_to"] == [folder]
+    assert saved["card_types"] == ["Account"]
 
 
 def test_a_new_rule_cannot_take_an_existing_name(tmp_path: Path) -> None:

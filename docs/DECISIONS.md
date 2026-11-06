@@ -6587,3 +6587,18 @@ sentence had already been saved as revision 1. Spec: `docs/phases/BI_TEST_AND_TO
 - **Not changed:** the schema and questions AIs (15 minutes, 40 tool calls, no trial cap or
   fallback) and the analysis AI (10 minutes, 30 calls) have the same shape; left for a decision.
 
+## 2026-11-06: An empty card_types means the domain profile's types, else the defaults
+
+Acceptance F17 (orchestrator): the skill form said 「只產生這些卡片類型（留空＝不限）」, but empty meant
+Signal, Technology and Application, so a rule about customers and supply links did nothing until the
+types were typed. Spec: `docs/phases/BI_TEST_AND_TOOLS.md` §4.
+
+- **Empty falls back to the domain's profile types when it has a profile, otherwise to the
+  defaults.** This is what runs already did; it is now one function and said on the page. Rejected:
+  empty = every schema type, which matches the old words but makes every run ask for all twelve
+  types (slower, noisier review) and changes every existing rule's output at once.
+- **The page says what a run produces** in the list and live in the form, and the label says what
+  empty means. Rejected: only rewording the label, which still hides the profile's effect.
+- **The skill AI must give `card_types` when its text names types a run would not make;** the
+  check names them. Types the profile leaves out are not demanded, since the rule cannot add them.
+

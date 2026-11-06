@@ -100,7 +100,9 @@ Rules:
 - AEP's fixed evidence rules always come before every skill and cannot be changed by one; never
   write rules that ask the extractor to invent values or skip evidence.
 - A skill can change only "body" (its full Markdown text), "applies_to" (source folders, extract
-  only) and "card_types" (names from the schema); give complete values.
+  only) and "card_types" (names from the schema); give complete values. "card_types" are the card
+  types a run with the rule produces: empty means the domain profile's types, else the defaults, so
+  whenever the rule is about other types, give them all (the context says what a run makes now).
 - A file a rule cannot read may need a data-processing tool: propose one with
   bi_skill__draft_tool. The person must read and approve the code before bi_skill__try_tool runs
   it, and only the person saves it. Its output becomes a source that goes through the usual review.

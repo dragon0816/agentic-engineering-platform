@@ -19,6 +19,7 @@ trial runs travel as fenced data.
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -54,7 +55,9 @@ Rules:
 - Change only what a skill can express:
   "body": the skill's full text (Markdown);
   "applies_to": the source folders the skill applies to (from the list given; extract only);
-  "card_types": the card types it is about (names from the schema).
+  "card_types": the card types a run with the skill produces (names from the schema). Empty means
+  the domain profile's types, else the defaults; whenever the rule is about other types, give
+  them all here, or the rule changes nothing.
 - Give the COMPLETE new value of each key you change; leave out keys you keep.
 - Anything a skill cannot express (a new file type, OCR, a parser, code, a schema change) goes in
   "needs_engineering". Never claim such a thing works.
@@ -144,6 +147,19 @@ def _recent_trials(staging: Staging) -> list[str]:
     return [r["id"] for r in staging.run_rows() if r["kind"] == "trial" and runs.listed(r)][:2]
 
 
+#: How the context names where a run's card types come from.
+TYPES_FROM = {
+    "skill": "the rule's card_types",
+    "profile": "the domain profile, since card_types is empty or outside it",
+    "default": "the defaults, since card_types is empty and the domain has no profile",
+}
+
+
+def _named_types(body: str, names: Any) -> list[str]:
+    """The schema's card types a rule's text names as words (Account, SupplyLink)."""
+    return [t for t in names if re.search(rf"(?<![A-Za-z]){re.escape(t)}(?![A-Za-z])", body)]
+
+
 def create_session(
     workspace: Path, dataset: str, name: str, actor: str, new: Any = None
 ) -> dict[str, Any]:
@@ -205,6 +221,13 @@ def session_turn(
         k: skill.get(k)
         for k in ("name", "role", "revision", "schema", "applies_to", "card_types", "body")
     }
+    run_note = ""
+    if skill.get("role") == "extract":
+        produced, origin, _ = vault.skill_run_types(workspace, vault_id, skill)
+        run_note = (
+            f"\nA run with this rule now produces only these card types: {', '.join(produced)} "
+            f"(from {TYPES_FROM[origin]}).\n"
+        )
     context = (
         f"Knowledge base schema: {reg.ref}\nCard types in this schema: {', '.join(reg.types)}\n"
         f"Card types this skill is about, with their fields:\n"
@@ -218,6 +241,7 @@ def session_turn(
             else f"The skill now (revision {skill.get('revision')}):\n"
         )
         + f"{json.dumps(shown, ensure_ascii=False, indent=1)}"
+        + run_note
         + (
             f"\n\nThis skill was written for {skill.get('schema')}; the knowledge base now uses "
             f"{listed['schema']}. Bring it up to date with the schema."
@@ -234,10 +258,25 @@ def session_turn(
         changes, found = _changes(answer)
         if found:
             return found
+        given = _given(skill, changes)
         try:
-            vault.checked_skill(workspace, vault_id, _given(skill, changes))
+            vault.checked_skill(workspace, vault_id, given)
         except BiStoreError as error:
             return [f"the changed skill is not valid: {error.message}"]
+        if given["role"] == "extract":
+            # A rule about types a run would not produce changes nothing (acceptance F17).
+            produced, _, allowed = vault.skill_run_types(workspace, vault_id, given)
+            missing = [
+                t
+                for t in _named_types(given["body"], reg.types)
+                if t not in produced and (allowed is None or t in allowed)
+            ]
+            if missing:
+                return [
+                    f"the rule is about {', '.join(missing)}, but a run with it produces only "
+                    f"{', '.join(produced)}: give card_types with every card type the rule is "
+                    "about"
+                ]
         return []
 
     turns = [*session["turns"], {"role": "user", "text": text}]

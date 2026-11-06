@@ -48,10 +48,16 @@ def test_vault_panel_and_dashboard_in_a_browser(
     # A skill's AI session is answered by a scripted model (no tools, one call): first the
     # rule being added, then a change to it.
     model = Scripted(
-        {"reply": "這條規則可以先這樣用。", "changes": {"body": "虛構電源廠是 Account。"}},
+        {
+            "reply": "這條規則可以先這樣用。",
+            "changes": {"body": "虛構電源廠是 Account。", "card_types": ["Account"]},
+        },
         {
             "reply": "把虛構電源廠的規則寫清楚。",
-            "changes": {"body": "虛構電源廠是 Account；額定功率放在 specs。"},
+            "changes": {
+                "body": "虛構電源廠是 Account；額定功率放在 specs。",
+                "card_types": ["Account"],
+            },
             "reasons": ["規格表常寫額定功率"],
         },
     )

@@ -2857,9 +2857,11 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
                   <input id="bi-b-sk-applies" class="bi-input" spellcheck="false"
                     placeholder="applications/aidc/sources"></div>
                 <div><label class="bi-label" for="bi-b-sk-types">
-                  只產生這些卡片類型（逗號分隔；留空＝不限）</label>
+                  只產生這些卡片類型（逗號分隔；留空＝用領域 profile 的類型，
+                  沒有 profile 就用預設類型）</label>
                   <input id="bi-b-sk-types" class="bi-input" spellcheck="false"></div>
               </div>
+              <p class="bi-meta" id="bi-b-sk-runtypes" role="status"></p>
               <p class="bi-meta" id="bi-b-sk-folders"></p>
               <label class="bi-label" for="bi-b-sk-body">規則內容</label>
               <textarea id="bi-b-sk-body" class="bi-input" rows="6"></textarea>
@@ -15052,6 +15054,12 @@ function biSkillsDraw(reply) {
         + "修改並儲存後才會再使用"));
     }
     if (item.problem) state.push(bh("p", "bi-warn", item.problem));
+    if (item.run_types) {
+      // What a run with it really produces (acceptance F17), whatever card_types says.
+      state.push(bh("p", "bi-meta", "產生：" + item.run_types.types.join("、")
+        + ({skill: "", profile: "（依領域 profile）", default: "（預設類型）"}[item.run_types.from]
+          || "")));
+    }
     const edit = bh("button", "bi-btn", "修改");
     edit.type = "button";
     edit.addEventListener("click", () => {
@@ -15373,10 +15381,36 @@ function biSkillForm(item) {
   el("bi-b-sk-body").value = item.body || "";
   el("bi-b-sk-folders").textContent = "可用的資料夾：" + ((bi.skills && bi.skills.folders) || [])
     .filter((f) => f !== "sources").join("、");
+  biSkillTypesNote();
   el("bi-b-sk-body").focus();
 }
 
 const biList = (text) => text.split(/[,，、\n]/).map((s) => s.trim()).filter(Boolean);
+
+function biRunTypes(role, applies, typed) {
+  // The card types a run with this rule produces, as ai_runs.run_types decides them
+  // (acceptance F17): the rule's, narrowed by the domain's profile, else the profile's,
+  // else the defaults.
+  if (role !== "extract") return null;
+  const s = bi.skills || {}, home = applies.length ? biFolderHome(applies[0]) : "";
+  const used = (s.profile_types || {})[home] || [];
+  if (used.length) {
+    const narrowed = typed.filter((t) => used.includes(t));
+    return narrowed.length ? [narrowed, "這條規則"] : [used, "領域 profile"];
+  }
+  return typed.length ? [typed, "這條規則"] : [s.default_types || [], "預設"];
+}
+
+function biSkillTypesNote() {
+  const found = biRunTypes(el("bi-b-sk-role").value, biList(el("bi-b-sk-applies").value),
+    biList(el("bi-b-sk-types").value));
+  el("bi-b-sk-runtypes").textContent = found
+    ? "用這條規則擷取會產生：" + found[0].join("、") + "（來自" + found[1] + "）"
+    : "分類規則不限定卡片類型。";
+}
+for (const id of ["bi-b-sk-role", "bi-b-sk-applies", "bi-b-sk-types"]) {
+  el(id).addEventListener("input", biSkillTypesNote);
+}
 
 el("bi-b-sk-new").addEventListener("click", () => biSkillNew()
   .catch((failure) => biNotice(false, failure.message)));
@@ -15696,7 +15730,8 @@ function biScopeEmpty() {
     && (item.applies_to || []).some((folder) => biFolderHome(folder) === scope));
   box.hidden = !scope || has;
   box.textContent = box.hidden ? "" : "這個領域還沒有判讀規則，AI 擷取只會找 "
-    + ((bi.skills || {}).default_types || []).join("、")
+    + (((bi.skills || {}).profile_types || {})[scope]
+      || (bi.skills || {}).default_types || []).join("、")
     + "。可以用「和 AI 新增規則」，或參考 library/skill-review 的範例。";
 }
 
