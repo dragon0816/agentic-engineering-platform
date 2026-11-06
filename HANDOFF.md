@@ -1,46 +1,40 @@
-# Handoff
+# BI SOP completed — bi-sop
 
-Updated 2026-11-06 by the same-card regression worker. No push, real vault access, server restart or installer action.
+Base: `73f9145c`; branch: `bi-sop`. No push. The next action is for the BI orchestrator to review and merge this documentation commit, then package the release with its existing BI_SOP copy step.
 
-## Goal and branch
+## Delivered
 
-Branch `bi-same-card-fix`, based on `3167044b`, in `C:/Users/Chi_L/.paseo/worktrees/2qnenase/bi-share-step`.
-The BI orchestrator reported 5939 passes and four failures on that main; two passed alone under less load, while the summary-chunk and coverage-golden failures reproduced alone. This branch fixes those two regressions without changing any golden.
+- `docs/guides/BI_SOP.zh-TW.md`: 98 numbered Traditional Chinese steps, exactly one screenshot per step, concrete controls, observed results and failure actions; flow index and fictional practice source text.
+- `docs/guides/images/bi-sop/`: 98 newly captured PNGs (1366 x 1000; 13,736,162 bytes). Every image was opened and visually read before copying into the public repository. Only fictional actors/companies/contacts, example email addresses and artificial phone numbers appear; no credential or token in images/address bars. No old screenshot reused, no UI image edited.
+- Real isolated headless agent-browser sessions against two independent temporary Agent Web processes on this base; gateway `127.0.0.1:4000`, model `gpt-5.5`, credential supplied only through environment. Two probes returned in 2.0 and 1.5 seconds; no gateway hang observed. Installer workspace assets were installed and `local_owner_grants` retained its default true. No runtime, contract or feed-golden change.
+- Covered new vault/domain/folders, two-file conversion and Markdown revision, schema suggestion and AI additive upgrade, Skill AI with five card types and manual v2, batch ingest and source-linked review/check marks, writes, commit via status line, manual/AI benchmark questions, AI dashboard creation/change and ordering, real benchmark, one-step share/date tag `2026-11-07`, second-PC join/cards/dashboard/questions, and chat citing that published version.
+- Business-card photo attach/save for two people; same-email update without duplicate; interactive chart/tree/group/file viewer; explicit department/title/manager updates with evidenced line; F5 and actual same-tab reload work; new conversation reads two persisted contacts and their final values.
+- Required guidance is explicit: AI 1–4 minutes, tool approval means reading/trusting code and guard is not a sandbox, same-tab F5/new-tab desktop shortcut, Telegram or file photo attachment with no page camera, everyone on same release.
 
-## Changes and decisions
+## Actual failures and limits retained in the SOP
 
-- `24a94a01`: within one extraction run, inferred summary/usage/scope variants keep the first reading, retain the other with evidence as an alternative, and do not emit value_conflict. Normal chunking should not alarm. Sourced summary facts and ordinary fields still warn. Tests cover all three reading fields, retained evidence and sourced/ordinary conflicts.
-- Timestamp correction: use one UTC instant comparison for updated-field maxima, duplicate reference times and derived card.updated. Date-only/naive dates compare in UTC on every PC; undated legacy text ranks below valid times. Field/reference ties still use canonical JSON. A derived card timestamp takes history's representation when instants tie, preserving legacy formatting.
-- Replay policy 2 and MODEL_VERSION 13 cause one correction replay/rebuild. Existing commits are immutable and the evidence-operation context format is unchanged. Decision and contract details are in docs/DECISIONS.md, docs/CONTRACTS.md and docs/phases/BI_CARD_MODEL.md.
-
-## Exact coverage difference and resolution
-
-Only four coverage latest-update strings changed on 3167044b:
-
-| Cell | Count, unchanged |
-|---|---:|
-| aidc-computing / high-speed-io | 1 |
-| aidc-power / rf | 1 |
-| aidc-power / power-generic-io | 3 |
-| aidc-power / emc | 1 |
-
-The golden value `2026-11-01T01:00:00+00:00` became `2026-11-01T09:00:00+08:00`: exactly the same instant. Lexical max had let commit.created's local offset text beat history.at's UTC text. Coverage ratios, counts and missing-field descriptions did not change. The correct fix is chronological comparison and history formatting on equality, not a new analysis answer. Every feed/default-pack golden remains untouched.
+- CSV Signal candidate lacked required `so_what` (「所以呢」); rejected it through the GUI. Do not invent source evidence to fill a required field.
+- AI first proposed a benchmark forbidding the source's actual six-month calibration period. Pointing to the original text made it correct its latest proposal; only the corrected pair was added.
+- Benchmark `bibench-20261106T160502-2c89`: working 2/3, pre-publication shared version 0/3. Calibration question missed six months because the answer read SupplyLink and missed CustomerProduct body. Kept the correct must-include, real failed answer and screenshots; did not weaken the test or change runtime. Reported this to the orchestrator. The entirely fictional tutorial vault was shared with this known limitation explicitly in its purpose; SOP says resolve failed questions before formal sharing.
+- Skill AI used its three-trial budget despite a one-trial request, then provided a usable rule; its limits are visible. Human review remains necessary.
+- Two PCs are independent workspaces on one machine sharing a fictional local directory. This verifies joining/replay/content/version propagation, not actual OneDrive/SharePoint cloud transport. No Telegram phone interaction, fresh Windows installer execution or Atlas deployment tested. No full repository pytest suite rerun for this documentation-only change.
 
 ## Verification
 
-Interpreter: `C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/.venv/Scripts/python`; PYTHONPATH=src.
+Python: `C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/.venv/Scripts/python`; `PYTHONPATH=src` for tests.
 
-- Before implementation: both reported failing files reproduced 2 failed / 11 passed; four new cross-offset chronology/equal-instant tests reproduced four failures.
-- `python -m pytest tests/test_bi_card_summaries.py tests/test_bi_same_card.py tests/test_bi_pack_chains.py tests/test_bi_default_pack.py tests/test_bi_feed_fixtures.py tests/test_bi_feed_api.py tests/test_bi_feed_server.py -q --basetemp .scratch/same-card-fix-final`: 69 passed.
-- After the final extra sourced-summary and duplicate-reference timezone cases, `python -m pytest tests/test_bi_card_summaries.py tests/test_bi_same_card.py -q --basetemp .scratch/same-card-fix-complete`: 45 passed.
-- All files matching test_bi_pack_* are included (currently test_bi_pack_chains.py); test_bi_default_pack.py additionally checks the pack's other fixtures.
-- `python -m ruff check .`, `python -m ruff format --check .`, `python -m mypy`: passed; mypy checked 1047 source files.
-- `python -m pip check`: passed, no broken requirements.
-- `python -m build --no-isolation --outdir .scratch/same-card-fix-dist`: successfully built the sdist and wheel. The final wheel-only rebuild passed; all four changed source modules inside the wheel match the final worktree byte for byte.
-- No golden files changed. No browser files touched or browser tests required for this slice. No complete repository suite rerun or Windows installer/preview build here; release-wide integration remains with the orchestrator.
+- `python -m pytest tests/test_release_windows.py -q --basetemp C:/Temp/bi-sop-release-tests-73`: 8 passed; after final manuscript/images, rerun with `C:/Temp/bi-sop-release-final-73`: 8 passed in 1.22s.
+- `python -m ruff check .`: passed.
+- `python -m ruff format --check .`: 1389 files already formatted.
+- `python -m mypy`: no issues in 1047 source files.
+- Also `ruff check src tests`, `ruff format --check src tests` (1093 files), `mypy src tests`: passed.
+- `python -m build`: wheel and sdist built successfully.
+- `python -m pip check`: no broken requirements.
+- `git diff --check`: passed (only normal LF/CRLF working-copy notices).
+- Documentation audit: 98 consecutive steps; 98 unique links match all public PNG filenames; every image 1366 x 1000 and byte-identical to its fresh reviewed capture; no unfinished text, credential patterns or actual gateway secret. Documentation-only final architecture review: no boundary/policy/runtime change.
 
-## Next actions
+## Cleanup and safety
 
-1. Both fixes are committed on bi-same-card-fix (first 24a94a01 for quiet chunk alternatives, then the timestamp correction carrying this handoff). Review git log for their hashes and report to BI orchestrator agent 1c2694f9-300d-4869-998b-4d33e40561e1.
-2. The orchestrator integrates this branch and runs final combined-head/full-suite and installer checks. Do not push or access the owner's real vault.
-3. The separate same-file-in-two-homes source.folder conflict remains open in TASKS; this patch does not claim to fix it.
+Own servers were loopback ports 65031 and 65052 only. Before stopping, authenticated `/api/activity` on each reported idle with zero items. Both named browsers (`bi-sop-73-pc1`, `bi-sop-73-pc2`) closed. Both temporary server processes shut down normally (exit 0); ports no longer listening and private endpoint files removed. The owner's Agent Web and real vault were never used or restarted.
+
+Private temporary fictional workspaces/captures remain outside the commit for audit. `.scratch` contains local-only automation/verification logs and is ignored; never publish its private bootstrap logs. New work should use a new temporary runtime, not restart or attach to the owner's server. No unfinished implementation remains in this branch.
