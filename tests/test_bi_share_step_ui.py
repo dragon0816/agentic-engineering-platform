@@ -125,8 +125,15 @@ def test_one_share_step_carries_commit_push_tag_and_publish(tmp_path: Path) -> N
             page.click("#bi-views [data-bi-view=build]")
             page.stage("test")
             page.wait("document.querySelectorAll('#bi-b-share-tests tbody tr').length === 2")
+            # The domains' names come with another read; the tables are drawn again with them.
+            page.wait("['aidc', 'wireless'].every((k) => bi.build.homes.some((h) => h.home === k))")
             label = "bi.build.homes.find((h) => h.home === %r).label"
             wireless, aidc = str(page.run(label % "wireless")), str(page.run(label % "aidc"))
+            names = json.dumps("|".join(sorted([aidc, wireless])))
+            page.wait(
+                "[...document.querySelectorAll('#bi-b-share-tests tbody tr')]"
+                f".map((r) => r.cells[0].textContent).sort().join('|') === {names}"
+            )
 
             # -- what will be shared, by whom, in which domain ---------------------------------
             rows = json.loads(
@@ -141,7 +148,7 @@ def test_one_share_step_carries_commit_push_tag_and_publish(tmp_path: Path) -> N
             # Each domain's tests: wireless regressed; aidc's content changed since its run, so
             # that run is an old result (acceptance F24).
             assert _states(page) == {aidc: "舊結果", wireless: "退步"}
-            assert "比較：工作版本與大家已 push 的內容" in page.text_of("bi-b-bench-report")
+            page.see("bi-b-bench-report", "比較：工作版本與大家已 push 的內容")
             tests = page.text_of("bi-b-share-tests")
             assert "其他領域，不擋這次 push" in tests and "虛構題 theirs" in tests
             # A regression in another domain does not stop it, and asks nothing more.

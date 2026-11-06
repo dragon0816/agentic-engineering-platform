@@ -15151,7 +15151,12 @@ async function biShareLoad(vaultId) {
   const seq = bi.shareSeq = (bi.shareSeq || 0) + 1;
   const plan = await call("/api/bi/vaults/" + vaultId + "/share");
   if (seq !== bi.shareSeq || vaultId !== bi.verVault) return;
-  bi.share = plan;
+  bi.share = plan; bi.shareVault = vaultId;
+  biShareDraw(plan);
+}
+
+function biShareDraw(plan) {
+  // Drawn again when the domains' names arrive (`biSourceFolders`): before, a home shows its key.
   const list = el("bi-b-share-list"); list.replaceChildren();
   const commits = plan.commits || [];
   list.append(bh("p", "", plan.published
@@ -16085,6 +16090,9 @@ async function biSourceFolders() {
   const listed = biDataset(), reply = await call("/api/bi/vaults/" + vault.id + "/skills");
   if (listed !== biDataset()) return;
   bi.build.homes = reply.homes || [];
+  if (bi.share && bi.shareVault === vault.id && vault.id === bi.verVault) {
+    biShareDraw(bi.share);
+  }
   const pick = el("bi-b-src-folder"), current = pick.value;
   const all = bh("option", "", "全部領域"); all.value = "sources";
   pick.replaceChildren(all, ...bi.build.homes.map((item) => {
