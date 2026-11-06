@@ -384,7 +384,7 @@ def test_the_whole_build_flow(
     # -- what users get: the published version has it all ------------------------------------
     assert agent.script == []  # every scripted AI step ran
     target = vault.Vault(workspace, vault_id)
-    assert target.reads()["tag"] == "v1"
+    assert target.reads()["tag"] == date.today().isoformat()
     published = vault.reading_store(workspace, dataset)
     assert "A 公司評估 TSN" in {c["name"] for c in published.card_rows()}
     assert published.schema_ref().startswith("bi.schema/v1.1@5.0.0+")
