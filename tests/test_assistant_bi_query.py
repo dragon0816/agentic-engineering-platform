@@ -120,7 +120,8 @@ def test_turned_on_it_answers_from_the_published_version_with_the_source_line(
         answer = _call(server, **_search(dataset))
         assert answer["ok"] is True, answer
         assert "FACT-PUBLISHED" in json.dumps(answer["cards"], ensure_ascii=False)
-        assert answer["source"] == f"資料來源：知識庫 {dataset} 發佈版本 v1"
+        # The vault's name, not its dataset id (`vault-` + id read 「vault-vault-199bbd」).
+        assert answer["source"] == "資料來源：知識庫 Market Signals 發佈版本 v1"
         assert answer["reads"]["tag"] == "v1"
         # A push after the tag is not read; the source line does not move.
         bi._ok(bi._edit(publisher, dataset, "TSN", "standard_body", "FACT-PUSHED", "alice"))

@@ -692,7 +692,8 @@ def _vault_lines(result: Any) -> list[str]:
         read = host.data.get("vault") if isinstance(host.data, dict) else None
         if isinstance(read, dict):
             key = (str(read.get("dataset")), str(read.get("commit")))
-            found.setdefault(key, repo_engine.source_line(str(read.get("dataset")), read))
+            name = str(read.get("title") or read.get("dataset"))
+            found.setdefault(key, repo_engine.source_line(name, read))
     return list(found.values())
 
 

@@ -244,7 +244,10 @@ class QueryHandler:
                 vault_id = store.vault_id
                 store = vault.reading_store(self.workspace_root, request.dataset)
                 reads = vault.Vault(self.workspace_root, vault_id).reads()
-                read_version = {"dataset": request.dataset, **reads}
+                # The vault's name for the source line: its id can be unreadable, and a vault's
+                # dataset is `vault-<id>`, so `vault-vault-199bbd` showed (acceptance).
+                title = vault.Vault(self.workspace_root, vault_id).describe().get("title")
+                read_version = {"dataset": request.dataset, "title": title, **reads}
                 published = (
                     f"內容來自發佈版本 {reads['tag']}"
                     if reads["tag"]

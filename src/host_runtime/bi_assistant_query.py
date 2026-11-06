@@ -95,7 +95,7 @@ def answer(
         "passages_withheld": data.get("passages_withheld") or 0,
         "analysis": data.get("analysis") or [],
         "scope_note": data.get("scope_note"),
-        "source": source_line(dataset, read),
+        "source": source_line(str(read.get("title") or dataset), read),
         "sample_note": data.get("sample_note") or "",
         "reads": {"tag": read.get("tag"), "commit": read.get("commit")},
     }
