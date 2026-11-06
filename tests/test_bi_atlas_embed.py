@@ -516,7 +516,8 @@ def test_the_answer_stores_the_embed_and_keeps_its_page_once(web: AgentWeb) -> N
 def test_a_framed_panels_answer_cites_the_vault_and_version(web: AgentWeb) -> None:
     # Asking a vault (BI_VAULT_ASKING.md): an answer from a vault says which version it read.
     read = _show(web, {"dataset": DATASET, "analysis": SLUG}).data["vault"]
-    line = repository.source_line(DATASET, read)
+    # Chat cites the configured title, not the internal dataset id (7c6a5e04).
+    line = repository.source_line("Feed Fixture Market (fictional)", read)
     _session, answer = _turn(
         web,
         {"tools": [(ATLAS_TOOL, {"dataset": DATASET, "analysis": SLUG})]},

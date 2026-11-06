@@ -4360,3 +4360,5 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [ ] Release test maintenance: migrate-domains content-derived schema version, Atlas vault-title citation, and F26 early-send follow-up hooks; assigned by BI orchestrator, separate commits on bi-same-card.
 
 - [x] 2026-11-06, Codex: migrate-domains vault test pins the content-derived 5.1.118005 version and identical schema refs on both PCs (BI_CARD_MODEL section 4.3), retaining the direct-dataset 5.1.0 assertion. Whole file: 3 passed.
+
+- [x] 2026-11-06, Codex: Atlas framed-answer test asserts the configured vault title plus version, preserving citation strictness after 7c6a5e04. Whole file: 54 passed with AEP_ATLAS_REPO pointing at atlas-embed, including browser cases.
