@@ -2789,6 +2789,38 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
           hidden>
           <h3 class="kp-stage-title" id="bi-b-schema" tabindex="-1">步驟 2／3・類別與規則</h3>
           <p class="bi-meta" id="bi-b-schema-now"></p>
+          <div class="bi-step-grid" id="bi-b-sg-bar">
+            <div><label class="bi-label" for="bi-b-sg-scope">看哪些來源</label>
+              <select id="bi-b-sg-scope">
+                <option value="new">這個領域還沒 ingest 的來源</option>
+                <option value="picked">步驟 1 選的來源</option></select></div>
+            <div><button class="go" id="bi-b-sg-run" type="button">建議 schema</button></div>
+            <div><button class="bi-btn" id="bi-b-sa-open" type="button">
+              和 AI 調整 schema</button></div>
+          </div>
+          <div class="mem-status" id="bi-b-sg-status" role="status" aria-live="polite"
+            hidden></div>
+          <div id="bi-b-sg-box" hidden>
+            <p class="bi-meta" id="bi-b-sg-sum"></p>
+            <div class="bi-scroll"><table class="bi-table bi-stack" id="bi-b-sg-table"
+              aria-label="schema 建議">
+              <thead><tr><th>建議</th><th>為什麼</th><th>原文</th><th>動作</th></tr></thead>
+              <tbody></tbody></table></div></div>
+          <div id="bi-b-draft-main" role="region" aria-labelledby="bi-b-draft-h" hidden>
+            <h4 id="bi-b-draft-h">Schema 草稿</h4>
+            <div class="bi-step-grid">
+              <div><label class="bi-label" for="bi-b-draft-pick">草稿</label>
+                <select id="bi-b-draft-pick"></select></div>
+              <div><button class="go" id="bi-b-draft-use" type="button">
+                套用到資料集</button></div>
+            </div>
+            <div class="bi-scroll"><table class="bi-table bi-stack" id="bi-b-draft-table"
+              aria-label="草稿的改動">
+              <thead><tr><th>類型</th><th>欄位</th><th>改動</th><th>說明</th></tr></thead>
+              <tbody></tbody></table></div>
+            <p class="bi-meta" id="bi-b-draft-sum"></p>
+          </div>
+          <div id="bi-b-upgrade" hidden></div>
           <div class="bi-ai" id="bi-b-skills" role="region" aria-labelledby="bi-b-skills-h"
             hidden>
             <h4 id="bi-b-skills-h">判讀規則（skills）</h4>
@@ -2875,12 +2907,7 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
           <details class="bi-manage bi-adv" id="bi-b-adv-schema">
             <summary>進階：Schema</summary>
           <div id="bi-b-versions"></div>
-          <div id="bi-b-upgrade" hidden></div>
-          <div class="bi-actions"><button class="bi-btn" id="bi-b-sa-open" type="button">
-            和 AI 調整 schema</button></div>
           <h4>Schema 草稿</h4>
-          <p class="bi-meta">草稿每次儲存都是新的版次，可以比較與回復；儲存草稿不會改動任何資料集。
-            發布後成為新版本，再用「預覽升級」把資料集移過去。</p>
           <div class="bi-actions"><button class="bi-btn" id="bi-b-draft-new" type="button">
             從目前版本建立草稿</button></div>
           <ul id="bi-b-drafts" class="bi-cards" aria-label="schema 草稿"></ul>
@@ -16237,25 +16264,36 @@ el("bi-b-upload").addEventListener("click", async () => {
 });
 
 // -- step 2: schema ----------------------------------------------------------
+function biSchemaLabel(schema) {
+  // Readable, never the digest (acceptance F6): 「5.0 加 1 項新增」.
+  return (schema || {}).label || (schema || {}).version || "—";
+}
+
 async function biBuildSchema() {
   const schema = bi.schema || {};
-  const id = schema.schema_id, ref = schema.ref || "";
-  el("bi-b-schema-now").textContent = "這個資料集目前使用 " + (ref || id || "—") + "（"
-    + (schema.title || "") + "），" + (schema.types || []).length + " 種卡片。";
-  const others = bi.schemas.filter((item) => item.id === id && item.ref !== ref);
+  const now = el("bi-b-schema-now"); now.replaceChildren();
+  now.append("目前的 schema：" + biSchemaLabel(schema) + "・" + (schema.types || []).length
+    + " 種卡片");
+  if ((schema.additions || []).length) {
+    now.append(bh("details", "bi-manage", bh("summary", "", "新增了哪些"),
+      bh("ul", "", ...schema.additions.map((a) => bh("li", "", a)))));
+  }
+  // Only newer versions that keep this vault's additions (acceptance F6).
+  const newer = schema.upgrades || [];
   const box = el("bi-b-versions"); box.replaceChildren();
-  if (others.length) {
-    box.append(bh("p", "bi-meta", "同一個 schema 的其他版本："));
-    for (const item of others) {
-      box.append(bh("div", "bi-actions", bh("span", "", item.ref),
+  if (newer.length) {
+    box.append(bh("p", "bi-meta", "可以升級到的版本："));
+    for (const item of newer) {
+      box.append(bh("div", "bi-actions", bh("span", "", item.label),
         biButton("預覽升級", () => biBuildUpgradePreview(item.ref), "bi-btn",
-          "預覽把資料集移到 " + item.ref)));
+          "預覽把資料集移到 " + item.label)));
     }
   } else {
-    box.append(bh("p", "bi-meta", "沒有同一個 schema 的其他版本。"));
+    box.append(bh("p", "bi-meta", "沒有比目前更新的版本。"));
   }
   await biBuildDrafts();
   await biBuildSessA(false);
+  await biSuggestLoad();
 }
 
 function biImpactList(title, items, render) {
@@ -16269,7 +16307,9 @@ async function biBuildUpgradePreview(to) {
   const preview = await biCall("/api/bi/datasets/" + encodeURIComponent(biDataset())
     + "/schema/preview", {to});
   bi.build.upgrade = preview;
-  const parts = [bh("h4", "", "升級 " + preview.from + " → " + preview.to)];
+  const parts = [bh("h4", "", preview.additive
+    ? "加入 " + preview.diff.length + " 項新增到 " + biSchemaLabel(bi.schema) + "（版本不變）"
+    : "升級 " + biSchemaLabel(bi.schema) + " → " + biRefLabel(preview.to))];
   for (const type of preview.types) {
     const lines = [
       biImpactList("改名後移動的值", type.renamed, (r) => r.from + " → " + r.to + "（"
@@ -16290,13 +16330,29 @@ async function biBuildUpgradePreview(to) {
   } else {
     if (parts.length === 1) parts.push(bh("p", "bi-meta", "既有卡片都不受影響。"));
     parts.push(bh("div", "bi-actions", biButton("套用升級", async () => {
-      await biCall("/api/bi/datasets/" + encodeURIComponent(biDataset()) + "/schema/apply",
-        {to: preview.to, preview_token: preview.preview_token});
-      biNotice(true, "資料集已升級到 " + preview.to + "。");
+      const done = await biCall("/api/bi/datasets/" + encodeURIComponent(biDataset())
+        + "/schema/apply", {to: preview.to, preview_token: preview.preview_token});
+      biNotice(true, biUpgradeWords(preview.from, done.schema));
       box.hidden = true; await biLoad();
     }, "go")));
   }
   box.append(...parts);
+}
+
+function biRefLabel(ref) {
+  // `bi.schema/v1.1@5.1.0` -> 5.1, as the server labels a version.
+  const version = String(ref || "").split("@")[1] || String(ref || "");
+  const base = version.split("+")[0], parts = base.split(".");
+  return parts.length === 3 && parts[2] === "0" ? parts[0] + "." + parts[1] : base;
+}
+
+function biUpgradeWords(from, after) {
+  // What really happened: additions on the same version, or a new one (acceptance F6).
+  const same = String(from).split("+")[0] === String(after.ref).split("+")[0];
+  return same
+    ? "已加入 schema：" + after.label
+      + "（相容的新增，不是新版本；commit 並 push 後大家才會用到）。"
+    : "資料集已升級到 " + after.label + "。";
 }
 
 async function biBuildDrafts() {
@@ -16308,7 +16364,198 @@ async function biBuildDrafts() {
     list.append(bh("li", "", biButton(draft.title + "・第 " + draft.revisions + " 版"
       + (draft.valid ? "" : "（有錯誤）"), () => biBuildOpenDraft(draft.id), "bi-btn")));
   }
+  biDraftMain();
 }
+
+const BI_DRAFT_CHANGE = {type_added: "新增類型", type_removed: "移除類型", field_added: "新增欄位",
+  field_removed: "移除欄位", renamed: "改名", widened: "放寬型別", kind: "改型別",
+  class: "改類別", required: "必填", enum_added: "新增允許值", enum_removed: "移除允許值",
+  link_to: "改連結", label: "顯示名稱", aliases: "別名", naming: "命名欄位"};
+
+function biDraftMain() {
+  // Acceptance F8: the draft as a table of what changes; the AI edits it, JSON is 進階.
+  const view = bi.build.draft, box = el("bi-b-draft-main");
+  const pick = el("bi-b-draft-pick"); pick.replaceChildren();
+  for (const draft of bi.build.drafts || []) {
+    const option = new Option(draft.title + "・第 " + draft.revisions + " 版", draft.id);
+    option.selected = Boolean(view && view.draft.id === draft.id);
+    pick.append(option);
+  }
+  box.hidden = !view;
+  const body = el("bi-b-draft-table").tBodies[0]; body.replaceChildren();
+  if (!view) return;
+  for (const c of view.diff) {
+    const row = bh("tr", c.breaking ? "bi-flag-red" : "", bh("td", "", biTypeLabel(c.type)),
+      bh("td", "", c.field || "—"), bh("td", "", (c.breaking ? "⚠ " : "")
+        + (BI_DRAFT_CHANGE[c.change] || c.change)), bh("td", "", c.detail));
+    body.append(row);
+  }
+  if (!view.diff.length) {
+    body.append(bh("tr", "", bh("td", "bi-empty", "這份草稿和目前的 schema 一樣。")));
+  }
+  el("bi-b-draft-sum").textContent = view.errors.length
+    ? "有 " + view.errors.length + " 個問題，不能套用；請和 AI 調整，或在進階看 JSON。"
+    : view.additive ? "都是新增：套用後版本不變，加在目前的 schema 上。"
+      : "有新增以外的改動：套用後是新的版本。";
+  el("bi-b-draft-use").disabled = Boolean(view.errors.length || !view.diff.length);
+}
+
+el("bi-b-draft-pick").addEventListener("change", () => biBuildOpenDraft(
+  el("bi-b-draft-pick").value).catch((failure) => biNotice(false, failure.message)));
+el("bi-b-draft-use").addEventListener("click", async () => {
+  // Publish the open revision, then the same preview and confirm as 預覽升級.
+  const view = bi.build.draft; if (!view) return;
+  try {
+    const reply = await biCall("/api/bi/schema-drafts/" + view.draft.id + "/publish",
+      {rev: view.revision});
+    await biBuildUpgradePreview(reply.ref);
+    el("bi-b-upgrade").scrollIntoView({block: "nearest"});
+  } catch (failure) {
+    const errors = (failure.payload && failure.payload.errors) || [];
+    biNotice(false, "沒有套用：" + failure.message + (errors.length ? "（"
+      + errors.map((e) => e.path + "：" + e.message).join("；") + "）" : ""));
+  }
+});
+
+// -- step 2a: 建議 schema (BI_PAGE_SIMPLE.md S2, acceptance F5) --------------------
+// The fit question alone, on a press: the model reads the sources, no card is written.
+// Each row is quoted from a source; 「不用改」 is an answer.
+const BI_SG_KIND = {extend_schema: ["新增欄位", "accent"], dictionary_change: ["用語", "dim"],
+  propose_type: ["新增類型", "warn"], needs_clarification: ["待釐清", "dim"]};
+
+function biSuggestSources() {
+  if (el("bi-b-sg-scope").value === "picked") {
+    return bi.build.sourceId ? [bi.build.sourceId] : [];
+  }
+  return (bi.build.sources || []).filter((s) => biSourceInScope(s) && s.markdown_rev)
+    .map((s) => s.id);
+}
+
+async function biSuggestLoad() {
+  // A read that answers after a press must not put back what the press replaced.
+  const seq = bi.sgSeq = (bi.sgSeq || 0) + 1;
+  const reply = await call("/api/bi/schema-suggest?dataset=" + encodeURIComponent(biDataset()));
+  if (seq !== bi.sgSeq) return;
+  biSuggestShow(reply.suggestion);
+  if (reply.suggestion && reply.suggestion.status === "running") biSuggestFollow();
+}
+
+async function biSuggestFollow() {
+  const listed = biDataset(), seq = bi.sgSeq = (bi.sgSeq || 0) + 1;
+  for (;;) {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    if (seq !== bi.sgSeq || listed !== biDataset()) return;
+    const reply = await call("/api/bi/schema-suggest?dataset=" + encodeURIComponent(listed));
+    biSuggestShow(reply.suggestion);
+    if (!reply.suggestion || reply.suggestion.status !== "running") return;
+  }
+}
+
+function biSuggestShow(state) {
+  bi.build.suggest = state;
+  const box = el("bi-b-sg-box"), body = el("bi-b-sg-table").tBodies[0];
+  el("bi-b-sg-run").disabled = Boolean(state && state.status === "running");
+  if (!state) { box.hidden = true; biStatus("bi-b-sg-status", ""); return; }
+  if (state.status === "running") {
+    biStatus("bi-b-sg-status", "loading", "AI 正在看 " + state.sources.length + " 份來源…（第 "
+      + state.done + "／" + state.sources.length + " 份；只問 schema，不會寫卡片）");
+  } else if (state.status === "failed") {
+    biStatus("bi-b-sg-status", "error", "建議沒有完成：" + state.failures.map((f) => f.message)
+      .join("；"));
+  } else {
+    biStatus("bi-b-sg-status", "");
+  }
+  box.hidden = state.status === "running";
+  const tokens = state.answers.input_tokens + state.answers.output_tokens;
+  el("bi-b-sg-sum").textContent = "看了 " + state.sources.length + " 份來源（"
+    + state.sources.map((s) => s.name).join("、") + "）"
+    + (state.seconds !== null ? "，" + state.seconds + " 秒" : "")
+    + (tokens ? "，約 " + tokens + " tokens" : "")
+    + (state.answers.reused ? "，" + state.answers.reused + " 段沿用上次的回答" : "")
+    + "。放得進目前 schema 的內容 " + state.fits + " 項"
+    + (state.unquoted ? "；" + state.unquoted + " 項找不到原文，沒有列出" : "")
+    + (state.left_out ? "；還有 " + state.left_out + " 份沒看（一次最多 10 份）" : "")
+    + (state.failures.length ? "；" + state.failures.length + " 段沒有讀到" : "") + "。";
+  body.replaceChildren();
+  for (const row of state.items) body.append(biSuggestRow(state, row));
+  if (!state.items.length && state.status === "done") {
+    const cell = bh("td", "", bh("strong", "", "不用改"),
+      "：這些來源的內容都放得進目前的 schema。");
+    cell.colSpan = 4;
+    body.append(bh("tr", "", cell));
+  }
+}
+
+function biSuggestRow(state, row) {
+  const kind = BI_SG_KIND[row.kind] || [row.kind, "dim"];
+  const why = bh("td", "", row.reason);
+  if (row.questions.length) why.append(biListBlock("要回答", row.questions));
+  const quote = bh("td", "", bh("q", "", row.quote), bh("div", "bi-meta", row.source
+    + (row.places > 1 ? "・提到 " + row.places + " 次" : "")));
+  const act = bh("td", "");
+  if (row.status === "applied") {
+    act.append(biBadge("✓ 已加入", "good"), " " + (row.schema || ""));
+  } else if (row.status === "rejected") {
+    act.append(biBadge("✕ 不要", "dim"));
+  } else {
+    // One way first: add it when a press can, else talk it through; the rest in a menu.
+    const direct = row.applies && biDataset().startsWith("vault-");
+    const add = direct ? biButton("加入 schema", () => biSuggestApply(state, row), "go",
+      "把「" + row.what + "」加入 schema") : null;
+    const ask = biButton("和 AI 討論", () => biSuggestAsk(row), direct ? "bi-btn" : "go",
+      "和 AI 討論「" + row.what + "」");
+    const no = biButton("不要", () => biSuggestReject(state, row), "bi-btn",
+      "不要「" + row.what + "」");
+    act.append(add || ask, biRowMenu(add ? ask : null, no));
+  }
+  const tr = bh("tr", "", bh("td", "", biBadge(kind[0], kind[1]), " ", row.what), why, quote,
+    act);
+  tr.dataset.row = row.id;
+  return tr;
+}
+
+async function biSuggestApply(state, row) {
+  const reply = await biCall("/api/bi/schema-suggest/apply",
+    {dataset: biDataset(), id: state.id, row: row.id});
+  biNotice(true, "已加入「" + row.what + "」：目前的 schema 是 " + reply.schema.label
+    + "（相容的新增，不是新版本；commit 並 push 後大家才會用到）。");
+  bi.schema = await biCall("/api/bi/schema?dataset=" + encodeURIComponent(biDataset()));
+  await biBuildSchema();
+  biSuggestShow(reply.suggestion);
+}
+
+async function biSuggestReject(state, row) {
+  const reply = await biCall("/api/bi/schema-suggest/reject",
+    {dataset: biDataset(), id: state.id, row: row.id, reason: "不需要"});
+  biSuggestShow(reply.suggestion);
+}
+
+async function biSuggestAsk(row) {
+  // The one AI panel, with the suggestion and its quote already written.
+  await biSchemaAi();
+  const box = el("bi-ai-sources");
+  for (const input of box.querySelectorAll("input")) {
+    if (input.value === row.source_id) input.checked = true;
+  }
+  el("bi-ai-msg").value = "建議：" + row.what + "\n理由：" + row.reason + "\n原文（"
+    + row.source + "）：「" + row.quote + "」"
+    + (row.questions.length ? "\n要回答：" + row.questions.join("；") : "")
+    + "\n請幫我決定要不要改 schema，要的話怎麼改。";
+}
+
+el("bi-b-sg-run").addEventListener("click", async () => {
+  const ids = biSuggestSources();
+  if (!ids.length) {
+    biStatus("bi-b-sg-status", "error", el("bi-b-sg-scope").value === "picked"
+      ? "先在步驟 1 選一份來源。" : "這個領域還沒有轉好的來源。"); return;
+  }
+  bi.sgSeq = (bi.sgSeq || 0) + 1;
+  try {
+    const reply = await biCall("/api/bi/schema-suggest", {dataset: biDataset(), source_ids: ids,
+      only_new: el("bi-b-sg-scope").value === "new"});
+    biSuggestShow(reply.suggestion); biSuggestFollow();
+  } catch (failure) { biStatus("bi-b-sg-status", "error", failure.message); }
+});
 
 function biDraftInfo(view) {
   const info = el("bi-b-draft-info"); info.replaceChildren();
@@ -16338,7 +16585,7 @@ function biBuildShowDraft(view) {
   el("bi-b-draft").hidden = false;
   el("bi-b-draft-text").value = JSON.stringify(view.document, null, 1);
   el("bi-b-draft-note").value = "";
-  biDraftInfo(view);
+  biDraftInfo(view); biDraftMain();
   if (other) el("bi-b-draft-trial-result").replaceChildren();
   biBuildSessA(other).catch((failure) => biNotice(false, "對話沒有載入：" + failure.message));
 }
@@ -16353,8 +16600,8 @@ function biSchemaAbout() {
   const draft = bi.build.draft;
   return draft ? "草稿「" + draft.draft.title + "」第 " + draft.revision + " 版。"
     + "發布並升級前，資料集不會變。"
-    : "還沒有開啟草稿：第一句話會從 " + ((bi.schema || {}).ref || "目前版本")
-      + " 建一份。發布並升級前，資料集不會變。";
+    : "還沒有開啟草稿：第一句話會從目前的 schema（" + biSchemaLabel(bi.schema)
+      + "）建一份。套用前，資料集不會變。";
 }
 
 function biSchemaSources() {
@@ -16499,8 +16746,10 @@ el("bi-b-draft-publish").addEventListener("click", async () => {
   try {
     const reply = await biCall("/api/bi/schema-drafts/" + draft.draft.id + "/publish",
       {rev: draft.revision});
-    biNotice(true, "已發布 " + reply.ref + "。要讓資料集使用它，請按「預覽升級」。");
+    biNotice(true, "已發布 " + biRefLabel(reply.ref) + "。要讓資料集使用它，請按「預覽升級」。");
     const schemas = await call("/api/bi/schemas"); bi.schemas = schemas.schemas || [];
+    // What it may upgrade to is the dataset's schema state, read again.
+    bi.schema = await biCall("/api/bi/schema?dataset=" + encodeURIComponent(biDataset()));
     await biBuildSchema();
   } catch (failure) {
     const errors = (failure.payload && failure.payload.errors) || [];

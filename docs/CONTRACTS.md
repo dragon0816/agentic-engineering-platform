@@ -4229,6 +4229,41 @@ schema is chosen at creation and never changed" (owner 2026-10-27): a dataset ma
     again.
   - A run made before the upgrade cannot be reviewed, rechecked or committed: 409 `schema_changed` (run
     again).
+  - **Readable and safe (acceptance F6, 2026-11-06).** The preview adds `"additive": bool`: in a vault, only
+    additions, which become `schema_change:` units and take no version. The apply adds `"schema": <schema
+    state>`. A vault refuses both with 400 `schema_drops_additions` when `to` lacks an addition its units hold,
+    unless `to` was published from a draft whose `base_ref` is the vault's current ref (a person's own new
+    version). A plain dataset may still move back.
+  - `<schema state>` = `{"ref", "label", "additions": [str], "upgrades": [{"ref", "label"}]}`. `label` reads
+    `5.0` or `5.0 加 N 項新增`, never the digest; `upgrades` are the versions newer than the base that the
+    dataset may move to. `GET /api/bi/schema?dataset=` adds `label`, `additions` and `upgrades`.
+  - A draft view adds `"additive": bool` (its diff from the base is only additions).
+- **建議 schema (acceptance F5, `BI_PAGE_SIMPLE.md` S2).** `src/capabilities/bi_cards/schema_suggest.py`.
+  The schema-fit question alone, over chosen sources, on a press; writes no card. The latest per dataset is
+  kept in `<dataset dir>/schema-suggest.json`.
+  - `POST /api/bi/schema-suggest {"dataset", "source_ids": [...], "only_new": bool}` → `{"ok": true,
+    "suggestion": <suggestion>}` with `status: "running"`; the model is asked in the background. `only_new`
+    leaves out sources an ingest run read. At most 10 sources (`left_out` counts the rest). Refusals: 400
+    `suggest_no_sources`, `model_unavailable`, `classification_not_approved`; 409 `suggest_running`,
+    `dataset_read_only`.
+  - `GET /api/bi/schema-suggest?dataset=` → `{"suggestion": <suggestion> | null}`.
+  - `<suggestion>` = `{"id", "status": "running" | "done" | "failed", "at", "by", "schema", "model",
+    "sources": [{"id", "name"}], "left_out", "done", "seconds", "answers": {"asked", "reused",
+    "input_tokens", "output_tokens"}, "items": [<row>], "fits", "unquoted", "failures": [{"source", "lines",
+    "message"}]}`. `fits` counts items that fit the schema as it is; `unquoted` counts items whose quote is not
+    in the source, which are never rows. No rows on `done` is the answer 「不用改」.
+  - `<row>` = `{"id", "kind": "extend_schema" | "dictionary_change" | "propose_type" |
+    "needs_clarification", "what", "proposal", "summary", "reason", "questions", "quote", "locator",
+    "source_id", "source", "places", "applies": bool, "status": "proposed" | "applied" | "rejected"}`. A type
+    the schema has, or a field it has, is `needs_clarification` with a question (`schema_fit`). `applies`: a
+    new field, or a new allowed value with no `maps_to`, that leaves a valid schema.
+  - `POST /api/bi/schema-suggest/apply {"dataset", "id", "row"}` → `{"ok": true, "suggestion", "schema":
+    <schema state>}`. A vault only: a draft from the current schema with the row, publish, preview and apply;
+    the vault turns it into units on the version; the draft is removed. Nothing is committed. Refusals: 400
+    `suggest_apply_vault_only`, `suggest_not_direct`, `suggest_invalid`, `suggest_field_exists`,
+    `suggest_not_enum`, `suggest_value_exists`, `suggest_row_unknown`; 409 `suggest_stale`,
+    `suggest_row_decided`.
+  - `POST /api/bi/schema-suggest/reject {"dataset", "id", "row", "reason"}` → `{"ok": true, "suggestion"}`.
 
 ## BI schema 2.0, new kinds and widening (BI vault V9, owner 2026-10-29)
 

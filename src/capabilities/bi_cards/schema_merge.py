@@ -323,6 +323,25 @@ def effective_ref(workspace: Path, units: Mapping[str, Any]) -> str:
     return f"{schema_id}@{derived}"
 
 
+def version_label(version: str, additions: int = 0) -> str:
+    """A version as a person reads it: `5.0`, `5.0 加 2 項新增`; never the digest."""
+    base = catalog.base_version(version)
+    major, _, rest = base.partition(".")
+    minor, _, patch = rest.partition(".")
+    short = f"{major}.{minor}" if minor and patch in ("", "0") else base
+    return short + (f" 加 {additions} 項新增" if additions else "")
+
+
+def keeps(target: Mapping[str, Any], units: Mapping[str, Any]) -> bool:
+    """Whether a move to `target` keeps every change these units hold. A new version
+    absorbs the stored changes (`Vault._schema_units`), so `target` must have them."""
+    for key, value in _in_order(stored_changes(units)):
+        trial = copy.deepcopy(dict(target))
+        if _apply(trial, key, value) is not None or canonical(trial) != canonical(target):
+            return False
+    return True
+
+
 def clashes(workspace: Path, units: Mapping[str, Any]) -> list[dict[str, str]]:
     """The changes these units cannot apply. Empty when the base is not on this PC."""
     base = str(units.get(SCHEMA_UNIT) or "")
