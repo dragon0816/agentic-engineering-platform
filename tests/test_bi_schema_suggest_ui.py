@@ -13,7 +13,7 @@ from typing import Any
 import pytest
 from bi_page_driver import BiPage, browser_missing
 from test_bi_extract import Scripted
-from test_bi_vault import _call, _ok
+from test_bi_vault import _call, _ok, _use_homes
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
 from capabilities.bi_cards import vault
@@ -70,6 +70,8 @@ def test_a_press_suggests_with_quotes_and_a_field_is_added_on_the_version(
                "author": "alice"})
     )  # fmt: skip
     dataset, vault_id = str(made["vault"]["dataset"]), str(made["vault"]["id"])
+    # Only homes something is in are listed (acceptance F22): this test works in these.
+    _use_homes(workspace, vault_id, "AIDC")
     model = Scripted(lambda _chunk: ITEMS)
     monkeypatch.setattr(
         bi_cards_api,

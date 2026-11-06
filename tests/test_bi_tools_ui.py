@@ -11,7 +11,7 @@ from typing import Any
 import pytest
 from bi_page_driver import BiPage, browser_missing
 from test_bi_extract import MEETING_ANSWER, NOTE, Scripted
-from test_bi_vault import _call, _ok
+from test_bi_vault import _call, _ok, _use_homes
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
 from capabilities.bi_cards import vault
@@ -42,6 +42,8 @@ def test_a_tool_is_approved_run_and_its_output_previewed(
                "author": "alice"})
     )  # fmt: skip
     vault_id, dataset = str(made["vault"]["id"]), str(made["vault"]["dataset"])
+    # Only homes something is in are listed (acceptance F22): this test works in these.
+    _use_homes(workspace, vault_id, "AIDC")
     extractor = Scripted(lambda _chunk: MEETING_ANSWER)
     monkeypatch.setattr(
         bi_cards_api,

@@ -139,6 +139,15 @@ def _status(ws: Path, vault_id: str) -> dict[str, Any]:
     return _ok(_call(ws, "GET", f"/api/bi/vaults/{vault_id}/status"))
 
 
+def _use_homes(ws: Path, vault_id: str, *names: str) -> None:
+    """Domains a test works in, taken up from the vault's default list and pushed: only the
+    homes something is in are listed (acceptance F22)."""
+    for name in names:
+        _ok(_call(ws, "POST", f"/api/bi/vaults/{vault_id}/homes", {"name": name}))
+    _commit(ws, vault_id, "領域")
+    _push(ws, vault_id)
+
+
 def _commit(ws: Path, vault_id: str, purpose: str) -> dict[str, Any]:
     return _ok(_call(ws, "POST", f"/api/bi/vaults/{vault_id}/commit", {"purpose": purpose}))
 
