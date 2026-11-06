@@ -1292,6 +1292,13 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
   box-shadow: inset 0 0 0 1px var(--accent); }
 .bi-ver-ask { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-top: 6px; }
 .bi-ver-ask .bi-input { flex: 1 1 200px; min-width: 0; }
+.bi-confirm { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 6px;
+  padding: 8px 10px; border: 1px solid var(--warn); border-radius: 8px; }
+.bi-confirm > span { flex: 1 1 240px; min-width: 0; overflow-wrap: anywhere; }
+.bi-share-progress { margin: 8px 0; padding-left: 20px; display: grid; gap: 4px; }
+.bi-share-progress > li[data-state=done] { color: var(--good); }
+.bi-share-progress > li[data-state=failed] { color: var(--bad); }
+.bi-share-progress > li[data-state=waiting] { color: var(--dim); }
 .bi-log { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 8px; }
 .bi-log > li { padding: 8px 10px; border-radius: 8px; background: var(--panel);
   border: 1px solid var(--line); overflow-wrap: anywhere; min-width: 0; }
@@ -1334,7 +1341,9 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
 .bi-top { display: contents; }
 #bi-b-v-state:not(:empty) { margin-bottom: 8px; }
 #bi-b-v-state .bi-link { min-height: 0; padding: 0; }
-#bi-b-ver { scroll-margin-top: calc(var(--bi-top-h, 0px) + var(--bi-steps-h, 0px) + 8px); }
+#bi-b-ver { scroll-margin-top: calc(var(--bi-top-h, 0px) + var(--bi-steps-h, 0px) + 8px);
+  /* Its tables fill in after a jump to it: they must not pull the page along. */
+  overflow-anchor: none; }
 /* The step bar sticks just under the top row instead of sliding half under it (acceptance
    F4); the row's height is measured into --bi-top-h. */
 #bi-build-steps { position: sticky; top: var(--bi-top-h, 0px); z-index: 4; background: var(--bg); }
@@ -3195,26 +3204,33 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
           <div class="bi-actions">
             <button class="bi-btn" id="bi-b-to-cards" type="button">看卡片</button></div>
           <div id="bi-b-ver" class="bi-step" role="region" aria-labelledby="bi-b-ver-h" hidden>
-            <h4 id="bi-b-ver-h">版本</h4>
+            <h4 id="bi-b-ver-h">分享</h4>
             <p class="bi-meta" id="bi-b-ver-reads"></p>
             <div id="bi-b-ver-pending"></div>
+            <div id="bi-b-share-list"></div>
+            <div id="bi-b-share-tests"></div>
             <div class="bi-step-grid">
               <div><label class="bi-label" for="bi-b-ver-purpose">
-                這次改動的目的（commit 一定要寫，之後在歷史裡看得到）</label>
+                這次改動的目的（有還沒 commit 的改動時要寫，之後在歷史裡看得到）</label>
                 <input id="bi-b-ver-purpose" class="bi-input" maxlength="500"
                   placeholder="例如：補上 TSN 的標準組織"></div>
+              <div><label class="bi-label" for="bi-b-share-tag">版本名稱（tag）</label>
+                <input id="bi-b-share-tag" class="bi-input" maxlength="60" spellcheck="false"></div>
             </div>
-            <div class="bi-actions">
-              <button class="go" id="bi-b-ver-commit" type="button">Commit</button>
-              <button class="bi-btn" id="bi-b-ver-push" type="button">Push 給大家</button>
-            </div>
+            <div class="bi-actions" id="bi-b-share-act">
+              <button class="go" id="bi-b-share-go" type="button">分享</button>
+              <span class="bi-meta" id="bi-b-share-why"></span></div>
+            <ol id="bi-b-share-progress" class="bi-share-progress" aria-live="polite" hidden></ol>
             <div id="bi-b-ver-conflicts" role="alert"></div>
             <h5>歷史與發佈</h5>
             <div id="bi-b-ver-history"></div>
           <details class="bi-manage bi-adv" id="bi-b-adv-ver">
-            <summary>進階：捨棄改動</summary>
+            <summary>進階：分開 commit、push 與捨棄</summary>
+            <div class="bi-actions">
+              <button class="bi-btn" id="bi-b-ver-commit" type="button">只 commit</button>
+              <button class="bi-btn" id="bi-b-ver-push" type="button">只 push</button>
               <button class="bi-btn" id="bi-b-ver-discard" type="button">
-                捨棄還沒 commit 的改動</button>
+                捨棄還沒 commit 的改動</button></div>
           </details>
           </div>
           <div class="bi-actions"><button class="bi-btn" type="button" data-bi-next="ingest">
@@ -5334,6 +5350,7 @@ async function loadChat(selectId) {
   } finally {
     if (wait) clearTimeout(wait);
     sendWait(false);
+    flushQueuedSend();
   }
 }
 
@@ -5342,6 +5359,25 @@ function sendWait(on) {
   note.hidden = !on;
   note.textContent = on ? "正在檢查可用的對話後端與模型（Codex、Claude Code、Copilot 的登入狀態"
     + "與 LLM gateway），可能要一分鐘；好了就能送出。" : "";
+}
+
+// A message sent before the page could send it (acceptance F26: Enter right after the page
+// opened did nothing and left the text in the box) is kept, said so, and sent once ready.
+let sendQueued = false;
+function sendReady() {
+  return !send.disabled && !!activeConversation && !startingSession && uploadingFiles === 0;
+}
+function queueSend(why) {
+  sendQueued = true;
+  const note = el("send-wait");
+  note.hidden = false;
+  note.textContent = why + "；準備好後會自動送出這則訊息。";
+}
+function flushQueuedSend() {
+  if (!sendQueued) return;
+  if (!sendReady()) { queueSend(uploadingFiles > 0 ? "附件還在上傳" : "對話還在準備中"); return; }
+  sendQueued = false; sendWait(false);
+  form.requestSubmit();
 }
 
 el("session-search").addEventListener("input", () => {
@@ -5420,6 +5456,7 @@ el("new-conversation").addEventListener("click", async () => {
   finally {
     startingSession = false; send.removeAttribute("aria-busy");
     send.disabled = uploadingFiles > 0 || !activeConversation;
+    flushQueuedSend();
   }
 });
 
@@ -5793,6 +5830,7 @@ function renderAttachments() {
     box.append(chip);
   }
   send.disabled = uploadingFiles > 0 || !activeConversation;
+  if (sendQueued && uploadingFiles === 0) flushQueuedSend();
 }
 
 function readAsBase64(file) {
@@ -5946,10 +5984,13 @@ loadVoice();
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  if (uploadingFiles > 0 || startingSession) return;
   const files = readyFiles();
   const asked = field.value.trim() || (files.length ? "請看附件。" : "");
-  if (!asked || !activeConversation) return;
+  if (!asked) return;
+  if (!sendReady()) {
+    queueSend(uploadingFiles > 0 ? "附件還在上傳" : "對話還在準備中");
+    return;
+  }
   field.value = "";
   // A message that came from the microphone names its transcript (§3.2).
   const spoken = voiceTranscript && voiceTranscript.session === activeConversation
@@ -12522,7 +12563,9 @@ el("bi-dataset").addEventListener("change", () => {
 });
 el("bi-empty-demo").addEventListener("click", () => el("bi-demo").click());
 const biStuck = new ResizeObserver(() => {
-  el("kn-pane-bi").style.setProperty("--bi-top-h", el("bi-top-row").offsetHeight + "px");
+  // Not on a phone, where the row does not stick.
+  const row = el("bi-top-row"), sticks = getComputedStyle(row).position === "sticky";
+  el("kn-pane-bi").style.setProperty("--bi-top-h", (sticks ? row.offsetHeight : 0) + "px");
   el("kn-pane-bi").style.setProperty("--bi-steps-h", el("bi-build-steps").offsetHeight + "px");
 });
 biStuck.observe(el("bi-top-row")); biStuck.observe(el("bi-build-steps"));
@@ -13607,8 +13650,14 @@ async function biToVersion() {
   biBuildStage("test", false);
   const box = el("bi-b-ver");
   if (box.hidden) return;
+  // Clear of the top row while it sticks (not on a phone): its own height, as it is now.
+  const row = el("bi-top-row");
+  box.style.setProperty("--bi-top-h",
+    getComputedStyle(row).position === "sticky" ? row.offsetHeight + "px" : "0px");
   box.scrollIntoView({block: "start"});
   el("bi-b-ver-purpose").focus({preventScroll: true});
+  // What loads after this (the share step, the tests above it) moves it: place it again then.
+  bi.toVersionAt = Date.now();
 }
 
 function biBuildStage(name, focus = true) {
@@ -14076,6 +14125,14 @@ function biBenchGrade(side) {
   return "沒通過（" + why.join("；") + "）";
 }
 
+function biBenchCompared(report) {
+  // Which two versions the run compared; a report from before this did not record it.
+  if (!("published" in report)) return "比較：工作版本與當時的發佈版本（這次測試沒有記下是哪一版）";
+  return report.published
+    ? "比較：工作版本與發佈版本「" + report.published.tag + "」"
+    : "比較：工作版本與大家已 push 的內容（當時還沒有發佈過）";
+}
+
 function biBenchReport(report, standing) {
   const box = el("bi-b-bench-report"); box.replaceChildren();
   // In every working domain: the push carries the whole vault, so it blocks everyone.
@@ -14092,7 +14149,21 @@ function biBenchReport(report, standing) {
   const state = {running: "測試中…", finished: "完成", failed: "沒有跑完"}[report.status]
     || report.status;
   const head = "最近一次測試（" + biTime(report.started_at) + "，" + state + "）";
-  box.append(bh("h5", "", head));
+  const stale = report.stale || {};
+  box.append(bh("h5", "", head, ...(stale.stale ? [" ", biBadge("舊結果", "warn")] : [])));
+  box.append(bh("p", "bi-meta", biBenchCompared(report)));
+  if (stale.stale) {
+    // Acceptance F24: an old comparison must not read as how the versions stand today.
+    const why = [];
+    if (stale.published_changed) {
+      why.push(stale.published_now ? "之後發佈了「" + stale.published_now.tag + "」"
+        : "之後發佈的版本變了");
+    }
+    if (stale.content_changed) why.push("之後內容改了");
+    box.append(bh("p", "bi-warn", "這是舊結果：" + why.join("，") + "，下面的比較不是現在的狀態。"),
+      bh("div", "bi-actions", biButton("重新跑測試", () => el("bi-b-bench-run").click(),
+        "bi-btn", "重新跑測試")));
+  }
   box.append(bh("p", "bi-meta", (report.scope ? "涵蓋 " + report.scope + " "
     : "涵蓋全部 ") + (report.total || 0) + " 題"));
   for (const line of notes.filter((n) => !elsewhere(n))) box.append(bh("p", "bi-meta", line));
@@ -14168,6 +14239,11 @@ async function biBench(vaultId) {
     bi.benchWatch = null;
     biNotice(newest.status === "finished", newest.status === "finished"
       ? "測試跑完了。" : "測試沒有跑完：" + (newest.error || ""));
+    // What the share step says of each domain's tests changed with this run.
+    if (vaultId === bi.verVault) {
+      biShareLoad(vaultId)
+        .catch((failure) => biNotice(false, "讀不到分享的內容：" + failure.message));
+    }
   }
 }
 
@@ -14608,16 +14684,16 @@ async function biAnalyses(vaultId) {
     under.cell.append(...[biParamInputs(item, state.values, () => biRunInto(vaultId, item, state,
       out).catch((failure) => biNotice(false, failure.message))), out].filter(Boolean));
     row.lastChild.append(
-      biRowMenu(
+      biRowActions([
         biButton("執行", () => {
           under.row.hidden = false;
           return biRunInto(vaultId, item, state, out);
         }, "bi-btn", "執行分析 " + item.title),
+        reply.order.includes(item.slug) ? biButton("上移", () => move(item.slug, -1), "bi-btn",
+          "在 Dashboard 上移分析 " + item.title) : null],
         biButton("和 AI 一起修改", (event) =>
           biAnalysisAi(item.slug, item.title, event.currentTarget),
           "bi-btn", "和 AI 一起修改分析 " + item.title),
-        reply.order.includes(item.slug) ? biButton("上移", () => move(item.slug, -1), "bi-btn",
-          "在 Dashboard 上移分析 " + item.title) : null,
         reply.order.includes(item.slug) ? biButton("下移", () => move(item.slug, 1), "bi-btn",
           "在 Dashboard 下移分析 " + item.title) : null,
         item.offered ? shown : null,
@@ -14896,7 +14972,7 @@ function biVerChanges(changes) {
   return table.box;
 }
 
-// A list as a table, its row's actions as a menu (the owner: 善用 table, menu).
+// A list as a table, its row's rarer actions in a menu (the owner: 善用 table, menu).
 function biListTable(heads) {
   const body = bh("tbody", "");
   const table = bh("table", "bi-table bi-stack",
@@ -14922,11 +14998,22 @@ function biRowDetail(table) {
   return {row, cell};
 }
 
+function biRowActions(shown, ...more) {
+  // A row's one or two common actions in sight, the rest in a menu, so a first-timer
+  // finds them (acceptance F15).
+  const rest = more.filter(Boolean);
+  const box = bh("div", "bi-actions", ...shown.filter(Boolean));
+  if (rest.length === 1) box.append(rest[0]);
+  else if (rest.length) {
+    box.append(bh("details", "bi-row-menu", bh("summary", "", "更多"),
+      bh("div", "bi-actions", ...rest)));
+  }
+  return box;
+}
+
 function biRowMenu(...items) {
-  const found = items.filter(Boolean);
-  return found.length > 1
-    ? bh("details", "bi-row-menu", bh("summary", "", "動作"), bh("div", "bi-actions", ...found))
-    : bh("div", "bi-actions", ...found);
+  // Only rarer actions, in 更多; a lone one stays a button.
+  return biRowActions([], ...items);
 }
 
 function biVerAsk(where, label, value, go, run) {
@@ -14942,6 +15029,18 @@ function biVerAsk(where, label, value, go, run) {
     await run(answer);
   }, "go"), biButton("取消", () => row.remove()));
   where.append(row); input.focus();
+}
+
+function biConfirm(where, question, go, run) {
+  // The page's own confirm, in place of the browser's: the question and two buttons, under
+  // what asked it. Only the button runs it.
+  where.querySelector(":scope > .bi-confirm")?.remove();
+  const box = bh("div", "bi-confirm", bh("span", "", question));
+  box.setAttribute("role", "group"); box.setAttribute("aria-label", question);
+  const yes = biButton(go, () => { box.remove(); return run(); }, "go");
+  box.append(yes, biButton("取消", () => box.remove()));
+  where.append(box); yes.focus();
+  return box;
 }
 
 function biPublishWords(name, reply) {
@@ -15003,6 +15102,7 @@ async function biVersions(vaultId) {
   el("bi-b-ver-discard").disabled = !changes.length;
   el("bi-b-ver-push").disabled = !commits.length;
   biVerHistory(vaultId, history);
+  biShareLoad(vaultId).catch((failure) => biNotice(false, "讀不到分享的內容：" + failure.message));
   biSkills(vaultId).catch((failure) => biNotice(false, "讀不到判讀規則：" + failure.message));
   biProfiles(vaultId).catch((failure) => biNotice(false, "讀不到 profile：" + failure.message));
   biTools(vaultId).catch((failure) => biNotice(false, "讀不到資料處理程式：" + failure.message));
@@ -15018,18 +15118,18 @@ function biVerHistory(vaultId, history) {
   (history.commits || []).forEach((commit, index) => {
     const badges = (byCommit[commit.id] || []).map((tag) =>
       biBadge("tag " + tag.name + (live(tag) ? "・發佈中" : ""), live(tag) ? "good" : ""));
-    const actions = [];
+    const actions = [], publishes = [];
     const shown = biRow(list, [[bh("strong", "", commit.purpose), " ", ...badges,
       commit.kind === "revert" ? bh("span", "bi-meta", "・回復版本") : ""],
     biTime(commit.created), commit.author, String(commit.units), ""]);
     const under = biRowDetail(list), row = under.cell, detail = bh("div", "");
     row.append(detail);
-    actions.push(biButton("看改動", async () => {
+    const look = biButton("看改動", async () => {
       if (detail.childNodes.length) { detail.replaceChildren(); return; }
       const reply = await call("/api/bi/vaults/" + vaultId + "/diff?commit="
         + encodeURIComponent(commit.id));
       detail.replaceChildren(biVerChanges(reply.changes || []));
-    }, "bi-btn", "看「" + commit.purpose + "」的改動"));
+    }, "bi-btn", "看「" + commit.purpose + "」的改動");
     if (index > 0) {
       actions.push(biButton("回到這個版本", () => biVerAsk(row, "回復的目的",
         "回到「" + commit.purpose + "」的版本", "回復（成為新的 commit）", (purpose) =>
@@ -15044,17 +15144,197 @@ function biVerHistory(vaultId, history) {
     "bi-btn", "幫「" + commit.purpose + "」加 tag"));
     for (const tag of byCommit[commit.id] || []) {
       if (live(tag)) continue;
-      actions.push(biButton("發佈 " + tag.name, async () => {
-        if (!confirm("發佈 tag「" + tag.name + "」？發佈後 Agent 只讀這個版本的內容；"
-          + "要撤回就再發佈另一個 tag。")) return;
-        await biVerRun(vaultId, "publish", {tag: tag.name, confirm: true},
-          (reply) => biPublishWords(tag.name, reply));
-      }, "bi-btn", "發佈 tag " + tag.name));
+      publishes.push(biButton("發佈 " + tag.name, () => biConfirm(row,
+        "發佈 tag「" + tag.name + "」？發佈後 Agent 只讀這個版本的內容；要撤回就再發佈另一個 tag。",
+        "確定發佈", () => biVerRun(vaultId, "publish", {tag: tag.name, confirm: true},
+          (reply) => biPublishWords(tag.name, reply))), "bi-btn", "發佈 tag " + tag.name));
     }
-    shown.lastChild.append(biRowMenu(...actions));
+    shown.lastChild.append(biRowActions([look, publishes[0]], ...publishes.slice(1),
+      ...actions));
   });
   box.append((history.commits || []).length ? list.box : bh("p", "bi-meta", "還沒有 commit。"));
 }
+
+// -- 分享: commit, push, tag and publish as one step (BI_PAGE_SIMPLE.md S6) ---------------
+const BI_SHARE_STEPS = [["commit", "Commit"], ["push", "Push 給大家"], ["tag", "建立 tag"],
+  ["publish", "發佈"]];
+const BI_TEST_STATE = {passed: ["通過", "good"], regressed: ["退步", "warn"],
+  untested: ["沒有測試", "dim"], stale: ["舊結果", "warn"]};
+
+function biShareTagName(taken) {
+  // Today's local date; a suffix when that tag is taken (a tag never moves).
+  const now = new Date(), two = (n) => String(n).padStart(2, "0");
+  const day = now.getFullYear() + "-" + two(now.getMonth() + 1) + "-" + two(now.getDate());
+  let name = day;
+  for (let n = 2; taken.includes(name); n += 1) name = day + "-" + n;
+  return name;
+}
+
+function biShareHomes(homes) {
+  if (!homes.length) return "—";
+  return homes.includes("*") ? "全部領域" : homes.map(biHomeLabel).join("、");
+}
+
+async function biShareLoad(vaultId) {
+  const seq = bi.shareSeq = (bi.shareSeq || 0) + 1;
+  const plan = await call("/api/bi/vaults/" + vaultId + "/share");
+  if (seq !== bi.shareSeq || vaultId !== bi.verVault) return;
+  bi.share = plan;
+  const list = el("bi-b-share-list"); list.replaceChildren();
+  const commits = plan.commits || [];
+  list.append(bh("p", "", plan.published
+    ? "上次發佈「" + plan.published.tag + "」之後的內容："
+    : "還沒有發佈過，這次會分享的內容："));
+  if (commits.length || plan.uncommitted) {
+    const table = biListTable(["內容", "作者", "領域", "狀態"]);
+    if (plan.uncommitted) {
+      biRow(table, [bh("strong", "", "還沒 commit 的改動 " + plan.uncommitted + " 項"),
+        "你", biShareHomes(plan.uncommitted_homes || []), "分享時會先 commit"]);
+    }
+    for (const commit of commits) {
+      biRow(table, [[bh("strong", "", commit.purpose), bh("div", "bi-meta",
+        biTime(commit.created) + "・" + commit.units + " 項")], commit.author,
+      biShareHomes(commit.homes || []), commit.pushed ? "已 push" : "還沒 push"]);
+    }
+    list.append(table.box);
+    if (plan.older) list.append(bh("p", "bi-meta", "更早的還有 " + plan.older + " 個 commit。"));
+  } else {
+    list.append(bh("p", "bi-meta", "沒有新的內容：大家與 Agent 讀到的就是現在的內容。"));
+  }
+  const tests = el("bi-b-share-tests"); tests.replaceChildren();
+  const standing = plan.standing || {};
+  if (plan.running) {
+    tests.append(bh("p", "bi-meta", "測試還在跑；跑完再看各領域的結果。"));
+  } else if ((plan.domains || []).length) {
+    const table = biListTable(["領域", "測試"]);
+    for (const item of plan.domains) {
+      const [word, cls] = BI_TEST_STATE[item.state] || [item.state, ""];
+      const said = [biBadge(word, cls)];
+      if (item.tested) said.push(" " + item.passed + "/" + item.tested + " 題通過");
+      if (item.questions > item.tested) {
+        said.push(bh("span", "bi-meta", "・" + (item.questions - item.tested) + " 題沒有測"));
+      }
+      for (const question of item.regressed || []) {
+        said.push(bh("div", "bi-warn", "「" + question + "」發佈版本答得對，這次的內容答錯"));
+      }
+      biRow(table, [item.home ? biHomeLabel(item.home) : "不分領域", said]);
+    }
+    tests.append(table.box);
+    if (plan.domains.some((item) => item.state === "stale")) {
+      tests.append(bh("p", "bi-meta",
+        "舊結果：之後發佈了新版本或內容改了，這些結果不是現在的狀態。"),
+        bh("div", "bi-actions", biButton("重新跑測試", () => el("bi-b-bench-run").click(),
+          "bi-btn", "重新跑測試")));
+    }
+  }
+  for (const line of standing.blocking || []) tests.append(bh("p", "bi-warn", line));
+  for (const line of standing.notes || []) tests.append(bh("p", "bi-meta", line));
+  const tag = el("bi-b-share-tag");
+  if (!tag.dataset.edited || (plan.tags || []).includes(tag.value.trim())) {
+    tag.value = biShareTagName(plan.tags || []); delete tag.dataset.edited;
+  }
+  const why = !commits.length && !plan.uncommitted ? "沒有新的內容要分享。"
+    : (standing.blocking || []).length
+      ? "這次的內容在它改到的領域測試退步，push 會被擋下；請先修正或再跑一次測試。" : "";
+  el("bi-b-share-why").textContent = why;
+  el("bi-b-share-go").disabled = Boolean(why) || Boolean(bi.shareBusy);
+  if (Date.now() - (bi.toVersionAt || 0) < 10000) {
+    bi.toVersionAt = 0;
+    el("bi-b-ver").scrollIntoView({block: "start"});
+  }
+}
+
+function biShareProgress(skipCommit) {
+  const box = el("bi-b-share-progress"); box.replaceChildren(); box.hidden = false;
+  const items = {};
+  for (const [step, label] of BI_SHARE_STEPS) {
+    const item = bh("li", "", label + "：", bh("span", "", ""));
+    item.dataset.step = step;
+    items[step] = item; box.append(item);
+  }
+  const mark = (step, state, words) => {
+    items[step].dataset.state = state;
+    items[step].lastChild.textContent = words;
+  };
+  for (const [step] of BI_SHARE_STEPS) mark(step, "waiting", "等待");
+  if (skipCommit) mark("commit", "skipped", "不需要（沒有還沒 commit 的改動）");
+  return mark;
+}
+
+async function biShare(vaultId, purpose, name) {
+  // In order, stopping at the first that fails; each says done, failed or not done.
+  const plan = bi.share || {};
+  const mark = biShareProgress(!plan.uncommitted);
+  const done = [], label = Object.fromEntries(BI_SHARE_STEPS);
+  let step = "commit";
+  bi.shareBusy = true; el("bi-b-share-go").disabled = true;
+  try {
+    if (plan.uncommitted) {
+      mark(step, "running", "進行中…");
+      await biCall("/api/bi/vaults/" + vaultId + "/commit", {purpose});
+      mark(step, "done", "完成"); done.push(step);
+    }
+    step = "push"; mark(step, "running", "進行中…");
+    const pushed = await biCall("/api/bi/vaults/" + vaultId + "/push", {});
+    biVerConflicts(vaultId, pushed.status === "conflicts" ? pushed.conflicts || [] : []);
+    if (pushed.status === "blocked") throw new Error((pushed.blocking || []).join("；"));
+    if (pushed.status === "conflicts") {
+      throw new Error("有 " + (pushed.conflicts || []).length + " 個地方別人也改了，"
+        + "請在下面每一項選一邊，再按一次「分享」");
+    }
+    const notes = (pushed.notes || []).join("；");
+    mark(step, "done", (pushed.status === "nothing" ? "完成（已經 push 過）" : "完成")
+      + (notes ? "・" + notes : "")); done.push(step);
+    step = "tag"; mark(step, "running", "進行中…");
+    const newest = (plan.commits || [])[0];
+    await biCall("/api/bi/vaults/" + vaultId + "/tag",
+      {name, purpose: purpose || (newest ? newest.purpose : "分享 " + name)});
+    mark(step, "done", "完成「" + name + "」"); done.push(step);
+    step = "publish"; mark(step, "running", "進行中…");
+    const reply = await biCall("/api/bi/vaults/" + vaultId + "/publish",
+      {tag: name, confirm: true});
+    mark(step, "done", "完成"); done.push(step);
+    el("bi-b-ver-purpose").value = ""; delete el("bi-b-share-tag").dataset.edited;
+    biNotice(true, biPublishWords(name, reply));
+  } catch (failure) {
+    mark(step, "failed", "停下：" + failure.message);
+    const left = BI_SHARE_STEPS.map(([key]) => key)
+      .filter((key) => key !== step && !done.includes(key)
+        && !(key === "commit" && !plan.uncommitted));
+    for (const key of left) mark(key, "waiting", "沒有做");
+    biNotice(false, "分享停在「" + label[step] + "」：" + failure.message + "。已完成："
+      + (done.map((key) => label[key]).join("、") || "沒有") + "；沒有做："
+      + [step, ...left].map((key) => label[key]).join("、") + "。");
+  } finally {
+    bi.shareBusy = false;
+    bi.loaded = {}; biRefreshCounts();
+    biVaultState(await call("/api/bi/vaults/" + vaultId + "/status"));
+  }
+}
+
+el("bi-b-share-tag").addEventListener("input", (event) => {
+  event.currentTarget.dataset.edited = "1";
+});
+el("bi-b-share-go").addEventListener("click", () => {
+  const vaultId = bi.verVault, plan = bi.share || {};
+  const input = el("bi-b-ver-purpose"), purpose = input.value.trim();
+  const tag = el("bi-b-share-tag"), name = tag.value.trim();
+  if (plan.uncommitted && !purpose) {
+    biNotice(false, "請先寫這次改動的目的（commit 一定要寫）。"); input.focus(); return;
+  }
+  if (!/^[a-z0-9]+(?:[.-][a-z0-9]+)*$/.test(name) || name.length > 60) {
+    biNotice(false, "版本名稱只能用小寫英數字與 . -（最多 60 個字），例如 2026-11-06。");
+    tag.focus(); return;
+  }
+  if ((plan.tags || []).includes(name)) {
+    biNotice(false, "版本名稱「" + name + "」已經用過；tag 不能移動，請換一個。");
+    tag.focus(); return;
+  }
+  const steps = (plan.uncommitted ? "commit " + plan.uncommitted + " 項改動、" : "")
+    + "push、建立 tag「" + name + "」並發佈";
+  biConfirm(el("bi-b-share-act"), "要分享嗎？會依序 " + steps + "；發佈後 Agent 讀這個版本。",
+    "確定分享", () => biShare(vaultId, purpose, name));
+});
 
 function biVerConflicts(vaultId, conflicts) {
   bi.verPushConflicts = conflicts;
@@ -15194,7 +15474,7 @@ function biSkillsDraw(reply) {
       "bi-btn",
       "和 AI 一起修改判讀規則 " + item.name);
     biRow(list, [bh("strong", "", item.name), item.role === "classify" ? "分類" : "擷取",
-      "第 " + item.revision + " 版", where, state, biRowMenu(talk, edit)]);
+      "第 " + item.revision + " 版", where, state, biRowActions([edit, talk])]);
   }
   box.append(skills.length ? list.box : bh("p", "bi-meta", "還沒有判讀規則。"));
   if (skills.length < (reply.skills || []).length) {
@@ -15270,7 +15550,7 @@ function biToolsDraw(vaultId, reply) {
     }
     biRow(list, [bh("strong", "", title),
       item.approved ? biBadge("已核准", "good") : biBadge("等待核准", "warn"),
-      biRowMenu(...actions)]);
+      biRowActions(actions)]);
     // Code waiting for approval is shown open: approving means having read it.
     const shown = bh("details", "", bh("summary", "", "程式碼"), code);
     shown.open = Boolean(item.code && !item.approved);
@@ -15665,10 +15945,12 @@ el("bi-b-ver-push").addEventListener("click", async () => {
     button.disabled = false;
   }
 });
-el("bi-b-ver-discard").addEventListener("click", async () => {
-  if (!confirm("捨棄這台電腦上還沒 commit 的改動？已 commit 的不受影響。")) return;
-  try { await biVerRun(bi.verVault, "discard", {}, "已捨棄還沒 commit 的改動。"); }
-  catch (failure) { biNotice(false, "沒有捨棄：" + failure.message); }
+el("bi-b-ver-discard").addEventListener("click", () => {
+  biConfirm(el("bi-b-adv-ver"), "捨棄這台電腦上還沒 commit 的改動？已 commit 的不受影響。",
+    "確定捨棄", async () => {
+      try { await biVerRun(bi.verVault, "discard", {}, "已捨棄還沒 commit 的改動。"); }
+      catch (failure) { biNotice(false, "沒有捨棄：" + failure.message); }
+    });
 });
 
 el("bi-b-v-sync").addEventListener("click", async () => {
@@ -18274,7 +18556,7 @@ function biRenderSubs() {
       actions.append(biButton("更新", (event) => biUpdateSub(sub, event.currentTarget), "go",
         "更新「" + (sub.name || key) + "」到最新版"));
     }
-    actions.append(biButton("取消訂閱", (event) => biUnsubscribe(sub, event.currentTarget),
+    actions.append(biButton("取消訂閱", (event) => biUnsubscribeAsk(sub, event.currentTarget),
       "bi-btn", "取消訂閱「" + (sub.name || key) + "」"));
     li.append(main, actions); list.append(li);
   }
@@ -18351,9 +18633,13 @@ async function biUpdateSub(sub, button) {
   } finally { button.disabled = false; button.removeAttribute("aria-busy"); }
 }
 
+function biUnsubscribeAsk(sub, button) {
+  biConfirm(button.closest("li") || button.parentElement, "取消訂閱「" + sub.name
+    + "」？這台電腦上的副本會被移除，之後要再到 Shared Platform 選取才能讀。", "確定取消訂閱",
+  () => biUnsubscribe(sub, button));
+}
+
 async function biUnsubscribe(sub, button) {
-  if (!window.confirm("取消訂閱「" + sub.name + "」？這台電腦上的副本會被移除，"
-      + "之後要再到 Shared Platform 選取才能讀。")) return;
   button.disabled = true; button.setAttribute("aria-busy", "true");
   try {
     await biCall("/api/bi/subscriptions/unsubscribe", {dataset: sub.name});

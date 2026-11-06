@@ -94,8 +94,13 @@ MAIN_PATH = (
     # Step 3: dashboard, questions, the test run, its result, and what follows it.
     "bi-b-bench-run",
     "bi-b-bench-report",
-    "bi-b-ver-commit",
-    "bi-b-ver-push",
+    # 分享: one step for commit, push, tag and publish (acceptance F13).
+    "bi-b-share-list",
+    "bi-b-share-tests",
+    "bi-b-ver-purpose",
+    "bi-b-share-tag",
+    "bi-b-share-go",
+    "bi-b-share-progress",
     "bi-b-ver-history",
 )
 
@@ -130,6 +135,8 @@ ADVANCED = (
     "bi-b-an-pack",
     "bi-b-atl",
     "bi-b-bc-list",
+    "bi-b-ver-commit",
+    "bi-b-ver-push",
     "bi-b-ver-discard",
 )
 
@@ -306,3 +313,11 @@ def test_the_schema_buttons_sit_above_the_skills_table() -> None:
     start = PAGE.index('data-stage="schema"')
     at = [PAGE.index(f'id="{i}"', start) for i in ("bi-b-sg-run", "bi-b-sa-open", "bi-b-skills")]
     assert at == sorted(at)
+
+
+def test_every_bi_function_the_page_calls_is_defined() -> None:
+    # A helper removed while another branch still calls it fails only at run time, where the
+    # parse check cannot see it (biRowMenu, 2026-11-06).
+    called = set(re.findall(r"(?<![\w.])(bi[A-Z]\w*)\(", PAGE))
+    defined = set(re.findall(r"(?:function\s+|(?:const|let|var)\s+)(bi[A-Z]\w*)", PAGE))
+    assert called - defined == set()

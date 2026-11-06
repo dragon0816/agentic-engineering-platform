@@ -4,10 +4,11 @@ Contracts: `docs/CONTRACTS.md` "Knowledge repositories: the BI type (R2)". A
 vault is used through every other `/api/bi/*` route as the dataset
 `vault-<id>`; these routes list, create, join, convert and sync vaults and run
 the version operations: commit, push, resolve, discard, history, diff, revert,
-tag and publish; and list or save a skill revision (R3); and import a
-Dashboard order from Atlas (BI K2, a dry run first). Publish needs
-`confirm: true` and is an Agent Web action, never a capability the model can
-call. Errors are raised as `BiStoreError` and answered by `bi_cards_api.route`.
+tag and publish, and say what a share would carry (`share`); and list or save a
+skill revision (R3); and import a Dashboard order from Atlas (BI K2, a dry run
+first). Publish needs `confirm: true` and is an Agent Web action, never a
+capability the model can call. Errors are raised as `BiStoreError` and answered
+by `bi_cards_api.route`.
 """
 
 from __future__ import annotations
@@ -81,6 +82,17 @@ def _start_bench(
     return {"run_id": run_id}
 
 
+def _with_staleness(
+    workspace: Path, vault_id: str, report: dict[str, Any] | None, running: bool
+) -> dict[str, Any] | None:
+    """A finished report with what makes it an old result today (acceptance F24); not while a
+    run goes, as the page reads this every 2 s then."""
+    if report is None or running or report.get("status") == "running":
+        return report
+    repo = vault.Vault(workspace, vault_id).repo
+    return {**report, "stale": bi_bench.staleness(report, repo.working_units(), repo.published())}
+
+
 def route(
     workspace: Path,
     actor: str,
@@ -121,10 +133,31 @@ def route(
             running = newest is not None and newest.get("status") == "running"
             return 200, {
                 **vault_checks.listing(workspace, parts[0]),
-                "latest": bi_bench.latest_for(workspace, parts[0], query.get("home") or None),
+                "latest": _with_staleness(
+                    workspace,
+                    parts[0],
+                    bi_bench.latest_for(workspace, parts[0], query.get("home") or None),
+                    running,
+                ),
                 "newest": None
                 if newest is None
                 else {k: newest.get(k) for k in ("run_id", "status", "error")},
+                "standing": {"blocking": [], "notes": []}
+                if running
+                else bi_bench.standing(workspace, parts[0]),
+            }
+        if len(parts) == 2 and parts[1] == "share":
+            # The share step's table (`BI_PAGE_SIMPLE.md` S6); the page sequences commit, push,
+            # tag and publish itself, and the push check stays in `repo.push`.
+            newest = bi_bench.latest(workspace, parts[0])
+            running = newest is not None and newest.get("status") == "running"
+            repo = vault.Vault(workspace, parts[0]).repo
+            return 200, {
+                **vault.share_plan(workspace, parts[0]),
+                "running": running,
+                "domains": []
+                if running
+                else bi_bench.domain_states(workspace, repo.working_units(), repo.published()),
                 "standing": {"blocking": [], "notes": []}
                 if running
                 else bi_bench.standing(workspace, parts[0]),

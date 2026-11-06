@@ -135,7 +135,9 @@ FAILURE_TEXT = {
     "memory_kind_not_declared": "這個記憶空間沒有宣告同步進度",
     "sync_state_backwards": "同步進度只能往前，沒有更新",
     "sync_extractor_changed": "簽名檔擷取規則已更新，需要先重新整理",
-    "permission_denied": "這項名片功能沒有授權給你（在 Agent Web 的 Capabilities 選取）",
+    "permission_denied": "這項名片功能沒有授權給你。這要由管理員授權："
+    "加入共用平台的電腦在共用平台授權，"
+    "其他電腦由管理這台電腦的人設定授權（grants.json）；請通知管理員",
     "invalid_input": "工具參數不正確",
     "timeout": "這次操作逾時",
     "handler_error": "名片功能內部出錯",

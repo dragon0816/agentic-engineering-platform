@@ -84,7 +84,9 @@ CHARTS_DIR = "bi-chat-charts"
 FAILURE_TEXT = {
     "dataset_invalid": "資料集名稱不正確",
     "dataset_unknown": "這台電腦沒有訂閱這個資料集",
-    "permission_denied": "BI 卡片查詢沒有授權給你（在 Agent Web 的 Capabilities 選取）",
+    "permission_denied": "BI 卡片查詢沒有授權給你。這要由管理員授權："
+    "加入共用平台的電腦在共用平台授權，"
+    "其他電腦由管理這台電腦的人設定授權（grants.json）；請通知管理員",
     "invalid_input": "工具參數不正確",
     "analysis_unknown": "這個知識庫的發佈版本沒有這個分析",
     "param_invalid": "分析的參數不正確",
