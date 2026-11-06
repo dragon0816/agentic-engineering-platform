@@ -93,11 +93,14 @@ class Reach:
         return ALL
 
 
-def touched(before: Mapping[str, Any], after: Mapping[str, Any]) -> frozenset[str]:
-    """What going from `before` to `after` reaches."""
+def touched(
+    before: Mapping[str, Any], after: Mapping[str, Any], keys: Iterable[str] | None = None
+) -> frozenset[str]:
+    """What going from `before` to `after` reaches; with `keys`, looking only at those (one
+    commit's units over whole states)."""
     reach = Reach(after, before)
     found: set[str] = set()
-    for key in set(before) | set(after):
+    for key in set(before) | set(after) if keys is None else set(keys):
         if canonical(before.get(key)) != canonical(after.get(key)):
             found |= reach.unit(key)
             if "*" in found:

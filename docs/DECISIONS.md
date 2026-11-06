@@ -6710,3 +6710,15 @@ Agent Web come before the port is bound). The shortcut reported 「Agent Web did
 - **Nothing is started while something listens on the port,** and `aep-host web --port N` exits
   at once (code 3) when the port is taken, before the minutes of building the runtime.
 
+
+## 2026-11-06 — BI 分享: the page sequences it, the route only reads (acceptance F13-F15)
+
+- **One 分享 step runs commit, push, tag and publish through their existing routes**, in order, stopping at the first failure. A new route reads what a share would carry. Rejected: one server route doing all four (it would duplicate the push gate's path and hide which step failed).
+- **One confirm, on the page, before the four steps;** no extra confirm for a regression in another domain (the owner). A regression in a domain the share touches disables the button with the reason; `repo.push` still blocks it.
+- **Tag name: today's local date, `-2`, `-3` when taken,** editable. A name taken between loading and pressing stops at the tag step; the next load proposes the next suffix.
+- **`confirm()` leaves the BI page** for an inline confirm the tests can press. The wiki side's nine stay for now, listed in `docs/phases/BI_PAGE_SIMPLE.md` S6.
+
+## 2026-11-06 — BI test results: an old comparison says so (acceptance F24)
+
+- **A result is 舊結果 when the published version's commit changed since the run, or the content it tested changed.** Publishing the same commit under another tag changes nothing the run compared, so it stays current. A report from before runs recorded the version is old when a publish came after it started.
+- **Display only: the push check is unchanged.** A regression found against an older published version still blocks a push that touches its domain, as the owner's rule in §14 says; the page marks it 舊結果 and offers 重新跑測試. Rejected: voiding verdicts in the gate on a publish (a colleague's publish would silently unblock a regression).
