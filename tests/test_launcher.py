@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import os
+import socket
 import subprocess
 import sys
 import threading
@@ -15,7 +16,9 @@ from typing import Any
 
 import pytest
 
+from host_runtime import launcher
 from host_runtime.launcher import (
+    MAX_START_SECONDS,
     NOT_READY_PREFIX,
     SLOW_START_SECONDS,
     START_RECORD,
@@ -95,7 +98,11 @@ def test_a_stale_record_is_dropped_and_the_server_started_then_opened(
     tmp_path: Path,
     server: ThreadingHTTPServer,
 ) -> None:
-    write_record(tmp_path, address(server, "old-token"), 1)  # from a server that died
+    # From a server that died: its process is gone (a live one is waited for instead).
+    record_path(tmp_path).write_text(
+        json.dumps({"address": address(server, "old-token"), "port": 1, "pid": _gone_pid()}),
+        encoding="utf-8",
+    )
     opened: list[str] = []
     started: list[bool] = []
 
@@ -319,6 +326,7 @@ def test_a_second_click_joins_a_start_under_way_and_starts_nothing(tmp_path: Pat
                 start=lambda: started.append(1),
                 opener=shown.append,
                 wait_seconds=0.2,
+                max_seconds=0.4,  # it is waited for while it runs, up to this
                 poll=0.01,
             )
     finally:
@@ -356,7 +364,7 @@ def test_a_joined_start_that_stops_is_reported_and_keeps_the_reason_given(tmp_pa
 
 @pytest.mark.parametrize(
     "age_seconds",
-    [0.0, START_WAIT_SECONDS + 1],
+    [0.0, MAX_START_SECONDS + 1],
     ids=["its process ended", "too old"],
 )
 def test_a_start_that_is_over_does_not_stop_a_new_one(tmp_path: Path, age_seconds: float) -> None:
@@ -502,3 +510,128 @@ def test_the_starting_page_shows_a_failure_in_a_real_browser(tmp_path: Path) -> 
         assert browser._evaluate(spinner) == "none"
     finally:
         browser.close()
+
+
+# --- a slow start and a server already there (2026-11-06) ----------------------------
+#
+# On the owner's PC a server took 5.5 minutes to listen: the shortcut said it did not
+# start at 300 s and the server came up 32 s later with nothing waiting for it.
+
+
+@pytest.fixture(autouse=True)
+def _port_free(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The real port check would see whatever Agent Web runs on this PC."""
+    monkeypatch.setattr(launcher, "port_in_use", lambda _port: False)
+
+
+def _later(seconds: float, act: Any) -> threading.Thread:
+    def run() -> None:
+        time.sleep(seconds)
+        act()
+
+    thread = threading.Thread(target=run, daemon=True)
+    thread.start()
+    return thread
+
+
+def test_a_start_still_running_past_the_wait_is_waited_for(tmp_path: Path, server: Any) -> None:
+    keeper = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+    try:
+        _later(0.6, lambda: write_record(tmp_path, address(server), server.server_address[1]))
+        assert (
+            open_agent(
+                tmp_path,
+                tmp_path / "host.json",
+                start=lambda: keeper,
+                opener=lambda _: False,
+                wait_seconds=0.2,
+                max_seconds=10,
+                poll=0.02,
+            )
+            == "started"
+        )
+    finally:
+        keeper.kill()
+        keeper.wait()
+
+
+def test_a_click_after_the_wait_joins_a_start_still_running(tmp_path: Path, server: Any) -> None:
+    _start_record(tmp_path, os.getpid(), age_seconds=START_WAIT_SECONDS + 1)
+    _later(0.4, lambda: write_record(tmp_path, address(server), server.server_address[1]))
+    assert (
+        open_agent(
+            tmp_path,
+            tmp_path / "host.json",
+            start=lambda: pytest.fail("a second server was started"),
+            opener=lambda _: False,
+            wait_seconds=30,  # returns as soon as it answers; a loaded PC is slow
+            poll=0.02,
+        )
+        == "started"
+    )
+
+
+def test_a_running_server_slow_to_answer_is_waited_for_not_replaced(
+    tmp_path: Path, server: Any
+) -> None:
+    # Its record is there and its process runs, but it does not answer yet.
+    record_path(tmp_path).write_text(
+        json.dumps({"address": "http://127.0.0.1:9/?token=right", "port": 9, "pid": os.getpid()}),
+        encoding="utf-8",
+    )
+    seen: list[bool] = []
+    _later(0.2, lambda: seen.append(record_path(tmp_path).is_file()))
+    _later(0.5, lambda: write_record(tmp_path, address(server), server.server_address[1]))
+    assert (
+        open_agent(
+            tmp_path,
+            tmp_path / "host.json",
+            start=lambda: pytest.fail("a second server was started"),
+            opener=lambda _: False,
+            wait_seconds=30,  # returns as soon as it answers; a loaded PC is slow
+            poll=0.02,
+        )
+        == "started"
+    )
+    assert seen == [True]  # its record was never dropped
+
+
+def test_nothing_is_started_while_the_port_is_taken(
+    tmp_path: Path, server: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(launcher, "port_in_use", lambda _port: True)
+    _later(0.3, lambda: write_record(tmp_path, address(server), server.server_address[1]))
+    assert (
+        open_agent(
+            tmp_path,
+            tmp_path / "host.json",
+            start=lambda: pytest.fail("a second server was started"),
+            opener=lambda _: False,
+            wait_seconds=30,  # returns as soon as it answers; a loaded PC is slow
+            poll=0.02,
+        )
+        == "started"
+    )
+
+
+def test_a_server_whose_port_is_taken_stops_before_starting_anything(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from test_host_wiring import host_json, ready
+
+    from host_runtime import cli
+
+    config, _layout = ready(tmp_path)
+    path = host_json(tmp_path, config)
+    taken = socket.socket()
+    taken.bind(("127.0.0.1", 0))
+    taken.listen(1)
+    monkeypatch.undo()  # the real port check
+    monkeypatch.setattr(cli, "build_runtime", lambda *a, **k: pytest.fail("it started"))
+    try:
+        begun = time.monotonic()
+        code = cli.main(["web", "--config", str(path), "--port", str(taken.getsockname()[1])])
+    finally:
+        taken.close()
+    assert code == 3 and time.monotonic() - begun < 10
+    assert "already in use" in capsys.readouterr().err
