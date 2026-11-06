@@ -61,10 +61,14 @@ The owner is the only person who confirms a push to GitHub.
 
 ## Known limits to state in the release notes and SOP
 
-- The owner's same-card rule (summary unchanged, evidence and links appended, time a union) is
-  **not** what the code does yet: a second table import replaces a summary silently; two appends to
-  one field's evidence conflict; `updated` conflicts. The owner has not chosen between releasing
-  with this documented (A, recommended) or fixing first (B).
+- **Must be fixed before release (owner chose B, 2026-11-06 18:45):** the owner's same-card rule
+  for one card reached from two domains: the summary (`summary`, `usage`, `scope`) stays as first
+  written, a differing later value becomes a proposal and never replaces it silently; evidence and
+  raw-data links append; time is a union. Today a second table import replaces a summary
+  silently, two appends to one field's evidence conflict at unit level, and two `updated` values
+  conflict; two people filling the same empty summary conflict. Agent 963f49c6 measured this
+  (`docs/phases/BI_PAGE_SIMPLE.md` §14). It needs a merge rule where `push` meets a conflict and in
+  the import/run merge; commit units stay immutable and every PC must rebuild to the same result.
 - Chat has no data-class check on BI cards and analysis rows; add no source above INTERNAL.
 - Test results are local to the PC that ran them. Upload to the Shared Platform, encryption, and
   the per-domain name dictionary are not built (`docs/phases/BI_PLATFORM_RELEASE.md` is on branch
