@@ -207,17 +207,22 @@ def test_build_and_import_steps_in_a_browser(served: Any, tmp_path: Path) -> Non
         wait("document.getElementById('bi-b-draft-info').textContent.includes('第 2 版')")
         assert "price_band" in text_of("bi-b-draft-info")
         click("#bi-b-draft-publish")
-        wait("document.getElementById('bi-notice').textContent.includes('bi.schema/v1.1@5.1.0')")
-        wait("document.getElementById('bi-b-versions').textContent.includes('5.1.0')")
-        # The published 5.1.0, not the shipped versions listed beside it.
+        wait("document.getElementById('bi-notice').textContent.includes('已發布 5.1')")
+        wait("document.getElementById('bi-b-versions').textContent.includes('5.1')")
+        # Only versions newer than the dataset's 1.1, the published 5.1 last (F6).
+        offered = run(
+            "[...document.querySelectorAll('#bi-b-versions .bi-actions span')]"
+            ".map(s => s.textContent)"
+        )
+        assert offered == ["2.0", "3.0", "4.0", "5.0", "5.1"], offered
         run(
             "[...document.querySelectorAll('#bi-b-versions .bi-actions')]"
-            ".find(r => r.textContent.includes('@5.1.0')).querySelector('button').click()"
+            ".find(r => r.textContent.includes('5.1')).querySelector('button').click()"
         )
         wait("document.getElementById('bi-b-upgrade').textContent.includes('套用升級')")
         shoot("2-upgrade")
         click_text("#bi-b-upgrade", "套用升級")
-        wait("document.getElementById('bi-notice').textContent.includes('已升級')")
+        wait("document.getElementById('bi-notice').textContent.includes('已升級到 5.1')")
         assert BiStore(workspace).schema_ref() == "bi.schema/v1.1@5.1.0"
     finally:
         browser.close()

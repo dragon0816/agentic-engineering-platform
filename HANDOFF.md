@@ -1,5 +1,15 @@
 # Handoff
 
+## Step 2a's schema: suggest, readable versions, draft table (2026-11-06, Claude Code worker D) — built, sweep running
+
+Acceptance F5, F6, F8. Branch `bi-schema-suggest`, with main 98b2f182 merged in, not pushed. Design `docs/phases/BI_PAGE_SIMPLE.md` §15; decision `docs/DECISIONS.md` 2026-11-06; contract `docs/CONTRACTS.md`, "BI schema drafts and dataset upgrade" (建議 schema, schema state). Code `src/capabilities/bi_cards/schema_suggest.py`, `schema_versions.state`, `schema_merge.version_label`/`keeps`.
+
+**Verified:** ruff and mypy like CI; targeted non-browser tests (suggest, schema versions, merge, fit, page_simple, feed, cross-domain, ADR-K10 guard); browser `test_bi_schema_suggest_ui`, `test_bi_build_flow_ui`, `test_bi_build_ui`; three real-model presses on fictional sources (§15). **Not run:** the full suite; the real vault.
+
+**Open:** `bi-b-fit` stays under 進階 (S2 said remove it: orchestrator or owner). The BI browser sweep on the merged head: `.scratch/sweep.txt` if it did not finish.
+
+**Next:** orchestrator merges; restart Agent Web when `/api/tasks` is quiet; on the real vault, press 建議 schema on one new source.
+
 ## Sample marks on `market-intel` (2026-11-06, Claude Code worker D) — done; the pack's rule waits
 
 95 samples of 760, pushed, not tagged or published; published `2026q4-r6.2` still says 85. 4 Technologies stay cleared and 3 TestSolutions were marked again: `docs/phases/BI_SUMMARY_FILL.md`. Run `e3de934115f0` unchanged, waiting for the owner's review.

@@ -79,6 +79,14 @@ MAIN_PATH = (
     "bi-b-sk-list",
     "bi-b-tl-list",
     "bi-b-sk-new",
+    # Step 2a's schema (acceptance F5, F8): suggest, the AI, and the draft as a table.
+    "bi-b-sg-scope",
+    "bi-b-sg-run",
+    "bi-b-sg-table",
+    "bi-b-sa-open",
+    "bi-b-draft-table",
+    "bi-b-draft-use",
+    "bi-b-upgrade",
     "bi-ai",
     "bi-b-start",
     "bi-b-cands",
@@ -109,10 +117,9 @@ ADVANCED = (
     "bi-b-rerun",
     "bi-b-sk-form",
     "bi-b-tl-save",
-    "bi-b-sa-open",
     "bi-b-draft-new",
+    "bi-b-draft-text",
     "bi-b-versions",
-    "bi-b-upgrade",
     "bi-b-fit",
     "bi-b-fresh",
     "bi-b-recipe",
@@ -290,3 +297,10 @@ def test_every_jump_to_another_tab_has_a_way_back() -> None:
     script = PAGE[PAGE.index("function biBackHide") :]
     jumps = [line for line in script.splitlines() if 'biShowView("' in line]
     assert jumps == []
+
+
+def test_the_schema_buttons_sit_above_the_skills_table() -> None:
+    # Acceptance F5: suggest and the schema AI are on 2a's main path, before the skills.
+    start = PAGE.index('data-stage="schema"')
+    at = [PAGE.index(f'id="{i}"', start) for i in ("bi-b-sg-run", "bi-b-sa-open", "bi-b-skills")]
+    assert at == sorted(at)

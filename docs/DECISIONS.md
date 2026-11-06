@@ -6663,6 +6663,19 @@ model could not answer this turn.」 with no cause or 重試.
   are not sent again), and a failed BI AI turn too.
 - **Send waiting after a reload says why** (the conversation backends' sign-in check).
 
+## 2026-11-06: 建議 schema is its own press, and a version reads as 「5.0 加 N 項新增」
+
+Acceptance findings F5, F6 and F8 on step 2a. The owner's flow: 「根據新增的資料來建議是否要在schema新增類別，做法可以讓使用者按一個button，系統給出建議」. Design: `docs/phases/BI_PAGE_SIMPLE.md` S2; contract `docs/CONTRACTS.md`, "BI schema drafts and dataset upgrade".
+
+- **The suggestion asks the schema-fit question alone, on its own path** (`schema_suggest`), with `schema_fit`'s rules and checks. It reads the domain's sources no ingest read, or the one picked in step 1, and works whatever extraction method the ingest will use. Rejected: running it as an ingest run with the fit tick, which writes candidates, costs the extraction, and is skipped by a custom method.
+- **Every row has a quote found in the source.** What the model could not quote is counted and left out; a type or field the schema has becomes a question. 「不用改」 is a valid answer, shown as one.
+- **A field or allowed value is added through draft, publish and upgrade,** which a vault already turns into units on its version (`schema_merge`). The draft is removed afterwards. Rejected: staging `schema_change:` units directly, a second way in beside the one that checks and renumbers. A type, a synonym or an enum field with no values goes to the AI panel with the row written: they need a definition a person agrees.
+- **A version is shown as 「5.0」 or 「5.0 加 N 項新增」, never its digest,** and the notice after an upgrade says whether it was additions or a new version.
+- **預覽升級 offers only versions newer than the base that keep the vault's additions,** and the server refuses a move that would drop them (`schema_drops_additions`), unless the version was published from a draft of the current schema, which is a person's own removal. Rejected: refusing every move back, which plain datasets use by design.
+- **The draft on the main path is a table of its changes,** with the AI to edit it and 套用到資料集; its JSON, revisions and trial stay under 進階.
+- **`bi-b-fit` stays under 進階** for now; S2 planned to remove it once this button exists. That waits for the owner.
+
+
 
 ## 2026-11-06: Acceptance fixes F9, F10, F12, F19 (BI orchestrator)
 
