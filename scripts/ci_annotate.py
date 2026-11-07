@@ -34,6 +34,10 @@ def failure_lines(report: Path) -> list[str]:
 
 
 def main(argv: list[str]) -> int:
+    # GitHub interprets command output as UTF-8, including on a legacy Windows console.
+    reconfigure = getattr(sys.stdout, "reconfigure", None)
+    if reconfigure is not None:
+        reconfigure(encoding="utf-8", errors="backslashreplace")
     report = Path(argv[1] if len(argv) > 1 else "pytest-results.xml")
     if not report.is_file():
         print(f"::warning::no pytest report at {report}")
