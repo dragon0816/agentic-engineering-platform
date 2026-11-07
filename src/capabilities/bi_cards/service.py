@@ -8,7 +8,8 @@ is not synthetic (DQ-1); every shipped demo card is synthetic.
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Sequence
+from collections import Counter
+from collections.abc import Collection, Iterable, Sequence
 from importlib import resources
 from pathlib import Path
 from typing import Any
@@ -417,6 +418,7 @@ def query_cards(
     follow_links: bool,
     limit: int,
     hops: int = 0,
+    approved: Collection[str] | None = None,
 ) -> dict[str, Any]:
     """The chat capability's answer: cards with per-field source evidence, and
     with `hops` the cards their relations reach, each with its path."""
@@ -438,8 +440,20 @@ def query_cards(
         found = [(card, fields) for _, card, fields in near]
         closest = bool(found)
     cards = []
+    classes: dict[str, set[str]] = {}
+    if words and approved:
+        from capabilities.bi_cards.staging import Staging
+
+        for source_id, name, classification in Staging(
+            store.workspace, store.dataset
+        ).source_classes():
+            classes[source_id] = {classification}
+            classes.setdefault("name:" + name, set()).add(classification)
     for card, fields in found[:limit]:
         entry = _card_entry(store, card, fields)
+        snippet = _body_snippet(store, card, fields, words, approved, classes)
+        if snippet is not None:
+            entry["body_snippet"] = snippet
         if follow_links:
             entry["links"] = [
                 {**link, "card": None if link["missing"] else link["target_key"]}
@@ -457,6 +471,8 @@ def query_cards(
         )
     elif not found and text:
         note += "沒有卡片含這些字詞；回答「沒有」之前，請換較短的字詞（例如公司名）再查一次。"
+    if words and (entity_type or domain or field):
+        note += _filter_note(store, found, text or "", entity_type, domain)
     related: list[dict[str, Any]] = []
     if hops:
         walked = walk_relations(store, [c["card_id"] for c in cards], hops=hops)
@@ -472,6 +488,95 @@ def query_cards(
         "related": related,
         "scope_note": note,
     }
+
+
+def _filter_note(
+    store: BiStore,
+    found: list[tuple[Any, dict[str, dict[str, Any]]]],
+    text: str,
+    entity_type: str | None,
+    domain: str | None,
+) -> str:
+    """Count excluded exact word matches; no extra card entries, links or evidence reads."""
+    selected = {card["id"] for card, _ in found}
+    outside = [(c, f) for c, f in search(store, text=text) if c["id"] not in selected]
+    if not outside:
+        return ""
+    selected_types = (
+        {entity_type.lower()} if entity_type else {c["entity_type"].lower() for c, _ in found}
+    )
+    types = Counter(
+        c["entity_type"] for c, _ in outside if c["entity_type"].lower() not in selected_types
+    )
+    note = ""
+    if types:
+        note += (
+            f"其他類型也有 {sum(types.values())} 張卡符合："
+            + "、".join(f"{k} {types[k]}" for k in sorted(types))
+            + "。"
+        )
+    if domain:
+        reg = for_store(store)
+        domains: Counter[str] = Counter()
+        for _, fields in outside:
+            if _in_domain(fields, domain, reg):
+                continue
+            value = _value(fields, "domain")
+            if value is None and reg.is_bi:
+                value = "wireless"
+            domains.update(
+                {str(v) for v in (value if isinstance(value, list) else [value]) if v is not None}
+            )
+        if domains:
+            count = sum(not _in_domain(f, domain, reg) for _, f in outside)
+            note += (
+                f"其他領域也有 {count} 張卡符合："
+                + "、".join(f"{k} {domains[k]}" for k in sorted(domains))
+                + "。"
+            )
+    if not note:
+        note = f"另有 {len(outside)} 張卡符合字詞，但被目前篩選排除。"
+    return (
+        note + "若以上沒有答案，請用相同 text 再查，移除 entity_type、domain、field、value 篩選；"
+        "計數不是答案，需讀卡片內容。"
+    )
+
+
+BODY_SNIPPET_CHARS = 300
+
+
+def _body_snippet(
+    store: BiStore,
+    card: Any,
+    fields: dict[str, dict[str, Any]],
+    words: list[str],
+    approved: Collection[str] | None,
+    classes: dict[str, set[str]],
+) -> dict[str, str] | None:
+    """A matched stored body excerpt, never an entire unrestricted body or raw source."""
+    body = fields.get("body")
+    if body is None or not words or not approved:
+        return None
+    text = str(body["value"] or "")
+    positions = [text.lower().find(word) for word in words if word in text.lower()]
+    if not positions:
+        return None
+    sources = {
+        e["source_id"]
+        for e in store.evidence(card["id"])
+        if e["field"] == "body" and e["source_id"]
+    }
+    # Curated/imported card text without source classification defaults to INTERNAL.
+    levels = {level for source in sources for level in classes.get(source, {"UNKNOWN"})}
+    if not sources:
+        filename = str(body["ref"]).split("#row", 1)[0]
+        levels = classes.get("name:" + filename, {"INTERNAL"})
+    if not levels.issubset(approved):
+        return None
+    start = max(0, min(positions) - 80)
+    end = min(len(text), start + BODY_SNIPPET_CHARS - 2)
+    snippet = ("…" if start else "") + text[start:end] + ("…" if end < len(text) else "")
+    return {"field": "body", "text": snippet, "source": f"{body['kind']}:{body['ref']}"}
 
 
 def _card_entry(store: BiStore, card: Any, fields: dict[str, dict[str, Any]]) -> dict[str, Any]:

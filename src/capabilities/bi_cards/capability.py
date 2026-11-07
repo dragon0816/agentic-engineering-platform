@@ -307,6 +307,7 @@ class QueryHandler:
                 follow_links=request.follow_links,
                 limit=request.limit,
                 hops=request.hops,
+                approved=self.approved,
             )
             found = _source_passages(store, request.text, self.approved, chosen is not None)
             withheld = found["withheld"]

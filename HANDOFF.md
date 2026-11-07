@@ -1,34 +1,37 @@
-# Release blocker fixed — release-test-ids
+# BI query implementation committed; UI comparison pending
 
-Base: `ce924e5b`; branch: `release-test-ids`. No push. Next action: orchestrator reviews/merges this commit, then retries the normal release verification on main. The existing leaked release log was not inspected, copied or published by this worker.
+Branch `bi-query-other-types`, base `b1dd4cf8`. Do not push. Owner/orchestrator approved count-only cross-filter hints, widening guidance, bounded matched body snippets, stub and real-model validation. No real vault or owner Web used.
 
-## Changes
+## Implemented and verified
 
-- Every parametrized case in `tests/test_bi_atlas_file_import.py` now has a short explicit ID. The 100,000-character malformed input remains intact, as do every input, test body and assertion. An AST comparison against ce924e5b, excluding only the new `ids` keyword, is identical.
-- `scripts/release_windows.py::run` no longer forwards the last 25 lines of failed child stdout/stderr into ReleaseError. It reports command and exit code; failure still stops the release, successful output still reaches internal revision/build consumers. This prevents arbitrary pytest OS tracebacks from rendering inherited environment values into release logs. No attempt to guess secret names/patterns.
-- Added synthetic-only release regressions: failure never echoes child stdout/stderr, while successful output is returned unchanged. Before implementation, the failure test failed and success test passed; both pass after the fix.
-- Audit found the sign-in test serialized the inherited environment into an assertion operand. It now computes exactly the same JSON containment predicate before asserting its boolean, so a failing check cannot print the environment string. No weakening of the condition.
-- Test helper/script searches found no other explicit whole-environment print. The restricted-runner test prints variable names only. Ordinary pytest argument rendering was the original indirect source; the release runner now excludes all failed child output.
-- Release guide explains the diagnostic behavior; DECISIONS appends the rationale and rejected pattern-redaction alternative; TASKS marks completion. No runtime/BI model/feed-golden change.
+- service.query_cards keeps requested rows/total/limit unchanged; scope_note counts exact word matches excluded by active type/domain/field/value filters in the same store/version, groups other types/domains and tells the model to retry without filters. No extra card entries/links/evidence in the hint. No hint for no text/no filter/no excluded exact match.
+- Only returned schema-visible bodies with a query-word match can emit body_snippet (field=body, text<=300 including ellipses, source=kind:ref), retaining card citation/sample/trust flags. Full fields.body remains excluded. Host approval gates every known source class; unresolved evidence IDs withhold the snippet, staged filename matches also use their classes, no source classification defaults to INTERNAL. No unknown approval. Staging.source_classes reads only id/name/classification in one metadata query.
+- Chosen-version reading_tool inherits the installed query handler's host approval. It still reads the chosen store; raw passage rules unchanged. Widening instructions are in fresh tool descriptions, shipped Skill text and benchmark role, with a cross-type calibration example in question-generation guidance.
+- New fictional regression tests include a real vault/stub harness starting with SupplyLink, following the hint, reading CustomerProduct body before answering; counts/limits, matched-only/bounded snippets, class gates, published-version isolation and sample flags.
+- CONTRACTS/DECISIONS updated; evaluation report committed with eventual change. No persisted model version/commit changes, no new dependency, no feed golden edit.
 
-## Verification (Windows)
+Focused tests passed (PYTHONPATH=src, shared Python at C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/.venv/Scripts/python):
+- test_bi_query_other_types.py: 7 passed (C:/Temp/bi-other-types-unit-final)
+- test_bi_query_retrieval.py, test_bi_query_analyses.py, test_bi_vault_bench.py: 33 passed (C:/Temp/bi-other-types-core-final)
+- test_bi_cards.py, test_bi_feed_api.py, test_bi_feed_server.py, test_bi_feed_fixtures.py: 54 passed (C:/Temp/bi-other-types-feed)
+- test_vault_asking_e2e.py: 6 passed (C:/Temp/bi-other-types-vault-asking)
+- test_assistant_bi_query.py: 11 passed (C:/Temp/bi-other-types-assistant)
+- test_bi_questions_session.py: 5 passed (C:/Temp/bi-other-types-questions)
+- Browser-bearing files ran one at a time. Requested Ruff format --check src tests (1094 files), Ruff check src tests, mypy src tests (1048 files): passed. git diff --check passed after normalizing appended Markdown newlines.
+- Tests first: 5 feature regressions failed on the base; the approval-negative case already passed. Initial fixture keyword/frozen-row mistakes were corrected without weakening assertions.
 
-Python: `C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/.venv/Scripts/python`; `PYTHONPATH=src` for pytest.
+## Real model evidence
 
-- `python -m pytest tests/test_bi_atlas_file_import.py -q --tb=short --basetemp C:/Temp/release-test-ids-atlas`: 13 passed in 31.91s, including the real headless browser test, no setup/teardown errors. Browser tests ran one file at a time with private basetemps.
-- `python -m pytest tests/test_release_windows.py -q --tb=short`: 10 passed in 13.97s.
-- `python -m pytest tests/test_agent_code.py -q --tb=short --basetemp C:/Temp/release-test-ids-agent-code`: 8 passed in 48.92s, including its browser case.
-- Full repository collection through a local audit plugin: exit 0, 5,997 items, longest full node ID 316 characters, no IDs over 1,000, no collection errors. It reports test names without parameter values and numeric lengths only; does not print environment values. No other huge generated IDs found.
-- `python -m ruff check .`: passed.
-- `python -m ruff format --check .`: 1389 files already formatted.
-- `python -m mypy`: no issues in 1047 source files.
-- `python -m build`: wheel and sdist built successfully.
-- `python -m pip check`: no broken requirements.
-- `git diff --check`: passed.
-- An extra mypy invocation explicitly naming the script alongside src/tests reported the same module under two names (namespace scripts); the repository's configured CI command above passes. An initial scratch collection runner lacked the repository import path; corrected it and obtained the successful complete collection above. No such tooling workaround changes shipped code or tests.
+Private fictional SOP workspace copied to C:/Temp/bi-query-other-types/workspace. Script .scratch/bi_other_types_real.py; per-turn output before.json/after.json in that private root. No secret printed. Probe 2.0s/2.4s, no hang; gpt-5.5, exact question BW-200 的校準週期是多少？, five independent harness turns each, same copy/config. Before 0/5, tool calls [2,1,1,1,1]; after 5/5, [1,1,1,1,1]. All five positive answers read, affirm six months and cite the CustomerProduct card. This run's before model already queried all types, so body omission was independently causal; it does not isolate the count hint's effect. The stub exercises the filtered retry. Public reproducible description: docs/evaluations/BI_QUERY_OTHER_TYPES_2026-11-07.md.
 
-## Scope and safety
+## Full suite and pending comparison
 
-No full test-suite execution or actual release.cmd/package/tag/publish run here; the requested files and CI checks passed, and full collection audits all generated IDs. No credentials, environment values or incident-log content were printed; regression fixtures contain fictional text only. Own focused browser tests close their browsers normally. Owner Agent Web and real vault were not touched.
+Full suite: 5994 passed, 9 skipped, 2 failed in 6761.26s (C:/Temp/bi-other-types-full). This is not an all-green run. Failures:
+- test_bi_review_table_ui.py::test_accepting_a_proposal_shows_what_it_loses_and_then_that_it_was_done: line 703, second confirmation click, BrowserError navigation_failed (JS exception).
+- test_bi_sessions_ui.py::test_session_panels_in_a_browser: waiting for method revision 2. Whole file isolated: 1 passed (19.67s).
 
-Previous completed SOP remains in ce924e5b: 98 fresh, reviewed screenshots plus the Traditional Chinese guide. Its temporary servers/browsers were already shut down; they were not restarted for this task. Local audit/build/test artifacts stay ignored under `.scratch` or task-specific temp folders.
+Review table whole-file isolated on this branch: 10 passed/1 failed (320.93s), then 10 passed/1 failed (248.24s), same case/error. That case alone: 1 passed (27.71s). Baseline b1dd4cf8 whole file: 11 passed (355.15s). These counts do not yet establish whether this is pre-existing. No UI/test assertion changes made. Baseline temporary worktree was removed after that run.
+
+Orchestrator explicitly requested committing the query change now, then running review_table_ui whole file 3 more times on each version, alternating, serial browsers, each with its own basetemp, and capturing the JS exception text without environment values. This is the next required work before reporting. If only this branch fails, trace how query changes reach the page; if both fail similarly, record measured rates as a pre-existing flake. Do not claim the full suite passed.
+
+Final diff architecture review and staged credential/feed-path scan passed. Requested CI/focused 116 all passed. No actual release/tag/push. Real-check runtime contexts closed; no temp Web server was started for the real-model task. Test fixtures close their own servers/browsers.

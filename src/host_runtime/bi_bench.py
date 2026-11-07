@@ -548,7 +548,9 @@ def standing(workspace: Path, vault_id: str) -> dict[str, list[str]]:
 ROLE = (
     "You are answering a benchmark question about the shared BI knowledge base dataset "
     "{dataset}. Use bi__query with dataset {dataset} and answer from what it returns, as you "
-    "would answer the person."
+    "would answer the person. If the answer is not in filtered results, query again without "
+    "entity_type (and widen other filters named by scope_note) before saying there is no data. "
+    "An answer may be in another type's body_snippet, not on the first matching SupplyLink."
 )
 
 

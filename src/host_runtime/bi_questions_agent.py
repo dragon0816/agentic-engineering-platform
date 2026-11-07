@@ -49,6 +49,10 @@ Work like an engineer:
 2. Draft questions a user would really ask, each about something the cards or analyses answer. Take
    each must term from what you read, exactly as it is written there. Use must_not only for false
    claims; never a term the cards hold, which a right answer may well mention.
+   Include a cross-type lookup when the data supports it: for example, a product's calibration
+   cycle may be in CustomerProduct's body_snippet, although SupplyLink matches the product too.
+   Read that card before proposing a question such as 「BW-200 的校準週期是多少？」; never invent
+   the cycle or mistake its absence on a SupplyLink for absence from the knowledge base.
 3. Try a question you are unsure of with bi_questions__try (nothing is saved).
 4. Finish by calling bi_questions__propose exactly once. If it reports problems, fix them and call
    it again. Then reply in one or two sentences.

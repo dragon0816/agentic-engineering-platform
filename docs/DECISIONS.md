@@ -6772,3 +6772,38 @@ regressions verify both behaviors. The sign-in test's existing environment conta
 also computes a boolean before asserting, so a failure cannot print its serialized environment;
 the condition is unchanged. This changes diagnostics, not assertion strictness, runtime
 authorization or the contents of a release.
+
+## 2026-11-07 — Widen filtered BI searches and expose bounded matched body excerpts
+
+The SOP calibration question had an answer only in a CustomerProduct body. A SupplyLink hit
+was insufficient, and even an unfiltered search omitted every body from its card output.
+On a fictional SOP workspace copy, direct type-specific and unfiltered queries reproduced
+this omission. Body was excluded since the original card UI/query implementation (136c5cca);
+no separate documented privacy rationale was found. Keep that whole-body exclusion, and add
+only an excerpt needed for a text match under the host's data approval.
+
+- A text search with type/domain/field/value filters counts exact word-matching cards excluded
+  by those filters in the same authorized dataset/version. scope_note groups other types and
+  other domains, with a same-text retry instruction. Counts do not return extra cards, fields,
+  links, evidence or passages, and do not broaden the result automatically. The existing word
+  matcher and nearest-match behavior remain in charge; no cross-dataset search.
+- A returned card whose current body contains a query word may have body_snippet:
+  field=body, text up to 300 characters around the first match, source=kind:ref. Ellipses mark
+  cuts; the card's existing citation and trusted/synthetic fields remain. No text query, no
+  body match, or no approved class: no snippet. Related cards do not gain whole bodies.
+- Body source IDs must resolve to approved source classes; unknown IDs withhold the excerpt.
+  Imported filename matches also use known source classes (all classes on duplicate names must
+  be approved). Curated/imported text without source classification conservatively defaults to
+  INTERNAL. Source identity/class is a single metadata projection, without per-source revision
+  lookups. Chosen-version harness tools inherit the installed tool's host approval, not model
+  input; the selected store still supplies all text and counts. Raw passages keep their prior
+  approval/version restrictions, including no raw passages for chosen-version benchmarks.
+- Tool description and Skill guidance require removing entity_type, then other restricting
+  filters as indicated, before claiming the knowledge base has no answer. A count is a hint,
+  never evidence. Benchmark-question guidance includes looking for a calibration cycle on
+  another card type, using only terms actually read there.
+
+Returning every matching type's rows automatically or returning complete bodies was rejected
+because it increases context and can bypass the person's filters/size expectations. Inventing
+an answer from counts or weakening benchmark must terms was also rejected. No persisted model
+or commit format changes; feed goldens remain byte-identical.

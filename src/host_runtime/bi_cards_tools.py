@@ -46,7 +46,7 @@ from capabilities.bi_cards.capability import (
     search_sample_note,
     source_note,
 )
-from capabilities.bi_cards.manifest import BI_SKILL, bi_question
+from capabilities.bi_cards.manifest import BI_SKILL, SEARCH_RULE, bi_question
 from capabilities.bi_cards.packs import SECTIONS as PACK_SECTIONS
 from capabilities.bi_cards.store import VAULT_PREFIX, BiStoreError
 from capabilities.runtime import CapabilityInvocation, CapabilityRefused
@@ -603,7 +603,7 @@ def _model_tool(gateway: Any, found: list[Any]) -> ModelTool:
         "their sources. Use THIS tool, not a knowledge vault query, for questions about "
         "客戶產品 customer products, 商機 opportunities, 客戶 accounts, 應用 applications, "
         "測試方案 test solutions, 競品 competitors, 趨勢 trends, 技術, 節點, 生態系 and 缺口 "
-        f"gaps. PROCEDURE: {found[-1].instructions}"
+        f"gaps. {SEARCH_RULE} PROCEDURE: {found[-1].instructions}"
     ) + _vaults_note(gateway)
     return ModelTool(
         name=TOOL_NAME,
@@ -618,8 +618,16 @@ def reading_tool(gateway: Any, handler: QueryHandler) -> HostTool | None:
     a chosen version, BI T1) for one turn (`agent.gateway.turn_host_tools`).
     None when the BI Skill is off, as the Agent would have no such tool."""
     found = _switched_on(gateway)
-    if not found or gateway.bridge.installed.get(QUERY_SPEC.identity) is None:
+    installed = gateway.bridge.installed.get(QUERY_SPEC.identity)
+    if not found or installed is None:
         return None
+    if handler.approved is None:
+        # A chosen-version tool uses the same host approval as the installed read tool.
+        handler = QueryHandler(
+            handler.workspace_root,
+            handler.store_for,
+            approved=getattr(installed.handler, "approved", None),
+        )
 
     async def call(context: RequestContext, arguments: dict[str, Any]) -> HostToolOutcome:
         try:

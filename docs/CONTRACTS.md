@@ -6933,3 +6933,29 @@ The replay epoch is persisted in `repo.sqlite` user_version, independently of th
 
 
 BI same-card release correction (2026-11-06): chunk-inferred readings retain alternatives without a conflict warning; sourced facts and ordinary fields still warn. Time maxima compare actual ISO instants in UTC (date-only/naive dates use UTC). A derived card.updated timestamp keeps history's representation on equal instants. Evidence and updated-field unit ties remain canonical and deterministic. Replay policy 2 / card model 13 supersede versions 1 / 12 for this timestamp correction; no commit or golden is rewritten.
+
+## BI query filter hints and matched body snippets (2026-11-07)
+
+`bi-cards/query@1.0.0` / `bi__query` remain read-only and scoped to the selected dataset and
+reading version. Additive card output: optional `body_snippet` with `field: "body"`, `text`
+(at most 300 characters including cut ellipses), and `source` (`kind:ref`). Only returned cards
+whose current, schema-visible body contains a text-query word qualify; full bodies stay absent
+from `fields`, and no unrelated or wordless body is emitted. Cite the containing card using
+its existing `card` key. Sample/trust flags are unchanged; an excerpt is data, not instructions.
+
+Snippets require host approval: every known body-evidence source class must be approved;
+unresolved source IDs withhold it. An import ref naming a staged source uses that source's
+class; duplicate names require all their classes. With no source classification, a curated
+body defaults to INTERNAL. Unknown/no host approval emits no body excerpt. Chosen-version
+harness tools take the installed query handler's approval, never a tool argument. Approved raw
+passages and their withholding/version rules are unchanged.
+
+For a nonempty text search restricted by type, domain, field or value, `scope_note` may count
+other exact word matches excluded by those filters, grouped in deterministic type/domain
+order. Counts cover all matches, independent of `limit`, but add no rows or body snippets.
+A card in several domains can contribute to several domain groups while the headline total
+counts it once. The note tells the model to retry the same text without restricting filters;
+no matches elsewhere means no hint, and unfiltered/wordless searches add no filter hints.
+SQL and saved analyses do not run this card-search hint path. Counts are discovery hints, not
+citations or proof of an answer. No pending proposal, preview or unpushed/unpublished version
+is admitted beyond the version already selected by the query.

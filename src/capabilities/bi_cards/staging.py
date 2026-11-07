@@ -696,6 +696,16 @@ class Staging:
             "convert_error": failure,
         }
 
+    def source_classes(self) -> list[tuple[str, str, str]]:
+        """Source identity and class only: no per-source conversion/revision queries."""
+        if not self.exists:
+            return []
+        with self._db() as db:
+            return [
+                (str(r["id"]), str(r["name"]), str(r["classification"]))
+                for r in db.execute("SELECT id, name, classification FROM sources")
+            ]
+
     def sources(self) -> list[dict[str, Any]]:
         if not self.exists:
             return []
