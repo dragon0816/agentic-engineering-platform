@@ -37,3 +37,36 @@ Gateway 探測分別 2.0 秒、2.4 秒，皆成功，未掛住。每個階段只
 計數後去除限制，讀到 CustomerProduct 的 body_snippet，才回覆並引用該卡片。
 沒有從計數猜答案，也沒有放寬原本的必須命中詞。未裁切的長篇 body、未核准來源和未發佈版本
 仍不會藉此進入一般查詢結果。
+
+## 驗證與既有 UI 失敗對照
+
+查詢修改為 `e9105373`。指定與相關測試共 116 passed；Ruff format/check、mypy 通過，
+feed goldens 未變。額外全套 pytest 為 5994 passed、9 skipped、2 failed（6761 秒），
+不能報為全綠。兩個失敗是 review 提案確認與 sessions 新版次等待；sessions 整檔
+單獨重跑 1 passed。review 失敗案例單獨 1 passed，但整檔先前兩次均 10 passed／1 failed；
+未修改基準先前一次整檔 11 passed。
+
+依 orchestrator 要求，提交後以相同暫存 DevTools 診斷外掛交替跑整檔，各 3 次，
+一次一檔、各自 basetemp。外掛只旁錄原本 Runtime.evaluate 回傳的 exceptionDetails，
+不重送點擊、不改回傳、不改產品程式或測試斷言，且遮蔽敏感值。
+
+| 順序 | 版本 | 結果 | 秒 |
+|---|---|---|---:|
+| 1 | 本分支 | 11 passed | 281.18 |
+| 2 | b1dd4cf8 | 11 passed | 279.81 |
+| 3 | 本分支 | 11 passed | 321.04 |
+| 4 | b1dd4cf8 | 11 passed | 397.85 |
+| 5 | 本分支 | 11 passed | 586.50 |
+| 6 | b1dd4cf8 | 10 passed、1 failed | 500.60 |
+
+新增對照失敗計數：本分支 0／3、基準 1／3；加計先前的獨立整檔執行則為本分支
+2／5、基準 1／4，全套的失敗另列。基準失敗精確同一案例、同一行 703，JS 訊息為：
+
+```text
+TypeError: Cannot read properties of undefined (reading 'click')
+    at <anonymous>:1:180
+```
+
+運算式找到 FAKE-040 提案列後，找含「確定取代」的按鈕再呼叫 click；失敗當下按鈕為
+undefined。這證明問題已存在於未修改基準，尚不能判定兩版本失敗率相等，也未證明
+是哪個重繪／競態機制使按鈕消失。已在 TASKS 留獨立追蹤項目，本次沒有改 UI 或放寬斷言。

@@ -1,4 +1,4 @@
-# BI query implementation committed; UI comparison pending
+# BI query complete; pre-existing review UI failure measured
 
 Branch `bi-query-other-types`, base `b1dd4cf8`. Do not push. Owner/orchestrator approved count-only cross-filter hints, widening guidance, bounded matched body snippets, stub and real-model validation. No real vault or owner Web used.
 
@@ -24,7 +24,7 @@ Focused tests passed (PYTHONPATH=src, shared Python at C:/Users/Chi_L/Documents/
 
 Private fictional SOP workspace copied to C:/Temp/bi-query-other-types/workspace. Script .scratch/bi_other_types_real.py; per-turn output before.json/after.json in that private root. No secret printed. Probe 2.0s/2.4s, no hang; gpt-5.5, exact question BW-200 的校準週期是多少？, five independent harness turns each, same copy/config. Before 0/5, tool calls [2,1,1,1,1]; after 5/5, [1,1,1,1,1]. All five positive answers read, affirm six months and cite the CustomerProduct card. This run's before model already queried all types, so body omission was independently causal; it does not isolate the count hint's effect. The stub exercises the filtered retry. Public reproducible description: docs/evaluations/BI_QUERY_OTHER_TYPES_2026-11-07.md.
 
-## Full suite and pending comparison
+## Full suite and completed comparison
 
 Full suite: 5994 passed, 9 skipped, 2 failed in 6761.26s (C:/Temp/bi-other-types-full). This is not an all-green run. Failures:
 - test_bi_review_table_ui.py::test_accepting_a_proposal_shows_what_it_loses_and_then_that_it_was_done: line 703, second confirmation click, BrowserError navigation_failed (JS exception).
@@ -32,6 +32,21 @@ Full suite: 5994 passed, 9 skipped, 2 failed in 6761.26s (C:/Temp/bi-other-types
 
 Review table whole-file isolated on this branch: 10 passed/1 failed (320.93s), then 10 passed/1 failed (248.24s), same case/error. That case alone: 1 passed (27.71s). Baseline b1dd4cf8 whole file: 11 passed (355.15s). These counts do not yet establish whether this is pre-existing. No UI/test assertion changes made. Baseline temporary worktree was removed after that run.
 
-Orchestrator explicitly requested committing the query change now, then running review_table_ui whole file 3 more times on each version, alternating, serial browsers, each with its own basetemp, and capturing the JS exception text without environment values. This is the next required work before reporting. If only this branch fails, trace how query changes reach the page; if both fail similarly, record measured rates as a pre-existing flake. Do not claim the full suite passed.
+Query implementation commit: e9105373. Orchestrator requested committing first, then three more whole-file runs per version, alternating and serial, with the same temporary diagnostic plugin. Completed order/results:
+
+| Run | Result | Seconds |
+|---|---|---:|
+| branch-1 | 11 passed | 281.18 |
+| b1dd4cf8 base-1 | 11 passed | 279.81 |
+| branch-2 | 11 passed | 321.04 |
+| b1dd4cf8 base-2 | 11 passed | 397.85 |
+| branch-3 | 11 passed | 586.50 |
+| b1dd4cf8 base-3 | 10 passed, 1 failed | 500.60 |
+
+New comparison failure counts: branch 0/3, baseline 1/3. Including preceding isolated whole-file runs: branch 2/5, baseline 1/4; full-suite failure is separate. Baseline base-3 failed at the exact same test and line 703. DevTools exceptionDetails captured without re-executing the expression: `TypeError: Cannot read properties of undefined (reading 'click')` at `<anonymous>:1:180`. The selector finds the FAKE-040 proposal row, then a button containing the explicit replacement confirmation label; that button is undefined at the click. This proves the UI failure exists before the query change, but does not establish equal failure rates or the exact refresh/race mechanism. No UI/test assertions changed.
+
+Private reproducible artifacts: C:/Temp/bi-query-diagnostics (run_comparison.py, bi_js_diagnostics.py, six logs, base-3.jsonl, verified-results.json). Plugin only observes the original Runtime.evaluate response and records exception details for this test, with sensitive values redacted; it never repeats an expression or changes the response. All six runs used the same plugin and unique C:/Temp/bi-other-types-{branch,base}-{1,2,3} basetemps. Baseline detached worktree is removed after comparison; test fixture servers/browsers have ended.
+
+Follow-up: separately fix the pre-existing review confirmation UI failure, preserving the second explicit press and strict assertions. This task does not include that UI change. Do not describe the original full suite as green; the final branch review file and sessions file do pass in isolation, and the baseline failure remains tracked in TASKS.
 
 Final diff architecture review and staged credential/feed-path scan passed. Requested CI/focused 116 all passed. No actual release/tag/push. Real-check runtime contexts closed; no temp Web server was started for the real-model task. Test fixtures close their own servers/browsers.
