@@ -1808,6 +1808,47 @@ The installed-asset projection exposes the manifest's `input_contract` and
 `output_contract`. These are names, not field schemas. The current generic form
 therefore accepts one JSON object and never invents field definitions.
 
+### Chat form execution state (2026-11-07)
+
+A chat launch may name `session_id` plus `form_message_id`, the exact assistant
+message that offered the exact Workflow. These are references, not authority:
+the resident actor must own the non-Telegram conversation. Older clients without
+a message id bind to the newest matching offer; launches without a chat form
+retain the existing execution response and path.
+
+Before waiting for execution, the host atomically records a form `run` marker:
+`status`, attempt `key`, `started`, validated/defaulted runtime `arguments` and an
+internal instance `owner`. Terminal markers add the result answer. The instance
+identifier is removed from Web projection. A duplicate activation returns the
+compact saved `answer`, `status`, `replayed=true` and success flag, without
+execution or another result-summary write. An explicit retry requires `retry_of`
+to match the exact failed/interrupted key and a distinct new key. Success cannot
+be retried through its consumed form; a new intentional run uses a new offer.
+Runtime authorization and all step policy checks remain unchanged.
+
+`SqliteLocalState.set_workflow_form_run` updates only one actor-owned assistant
+form's execution metadata. Ordinary `save_conversation` retains its append-only
+transcript checks. Execution still appends the run/result pair through the
+existing recorder. Active launches, including ones queued before telemetry
+starts, appear in `/api/activity`; `/api/tasks` keeps its Workflow telemetry
+projection. Another instance projects an unfinished marker as interrupted;
+no automatic execution or mailbox retry occurs. A crash after a result pair but
+before its terminal marker is conservatively interrupted: inspect the recorded
+result/effects before explicitly retrying.
+
+Failed/interrupted forms reuse the prior validated arguments and identify their
+origin as the prior attempt. Uploaded file references are restored using the
+existing upload collector, never by setting a browser file chooser's value;
+the engine still rechecks existence and confinement for every run. Status
+refresh preserves unchanged forms' controls, draft values, focus and selection.
+A missing HTTP reply is followed by a host-state read; an unchanged/unclaimed
+form remains editable and actionable, while a started form stays consumed.
+
+Old inline-run pairs project consumed state only for an unambiguous exact
+identity. Complete JSON-valued recorded arguments may be recovered; hidden
+upload paths and truncated values are never invented. Missing historical upload
+references or incomplete arguments are named explicitly before a retry.
+
 ## Personal Agent Web Knowledge asking (Productization 1, slice 5)
 
 `KnowledgeAskRequest` contains one exact Knowledge `AssetIdentity` and one

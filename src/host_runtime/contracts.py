@@ -363,6 +363,9 @@ class WorkflowLaunchRequest(Contract):
     # result are added to that conversation (owner 2026-10-15).
     session_id: Symbol | None = None
 
+    form_message_id: Symbol | None = None
+    retry_of: IdempotencyKey | None = None
+
     @model_validator(mode="after")
     def no_credential_material(self) -> Self:
         reject_embedded_secrets(self.model_dump(mode="json"))
