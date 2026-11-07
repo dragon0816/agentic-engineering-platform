@@ -8,18 +8,42 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import Any
 
 import pytest
 from bi_page_driver import BiPage, browser_missing
 from test_bi_vault import _call, _ok
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
+from integrations.browser import Browser
+
 QUIET = "window.__aepWatch.open.length === 0"
 LINKS = "[...document.querySelectorAll('#bi-b-v-state button.bi-link')]"
 
 
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
-def test_the_status_line_opens_commit_and_push_from_any_tab(tmp_path: Path) -> None:
+def test_the_status_line_opens_commit_and_push_from_any_tab(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The benchmark above the version form arrives after the share tables. Keep
+    # this response ordering deterministic instead of relying on runner speed.
+    original_navigate = Browser.navigate
+
+    def navigate(browser: Browser, address: str) -> Any:
+        browser.page().call(
+            "Page.addScriptToEvaluateOnNewDocument",
+            source=(
+                "(() => { const real = window.fetch; let release;"
+                " const gate = new Promise((go) => { release = go; });"
+                " window.__releaseBench = release; window.__benchWaiting = false;"
+                " window.fetch = async (u, o) => {"
+                " if (String(u).includes('/checks') && (!o || !o.method || o.method === 'GET')) {"
+                " window.__benchWaiting = true; await gate; } return real(u, o); }; })()"
+            ),
+        )
+        return original_navigate(browser, address)
+
+    monkeypatch.setattr(Browser, "navigate", navigate)
     config, layout = _bi_host(tmp_path / "pc")
     workspace = layout.workspace_root
     shared = tmp_path / "shared"
@@ -54,13 +78,21 @@ def test_the_status_line_opens_commit_and_push_from_any_tab(tmp_path: Path) -> N
             page.run(f"{LINKS}[0].click()")
             page.wait("bi.view === 'build' && bi.build.stage === 'test'", 60)
             page.wait("!document.getElementById('bi-b-ver').hidden", 60)
+            page.wait("window.__benchWaiting", 60)
+            page.wait(QUIET, 60)  # every other table has been drawn
+            page.run("window.__releaseBench()")
             page.wait(QUIET, 60)
+            page.wait("document.getElementById('bi-b-bq-list').textContent.includes('虛構題')", 60)
             # 版本 shows below the sticky top row, ready for the commit's purpose.
-            assert page.run(
+            visible_version = (
                 "(() => { const v = document.getElementById('bi-b-ver').getBoundingClientRect(),"
                 " r = document.getElementById('bi-top-row').getBoundingClientRect();"
                 " return v.top >= r.bottom && v.top < innerHeight; })()"
             )
+            # Network quiet does not promise that the browser has completed scrolling.
+            # Keep the same spatial condition, waiting for it rather than sampling one frame.
+            page.wait(visible_version, 60)
+            assert page.run(visible_version)
             assert page.run("document.activeElement.id") == "bi-b-ver-purpose"
             page.see("bi-b-ver-pending", "虛構題")
             page.shoot("version")
