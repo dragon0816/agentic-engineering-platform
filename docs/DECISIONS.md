@@ -7503,3 +7503,20 @@ authoring isolation stay unchanged. Any observed regression blocks delivery;
 record limitations rather than promise every stochastic model answer is identical.
 Rejected: merge all remote commits because source text auto-merges, force-push
 main, weaken tests, or use the earlier package's verification for new code.
+## 2026-11-07 — Diagnose Outlook draft failures without logging mail content
+
+The SDE run on the owner's host reached `weekly-report/apply` successfully, then
+`weekly-report/mail` failed with `draft_failed` after 392164.4 ms. The saved run and
+telemetry prove execution continued after navigation. They do not identify the
+failing COM operation or HRESULT: the draft adapter discarded every underlying
+exception. Existing stderr contains no usable numeric diagnosis for that failure.
+Do not label this historical failure an Outlook environment fault or an adapter
+logic fault without evidence, and do not retry a real draft to investigate it.
+
+The draft adapter now logs a fixed stage plus numeric HRESULT/scode, including
+COM-apartment failure. It retains the public `draft_failed` contract. No exception
+message, traceback, subject, recipient, file path or environment value is logged.
+A synthetic COM failure regression first failed with empty diagnostics, then passed
+with the numeric codes and explicit assertions excluding private exception text.
+Rejected: printing COM exceptions, automatically retrying mailbox writes, or
+changing business success semantics to hide the failed draft.
