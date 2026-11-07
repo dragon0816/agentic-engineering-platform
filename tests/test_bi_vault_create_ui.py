@@ -67,8 +67,9 @@ def test_a_person_can_name_the_vault_id(served: Any, tmp_path: Path) -> None:  #
         # The id typed is the id, with no random ending.
         put("bi-b-v-id", "market-fiction")
         click("#bi-b-v-go")
-        wait("document.getElementById('bi-notice').textContent.includes('已建立共用知識庫')")
         wait("document.getElementById('bi-dataset').value === 'vault-market-fiction'")
+        wait("bi.vaultArrived === null")
+        wait("document.getElementById('bi-notice').textContent.includes('已建立共用知識庫')")
         assert (shared / "market-fiction" / "repo.json").is_file()
 
         # In the other modes the field is not offered.

@@ -16171,16 +16171,21 @@ async function biSourceFolders() {
   // Just joined or created (acceptance F22): one domain is chosen, several are asked for.
   if (bi.vaultArrived !== listed) return;
   bi.vaultArrived = null;
+  const arrivedNotice = el("bi-notice").classList.contains("good")
+    ? el("bi-notice").textContent : "";
+  const arrivalHint = (message) =>
+    biNotice(true, [arrivedNotice, message].filter(Boolean).join(" "));
   const domains = bi.build.homes.filter((item) => !item.home.startsWith("library/"));
   if (domains.length === 1) {
-    pick.value = domains[0].folder; pick.dispatchEvent(new Event("change"));
+    // This is automatic initialization, not the next press that dismisses a success notice.
+    pick.value = domains[0].folder; biScopeChanged();
   } else if (domains.length) {
     pick.focus();
     try { pick.showPicker(); } catch (e) { /* a picker opens only on a person's click */ }
-    biNotice(true, "選一個工作領域：新增、Ingest 和測試都在那個領域裡做。");
+    arrivalHint("選一個工作領域：新增、Ingest 和測試都在那個領域裡做。");
   } else {
     el("bi-b-home-new").focus();
-    biNotice(true, "這個知識庫還沒有領域：按「新增領域」建一個。");
+    arrivalHint("這個知識庫還沒有領域：按「新增領域」建一個。");
   }
 }
 
