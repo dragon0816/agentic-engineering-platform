@@ -4385,4 +4385,4 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 
 - [x] 2026-11-08, Codex (codex-lead): preserve queued-send notice during delayed backend checks (c0553d76), with coordinated browser regression failing on b9d96ac7 and all original assertions retained. Focused 9 passed; final full 6018 passed/13 skipped.
 
-- [ ] 2026-11-08, Codex (codex-lead): owner requested a local Windows release package including the verified repair. Dependencies prepared; official clean-source build pending. No tag, publish, push, install or owner restart authorized.
+- [x] 2026-11-08, Codex (codex-lead): build local Windows offline release 20261108-0234-e564e1ad from clean tested e564e1ad. Official builder exit0; archive SHA256, integrity, all manifest hashes/sizes/revision and inner-wheel repair content verified. Package189186782 bytes; SHA256/path in HANDOFF. No tag, publish, push, install or owner restart performed.

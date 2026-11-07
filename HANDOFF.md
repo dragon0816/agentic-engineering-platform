@@ -24,7 +24,7 @@ A separate existing 11-07 21:15–21:28 run timed out in mail, not launched here
   text/traceback/content/paths/env; same failure behavior, no retry.
 - 3b3da4d5: live Outlook tests opt in explicitly; collection never probes COM.
 - c0553d76: keep queued-send promise when delayed readiness notice arrives.
-- Navigation change pending commit: exact actor-owned form identity, persisted
+- e564e1ad navigation repair: exact actor-owned form identity, persisted
   start/validated args before lock, duplicate replay, explicit failed/interrupted
   retry; narrow state transaction preserves transcript append-only contract.
   Same original Agent/Gateway/Harness/engine/Bridge path; no new executor/policy.
@@ -59,15 +59,23 @@ All26 Workflow cases and both old remote CI failures passed in first and final r
 Remote main b9d96ac7 CI42360202085 failed version geometry/Member Portal; no new
 remote CI until owner authorizes push. Do not claim local pass is remote green.
 
-## Release next
-Owner asked another local Windows Agent+Bridge offline package including fixes.
-Official scripts/release_windows.py uses git archive HEAD and clean tracked tree.
-Commit verified navigation/docs, then use --quick --no-tag --notes-since
-b1dd4cf85179d75b163d75e70fb2ccff9be63a56. --quick reuses completed exact-source full
-above; static checks still run. No allow-dirty/skip unfinished checks.
-126 dependency/gateway wheels prepared in .scratch/release-prep, cache warmed.
-Output local dist/releases/<timestamp>-<revision>, retain older releases.
-Verify zip SHA256SUMS, manifest revision, platform wheel contains new module and
-UI guard. Record actual artifact path/hash and update TASKS after success.
-No publishing/shared copy/install/restart. Final reply link package, state tests,
-briefly explain owner run continued then draft failed and cause remains unknown.
+## Release completed
+Owner-requested local Windows Agent+Bridge offline bundle built from clean
+committed e564e1ad35a259b998936f672a3b43163c91bf78.
+Command: python -u scripts/release_windows.py --quick --no-tag --notes-since
+b1dd4cf85179d75b163d75e70fb2ccff9be63a56. Exit0; --quick reused completed exact-source
+full above; builder reran Ruff and mypy before git archive HEAD export.
+Log .scratch/codex-lead-release.log.
+
+Folder: dist/releases/20261108-0234-e564e1ad/
+Zip: aep-windows-preview-0.1.0-e564e1ad35a2.zip (189186782 bytes).
+SHA256: 2aea35ba3e1e2e47d49b466a5389fe39c6ff35ec2dcf0f9f5b1fc3fc2b6d86a1
+SHA256SUMS, zip integrity, all manifest file hashes/sizes and source revision
+independently verified. Inner wheel verified to contain workflow_form_runs.py,
+durable form contract/state transaction and queued-send UI guard.
+Release includes installation/user guides, notes and BI SOP images. latest.json
+points to this artifact. No tag/push/publish/shared copy/install/owner restart.
+
+Next: owner may install/review the local package. Wait for explicit owner word
+before integration/push. Documentation-only release record commit follows the
+packaged revision; package remains pinned to tested e564e1ad.
