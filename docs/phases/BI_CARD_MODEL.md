@@ -83,7 +83,7 @@ The rebuild starts from nothing, so no SQL migration. `PRAGMA user_version` (`ca
 - `POST /api/bi/cards/<id>/rename {dataset, name, base_version, reason}` runs through `capture`: the card's `key` and `name` change, the old key joins `former_keys`, and the naming field is updated. Nothing else is touched, because links are by id (§3.2).
 - `names.py` also resolves `former_keys`, so an import of the old name lands on the same card, on every PC.
 - A former name stays reserved. A new card with that name would hash to the same id, so it **is** that card. If another entity really has the name, it needs a different one. Rejected: a salted id, since two PCs would then disagree.
-- Rename to a taken name is refused. Two PCs doing it at once (rename X→Y, create Y) both reach the folder, so `materialize` is deterministic: the card created first keeps the key, and the other shows as `<key>#<id>` with a `key_conflict` quality item until a person renames it. `check` also blocks this at push when it is visible.
+- Rename to a taken name is refused. Two PCs doing it at once (rename X→Y, create Y) both reach the folder, so `materialize` is deterministic: the card created first keeps the key (UTC instant, then its first deterministic replay position for same-second ties, then card id), and the other shows as `<key>#<id>` with a `key_conflict` quality item until a person renames it. `check` also blocks this at push when it is visible.
 - Like an alias today, a former name resolves across types in `names.canon`: a row of another type with exactly that name takes the new name. It shows in the preview. Rare; left as aliases behave.
 - `Signal` and `VisitLog` are named by `date` and `title`: rename takes the key's fields.
 

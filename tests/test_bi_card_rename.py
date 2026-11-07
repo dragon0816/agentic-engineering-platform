@@ -10,6 +10,7 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
+import pytest
 from test_bi_vault import _call, _card, _commit, _ok, _push, _row, _sync, _two_pcs
 
 from capabilities.bi_cards import catalog, quality, vault
@@ -165,7 +166,11 @@ def test_a_rename_needs_a_reason_a_current_version_and_a_vault(tmp_path: Path) -
     assert (status, body["code"]) == (400, "rename_vault_only")
 
 
-def test_a_rename_and_a_new_card_with_that_name_settle_the_same_on_each_pc(tmp_path: Path) -> None:
+def test_a_rename_and_a_new_card_with_that_name_settle_the_same_on_each_pc(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A fast CI runner can commit all of this in one second. Keep that case explicit.
+    monkeypatch.setattr("knowledge.repo.repository._now", lambda: "2026-11-06T23:59:59+00:00")
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
     old = _make(a, dataset, "FAKE-X")
     _push(a, vault_id)
@@ -267,3 +272,34 @@ def test_a_materialized_clash_of_keys_is_deterministic() -> None:
     assert vault._card_keys(units, info) == {"bbb": "SAME", "aaa": "SAME#aaa"}
     # With no dates, the lower id.
     assert vault._card_keys(units, {}) == {"aaa": "SAME", "bbb": "SAME#bbb"}
+
+
+@pytest.mark.parametrize(
+    "second_at",
+    ["2026-11-07T07:59:59+08:00", "2026-11-06T23:59:59+00:00"],
+    ids=["same-second", "same-instant-other-offset"],
+)
+def test_equal_creation_times_keep_the_first_replayed_card_in_either_unit_order(
+    second_at: str,
+) -> None:
+    """A fast PC can create both cards in one second; id order is not creation order."""
+    units = {
+        "card:bbb": {"type": TECH, "key": "SAME", "name": "SAME", "synthetic": False},
+        "card:aaa": {"type": TECH, "key": "SAME", "name": "SAME", "synthetic": False},
+    }
+    entries = [
+        {
+            "at": "2026-11-07T07:59:59+08:00",
+            "group": "first",
+            "changes": [{"unit": "card:bbb", "applied": True, "after": units["card:bbb"]}],
+        },
+        {
+            "at": second_at,
+            "group": "second",
+            "changes": [{"unit": "card:aaa", "applied": True, "after": units["card:aaa"]}],
+        },
+    ]
+    _, info = vault._field_history(entries)
+    expected = {"bbb": "SAME", "aaa": "SAME#aaa"}
+    assert vault._card_keys(units, info) == expected
+    assert vault._card_keys(dict(reversed(list(units.items()))), info) == expected

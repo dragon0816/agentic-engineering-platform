@@ -6959,3 +6959,8 @@ no matches elsewhere means no hint, and unfiltered/wordless searches add no filt
 SQL and saved analyses do not run this card-search hint path. Counts are discovery hints, not
 citations or proof of an answer. No pending proposal, preview or unpushed/unpublished version
 is admitted beyond the version already selected by the query.
+
+
+### BI rename collision projection (2026-11-07)
+
+When two distinct card units claim one key, creation timestamps are compared as UTC instants. Equal instants use the deterministic replay position that first introduced each card, then card id; two cards in one commit therefore have a stable id tie-break. Unknown legacy replay metadata retains timestamp/id fallback. The winner keeps the key; the other projects key#id until a person renames it. Unit identities and immutable commit contents never change. MODEL_VERSION14 invalidates the projection cache once; repository wiki behavior is unchanged.

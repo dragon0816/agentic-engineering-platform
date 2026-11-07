@@ -565,7 +565,7 @@ def _field_history(
     and per card its first and last change: `created`, `updated`, `groups`."""
     rows: list[dict[str, Any]] = []
     cards: dict[str, dict[str, Any]] = {}
-    for entry in entries:
+    for position, entry in enumerate(entries):
         for change in entry["changes"]:
             unit = str(change["unit"])
             if not change["applied"]:
@@ -573,7 +573,13 @@ def _field_history(
             if unit.startswith("card:") and change["after"] is not None:
                 cid = unit[5:]
                 info = cards.setdefault(
-                    cid, {"created": entry["at"], "updated": entry["at"], "groups": set()}
+                    cid,
+                    {
+                        "created": entry["at"],
+                        "updated": entry["at"],
+                        "groups": set(),
+                        "created_order": position,
+                    },
                 )
                 info.setdefault("created", entry["at"])
             if not unit.startswith("field:"):
@@ -586,7 +592,13 @@ def _field_history(
             if not history:
                 continue  # a value without a history row (converted) keeps none
             info = cards.setdefault(
-                cid, {"created": entry["at"], "updated": entry["at"], "groups": set()}
+                cid,
+                {
+                    "created": entry["at"],
+                    "updated": entry["at"],
+                    "groups": set(),
+                    "created_order": position,
+                },
             )
             at = history.get("at") or entry["at"]
             if same_card.time_key(at) >= same_card.time_key(info["updated"]):
@@ -619,11 +631,16 @@ def _card_keys(units: Mapping[str, Any], info: Mapping[str, Mapping[str, Any]]) 
     keys: dict[str, str] = {}
     seen: set[tuple[str, str]] = set()
     order = sorted(
-        (str(info.get(k[5:], {}).get("created") or ""), k[5:], v)
+        (
+            same_card.time_key(str(info.get(k[5:], {}).get("created") or "")),
+            int(info.get(k[5:], {}).get("created_order", 0)),
+            k[5:],
+            v,
+        )
         for k, v in units.items()
         if k.startswith("card:")
     )
-    for _, cid, value in order:
+    for _, _, cid, value in order:
         slot = (str(value["type"]), str(value["key"]))
         keys[cid] = slot[1] if slot not in seen else f"{slot[1]}#{cid}"
         seen.add(slot)
