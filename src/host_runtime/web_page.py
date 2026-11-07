@@ -5415,6 +5415,7 @@ async function loadChat(selectId) {
 }
 
 function sendWait(on) {
+  if (on && sendQueued) return;
   const note = el("send-wait");
   note.hidden = !on;
   note.textContent = on ? "正在檢查可用的對話後端與模型（Codex、Claude Code、Copilot 的登入狀態"
