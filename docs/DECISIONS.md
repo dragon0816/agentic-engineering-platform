@@ -7520,3 +7520,20 @@ A synthetic COM failure regression first failed with empty diagnostics, then pas
 with the numeric codes and explicit assertions excluding private exception text.
 Rejected: printing COM exceptions, automatically retrying mailbox writes, or
 changing business success semantics to hide the failed draft.
+
+## 2026-11-07 — Collect ordinary tests without probing live Outlook
+
+The full suite hung during collection in `_outlook_running` at
+`win32com.client.GetActiveObject`, even with AEP_GUI_TESTS=0. Its two skip
+conditions called real COM before pytest could skip anything. A controlled
+subprocess replacing GetActiveObject recorded two calls on the old source and
+zero after the fix.
+
+Live Outlook tests require explicit `AEP_OUTLOOK_TESTS=1` and Windows. Collection
+checks only those conditions; the opted-in test body may then check that Outlook
+is already running. The same original mailbox/thread assertions remain. Default
+unit and CI collection never reads the person's mailbox or waits on Outlook.
+Rejected: allowing an unbounded live COM probe during collection, deleting the
+live tests, or using real mailbox operations to diagnose an unrelated test run.
+No Outlook process was restarted or stopped; only this task's blocked pytest
+processes were stopped before retrying the inert suite.

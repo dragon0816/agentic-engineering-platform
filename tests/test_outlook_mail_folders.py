@@ -15,6 +15,7 @@ read only and compares folder strings, never a subject or a body.
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 import threading
 from datetime import UTC, datetime, timedelta
@@ -228,7 +229,7 @@ def test_signature_harvest_reads_inbox_mail_through_outlook(tmp_path: Path) -> N
 
 
 def _outlook_running() -> Any:
-    if sys.platform != "win32":
+    if sys.platform != "win32" or os.environ.get("AEP_OUTLOOK_TESTS") != "1":
         return None
     try:
         import win32com.client
@@ -238,12 +239,18 @@ def _outlook_running() -> Any:
         return None
 
 
-@pytest.mark.skipif(_outlook_running() is None, reason="Outlook is not running on this computer")
+@pytest.mark.skipif(
+    sys.platform != "win32" or os.environ.get("AEP_OUTLOOK_TESTS") != "1",
+    reason="reads live Outlook; opt in with AEP_OUTLOOK_TESTS=1",
+)
 def test_live_outlook_list_and_get_agree_on_the_inbox_folder() -> None:
     """Read only, against the real Outlook: one Inbox message's folder from
     `list` and from `get`. Only the folder strings are compared; the
     subject and body are never printed."""
-    box = OutlookComMailbox(dispatch=_outlook_running())
+    application = _outlook_running()
+    if application is None:
+        pytest.skip("Outlook is not running on this computer")
+    box = OutlookComMailbox(dispatch=application)
     listed = box.list("Inbox", NOW - timedelta(days=365), 1)
     if not listed:
         pytest.skip("the Inbox has no message in the last year")
@@ -251,7 +258,10 @@ def test_live_outlook_list_and_get_agree_on_the_inbox_folder() -> None:
     assert (listed[0].folder, got.folder) == ("Inbox", "Inbox")
 
 
-@pytest.mark.skipif(_outlook_running() is None, reason="Outlook is not running on this computer")
+@pytest.mark.skipif(
+    sys.platform != "win32" or os.environ.get("AEP_OUTLOOK_TESTS") != "1",
+    reason="reads live Outlook; opt in with AEP_OUTLOOK_TESTS=1",
+)
 def test_live_outlook_is_read_from_two_different_worker_threads() -> None:
     """Read only, against the real Outlook (live test 2026-10-20: the second
     mail call after a restart failed with CO_E_NOTINITIALIZED). `list` runs on
@@ -259,6 +269,8 @@ def test_live_outlook_is_read_from_two_different_worker_threads() -> None:
     the folder strings are compared; no subject or body is printed."""
     from concurrent.futures import ThreadPoolExecutor
 
+    if _outlook_running() is None:
+        pytest.skip("Outlook is not running on this computer")
     box = OutlookComMailbox()
 
     def one() -> tuple[int, list[str]]:
