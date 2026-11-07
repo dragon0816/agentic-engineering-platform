@@ -2432,7 +2432,8 @@ s-k-20261011T102952` (not published).
   `tests/test_skill_suggestion_cards.py` (17, incl. a real browser render with 44 px
   checks, dark mode, no horizontal scroll; screenshots in `.scratch/skill-suggestion-ui/`).
   Verification: ruff check, format --check, mypy (src+tests) in the project `.venv` and
-  `C:epci-wkenv` (`.[dev,office]`); full pytest project `.venv` 3091 passed, 7 skipped,
+  `C:epci-wk
+env` (`.[dev,office]`); full pytest project `.venv` 3091 passed, 7 skipped,
   1 failed (a settings exact-dict test, updated for the new field and re-run green); CI-like
   venv 3069 passed, 30 skipped. Not verified live (Agent Web not restarted).
 
@@ -4375,3 +4376,5 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [x] 2026-11-07, Codex (bi-query-other-types, base b1dd4cf8): add count-only hints for cards excluded by type/domain/field filters, bounded matched body snippets with source/host-class approval, model widening guidance and cross-type benchmark regression. Requested/focused groups: 116 passed; Ruff format/check and mypy passed; feed goldens unchanged. SOP-copy gpt-5.5: before 0/5 (calls 2,1,1,1,1), after 5/5 (1,1,1,1,1). Committed e9105373. Full suite: 5994 passed/9 skipped/2 UI failures; sessions isolated passed. Three more alternating review UI whole-file runs each: branch 0/3 failed, baseline b1dd4cf8 1/3 failed with the same confirmation-button JS error, proving the failure predates this change. See HANDOFF and docs/evaluations/BI_QUERY_OTHER_TYPES_2026-11-07.md.
 
 - [ ] 2026-11-07: Fix pre-existing review proposal confirmation UI failure in test_bi_review_table_ui.py::test_accepting_a_proposal_shows_what_it_loses_and_then_that_it_was_done (line 703). Baseline b1dd4cf8 reproduced TypeError: Cannot read properties of undefined (reading click), at the second confirmation button. Added alternating runs: branch 0/3 failed, baseline 1/3; all isolated whole-file observations: branch 2/5, baseline 1/4. Preserve explicit replacement confirmation and strict assertions; refresh/race mechanism is not yet established. See BI_QUERY_OTHER_TYPES_2026-11-07 evaluation and HANDOFF.
+
+- [x] 2026-11-07, Codex (ci-fix): fix Windows CI run 42311321089 rename identity (28b9150f), cross-midnight business-card tests (1d7ac809), vault feedback (334ba3b5), share race arrangement (ffe88f4a), version readiness (48083923), UTF8 annotations (8463c1cb). Required files: 59 passed each under UTC/Taipei; final Taipei core repeat 56 passed; related 91 passed; full 5999 passed/9 skipped; Ruff format/check and mypy pass in both zones. MODEL_VERSION 14 rebuilds projection once; feed goldens unchanged. Original CI version geometry was not directly reproduced; same spatial/focus assertions retained with readiness wait, product scrolling unchanged. No push; orchestrator reruns GitHub CI after integration. See HANDOFF.

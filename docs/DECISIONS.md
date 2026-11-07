@@ -6807,3 +6807,17 @@ Returning every matching type's rows automatically or returning complete bodies 
 because it increases context and can bypass the person's filters/size expectations. Inventing
 an answer from counts or weakening benchmark must terms was also rejected. No persisted model
 or commit format changes; feed goldens remain byte-identical.
+
+
+## 2026-11-07 — Keep rename collision identity stable within one clock second
+
+Windows CI run 42311321089 exposed two card creations in one timestamp second: sorting by the raw timestamp then card id gave the canonical name to a newer card. Rebuild compares creation instants in UTC and breaks equal-instant ties by the existing deterministic commit replay position that first introduced the card, then card id (including two cards introduced by one commit). Different textual UTC offsets cannot change the winner. Legacy metadata without replay positions keeps the date/id fallback. Reject adding sleeps, changing ids or weakening the two-PC assertion. Commit files stay immutable; projection MODEL_VERSION advances 13 to 14 so cached views rebuild once. This changes collision projection, not unit formats or wiki policy.
+
+The same CI run crossed UTC midnight. Business-card tests that cached date.today at collection mislabeled same-day signatures as newer after the edit day advanced. Those tests use a fixed local edit day and clock; the source-date rule (strictly after the day of the person's change) is unchanged. A process UTC probe advancing the edit day reproduced both original failures. Do not change product chronology to satisfy a stale test date.
+
+
+## 2026-11-07 — Preserve vault arrival feedback and control CI race boundaries
+
+Creating or joining a vault must keep its success message after automatic working-domain initialization. Automatic domain selection calls the existing handler directly; it does not emit a synthetic change interpreted as the person's next action. Missing/multiple-domain guidance appends to that success. A browser regression waits for arrival initialization to finish before checking the notice; it failed before this fix.
+
+The share browser test arranges a real duplicate tag at the confirmed POST/tag boundary, instead of racing background tag suggestions. Its original side-effect order/failure assertions stay strict. Version navigation waits for the original visibility predicate and retains its focus assertions; controlled response ordering and CPU throttling did not reproduce the CI rectangle failure, so no unproven product scroll change is made. Windows CI error annotations explicitly emit UTF8, tested under cp1252; changing test messages to ASCII was rejected.
