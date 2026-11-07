@@ -158,8 +158,6 @@ def test_one_share_step_carries_commit_push_tag_and_publish(tmp_path: Path) -> N
             page.shoot("share-before")
 
             # -- the first failure stops it, saying what is done and what is not ---------------
-            # A colleague took today's name after the page proposed it.
-            _ok(_call(workspace, "POST", f"{path}/tag", {"name": today, "purpose": "別人的"}))
             page.click("#bi-b-share-go")
             page.notice("請先寫這次改動的目的")
             assert page.run("!document.querySelector('#bi-b-share-act .bi-confirm')")
@@ -172,7 +170,20 @@ def test_one_share_step_carries_commit_push_tag_and_publish(tmp_path: Path) -> N
             assert page.run("!document.querySelector('#bi-b-share-act .bi-confirm')")
             assert page.run("document.getElementById('bi-b-share-progress').hidden")
 
+            # Hold the actual tag write after confirmation. A colleague claims the name
+            # then, so a background plan refresh cannot silently change this test's input.
+            page.run(
+                "(() => { const real = window.__shareRealFetch = window.fetch; let release;"
+                " const gate = new Promise((go) => { release = go; });"
+                " window.__releaseShareTag = release; window.__shareTagWaiting = false;"
+                " window.fetch = async (u, o) => {"
+                " if (String(u).endsWith('/tag') && o && o.method === 'POST') {"
+                " window.__shareTagWaiting = true; await gate; } return real(u, o); }; })()"
+            )
             _share(page)
+            page.wait("window.__shareTagWaiting")
+            _ok(_call(workspace, "POST", f"{path}/tag", {"name": today, "purpose": "別人的"}))
+            page.run("window.__releaseShareTag(); window.fetch = window.__shareRealFetch")
             page.notice("分享停在「建立 tag」")
             notice = page.text_of("bi-notice")
             assert "已完成：Commit、Push 給大家；沒有做：建立 tag、發佈。" in notice, notice
