@@ -214,3 +214,27 @@ def test_a_missing_document_leaves_no_half_built_draft(tmp_path: Path) -> None:
     assert outlook.created == []
     with pytest.raises(DraftError):
         RecordingDraftWriter().save(draft(attachments=(str(tmp_path / "absent.docx"),)))
+
+
+def test_draft_failure_keeps_numeric_diagnostics_without_mail_content(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    class ComFailure(Exception):
+        hresult = -2147352567
+
+    class Broken:
+        def CreateItem(self, kind: int) -> Any:  # noqa: N802
+            raise ComFailure(
+                -2147352567,
+                "private subject",
+                (0, "Outlook", "private recipient", None, 0, -2147467259),
+                None,
+            )
+
+    with pytest.raises(DraftError):
+        OutlookComDraft(dispatch=Broken()).save(draft())
+    assert "stage=create_item" in caplog.text
+    assert "hresult=0x80020009" in caplog.text
+    assert "scode=0x80004005" in caplog.text
+    assert "private subject" not in caplog.text
+    assert "private recipient" not in caplog.text
