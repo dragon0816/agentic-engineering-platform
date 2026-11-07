@@ -24,6 +24,7 @@ from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
+from business_cards_clock import fixed_contact_day  # noqa: F401 - fixture
 from test_business_cards_migration import ACTOR, CARD_ID, STAMP, WANG, WHO, _legacy
 
 from capabilities.business_cards.contracts import PersonRef
@@ -45,7 +46,6 @@ CARD = {
 }
 OLD_CARD = "sha256:" + "11" * 32
 NEW_CARD = "sha256:" + "22" * 32
-TODAY = date.today()
 
 
 def _store(tmp_path: Path) -> CardStore:
@@ -76,11 +76,13 @@ def _person_with_own_place(store: CardStore) -> str:
     return str(first.person_id)
 
 
-def test_a_new_card_updates_the_place_directly_and_a_rescan_never_does(tmp_path: Path) -> None:
+def test_a_new_card_updates_the_place_directly_and_a_rescan_never_does(
+    tmp_path: Path, contact_today: date
+) -> None:
     store = _store(tmp_path)
     person = _person_with_own_place(store)
     # The old card again, filed under any date: nothing changes, nothing is said.
-    for when in (date(2020, 1, 1), TODAY, TODAY + timedelta(days=400)):
+    for when in (date(2020, 1, 1), contact_today, contact_today + timedelta(days=400)):
         rescan = _add(
             store, {**CARD, "department": "研展一部", "title": "經理"}, when=when, ref=OLD_CARD
         )
@@ -116,7 +118,7 @@ def test_a_new_card_updates_the_place_directly_and_a_rescan_never_does(tmp_path:
     store.undo(new.change_id, actor="a")
     view = store.view(person)
     assert (view.department, view.title) == ("研展三部", "資深經理")
-    rescan = _add(store, {**CARD, "department": "研展一部"}, when=TODAY, ref=OLD_CARD)
+    rescan = _add(store, {**CARD, "department": "研展一部"}, when=contact_today, ref=OLD_CARD)
     assert rescan.changes == ()
 
 
@@ -143,7 +145,9 @@ def test_a_new_card_with_another_email_is_a_proposal_not_an_overwrite(tmp_path: 
     assert "email" in again.needs_confirmation and again.email_differs is not None
 
 
-def test_a_signature_counts_only_when_sent_after_the_persons_change(tmp_path: Path) -> None:
+def test_a_signature_counts_only_when_sent_after_the_persons_change(
+    tmp_path: Path, contact_today: date
+) -> None:
     store = _store(tmp_path)
     person = _person_with_own_place(store)
 
@@ -156,19 +160,19 @@ def test_a_signature_counts_only_when_sent_after_the_persons_change(tmp_path: Pa
             ref=f"<{sent}-{title}-{email}>",
         )
 
-    for sent in (TODAY - timedelta(days=30), TODAY):  # older, and the same day
+    for sent in (contact_today - timedelta(days=30), contact_today):  # older, and the same day
         old = signature(sent, "經理")
         assert (old.changes, old.kept, old.proposals) == ((), (), ())
     assert store.view(person).title == "資深經理"
-    newer = signature(TODAY + timedelta(days=1), "協理")
+    newer = signature(contact_today + timedelta(days=1), "協理")
     assert [(c.field, c.old, c.new) for c in newer.changes] == [("title", "資深經理", "協理")]
     assert store.view(person).title == "協理"
     # An email the person set: an older signature is ignored, a newer one
     # with another email is a proposal, never an overwrite.
     store.edit(PersonRef(person_id=person), {}, actor="a", reason="", confirm=["email"])
-    old_mail = signature(TODAY - timedelta(days=1), "協理", "rj.fan2@example.com")
+    old_mail = signature(contact_today - timedelta(days=1), "協理", "rj.fan2@example.com")
     assert old_mail.email_differs is None and old_mail.proposals == ()
-    new_mail = signature(TODAY + timedelta(days=2), "協理", "rj.fan2@example.com")
+    new_mail = signature(contact_today + timedelta(days=2), "協理", "rj.fan2@example.com")
     assert [(p.field, p.proposed) for p in new_mail.proposals] == [("email", "rj.fan2@example.com")]
     assert store.view(person).email == CARD["email"]
 
@@ -200,16 +204,17 @@ def _propose_directly(
 
 def test_the_cleanup_dismisses_only_what_the_rule_would_not_propose_and_is_undoable(
     tmp_path: Path,
+    contact_today: date,
 ) -> None:
     store = _store(tmp_path)
     person = _person_with_own_place(store)
-    later = (TODAY + timedelta(days=2)).isoformat()
+    later = (contact_today + timedelta(days=2)).isoformat()
     _propose_directly(store, person, kind="card", ref=OLD_CARD, when="2026-01-10", value="研展處")
     _propose_directly(
         store, person, kind="email_signature", ref="<a>", when="2026-01-01", value="A"
     )
     _propose_directly(
-        store, person, kind="email_signature", ref="<b>", when=TODAY.isoformat(), value="B"
+        store, person, kind="email_signature", ref="<b>", when=contact_today.isoformat(), value="B"
     )
     _propose_directly(store, person, kind="card", ref=NEW_CARD, when="2020-01-01", value="新卡")
     _propose_directly(store, person, kind="email_signature", ref="<c>", when=later, value="新信")

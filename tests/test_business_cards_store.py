@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from business_cards_clock import fixed_contact_day  # noqa: F401 - fixture
 
 from capabilities.business_cards.contracts import PersonRef
 from capabilities.business_cards.space import PEOPLE
@@ -41,10 +42,6 @@ CARD = {
 
 def _store(tmp_path: Path, actor: str = "alice") -> CardStore:
     return CardStore.for_actor(tmp_path, actor)
-
-
-#: After the person's edits (made today): a signature sent then is new evidence.
-LATER = date.today() + timedelta(days=1)
 
 
 def _add(
@@ -152,7 +149,9 @@ def test_business_group_division_and_department_are_kept_apart(tmp_path: Path) -
     )
 
 
-def test_a_user_set_title_follows_only_a_newer_signature(tmp_path: Path) -> None:
+def test_a_user_set_title_follows_only_a_newer_signature(
+    tmp_path: Path, contact_today: date
+) -> None:
     """Owner 2026-10-20: 「換部門, 或換職位, 就修改那一筆資料」. A signature sent
     after the person's change updates the title directly (history, undoable);
     an older one changes nothing and says nothing."""
@@ -169,7 +168,7 @@ def test_a_user_set_title_follows_only_a_newer_signature(tmp_path: Path) -> None
         store,
         {"email": CARD["email"], "name": "王小明", "title": "副理", "department": "天線部"},
         source="email_signature",
-        when=LATER,
+        when=contact_today + timedelta(days=1),
         ref="<sig>",
     )
     assert store.view(person.person_id).title == "副理"
@@ -186,7 +185,7 @@ def test_a_user_set_title_follows_only_a_newer_signature(tmp_path: Path) -> None
     assert store.view(person.person_id).title == "資深經理"
     # A signature sent before the person's change (or the same day) is
     # ignored silently: no proposal, nothing kept (owner 2026-10-20).
-    for sent in (date(2026, 9, 1), date.today()):
+    for sent in (date(2026, 9, 1), contact_today):
         old_mail = _add(
             store,
             {"email": CARD["email"], "name": "王小明", "title": "處長"},
