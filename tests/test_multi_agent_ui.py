@@ -603,7 +603,7 @@ def test_sub_agents_and_the_record_in_a_real_browser(tmp_path: Path) -> None:
         thread.start()
         release = threading.Event()
         runtime.agent.converse = _delegating_turn(web, release, elapsed=75)  # type: ignore[method-assign]
-        browser = Browser(tmp_path / "browser", timeout_s=60)
+        browser = Browser(tmp_path / "browser", timeout_s=60, viewport=(1440, 900))
         browser.start()
         shots = Path(os.environ.get("AEP_UI_SHOTS") or SHOTS)
         shots.mkdir(parents=True, exist_ok=True)
@@ -629,20 +629,20 @@ def test_sub_agents_and_the_record_in_a_real_browser(tmp_path: Path) -> None:
             )
 
         def narrow(on: bool) -> None:
-            if on:
-                browser.page().call(
-                    "Emulation.setDeviceMetricsOverride",
-                    width=390,
-                    height=844,
-                    deviceScaleFactor=1,
-                    mobile=True,
-                )
-            else:
-                browser.page().call("Emulation.clearDeviceMetricsOverride")
+            width, height = (390, 844) if on else (1440, 900)
+            browser.page().call(
+                "Emulation.setDeviceMetricsOverride",
+                width=width,
+                height=height,
+                deviceScaleFactor=1,
+                mobile=on,
+            )
+            assert browser._evaluate("innerWidth") == width
 
         agents = ".turn-progress .tp-agents"
         try:
             browser.navigate(server.address)
+            assert browser._evaluate("innerWidth") == 1440
             wait('!document.getElementById("send").disabled')
             browser._evaluate(
                 'document.getElementById("message").value = "比較這兩份文件";'
