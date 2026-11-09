@@ -23,6 +23,19 @@ the history is complete; this table is the index into them.
 
 ## Status
 
+- [ ] Resolve five SOP Workflow autonomy gaps (owner request2026-11-09):
+  execution truth/fresh outputs, persisted requirements/current-revision trial,
+  scoped Browser evidence, bounded repair and supplied-input reuse implemented
+  with focused regressions. Initial full6162-case run:6142 passed,10 failed,
+  10 skipped, plus the optional missing-av collection skip. Every initial
+  failure has a passing affected rerun; final affected verification505 passed,
+  1 optional desktop skip; global Ruff/mypy/build and clean-wheel pip check pass.
+  Genuine Agent-only C4C acceptance remains incomplete: same candidate repaired
+  automatically through revision10, but no verified workbook yet. Latest fixes
+  retain exact failure/action evidence, reuse original references, classify
+  technical repair correctly and reject false1/1 paging. No resident rollout.
+  See `docs/phases/SOP_WORKFLOW_AUTONOMY.md` and `HANDOFF.md` for running evidence.
+
 - [x] PDF/Excel/Word chat attachments and numbered replies (2026-11-09):
   local source-aware previews, PDF/DOCX hyperlinks,
   embedded pictures, Office picker/drop support, offline Word dependencies and

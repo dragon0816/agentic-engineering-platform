@@ -6890,3 +6890,40 @@ amounts; do not infer departments or silently omit their monthly totals. Real
 business data, test manifests and output stay in private local task directories.
 Source verification uses a separate runtime and the installed restricted,
 network-blocked Python interpreter; it does not update/restart the resident Host.
+
+### Preserve execution truth and resident authoring state (2026-11-09)
+
+The owner requested resolution of all five gaps in the SOP Workflow autonomy
+diagnosis. Keep the existing Bridge, Workflow engine and owner approval paths;
+add typed local failure diagnostics, bounded Browser observation, durable
+actor/session inputs and requirements, exact-revision trial verification and
+bounded Agent repair continuation. Reject installing a planned revision merely
+because a previous revision ran or an old Excel exists. Preserve legacy unplanned
+authoring behavior; SOP authoring activates the persisted task gate.
+
+Procedure assertion paths describe technical evidence and may need rebinding
+after discovery or step insertion. Preserve requirement IDs/descriptions/check
+IDs, disallow clearing existing coverage, and invalidate both verified digests
+and in-flight trial tokens whenever bindings change. Immutable technical paths
+were rejected because they prevent correcting an initially malformed binding;
+silently dropping requirements was also rejected. Independent Agent-only live
+acceptance still decides business completeness.
+
+Repairs reuse normal Agent admission and authorization, offer a restricted tool
+set and never install/approve themselves. Code-only tests and a Codex-authored
+C4C manifest are not evidence that the resident Agent can author this task.
+Keep actual owner documents, browser records and workbooks private. Deployment
+of the resident Host remains distinct from source verification and requires
+checking active interactions first.
+
+### Compose multiple Workflow outputs with an atomic read tool (2026-11-09)
+
+Live SOP authoring produced a preparation step and Browser step, but its report
+received only Browser data and hardcoded the earlier parameters. Add the local
+read-only `data/merge` building block so each input uses existing typed Workflow
+bindings. Reject conflicting values rather than silently overwrite owner input.
+Keep numeric equality but distinguish JSON booleans from numbers. This avoids
+expanding the shared input union, hidden runner context or dependence on private
+runner parameter files. Existing knowledge-pipeline Merge types remain distinct
+through explicit Host import aliases. Schema/real Workflow/Host-policy cases
+precede rollout; actual Agent selection remains part of live acceptance.

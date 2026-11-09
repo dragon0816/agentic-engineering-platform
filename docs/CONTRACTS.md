@@ -6992,3 +6992,81 @@ Browser timeout; expiry is `web_wait_timeout`. Invalid patterns fail contract
 validation. Ambiguous targets and origin refusal are never retried as readiness.
 It performs no pointer action and is usable in read mode. Workflows can await a
 visible query-completion marker before trusting a retained old table/page count.
+
+### SOP authoring reliability (2026-11-09)
+
+See `docs/phases/SOP_WORKFLOW_AUTONOMY.md` for the acceptance boundary.
+
+- `CapabilityExecutionFailed` retains validated local output with a failed
+  Bridge result. Nonzero/timed-out Python and Browser action failures use this
+  path; diagnostic data never turns a failed invocation into success. External
+  status-only surfaces continue withholding capability data.
+- `RunPythonResult.files` contains only new/content-changed outputs. Streaming
+  hashes are bounded to 2,000 files, 10,000 directory entries, 1 GiB and ten
+  seconds per scan. A pre-scan limit refuses before execution; a post-scan
+  limit fails with runner diagnostics and no output claims. `data` optionally
+  contains one complete, bounded stdout JSON object; noisy, truncated,
+  nonobject or nonfinite output leaves it null. Failed steps cannot satisfy
+  Workflow output checks using diagnostic or old files.
+- `inspect_dom` is origin-scoped, bounded and read-only. `browser__inspect`
+  exposes only scope/offset/limit and constructs that action itself. Failed
+  Browser executions identify action index/kind and retain fresh bounded DOM
+  evidence when the current origin is permitted. Inspection omits input values
+  and redacts credential material; it grants no new origins or execution rights.
+- `WorkflowParameter.file_mode` optionally declares input/output. Files reject
+  directories and unsupported suffixes; declared input files must exist before
+  dispatch. Legacy/output destinations may be new paths. Actual user evidence
+  binds declared defaults with actor/session provenance and timestamps; newer
+  form answers survive older history and short context windows.
+- A planned SOP task persists its requirements, inputs, current trial digest,
+  failure, repair count and structured missing-input question. Requirements and
+  existing check IDs cannot be removed. Nonempty procedure assertions may be
+  rebound after discovery; every plan/candidate change invalidates prior proof
+  and in-flight proof tokens. These bindings are technical checks, not a formal
+  proof of the SOP's business meaning.
+- Installation of a planned candidate requires successful actual execution of
+  the exact current candidate plus declared coverage. Business approval remains
+  separate. Pending execution approval is a safe waiting state. Completion is
+  checked against persisted actor/session state even without new tool calls;
+  exhausted checks retain diagnostics and explicitly return unverified input
+  state rather than claiming readiness.
+- A failed approved/form/card trial resumes the same Agent task at most three
+  times. Repair is scoped to its candidate/session and offers only bounded
+  observation, authoring and trial tools. It cannot approve itself, install,
+  invoke arbitrary code or repeat a successful side effect. A valid current
+  pending approval blocks repair; an obsolete approval does not authorize or
+  block a different revision. Missing-resource questions must identify their
+  input and reuse supplied files; technical selectors/navigation are diagnosed
+  by the Agent rather than requested from the person.
+
+`data/merge@1.0.0` is a read-only local composition capability. `left` and
+`right` are independently bound JSON objects, each limited to1000 top-level
+keys; output `data` is their shallow union (at most2000 keys). Equal duplicate
+values are retained, numerically equal1/1.0 are accepted, but booleans and
+numbers are distinct, including nested values. Unequal collisions refuse with
+`data_merge_conflict` without exposing keys/values. No files, hidden context,
+network access or new Workflow input variant is involved. A reporting step can
+receive prepared dates/mapping/rates together with Browser rows through normal
+step bindings. Real Workflow and actual Host/owner-policy tests cover the path.
+
+Authoring follow-ups (2026-11-10): original SOP attachments are reused only
+from the active task's same-actor/session recorded references, with the existing
+ownership, root, existence and preview limits. Their source notes/images remain
+available beyond the short message window and in a repair turn. They are not
+new human answers. Read-only composition and accessible-name resolution do not
+grant new execution authority.
+
+Known technical Browser failures (including CSS query scope, target readiness
+and pagination) and failed program/output checks carry bounded repair guidance.
+They do not mean a person must provide selectors or navigate manually. Origin,
+credential, approval and repair-budget boundaries remain stops. Failed trial
+state retains at most12 KB of redacted actual failure/action metadata, invalid
+control labels/paths and bounded Python output tail; no bulk page, rows, file
+contents or field values. Only exact-current successful complete proof clears it.
+
+Pagination current/total must be distinct locators and distinct resolved DOM
+elements, checked together in an origin-authorized snapshot on every poll.
+Equal numeric values on different elements at the last page are valid. A shared
+element fails with `pagination_controls_must_differ`; it cannot establish1/1
+completeness. Bounded inspection exposes `state.invalid` as a boolean and
+`aria-invalid` metadata without reading the field value.
