@@ -94,8 +94,139 @@ MAX_TRIAL_DIAGNOSTICS_BYTES = 12_000
 
 def _diagnostic_text(value: str, limit: int, *, tail: bool = False) -> str:
     cleaned, _ = redact(value)
-    text = str(cleaned)
-    return text[-limit:] if tail else text[:limit]
+    encoded = str(cleaned).encode("utf-8")
+    bounded = encoded[-limit:] if tail else encoded[:limit]
+    return bounded.decode("utf-8", errors="ignore")
+
+
+def _control_priority(control: dict[str, JsonValue]) -> int:
+    state = control.get("state")
+    state = state if isinstance(state, dict) else {}
+    if state.get("invalid") not in (None, False, "false", ""):
+        return 0
+    kind = str(state.get("type", control.get("kind", ""))).lower()
+    tag = str(control.get("tag", "")).lower()
+    if kind not in {"checkbox", "radio", "hidden"} and (
+        tag in {"input", "select", "textarea"}
+        or kind in {"combobox", "textbox", "searchbox", "spinbutton"}
+    ):
+        return 1
+    if tag == "button" or kind in {"button", "switch"} or "pressed" in state:
+        return 2
+    if kind in {"checkbox", "radio"}:
+        return 4
+    if tag == "a" or kind in {"link", "tab", "menuitem", "treeitem"}:
+        return 5
+    return 3
+
+
+def _technical_metadata(data: JsonValue) -> dict[str, JsonValue]:
+    """Whitelist technical facts; query hints precede row checkboxes and navigation."""
+    detail: dict[str, JsonValue] = {}
+    if not isinstance(data, dict):
+        return detail
+    for key in ("failed_action_index", "exit_code", "timed_out"):
+        value = data.get(key)
+        if key in data and (value is None or isinstance(value, (int, bool))):
+            detail[key] = value
+    for key in ("failed_action_kind", "url", "diagnostic_error"):
+        value = data.get(key)
+        if isinstance(value, str):
+            detail[key] = _diagnostic_text(value, 700)
+    overview = data.get("overview")
+    if isinstance(overview, dict):
+        safe: dict[str, JsonValue] = {}
+        for key in (
+            "visited_nodes",
+            "time_limit_reached",
+            "scan_limit_reached",
+            "controls_truncated",
+            "text_truncated",
+        ):
+            value = overview.get(key)
+            if isinstance(value, (int, bool)):
+                safe[key] = value
+        raw_controls = overview.get("controls")
+        if isinstance(raw_controls, list):
+            controls: list[dict[str, JsonValue]] = []
+            for raw in raw_controls[:200]:
+                if not isinstance(raw, dict):
+                    continue
+                control: dict[str, JsonValue] = {}
+                for key, limit in (("label", 80), ("path", 200), ("tag", 80), ("kind", 32)):
+                    value = raw.get(key)
+                    if isinstance(value, str):
+                        control[key] = _diagnostic_text(value, limit)
+                state = raw.get("state")
+                if isinstance(state, dict):
+                    control["state"] = {
+                        key: value if isinstance(value, bool) else _diagnostic_text(value, 80)
+                        for key in ("type", "placeholder", "pressed", "expanded", "invalid")
+                        if isinstance(value := state.get(key), (str, bool))
+                    }
+                if isinstance(raw.get("disabled"), bool):
+                    control["disabled"] = raw["disabled"]
+                controls.append(control)
+            controls.sort(key=_control_priority)
+            safe["controls"] = cast(list[JsonValue], controls[:32])
+            if len(raw_controls) > 32:
+                safe["controls_truncated"] = True
+        if safe:
+            detail["overview"] = safe
+    output = data.get("output")
+    if isinstance(output, str) and ("exit_code" in data or "timed_out" in data):
+        detail["output_tail"] = _diagnostic_text(output, 4000, tail=True)
+    return detail
+
+
+def _trim_control_hint(detail: dict[str, JsonValue]) -> bool:
+    overview = detail.get("overview")
+    if isinstance(overview, dict) and isinstance(overview.get("controls"), list):
+        controls = cast(list[JsonValue], overview["controls"])
+        if controls:
+            controls.pop()
+            overview["controls_truncated"] = True
+            return True
+    return False
+
+
+def _trim_technical_metadata(detail: dict[str, JsonValue]) -> bool:
+    tail = detail.get("output_tail")
+    if isinstance(tail, str) and len(tail) > 256:
+        detail["output_tail"] = tail[len(tail) // 2 :]
+        return True
+    if _trim_control_hint(detail):
+        return True
+    for key in ("diagnostic_error", "url", "output_tail"):
+        value = detail.get(key)
+        if isinstance(value, str) and len(value) > 80:
+            detail[key] = value[: len(value) // 2]
+            return True
+    return False
+
+
+def _failed_data_preview(data: JsonValue) -> JsonValue:
+    metadata = _technical_metadata(data)
+    if not metadata:
+        return _excerpt(data)
+    # Leave room for the existing bulk excerpt without letting it crowd out hints.
+    while len(json.dumps(metadata, ensure_ascii=False).encode("utf-8")) > 7000:
+        if not _trim_technical_metadata(metadata):
+            break
+    preview_text = json.dumps(redact(data)[0], ensure_ascii=False)
+    metadata["truncated"] = len(preview_text) > MAX_DATA_CHARS
+    metadata["preview"] = preview_text[:MAX_DATA_CHARS]
+    while (
+        len(json.dumps(metadata, ensure_ascii=False).encode("utf-8")) > MAX_TRIAL_DIAGNOSTICS_BYTES
+    ):
+        text = metadata.get("preview")
+        if isinstance(text, str) and text:
+            metadata["preview"] = text[: len(text) // 2]
+            metadata["truncated"] = True
+            continue
+        if not _trim_technical_metadata(metadata):
+            break
+    return metadata
 
 
 def _trial_diagnostics(
@@ -130,60 +261,7 @@ def _trial_diagnostics(
                 "code": step.failure.code,
                 "message": _diagnostic_text(step.failure.message, 1000),
             }
-        data = step.data
-        if isinstance(data, dict):
-            for key in ("failed_action_index", "exit_code", "timed_out"):
-                value = data.get(key)
-                if value is None or isinstance(value, (int, bool)):
-                    if key in data:
-                        detail[key] = value
-            for key in ("failed_action_kind", "url", "diagnostic_error"):
-                value = data.get(key)
-                if isinstance(value, str):
-                    detail[key] = _diagnostic_text(value, 700)
-            overview = data.get("overview")
-            if isinstance(overview, dict):
-                safe: dict[str, JsonValue] = {}
-                for key in (
-                    "visited_nodes",
-                    "time_limit_reached",
-                    "scan_limit_reached",
-                    "controls_truncated",
-                    "text_truncated",
-                ):
-                    value = overview.get(key)
-                    if isinstance(value, (int, bool)):
-                        safe[key] = value
-                controls = overview.get("controls")
-                invalid: list[JsonValue] = []
-                if isinstance(controls, list):
-                    for control in controls:
-                        if not isinstance(control, dict):
-                            continue
-                        state = control.get("state")
-                        if not isinstance(state, dict) or state.get("invalid") in (
-                            None,
-                            False,
-                            "false",
-                            "",
-                        ):
-                            continue
-                        invalid.append(
-                            {
-                                "label": _diagnostic_text(str(control.get("label", "")), 80),
-                                "path": _diagnostic_text(str(control.get("path", "")), 200),
-                                "invalid": _diagnostic_text(str(state["invalid"]), 80),
-                            }
-                        )
-                        if len(invalid) == 4:
-                            break
-                if invalid:
-                    safe["invalid_controls"] = invalid
-                if safe:
-                    detail["overview"] = safe
-            output = data.get("output")
-            if isinstance(output, str) and ("exit_code" in data or "timed_out" in data):
-                detail["output_tail"] = _diagnostic_text(output, 4000, tail=True)
+        detail.update(_technical_metadata(step.data))
         failed.append(detail)
         if len(failed) == 4:
             break
@@ -211,8 +289,8 @@ def _trial_diagnostics(
                     bounded_detail["output_tail"] = tail[len(tail) // 2 :]
                     continue
                 bounded_detail.pop("output_tail")
-            elif isinstance(bounded_detail, dict) and "overview" in bounded_detail:
-                bounded_detail.pop("overview")
+            elif isinstance(bounded_detail, dict) and _trim_control_hint(bounded_detail):
+                continue
             else:
                 result.pop("failed_steps", None)
     return result
@@ -326,7 +404,9 @@ def summarize(snapshot: WorkflowRunSnapshot) -> dict[str, JsonValue]:
                     if step.failure.message == GENERIC_FAILURE
                     else f"{step.failure.code}: {step.failure.message}"
                 ),
-                "data": _excerpt(step.data),
+                "data": _excerpt(step.data)
+                if step.status == "succeeded"
+                else _failed_data_preview(step.data),
             }
         )
     return {

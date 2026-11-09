@@ -297,3 +297,127 @@ def test_partial_success_keeps_actual_stats_and_coverage_gaps(tmp_path: Path) ->
     assert task.last_trial_diagnostics["completed_steps"] == 1
     assert "complete" in json.dumps(task.last_trial_diagnostics["coverage_problems"])
     assert "PRIVATE" not in json.dumps(task.last_trial_diagnostics)
+
+
+def _crowded_browser_data() -> dict[str, Any]:
+    return {
+        "page": "ROW-CHECKBOX-BODY " * 1000,
+        "data": {"rows": ["PRIVATE-ROWS" * 1000]},
+        "failed_action_index": 17,
+        "failed_action_kind": "fill",
+        "overview": {
+            "controls": [
+                *[
+                    {
+                        "tag": "input",
+                        "kind": "checkbox",
+                        "label": f"row-{i}",
+                        "path": f"#row-{i}",
+                        "state": {"type": "checkbox"},
+                    }
+                    for i in range(40)
+                ],
+                {"tag": "a", "kind": "link", "label": "Navigation", "path": "#nav"},
+                {
+                    "tag": "input",
+                    "kind": "text",
+                    "label": "Date From",
+                    "path": "#from",
+                    "value": "PRIVATE-INPUT",
+                    "state": {
+                        "type": "text",
+                        "placeholder": "YYYY-MM-DD",
+                        "invalid": "true",
+                        "value": "PRIVATE-INPUT",
+                    },
+                },
+                {
+                    "tag": "button",
+                    "kind": "button",
+                    "label": "Advanced filters",
+                    "path": "#filters",
+                    "state": {"pressed": "false", "expanded": "true"},
+                },
+            ],
+            "text": "PRIVATE-OVERVIEW",
+            "visited_nodes": 800,
+        },
+    }
+
+
+def test_query_fields_and_toolbar_survive_checkbox_crowding_in_trial_diagnostics(
+    tmp_path: Path,
+) -> None:
+    chat, _ = studio(tmp_path)
+    running = chat.begin_trial("owner", _candidate(chat), {"month": "2026-11"})
+    chat.record_trial("owner", running, _snapshot(running, "query-failed", _crowded_browser_data()))
+    task = chat.tasks.load("owner", "session-1")
+    assert task is not None and task.last_trial_diagnostics is not None
+    diagnostics: Any = task.last_trial_diagnostics
+    controls = diagnostics["failed_steps"][0]["overview"]["controls"]
+    labels = [c["label"] for c in controls]
+    assert labels[:2] == ["Date From", "Advanced filters"]
+    assert len(controls) <= 32
+    assert controls[0]["state"]["placeholder"] == "YYYY-MM-DD"
+    assert controls[0]["state"]["type"] == "text"
+    assert controls[1]["state"] == {"pressed": "false", "expanded": "true"}
+    encoded = json.dumps(diagnostics, ensure_ascii=False)
+    assert len(encoded.encode()) <= 12000 and "PRIVATE" not in encoded
+    assert "ROW-CHECKBOX-BODY" not in encoded
+
+
+def test_failed_public_summary_puts_query_metadata_before_bulk_preview_and_keeps_success_shape(
+    tmp_path: Path,
+) -> None:
+    from host_runtime.chat_authoring import summarize
+
+    chat, _ = studio(tmp_path)
+    item = _candidate(chat)
+    summary: Any = summarize(_snapshot(item, "query-failed", _crowded_browser_data()))
+    data = summary["steps"][0]["data"]
+    assert data["failed_action_index"] == 17
+    assert data["overview"]["controls"][0]["state"]["placeholder"] == "YYYY-MM-DD"
+    assert data["overview"]["controls"][1]["state"]["pressed"] == "false"
+    assert list(data).index("overview") < list(data).index("preview")
+    assert data["truncated"] is True and isinstance(data["preview"], str)
+    assert len(json.dumps(data, ensure_ascii=False).encode()) <= 12000
+    success: Any = summarize(_snapshot(item, "success", {"echoed": "value"}, succeeded=True))
+    assert success["steps"][0]["data"] == {"echoed": "value"}
+
+
+def test_large_control_hints_trim_from_end_without_removing_query_overview(tmp_path: Path) -> None:
+    from host_runtime.chat_authoring import summarize
+
+    chat, _ = studio(tmp_path)
+    item = _candidate(chat)
+    data = _crowded_browser_data()
+    data["overview"]["controls"] += [
+        {
+            "tag": "input",
+            "kind": "text",
+            "label": "界" * 80,
+            "path": "界" * 200,
+            "state": {
+                "placeholder": "界" * 80,
+                "type": "text",
+                "pressed": "false",
+                "expanded": "false",
+                "invalid": "false",
+            },
+        }
+        for _ in range(40)
+    ]
+    running = chat.begin_trial("owner", item, {"month": "2026-11"})
+    snapshot = _snapshot(running, "large-query-failed", data)
+    chat.record_trial("owner", running, snapshot)
+    task = chat.tasks.load("owner", "session-1")
+    assert task is not None and task.last_trial_diagnostics is not None
+    diagnostics: Any = task.last_trial_diagnostics
+    overview = diagnostics["failed_steps"][0]["overview"]
+    assert overview["controls"][0]["label"] == "Date From"
+    assert 0 < len(overview["controls"]) < 32 and overview["controls_truncated"] is True
+    assert len(json.dumps(diagnostics, ensure_ascii=False).encode()) <= 12000
+    summary: Any = summarize(snapshot)
+    overview = summary["steps"][0]["data"]["overview"]
+    assert overview["controls"][0]["label"] == "Date From"
+    assert len(json.dumps(summary["steps"][0]["data"], ensure_ascii=False).encode()) <= 12000
