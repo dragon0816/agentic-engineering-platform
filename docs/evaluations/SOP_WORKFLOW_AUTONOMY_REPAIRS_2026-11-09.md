@@ -158,3 +158,47 @@ both date bounds, source mapping, currency conversion, monthly sums, changed
 parameters and fresh workbook still require successful live acceptance.
 No resident Host update/restart, production Workflow replacement or push has
 occurred. Private source documents, traces and business outputs stay ignored.
+
+## Continued current-source verification (2026-11-10 04:30 Taipei)
+
+The subsequent full run collected6294 cases in537 modules:6281 passed,
+3 failed and10 skipped, plus the optional missing-av collection skip. Original
+shard logs/XML remain under .scratch/autonomy-current-20261110-*; do not describe
+this full run as all green. Each failure was corrected without removing its
+assertions: capability sync now checks all four advertised identities, desktop
+geometry explicitly selects the desktop viewport, and the BI demo waits for
+its own final refresh before checking layout. Corresponding complete modules
+passed19/16/2 cases respectively (one IPv6 skip in the transport module).
+Combined affected verification passed188 cases with one IPv6 skip. These
+counts overlap and must not be summed. Global Ruff/format (1420 files), mypy
+(1070 files), and sdist/wheel build passed before the conditional disclosure
+follow-up. Source is committed locally through a115557e; no push occurred.
+
+Same-candidate native acceptance reached revision21. Repeated attempts still
+have not produced a workbook; root supplied business continuation requests and
+normal trial approvals, never candidate code/selectors. Bounded actual trial
+history now survives normal-turn context truncation as well as automatic
+repair. Pagination failures identify the actual current/total/next/control
+field while preserving existing error codes and authorization boundaries.
+
+An actual revision20 trial failed at date fill with Advanced Search pressed
+false and only the paginator input visible after its unconditional disclosure
+click. This is concrete evidence for a repeatability repair, distinct from
+earlier unproven field-label hypotheses. The narrow ensure_visible action
+probes unique visible presence without field values, skips an already visible
+target, or native-clicks its disclosure once within a shared deadline. Omitted
+wait_for value means presence; supplied regex behavior is unchanged. Final
+regressions/review and AEP's own revised candidate are still in progress.
+Resident rollout and C4C business acceptance remain incomplete.
+
+Conditional disclosure source committed4fd706fc after105 affected cases,
+global Ruff/format1420 files, mypy1070 files and build passed. Independent
+implementation review found no blockers. Native AEP independently adopted
+ensure_visible/presence waits inrevision22, but trials22/23 failed earlier at
+All selection (actions3), not the new disclosure action. Subsequent real
+exploration successfully used layout-toggle then variant-trigger and menu-item
+click. Savedrevision24 omitted the first operation. A generic business QA
+continuation now requires AEP to compare successful discovery with the saved
+sequence and prove repeatability from a reopened page before another trial.
+No Codex selectors/code were supplied. This observed remaining planning issue
+means native autonomy acceptance stays open despite verified platform source.

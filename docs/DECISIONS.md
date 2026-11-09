@@ -6927,3 +6927,26 @@ expanding the shared input union, hidden runner context or dependence on private
 runner parameter files. Existing knowledge-pipeline Merge types remain distinct
 through explicit Host import aliases. Schema/real Workflow/Host-policy cases
 precede rollout; actual Agent selection remains part of live acceptance.
+
+### Keep bounded actual trial history during SOP repair (2026-11-10)
+
+Live AEP revisions revisited earlier failed navigation after those attempts
+left the short conversation window. Retain a bounded actor/session history
+of actual current-token trials in the existing authoring task, including only
+failure metadata and declared Browser action/target prefixes. Do not store
+fill values, open URLs, scripts or result rows. Limit it to ten records and
+12 KB, trimming oldest records. Show it as technical evidence in repair, with
+no automatic backfill, new authority, budget reset or hard ban on a previously
+failed procedure (a transient condition may change). Last-failure-only memory
+was rejected because it permits cycling; a broad procedure recorder or new
+workflow engine was rejected as unnecessary for this bounded continuity fix.
+
+### Reveal content without blindly toggling it (2026-11-10)
+
+Live failure evidence showed a date fill after Advanced Search had been closed
+by an unconditional click. Extend the existing Browser primitive with explicit
+`ensure_visible(target, trigger)`: observe first, skip an unnecessary click,
+otherwise native-click once and verify desired content within a shared bound.
+Keep origin/read policy, permissions, ordinary clicks and business proof gates.
+This is a focused implementation of the approved repeatability repairs; a
+general Workflow condition or browser recorder would be broader than needed.

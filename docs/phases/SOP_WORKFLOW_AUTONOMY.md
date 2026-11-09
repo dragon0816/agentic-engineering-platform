@@ -98,3 +98,44 @@ The candidate also reused one input for current and total pages. Reject both
 identical declarations and different locators resolving the same DOM element;
 equal numbers from distinct last-page controls remain valid. These changes
 prevent false success; they do not certify business completeness by themselves.
+
+Repeated live revisions also revisited previously failed navigation after
+history eviction. Extend the existing task with bounded actual trial history
+(ten entries/12 KB, metadata and declared Browser target prefixes only), and
+surface it before bulk repair context. Do not fabricate historical records,
+change approvals/repair limits or forbid legitimate transient-failure repairs.
+
+### Idempotent disclosure action (acceptance-driven, 2026-11-10)
+
+Actual revision20 reached its date fill after blindly clicking Advanced Search;
+the retained actual failure showed pressed=false and only the paginator input.
+The click closed an already-open panel. A reusable linear procedure therefore
+needs a conditional reveal primitive, not another guessed field selector.
+
+Add `ensure_visible` to the existing Browser action contract, with `target`
+(desired content) and `trigger` (the disclosure control). Probe only unique
+CSS-visible presence using the existing finder; never read field values. If
+already visible, return without clicking. Otherwise native-click the trigger
+once under the existing origin/read policy, then poll target within one shared
+deadline. Ambiguity/invalid selectors/origin errors fail immediately; only a
+genuinely missing target permits the trigger. Tag failures as
+`ensure_visible.target` or `ensure_visible.trigger`, preserving existing codes.
+Only this action accepts `trigger`; ordinary click behavior remains unchanged.
+
+This stays in deterministic local execution. No Workflow engine condition,
+recording subsystem, new permission or dependency is added. Existing owner
+authorization for the five repairs covers this necessary repeatability fix.
+Architecture review found no boundary conflict. A broad recorder is deferred;
+blind toggle retries were rejected because they can close desired content.
+
+Before implementation, regressions cover hidden/visible initial state, repeated
+replay, a single click followed by timeout, target ambiguity with zero clicks,
+read-mode refusal when a click is needed, origin checks and invalid trigger
+placement. Generic schema/authoring guidance must expose the operation without
+C4C selectors. Presence does not establish business success or reusable proof.
+
+Reuse the value-free presence probe for `wait_for` when `value` is omitted.
+Provided regular expressions retain their existing full-text semantics. This
+avoids treating an icon caption or a multiline table as text matching `.*`;
+presence waits do not need to read field values. Keep existing origin/read
+boundaries and a bounded timeout. Add actual Edge coverage for both forms.

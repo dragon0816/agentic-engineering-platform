@@ -7070,3 +7070,27 @@ Equal numeric values on different elements at the last page are valid. A shared
 element fails with `pagination_controls_must_differ`; it cannot establish1/1
 completeness. Bounded inspection exposes `state.invalid` as a boolean and
 `aria-invalid` metadata without reading the field value.
+
+Actual trial continuity retains at most ten redacted entries/12KB per
+actor/session, appended only after current candidate/digest/trial-token checks.
+Entries contain actual outcomes and declared Browser action/target prefixes,
+not fill values, open URLs, scripts or result rows. A compact advisory prelude
+(last three entries/last three target hints, at most4KB) precedes normal task
+context inside its existing24k character budget. New owner input preserves
+history; it does not fabricate or backfill past trials. Actual proof IDs remain
+unchanged while advisory IDs/codes are byte-bounded. Browser failures identify
+`pagination.current`, `pagination.total`, `pagination.next` or
+`pagination.controls` through `failed_target_field` and the failure message;
+unknown wire fields are ignored. The safe field persists through public trial
+summaries, repair and subsequent owner context.
+
+`ensure_visible` requires a desired `target` and disclosure `trigger`; only
+this action accepts trigger. Unique CSS-visible presence is probed without
+reading text/input values. Existing presence returns immediately; only missing
+permits one native policy-checked click, followed by presence polling within
+one shared deadline. Invalid/ambiguous/origin errors never authorize the click.
+Failures identify `ensure_visible.target` or `ensure_visible.trigger` through
+the same safe diagnostic contract. History may retain bounded redacted
+trigger label/css/kind hints, never fill values. No proof or approval is implied.
+`wait_for` with omitted value uses the same presence probe; provided regex
+continues to match complete actual text/value with existing semantics.
