@@ -104,14 +104,21 @@ class TaskStore:
         return tuple(ConversationMessage.model_validate(v) for v in json.loads(path.read_bytes()))
 
     def observe(
-        self, actor: str, session: str, text: str, attachments: tuple[dict[str, str], ...] = ()
+        self,
+        actor: str,
+        session: str,
+        text: str,
+        attachments: tuple[dict[str, str], ...] = (),
+        *,
+        event_id: str | None = None,
     ) -> None:
         previous = self.messages(actor, session)
+        # A transport request id identifies an actual new owner turn, even
+        # when its words repeat. Legacy callers retain content deduplication.
+        identity = [text, attachments] if event_id is None else ["event", event_id]
         item = ConversationMessage(
             message_id="input-"
-            + hashlib.sha256(json.dumps([text, attachments], sort_keys=True).encode()).hexdigest()[
-                :24
-            ],
+            + hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()[:24],
             role="user",
             text=text[:40000],
             created_at=datetime.now(UTC),
@@ -129,10 +136,15 @@ class TaskStore:
             ).encode(),
         )
         task = self.load(actor, session)
-        if task is not None and task.question is not None:
+        if task is not None and (task.question is not None or task.repair_attempts >= 3):
             # New input reopens evaluation; it does not itself confirm or
             # invalidate the saved plan/trial evidence.
-            self.save(actor, session, task.model_copy(update={"question": None}))
+            update: dict[str, Any] = {"question": None}
+            if task.repair_attempts >= 3:
+                update["repair_attempts"] = 0
+            # Keep the repaired-run marker: renewing the budget cannot replay
+            # the same failed run or alter existing proof/trial ownership.
+            self.save(actor, session, task.model_copy(update=update))
 
     def plan(
         self, actor: str, session: str, objective: str, requirements: list[Requirement]

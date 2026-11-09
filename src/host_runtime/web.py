@@ -3311,6 +3311,7 @@ class AgentWeb:
                         {"filename": file.filename, "kind": file.kind, "path": file.path}
                         for file in attached
                     ),
+                    event_id=f"web-input-{uuid.uuid4().hex}",
                 )
             started = datetime.now(UTC)
             if record.data_classification == "PUBLIC" and item.message.lstrip().startswith("/"):

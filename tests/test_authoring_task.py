@@ -237,3 +237,44 @@ def test_new_user_input_clears_question_while_preserving_plan_and_trial_proof(
     store.observe("owner", "session", "Use the attached workbook", ({"path": "C:/new.xlsx"},))
     assert store.load("owner", "session") == task.model_copy(update={"question": None})
     assert len(store.messages("owner", "session")) == 2
+
+
+def test_real_message_ids_distinguish_repeated_owner_answers_and_reset_exhausted_budget(
+    tmp_path: Path,
+) -> None:
+    store = TaskStore(tmp_path)
+    task = AuthoringTask(
+        objective="Read every page",
+        repair_attempts=3,
+        last_repaired_run_id="failed-run-1",
+        verified_digest="proof",
+        last_trial_digest="trial",
+        active_trial_token="running-token",
+        requirements=(Requirement(requirement_id="rows", description="Read every page"),),
+        question=AuthoringQuestion(reason="repair_limit", question="Continue repairing?"),
+    )
+    store.save("owner", "session", task)
+    store.observe("owner", "session", "繼續", event_id="actual-user-turn-1")
+    reset = task.model_copy(update={"question": None, "repair_attempts": 0})
+    assert store.load("owner", "session") == reset
+    # A retry of this same request does not renew the budget or clear a question.
+    store.save("owner", "session", task)
+    store.observe("owner", "session", "繼續", event_id="actual-user-turn-1")
+    assert store.load("owner", "session") == task
+    assert len(store.messages("owner", "session")) == 1
+    # A distinct actual later answer can repeat exactly the same words.
+    store.observe("owner", "session", "繼續", event_id="actual-user-turn-2")
+    assert store.load("owner", "session") == reset
+    assert len(store.messages("owner", "session")) == 2
+
+
+@pytest.mark.parametrize("attempts", [0, 1, 2, 3])
+def test_new_owner_input_resets_only_exhausted_repair_attempts(
+    tmp_path: Path, attempts: int
+) -> None:
+    store = TaskStore(tmp_path)
+    task = AuthoringTask(objective="Read every page", repair_attempts=attempts)
+    store.save("owner", "session", task)
+    store.observe("owner", "session", "繼續", event_id="actual-user-turn-1")
+    expected = task.model_copy(update={"repair_attempts": 0}) if attempts == 3 else task
+    assert store.load("owner", "session") == expected
