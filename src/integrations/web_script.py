@@ -475,9 +475,13 @@ _INSPECT_DOM = r"""
       const field = fields.includes(e.tagName) || ['combobox', 'checkbox', 'radio'].includes(role);
       const toolbar = e.closest('[role=toolbar]');
       const link = tag === 'a' || role === 'link';
-      const tableCell = e.closest('td,th,[role=cell],[role=gridcell],[role=rowheader],' +
-        '[role=columnheader]');
-      const priority = navigation ? 0 : field ? 1 : toolbar ? 2 : tableCell ? 5 : link ? 4 : 3;
+      const dataCell = e.closest('td,[role=cell],[role=gridcell]');
+      const headerCell = e.closest('th,[role=rowheader],[role=columnheader]');
+      const checkbox = role === 'checkbox' || (tag === 'input' && e.type === 'checkbox');
+      // Data-row fields are record controls, not query fields. Keep TH filters useful,
+      // while header select-all checkboxes stay with the table's record controls.
+      const recordControl = dataCell || (headerCell && checkbox);
+      const priority = navigation ? 0 : recordControl ? 5 : field ? 1 : toolbar ? 2 : link ? 4 : 3;
       if (buckets[priority].length < 80) {
         const label = accessibleName(e, budget);
         const state = {};

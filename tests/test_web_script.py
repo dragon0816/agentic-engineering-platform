@@ -965,3 +965,36 @@ def test_pagination_rejects_distinct_locators_resolving_to_the_same_control(
     assert failed.value.code == "pagination_controls_must_differ"
     assert failed.value.action_kind == "read_table" and failed.value.action_index == 0
     assert browser.evaluate("window.__pagingClicks") == 0
+
+
+def test_data_row_checkboxes_cannot_hide_query_fields_and_toolbar_state(
+    browser: Any, site: PracticeSite
+) -> None:
+    browser.navigate(site.url)
+    rows = "".join(
+        '<tr><td><input type="checkbox" aria-label="Select row"></td>'
+        '<td><div role="checkbox" aria-label="Select record"></div></td></tr>'
+        for _ in range(120)
+    )
+    html = (
+        "<style>[role=checkbox]{display:inline-block;width:20px;height:20px}</style>"
+        '<table><thead><tr><th><input id="select-all" type="checkbox" aria-label="Select all"></th>'
+        '<th><input id="column-filter" aria-label="Column filter"></th></tr></thead>'
+        f"<tbody>{rows}</tbody></table>"
+        '<input id="query-date" aria-label="Query date" placeholder="Start date">'
+        '<div role="toolbar"><button id="advanced" aria-pressed="true">'
+        "Advanced Search</button></div>"
+    )
+    browser.evaluate("document.body.innerHTML=" + json.dumps(html))
+    inspected = runner(browser, site).inspect()
+    overview = inspected["overview"]
+    assert isinstance(overview, dict) and isinstance(overview["controls"], list)
+    controls = [control for control in overview["controls"] if isinstance(control, dict)]
+    paths = [control["path"] for control in controls]
+    assert "#column-filter" in paths and "#query-date" in paths and "#advanced" in paths
+    assert paths.index("#column-filter") < paths.index("#select-all")
+    assert paths.index("#query-date") < paths.index("#select-all")
+    assert paths.index("#advanced") < paths.index("#select-all")
+    advanced = next(control for control in controls if control["path"] == "#advanced")
+    assert advanced["state"] == {"pressed": "true"}
+    assert overview["controls_truncated"] is True and len(json.dumps(overview)) <= 9000
