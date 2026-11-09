@@ -3779,6 +3779,7 @@ function renderMarkdown(source) {
     if (listStart) {
       const ordered = /^\d/.test(listStart[2]);
       const list = document.createElement(ordered ? "ol" : "ul");
+      if (ordered) list.setAttribute("start", String(parseInt(listStart[2], 10)));
       while (index < lines.length) {
         const item = /^( {0,3})([-*+]|\d+[.)])\s+(.+)$/.exec(lines[index]);
         if (!item || item[1].length !== listStart[1].length

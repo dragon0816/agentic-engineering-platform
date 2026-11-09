@@ -341,6 +341,13 @@ assert.equal(collect(target, "script").length, 0);
 assert.equal(collect(target, "img").length, 0);
 assert.match(content(target), /<img src=x onerror=alert\(1\)>/);
 assert.match(content(target), /\[unsafe\]\(javascript:alert\(1\)\)/);
+renderAnswer(target, [
+  "1. **C4C URL**", "", "- Open the sales page", "",
+  "2. **Excel mapping**", "", "- Sales Owner and Sub-Dept.", "",
+  "3. **Output**", "", "Choose a workbook.", "",
+  "4. **Dates**", "", "- Use the SOP dates",
+].join("\n"));
+assert.deepEqual(collect(target, "ol").map(node => node.attrs.start), ["1", "2", "3", "4"]);
 """.replace("__RENDERER__", json.dumps(renderer))
     path = tmp_path / "markdown-dom.js"
     path.write_text(harness, encoding="utf-8")
