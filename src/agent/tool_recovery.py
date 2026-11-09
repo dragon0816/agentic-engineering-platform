@@ -104,6 +104,7 @@ _FIXABLE: dict[str, str] = {
         "value from its recorded origin; ask only if a required business value is truly absent."
     ),
     "web_pagination_invalid": _BROWSER_PAGING_REPAIR,
+    "pagination_controls_must_differ": _BROWSER_PAGING_REPAIR,
     "web_pagination_not_at_start": _BROWSER_PAGING_REPAIR,
     "web_pagination_changed": _BROWSER_PAGING_REPAIR,
     "web_pagination_did_not_advance": _BROWSER_PAGING_REPAIR,

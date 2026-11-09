@@ -225,6 +225,7 @@ def test_a_workflow_tool_failure_is_read_from_its_run() -> None:
         "web_column_missing",
         "web_value_missing",
         "web_pagination_invalid",
+        "pagination_controls_must_differ",
         "web_pagination_not_at_start",
         "web_pagination_changed",
         "web_pagination_did_not_advance",
