@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from pathlib import Path
 
 from pydantic import JsonValue
 
@@ -31,12 +32,13 @@ def validate_run_parameters(
     checked = dict(arguments)
     for name, field in fields.items():
         if name not in arguments:
-            if field.required:
-                raise WorkflowParameterError(f"{name} is required")
             if field.default is not None:
                 # A declared default is part of the contract; every channel
                 # (web, schedule, Telegram, Agent) gets the same value.
+                _validate_value(field, field.default)
                 checked[name] = field.default
+            elif field.required:
+                raise WorkflowParameterError(f"{name} is required")
             continue
         _validate_value(field, arguments[name])
     return checked
@@ -46,6 +48,21 @@ def _validate_value(field: WorkflowParameter, value: JsonValue) -> None:
     problem = parameter_value_problem(field, value)
     if problem:
         raise WorkflowParameterError(f"{field.name} {problem}")
+    if field.kind == "file":
+        # These checks do not grant access: Bridge roots/ownership still govern
+        # actual reads. Uploads retain their separate store/authorization checks.
+        values = value if field.multiple else [value]
+        assert isinstance(values, list | tuple)
+        for item in values:
+            assert isinstance(item, str)
+            path = Path(item)
+            if path.is_dir():
+                raise WorkflowParameterError(f"{field.name} must be a file, not a directory")
+            if field.file_mode == "input" and not path.is_file():
+                raise WorkflowParameterError(f"{field.name} must refer to an existing file")
+            accepted = {"." + extension.strip().lower().lstrip(".") for extension in field.accept}
+            if accepted and path.suffix.lower() not in accepted:
+                raise WorkflowParameterError(f"{field.name} must be an accepted file type")
 
 
 def static_fields(manifest: WorkflowManifest) -> tuple[WorkflowParameter, ...]:
@@ -76,6 +93,7 @@ def validate_static_settings(
             _validate_value(field, values[name])
             checked[name] = values[name]
         elif field.default is not None:
+            _validate_value(field, field.default)
             checked[name] = field.default
         elif complete and field.required:
             raise WorkflowParameterError(f"{name} is required")

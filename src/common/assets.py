@@ -312,6 +312,7 @@ _LATER_PARAMETER_FIELDS = frozenset(
         "allow_other",
         "true_label",
         "false_label",
+        "file_mode",
     }
 )
 CHOICES_SOURCE = re.compile(r"^(ref|fn):[A-Za-z0-9_.-]+(\?[^\s]*)?$")
@@ -382,6 +383,9 @@ class WorkflowParameter(RegistryContract):
     needs: tuple[Symbol, ...] = ()
     multiple: StrictBool = False
     accept: tuple[Text, ...] = ()
+    # Input files must exist at dispatch; output destinations may be new.
+    # None preserves legacy manifests whose file direction was unspecified.
+    file_mode: Literal["input", "output"] | None = None
     # Which generated interfaces show the field; () keeps it internal.
     channels: tuple[ParameterChannel, ...] = ALL_PARAMETER_CHANNELS
     # A privileged field: changing it needs an explicit confirmation.
@@ -438,6 +442,8 @@ class WorkflowParameter(RegistryContract):
                 raise ValueError("parameter pattern must be a valid expression") from None
         if self.accept and self.kind not in _PATH_KINDS:
             raise ValueError("only file, folder and upload parameters may declare accept")
+        if self.file_mode is not None and self.kind != "file":
+            raise ValueError("only file parameters may declare file_mode")
         if self.multiple and self.kind not in ("select", "file", "upload"):
             raise ValueError("only select, file and upload parameters may be multiple")
         if len(set(self.channels)) != len(self.channels):
