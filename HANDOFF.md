@@ -1,111 +1,68 @@
-# C4C live Workflow validation — 2026-11-09
+# Resident SOP-to-Workflow autonomy diagnosis — 2026-11-09
 
-## Goal and branch
+## Current task and scope
 
-Continue the owner-approved PDF/XLSX/DOCX SOP authoring and reply numbering work
-(commits 59320b68 and 77f5477e on main) with a real automatic C4C run. The owner
-confirmed SSO and explicitly requested execution. Final TWD rate is 0.02712085
-EUR/TWD (the later explicit yes supersedes the earlier pending clarification).
+Owner asks why AEP itself cannot autonomously build the Sales Order Workflow,
+and why it sends browser navigation/column/path work back to non-programmers.
+This turn is diagnosis only: no runtime changes, C4C execution, restart, approval
+request or installed Workflow modification. Branch main; earlier browser/source
+work and draft-submission history are in the evaluation documents below.
 
-## Completed
+## What is now verified
 
-- Browser trusted pointer press/release, hidden-target filtering and role=option
-  labels; origin/read-mode checks precede pointer dispatch.
-- Optional split header selector, typed bounded pagination, stable page snapshots
-  and unique key columns. Frozen SAP ID cells lag the other cells; changing rows
-  alone is insufficient. Limits/stalls refuse without partial exports.
-- Bounded wait_for target/text regex action. C4C retains old tables/page counts
-  during queries; the recorded procedure awaits loading and numeric completion.
-- Actual SSO and All / Document Date Between 01.07.2026 and 30.06.2027 query,
-  all pages, restricted Python and Excel executed through WorkflowEngine,
-  Bridge and the shared Workflow Harness. No SAP HTTP/API or application state.
-- The installed network-blocked runner Python (openpyxl 3.1.5) is used with its
-  existing firewall requirement and allowed Documents/aep-workflows root.
-- Independent verification: 750 raw rows match browser output, 750 unique IDs,
-  all dates in range, all EUR conversions, all 106 monthly groups and all mapped
-  departments reconcile. 173 rows have no matching Owner in the supplied lookup;
-  originals/totals remain and Exceptions identifies them. No guessed departments.
-- Actual view has no Export/Spreadsheet button. SOP says copy its table, so the
-  Workflow reads the visible table into Excel rather than inventing an Export.
+- Live browser/operate schema now contains wait_for, header_table and pagination
+  with key_columns. The earlier stale-Host observation no longer describes the
+  current installation.
+- Resident candidate wf-20261109-102227-3989e0 is revision 2, source conversation,
+  installed engineering/c4c-sales-order-report@1.0.1. The Agent revised the
+  externally submitted full-flow candidate into four browser actions: open Home,
+  click Sales, click #__button22, read body text. No All/date/pagination actions.
+- Read the owner's actual conversation, run records, candidate and telemetry.
+  Trial and form runs capture Home; Python exits 1 with missing Sales Orders
+  headers. Platform still says succeeded / three successful steps and lists an
+  old test workbook/summary. See conversation-5767f95c3c1e47c986ef1910307bf483.
+- Read-only current-source minimal reproduction confirms output_check accepts
+  a failed Python result containing an old nonempty XLSX. data_nonempty also
+  accepts a nonempty failure dictionary. No fake live pass was inferred.
+- Browser conversation tool supplies generic action-object schemas and bounded
+  text/80 elements, with no scoped DOM/AX/screenshot action. Code-only failure
+  loses the failed action/target/current page. Codex's earlier diagnostic DOM
+  inspection was not equivalently available through AEP's browser tool.
+- Draft guidance already says repair/retest, but readiness/requirement coverage
+  is not strongly enforced. Inline form results are stored for later chat, not
+  automatically resumed into authoring repair. Installation is approval, not
+  independent proof of full SOP coverage.
+- A supplied full lookup path was not bound into the form (required, no default).
+  Later directory inputs reach execution. Known files should be stored/prefilled
+  and validated before running, beyond the bounded chat history.
 
-## Private artifacts and replay
+## Verification and durable evidence
 
-User package: %USERPROFILE%/Documents/aep-workflows/c4c-sales-order-report/.
-workflow.json contains the deterministic steps/scripts; input/ contains the
-unchanged owner lookup; output/c4c_sales_orders_fy2026_analysis.xlsx contains raw,
-EUR detail, monthly summary and exceptions. These business files are not in Git.
-The unused draft output_basename parameter was removed; output filename is fixed.
+Detailed findings, source references, confidence limits and proposed priorities:
+docs/evaluations/SOP_WORKFLOW_AUTONOMY_DIAGNOSIS_2026-11-09.md.
 
-Private .scratch/run_c4c_workflow.py rebuilds/checks and executes the manifest;
-.scratch/verify_c4c_live.py independently verifies the result/workbook. Evidence:
-.scratch/c4c-live-validation/workflow-run.json and independent-verification.json.
-Final successful live run: run-e390791473b84a95af7cbb43b6bfa923.
-The private browser is closed. Resident AEP config/service/workspace are untouched;
-no update/restart/install/publish/push was performed. Source features require an
-updated Host before this manifest can be installed into the resident service.
+Used read-only SQLite connections for persisted evidence and AEP MCP catalog,
+capability, list and show-installed. No source implementation/tests changed;
+therefore no full-suite/build rerun for this documentation-only diagnosis.
+Git diff --check is required before committing these records.
 
-## Final verification
+Previous evidence remains in C4C_LIVE_WORKFLOW_2026-11-09.md and
+CHAT_DOCUMENT_ATTACHMENTS_2026-11-09.md under docs/evaluations. Those establish
+externally assisted execution/attachments, not autonomous resident authoring.
+The source/browser commit was c1a0ee90; draft visibility follow-up f3cbf62f.
+Private tested package remains Documents/aep-workflows/c4c-sales-order-report.
+Do not overwrite the installed v1.0.1 during diagnosis; it is failure evidence.
 
-- Browser, web-script and session whole files: 39 passed in 262.65s.
-- Authoring conversation and Workflow preview whole files: 8 passed in 55.74s.
-- Final independent workbook/source/mapping/aggregate check passed.
-- Ruff check ., Ruff format --check . (1398 files), mypy src tests (1052 files)
-  passed. build --no-isolation produced sdist/wheel; pip check passed.
-- Full suite: .scratch/run_c4c_suite.py, four disjoint file sets from normal
-  collection, 6026 items/524 modules, AEP_GUI_TESTS=0. Initial 6013 passed,
-  10 skipped, 3 failed (no errors); optional av also skips collection. Shards:
-  1453 passed/2 skipped (4197.81s); 1402/2 +1 fail (2547.37s);
-  1631/5 +1 fail (2864.71s); 1527/1 +1 fail (4353.56s).
-- All initial failures inspected and unchanged whole modules rerun successfully:
-  test_script_tools.py 6 passed in 12.38s (initial script_timeout);
-  test_library_content_web.py 6 passed in 95.95s (initial wide layout measured
-  narrow; same failure occurred before this change in the document full run);
-  test_web_capabilities.py 4 passed in 45.25s (profile_in_use while asserting
-  origin refusal). No weakened assertion, enlarged timeout or speculative fix.
-  Do not claim the original full command was first-pass green.
-- Final normal collection 6028/524; original case multiplicities preserved, only
-  two later readiness/frozen-key regressions added, both in final 39-test pass.
-  .scratch/c4c-coverage-delta.json verifies this without dynamic token labels.
-  c4c-shard-N.log/.xml and c4c-suite-result.json preserve original outcomes.
-- Final diff architecture guard: pass, unchanged authorization/plane boundaries;
-  no SAP-specific core routing or provider details, no secrets/new dependency.
-  All test/build/private browser processes completed. No push.
+## Next recommended work (not implemented / proposed design)
 
-## Remaining / next action
+First fix P0 program failure and current-run artifact semantics with regressions
+for nonzero exit plus leftover XLSX/summary. Then scope browser inspection and
+precise failure evidence, durable authoring requirements/inputs and bounded
+repair continuation. Preserve deterministic execution, Bridge/origin policy,
+per-turn side-effect deduplication and normal human installation/business approval.
 
-The source change and live acceptance are complete, with the concurrent full-run
-failures transparently reconciled above. Before enabling this saved manifest in
-the resident AEP, update the Host through the normal active-work/restart policy
-and install through its approval flow. Neither is performed by this source-only
-verification. The owner may extend the supplied lookup for the 173 unmapped rows
-and rerun; no Workflow rebuild is needed.
-
-Architecture decision: docs/DECISIONS.md; typed contract: docs/CONTRACTS.md;
-phase: docs/phases/C4C_LIVE_WORKFLOW_VALIDATION.md; detailed evidence:
-docs/evaluations/C4C_LIVE_WORKFLOW_2026-11-09.md. Earlier attachment/numbering
-acceptance remains in CHAT_DOCUMENT_ATTACHMENTS_2026-11-09.md and the two commits
-named above. Next deployment is separate from this local source commit.
-
-## Follow-up: resident Host draft visibility (2026-11-09, 10:22 UTC)
-
-Owner restarted AEP and could not find c4c-sales-order-report. Earlier work saved
-and tested an external JSON file; it never submitted a resident candidate, and
-its internal asset name was c4c-sales-order-export-analysis (the report name was
-only the package folder). Restart does not discover arbitrary manifest files.
-
-Using aep-workflow-creator and the live AEP MCP catalog/format/capability/check/
-submit/list tools, submitted the same tested steps under the requested searchable
-name engineering/c4c-sales-order-report@1.0.0. Candidate
-wf-20261109-102227-3989e0, revision 1, source external:codex, owner leo.chi.
-Read-back confirms status draft with no installation/approval. Refresh Capabilities
-and search c4c-sales-order-report, including Drafts, to see it. Private receipt:
-Documents/aep-workflows/c4c-sales-order-report/aep-submission.json.
-
-The resident capability schema is still OLD: its WebAction enum lacks wait_for,
-and it has no header_table/pagination/key_columns. Restart did not deploy the
-source changes. Top-level aep_check_workflow returned ok but that is not a deep
-fixed-action compatibility proof; do not install/run the candidate as if this
-Host supports it. Description/title explicitly mark the Host update requirement.
-Next action: update the resident Host through the active-work/restart policy,
-verify its actual action schema, then test/install via the normal approval flow.
-No restart, config edits, run approval or install request was made in this follow-up.
+Acceptance must use a fresh resident AEP conversation with original SOP/workbook,
+without Codex-provided selectors/scripts, manual page switching or copied field
+names. Verify All, supplied dates, every page/current count, conversions and new
+output; deliberately inject a failure and verify correct failure/repair behavior.
+Do not substitute another externally hand-built passing Workflow for this test.
