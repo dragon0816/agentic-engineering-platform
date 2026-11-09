@@ -652,11 +652,12 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
         assert "0張卡片" in shown("bi-counts").replace(" ", "")
         wait("document.getElementById('bi-dash-sections').textContent.includes('6. 缺口')")
         # -- demo load refreshes the counts ----------------------------------------------
-        # Every Dashboard load from here on, with its caller: the demo's own is the only one
-        # expected. `[]` read right after the order matched (2026-11-06, 2 of 3 on one merge)
-        # can only be another, and a failure below names it.
+        # Track reload callers, including the demo's own asynchronous refresh. Counts and
+        # the old section order can match before that refresh clears and repaints the Dashboard.
         run(DASH_LOADS)
         run("document.getElementById('bi-demo').click()")
+        # The button is reenabled only after await biLoad(), including the Dashboard, finishes.
+        wait("!document.getElementById('bi-demo').disabled")
         wait("document.getElementById('bi-counts').textContent.startsWith('2')")
         assert "示範資料已載入" in shown("bi-notice")
         assert ("POST", "/api/bi/demo/load", {"dataset": "demo"}) in stub.calls
