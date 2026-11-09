@@ -39,10 +39,22 @@ _PLACEHOLDER = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
 MAX_TABLE_ROWS = 2000
 
 PaginationTargetField = Literal[
-    "pagination.current", "pagination.total", "pagination.next", "pagination.controls"
+    "pagination.current",
+    "pagination.total",
+    "pagination.next",
+    "pagination.controls",
+    "ensure_visible.target",
+    "ensure_visible.trigger",
 ]
 _PAGINATION_TARGET_FIELDS = frozenset(
-    ("pagination.current", "pagination.total", "pagination.next", "pagination.controls")
+    (
+        "pagination.current",
+        "pagination.total",
+        "pagination.next",
+        "pagination.controls",
+        "ensure_visible.target",
+        "ensure_visible.trigger",
+    )
 )
 
 
@@ -136,17 +148,23 @@ class WebAction(Contract):
         "read_record",
         "wait_for",
         "inspect_dom",
+        "ensure_visible",
     ]
     url: Text | None = None
     target: WebTarget | None = None
+    trigger: WebTarget | None = Field(
+        default=None,
+        description="Only ensure_visible: disclosure clicked once when desired target is missing",
+    )
     row: RowScope | None = None
     value: Text | None = Field(
         default=None,
         description=(
-            "For fill, the text to enter (with {placeholders}). For wait_for, a regular expression "
-            "matching the whole actual innerText/value, not the accessible name. For an icon-only "
-            "visible target, .* accepts empty text and waits for presence; "
-            "caption words may time out."
+            "For fill, the text to enter (with {placeholders}). For wait_for, OMIT value to wait "
+            "for unique CSS-visible presence without reading text/values. If provided, a regular "
+            "expression matching the whole actual innerText/value, not the accessible name. "
+            "An icon-only target may have empty text; .* is NOT a universal presence predicate "
+            "because it does not match multiline text. Caption words may time out."
         ),
     )
     table: Text | None = None
@@ -178,6 +196,7 @@ class WebAction(Contract):
     def complete(self) -> Self:
         needs = {
             "inspect_dom": self.save_as is not None,
+            "ensure_visible": self.target is not None and self.trigger is not None,
             "open": self.url is not None,
             "fill": self.target is not None and self.value is not None,
             "click": self.target is not None,
@@ -185,10 +204,12 @@ class WebAction(Contract):
             "read_text": self.target is not None and self.save_as is not None,
             "download": self.target is not None and self.save_as is not None,
             "read_record": self.table is not None and self.save_as is not None,
-            "wait_for": self.target is not None and self.value is not None,
+            "wait_for": self.target is not None,
         }
         if not needs[self.do]:
             raise ValueError(f"a {self.do} action is missing what it needs")
+        if self.trigger is not None and self.do != "ensure_visible":
+            raise ValueError("trigger belongs only to ensure_visible")
         if self.do != "read_table" and (
             self.header_table is not None or self.pagination is not None
         ):
@@ -255,6 +276,17 @@ _FIND = r"""
   return {element: found[0]};
 }
 """.replace("__DOM_NAME__", DOM_NAME_JS)
+
+_PRESENCE = r"""
+(() => {
+  const find = %(find)s;
+  const hit = find(%(spec)s);
+  if (hit.error === 'web_target_missing') return JSON.stringify({present: false});
+  if (hit.error) return JSON.stringify({error: hit.error});
+  return JSON.stringify({present: true});
+})()
+"""
+
 
 _ACT = r"""
 (() => {
@@ -677,6 +709,10 @@ class ScriptRunner:
         mode: ScriptMode,
         data: dict[str, JsonValue],
     ) -> None:
+        if action.do == "ensure_visible":
+            assert action.target is not None and action.trigger is not None
+            self._ensure_visible(action.target, action.trigger, mode)
+            return
         if action.do != "open":
             self._check_origin()
         if action.do == "inspect_dom":
@@ -684,8 +720,11 @@ class ScriptRunner:
             data[action.save_as] = self.inspect(action.scope, action.offset, action.limit)
             return
         if action.do == "wait_for":
-            assert action.target is not None and action.value is not None
+            assert action.target is not None
             deadline = time.monotonic() + self.timeout_s
+            if action.value is None:
+                self._wait_presence(action.target, deadline)
+                return
             while True:
                 self._check_origin()
                 try:
@@ -747,6 +786,68 @@ class ScriptRunner:
         if action.do == "click":
             self._settle()
             self._check_origin()
+
+    @staticmethod
+    def _check_deadline(deadline: float, field: PaginationTargetField | None = None) -> None:
+        if time.monotonic() >= deadline:
+            raise WebScriptError("web_wait_timeout", target_field=field)
+
+    def _present(
+        self,
+        target: WebTarget,
+        deadline: float,
+        field: PaginationTargetField | None = None,
+    ) -> bool:
+        try:
+            self._check_deadline(deadline, field)
+            self._check_origin()
+            self._check_deadline(deadline, field)
+            answer = self._evaluate(
+                _PRESENCE % {"find": _FIND, "spec": json.dumps(target.model_dump())}
+            )
+            self._check_origin()
+            self._check_deadline(deadline, field)
+            if type(answer.get("present")) is not bool:
+                raise WebScriptError("web_page_unreadable")
+            return bool(answer["present"])
+        except WebScriptError as error:
+            if field is not None:
+                error.target_field = field
+            raise
+        except Exception as error:
+            raise WebScriptError(
+                str(getattr(error, "code", "web_action_failed")), target_field=field
+            ) from None
+
+    def _wait_presence(
+        self,
+        target: WebTarget,
+        deadline: float,
+        field: PaginationTargetField | None = None,
+    ) -> None:
+        while not self._present(target, deadline, field):
+            self._check_deadline(deadline, field)
+            time.sleep(min(0.1, max(0.0, deadline - time.monotonic())))
+
+    def _ensure_visible(self, target: WebTarget, trigger: WebTarget, mode: ScriptMode) -> None:
+        deadline = time.monotonic() + self.timeout_s
+        if self._present(target, deadline, "ensure_visible.target"):
+            return
+        try:
+            self._check_origin()
+            self._check_deadline(deadline, "ensure_visible.trigger")
+            self._perform({"op": "click", "mode": mode, **trigger.model_dump()}, deadline=deadline)
+            self._check_origin()
+            self._check_deadline(deadline, "ensure_visible.trigger")
+        except WebScriptError as error:
+            error.target_field = "ensure_visible.trigger"
+            raise
+        except Exception as error:
+            raise WebScriptError(
+                str(getattr(error, "code", "web_action_failed")),
+                target_field="ensure_visible.trigger",
+            ) from None
+        self._wait_presence(target, deadline, "ensure_visible.target")
 
     def inspect(
         self, scope: str = "body", offset: int = 0, limit: int = 80
@@ -876,16 +977,24 @@ class ScriptRunner:
             current += 1
         return rows
 
-    def _perform(self, spec: dict[str, Any]) -> dict[str, Any]:
+    def _perform(self, spec: dict[str, Any], *, deadline: float | None = None) -> dict[str, Any]:
         pointer = getattr(self.page, "click_at", None)
         native = spec["op"] == "click" and callable(pointer)
         expression = _ACT % {"find": _FIND, "spec": json.dumps({**spec, "pointer": native})}
-        deadline = time.monotonic() + self.timeout_s
+        shared_deadline = deadline is not None
+        deadline = time.monotonic() + self.timeout_s if deadline is None else deadline
         while True:
+            if shared_deadline:
+                self._check_deadline(deadline)
             if native:
                 self._check_origin()
+            if shared_deadline:
+                self._check_deadline(deadline)
             try:
                 answer = self._evaluate(expression)
+                if shared_deadline:
+                    self._check_origin()
+                    self._check_deadline(deadline)
                 break
             except WebScriptError as error:
                 if (
@@ -900,11 +1009,20 @@ class ScriptRunner:
                     or time.monotonic() >= deadline
                 ):
                     raise
-                time.sleep(0.1)
+                if shared_deadline:
+                    time.sleep(min(0.1, max(0.0, deadline - time.monotonic())))
+                else:
+                    time.sleep(0.1)
         if native:
             assert callable(pointer)
             point = answer["pointer"]
+            if shared_deadline:
+                self._check_origin()
+                self._check_deadline(deadline)
             pointer(float(point["x"]), float(point["y"]))
+            if shared_deadline:
+                self._check_origin()
+                self._check_deadline(deadline)
         return answer
 
     def _evaluate(self, expression: str) -> dict[str, Any]:

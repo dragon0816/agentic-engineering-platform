@@ -375,7 +375,14 @@ def test_owner_continuation_gets_compact_history_before_large_task_context(tmp_p
 
 @pytest.mark.parametrize(
     "target_field",
-    ["pagination.current", "pagination.total", "pagination.next", "pagination.controls"],
+    [
+        "pagination.current",
+        "pagination.total",
+        "pagination.next",
+        "pagination.controls",
+        "ensure_visible.target",
+        "ensure_visible.trigger",
+    ],
 )
 def test_nested_pagination_target_survives_summary_and_advisory_history(
     tmp_path: Path, target_field: str
@@ -410,8 +417,12 @@ def test_nested_pagination_target_survives_summary_and_advisory_history(
     assert compact[0]["failed_step"]["failed_target_field"] == target_field
 
 
+@pytest.mark.parametrize(
+    "unknown", ["PRIVATE-INPUT-VALUE", "ensure_visible.value", "ensure_visible.secret"]
+)
 def test_arbitrary_nested_target_metadata_is_not_carried_into_advisory_state(
     tmp_path: Path,
+    unknown: str,
 ) -> None:
     from test_authoring_trial_diagnostics import _snapshot
     from test_chat_authoring import context
@@ -427,12 +438,80 @@ def test_arbitrary_nested_target_metadata_is_not_carried_into_advisory_state(
             "unsupported-field",
             {
                 "failed_action_index": 1,
-                "failed_target_field": "PRIVATE-INPUT-VALUE",
+                "failed_target_field": unknown,
             },
         ),
     )
     task = chat.tasks.load("owner", "session-1")
     assert task is not None
-    assert "PRIVATE-INPUT-VALUE" not in json.dumps(task.trial_history)
-    assert "PRIVATE-INPUT-VALUE" not in json.dumps(task.last_trial_diagnostics)
-    assert "PRIVATE-INPUT-VALUE" not in chat.task_context(context())
+    assert unknown not in json.dumps(task.trial_history)
+    assert unknown not in json.dumps(task.last_trial_diagnostics)
+    assert unknown not in chat.task_context(context())
+
+
+def test_ensure_visible_history_keeps_only_safe_trigger_and_target_hints(tmp_path: Path) -> None:
+    from test_authoring_trial_diagnostics import _snapshot
+    from test_chat_authoring import context
+
+    chat, _ = studio(tmp_path)
+    _browser(chat)
+    item = _draft(chat, "Orders")
+    raw = item.draft.model_dump(mode="json")
+    raw["steps"][0]["inputs"]["actions"]["value"] = [
+        {
+            "do": "ensure_visible",
+            "target": {"css": "#query-panel", "kind": "any"},
+            "trigger": {
+                "label": "Advanced filters",
+                "kind": "button",
+            },
+        }
+    ]
+    changed, problems = chat.draft("owner", "session-1", "Orders", raw, item.candidate_id)
+    assert changed is not None and not problems
+    running = chat.begin_trial("owner", changed, {})
+    chat.record_trial(
+        "owner",
+        running,
+        _snapshot(
+            running,
+            "ensure-target-failed",
+            {
+                "failed_action_index": 0,
+                "failed_target_field": "ensure_visible.trigger",
+            },
+        ),
+    )
+    task = chat.tasks.load("owner", "session-1")
+    assert task is not None
+    history: Any = task.trial_history
+    action = history[-1]["failed_steps"][0]["action_prefix"][0]
+    assert action == {
+        "do": "ensure_visible",
+        "target": {"css": "#query-panel", "kind": "any"},
+        "trigger": {"label": "Advanced filters", "kind": "button"},
+    }
+    compact = json.loads(chat.task_context(context()).splitlines()[1])
+    assert compact[0]["failed_step"]["action_prefix"][0] == action
+    assert "PRIVATE" not in json.dumps(history) and "PRIVATE" not in json.dumps(compact)
+
+
+def test_ensure_visible_trigger_cannot_embed_a_secret(tmp_path: Path) -> None:
+    chat, _ = studio(tmp_path)
+    _browser(chat)
+    item = _draft(chat, "Orders")
+    raw = item.draft.model_dump(mode="json")
+    raw["steps"][0]["inputs"]["actions"]["value"] = [
+        {
+            "do": "ensure_visible",
+            "target": {"css": "#query-panel"},
+            "trigger": {"label": "api_key=synthetic-secret-fixture", "kind": "button"},
+        }
+    ]
+    changed, problems = chat.draft("owner", "session-1", "Orders", raw, item.candidate_id)
+    assert changed is None and problems
+    assert "credential" in " ".join(problems).lower()
+    assert (
+        "synthetic-secret-fixture"
+        not in chat.candidate(item.candidate_id, "owner").model_dump_json()
+    )

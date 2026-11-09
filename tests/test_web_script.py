@@ -1166,3 +1166,233 @@ def test_page_error_only_forwards_allowlisted_target_fields(
         ScriptRunner(ErrorPage(), ("https://example.test",))._evaluate("unused test expression")
     assert failed.value.code == "web_target_missing" and failed.value.target_field == expected
     assert "private-selector" not in str(failed.value)
+
+
+def disclosure_page(
+    browser: Any, site: PracticeSite, *, visible: bool = False, reveal: bool = True
+) -> None:
+    browser.navigate(site.url)
+    html = (
+        '<button id="toggle">Open details</button><div id="panel" style="display:'
+        + ("block" if visible else "none")
+        + '">First<br>Second<input value="private-field"></div>'
+    )
+    browser.evaluate(
+        "document.body.innerHTML="
+        + json.dumps(html)
+        + ";window.__revealClicks=0;window.__trusted=false;"
+        "document.getElementById('toggle').addEventListener('mouseup',event=>{window.__revealClicks++;"
+        "window.__trusted=event.isTrusted;"
+        + ("document.getElementById('panel').style.display='block';" if reveal else "")
+        + "});"
+    )
+
+
+def ensure_action(target: str = "#panel", trigger: str = "#toggle") -> WebAction:
+    return WebAction.model_validate(
+        {"do": "ensure_visible", "target": {"css": target}, "trigger": {"css": trigger}}
+    )
+
+
+def test_ensure_visible_repeated_replay_clicks_once_and_uses_native_pointer(
+    browser: Any, site: PracticeSite
+) -> None:
+    disclosure_page(browser, site)
+    script = WebScript(actions=(ensure_action(), ensure_action()))
+    page_runner = ScriptRunner(browser, (site.url,), timeout_s=0.5)
+    page_runner.run(script, "act")
+    page_runner.run(script, "act")
+    assert browser.evaluate("window.__revealClicks") == 1
+    assert browser.evaluate("window.__trusted") is True
+
+
+def test_ensure_visible_read_noop_and_hidden_read_refusal(browser: Any, site: PracticeSite) -> None:
+    disclosure_page(browser, site, visible=True)
+    page_runner = ScriptRunner(browser, (site.url,), timeout_s=0.3)
+    page_runner.run(WebScript(actions=(ensure_action(trigger="#missing-trigger"),)), "read")
+    assert browser.evaluate("window.__revealClicks") == 0
+    disclosure_page(browser, site)
+    with pytest.raises(WebScriptError) as failed:
+        page_runner.run(WebScript(actions=(ensure_action(),)), "read")
+    assert failed.value.code == "web_click_not_read_only"
+    assert failed.value.target_field == "ensure_visible.trigger"
+    assert browser.evaluate("window.__revealClicks") == 0
+
+
+@pytest.mark.parametrize(
+    "target,code", [(".duplicate", "web_target_ambiguous"), ("[", "navigation_failed")]
+)
+def test_ensure_visible_bad_target_fails_before_any_click(
+    browser: Any, site: PracticeSite, target: str, code: str
+) -> None:
+    disclosure_page(browser, site)
+    browser.evaluate(
+        "document.body.insertAdjacentHTML('beforeend','<div class=duplicate>A</div>' + "
+        "'<div class=duplicate>B</div>')"
+    )
+    with pytest.raises(WebScriptError) as failed:
+        ScriptRunner(browser, (site.url,), timeout_s=0.3).run(
+            WebScript(actions=(ensure_action(target),)), "act"
+        )
+    assert failed.value.code == code and failed.value.target_field == "ensure_visible.target"
+    assert browser.evaluate("window.__revealClicks") == 0
+
+
+def test_ensure_visible_origin_refusal_never_clicks(browser: Any, site: PracticeSite) -> None:
+    disclosure_page(browser, site)
+    with pytest.raises(WebScriptError) as failed:
+        ScriptRunner(browser, ("https://different.test",), timeout_s=0.3).run(
+            WebScript(actions=(ensure_action(),)), "act"
+        )
+    assert (
+        failed.value.code == "web_origin_not_allowed"
+        and failed.value.target_field == "ensure_visible.target"
+    )
+    assert browser.evaluate("window.__revealClicks") == 0
+
+
+def test_ensure_visible_target_timeout_happens_after_only_one_click(
+    browser: Any, site: PracticeSite
+) -> None:
+    disclosure_page(browser, site, reveal=False)
+    with pytest.raises(WebScriptError) as failed:
+        ScriptRunner(browser, (site.url,), timeout_s=0.3).run(
+            WebScript(actions=(ensure_action(),)), "act"
+        )
+    assert (
+        failed.value.code == "web_wait_timeout"
+        and failed.value.target_field == "ensure_visible.target"
+    )
+    assert browser.evaluate("window.__revealClicks") == 1
+
+
+@pytest.mark.parametrize(
+    "action",
+    [
+        {"do": "ensure_visible", "target": {"css": "#panel"}},
+        {"do": "ensure_visible", "trigger": {"css": "#toggle"}},
+        {"do": "click", "target": {"css": "#toggle"}, "trigger": {"css": "#panel"}},
+        {"do": "wait_for", "target": {"css": "#panel"}, "trigger": {"css": "#toggle"}},
+    ],
+)
+def test_trigger_is_exclusive_to_complete_ensure_action(action: dict[str, Any]) -> None:
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        WebAction.model_validate(action)
+
+
+def test_presence_wait_ignores_multiline_text_and_never_reads_field_values(
+    browser: Any, site: PracticeSite
+) -> None:
+    disclosure_page(browser, site, visible=True)
+    page_runner = ScriptRunner(browser, (site.url,), timeout_s=0.2)
+    with pytest.raises(WebScriptError) as failed:
+        page_runner.run(
+            WebScript(
+                actions=(WebAction(do="wait_for", target=WebTarget(css="#panel"), value=".*"),)
+            ),
+            "read",
+        )
+    assert failed.value.code == "web_wait_timeout"
+    browser.evaluate(
+        "window.__presenceReads=0;Object.defineProperty(document.getElementById('panel'),'innerText',"
+        "{get:()=>{window.__presenceReads++;throw new Error('must not read text')}})"
+    )
+    result = page_runner.run(
+        WebScript(actions=(WebAction(do="wait_for", target=WebTarget(css="#panel")),)), "read"
+    )
+    assert result.data == {} and browser.evaluate("window.__presenceReads") == 0
+
+
+def test_ensure_visible_shares_deadline_with_trigger_readiness(
+    browser: Any, site: PracticeSite
+) -> None:
+    disclosure_page(browser, site, reveal=False)
+    browser.evaluate(
+        "document.getElementById('toggle').disabled=true;"
+        "setTimeout(()=>document.getElementById('toggle').disabled=false,600);"
+        "document.getElementById('toggle').addEventListener('mouseup',()=>"
+        "setTimeout(()=>document.getElementById('panel').style.display='block',900));"
+    )
+    with pytest.raises(WebScriptError) as failed:
+        ScriptRunner(browser, (site.url,), timeout_s=1.2).run(
+            WebScript(actions=(ensure_action(),)), "act"
+        )
+    assert (
+        failed.value.code == "web_wait_timeout"
+        and failed.value.target_field == "ensure_visible.target"
+    )
+    assert browser.evaluate("window.__revealClicks") == 1
+
+
+@pytest.mark.parametrize(
+    "trigger,code", [("[", "navigation_failed"), (".triggers", "web_target_ambiguous")]
+)
+def test_ensure_visible_invalid_or_ambiguous_trigger_never_clicks(
+    browser: Any, site: PracticeSite, trigger: str, code: str
+) -> None:
+    disclosure_page(browser, site)
+    browser.evaluate(
+        "document.body.insertAdjacentHTML('beforeend','<button class=triggers>A</button>' + "
+        "'<button class=triggers>B</button>');window.__allClicks=0;"
+        "document.body.addEventListener('mouseup',()=>window.__allClicks++);"
+    )
+    with pytest.raises(WebScriptError) as failed:
+        ScriptRunner(browser, (site.url,), timeout_s=0.3).run(
+            WebScript(actions=(ensure_action(trigger=trigger),)), "act"
+        )
+    assert failed.value.code == code and failed.value.target_field == "ensure_visible.trigger"
+    assert browser.evaluate("window.__allClicks") == 0
+
+
+def test_presence_wait_and_visible_ensure_never_read_input_value(
+    browser: Any, site: PracticeSite
+) -> None:
+    disclosure_page(browser, site, visible=True)
+    browser.evaluate(
+        "window.__valueReads=0;const field=document.querySelector('#panel input');"
+        "field.id='private-input';Object.defineProperty(field,'value',{get:()=>{"
+        "window.__valueReads++;throw new Error('must not read value')}});"
+    )
+    page_runner = ScriptRunner(browser, (site.url,), timeout_s=0.3)
+    page_runner.run(
+        WebScript(
+            actions=(
+                WebAction(do="wait_for", target=WebTarget(css="#private-input")),
+                ensure_action(target="#private-input"),
+            )
+        ),
+        "read",
+    )
+    assert browser.evaluate("window.__valueReads") == 0
+    assert browser.evaluate("window.__revealClicks") == 0
+
+
+def test_ensure_visible_rechecks_origin_after_presence_probe() -> None:
+    class RedirectingPage:
+        url = "https://allowed.test/page"
+        clicks = 0
+
+        def navigate(self, url: str) -> None:
+            raise AssertionError("no navigation")
+
+        def evaluate(self, expression: str) -> Any:
+            if expression == "document.location.href":
+                return self.url
+            self.url = "https://denied.test/page"
+            return json.dumps({"present": True})
+
+        def click_at(self, x: float, y: float) -> None:
+            self.clicks += 1
+
+    page = RedirectingPage()
+    with pytest.raises(WebScriptError) as failed:
+        ScriptRunner(page, ("https://allowed.test",), timeout_s=1).run(
+            WebScript(actions=(ensure_action(),)), "act"
+        )
+    assert (
+        failed.value.code == "web_origin_not_allowed"
+        and failed.value.target_field == "ensure_visible.target"
+    )
+    assert page.clicks == 0

@@ -55,7 +55,7 @@ from common.workflow_parameters import WorkflowParameterError, validate_run_para
 from common.workflow_run_form import OFFER_KEY
 from host_runtime.authoring_inputs import bind_supplied_inputs
 from host_runtime.authoring_task import (
-    PAGINATION_TARGET_FIELDS,
+    BROWSER_TARGET_FIELDS,
     AuthoringPlanRequest,
     AuthoringQuestion,
     AuthoringTask,
@@ -135,7 +135,7 @@ def _technical_metadata(data: JsonValue) -> dict[str, JsonValue]:
         if isinstance(value, str):
             detail[key] = _diagnostic_text(value, 700)
     target_field = data.get("failed_target_field")
-    if isinstance(target_field, str) and target_field in PAGINATION_TARGET_FIELDS:
+    if isinstance(target_field, str) and target_field in BROWSER_TARGET_FIELDS:
         detail["failed_target_field"] = target_field
     overview = data.get("overview")
     if isinstance(overview, dict):
@@ -326,7 +326,7 @@ def _trial_history_entry(
             step["capability"] = _diagnostic_text(_key(declared.capability), 256)
         data = result.data
         target_field = data.get("failed_target_field") if isinstance(data, dict) else None
-        if isinstance(target_field, str) and target_field in PAGINATION_TARGET_FIELDS:
+        if isinstance(target_field, str) and target_field in BROWSER_TARGET_FIELDS:
             step["failed_target_field"] = target_field
         action_index = data.get("failed_action_index") if isinstance(data, dict) else None
         if (
@@ -356,6 +356,13 @@ def _trial_history_entry(
                             key: _diagnostic_text(value, 160 if key == "css" else 80)
                             for key in ("label", "css", "kind")
                             if isinstance(value := target.get(key), str)
+                        }
+                    trigger = action.get("trigger")
+                    if action.get("do") == "ensure_visible" and isinstance(trigger, dict):
+                        hint["trigger"] = {
+                            key: _diagnostic_text(value, 160 if key == "css" else 80)
+                            for key in ("label", "css", "kind")
+                            if isinstance(value := trigger.get(key), str)
                         }
                     prefix.append(hint)
                 step["action_prefix"] = prefix
@@ -559,7 +566,11 @@ DRAFT_GUIDE = (
     '{"source": "fixed", "value": [the browser__operate actions]}, "values": '
     '{"source": "run", "path": []}, "workspace": {"source": "fixed", "value": '
     '"<absolute task folder>"}}; a download lands in <workspace>/output/downloads for a later '
-    "coding/run-python step. To operate a desktop application as a step use "
+    "coding/run-python step. For repeatable panels use ensure_visible with target naming "
+    "the desired content and trigger naming its disclosure control, so already-visible "
+    "content is not closed. For presence-only wait_for omit value; provide a regular "
+    "expression only when matching actual text/value, not an accessible label. "
+    "To operate a desktop application as a step use "
     'desktop/operate@1.0.0 with {"app": fixed, "actions": fixed, "values": run values}. '
     "{placeholders} in those actions take the run values; put run values in output file "
     "names so a rerun with new values neither collides with nor overwrites an earlier result. "

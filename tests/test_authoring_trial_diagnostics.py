@@ -423,8 +423,12 @@ def test_large_control_hints_trim_from_end_without_removing_query_overview(tmp_p
     assert len(json.dumps(summary["steps"][0]["data"], ensure_ascii=False).encode()) <= 12000
 
 
+@pytest.mark.parametrize(
+    "target_field", ["pagination.current", "ensure_visible.target", "ensure_visible.trigger"]
+)
 def test_typed_nested_target_failure_reaches_public_repair_and_owner_context(
     tmp_path: Path,
+    target_field: str,
 ) -> None:
     from test_chat_authoring import context
 
@@ -435,14 +439,19 @@ def test_typed_nested_target_failure_reaches_public_repair_and_owner_context(
 
         async def fail(context: RequestContext, inputs: Contract) -> Contract:
             request = BrowserRequest.model_validate(inputs)
-            assert request.actions[0].do == "read_table"
-            failure = BrowserResult(
-                failed_action_index=0,
-                failed_action_kind="read_table",
-                failed_target_field="pagination.current",
+            action_kind = (
+                "ensure_visible" if target_field.startswith("ensure_visible.") else "read_table"
+            )
+            assert request.actions[0].do == action_kind
+            failure = BrowserResult.model_validate(
+                {
+                    "failed_action_index": 0,
+                    "failed_action_kind": action_kind,
+                    "failed_target_field": target_field,
+                }
             )
             raise CapabilityExecutionFailed(
-                "web_target_missing", failure, where="actions[0] (read_table) pagination.current"
+                "web_target_missing", failure, where=f"actions[0] ({action_kind}) {target_field}"
             )
 
         runtime.agent.gateway.bridge.installed.register(
@@ -453,6 +462,22 @@ def test_typed_nested_target_failure_reaches_public_repair_and_owner_context(
         chat = runtime.chat_authoring
         assert chat is not None
         _plan(chat, runtime.actor, session, "operate")
+        action: dict[str, Any] = {
+            "do": "read_table",
+            "table": "#orders",
+            "save_as": "orders",
+            "pagination": {
+                "current": {"css": "#current"},
+                "total": {"css": "#total"},
+                "next": {"css": "#next"},
+            },
+        }
+        if target_field.startswith("ensure_visible."):
+            action = {
+                "do": "ensure_visible",
+                "target": {"css": "#query-panel", "kind": "any"},
+                "trigger": {"label": "Advanced filters", "kind": "button"},
+            }
         item, problems = chat.draft(
             runtime.actor,
             session,
@@ -467,18 +492,7 @@ def test_typed_nested_target_failure_reaches_public_repair_and_owner_context(
                         "inputs": {
                             "actions": {
                                 "source": "fixed",
-                                "value": [
-                                    {
-                                        "do": "read_table",
-                                        "table": "#orders",
-                                        "save_as": "orders",
-                                        "pagination": {
-                                            "current": {"css": "#current"},
-                                            "total": {"css": "#total"},
-                                            "next": {"css": "#next"},
-                                        },
-                                    }
-                                ],
+                                "value": [action],
                             }
                         },
                     }
@@ -508,11 +522,14 @@ def test_typed_nested_target_failure_reaches_public_repair_and_owner_context(
         result = web.decide_approval(approval.approval_id, "approve")
 
         step = result["approval"]["result"]["steps"][0]
-        assert step["data"]["failed_target_field"] == "pagination.current"
+        assert step["data"]["failed_target_field"] == target_field
         assert "repair" in result and model.requests
         note = next(m.text for m in reversed(model.requests[0].messages) if m.role == "user")
-        assert '"failed_target_field": "pagination.current"' in note
+        assert f'"failed_target_field": "{target_field}"' in note
         ctx = context().model_copy(update={"actor": runtime.actor, "session_id": session})
         guidance = chat.task_context(ctx)
         compact = json.loads(guidance.splitlines()[1])
-        assert compact[0]["failed_step"]["failed_target_field"] == "pagination.current"
+        assert compact[0]["failed_step"]["failed_target_field"] == target_field
+        if target_field.startswith("ensure_visible."):
+            prefix = compact[0]["failed_step"]["action_prefix"]
+            assert prefix[0]["trigger"] == {"label": "Advanced filters", "kind": "button"}

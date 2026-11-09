@@ -16,8 +16,15 @@ from common.trace import redact
 from host_runtime.conversations import ConversationMessage
 from host_runtime.workspace import write_atomically
 
-PAGINATION_TARGET_FIELDS = frozenset(
-    {"pagination.current", "pagination.total", "pagination.next", "pagination.controls"}
+BROWSER_TARGET_FIELDS = frozenset(
+    {
+        "pagination.current",
+        "pagination.total",
+        "pagination.next",
+        "pagination.controls",
+        "ensure_visible.target",
+        "ensure_visible.trigger",
+    }
 )
 
 
@@ -278,7 +285,7 @@ def _compact_history(task: AuthoringTask) -> str:
                     "failed_target_field",
                 )
                 if isinstance(value := first.get(key), (str, int, bool))
-                and (key != "failed_target_field" or value in PAGINATION_TARGET_FIELDS)
+                and (key != "failed_target_field" or value in BROWSER_TARGET_FIELDS)
             }
             prefix = first.get("action_prefix")
             if isinstance(prefix, list):
@@ -287,17 +294,23 @@ def _compact_history(task: AuthoringTask) -> str:
                     if not isinstance(action, dict):
                         continue
                     target = action.get("target")
-                    actions.append(
-                        {
-                            "do": hint(str(action.get("do", "")), 32),
-                            "target": {
-                                key: hint(value, 160 if key == "css" else 80)
-                                for key in ("label", "css", "kind")
-                                if isinstance(target, dict)
-                                and isinstance(value := target.get(key), str)
-                            },
+                    safe_action = {
+                        "do": hint(str(action.get("do", "")), 32),
+                        "target": {
+                            key: hint(value, 160 if key == "css" else 80)
+                            for key in ("label", "css", "kind")
+                            if isinstance(target, dict)
+                            and isinstance(value := target.get(key), str)
+                        },
+                    }
+                    trigger = action.get("trigger")
+                    if action.get("do") == "ensure_visible" and isinstance(trigger, dict):
+                        safe_action["trigger"] = {
+                            key: hint(value, 160 if key == "css" else 80)
+                            for key in ("label", "css", "kind")
+                            if isinstance(value := trigger.get(key), str)
                         }
-                    )
+                    actions.append(safe_action)
                 step["action_prefix"] = actions
             record["failed_step"] = step
         records.append(record)
