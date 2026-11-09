@@ -687,11 +687,18 @@ def test_sync_installs_what_the_member_chose_onto_a_real_host(
         # What this host can run, and what it holds, reach the platform.
         assert rebuilt.platform is not None
         advertised = run(rebuilt.platform.advertise(advertisement(rebuilt.agent, "adv-1")))
-        # The bounded file read, the Workflow drafter every host installs, and
-        # the fixture-scoped Personal Proof reader are advertised. The latter
+        # The bounded file read, the Workflow drafter and data/merge every host
+        # installs, and the fixture-scoped Personal Proof reader are advertised. The latter
         # remains unusable without its own asset-specific local grant.
-        assert advertised.status == "answered" and advertised.capabilities == 3
-        assert platform.enrollment.advertisement(BRIDGE).trace.trace_id == "adv-1"
+        assert advertised.status == "answered" and advertised.capabilities == 4
+        recorded = platform.enrollment.advertisement(BRIDGE)
+        assert recorded.trace.trace_id == "adv-1"
+        assert {cap.identity.key for cap in recorded.capabilities} == {
+            ("filesystem", "read-file", "1.0.0"),
+            ("workflow-author", "draft", "1.0.0"),
+            ("data", "merge", "1.0.0"),
+            ("company-agent", "personal-proof-fixture-read", "1.0.0"),
+        }
         reported = run(
             rebuilt.platform.report(rebuilt.agent.snapshot(observed_at=datetime.now(UTC)))
         )
