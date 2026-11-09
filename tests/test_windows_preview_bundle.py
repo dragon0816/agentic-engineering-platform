@@ -32,6 +32,8 @@ BUNDLED_WHEELS = (
     "openpyxl-3.1.5-py2.py3-none-any.whl",
     "et_xmlfile-2.0.0-py3-none-any.whl",
     "pypdf-6.0.0-py3-none-any.whl",
+    "python_docx-1.2.0-py3-none-any.whl",
+    "lxml-6.0.0-cp312-cp312-win_amd64.whl",
     "pywin32-312-cp312-cp312-win_amd64.whl",
     "matplotlib-3.11.2-cp312-cp312-win_amd64.whl",
     "numpy-1.26.4-cp312-cp312-win_amd64.whl",
@@ -224,6 +226,8 @@ def test_a_bundle_missing_a_wheel_its_extras_need_is_refused(tmp_path: Path) -> 
     platform_wheel.write_bytes(b"platform-wheel")
     for omitted in (
         "openpyxl-",
+        "python_docx-",
+        "lxml-",
         "pywin32-",
         "et_xmlfile-",
         "pydantic_core-",

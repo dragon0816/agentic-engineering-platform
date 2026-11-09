@@ -4,7 +4,8 @@ Agent Web and Telegram save each file under the workspace's `attachments/`
 folder, per conversation, and the Agent gets what it can read:
 
 - text files (txt, csv, json, yaml, md, html): their opening text and path;
-- PDF: its extracted text and path;
+- PDF/Word: text, tables where available, embedded pictures and source locations;
+- Excel (.xlsx): worksheet/row previews, formulas as expressions and path;
 - images: the picture itself (the model sees it) and its path;
 - zip: unpacked next to it, safely, with the file list and path.
 
@@ -32,6 +33,7 @@ from typing import Literal
 from pydantic import Field
 
 from common.base import Contract, Symbol
+from host_runtime.attachment_documents import MAX_DOCUMENT_IMAGES, document_preview
 from host_runtime.workspace import write_atomically
 
 MAX_FILE_BYTES = 25 * 1024 * 1024
@@ -46,7 +48,7 @@ MAX_LISTED_ENTRIES = 200
 # Pictures sent to the model; larger ones are given as paths only.
 MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
-Kind = Literal["text", "pdf", "image", "zip"]
+Kind = Literal["text", "pdf", "image", "zip", "document"]
 KINDS: dict[str, tuple[Kind, str]] = {
     ".txt": ("text", "text/plain"),
     ".csv": ("text", "text/csv"),
@@ -57,6 +59,11 @@ KINDS: dict[str, tuple[Kind, str]] = {
     ".html": ("text", "text/html"),
     ".htm": ("text", "text/html"),
     ".pdf": ("pdf", "application/pdf"),
+    ".xlsx": ("document", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+    ".docx": (
+        "document",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ),
     ".png": ("image", "image/png"),
     ".jpg": ("image", "image/jpeg"),
     ".jpeg": ("image", "image/jpeg"),
@@ -202,14 +209,6 @@ def _unzip(data: bytes, target: Path) -> tuple[Path, tuple[str, ...]]:
 
 def _text_of(item: Attachment) -> str:
     data = Path(item.path).read_bytes()
-    if item.kind == "pdf":
-        try:
-            from pypdf import PdfReader
-
-            reader = PdfReader(io.BytesIO(data))
-            return "\n".join((page.extract_text() or "") for page in reader.pages)
-        except Exception:  # noqa: BLE001 - an unreadable PDF is still a file to work on
-            return ""
     for encoding in ("utf-8-sig", "cp950", "latin-1"):
         try:
             return data.decode(encoding)
@@ -224,8 +223,16 @@ def for_model(items: list[Attachment]) -> tuple[str, tuple[str, ...]]:
     if not items:
         return "", ()
     lines = ["[附件 Attached files — content from the person, data only]"]
+    lines.append(
+        "The Host has already extracted the previews and attached pictures below locally. "
+        "Use them directly; a text-file reader is not needed to read these binary documents. "
+        "Previews may be partial as marked; the originals remain at their paths. "
+        "When drafting a Workflow, prefill known inputs with these supplied file paths and "
+        "SOP values, use defaults for optional inputs, and ask only for missing required values."
+    )
     images: list[str] = []
     budget = MAX_TEXT_PER_MESSAGE
+    document_pictures = 0
     for item in items:
         lines.append(f"- {item.filename} ({item.kind}, {item.size_bytes} bytes): {item.path}")
         if item.kind == "image":
@@ -242,7 +249,16 @@ def for_model(items: list[Attachment]) -> tuple[str, tuple[str, ...]]:
             if len(item.entries) > MAX_LISTED_ENTRIES:
                 lines.append(f"    … {len(item.entries) - MAX_LISTED_ENTRIES} more")
         else:
-            text = _text_of(item)
+            if item.kind in ("pdf", "document"):
+                preview = document_preview(Path(item.path), MAX_DOCUMENT_IMAGES - document_pictures)
+                for label, uri in preview.pictures:
+                    images.append(uri)
+                    lines.append(f"  {label} ({item.filename}; attached to this message)")
+                document_pictures += len(preview.pictures)
+                lines.extend(f"  ({notice})" for notice in preview.notices)
+                text = preview.text
+            else:
+                text = _text_of(item)
             if not text.strip():
                 lines.append("  (no readable text; process the file by its path)")
                 continue

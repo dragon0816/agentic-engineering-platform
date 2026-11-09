@@ -131,7 +131,7 @@ jobs:
         if: ${{ !cancelled() && steps.build.outcome == 'success' && (success() || steps.pytest.outcome == 'failure') }}
         shell: pwsh
         run: |
-          python -m pip download --only-binary=:all: --dest dist/windows-preview-wheels "pydantic>=2.10,<3" "tzdata>=2025.2,<2028" "openpyxl>=3.1,<4" "pypdf>=6,<7" "pywin32>=306" "matplotlib>=3.11,<4" "numpy>=1.26,<2" "contourpy>=1.3,<1.4"
+          python -m pip download --only-binary=:all: --dest dist/windows-preview-wheels "pydantic>=2.10,<3" "tzdata>=2025.2,<2028" "openpyxl>=3.1,<4" "pypdf[image]>=6,<7" "python-docx>=1,<2" "pywin32>=306" "matplotlib>=3.11,<4" "numpy>=1.26,<2" "contourpy>=1.3,<1.4"
           # The LLM gateway's exact lock (docs/phases/LLM_GATEWAY.md), without litellm[proxy].
           python -m pip download --no-deps --only-binary=:all: --platform win_amd64 --python-version 3.12 --implementation cp --dest dist/gateway-wheels -r deploy/windows-preview/gateway/requirements.txt
           python scripts/build_windows_preview.py --wheel dist/agentic_engineering_platform-0.1.0-py3-none-any.whl --dependency-dir dist/windows-preview-wheels --gateway-wheel-dir dist/gateway-wheels
@@ -161,7 +161,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'The installed bundle did not pass verify.cmd.' }
           # The bundle is offline, so the extras it claims to carry have to be
           # importable from it alone -- no index was available to fill a gap.
-          & "$installRoot\.venv\Scripts\python.exe" -c "import openpyxl, win32com.client, matplotlib, PIL"
+          & "$installRoot\.venv\Scripts\python.exe" -c "import openpyxl, win32com.client, matplotlib, PIL, docx, pypdf"
           if ($LASTEXITCODE -ne 0) { throw 'The bundle did not install the excel, windows and weekly-mail extras.' }
           # The LLM gateway: offline in its own venv, configured, the model set to it,
           # and a launcher that refuses to start without the company token.

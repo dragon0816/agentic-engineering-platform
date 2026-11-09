@@ -269,13 +269,14 @@ if ($PlatformWheels.Count -ne 1) { throw "Bundle must contain exactly one platfo
 $PlatformWheel = $PlatformWheels[0]
 # By name with its extras, resolved entirely from the bundle's own wheels:
 # the extras the bundle carries are reading workbooks (openpyxl), writing
-# them through Excel (pywin32), and drawing charts (matplotlib).
+# them through Excel (pywin32), and drawing charts (matplotlib). Conversation
+# attachments also need PDF pictures (Pillow) and Word documents (python-docx).
 # Extras appended to a wheel *path*
 # read to pip as part of the filename, so the requirement form is used and
 # the check above is what guarantees the directory holds exactly one build.
 # Still --no-index, so a missing wheel fails here rather than reaching for a
 # package index.
-& $VenvPython -m pip install --disable-pip-version-check --no-index --find-links (Join-Path $BundleRoot "wheels") --force-reinstall "agentic-engineering-platform[excel,windows,weekly-mail]" "pypdf>=6,<7"
+& $VenvPython -m pip install --disable-pip-version-check --no-index --find-links (Join-Path $BundleRoot "wheels") --force-reinstall "agentic-engineering-platform[excel,windows,weekly-mail]" "pypdf[image]>=6,<7" "python-docx>=1,<2"
 if ($LASTEXITCODE -ne 0) { throw "Offline wheel installation failed." }
 # This is the Agent + Bridge role. The wheel contains the shared contracts and
 # all project entry points, but this installation exposes only its own runtime.

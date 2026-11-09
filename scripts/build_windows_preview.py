@@ -71,8 +71,10 @@ REQUIRED_DEPENDENCIES = (
     # The `excel` extra: reading the weekly workbook without Excel.
     "openpyxl-",
     "et_xmlfile-",
-    # The `office` extra: controlled SOP PDF extraction.
+    # Conversation documents: PDF pictures and Word paragraphs/tables.
     "pypdf-",
+    "python_docx-",
+    "lxml-",
     # The `windows` extra: writing it through Excel.
     "pywin32-",
     # The `weekly-mail` extra: the source W2's composite chart and its wheels.

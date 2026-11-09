@@ -6821,3 +6821,49 @@ The same CI run crossed UTC midnight. Business-card tests that cached date.today
 Creating or joining a vault must keep its success message after automatic working-domain initialization. Automatic domain selection calls the existing handler directly; it does not emit a synthetic change interpreted as the person's next action. Missing/multiple-domain guidance appends to that success. A browser regression waits for arrival initialization to finish before checking the notice; it failed before this fix.
 
 The share browser test arranges a real duplicate tag at the confirmed POST/tag boundary, instead of racing background tag suggestions. Its original side-effect order/failure assertions stay strict. Version navigation waits for the original visibility predicate and retains its focus assertions; controlled response ordering and CPU throttling did not reproduce the CI rectangle failure, so no unproven product scroll change is made. Windows CI error annotations explicitly emit UTF8, tested under cp1252; changing test messages to ASCII was rejected.
+
+## 2026-11-09 — Read SOP attachments at chat ingress, preserving source evidence
+
+The owner approved direct PDF/XLSX/DOCX use for SOP-to-Workflow authoring and
+preserving numbered reply headings. Extend the existing session-owned attachment
+store with a local read-only preview adapter, not another Knowledge ingestion or
+authoring runtime. PDF previews include page text, embedded pictures and HTTP(S)
+hyperlinks. Word reuses the Office body/table/picture extractor and adds document
+hyperlink targets. Excel previews retain sheet names, row numbers and formula
+expressions. Originals, source paths and existing session isolation survive;
+bounded/truncated/failed extraction is explicit. Host guidance identifies the
+already-parsed evidence and asks the drafter to prefill supplied values.
+
+Reject asking people to paste their SOP manually, using a binary text reader as
+the normal document path, and treating an attachment preview as a new Knowledge
+source. The existing approved Office dependencies supply the parsers; the
+Windows offline bundle now requires python-docx and lxml as well as its existing
+PDF/Pillow/Excel wheels. No new library, model provider, execution permission or
+publication authority is added. Legacy .doc/.xls remain unsupported.
+
+The Markdown renderer preserves each explicit ordered-list start value, including
+lists separated by bullets/paragraphs. It keeps the existing safe DOM rendering.
+Do not infer new numbering when the source itself restarts at 1.
+
+Real-model attachment acceptance distinguishes a persisted draft, input-contract
+validation, fixture-tested Excel code and authenticated C4C execution. A draft is
+not proof that unvisited web controls work. Details and remaining live acceptance
+are in docs/evaluations/CHAT_DOCUMENT_ATTACHMENTS_2026-11-09.md.
+
+### Owner clarification: C4C SOP TWD rate remains pending
+
+The owner explicitly rejected interpreting the SOP's "TWD1 = TWD0.02712085" as
+1 TWD = 0.02712085 EUR: "不是，匯率先保留待確認" (2026-11-09). Keep original TWD
+amounts and flag their conversion as pending; do not substitute a guessed or
+current online rate, count them as EUR zero, or include them in converted EUR
+totals. A future explicit rate may resolve the pending rows. The SOP's explicit
+USD-to-EUR rule is unaffected. This is a business clarification for the private
+test candidate, not a platform-wide FX default.
+
+### Later owner correction: confirm the SOP's TWD-to-EUR rate
+
+Later in the same 2026-11-09 conversation, the owner changed the answer to yes:
+"草稿測試暫按『1 TWD = 0.02712085 EUR』計算；這是你要的匯率嗎？ => 這個改成是".
+This supersedes the pending-rate clarification above. The private C4C Workflow
+may now prefill 0.02712085 EUR per TWD with provenance from this explicit owner
+confirmation. It is not an inferred correction or a platform-wide exchange rate.

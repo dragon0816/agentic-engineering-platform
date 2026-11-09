@@ -23,6 +23,19 @@ the history is complete; this table is the index into them.
 
 ## Status
 
+- [x] PDF/Excel/Word chat attachments and numbered replies (2026-11-09):
+  local source-aware previews, PDF/DOCX hyperlinks,
+  embedded pictures, Office picker/drop support, offline Word dependencies and
+  ordered-list starts implemented. Synthetic upload-to-authoring/preview/install
+  integration passed; real owner attachments produced a model-authored candidate
+  with fixture-tested Excel processing and the owner's latest confirmed TWD
+  rate. Full coverage: 6021 collected cases, initially 6009 passed / 10 skipped /
+  2 failed, plus the missing-av collection skip; the release dependency mismatch
+  was fixed and both failed cases passed in the final 36-test affected-module
+  rerun. Ruff/Mypy/pip check/build passed. Authenticated C4C export and installed
+  Agent rollout remain separate live acceptance boundaries.
+  See `docs/phases/CHAT_DOCUMENT_ATTACHMENTS.md` and the dated evaluation report.
+
 - [x] Add Agent Web context Settings and local session management (2026-10-03):
   show declared model capacity separately from effective recent-message and
   UTF-8 history-text limits; apply saved limits to Gateway and local CLI chat;

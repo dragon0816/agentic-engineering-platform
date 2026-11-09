@@ -1522,10 +1522,10 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
       <div class="composer-footer">
         <button id="attach" class="link-button attach-button" type="button"
           aria-label="附加檔案"
-          title="附加檔案：圖片、PDF、CSV、HTML、TXT、JSON、YAML、MD、ZIP
+          title="附加檔案：圖片、PDF、Excel（XLSX）、Word（DOCX）、CSV、HTML、TXT、JSON、YAML、MD、ZIP
 （單檔 25 MB，最多 10 個）">📎</button>
         <input id="attach-input" type="file" multiple hidden
-          accept=".png,.jpg,.jpeg,.gif,.webp,.bmp,.pdf,.csv,.html,.htm,.txt,.json,.yaml,.yml,.md,.zip">
+          accept=".png,.jpg,.jpeg,.gif,.webp,.bmp,.pdf,.xlsx,.docx,.csv,.html,.htm,.txt,.json,.yaml,.yml,.md,.zip">
         <button id="mic" class="link-button attach-button mic-button" type="button" hidden
           aria-label="語音輸入" aria-pressed="false"
           title="語音輸入：錄音後轉成文字放進輸入框，確認後再送出">🎤</button>
@@ -5801,8 +5801,8 @@ el("agent-mode-form").addEventListener("submit", async (event) => {
 // Files are uploaded to the open conversation as they are chosen, dropped or
 // pasted, shown as chips, and sent with the next message by their ids.
 
-const ATTACHMENT_TYPES = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".pdf", ".csv",
-  ".html", ".htm", ".txt", ".json", ".yaml", ".yml", ".md", ".zip"];
+const ATTACHMENT_TYPES = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".pdf", ".xlsx",
+  ".docx", ".csv", ".html", ".htm", ".txt", ".json", ".yaml", ".yml", ".md", ".zip"];
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024, MAX_ATTACHMENTS = 10;
 let attachedFiles = [], uploadingFiles = 0, attachmentSession = "";
 
