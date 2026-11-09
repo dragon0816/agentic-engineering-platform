@@ -8,8 +8,10 @@ from the failure code, never by the model.
 
 - Recoverable: the model's own arguments were wrong or missing (`invalid_input`
   with the field named, a Workflow's run values, a draft's problems, a task
-  folder outside the roots, a tool name that is not offered), or the failure is
-  marked retryable. The model fixes the call and tries again in the same turn.
+  folder outside the roots, a tool name that is not offered), a known technical
+  observation/execution failure, or the failure is marked retryable. Corrected
+  model repair stays within existing turn, repetition and authoring budgets;
+  it does not authorize an unchanged transport retry or bypass a policy gate.
 - Needs the person: permission, credentials, approval, something not installed
   or switched off, connectivity, mail scope. The model says what is needed.
 - Anything else is not recoverable: the model explains it rather than guessing
@@ -23,6 +25,25 @@ from typing import Any
 
 from common.base import Contract, Text
 from common.execution import Failure
+
+_BROWSER_TARGET_REPAIR = (
+    "Inspect fresh authorized DOM and the failed action/page evidence; check control "
+    "state.invalid, visibility and readiness. Correct the selector, scope or action from "
+    "observed evidence and repair the candidate. Do not ask the person for CSS, custom "
+    "locators or manual navigation. Preserve the whole goal and existing bounds."
+)
+_BROWSER_PAGING_REPAIR = (
+    "Inspect fresh DOM, headers, current/total pages and row keys. Repair the candidate's "
+    "pagination/readiness procedure from that evidence, starting at the intended first page. "
+    "Preserve all requested filters, dates, pages and completeness checks; never strip "
+    "pagination or relax limits to pass. Use a complete bounded procedure, or record the "
+    "unmet requirement if existing bounds prevent completion. Do not ask for manual navigation."
+)
+_AUTHORING_PLAN_REPAIR = (
+    "Read the saved authoring plan and candidate. Preserve every requirement and supplied "
+    "input, correct the plan/coverage declarations and revise the complete candidate. Use "
+    "actual current-revision trial evidence for coverage; never invent proof or reduce the goal."
+)
 
 #: Failure codes the model can fix by changing its own call, with what to do.
 _FIXABLE: dict[str, str] = {
@@ -62,6 +83,82 @@ _FIXABLE: dict[str, str] = {
     "browser_workspace_not_allowed": (
         "The workspace is outside the task roots. Use a folder under one of them and call again."
     ),
+    "web_target_missing": _BROWSER_TARGET_REPAIR,
+    "web_target_ambiguous": _BROWSER_TARGET_REPAIR,
+    "web_target_obscured": _BROWSER_TARGET_REPAIR,
+    "web_target_disabled": _BROWSER_TARGET_REPAIR,
+    "web_target_not_visible": _BROWSER_TARGET_REPAIR,
+    "web_selector_invalid": _BROWSER_TARGET_REPAIR,
+    "web_scope_missing": _BROWSER_TARGET_REPAIR,
+    "web_scope_ambiguous": _BROWSER_TARGET_REPAIR,
+    "web_wait_timeout": _BROWSER_TARGET_REPAIR,
+    "web_row_missing": _BROWSER_TARGET_REPAIR,
+    "web_row_ambiguous": _BROWSER_TARGET_REPAIR,
+    "web_table_missing": _BROWSER_TARGET_REPAIR,
+    "web_table_header_missing": _BROWSER_TARGET_REPAIR,
+    "web_column_missing": _BROWSER_TARGET_REPAIR,
+    "web_page_did_not_load": _BROWSER_TARGET_REPAIR,
+    "web_page_unreadable": _BROWSER_TARGET_REPAIR,
+    "web_value_missing": (
+        "Read the saved supplied inputs and current candidate placeholders. Bind the missing "
+        "value from its recorded origin; ask only if a required business value is truly absent."
+    ),
+    "web_pagination_invalid": _BROWSER_PAGING_REPAIR,
+    "web_pagination_not_at_start": _BROWSER_PAGING_REPAIR,
+    "web_pagination_changed": _BROWSER_PAGING_REPAIR,
+    "web_pagination_did_not_advance": _BROWSER_PAGING_REPAIR,
+    "web_pagination_duplicate_keys": _BROWSER_PAGING_REPAIR,
+    "web_pagination_limit_exceeded": _BROWSER_PAGING_REPAIR,
+    "web_table_limit_exceeded": _BROWSER_PAGING_REPAIR,
+    "coding_program_failed": (
+        "Read the retained stdout/exit diagnostics and inputs. Repair the program and "
+        "candidate for the whole task, then trial the revision within existing bounds. "
+        "Old output files are not evidence of success."
+    ),
+    "coding_program_timeout": (
+        "Read retained diagnostics, identify the slow operation and repair the bounded "
+        "program. Keep timeout/resource limits and the whole goal; do not blindly rerun it."
+    ),
+    "coding_output_scan_limit": (
+        "Output fingerprinting exceeded its bound. Preserve existing files and limits; "
+        "use a fresh allowed task workspace with the recorded inputs and regenerate the "
+        "whole requested output. Do not delete historical files or trust unscanned outputs."
+    ),
+    "data_merge_conflict": (
+        "Inspect both source objects and their bindings. Correct conflicting keys in the "
+        "candidate or use distinct explicit field names; never silently overwrite a value."
+    ),
+    "workflow_output_check_failed": (
+        "Inspect the failed output checks and actual fresh outputs. Repair the candidate "
+        "to meet every original requirement and check; do not weaken assertions or accept "
+        "stale files. Preserve successful side effects and trial only the needed revision "
+        "under existing approvals and repair budgets."
+    ),
+    "authoring_plan_required": _AUTHORING_PLAN_REPAIR,
+    "authoring_plan_invalid": _AUTHORING_PLAN_REPAIR,
+    "authoring_requirements_missing": _AUTHORING_PLAN_REPAIR,
+    "authoring_coverage_incomplete": _AUTHORING_PLAN_REPAIR,
+    "authoring_trial_required": (
+        "Trial the current candidate with authoring__run_workflow under existing approvals "
+        "and unfinished-trial budget, then record actual evidence for every requirement. "
+        "Do not install or claim verified readiness before that proof."
+    ),
+    "authoring_revision_required": (
+        "Preserve the successful partial run and its artifacts. Revise the candidate to "
+        "complete missing requirements; do not replay the unchanged successful procedure."
+    ),
+    "authoring_repair_remaining": (
+        "Use the remaining bounded authoring repairs: inspect fresh evidence, revise the "
+        "candidate for every requirement and trial it under existing approvals."
+    ),
+    "authoring_technical_question": _BROWSER_TARGET_REPAIR,
+    "authoring_input_already_supplied": (
+        "Read the saved plan and reuse the supplied value and its origin; do not ask again."
+    ),
+    "authoring_resources_already_supplied": (
+        "Read the saved plan and supplied resources; bind the known resource instead of "
+        "asking the person to provide it again."
+    ),
 }
 
 #: Failure codes only the person can resolve, with what to tell them.
@@ -73,6 +170,12 @@ _PERSON: dict[str, str] = {
     "missing_local_capability": "A capability this tool depends on is not installed.",
     "workflow_not_installed": "The Workflow is not installed.",
     "needs_connectivity": "A central service this tool needs is not reachable.",
+    "web_origin_not_allowed": "The requested browser origin is outside the authorized boundary.",
+    "web_click_not_read_only": "This click is not allowed under the current read-only policy.",
+    "authoring_repair_limit": (
+        "Stop: the unfinished-trial budget is exhausted. Wait for the owner to decide the "
+        "next step; do not automatically retry, reset the task or continue execution."
+    ),
 }
 #: Words in a code that mean the person must act (sign-in, credentials, scope).
 _PERSON_WORDS = (
@@ -94,8 +197,8 @@ _PERSON_WORDS = (
 )
 _ASK_PERSON = " Tell the person what is needed and how they can provide it; do not retry the call."
 _UNKNOWN = (
-    "Explain this failure to the person and what they can do. Do not repeat the same call "
-    "unchanged."
+    "Stop and report the unresolved failure and available evidence. Do not repeat the same "
+    "call unchanged, invent a fix or hand technical navigation to the person."
 )
 _INVALID_AT = re.compile(r"Invalid input at (.+)$")
 
@@ -172,8 +275,15 @@ def recovery_for(item: Any) -> ToolRecovery | None:
 
 RECOVERY_GUIDANCE = (
     "A failed tool result carries `recovery`. When `recovery.recoverable` is true, the "
-    "problem is in your call: fix the arguments as its hint says and call again in this same "
-    "turn, without asking the person or telling them about the error. Ask the person only "
-    "when `recoverable` is false (permission, credentials, approval, something not installed, "
-    "mail scope) or the corrected call failed too. Never repeat a failed call unchanged."
+    "Agent can repair the arguments, observations or candidate in this same turn. A "
+    "nonretryable execution failure forbids blind transport retries, but does not forbid "
+    "an evidence-based model repair. Inspect fresh authorized DOM and state.invalid, read "
+    "diagnostics, then correct the procedure while preserving the whole goal, filters and "
+    "pagination. Do not ask for CSS, custom locators or manual navigation. A corrected "
+    "technical call failing again does not automatically require the person: obey the "
+    "existing turn, repetition and unfinished-trial budgets. authoring_repair_limit means "
+    "stop and wait for the owner. If recoverable is false, stop and explain; ask only for "
+    "an actual missing business input, resource, authorization or approval. Never bypass "
+    "policy, replay a successful side effect or relax limits. Never repeat a failed call "
+    "unchanged unless an existing trusted transient-read retry rule explicitly permits it."
 )

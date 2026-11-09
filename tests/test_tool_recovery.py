@@ -15,6 +15,7 @@ import json
 from types import SimpleNamespace
 from typing import Any
 
+import pytest
 from test_gateway import Handler, gateway, request
 from test_routing import FakeModel
 
@@ -203,3 +204,130 @@ def test_a_workflow_tool_failure_is_read_from_its_run() -> None:
         workflow=SimpleNamespace(run=SimpleNamespace(status="succeeded", failure=None)),
     )
     assert recovery_for(ran) is None
+
+
+@pytest.mark.parametrize(
+    "code",
+    [
+        "web_target_missing",
+        "web_target_obscured",
+        "web_target_ambiguous",
+        "web_selector_invalid",
+        "web_scope_missing",
+        "web_scope_ambiguous",
+        "web_target_not_visible",
+        "web_target_disabled",
+        "web_wait_timeout",
+        "web_row_missing",
+        "web_row_ambiguous",
+        "web_table_missing",
+        "web_table_header_missing",
+        "web_column_missing",
+        "web_value_missing",
+        "web_pagination_invalid",
+        "web_pagination_not_at_start",
+        "web_pagination_changed",
+        "web_pagination_did_not_advance",
+        "web_pagination_duplicate_keys",
+        "web_pagination_limit_exceeded",
+        "web_table_limit_exceeded",
+        "web_page_did_not_load",
+        "web_page_unreadable",
+        "coding_program_failed",
+        "coding_program_timeout",
+        "coding_output_scan_limit",
+        "data_merge_conflict",
+        "workflow_output_check_failed",
+        "authoring_plan_required",
+        "authoring_plan_invalid",
+        "authoring_requirements_missing",
+        "authoring_coverage_incomplete",
+        "authoring_trial_required",
+        "authoring_revision_required",
+        "authoring_repair_remaining",
+        "authoring_technical_question",
+        "authoring_input_already_supplied",
+        "authoring_resources_already_supplied",
+    ],
+)
+def test_known_technical_failures_allow_model_repair_without_transport_retry(code: str) -> None:
+    found = classify(Failure(code=code, message="technical failure", retryable=False))
+    assert found is not None and found.recoverable, code
+
+
+@pytest.mark.parametrize(
+    "code",
+    [
+        "web_origin_not_allowed",
+        "web_click_not_read_only",
+        "browser_scope_not_allowed",
+        "authoring_repair_scope",
+        "permission_denied",
+        "approval_required",
+        "credential_missing",
+        "secret_resolution_unavailable",
+        "missing_local_capability",
+        "capability_not_installed",
+        "needs_connectivity",
+    ],
+)
+def test_policy_and_dependency_failures_do_not_gain_repair_authority(code: str) -> None:
+    found = classify(Failure(code=code, message="denied", retryable=True))
+    assert found is not None and not found.recoverable
+
+
+def test_repair_limit_stops_for_owner_and_unknown_browser_codes_remain_closed() -> None:
+    limit = classify(Failure(code="authoring_repair_limit", message="stop", retryable=True))
+    assert limit is not None and not limit.recoverable
+    assert "owner" in limit.hint and "stop" in limit.hint.lower()
+    unknown = classify(Failure(code="web_unknown_failure", message="unknown"))
+    assert unknown is not None and not unknown.recoverable
+
+
+def test_nonretryable_browser_failure_is_repaired_in_same_conversation_turn() -> None:
+    seen: list[dict[str, Any]] = []
+
+    async def operate(context: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
+        seen.append(dict(args))
+        if args.get("scope") != "#observed-grid":
+            return HostToolOutcome(
+                status="failed",
+                failure=Failure(
+                    code="web_scope_missing",
+                    message="Execution failed at action 0 (inspect)",
+                ),
+            )
+        return HostToolOutcome(status="succeeded", data={"rows": [["complete"]]})
+
+    model = Recovering("browser__inspect", {"scope": "#stale"}, {"scope": "#observed-grid"})
+    built = gateway(Handler(), model)
+    built.host_tools = lambda: [
+        HostTool(
+            ModelTool(
+                name="browser__inspect",
+                description="Inspect authorized DOM",
+                input_contract="x.v1",
+                input_schema={"type": "object"},
+            ),
+            operate,
+        )
+    ]
+    result = asyncio.run(
+        built.converse(
+            request("完整製作報表"),
+            (ModelMessage(role="user", text="完整製作報表"),),
+        )
+    )
+    assert result.status == "answered" and result.text == "完成了。"
+    assert seen == [{"scope": "#stale"}, {"scope": "#observed-grid"}]
+    assert len(model.calls) == 3
+    assert result.tools[0].recovery is not None and result.tools[0].recovery.recoverable
+
+
+def test_recovery_guidance_keeps_whole_goal_and_existing_repair_limits() -> None:
+    from agent.tool_recovery import RECOVERY_GUIDANCE
+
+    assert "or the corrected call failed too" not in RECOVERY_GUIDANCE
+    assert "unfinished" in RECOVERY_GUIDANCE and "repetition" in RECOVERY_GUIDANCE
+    assert "CSS" in RECOVERY_GUIDANCE and "pagination" in RECOVERY_GUIDANCE
+    assert "nonretryable" in RECOVERY_GUIDANCE
