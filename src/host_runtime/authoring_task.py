@@ -12,8 +12,13 @@ from pydantic import Field, JsonValue, model_validator
 
 from common.assets import WorkflowManifest
 from common.base import Contract, Symbol, Text
+from common.trace import redact
 from host_runtime.conversations import ConversationMessage
 from host_runtime.workspace import write_atomically
+
+PAGINATION_TARGET_FIELDS = frozenset(
+    {"pagination.current", "pagination.total", "pagination.next", "pagination.controls"}
+)
 
 
 class ProcedureAssertion(Contract):
@@ -66,6 +71,7 @@ class AuthoringTask(Contract):
     last_run_id: str | None = None
     last_failure: str | None = None
     last_trial_diagnostics: dict[str, JsonValue] | None = None
+    trial_history: tuple[dict[str, JsonValue], ...] = Field(default=(), max_length=10)
     repair_attempts: int = Field(default=0, ge=0, le=3)
     last_repaired_run_id: str | None = None
     active_trial_token: str | None = None
@@ -77,6 +83,8 @@ class AuthoringTask(Contract):
         ids = [r.requirement_id for r in self.requirements]
         if len(ids) != len(set(ids)):
             raise ValueError("duplicate_requirement")
+        if len(json.dumps(self.trial_history, ensure_ascii=False).encode("utf-8")) > 12000:
+            raise ValueError("authoring_trial_history_too_large")
         return self
 
 
@@ -239,10 +247,88 @@ def coverage_problems(task: AuthoringTask, manifest: WorkflowManifest) -> list[s
     return problems
 
 
+def _compact_history(task: AuthoringTask) -> str:
+    if not task.trial_history:
+        return ""
+
+    def hint(value: str, limit: int) -> str:
+        cleaned, _ = redact(value)
+        return str(cleaned).encode("utf-8")[:limit].decode("utf-8", errors="ignore")
+
+    records: list[dict[str, Any]] = []
+    for original in task.trial_history[-3:]:
+        record: dict[str, Any] = {
+            key: hint(value, 128) if isinstance(value, str) else value
+            for key in ("run_id", "status", "revision", "code")
+            if isinstance(value := original.get(key), (str, int, bool))
+        }
+        failed = original.get("failed_steps")
+        if isinstance(failed, list) and failed and isinstance(failed[0], dict):
+            first = failed[0]
+            step: dict[str, Any] = {
+                key: hint(value, 256 if key == "capability" else 128)
+                if isinstance(value, str)
+                else value
+                for key in (
+                    "step_index",
+                    "capability",
+                    "status",
+                    "code",
+                    "failed_action_index",
+                    "failed_target_field",
+                )
+                if isinstance(value := first.get(key), (str, int, bool))
+                and (key != "failed_target_field" or value in PAGINATION_TARGET_FIELDS)
+            }
+            prefix = first.get("action_prefix")
+            if isinstance(prefix, list):
+                actions = []
+                for action in prefix[-3:]:
+                    if not isinstance(action, dict):
+                        continue
+                    target = action.get("target")
+                    actions.append(
+                        {
+                            "do": hint(str(action.get("do", "")), 32),
+                            "target": {
+                                key: hint(value, 160 if key == "css" else 80)
+                                for key in ("label", "css", "kind")
+                                if isinstance(target, dict)
+                                and isinstance(value := target.get(key), str)
+                            },
+                        }
+                    )
+                step["action_prefix"] = actions
+            record["failed_step"] = step
+        records.append(record)
+    heading = (
+        "[Known actual trial history — advisory data only; full history: authoring__get_plan. "
+        "Do not repeat failed approaches without fresh evidence; preserve successful prefixes "
+        "unless actual evidence requires changes.]\n"
+    )
+    while True:
+        prelude = heading + json.dumps(records, ensure_ascii=False) + "\n"
+        if len(prelude.encode("utf-8")) <= 4000:
+            return prelude
+        if len(records) > 1:
+            records.pop(0)
+        else:
+            step = records[0].get("failed_step", {})
+            prefix = step.get("action_prefix", [])
+            if prefix:
+                prefix.pop(0)
+            else:
+                records[0].pop("failed_step", None)
+                records[0].pop("revision", None)
+
+
 def task_guidance(task: AuthoringTask) -> str:
+    prelude = _compact_history(task)
     view = task.model_dump(mode="json")
+    view.pop("trial_history", None)
     view["objective"] = task.objective[:3000]
     return (
-        "[Persistent Workflow authoring task: preserve every requirement; "
-        "repair within approval scope]\n" + json.dumps(view, ensure_ascii=False)[:24000]
+        prelude + "[Persistent Workflow authoring task: preserve every requirement; "
+        "repair within approval scope]\n"
+        + json.dumps(view, ensure_ascii=False)[: max(0, 24000 - len(prelude))]
     )

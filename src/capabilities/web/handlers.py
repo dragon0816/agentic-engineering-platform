@@ -153,7 +153,14 @@ class WebScriptHandler:
                     timeout_s=float(self.binding.timeout_seconds),
                 ).run(script, self.mode)
         except WebScriptError as error:
-            raise CapabilityRefused(error.code) from None
+            where = (
+                f"actions[{error.action_index}] ({error.action_kind})"
+                if error.action_index is not None
+                else None
+            )
+            if error.target_field is not None:
+                where = f"{where} {error.target_field}" if where else error.target_field
+            raise CapabilityRefused(error.code, where=where) from None
         except Exception as error:  # noqa: BLE001 - the browser's own typed codes
             code = getattr(error, "code", None)
             raise CapabilityRefused(str(code) if code else "web_browser_failed") from None

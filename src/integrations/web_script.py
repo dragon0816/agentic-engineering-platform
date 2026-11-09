@@ -24,7 +24,7 @@ import json
 import re
 import time
 from collections.abc import Callable, Mapping
-from typing import Annotated, Any, Literal, Protocol, Self
+from typing import Annotated, Any, Literal, Protocol, Self, cast
 from urllib.parse import urlsplit
 
 from pydantic import Field, JsonValue, model_validator
@@ -38,10 +38,22 @@ ScriptMode = Literal["read", "act"]
 _PLACEHOLDER = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
 MAX_TABLE_ROWS = 2000
 
+PaginationTargetField = Literal[
+    "pagination.current", "pagination.total", "pagination.next", "pagination.controls"
+]
+_PAGINATION_TARGET_FIELDS = frozenset(
+    ("pagination.current", "pagination.total", "pagination.next", "pagination.controls")
+)
+
 
 class WebScriptError(Exception):
-    def __init__(self, code: str) -> None:
+    def __init__(self, code: str, *, target_field: str | None = None) -> None:
         self.code = code
+        self.target_field: PaginationTargetField | None = (
+            cast(PaginationTargetField, target_field)
+            if target_field in _PAGINATION_TARGET_FIELDS
+            else None
+        )
         self.action_index: int | None = None
         self.action_kind: str | None = None
         super().__init__(code)
@@ -292,19 +304,25 @@ _ACT = r"""
 _PAGE_NUMBERS = r"""
 (() => {
   const find = %(find)s;
-  const current = find(%(current)s), total = find(%(total)s);
-  if (current.error) return JSON.stringify(current);
-  if (total.error) return JSON.stringify(total);
+  const current = find(%(current)s);
+  if (current.error)
+    return JSON.stringify({error: current.error, target_field: 'pagination.current'});
+  const total = find(%(total)s);
+  if (total.error)
+    return JSON.stringify({error: total.error, target_field: 'pagination.total'});
   if (current.element === total.element)
-    return JSON.stringify({error: 'pagination_controls_must_differ'});
+    return JSON.stringify({error: 'pagination_controls_must_differ',
+      target_field: 'pagination.controls'});
   const number = element => {
     const text = (element.innerText || element.value || '').trim();
     const match = /^\s*\/?\s*(\d+)\s*$/.exec(text);
     return match ? Number(match[1]) : null;
   };
   const here = number(current.element), count = number(total.element);
-  if (!Number.isSafeInteger(here) || !Number.isSafeInteger(count))
-    return JSON.stringify({error: 'web_pagination_invalid'});
+  if (!Number.isSafeInteger(here))
+    return JSON.stringify({error: 'web_pagination_invalid', target_field: 'pagination.current'});
+  if (!Number.isSafeInteger(count))
+    return JSON.stringify({error: 'web_pagination_invalid', target_field: 'pagination.total'});
   // Only parsed page counts leave this expression, never raw field values.
   return JSON.stringify({current: here, total: count});
 })()
@@ -815,7 +833,16 @@ class ScriptRunner:
             raise WebScriptError("web_table_limit_exceeded")
         while current < total:
             previous = answer["rows"]
-            self._perform({"op": "click", "mode": mode, **paging.next.model_dump()})
+            try:
+                self._perform({"op": "click", "mode": mode, **paging.next.model_dump()})
+            except WebScriptError as error:
+                error.target_field = "pagination.next"
+                raise
+            except Exception as error:
+                raise WebScriptError(
+                    str(getattr(error, "code", "web_action_failed")),
+                    target_field="pagination.next",
+                ) from None
             deadline = time.monotonic() + self.timeout_s
             candidate: list[Any] | None = None
             stable_since = time.monotonic()
@@ -889,7 +916,10 @@ class ScriptRunner:
         if not isinstance(answer, dict):
             raise WebScriptError("web_page_unreadable")
         if "error" in answer:
-            raise WebScriptError(str(answer["error"]))
+            field = answer.get("target_field")
+            raise WebScriptError(
+                str(answer["error"]), target_field=field if isinstance(field, str) else None
+            )
         return answer
 
     def _settle(self) -> None:

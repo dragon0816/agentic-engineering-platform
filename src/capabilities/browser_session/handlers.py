@@ -38,6 +38,7 @@ from common.trace import redact
 from integrations.web_script import (
     DOMInspection,
     DOMOverview,
+    PaginationTargetField,
     ScriptRunner,
     WebAction,
     WebScript,
@@ -83,6 +84,7 @@ class BrowserResult(Contract):
     page: str = Field(default="", max_length=MAX_PAGE_CHARS)
     failed_action_index: int | None = Field(default=None, ge=0, le=49)
     failed_action_kind: str | None = None
+    failed_target_field: PaginationTargetField | None = None
     diagnostics: DOMInspection | None = None
     overview: DOMOverview | None = None
     diagnostic_error: str | None = None
@@ -212,12 +214,15 @@ class BrowserSessionHandler:
                     diagnostic_error=diagnostic_error,
                     failed_action_index=error.action_index,
                     failed_action_kind=error.action_kind,
+                    failed_target_field=error.target_field,
                 )
                 where = (
                     f"actions[{error.action_index}] ({error.action_kind})"
                     if error.action_index is not None
                     else None
                 )
+                if error.target_field is not None:
+                    where = f"{where} {error.target_field}" if where else error.target_field
                 raise CapabilityExecutionFailed(error.code, failure, where=where) from None
             except Exception as error:  # noqa: BLE001 - the browser's own typed codes
                 raise CapabilityRefused(str(getattr(error, "code", "browser_failed"))) from None

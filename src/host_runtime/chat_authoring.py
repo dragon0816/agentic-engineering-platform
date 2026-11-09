@@ -55,6 +55,7 @@ from common.workflow_parameters import WorkflowParameterError, validate_run_para
 from common.workflow_run_form import OFFER_KEY
 from host_runtime.authoring_inputs import bind_supplied_inputs
 from host_runtime.authoring_task import (
+    PAGINATION_TARGET_FIELDS,
     AuthoringPlanRequest,
     AuthoringQuestion,
     AuthoringTask,
@@ -133,6 +134,9 @@ def _technical_metadata(data: JsonValue) -> dict[str, JsonValue]:
         value = data.get(key)
         if isinstance(value, str):
             detail[key] = _diagnostic_text(value, 700)
+    target_field = data.get("failed_target_field")
+    if isinstance(target_field, str) and target_field in PAGINATION_TARGET_FIELDS:
+        detail["failed_target_field"] = target_field
     overview = data.get("overview")
     if isinstance(overview, dict):
         safe: dict[str, JsonValue] = {}
@@ -235,14 +239,14 @@ def _trial_diagnostics(
     """Keep actual technical failure metadata, ahead of page bodies or result rows."""
     run = snapshot.run
     result: dict[str, JsonValue] = {
-        "run_id": run.run_id,
+        "run_id": _diagnostic_text(run.run_id, 128),
         "status": run.status,
         "completed_steps": run.completed_steps,
         "step_results": len(snapshot.step_results),
     }
     if run.failure is not None:
         result["failure"] = {
-            "code": run.failure.code,
+            "code": _diagnostic_text(run.failure.code, 128),
             "message": _diagnostic_text(run.failure.message, 1500),
         }
     if problems:
@@ -255,10 +259,10 @@ def _trial_diagnostics(
         if index < len(manifest.steps) and isinstance(manifest.steps[index], WorkflowStep):
             declared = manifest.steps[index]
             assert isinstance(declared, WorkflowStep)
-            detail["capability"] = _key(declared.capability)
+            detail["capability"] = _diagnostic_text(_key(declared.capability), 256)
         if step.failure is not None:
             detail["failure"] = {
-                "code": step.failure.code,
+                "code": _diagnostic_text(step.failure.code, 128),
                 "message": _diagnostic_text(step.failure.message, 1000),
             }
         detail.update(_technical_metadata(step.data))
@@ -294,6 +298,102 @@ def _trial_diagnostics(
             else:
                 result.pop("failed_steps", None)
     return result
+
+
+def _trial_history_entry(
+    candidate: ChatCandidate, snapshot: WorkflowRunSnapshot
+) -> dict[str, JsonValue]:
+    """Remember actual outcomes and declared target hints, never executable values."""
+    entry: dict[str, JsonValue] = {
+        "run_id": _diagnostic_text(snapshot.run.run_id, 128),
+        "status": snapshot.run.status,
+        "candidate_id": _diagnostic_text(candidate.candidate_id, 128),
+        "revision": candidate.revision,
+        "digest": digest(candidate.draft),
+        "completed_steps": snapshot.run.completed_steps,
+    }
+    if snapshot.run.failure is not None:
+        entry["code"] = _diagnostic_text(snapshot.run.failure.code, 128)
+    failed: list[JsonValue] = []
+    for index, result in enumerate(snapshot.step_results):
+        if result.status == "succeeded":
+            continue
+        step: dict[str, JsonValue] = {"step_index": index, "status": result.status}
+        if result.failure is not None:
+            step["code"] = _diagnostic_text(result.failure.code, 128)
+        declared = candidate.draft.steps[index] if index < len(candidate.draft.steps) else None
+        if isinstance(declared, WorkflowStep):
+            step["capability"] = _diagnostic_text(_key(declared.capability), 256)
+        data = result.data
+        target_field = data.get("failed_target_field") if isinstance(data, dict) else None
+        if isinstance(target_field, str) and target_field in PAGINATION_TARGET_FIELDS:
+            step["failed_target_field"] = target_field
+        action_index = data.get("failed_action_index") if isinstance(data, dict) else None
+        if (
+            isinstance(action_index, int)
+            and not isinstance(action_index, bool)
+            and 0 <= action_index < 50
+        ):
+            step["failed_action_index"] = action_index
+            if (
+                isinstance(declared, WorkflowStep)
+                and (declared.capability.namespace, declared.capability.name)
+                == ("browser", "operate")
+                and isinstance(actions := declared.inputs.get("actions"), FixedInput)
+                and isinstance(actions.value, list)
+                and action_index < len(actions.value)
+            ):
+                prefix: list[JsonValue] = []
+                for action in actions.value[: action_index + 1]:
+                    if not isinstance(action, dict) or not isinstance(action.get("do"), str):
+                        continue
+                    hint: dict[str, JsonValue] = {
+                        "do": _diagnostic_text(cast(str, action["do"]), 32)
+                    }
+                    target = action.get("target")
+                    if isinstance(target, dict):
+                        hint["target"] = {
+                            key: _diagnostic_text(value, 160 if key == "css" else 80)
+                            for key in ("label", "css", "kind")
+                            if isinstance(value := target.get(key), str)
+                        }
+                    prefix.append(hint)
+                step["action_prefix"] = prefix
+        failed.append(step)
+        if len(failed) == 4:
+            break
+    if failed:
+        entry["failed_steps"] = failed
+    return cast(dict[str, JsonValue], redact(entry)[0])
+
+
+def _append_trial_history(
+    task: AuthoringTask, candidate: ChatCandidate, snapshot: WorkflowRunSnapshot
+) -> tuple[dict[str, JsonValue], ...]:
+    history = [*task.trial_history[-9:], _trial_history_entry(candidate, snapshot)]
+    while len(json.dumps(history, ensure_ascii=False).encode("utf-8")) > 12000:
+        if len(history) > 1:
+            history.pop(0)
+            continue
+        # A long single approach retains its actual terminal failed action.
+        steps = history[0].get("failed_steps")
+        prefixes = (
+            [
+                step
+                for step in steps
+                if isinstance(step, dict)
+                and isinstance(step.get("action_prefix"), list)
+                and len(cast(list[JsonValue], step["action_prefix"])) > 1
+            ]
+            if isinstance(steps, list)
+            else []
+        )
+        if not prefixes:
+            break
+        longest = max(prefixes, key=lambda step: len(cast(list[JsonValue], step["action_prefix"])))
+        cast(list[JsonValue], longest["action_prefix"]).pop(0)
+        longest["prefix_truncated"] = True
+    return tuple(history)
 
 
 GENERIC_FAILURE = "Capability invocation did not complete"
@@ -1108,6 +1208,7 @@ class ChatAuthoring:
                 "last_trial_diagnostics": None
                 if passed
                 else _trial_diagnostics(snapshot, current.draft, problems),
+                "trial_history": _append_trial_history(task, current, snapshot),
                 "repair_attempts": 0
                 if passed
                 else min(

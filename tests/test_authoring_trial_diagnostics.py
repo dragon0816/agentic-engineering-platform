@@ -421,3 +421,98 @@ def test_large_control_hints_trim_from_end_without_removing_query_overview(tmp_p
     overview = summary["steps"][0]["data"]["overview"]
     assert overview["controls"][0]["label"] == "Date From"
     assert len(json.dumps(summary["steps"][0]["data"], ensure_ascii=False).encode()) <= 12000
+
+
+def test_typed_nested_target_failure_reaches_public_repair_and_owner_context(
+    tmp_path: Path,
+) -> None:
+    from test_chat_authoring import context
+
+    from capabilities.browser_session.handlers import SPEC, BrowserRequest
+
+    config, layout = _chat_config(tmp_path)
+    with build_runtime(config, layout=layout, model_transport=_ChatGateway()) as runtime:
+
+        async def fail(context: RequestContext, inputs: Contract) -> Contract:
+            request = BrowserRequest.model_validate(inputs)
+            assert request.actions[0].do == "read_table"
+            failure = BrowserResult(
+                failed_action_index=0,
+                failed_action_kind="read_table",
+                failed_target_field="pagination.current",
+            )
+            raise CapabilityExecutionFailed(
+                "web_target_missing", failure, where="actions[0] (read_table) pagination.current"
+            )
+
+        runtime.agent.gateway.bridge.installed.register(
+            SPEC, fail, BrowserRequest, BrowserResult, ExecutionDependencies(central_required=False)
+        )
+        web = AgentWeb(runtime)
+        session = web.create_conversation()["conversation"]["session_id"]
+        chat = runtime.chat_authoring
+        assert chat is not None
+        _plan(chat, runtime.actor, session, "operate")
+        item, problems = chat.draft(
+            runtime.actor,
+            session,
+            "Orders",
+            {
+                "name": "nested-pagination-target",
+                "description": "Read orders",
+                "parameters": [],
+                "steps": [
+                    {
+                        "capability": "browser/operate@1.0.0",
+                        "inputs": {
+                            "actions": {
+                                "source": "fixed",
+                                "value": [
+                                    {
+                                        "do": "read_table",
+                                        "table": "#orders",
+                                        "save_as": "orders",
+                                        "pagination": {
+                                            "current": {"css": "#current"},
+                                            "total": {"css": "#total"},
+                                            "next": {"css": "#next"},
+                                        },
+                                    }
+                                ],
+                            }
+                        },
+                    }
+                ],
+                "checks": [{"check_id": "rows", "step_index": 0, "kind": "data_nonempty"}],
+            },
+        )
+        assert item is not None and not problems
+        model = Capturing(
+            {
+                "tools": [
+                    (
+                        "authoring__needs_input",
+                        {
+                            "reason": "business_decision",
+                            "question": "Which approved order scope applies?",
+                            "input_name": "order_scope",
+                        },
+                    )
+                ]
+            },
+            {"text": "Which approved order scope applies?"},
+        )
+        runtime.agent.gateway.router.model = model
+        approval = chat.request(runtime.actor, session, "run", item.candidate_id, {})
+
+        result = web.decide_approval(approval.approval_id, "approve")
+
+        step = result["approval"]["result"]["steps"][0]
+        assert step["data"]["failed_target_field"] == "pagination.current"
+        assert "repair" in result and model.requests
+        note = next(m.text for m in reversed(model.requests[0].messages) if m.role == "user")
+        assert '"failed_target_field": "pagination.current"' in note
+        ctx = context().model_copy(update={"actor": runtime.actor, "session_id": session})
+        guidance = chat.task_context(ctx)
+        compact = json.loads(guidance.splitlines()[1])
+        assert compact[0]["failed_step"]["failed_target_field"] == "pagination.current"

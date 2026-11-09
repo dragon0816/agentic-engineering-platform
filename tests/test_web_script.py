@@ -963,6 +963,7 @@ def test_pagination_rejects_distinct_locators_resolving_to_the_same_control(
     with pytest.raises(WebScriptError) as failed:
         runner(browser, site).run(WebScript(actions=(parsed,)), "act")
     assert failed.value.code == "pagination_controls_must_differ"
+    assert failed.value.target_field == "pagination.controls"
     assert failed.value.action_kind == "read_table" and failed.value.action_index == 0
     assert browser.evaluate("window.__pagingClicks") == 0
 
@@ -1039,3 +1040,129 @@ def test_icon_only_wait_uses_actual_text_and_presence_not_accessible_name(
         )
     assert failed.value.code == "web_wait_timeout" and time.monotonic() - began < 2
     assert browser.evaluate("window.__waitClicks") == 0
+
+
+@pytest.mark.parametrize("field", ["current", "total", "next"])
+def test_pagination_nested_target_failure_reaches_model_with_field_context(
+    browser: Any, site: PracticeSite, tmp_path: Path, field: str
+) -> None:
+    import asyncio
+
+    from capabilities.browser_session.handlers import (
+        SPEC,
+        BrowserRequest,
+        BrowserResult,
+        BrowserSessionHandler,
+    )
+    from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
+    from common.assets import ExecutionDependencies
+    from common.execution import RequestContext, TraceIdentifiers
+    from host_runtime.bridge_tools import bridge_tools
+    from workflow.dispatch import BridgeExecutor
+
+    class ExistingBrowser:
+        def start(self) -> None:
+            pass
+
+        def __getattr__(self, name: str) -> Any:
+            return getattr(browser, name)
+
+    paginated_page(browser, site)
+    action = paginated_action().model_dump(mode="json")
+    action["pagination"][field] = {"css": "#__missing_private_locator"}
+    installed = InstalledCapabilities()
+    installed.register(
+        SPEC,
+        BrowserSessionHandler(
+            (site.url,),
+            tmp_path / "profile",
+            headless=True,
+            timeout_s=0.2,
+            workspace_roots=(),
+            browser_factory=ExistingBrowser,
+        ),
+        BrowserRequest,
+        BrowserResult,
+        ExecutionDependencies(central_required=False),
+    )
+    grant = CapabilityGrant(
+        actor="owner",
+        asset=SPEC.identity,
+        permissions=SPEC.policy.required_permissions,
+        policy_refs=SPEC.policy.policy_refs,
+        approval_ref="owner-approved",
+    )
+    tool = next(
+        tool
+        for tool in bridge_tools(BridgeExecutor(installed, LocalPolicy((grant,))))
+        if tool.tool.name == "browser__operate"
+    )
+    context = RequestContext(
+        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+        actor="owner",
+        namespace="engineering",
+        channel="local",
+        message="read all pages",
+    )
+
+    async def invoke() -> Any:
+        return await tool.handler(context, {"actions": [action], "look": False})
+
+    result = asyncio.run(invoke())
+    assert result.status == "failed" and result.failure is not None
+    assert result.failure.code == "web_target_missing"
+    assert "actions[0] (read_table)" in result.failure.message
+    assert f"pagination.{field}" in result.failure.message
+    assert (
+        isinstance(result.data, dict)
+        and result.data["failed_target_field"] == f"pagination.{field}"
+    )
+    assert (
+        "__missing_private_locator" not in result.failure.message
+        and "#" not in result.failure.message
+    )
+
+
+@pytest.mark.parametrize("field", ["current", "total"])
+def test_pagination_number_failure_names_only_the_failed_field(
+    browser: Any, site: PracticeSite, field: str
+) -> None:
+    paginated_page(browser, site)
+    browser.evaluate(
+        "document.getElementById("
+        + json.dumps("page" if field == "current" else "total")
+        + ")."
+        + ("value" if field == "current" else "innerText")
+        + "='private-not-a-page-number'"
+    )
+    with pytest.raises(WebScriptError) as failed:
+        runner(browser, site).run(WebScript(actions=(paginated_action(),)), "act")
+    assert failed.value.code == "web_pagination_invalid"
+    assert failed.value.target_field == f"pagination.{field}"
+    assert "private-not-a-page-number" not in str(failed.value)
+
+
+@pytest.mark.parametrize(
+    "wire_field,expected",
+    [
+        ("pagination.current", "pagination.current"),
+        ("pagination.next", "pagination.next"),
+        ("pagination.controls", "pagination.controls"),
+        ("pagination.current #private-selector", None),
+        ({"selector": "private-selector"}, None),
+    ],
+)
+def test_page_error_only_forwards_allowlisted_target_fields(
+    wire_field: Any, expected: str | None
+) -> None:
+    class ErrorPage:
+        def navigate(self, url: str) -> None:
+            raise AssertionError("no navigation")
+
+        def evaluate(self, expression: str) -> str:
+            return json.dumps({"error": "web_target_missing", "target_field": wire_field})
+
+    with pytest.raises(WebScriptError) as failed:
+        ScriptRunner(ErrorPage(), ("https://example.test",))._evaluate("unused test expression")
+    assert failed.value.code == "web_target_missing" and failed.value.target_field == expected
+    assert "private-selector" not in str(failed.value)
