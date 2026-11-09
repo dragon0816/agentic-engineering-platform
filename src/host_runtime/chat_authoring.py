@@ -240,6 +240,11 @@ DRAFT_GUIDE = (
     "If it prints only one complete JSON object, run-python exposes it as output.data. "
     "Use a prior Python step to prepare locale-specific browser values, then bind the "
     "browser values input from that step's ['data']; do not freeze formatted dates. "
+    "To combine prepared parameters and Browser data, add a read-only data/merge@1.0.0 "
+    "step: bind left from the preparation step's ['data'] and right from the Browser "
+    "step's ['data']. Bind the report's arguments from the merge step's ['data']. "
+    "Unequal duplicate keys fail; choose nonoverlapping names. Report code must use "
+    "these actual values rather than hardcoding the original file/date/rates. "
     'To operate a web system as a step use browser/operate@1.0.0 with inputs {"actions": '
     '{"source": "fixed", "value": [the browser__operate actions]}, "values": '
     '{"source": "run", "path": []}, "workspace": {"source": "fixed", "value": '

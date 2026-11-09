@@ -65,6 +65,10 @@ from capabilities.coding_change.run_python import (
 )
 from capabilities.coding_change.workspaces import workspace_note
 from capabilities.company_agent.manifest import personal_proof_fixture_read_spec
+from capabilities.data_merge.handlers import SPEC as DATA_MERGE_SPEC
+from capabilities.data_merge.handlers import MergeHandler as DataMergeHandler
+from capabilities.data_merge.handlers import MergeRequest as DataMergeRequest
+from capabilities.data_merge.handlers import MergeResult as DataMergeResult
 from capabilities.desktop_session.handlers import SPEC as DESKTOP_SPEC
 from capabilities.desktop_session.handlers import (
     DesktopRequest,
@@ -903,6 +907,13 @@ def build_integrations(
         )
     # Data and Excel blocks: installed when a Workflow uses them, or when this
     # host turned on web steps for generated Workflows (`web` in host.json).
+    installed.register(
+        DATA_MERGE_SPEC,
+        DataMergeHandler(),
+        DataMergeRequest,
+        DataMergeResult,
+        ExecutionDependencies(central_required=False),
+    )
     generated = config.web is not None
     if generated or DATA_SELECT_SPEC.identity.key in uses:
         installed.register(
