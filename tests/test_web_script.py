@@ -764,3 +764,204 @@ def test_standard_accessible_names_are_shared_by_overview_and_target_matching(
     assert attrs["aria-labelledby"] == "missing first second"
     assert attrs["aria-describedby"] == "help" and attrs["name"] == "order_date"
     assert any(attributes.get("for") == "native" for attributes in attribute_sets)
+
+
+@pytest.mark.parametrize(
+    "current,total",
+    [
+        ({"css": "#page", "kind": "field"}, {"css": "#page", "kind": "any"}),
+        ({"css": "  #page  "}, {"css": "#page"}),
+        ({"label": "Page number", "kind": "field"}, {"label": "Page number", "kind": "field"}),
+    ],
+)
+def test_pagination_rejects_reusing_current_control_as_total(
+    current: dict[str, str], total: dict[str, str]
+) -> None:
+    from pydantic import ValidationError
+
+    from integrations.web_script import WebPagination
+
+    with pytest.raises(ValidationError) as invalid:
+        WebPagination.model_validate({"next": {"css": "#next"}, "current": current, "total": total})
+    assert invalid.value.errors()[0]["type"] == "pagination_controls_must_differ"
+
+
+def test_pagination_invalid_input_reaches_bridge_before_browser_start(tmp_path: Path) -> None:
+    import asyncio
+
+    from capabilities.browser_session.handlers import (
+        SPEC,
+        BrowserRequest,
+        BrowserResult,
+        BrowserSessionHandler,
+    )
+    from capabilities.runtime import (
+        CapabilityGrant,
+        CapabilityInvocation,
+        InstalledCapabilities,
+        LocalPolicy,
+    )
+    from common.assets import ExecutionDependencies
+    from common.execution import RequestContext, TraceIdentifiers
+    from workflow.dispatch import BridgeExecutor
+
+    starts: list[bool] = []
+
+    def browser_factory() -> Any:
+        starts.append(True)
+        raise AssertionError("invalid pagination must stop before the browser")
+
+    installed = InstalledCapabilities()
+    installed.register(
+        SPEC,
+        BrowserSessionHandler(
+            ("https://example.test",),
+            tmp_path / "profile",
+            headless=True,
+            timeout_s=2,
+            workspace_roots=(),
+            browser_factory=browser_factory,
+        ),
+        BrowserRequest,
+        BrowserResult,
+        ExecutionDependencies(central_required=False),
+    )
+    grant = CapabilityGrant(
+        actor="owner",
+        asset=SPEC.identity,
+        permissions=SPEC.policy.required_permissions,
+        policy_refs=SPEC.policy.policy_refs,
+        approval_ref="owner-approved",
+    )
+    context = RequestContext(
+        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+        actor="owner",
+        namespace="engineering",
+        channel="local",
+        message="read all pages",
+    )
+    result = asyncio.run(
+        BridgeExecutor(installed, LocalPolicy((grant,))).execute(
+            CapabilityInvocation(
+                context=context,
+                target=SPEC.identity,
+                arguments={
+                    "actions": [
+                        {
+                            "do": "read_table",
+                            "table": "#rows",
+                            "save_as": "rows",
+                            "pagination": {
+                                "next": {"css": "#next"},
+                                "current": {"css": "#page", "kind": "field"},
+                                "total": {"css": "#page", "kind": "any"},
+                            },
+                        }
+                    ]
+                },
+            )
+        )
+    )
+    assert result.status == "failed" and result.failure is not None
+    assert result.failure.code == "invalid_input"
+    assert "pagination_controls_must_differ" in result.failure.message
+    assert starts == []
+
+
+def test_distinct_pagination_controls_can_both_display_25_on_last_page(
+    browser: Any, site: PracticeSite
+) -> None:
+    paginated_page(browser, site)
+    browser.evaluate("document.getElementById('total').innerText='/ 25'")
+    result = ScriptRunner(browser, (site.url,), settle_s=0, timeout_s=2).run(
+        WebScript(actions=(paginated_action(25),)), "act"
+    )
+    rows = result.data["orders"]
+    assert isinstance(rows, list) and len(rows) == 25
+    assert rows[-1] == {"ID": "SO-25", "Amount": "2500"}
+    assert browser.evaluate("document.getElementById('page').value") == "25"
+    assert browser.evaluate("document.getElementById('total').innerText") == "/ 25"
+
+
+def test_invalid_field_state_is_observed_without_turning_fill_into_failure(
+    browser: Any, site: PracticeSite
+) -> None:
+    from capabilities.browser_session.handlers import _described
+    from integrations.web_script import DOMInspection
+
+    browser.navigate(site.url)
+    html = (
+        '<input id="date-invalid" aria-label="Report date" aria-invalid="true" '
+        'value="private-invalid-date">'
+        '<input id="email-invalid" type="email" aria-label="Contact email" '
+        'value="private-invalid-email">'
+    )
+    browser.evaluate(
+        "document.body.innerHTML = " + json.dumps(html) + ";"
+        "document.getElementById('date-invalid').addEventListener('input',e=>"
+        "e.target.setAttribute('aria-invalid','false'));"
+    )
+    before = runner(browser, site).inspect()
+    overview = before["overview"]
+    assert isinstance(overview, dict) and isinstance(overview["controls"], list)
+    controls = [control for control in overview["controls"] if isinstance(control, dict)]
+    assert all(
+        isinstance(control["state"], dict) and control["state"]["invalid"] is True
+        for control in controls
+    )
+    assert "invalid=True" in _described(DOMInspection.model_validate(before))
+    elements = before["elements"]
+    assert isinstance(elements, list)
+    assert any(
+        isinstance(element, dict)
+        and isinstance(element.get("attributes"), dict)
+        and element["attributes"]
+        == {"id": "date-invalid", "aria-label": "Report date", "aria-invalid": "true"}
+        for element in elements
+    )
+    result = runner(browser, site).run(
+        WebScript(
+            actions=(
+                WebAction(
+                    do="fill",
+                    target=WebTarget(label="Report date", kind="field"),
+                    value="new-private-date",
+                ),
+            )
+        ),
+        "act",
+    )
+    assert result.data == {}
+    after = runner(browser, site).inspect()
+    after_overview = after["overview"]
+    assert isinstance(after_overview, dict) and isinstance(after_overview["controls"], list)
+    date = next(
+        control
+        for control in after_overview["controls"]
+        if isinstance(control, dict) and control["path"] == "#date-invalid"
+    )
+    assert (
+        isinstance(date, dict)
+        and isinstance(date["state"], dict)
+        and "invalid" not in date["state"]
+    )
+    for value in ("private-invalid-date", "private-invalid-email", "new-private-date"):
+        assert value not in json.dumps(before) + json.dumps(after)
+
+
+def test_pagination_rejects_distinct_locators_resolving_to_the_same_control(
+    browser: Any, site: PracticeSite
+) -> None:
+    paginated_page(browser, site)
+    browser.evaluate(
+        "window.__pagingClicks=0;document.getElementById('next').addEventListener('mouseup',()=>window.__pagingClicks++)"
+    )
+    action = paginated_action().model_dump(mode="json")
+    assert isinstance(action["pagination"], dict)
+    action["pagination"]["total"] = {"css": "input#page", "kind": "field"}
+    parsed = WebAction.model_validate(action)
+    with pytest.raises(WebScriptError) as failed:
+        runner(browser, site).run(WebScript(actions=(parsed,)), "act")
+    assert failed.value.code == "pagination_controls_must_differ"
+    assert failed.value.action_kind == "read_table" and failed.value.action_index == 0
+    assert browser.evaluate("window.__pagingClicks") == 0

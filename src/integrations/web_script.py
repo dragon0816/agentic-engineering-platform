@@ -28,6 +28,7 @@ from typing import Annotated, Any, Literal, Protocol, Self
 from urllib.parse import urlsplit
 
 from pydantic import Field, JsonValue, model_validator
+from pydantic_core import PydanticCustomError
 
 from common.base import Contract, Symbol, Text
 from common.trace import redact
@@ -72,10 +73,32 @@ class WebPagination(Contract):
     """Visible page controls; pagination must begin at page one and advance."""
 
     next: WebTarget
-    current: WebTarget
-    total: WebTarget
+    current: WebTarget = Field(description="Current page number control; distinct from total")
+    total: WebTarget = Field(
+        description="Distinct total-page-count control; never reuse the current-page control"
+    )
     max_pages: int = Field(default=200, ge=1, le=200, strict=True)
     key_columns: tuple[Text, ...] = Field(default=(), max_length=10)
+
+    @model_validator(mode="after")
+    def distinct_page_controls(self) -> Self:
+        same_css = (
+            self.current.css is not None
+            and self.total.css is not None
+            and self.current.css.strip() == self.total.css.strip()
+        )
+        same_label = (
+            self.current.label is not None
+            and self.total.label is not None
+            and self.current.kind == self.total.kind
+            and " ".join(self.current.label.split())[:80] == " ".join(self.total.label.split())[:80]
+        )
+        if same_css or same_label:
+            raise PydanticCustomError(
+                "pagination_controls_must_differ",
+                "pagination current and total must reference distinct controls",
+            )
+        return self
 
 
 class WebAction(Contract):
@@ -249,6 +272,28 @@ _ACT = r"""
 """
 
 
+_PAGE_NUMBERS = r"""
+(() => {
+  const find = %(find)s;
+  const current = find(%(current)s), total = find(%(total)s);
+  if (current.error) return JSON.stringify(current);
+  if (total.error) return JSON.stringify(total);
+  if (current.element === total.element)
+    return JSON.stringify({error: 'pagination_controls_must_differ'});
+  const number = element => {
+    const text = (element.innerText || element.value || '').trim();
+    const match = /^\s*\/?\s*(\d+)\s*$/.exec(text);
+    return match ? Number(match[1]) : null;
+  };
+  const here = number(current.element), count = number(total.element);
+  if (!Number.isSafeInteger(here) || !Number.isSafeInteger(count))
+    return JSON.stringify({error: 'web_pagination_invalid'});
+  // Only parsed page counts leave this expression, never raw field values.
+  return JSON.stringify({current: here, total: count});
+})()
+"""
+
+
 class DOMElement(Contract):
     index: int = Field(ge=0, le=100_000)
     parent: int | None = Field(default=None, ge=0, le=100_000)
@@ -261,7 +306,7 @@ class DOMElement(Contract):
     text: str = Field(max_length=200)
     attributes: dict[
         Annotated[str, Field(max_length=32)], Annotated[str, Field(max_length=160)]
-    ] = Field(default_factory=dict, max_length=15)
+    ] = Field(default_factory=dict, max_length=16)
 
 
 class DOMControl(Contract):
@@ -271,9 +316,9 @@ class DOMControl(Contract):
     path: str = Field(default="", max_length=200)
     disabled: bool = False
     state: dict[
-        Literal["expanded", "pressed", "placeholder", "type"],
-        Annotated[str, Field(max_length=80)],
-    ] = Field(default_factory=dict, max_length=4)
+        Literal["expanded", "pressed", "placeholder", "type", "invalid"],
+        Annotated[str, Field(max_length=80)] | bool,
+    ] = Field(default_factory=dict, max_length=5)
 
 
 class DOMTableHint(Contract):
@@ -412,7 +457,8 @@ _INSPECT_DOM = r"""
       const attrs = {};
       for (const name of ['id', 'class', 'role', 'aria-label', 'aria-expanded', 'aria-disabled',
                           'name', 'type', 'title', 'data-testid', 'data-test-id',
-                          'data-automation-id', 'aria-labelledby', 'aria-describedby', 'for']) {
+                          'data-automation-id', 'aria-labelledby', 'aria-describedby', 'for',
+                          'aria-invalid']) {
         const attribute = e.getAttribute(name);
         if (attribute !== null) attrs[name] = norm(attribute).slice(0, 160);
       }
@@ -442,6 +488,8 @@ _INSPECT_DOM = r"""
         if (fields.includes(e.tagName) && placeholder !== null)
           state.placeholder = norm(placeholder).slice(0, 80);
         if (type !== null) state.type = norm(type).slice(0, 32);
+        if (e.getAttribute('aria-invalid') === 'true' || (e.validity && !e.validity.valid))
+          state.invalid = true;
         buckets[priority].push({tag, kind: (role || type || '').slice(0, 32),
           label: norm(label).slice(0, 80), path: selector(e, path_truncated ? '' : path), state,
           disabled: !!e.disabled || e.getAttribute('aria-disabled') === 'true'});
@@ -706,19 +754,25 @@ class ScriptRunner:
                     raise
                 time.sleep(0.1)
 
-    def _page_number(self, target: WebTarget) -> int:
-        result = self._perform({"op": "read_text", "mode": "read", **target.model_dump()})
-        match = re.fullmatch(r"\s*/?\s*(\d+)\s*", str(result.get("text", "")))
-        if match is None:
-            raise WebScriptError("web_pagination_invalid")
-        return int(match[1])
+    def _page_numbers(self, paging: WebPagination) -> tuple[int, int]:
+        self._check_origin()
+        answer = self._evaluate(
+            _PAGE_NUMBERS
+            % {
+                "find": _FIND,
+                "current": json.dumps(paging.current.model_dump()),
+                "total": json.dumps(paging.total.model_dump()),
+            }
+        )
+        self._check_origin()
+        return int(answer["current"]), int(answer["total"])
 
     def _table_pages(self, action: WebAction, mode: ScriptMode) -> list[Any]:
         answer = self._table_rows(action)
         paging = action.pagination
         if paging is None:
             return list(answer["rows"])
-        current, total = self._page_number(paging.current), self._page_number(paging.total)
+        current, total = self._page_numbers(paging)
         if current != 1 or total < 1:
             raise WebScriptError("web_pagination_not_at_start")
         if total > paging.max_pages:
@@ -746,14 +800,18 @@ class ScriptRunner:
             stable_since = time.monotonic()
             while True:
                 self._check_origin()
-                if self._page_number(paging.total) != total:
+                _, observed_total = self._page_numbers(paging)
+                if observed_total != total:
                     raise WebScriptError("web_pagination_changed")
                 answer = self._table_rows(action)
                 if answer["rows"] != candidate:
                     candidate = answer["rows"]
                     stable_since = time.monotonic()
+                observed_current, observed_total = self._page_numbers(paging)
+                if observed_total != total:
+                    raise WebScriptError("web_pagination_changed")
                 if (
-                    self._page_number(paging.current) == current + 1
+                    observed_current == current + 1
                     and answer["rows"]
                     and answer["rows"] != previous
                     and not (keys(answer["rows"]) & seen)
