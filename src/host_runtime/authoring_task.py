@@ -65,6 +65,7 @@ class AuthoringTask(Contract):
     last_status: str | None = None
     last_run_id: str | None = None
     last_failure: str | None = None
+    last_trial_diagnostics: dict[str, JsonValue] | None = None
     repair_attempts: int = Field(default=0, ge=0, le=3)
     last_repaired_run_id: str | None = None
     active_trial_token: str | None = None

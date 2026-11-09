@@ -33,7 +33,7 @@ import secrets
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from pydantic import Field, JsonValue, ValidationError
 
@@ -50,6 +50,7 @@ from capabilities.workflow_author.conversation import assemble
 from common.assets import AssetIdentity, FixedInput, WorkflowManifest, WorkflowStep
 from common.base import Contract, Symbol, Text
 from common.execution import Failure, RequestContext, TraceIdentifiers
+from common.trace import redact
 from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
 from common.workflow_run_form import OFFER_KEY
 from host_runtime.authoring_inputs import bind_supplied_inputs
@@ -88,6 +89,135 @@ CandidateStatus = Literal["draft", "previewed", "installed"]
 ApprovalKind = Literal["run", "install", "install_skill", "capability"]
 ApprovalStatus = Literal["pending", "approved", "rejected", "failed"]
 MAX_DATA_CHARS = 4_000
+MAX_TRIAL_DIAGNOSTICS_BYTES = 12_000
+
+
+def _diagnostic_text(value: str, limit: int, *, tail: bool = False) -> str:
+    cleaned, _ = redact(value)
+    text = str(cleaned)
+    return text[-limit:] if tail else text[:limit]
+
+
+def _trial_diagnostics(
+    snapshot: WorkflowRunSnapshot, manifest: WorkflowManifest, problems: list[str]
+) -> dict[str, JsonValue]:
+    """Keep actual technical failure metadata, ahead of page bodies or result rows."""
+    run = snapshot.run
+    result: dict[str, JsonValue] = {
+        "run_id": run.run_id,
+        "status": run.status,
+        "completed_steps": run.completed_steps,
+        "step_results": len(snapshot.step_results),
+    }
+    if run.failure is not None:
+        result["failure"] = {
+            "code": run.failure.code,
+            "message": _diagnostic_text(run.failure.message, 1500),
+        }
+    if problems:
+        result["coverage_problems"] = [_diagnostic_text(p, 300) for p in problems[:20]]
+    failed: list[JsonValue] = []
+    for index, step in enumerate(snapshot.step_results):
+        if step.status == "succeeded":
+            continue
+        detail: dict[str, JsonValue] = {"step_index": index, "status": step.status}
+        if index < len(manifest.steps) and isinstance(manifest.steps[index], WorkflowStep):
+            declared = manifest.steps[index]
+            assert isinstance(declared, WorkflowStep)
+            detail["capability"] = _key(declared.capability)
+        if step.failure is not None:
+            detail["failure"] = {
+                "code": step.failure.code,
+                "message": _diagnostic_text(step.failure.message, 1000),
+            }
+        data = step.data
+        if isinstance(data, dict):
+            for key in ("failed_action_index", "exit_code", "timed_out"):
+                value = data.get(key)
+                if value is None or isinstance(value, (int, bool)):
+                    if key in data:
+                        detail[key] = value
+            for key in ("failed_action_kind", "url", "diagnostic_error"):
+                value = data.get(key)
+                if isinstance(value, str):
+                    detail[key] = _diagnostic_text(value, 700)
+            overview = data.get("overview")
+            if isinstance(overview, dict):
+                safe: dict[str, JsonValue] = {}
+                for key in (
+                    "visited_nodes",
+                    "time_limit_reached",
+                    "scan_limit_reached",
+                    "controls_truncated",
+                    "text_truncated",
+                ):
+                    value = overview.get(key)
+                    if isinstance(value, (int, bool)):
+                        safe[key] = value
+                controls = overview.get("controls")
+                invalid: list[JsonValue] = []
+                if isinstance(controls, list):
+                    for control in controls:
+                        if not isinstance(control, dict):
+                            continue
+                        state = control.get("state")
+                        if not isinstance(state, dict) or state.get("invalid") in (
+                            None,
+                            False,
+                            "false",
+                            "",
+                        ):
+                            continue
+                        invalid.append(
+                            {
+                                "label": _diagnostic_text(str(control.get("label", "")), 80),
+                                "path": _diagnostic_text(str(control.get("path", "")), 200),
+                                "invalid": _diagnostic_text(str(state["invalid"]), 80),
+                            }
+                        )
+                        if len(invalid) == 4:
+                            break
+                if invalid:
+                    safe["invalid_controls"] = invalid
+                if safe:
+                    detail["overview"] = safe
+            output = data.get("output")
+            if isinstance(output, str) and ("exit_code" in data or "timed_out" in data):
+                detail["output_tail"] = _diagnostic_text(output, 4000, tail=True)
+        failed.append(detail)
+        if len(failed) == 4:
+            break
+    if failed:
+        result["failed_steps"] = failed
+    # Redact before limiting strings, so a cut never exposes a credential suffix.
+    result = cast(dict[str, JsonValue], redact(result)[0])
+    failed = cast(list[JsonValue], result.get("failed_steps", []))
+    while len(json.dumps(result, ensure_ascii=False).encode("utf-8")) > MAX_TRIAL_DIAGNOSTICS_BYTES:
+        # Retain the real failure/action metadata first when several failures compete.
+        if len(failed) > 1:
+            failed.pop()
+            result["failed_steps"] = failed
+        elif isinstance(result.get("coverage_problems"), list) and result["coverage_problems"]:
+            cast(list[JsonValue], result["coverage_problems"]).pop()
+        else:
+            # One failed step's bounded metadata can still be large in UTF-8.
+            steps = result.get("failed_steps")
+            bounded_detail = steps[0] if isinstance(steps, list) and steps else None
+            if isinstance(bounded_detail, dict) and isinstance(
+                bounded_detail.get("output_tail"), str
+            ):
+                tail = cast(str, bounded_detail["output_tail"])
+                if len(tail) > 256:
+                    bounded_detail["output_tail"] = tail[len(tail) // 2 :]
+                    continue
+                bounded_detail.pop("output_tail")
+            elif isinstance(bounded_detail, dict) and "overview" in bounded_detail:
+                bounded_detail.pop("overview")
+            else:
+                result.pop("failed_steps", None)
+    return result
+
+
 GENERIC_FAILURE = "Capability invocation did not complete"
 RUN_TIMEOUT_SECONDS = 900.0
 
@@ -886,7 +1016,8 @@ class ChatAuthoring:
             or task.active_trial_token != expected.active_trial_token
         ):
             return
-        passed = snapshot.run.status == "succeeded" and not coverage_problems(task, current.draft)
+        problems = coverage_problems(task, current.draft)
+        passed = snapshot.run.status == "succeeded" and not problems
         task = task.model_copy(
             update={
                 "last_trial_digest": digest(candidate.draft),
@@ -894,6 +1025,9 @@ class ChatAuthoring:
                 "last_status": snapshot.run.status,
                 "last_run_id": snapshot.run.run_id,
                 "last_failure": snapshot.run.failure.code if snapshot.run.failure else None,
+                "last_trial_diagnostics": None
+                if passed
+                else _trial_diagnostics(snapshot, current.draft, problems),
                 "repair_attempts": 0
                 if passed
                 else min(
