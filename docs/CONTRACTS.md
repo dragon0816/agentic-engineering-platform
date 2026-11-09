@@ -6964,3 +6964,31 @@ is admitted beyond the version already selected by the query.
 ### BI rename collision projection (2026-11-07)
 
 When two distinct card units claim one key, creation timestamps are compared as UTC instants. Equal instants use the deterministic replay position that first introduced each card, then card id; two cards in one commit therefore have a stable id tie-break. Unknown legacy replay metadata retains timestamp/id fallback. The winner keeps the key; the other projects key#id until a person renames it. Unit identities and immutable commit contents never change. MODEL_VERSION 14 invalidates the projection cache once; repository wiki behavior is unchanged.
+
+### Browser table pagination and native pointer delivery (2026-11-09)
+
+`WebAction.read_table` accepts an optional `header_table` CSS selector for split
+header/body tables, and optional typed `pagination` with `next`, `current`, `total`
+WebTargets and `max_pages` (1..200, default 200). Optional `key_columns` (up to ten
+column names) declares record identity: keys must exist, be unique within each
+page, and not overlap earlier pages. Page labels are integers or `/ N`.
+Reading starts at page one, requires each next page to advance and replace rows,
+and refuses changed totals, stalled pages, or more than 2,000 aggregate rows.
+Each new page must remain unchanged for the runner's settling interval; declared
+keys must also advance, so asynchronously refreshed frozen columns are not read
+with the previous page's IDs. Stale/overlapping keys time out without partial data.
+Failure returns no partial table. Omitted fields preserve single-table behavior.
+
+Native Browser clicks dispatch trusted pointer press/release after the existing
+origin and read-mode checks. Hidden copies are excluded from target matching;
+multiple visible matches still refuse. Visible role=option controls are eligible
+for label matching. Missing/obscured/disabled native click targets have a bounded
+wait; unsafe read-mode clicks fail before any pointer event. Existing capability
+identity, Bridge authorization and side-effect classification are unchanged.
+
+`wait_for` takes a target and `value`, a regular expression matched against its
+whole visible text. Missing targets and nonmatching text are polled within the
+Browser timeout; expiry is `web_wait_timeout`. Invalid patterns fail contract
+validation. Ambiguous targets and origin refusal are never retried as readiness.
+It performs no pointer action and is usable in read mode. Workflows can await a
+visible query-completion marker before trusting a retained old table/page count.

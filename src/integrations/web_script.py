@@ -64,17 +64,31 @@ class RowScope(Contract):
     equals: Text
 
 
+class WebPagination(Contract):
+    """Visible page controls; pagination must begin at page one and advance."""
+
+    next: WebTarget
+    current: WebTarget
+    total: WebTarget
+    max_pages: int = Field(default=200, ge=1, le=200, strict=True)
+    key_columns: tuple[Text, ...] = Field(default=(), max_length=10)
+
+
 class WebAction(Contract):
     # `download` clicks a link or button and keeps the file it sends under
     # `save_as`; `read_record` reads a two-column table of field names and
     # values (a detail page's header). Both need a runner that supports them.
-    do: Literal["open", "fill", "click", "read_table", "read_text", "download", "read_record"]
+    do: Literal[
+        "open", "fill", "click", "read_table", "read_text", "download", "read_record", "wait_for"
+    ]
     url: Text | None = None
     target: WebTarget | None = None
     row: RowScope | None = None
     value: Text | None = None
     table: Text | None = None
     save_as: Symbol | None = None
+    header_table: Text | None = None
+    pagination: WebPagination | None = None
 
     @model_validator(mode="after")
     def complete(self) -> Self:
@@ -86,9 +100,19 @@ class WebAction(Contract):
             "read_text": self.target is not None and self.save_as is not None,
             "download": self.target is not None and self.save_as is not None,
             "read_record": self.table is not None and self.save_as is not None,
+            "wait_for": self.target is not None and self.value is not None,
         }
         if not needs[self.do]:
             raise ValueError(f"a {self.do} action is missing what it needs")
+        if self.do != "read_table" and (
+            self.header_table is not None or self.pagination is not None
+        ):
+            raise ValueError("header_table and pagination belong only to read_table")
+        if self.do == "wait_for" and self.value is not None:
+            try:
+                re.compile(self.value)
+            except re.error as error:
+                raise ValueError("wait_for value must be a valid regular expression") from error
         return self
 
 
@@ -138,9 +162,12 @@ _FIND = r"""
     field: 'input:not([type=hidden]), select, textarea',
     button: 'button, input[type=submit], input[type=button], [role=button]',
     link: 'a[href]',
-    any: 'a[href], button, input:not([type=hidden]), select, textarea, [role=button]'};
-  const found = spec.css ? [...scope.querySelectorAll(spec.css)]
+    any: 'a[href], button, input:not([type=hidden]), select, textarea, '
+      + '[role=button], [role=option]'};
+  const matches = spec.css ? [...scope.querySelectorAll(spec.css)]
     : [...scope.querySelectorAll(kinds[spec.kind])].filter(e => caption(e) === spec.label);
+  const found = matches.filter(e => e.getClientRects().length
+    && getComputedStyle(e).visibility !== 'hidden');
   if (!found.length) return {error: 'web_target_missing'};
   if (found.length > 1) return {error: 'web_target_ambiguous'};
   return {element: found[0]};
@@ -168,6 +195,18 @@ _ACT = r"""
       const submits = form && (e.type === 'submit' || (e.tagName === 'BUTTON' && !e.type));
       const reading = submits && (form.getAttribute('method') || 'get').toLowerCase() === 'get';
       if (!link && !reading) return JSON.stringify({error: 'web_click_not_read_only'});
+    }
+    if (spec.pointer) {
+      if (e.disabled || e.getAttribute('aria-disabled') === 'true')
+        return JSON.stringify({error: 'web_target_disabled'});
+      e.scrollIntoView({block: 'center', inline: 'center'});
+      const r = e.getBoundingClientRect(), x = r.x + r.width / 2, y = r.y + r.height / 2;
+      if (!r.width || !r.height || getComputedStyle(e).visibility === 'hidden')
+        return JSON.stringify({error: 'web_target_not_visible'});
+      const top = document.elementFromPoint(x, y);
+      if (!top || (top !== e && !e.contains(top)))
+        return JSON.stringify({error: 'web_target_obscured'});
+      return JSON.stringify({ok: true, pointer: {x, y}});
     }
     e.click();
     return JSON.stringify({ok: true});
@@ -198,7 +237,10 @@ _READ_TABLE = r"""
   const norm = s => (s || '').replace(/\s+/g, ' ').trim();
   const table = document.querySelector(%(css)s);
   if (!table) return JSON.stringify({error: 'web_table_missing'});
-  let heads = [...table.querySelectorAll('thead th')].map(th => norm(th.innerText));
+  const headerSelector = %(header)s;
+  const header = headerSelector ? document.querySelector(headerSelector) : table;
+  if (!header) return JSON.stringify({error: 'web_table_header_missing'});
+  let heads = [...header.querySelectorAll('thead th')].map(th => norm(th.innerText));
   let rows = [...table.querySelectorAll('tbody tr')];
   if (!heads.length && rows.length) {
     heads = [...rows[0].children].map(c => norm(c.innerText)); rows = rows.slice(1);
@@ -209,7 +251,7 @@ _READ_TABLE = r"""
     heads.forEach((h, i) => { if (h) row[h] = cells[i] === undefined ? '' : cells[i]; });
     return row;
   });
-  return JSON.stringify({ok: true, rows: out});
+  return JSON.stringify({ok: true, rows: out, truncated: rows.length > %(limit)d});
 })()
 """
 
@@ -286,6 +328,23 @@ class ScriptRunner:
         mode: ScriptMode,
         data: dict[str, JsonValue],
     ) -> None:
+        if action.do == "wait_for":
+            assert action.target is not None and action.value is not None
+            deadline = time.monotonic() + self.timeout_s
+            while True:
+                self._check_origin()
+                try:
+                    answer = self._perform(
+                        {"op": "read_text", "mode": "read", **action.target.model_dump()}
+                    )
+                    if re.fullmatch(action.value, str(answer.get("text", ""))):
+                        return
+                except WebScriptError as error:
+                    if error.code != "web_target_missing":
+                        raise
+                if time.monotonic() >= deadline:
+                    raise WebScriptError("web_wait_timeout")
+                time.sleep(0.1)
         if action.do == "open":
             assert action.url is not None
             url = _fill_in(action.url, values)
@@ -304,10 +363,7 @@ class ScriptRunner:
             return
         if action.do == "read_table":
             assert action.table is not None and action.save_as is not None
-            answer = self._evaluate(
-                _READ_TABLE % {"css": json.dumps(action.table), "limit": MAX_TABLE_ROWS}
-            )
-            data[action.save_as] = answer["rows"]
+            data[action.save_as] = self._table_pages(action, mode)
             return
         spec: dict[str, Any] = {
             "op": "click" if action.do == "download" else action.do,
@@ -323,20 +379,135 @@ class ScriptRunner:
             assert action.save_as is not None
             if self.downloader is None:
                 raise WebScriptError("web_download_not_supported")
-            expression = _ACT % {"find": _FIND, "spec": json.dumps(spec)}
 
             def click() -> None:
-                self._evaluate(expression)
+                self._perform(spec)
 
             data[action.save_as] = self.downloader(click, action.save_as)
             return
-        answer = self._evaluate(_ACT % {"find": _FIND, "spec": json.dumps(spec)})
+        answer = self._perform(spec)
         if action.do == "read_text":
             assert action.save_as is not None
             data[action.save_as] = answer.get("text", "")
         if action.do == "click":
             self._settle()
             self._check_origin()
+
+    def _table_rows(self, action: WebAction) -> dict[str, Any]:
+        deadline = time.monotonic() + self.timeout_s
+        while True:
+            self._check_origin()
+            try:
+                return self._evaluate(
+                    _READ_TABLE
+                    % {
+                        "css": json.dumps(action.table),
+                        "header": json.dumps(action.header_table),
+                        "limit": MAX_TABLE_ROWS,
+                    }
+                )
+            except WebScriptError as error:
+                if (
+                    error.code not in {"web_table_missing", "web_table_header_missing"}
+                    or time.monotonic() >= deadline
+                ):
+                    raise
+                time.sleep(0.1)
+
+    def _page_number(self, target: WebTarget) -> int:
+        result = self._perform({"op": "read_text", "mode": "read", **target.model_dump()})
+        match = re.fullmatch(r"\s*/?\s*(\d+)\s*", str(result.get("text", "")))
+        if match is None:
+            raise WebScriptError("web_pagination_invalid")
+        return int(match[1])
+
+    def _table_pages(self, action: WebAction, mode: ScriptMode) -> list[Any]:
+        answer = self._table_rows(action)
+        paging = action.pagination
+        if paging is None:
+            return list(answer["rows"])
+        current, total = self._page_number(paging.current), self._page_number(paging.total)
+        if current != 1 or total < 1:
+            raise WebScriptError("web_pagination_not_at_start")
+        if total > paging.max_pages:
+            raise WebScriptError("web_pagination_limit_exceeded")
+        rows = list(answer["rows"])
+
+        def keys(batch: list[Any]) -> set[tuple[str, ...]]:
+            if not paging.key_columns:
+                return set()
+            if any(column not in row for row in batch for column in paging.key_columns):
+                raise WebScriptError("web_column_missing")
+            result = {tuple(str(row[column]) for column in paging.key_columns) for row in batch}
+            if len(result) != len(batch):
+                raise WebScriptError("web_pagination_duplicate_keys")
+            return result
+
+        seen = keys(rows)
+        if answer.get("truncated"):
+            raise WebScriptError("web_table_limit_exceeded")
+        while current < total:
+            previous = answer["rows"]
+            self._perform({"op": "click", "mode": mode, **paging.next.model_dump()})
+            deadline = time.monotonic() + self.timeout_s
+            candidate: list[Any] | None = None
+            stable_since = time.monotonic()
+            while True:
+                self._check_origin()
+                if self._page_number(paging.total) != total:
+                    raise WebScriptError("web_pagination_changed")
+                answer = self._table_rows(action)
+                if answer["rows"] != candidate:
+                    candidate = answer["rows"]
+                    stable_since = time.monotonic()
+                if (
+                    self._page_number(paging.current) == current + 1
+                    and answer["rows"]
+                    and answer["rows"] != previous
+                    and not (keys(answer["rows"]) & seen)
+                    and time.monotonic() - stable_since >= self.settle_s
+                ):
+                    break
+                if time.monotonic() >= deadline:
+                    raise WebScriptError("web_pagination_did_not_advance")
+                time.sleep(0.1)
+            if answer.get("truncated") or len(rows) + len(answer["rows"]) > MAX_TABLE_ROWS:
+                raise WebScriptError("web_table_limit_exceeded")
+            rows.extend(answer["rows"])
+            seen.update(keys(answer["rows"]))
+            current += 1
+        return rows
+
+    def _perform(self, spec: dict[str, Any]) -> dict[str, Any]:
+        pointer = getattr(self.page, "click_at", None)
+        native = spec["op"] == "click" and callable(pointer)
+        expression = _ACT % {"find": _FIND, "spec": json.dumps({**spec, "pointer": native})}
+        deadline = time.monotonic() + self.timeout_s
+        while True:
+            if native:
+                self._check_origin()
+            try:
+                answer = self._evaluate(expression)
+                break
+            except WebScriptError as error:
+                if (
+                    not native
+                    or error.code
+                    not in {
+                        "web_target_missing",
+                        "web_target_not_visible",
+                        "web_target_disabled",
+                        "web_target_obscured",
+                    }
+                    or time.monotonic() >= deadline
+                ):
+                    raise
+                time.sleep(0.1)
+        if native:
+            assert callable(pointer)
+            point = answer["pointer"]
+            pointer(float(point["x"]), float(point["y"]))
+        return answer
 
     def _evaluate(self, expression: str) -> dict[str, Any]:
         raw = self.page.evaluate(expression)

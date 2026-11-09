@@ -6867,3 +6867,26 @@ Later in the same 2026-11-09 conversation, the owner changed the answer to yes:
 This supersedes the pending-rate clarification above. The private C4C Workflow
 may now prefill 0.02712085 EUR per TWD with provenance from this explicit owner
 confirmation. It is not an inferred correction or a platform-wide exchange rate.
+
+### C4C live replay uses UI tables and explicit readiness (2026-11-09)
+
+The owner's authenticated C4C view has no Export/Spreadsheet control; its SOP
+instructs copying the table into Excel. Use the Browser capability to read every
+visible page, then restricted local Python to write Excel, without SAP HTTP
+endpoints, application internals or order edits. Reject the draft's unverified
+Export button and US number/date assumptions. Observed dates are DD.MM.YYYY and
+amounts use decimal comma and thousands dot.
+
+SAP requires trusted pointer press/release. Add that primitive to the existing
+Browser runner, after origin/read-mode checks, rather than a SAP-specific
+runtime or DOM click workaround. Add optional split headers, bounded pagination,
+stable rows and declared unique key columns to the existing typed action contract.
+Frozen ID cells can update after other columns; accepting only a changed row is
+insufficient. Await visible loading/completion markers with a bounded wait_for,
+rather than guessing a fixed delay or treating retained old tables as results.
+
+Keep unmapped Owners as explicit exceptions with their original rows and EUR
+amounts; do not infer departments or silently omit their monthly totals. Real
+business data, test manifests and output stay in private local task directories.
+Source verification uses a separate runtime and the installed restricted,
+network-blocked Python interpreter; it does not update/restart the resident Host.

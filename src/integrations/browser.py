@@ -49,6 +49,7 @@ BrowserErrorCode = Literal[
     "navigation_failed",
     "page_changed",
     "element_missing",
+    "click_failed",
     "browser_lost",
 ]
 
@@ -821,6 +822,22 @@ class Browser:
                 f"element {index} is no longer what it was when the page was read",
             )
         return now
+
+    def click_at(self, x: float, y: float) -> None:
+        """Send real pointer events, including trusted press/release for UI controls."""
+        page = self.page()
+        try:
+            for event in ("mousePressed", "mouseReleased"):
+                page.call(
+                    "Input.dispatchMouseEvent",
+                    type=event,
+                    x=x,
+                    y=y,
+                    button="left",
+                    clickCount=1,
+                )
+        except (DevtoolsRefused, WebSocketError) as failure:
+            raise BrowserError("click_failed", type(failure).__name__) from None
 
     def click(self, index: int, *, expected: Element | None = None) -> None:
         self._at(index, expected)

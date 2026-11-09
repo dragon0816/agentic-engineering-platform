@@ -122,3 +122,8 @@ Still required for the business Workflow: run against an authorized, signed-in
 C4C browser, verify actual controls/export scope and expected workbook output.
 Changing or restarting the installed Agent requires the normal active-work
 check; this implementation performs neither action.
+
+Later live acceptance completed that signed-in run using the modified source
+runtime. See [C4C live Workflow evaluation](C4C_LIVE_WORKFLOW_2026-11-09.md) for
+actual UI corrections, full-page/Excel reconciliation and delivery limits. The
+draft-only results above remain the historical record of this earlier stage.

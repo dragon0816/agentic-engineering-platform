@@ -4,6 +4,7 @@ import json
 import sys
 import urllib.request
 from collections.abc import Iterator
+from typing import Any
 
 import pytest
 
@@ -164,3 +165,140 @@ def test_any_origin_allows_every_web_page_but_no_other_scheme() -> None:
     assert origin_permitted("https://tw.stock.yahoo.com/x", listed)
     assert not origin_permitted("https://evil.example/", listed)
     assert WebHostBinding().allowed_origins == ("*",)
+
+
+def test_click_delivers_a_trusted_pointer_sequence(browser, site) -> None:  # type: ignore[no-untyped-def]
+    """SAP controls listen for pointer release/tap, not HTMLElement.click()."""
+    browser.navigate(site.url)
+    browser.evaluate(
+        "document.body.innerHTML = '<button id=\"sap-press\">Select View</button>';"
+        "window.__presses = 0; document.getElementById('sap-press').addEventListener("
+        "'mouseup', e => { if (e.isTrusted) window.__presses += 1; });"
+    )
+    script = WebScript(actions=(WebAction(do="click", target=WebTarget(css="#sap-press")),))
+    with pytest.raises(WebScriptError) as refused:
+        runner(browser, site).run(script, "read")
+    assert refused.value.code == "web_click_not_read_only"
+    assert browser.evaluate("window.__presses") == 0
+    runner(browser, site).run(script, "act")
+    assert browser.evaluate("window.__presses") == 1
+
+
+def test_hidden_copies_do_not_make_a_visible_target_ambiguous(browser, site) -> None:  # type: ignore[no-untyped-def]
+    browser.navigate(site.url)
+    browser.evaluate(
+        "document.body.innerHTML = '<button style=\"display:none\">Sales Orders</button>'"
+        ' + \'<a href="#" id="visible-orders">Sales Orders</a>\';'
+        "window.__chosen = false; document.getElementById('visible-orders').addEventListener("
+        "'mouseup', e => { window.__chosen = e.isTrusted; });"
+    )
+    runner(browser, site).run(
+        WebScript(actions=(WebAction(do="click", target=WebTarget(label="Sales Orders")),)), "act"
+    )
+    assert browser.evaluate("window.__chosen") is True
+
+
+def test_native_dropdown_options_are_selected_by_their_visible_label(browser, site) -> None:  # type: ignore[no-untyped-def]
+    browser.navigate(site.url)
+    browser.evaluate(
+        'document.body.innerHTML = \'<ul><li role="option" id="between">... Between</li></ul>\';'
+        "window.__chosen = false; document.getElementById('between').addEventListener("
+        "'mouseup', e => { window.__chosen = e.isTrusted; });"
+    )
+    runner(browser, site).run(
+        WebScript(actions=(WebAction(do="click", target=WebTarget(label="... Between")),)), "act"
+    )
+    assert browser.evaluate("window.__chosen") is True
+
+
+def paginated_page(browser: Any, site: PracticeSite, *, stalled: bool = False) -> None:
+    browser.navigate(site.url)
+    browser.evaluate(
+        "document.body.innerHTML = '<table id=\"headers\"><thead><tr><th>ID</th><th>Amount</th>'"
+        " + '</tr></thead></table><table id=\"rows\"><thead><tr><th></th><th></th></tr></thead>'"
+        " + '<tbody><tr><td>SO-1</td><td>100</td></tr></tbody></table>'"
+        ' + \'<input id="page" value="1"><span id="total">/ 3</span>\''
+        " + '<button id=\"next\">Next Page</button>';"
+        "document.getElementById('next').addEventListener('mouseup', e => {"
+        f"if (!e.isTrusted || {json.dumps(stalled)}) return;"
+        "const n = Number(document.getElementById('page').value) + 1;"
+        "document.getElementById('page').value = n;"
+        "setTimeout(() => { document.querySelector('#rows tbody').innerHTML = "
+        "'<tr><td>SO-' + n + '</td><td>' + n*100 + '</td></tr>'; }, 80); });"
+    )
+
+
+def paginated_action(max_pages: int = 3) -> WebAction:
+    return WebAction.model_validate(
+        {
+            "do": "read_table",
+            "table": "#rows",
+            "header_table": "#headers",
+            "save_as": "orders",
+            "pagination": {
+                "next": {"css": "#next"},
+                "current": {"css": "#page"},
+                "total": {"css": "#total"},
+                "max_pages": max_pages,
+                "key_columns": ["ID"],
+            },
+        }
+    )
+
+
+def test_split_header_and_all_pages_are_read_after_each_refresh(browser, site) -> None:  # type: ignore[no-untyped-def]
+    paginated_page(browser, site)
+    result = runner(browser, site).run(WebScript(actions=(paginated_action(),)), "act")
+    assert result.data["orders"] == [
+        {"ID": "SO-1", "Amount": "100"},
+        {"ID": "SO-2", "Amount": "200"},
+        {"ID": "SO-3", "Amount": "300"},
+    ]
+
+
+def test_pagination_bounds_and_stalled_pages_never_return_partial_data(browser, site) -> None:  # type: ignore[no-untyped-def]
+    paginated_page(browser, site)
+    with pytest.raises(WebScriptError) as limited:
+        runner(browser, site).run(WebScript(actions=(paginated_action(2),)), "act")
+    assert limited.value.code == "web_pagination_limit_exceeded"
+    paginated_page(browser, site, stalled=True)
+    with pytest.raises(WebScriptError) as stopped:
+        ScriptRunner(browser, (site.url,), timeout_s=0.4).run(
+            WebScript(actions=(paginated_action(),)), "act"
+        )
+    assert stopped.value.code == "web_pagination_did_not_advance"
+
+
+def test_wait_for_observes_visible_completion_and_times_out(browser, site) -> None:  # type: ignore[no-untyped-def]
+    browser.navigate(site.url)
+    browser.evaluate(
+        "document.body.innerHTML = '<span id=\"count\">(--)</span>';"
+        "setTimeout(() => document.getElementById('count').innerText = '(750)', 150);"
+    )
+    action = WebAction(do="wait_for", target=WebTarget(css="#count"), value=r"\(\d+\)")
+    ScriptRunner(browser, (site.url,), timeout_s=1).run(WebScript(actions=(action,)), "read")
+    assert browser.evaluate("document.getElementById('count').innerText") == "(750)"
+    with pytest.raises(WebScriptError) as stopped:
+        ScriptRunner(browser, (site.url,), timeout_s=0.2).run(
+            WebScript(actions=(action.model_copy(update={"value": "finished"}),)), "read"
+        )
+    assert stopped.value.code == "web_wait_timeout"
+
+
+def test_pagination_waits_for_frozen_key_cells_to_catch_up(browser, site) -> None:  # type: ignore[no-untyped-def]
+    paginated_page(browser, site)
+    browser.evaluate(
+        "document.getElementById('next').addEventListener('mouseup', () => {"
+        "const before = document.querySelector('#rows tbody td').innerText;"
+        "setTimeout(() => {"
+        "const cell = document.querySelector('#rows tbody td'); const after = cell.innerText;"
+        "cell.innerText = before; setTimeout(() => cell.innerText = after, 500); }, 100); });"
+    )
+    result = ScriptRunner(browser, (site.url,), timeout_s=2).run(
+        WebScript(actions=(paginated_action(),)), "act"
+    )
+    assert result.data["orders"] == [
+        {"ID": "SO-1", "Amount": "100"},
+        {"ID": "SO-2", "Amount": "200"},
+        {"ID": "SO-3", "Amount": "300"},
+    ]
