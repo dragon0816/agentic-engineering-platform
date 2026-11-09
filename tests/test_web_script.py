@@ -998,3 +998,44 @@ def test_data_row_checkboxes_cannot_hide_query_fields_and_toolbar_state(
     advanced = next(control for control in controls if control["path"] == "#advanced")
     assert advanced["state"] == {"pressed": "true"}
     assert overview["controls_truncated"] is True and len(json.dumps(overview)) <= 9000
+
+
+def test_browser_full_schema_describes_exact_targets_and_wait_text() -> None:
+    from capabilities.browser_session.handlers import BrowserRequest
+
+    schema = BrowserRequest.model_json_schema()
+    targets = schema["$defs"]["WebTarget"]["properties"]
+    assert "exact accessible name" in targets["label"]["description"]
+    assert "exactly one visible" in targets["css"]["description"]
+    assert "not a fallback" in targets["css"]["description"]
+    value = schema["$defs"]["WebAction"]["properties"]["value"]["description"]
+    assert "whole actual innerText/value" in value and "not the accessible name" in value
+    assert ".*" in value and "icon-only" in value
+
+
+def test_icon_only_wait_uses_actual_text_and_presence_not_accessible_name(
+    browser: Any, site: PracticeSite
+) -> None:
+    import time
+
+    browser.navigate(site.url)
+    browser.evaluate(
+        'document.body.innerHTML = \'<button aria-label="Open filters" '
+        'title="Open filters" style="width:40px;height:40px"></button>\';'
+        "window.__waitClicks=0;document.querySelector('button').addEventListener('click',"
+        "()=>window.__waitClicks++);"
+    )
+    page_runner = ScriptRunner(browser, (site.url,), timeout_s=0.2)
+    target = WebTarget(label="Open filters", kind="button")
+    result = page_runner.run(
+        WebScript(actions=(WebAction(do="wait_for", target=target, value=".*"),)), "read"
+    )
+    assert result.data == {}
+    began = time.monotonic()
+    with pytest.raises(WebScriptError) as failed:
+        page_runner.run(
+            WebScript(actions=(WebAction(do="wait_for", target=target, value=".*Open filters.*"),)),
+            "read",
+        )
+    assert failed.value.code == "web_wait_timeout" and time.monotonic() - began < 2
+    assert browser.evaluate("window.__waitClicks") == 0

@@ -50,8 +50,17 @@ class WebScriptError(Exception):
 class WebTarget(Contract):
     """What to act on: a label as shown on the page, or a CSS selector."""
 
-    label: Text | None = None
-    css: Text | None = None
+    label: Text | None = Field(
+        default=None,
+        description="The exact accessible name; not nearby text or an inferred caption",
+    )
+    css: Text | None = Field(
+        default=None,
+        description=(
+            "Use an observed stable CSS locator matching exactly one visible element. "
+            "A comma-separated CSS union matches every branch; it is not a fallback list."
+        ),
+    )
     kind: Literal["field", "button", "link", "any"] = "any"
 
     @model_validator(mode="after")
@@ -119,7 +128,15 @@ class WebAction(Contract):
     url: Text | None = None
     target: WebTarget | None = None
     row: RowScope | None = None
-    value: Text | None = None
+    value: Text | None = Field(
+        default=None,
+        description=(
+            "For fill, the text to enter (with {placeholders}). For wait_for, a regular expression "
+            "matching the whole actual innerText/value, not the accessible name. For an icon-only "
+            "visible target, .* accepts empty text and waits for presence; "
+            "caption words may time out."
+        ),
+    )
     table: Text | None = None
     save_as: Symbol | None = None
     header_table: Text | None = None
