@@ -26,11 +26,14 @@ nothing is created.
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
+import os
 from collections.abc import Callable, Mapping
 from pathlib import Path
+from time import monotonic
 
-from pydantic import Field, JsonValue
+from pydantic import Field, JsonValue, TypeAdapter
 
 from capabilities.coding_change.contracts import CodingHostBinding
 from capabilities.coding_change.workspaces import (
@@ -39,7 +42,7 @@ from capabilities.coding_change.workspaces import (
     has_traversal,
 )
 from capabilities.contracts import CapabilitySpec
-from capabilities.runtime import CapabilityRefused
+from capabilities.runtime import CapabilityExecutionFailed, CapabilityRefused
 from common.base import Contract, Text
 from common.execution import RequestContext
 from harness.network_block import outbound_rule_present
@@ -66,6 +69,12 @@ RUN_SPEC = CapabilitySpec.model_validate(
 )
 MAX_OUTPUT_CHARS = 12_000
 MAX_FILES_LISTED = 200
+# Both scans are bounded independently; unknown freshness is never a success.
+MAX_SCAN_FILES = 2_000
+MAX_SCAN_ENTRIES = 10_000
+MAX_SCAN_BYTES = 1024**3
+MAX_SCAN_SECONDS = 10.0
+SCAN_CHUNK_BYTES = 1024**2
 
 
 class RunPythonRequest(Contract):
@@ -94,6 +103,8 @@ class RunPythonResult(Contract):
     script_path: str
     # The workspace did not exist and this run created it under its root.
     workspace_created: bool = False
+    # Only an exact, complete bounded JSON object on stdout is composable.
+    data: dict[str, JsonValue] | None = None
 
 
 class RunPythonHandler:
@@ -110,7 +121,12 @@ class RunPythonHandler:
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         step_input = RunPythonStepInput.model_validate(inputs)
-        return await asyncio.to_thread(self.run, step_input.request, step_input.arguments)
+        result = await asyncio.to_thread(self.run, step_input.request, step_input.arguments)
+        if result.timed_out:
+            raise CapabilityExecutionFailed("coding_program_timeout", result)
+        if result.exit_code != 0:
+            raise CapabilityExecutionFailed("coding_program_failed", result)
+        return result
 
     def _workspace(self, raw: str) -> Path:
         """The resolved workspace, checked but not created: it lies under a
@@ -151,6 +167,7 @@ class RunPythonHandler:
             create_workspace(workspace)
         output = workspace / "output"
         output.mkdir(exist_ok=True)
+        before = _output_fingerprints(output)
         runs = workspace / ".aep-run"
         runs.mkdir(exist_ok=True)
         step = runs / f"run-{len(list(runs.glob('run-*'))) + 1:03d}"
@@ -164,19 +181,81 @@ class RunPythonHandler:
             env["AEP_WORKFLOW_PARAMS"] = str(params)
         label_low(output)
         result = runner.run([str(script)], cwd=workspace, run_dir=step, extra_env=env)
-        files = sorted(
-            (
-                OutputFile(path=item.relative_to(workspace).as_posix(), bytes=item.stat().st_size)
-                for item in output.rglob("*")
-                if item.is_file()
-            ),
-            key=lambda item: item.path,
-        )[:MAX_FILES_LISTED]
-        return RunPythonResult(
+        diagnostics = RunPythonResult(
             exit_code=result.exit_code,
             timed_out=result.timed_out,
             output=result.output[-MAX_OUTPUT_CHARS:],
-            files=tuple(files),
+            files=(),
             script_path=script.relative_to(workspace).as_posix(),
             workspace_created=created,
+            data=_structured_output(result.output),
         )
+        try:
+            after = _output_fingerprints(output)
+        except CapabilityRefused as failure:
+            raise CapabilityExecutionFailed(failure.code, diagnostics) from None
+        files = sorted(
+            (
+                OutputFile(path=item.relative_to(workspace).as_posix(), bytes=item.stat().st_size)
+                for item, digest in after.items()
+                if before.get(item) != digest
+            ),
+            key=lambda item: item.path,
+        )[:MAX_FILES_LISTED]
+        return diagnostics.model_copy(update={"files": tuple(files)})
+
+
+def _structured_output(output: str) -> dict[str, JsonValue] | None:
+    if len(output) > MAX_OUTPUT_CHARS:
+        return None
+    try:
+        data = TypeAdapter(dict[str, JsonValue]).validate_json(output, strict=True)
+        # Pydantic's JSON reader accepts NaN/Infinity; exported data must be
+        # ordinary transport-safe JSON, including deeply nested numeric values.
+        json.dumps(data, allow_nan=False)
+        return data
+    except (ValueError, RecursionError):
+        return None
+
+
+def _output_fingerprints(output: Path) -> dict[Path, bytes]:
+    """Bounded content evidence, independent of timestamps and file lengths.
+
+    Count directories too so an empty historical tree cannot evade the bound.
+    Stream checks also catch growing files without trusting their initial size.
+    """
+    deadline = monotonic() + MAX_SCAN_SECONDS
+    fingerprints: dict[Path, bytes] = {}
+    pending = [output]
+    entries = total_bytes = 0
+
+    def check_deadline() -> None:
+        if monotonic() >= deadline:
+            raise CapabilityRefused("coding_output_scan_limit")
+
+    while pending:
+        check_deadline()
+        with os.scandir(pending.pop()) as directory:
+            for entry in directory:
+                check_deadline()
+                entries += 1
+                if entries > MAX_SCAN_ENTRIES:
+                    raise CapabilityRefused("coding_output_scan_limit")
+                if entry.is_dir(follow_symlinks=False):
+                    pending.append(Path(entry.path))
+                elif entry.is_file():
+                    if len(fingerprints) >= MAX_SCAN_FILES:
+                        raise CapabilityRefused("coding_output_scan_limit")
+                    if total_bytes + entry.stat().st_size > MAX_SCAN_BYTES:
+                        raise CapabilityRefused("coding_output_scan_limit")
+                    digest = hashlib.sha256()
+                    with open(entry.path, "rb") as stream:
+                        while chunk := stream.read(SCAN_CHUNK_BYTES):
+                            check_deadline()
+                            total_bytes += len(chunk)
+                            if total_bytes > MAX_SCAN_BYTES:
+                                raise CapabilityRefused("coding_output_scan_limit")
+                            digest.update(chunk)
+                    check_deadline()
+                    fingerprints[Path(entry.path)] = digest.digest()
+    return fingerprints

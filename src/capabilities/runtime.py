@@ -38,6 +38,23 @@ class TransientCapabilityError(Exception):
     """
 
 
+class CapabilityExecutionFailed(Exception):
+    """An invoked operation failed, with typed local diagnostic output.
+
+    Unlike a refusal this reports execution, not policy or input rejection.
+    The Bridge validates `data` against the installed output contract before
+    retaining it. Exception text never travels. `where` is fixed request
+    structure only (positions and action kinds), just as for CapabilityRefused.
+    This does not authorize retries, even for a read capability.
+    """
+
+    def __init__(self, code: str, data: Contract, *, where: str | None = None) -> None:
+        self.code: str = TypeAdapter(Symbol).validate_python(code)
+        self.data = data
+        self.where = where
+        super().__init__(self.code)
+
+
 class CapabilityInvocation(Contract):
     context: RequestContext
     target: AssetIdentity

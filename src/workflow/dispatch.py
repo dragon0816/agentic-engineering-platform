@@ -12,6 +12,7 @@ from pydantic_core import ErrorDetails
 
 import telemetry.recorder as telemetry
 from capabilities.runtime import (
+    CapabilityExecutionFailed,
     CapabilityInvocation,
     CapabilityRefused,
     InstalledCapabilities,
@@ -152,6 +153,26 @@ class BridgeExecutor:
                 )
         except TimeoutError:
             return self._failure(call, "timeout", invoked=True)
+        except CapabilityExecutionFailed as failure:
+            try:
+                checked = binding.output_model.model_validate(failure.data, strict=True)
+                result = CapabilityResult(
+                    trace=call.context.trace,
+                    status="failed",
+                    data=checked.model_dump(mode="json"),
+                    failure=Failure(
+                        code=failure.code,
+                        message=(
+                            f"Execution failed at {failure.where}"
+                            if failure.where
+                            else "Capability execution failed"
+                        ),
+                    ),
+                    handler_invoked=True,
+                )
+            except (ValidationError, TypeError, ValueError):
+                return self._failure(call, "invalid_output", invoked=True)
+            return self._finish(call, result)
         except CapabilityRefused as refusal:
             # The handler named why; only the code, and where in the request, travel.
             if refusal.where:

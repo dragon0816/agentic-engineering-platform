@@ -34,7 +34,10 @@ def _files(data: Any) -> list[dict[str, Any]]:
 def output_check(check: WorkflowOutputCheck, snapshot: WorkflowRunSnapshot) -> bool:
     if check.step_index >= len(snapshot.step_results):
         return False
-    data = snapshot.step_results[check.step_index].data
+    result = snapshot.step_results[check.step_index]
+    if result.status != "succeeded":
+        return False
+    data = result.data
     if check.kind == "data_nonempty":
         return data not in (None, "", [], {})
     matching = [

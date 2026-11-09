@@ -123,3 +123,36 @@ def test_a_workflow_without_checks_keeps_its_digest_and_behaviour(tmp_path: Path
         run_workflow_checked(engine, context(), manifest.metadata.identity, {"size": 0})
     )
     assert done.run.status == "succeeded"
+
+
+def test_failed_step_diagnostics_are_not_success_evidence() -> None:
+    from common.execution import Failure
+    from workflow.harness import output_check
+
+    engine, manifest = engine_with([])
+    done = asyncio.run(
+        run_workflow_checked(engine, context(), manifest.metadata.identity, {"size": 10})
+    )
+    failed = done.model_copy(
+        update={
+            "step_results": (
+                done.step_results[0].model_copy(
+                    update={
+                        "status": "failed",
+                        "failure": Failure(code="program_failed", message="failed"),
+                    }
+                ),
+            )
+        }
+    )
+    from common.assets import WorkflowOutputCheck
+
+    for kind in ("data_nonempty", "file_exists", "files_nonempty"):
+        check = WorkflowOutputCheck.model_validate(
+            {
+                "check_id": "report",
+                "step_index": 0,
+                "kind": kind,
+            }
+        )
+        assert not output_check(check, failed)

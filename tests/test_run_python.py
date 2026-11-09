@@ -202,3 +202,216 @@ def test_a_workflow_step_gives_the_same_script_new_values(tmp_path: Path) -> Non
     assert (workspace / "output" / "m2026-08.txt").read_text() == "2026-08"
     scripts = sorted((workspace / ".aep-run").glob("run-*/script.py"))
     assert len(scripts) == 2 and scripts[0].read_bytes() == scripts[1].read_bytes()
+
+
+@requires_win32
+@pytest.mark.parametrize(
+    ("script", "failure_code", "exit_code", "timed_out"),
+    [
+        (
+            "print('missing headers', flush=True)\nraise SystemExit(3)",
+            "coding_program_failed",
+            3,
+            False,
+        ),
+        ("print('started', flush=True)\nwhile True: pass", "coding_program_timeout", None, True),
+    ],
+    ids=["nonzero", "timeout"],
+)
+def test_failed_program_cannot_pass_with_an_old_workbook(
+    tmp_path: Path, script: str, failure_code: str, exit_code: int | None, timed_out: bool
+) -> None:
+    import asyncio
+
+    from test_workflow_harness import context
+
+    from capabilities.coding_change.run_python import RUN_SPEC, RunPythonResult, RunPythonStepInput
+    from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
+    from common.assets import ExecutionDependencies, WorkflowOutputCheck
+    from host_runtime.session_artifacts import SessionArtifacts
+    from workflow.dispatch import BridgeExecutor
+    from workflow.engine import InstalledWorkflows, WorkflowEngine
+    from workflow.harness import output_check, run_workflow_checked
+
+    workspace = task(tmp_path)
+    (workspace / "output").mkdir()
+    (workspace / "output" / "old.xlsx").write_bytes(b"previous report")
+    runner = handler(tmp_path / "tasks")
+    runner.binding = runner.binding.model_copy(update={"timeout_seconds": 5})
+    installed = InstalledCapabilities()
+    installed.register(
+        RUN_SPEC,
+        runner,
+        RunPythonStepInput,
+        RunPythonResult,
+        ExecutionDependencies(central_required=False),
+    )
+    grant = CapabilityGrant(
+        actor="owner",
+        asset=RUN_SPEC.identity,
+        permissions=("coding.run-python",),
+        policy_refs=("coding-restricted-execution-policy",),
+        approval_ref="test-approval",
+    )
+    check = WorkflowOutputCheck(
+        check_id="report", step_index=0, kind="files_nonempty", pattern="*.xlsx"
+    )
+    manifest = run_python_workflow().model_copy(update={"checks": (check,)})
+    workflows = InstalledWorkflows()
+    workflows.register(manifest)
+    engine = WorkflowEngine(workflows, BridgeExecutor(installed, LocalPolicy((grant,))))
+    done = asyncio.run(
+        run_workflow_checked(
+            engine,
+            context(),
+            manifest.metadata.identity,
+            {"workspace": str(workspace), "script": script},
+        )
+    )
+    assert done.run.status == "failed"
+    assert done.run.failure is not None and done.run.failure.code == failure_code
+    assert done.run.completed_steps == 0
+    result = done.step_results[0]
+    assert result.status == "failed" and result.handler_invoked
+    assert isinstance(result.data, dict)
+    assert result.data["exit_code"] == exit_code and result.data["timed_out"] is timed_out
+    assert result.data["output"] and result.data["files"] == []
+    assert not output_check(check, done)
+    summary = SessionArtifacts(tmp_path / "history").finish_run("chat-1", "owner", done).summary
+    assert summary is not None and summary.status == "failed"
+    assert "失敗" in summary.block()
+
+
+@requires_win32
+def test_outputs_are_new_or_content_changed_in_this_invocation(tmp_path: Path) -> None:
+    workspace = task(tmp_path)
+    output = workspace / "output"
+    output.mkdir()
+    (output / "unchanged.txt").write_bytes(b"same")
+    (output / "changed.txt").write_bytes(b"old!")
+    result = handler(tmp_path / "tasks").run(
+        RunPythonRequest(
+            workspace=str(workspace),
+            script=(
+                "import os\nfrom pathlib import Path\n"
+                "p = Path('output/changed.txt'); stamp = p.stat().st_mtime_ns\n"
+                "p.write_bytes(b'new!'); os.utime(p, ns=(stamp, stamp))\n"
+                "Path('output/unchanged.txt').write_bytes(b'same')\n"
+                "Path('output/new.txt').write_bytes(b'new')\n"
+            ),
+        )
+    )
+    assert result.exit_code == 0, result.output
+    assert [item.path for item in result.files] == ["output/changed.txt", "output/new.txt"]
+
+
+@requires_win32
+@pytest.mark.parametrize("limit", ["MAX_SCAN_FILES", "MAX_SCAN_BYTES", "MAX_SCAN_ENTRIES"])
+def test_oversized_history_refuses_before_launch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, limit: str
+) -> None:
+    from capabilities.coding_change import run_python
+    from harness.restricted_runner import RestrictedRunner
+
+    workspace = task(tmp_path)
+    output = workspace / "output"
+    output.mkdir()
+    (output / "old.xlsx").write_bytes(b"previous report")
+    monkeypatch.setattr(run_python, limit, 0, raising=False)
+    calls: list[str] = []
+
+    def unexpected_run(*args: object, **kwargs: object) -> None:
+        calls.append("run")
+        raise AssertionError("output evidence must be bounded before launch")
+
+    monkeypatch.setattr(RestrictedRunner, "run", unexpected_run)
+    with pytest.raises(CapabilityRefused, match="coding_output_scan_limit"):
+        handler(tmp_path / "tasks").run(
+            RunPythonRequest(workspace=str(workspace), script="print('never starts')")
+        )
+    assert calls == []
+
+
+@pytest.mark.parametrize("ticks_before_expiry", [1, 3], ids=["before-scan", "during-hash"])
+def test_output_fingerprint_deadline_is_enforced(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, ticks_before_expiry: int
+) -> None:
+    from capabilities.coding_change import run_python
+
+    (tmp_path / "old.xlsx").write_bytes(b"previous report")
+    ticks = iter([0.0] * ticks_before_expiry + [11.0])
+    monkeypatch.setattr(run_python, "monotonic", lambda: next(ticks), raising=False)
+    with pytest.raises(CapabilityRefused, match="coding_output_scan_limit"):
+        run_python._output_fingerprints(tmp_path)
+
+
+@requires_win32
+def test_post_run_scan_overflow_retains_failure_diagnostics(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from capabilities.coding_change import run_python
+    from capabilities.runtime import CapabilityExecutionFailed
+
+    workspace = task(tmp_path)
+    monkeypatch.setattr(run_python, "MAX_SCAN_BYTES", 1, raising=False)
+    with pytest.raises(CapabilityExecutionFailed, match="coding_output_scan_limit") as failure:
+        handler(tmp_path / "tasks").run(
+            RunPythonRequest(
+                workspace=str(workspace),
+                script="open('output/new.txt', 'w').write('xx')\nprint('created')",
+            )
+        )
+    data = run_python.RunPythonResult.model_validate(failure.value.data)
+    assert data.exit_code == 0 and "created" in data.output
+    assert data.files == ()
+
+
+@requires_win32
+@pytest.mark.parametrize(
+    ("stdout", "expected"),
+    [
+        ('{"date":"09.11.2026","nested":[1,true]}', {"date": "09.11.2026", "nested": [1, True]}),
+        ('["09.11.2026"]', None),
+        ('log line\n{"date":"09.11.2026"}', None),
+        ('{"date":', None),
+        ('{"value":NaN}', None),
+        ('{"value":1e999}', None),
+        (" " * 12_001 + '{"date":"09.11.2026"}', None),
+        ('{"nested":' + "[" * 1100 + "0" + "]" * 1100 + "}", None),
+    ],
+    ids=["object", "nonobject", "noisy", "partial", "nan", "overflow", "truncated", "recursive"],
+)
+def test_program_stdout_binds_only_an_exact_bounded_json_object(
+    tmp_path: Path, stdout: str, expected: dict[str, object] | None
+) -> None:
+    workspace = task(tmp_path)
+    result = handler(tmp_path / "tasks").run(
+        RunPythonRequest(
+            workspace=str(workspace),
+            script=f"print({stdout!r})",
+        )
+    )
+    assert result.exit_code == 0, result.output
+    assert result.data == expected
+    assert result.output == (stdout + "\n")[-12_000:]
+
+
+@requires_win32
+def test_nonzero_program_json_is_diagnostic_data_and_never_success(tmp_path: Path) -> None:
+    import asyncio
+
+    from capabilities.coding_change.run_python import RunPythonResult, RunPythonStepInput
+    from capabilities.runtime import CapabilityExecutionFailed
+
+    workspace = task(tmp_path)
+    (workspace / "output").mkdir()
+    (workspace / "output" / "old.xlsx").write_bytes(b"previous report")
+    request = RunPythonRequest(
+        workspace=str(workspace),
+        script='print(\'{"date":"09.11.2026"}\')\nraise SystemExit(3)',
+    )
+    with pytest.raises(CapabilityExecutionFailed, match="coding_program_failed") as failure:
+        asyncio.run(handler(tmp_path / "tasks")(None, RunPythonStepInput(request=request)))  # type: ignore[arg-type]
+    data = RunPythonResult.model_validate(failure.value.data)
+    assert data.exit_code == 3 and data.data == {"date": "09.11.2026"}
+    assert data.files == ()

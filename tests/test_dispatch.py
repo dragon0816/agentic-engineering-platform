@@ -321,3 +321,26 @@ def test_a_refusal_carries_where_in_the_request_but_no_message() -> None:
     result = asyncio.run(bridge.execute(invocation()))
     assert result.failure is not None and result.failure.code == "desktop_dialog_missing"
     assert result.failure.message == "Refused at action 7 (wait_dialog)"
+
+
+@pytest.mark.parametrize("valid", [True, False], ids=["validated-data", "invalid-data"])
+def test_execution_failure_retains_only_validated_output(valid: bool) -> None:
+    class Failed(Handler):
+        async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+            from capabilities.runtime import CapabilityExecutionFailed
+
+            self.calls.append(context)
+            data = Output(count=2) if valid else Output(count=2).model_copy(update={"count": "bad"})
+            raise CapabilityExecutionFailed("program_failed", data, where="action 2 (read)")
+
+    handler = Failed()
+    bridge = BridgeExecutor(installed(handler), LocalPolicy((grant(),)))
+    result = asyncio.run(bridge.execute(invocation()))
+    assert result.status == "failed" and result.handler_invoked
+    assert result.failure is not None and not result.failure.retryable
+    assert result.failure.code == ("program_failed" if valid else "invalid_output")
+    assert result.data == ({"count": 2} if valid else None)
+    if valid:
+        assert result.failure.message == "Execution failed at action 2 (read)"
+    assert len(handler.calls) == 1
+    assert "data" not in bridge.events[0].model_dump()
