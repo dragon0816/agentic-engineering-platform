@@ -688,3 +688,79 @@ def test_overview_keeps_late_search_fields_and_toolbar_before_table_record_links
     )
     page = run.run(BrowserRequest()).page
     assert "Advanced Search" in page and "Order Date" in page and "expanded='false'" in page
+
+
+def test_standard_accessible_names_are_shared_by_overview_and_target_matching(
+    browser: Any, site: PracticeSite
+) -> None:
+    browser.navigate(site.url)
+    html = (
+        '<span id="first" hidden>Order</span><span id="second">Date</span>'
+        '<input id="aria" name="order_date" aria-labelledby="missing first second" '
+        'aria-describedby="help" aria-label="Wrong fallback" value="private-date">'
+        '<span id="help">Date guidance</span>'
+        '<label for="native">Customer</label><label for="native">Code</label><input id="native">'
+        '<label>Owner<input id="wrapped" value="private-owner"></label>'
+        '<span id="verb">Run</span><span id="noun">report</span>'
+        '<button id="run" aria-labelledby="verb noun">Contradictory visible text</button>'
+        '<input id="continue" type="button" value="Continue">'
+        '<input id="fallback" aria-labelledby="does-not-exist" aria-label="Safe fallback">'
+        '<textarea id="private-note">private-note-value</textarea>'
+        '<div id="private-editor" contenteditable=true>private-editor-value</div>'
+        '<input id="privacy" aria-labelledby="private-note private-editor" aria-label="Safe name">'
+    )
+    browser.evaluate(
+        "document.body.innerHTML = " + json.dumps(html) + ";"
+        "window.__namedClick=false;document.getElementById('run').addEventListener('mouseup',"
+        "e=>window.__namedClick=e.isTrusted);"
+    )
+    inspected = runner(browser, site).inspect()
+    overview = inspected["overview"]
+    assert isinstance(overview, dict) and isinstance(overview["controls"], list)
+    controls = {
+        control["path"]: control for control in overview["controls"] if isinstance(control, dict)
+    }
+    expected = {
+        "#aria": "Order Date",
+        "#native": "Customer Code",
+        "#wrapped": "Owner",
+        "#run": "Run report",
+        "#continue": "Continue",
+        "#fallback": "Safe fallback",
+        "#privacy": "Safe name",
+    }
+    for path, name in expected.items():
+        assert controls[path]["label"] == name
+    for path in ("#aria", "#native", "#wrapped"):
+        action = WebAction(
+            do="fill",
+            target=WebTarget(label=str(controls[path]["label"]), kind="field"),
+            value="chosen",
+        )
+        runner(browser, site).run(WebScript(actions=(action,)), "act")
+    action = WebAction(
+        do="click", target=WebTarget(label=str(controls["#run"]["label"]), kind="button")
+    )
+    runner(browser, site).run(WebScript(actions=(action,)), "act")
+    assert browser.evaluate("window.__namedClick") is True
+    assert (
+        browser.evaluate(
+            "['aria','native','wrapped'].every(id=>document.getElementById(id).value==='chosen')"
+        )
+        is True
+    )
+    serialized = json.dumps(inspected)
+    for secret in ("private-date", "private-owner", "private-note-value", "private-editor-value"):
+        assert secret not in serialized
+    elements = inspected["elements"]
+    assert isinstance(elements, list)
+    attribute_sets = []
+    for element in elements:
+        if isinstance(element, dict):
+            attributes = element.get("attributes")
+            if isinstance(attributes, dict):
+                attribute_sets.append(attributes)
+    attrs = next(attributes for attributes in attribute_sets if attributes.get("id") == "aria")
+    assert attrs["aria-labelledby"] == "missing first second"
+    assert attrs["aria-describedby"] == "help" and attrs["name"] == "order_date"
+    assert any(attributes.get("for") == "native" for attributes in attribute_sets)

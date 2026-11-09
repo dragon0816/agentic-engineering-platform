@@ -64,7 +64,7 @@ class FakeBrowser:
             return "complete"
         if expression == "document.location.href":
             return self.url
-        if "const walker" in expression:
+        if "inspection:" in expression:
             return json.dumps(
                 {
                     "inspection": {
@@ -254,9 +254,9 @@ def test_inspect_dom_rejects_unbounded_or_executable_arguments() -> None:
 def test_failed_browser_action_keeps_fresh_diagnostics_through_bridge(tmp_path: Path) -> None:
     class FailedBrowser(FakeBrowser):
         def evaluate(self, expression: str) -> Any:
-            if "const spec" in expression and "const walker" not in expression:
+            if "const hit = find(spec)" in expression:
                 return json.dumps({"error": "web_target_missing"})
-            if "const walker" in expression:
+            if "inspection:" in expression:
                 return json.dumps(
                     {
                         "inspection": {

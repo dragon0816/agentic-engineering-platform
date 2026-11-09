@@ -39,6 +39,7 @@ from types import TracebackType
 from typing import IO, Any, Literal, Self
 
 from common.base import Contract, Text
+from integrations.dom_names import DOM_NAME_JS
 from integrations.websocket import Devtools, DevtoolsRefused, SocketTrace, WebSocketError
 
 BrowserErrorCode = Literal[
@@ -175,6 +176,7 @@ class PageView(Contract):
 _LIST_ELEMENTS = """
 (() => {
   const out = [];
+  const accessibleName = __DOM_NAME__;
   document.querySelectorAll(%s).forEach((e, i) => {
     const box = e.getBoundingClientRect();
     out.push({
@@ -183,9 +185,7 @@ _LIST_ELEMENTS = """
       kind: e.getAttribute('type') || '',
       element_id: e.id || '',
       name: e.getAttribute('name') || '',
-      label: (e.innerText || e.getAttribute('aria-label') ||
-              e.getAttribute('placeholder') || e.getAttribute('title') || '')
-             .replace(/\\s+/g, ' ').trim().slice(0, 200),
+      label: accessibleName(e),
       value: (e.value == null ? '' : String(e.value))
              .replace(/\\s+/g, ' ').trim().slice(0, 200),
       href: e.getAttribute('href') || '',
@@ -194,7 +194,7 @@ _LIST_ELEMENTS = """
   });
   return JSON.stringify(out);
 })()
-"""
+""".replace("__DOM_NAME__", DOM_NAME_JS)
 
 
 def _named(failure: Exception) -> str:

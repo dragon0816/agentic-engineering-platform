@@ -31,6 +31,7 @@ from pydantic import Field, JsonValue, model_validator
 
 from common.base import Contract, Symbol, Text
 from common.trace import redact
+from integrations.dom_names import DOM_NAME_JS
 
 ScriptMode = Literal["read", "act"]
 _PLACEHOLDER = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
@@ -172,11 +173,7 @@ class ScriptPage(Protocol):
 _FIND = r"""
 (spec) => {
   const norm = s => (s || '').replace(/\s+/g, ' ').trim();
-  const caption = e => {
-    const own = e.labels && e.labels.length ? e.labels[0].innerText : '';
-    return norm(own || e.getAttribute('aria-label') || e.getAttribute('placeholder') ||
-                e.getAttribute('title') || e.innerText || e.value || '');
-  };
+  const caption = __DOM_NAME__;
   let scope = document;
   if (spec.row) {
     const table = document.querySelector(spec.row.table);
@@ -197,14 +194,15 @@ _FIND = r"""
     any: 'a[href], button, input:not([type=hidden]), select, textarea, '
       + '[role=button], [role=option]'};
   const matches = spec.css ? [...scope.querySelectorAll(spec.css)]
-    : [...scope.querySelectorAll(kinds[spec.kind])].filter(e => caption(e) === spec.label);
+    : [...scope.querySelectorAll(kinds[spec.kind])].filter(
+      e => caption(e) === norm(spec.label).slice(0, 80));
   const found = matches.filter(e => e.getClientRects().length
     && getComputedStyle(e).visibility !== 'hidden');
   if (!found.length) return {error: 'web_target_missing'};
   if (found.length > 1) return {error: 'web_target_ambiguous'};
   return {element: found[0]};
 }
-"""
+""".replace("__DOM_NAME__", DOM_NAME_JS)
 
 _ACT = r"""
 (() => {
@@ -263,7 +261,7 @@ class DOMElement(Contract):
     text: str = Field(max_length=200)
     attributes: dict[
         Annotated[str, Field(max_length=32)], Annotated[str, Field(max_length=160)]
-    ] = Field(default_factory=dict, max_length=12)
+    ] = Field(default_factory=dict, max_length=15)
 
 
 class DOMControl(Contract):
@@ -371,20 +369,7 @@ _INSPECT_DOM = r"""
     }
     return {text: norm(text), truncated};
   };
-  const safeLabel = element => {
-    if (fields.includes(element.tagName)) return '';
-    const labels = document.createTreeWalker(element, NodeFilter.SHOW_ELEMENT, {
-      acceptNode: e => excluded(e) || fields.includes(e.tagName) || !visible(e)
-        ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
-    });
-    let current = element, text = '', count = 0;
-    while (current && count < 200 && text.length < 200 && budget()) {
-      count++;
-      text += ' ' + ownText(current, 200 - text.length).text;
-      current = labels.nextNode();
-    }
-    return norm(text).slice(0, 200);
-  };
+  const accessibleName = __DOM_NAME__;
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
     acceptNode: e => excluded(e) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
   });
@@ -427,7 +412,7 @@ _INSPECT_DOM = r"""
       const attrs = {};
       for (const name of ['id', 'class', 'role', 'aria-label', 'aria-expanded', 'aria-disabled',
                           'name', 'type', 'title', 'data-testid', 'data-test-id',
-                          'data-automation-id']) {
+                          'data-automation-id', 'aria-labelledby', 'aria-describedby', 'for']) {
         const attribute = e.getAttribute(name);
         if (attribute !== null) attrs[name] = norm(attribute).slice(0, 160);
       }
@@ -448,8 +433,7 @@ _INSPECT_DOM = r"""
         '[role=columnheader]');
       const priority = navigation ? 0 : field ? 1 : toolbar ? 2 : tableCell ? 5 : link ? 4 : 3;
       if (buckets[priority].length < 80) {
-        const label = safeLabel(e) || e.getAttribute('aria-label') || e.getAttribute('title') ||
-          (e.labels && e.labels.length ? safeLabel(e.labels[0]) : '');
+        const label = accessibleName(e, budget);
         const state = {};
         const expanded = e.getAttribute('aria-expanded'), pressed = e.getAttribute('aria-pressed');
         if (['true', 'false'].includes(expanded)) state.expanded = expanded;
@@ -484,8 +468,7 @@ _INSPECT_DOM = r"""
       tables_truncated: tablesTruncated || !!e, visited_nodes: visited,
       time_limit_reached: timedOut, scan_limit_reached: scanLimit}}});
 })()
-"""
-
+""".replace("__DOM_NAME__", DOM_NAME_JS)
 
 _READ_RECORD = r"""
 (() => {
