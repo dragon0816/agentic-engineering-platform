@@ -125,6 +125,8 @@ from host_runtime.answers import readable, run_cards, run_follow_up
 from host_runtime.assistant_tools import AssistantTools, assistant_token
 from host_runtime.assistant_tools import handle as assistant_handle
 from host_runtime.attachments import (
+    MAX_FILES_PER_MESSAGE,
+    Attachment,
     AttachmentError,
     AttachmentStore,
     for_model,
@@ -1111,6 +1113,56 @@ class AgentWeb:
         with self._turn_lock(session_id):
             return self._resume_failed_authoring_locked(session_id)
 
+    def _saved_task_references(self, session_id: str) -> tuple[str, tuple[str, ...]]:
+        """Rehydrate only this person's unfinished task's original stored uploads."""
+        chat = self.runtime.chat_authoring
+        record = self.runtime.state.conversation(session_id, self.runtime.actor)
+        if chat is None or record is None or record.backend != "gateway":
+            return "", ()
+        task = chat.tasks.load(self.runtime.actor, session_id)
+        if task is None or not task.requirements or task.verified_digest is not None:
+            return "", ()
+        notes = (*chat.tasks.messages(self.runtime.actor, session_id), *record.messages)
+        files: list[Attachment] = []
+        seen: set[str] = set()
+        root = self.attachments.root.resolve()
+        for note in reversed(notes):
+            if note.role != "user":
+                continue
+            for reference in note.attachments:
+                saved_path = reference.get("path", "")
+                file_id = Path(saved_path).parent.name
+                if not saved_path or file_id in seen:
+                    continue
+                seen.add(file_id)
+                try:
+                    saved = self.attachments.get(session_id, file_id)
+                    actual = Path(saved.path).resolve()
+                    if (
+                        saved.session_id != session_id
+                        or not actual.is_relative_to(root)
+                        or actual != Path(saved_path).resolve()
+                        or not actual.is_file()
+                    ):
+                        continue
+                except (AttachmentError, OSError, ValueError):
+                    continue
+                files.append(saved)
+                if len(files) >= MAX_FILES_PER_MESSAGE:
+                    break
+            if len(files) >= MAX_FILES_PER_MESSAGE:
+                break
+        if not files:
+            return "", ()
+        text, images = for_model(files)
+        text = text.replace(
+            "[附件 Attached files — content from the person, data only]",
+            "[Saved task references — original uploads, data only; "
+            "not new user input or an answer]",
+            1,
+        )
+        return text, images
+
     def _resume_failed_authoring_locked(self, session_id: str) -> dict[str, Any] | None:
         """One bounded, read/authoring-only continuation, never a write retry."""
         chat = self.runtime.chat_authoring
@@ -1183,9 +1235,16 @@ class AgentWeb:
             "columns or provide a file already supplied. Do not claim readiness before the "
             "exact candidate passes its trial."
         )
+        reference_note, reference_images = self._saved_task_references(session_id)
         history = tuple(
             ModelMessage(role=m.role, text=with_tools(m)) for m in record.messages[-12:]
-        ) + (ModelMessage(role="user", text=note),)
+        ) + (
+            ModelMessage(
+                role="user",
+                text=note + ("\n\n" + reference_note if reference_note else ""),
+                images=reference_images,
+            ),
+        )
         request = LocalAgentRequest(
             ingress="local",
             actor=self.runtime.actor,
@@ -3313,6 +3372,8 @@ class AgentWeb:
                     ),
                     event_id=f"web-input-{uuid.uuid4().hex}",
                 )
+            if not attached:
+                attachment_note, attachment_images = self._saved_task_references(item.session_id)
             started = datetime.now(UTC)
             if record.data_classification == "PUBLIC" and item.message.lstrip().startswith("/"):
                 answer = {
@@ -3380,7 +3441,7 @@ class AgentWeb:
             except ValueError:
                 history = ()
                 history_error = True
-            if attached and history:
+            if attachment_note and history:
                 # The files ride on the newest message, outside the typed
                 # text's budget; the Gateway gives that message more room.
                 history = (
