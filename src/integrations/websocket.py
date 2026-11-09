@@ -41,6 +41,9 @@ LOOPBACK = ("127.0.0.1", "localhost", "::1")
 #: list is not small either, but nothing here is a file transfer. Past this a
 #: message is refused rather than held.
 MAX_MESSAGE_BYTES = 64 * 1024 * 1024
+# Events are observation signals, never an unbounded transcript of page traffic.
+MAX_DEVTOOLS_EVENTS = 256
+MAX_DEVTOOLS_EVENT_BYTES = 4096
 
 WebSocketErrorCode = Literal[
     "not_loopback",
@@ -50,6 +53,7 @@ WebSocketErrorCode = Literal[
     "closed",
     "protocol_error",
     "message_too_large",
+    "timeout",
 ]
 
 
@@ -174,6 +178,7 @@ class WebSocket:
         self, url: str, *, timeout_s: float = 30.0, trace: SocketTrace | None = None
     ) -> None:
         self.trace = trace
+        self._deadline: float | None = None
         if trace is not None:
             trace.url = url
         parts = urlsplit(url)
@@ -250,10 +255,27 @@ class WebSocket:
 
     # -- frames --------------------------------------------------------
 
+    def _io_timeout(self) -> None:
+        """Use one absolute command budget, including fragments and control frames."""
+        if self._deadline is None:
+            return
+        remaining = self._deadline - time.monotonic()
+        if remaining <= 0:
+            raise self._failed("deadline", "timeout", TimeoutError())
+        try:
+            self.socket.settimeout(remaining)
+        except OSError as failure:
+            raise self._failed("deadline", "closed", failure) from None
+
     def _take(self, count: int) -> bytes:
+        self._io_timeout()
         while len(self._held) < count:
+            self._io_timeout()
             try:
                 chunk = self.socket.recv(65536)
+            except TimeoutError as failure:
+                code: WebSocketErrorCode = "timeout" if self._deadline is not None else "closed"
+                raise self._failed("receive", code, failure) from None
             except OSError as failure:
                 raise self._failed("receive", "closed", failure) from None
             if not chunk:
@@ -280,10 +302,14 @@ class WebSocket:
         return first & 0x0F, bool(first & 0x80), self._take(length)
 
     def _send_frame(self, opcode: int, payload: bytes) -> None:
+        self._io_timeout()
         if self.trace is not None:
             self.trace.frame("out", opcode, True, len(payload))
         try:
             self.socket.sendall(frame(opcode, payload))
+        except TimeoutError as failure:
+            code: WebSocketErrorCode = "timeout" if self._deadline is not None else "closed"
+            raise self._failed("send", code, failure) from None
         except OSError as failure:
             raise self._failed("send", "closed", failure) from None
 
@@ -360,11 +386,26 @@ class Devtools:
         self, url: str, *, timeout_s: float = 30.0, trace: SocketTrace | None = None
     ) -> None:
         self.trace = trace
+        self.timeout_s = timeout_s
         self.socket = WebSocket(url, timeout_s=timeout_s, trace=trace)
         self._last = 0
         self.events: list[dict[str, Any]] = []
 
     def call(self, method: str, **params: Any) -> dict[str, Any]:
+        """A command has a wall-clock budget even when events keep arriving."""
+        previous_deadline = self.socket._deadline
+        previous_timeout = self.socket.socket.gettimeout()
+        deadline = time.monotonic() + self.timeout_s
+        self.socket._deadline = (
+            deadline if previous_deadline is None else min(deadline, previous_deadline)
+        )
+        try:
+            return self._call(method, **params)
+        finally:
+            self.socket._deadline = previous_deadline
+            self.socket.socket.settimeout(previous_timeout)
+
+    def _call(self, method: str, **params: Any) -> dict[str, Any]:
         self._last += 1
         wanted = self._last
         if self.trace is not None:
@@ -377,16 +418,39 @@ class Devtools:
                 raise WebSocketError("protocol_error") from None
             if not isinstance(message, dict):
                 raise WebSocketError("protocol_error")
+            self.socket._io_timeout()
             if self.trace is not None:
                 self.trace.message("in", ident=message.get("id"), method=message.get("method"))
             if message.get("id") != wanted:
-                self.events.append(message)
+                self._remember(message)
                 continue
             if "error" in message:
                 # The browser's own words about a command, not about content.
                 raise DevtoolsRefused(method, str(message["error"].get("message", "")))
             result = message.get("result")
             return result if isinstance(result, dict) else {}
+
+    def _remember(self, message: dict[str, Any]) -> None:
+        if len(json.dumps(message).encode("utf-8")) > MAX_DEVTOOLS_EVENT_BYTES:
+            # A large console/network payload is not needed to notice load events.
+            compact: dict[str, Any] = {}
+            if isinstance(message.get("method"), str):
+                compact["method"] = message["method"][:80]
+            if isinstance(message.get("id"), int):
+                compact["id"] = message["id"]
+            message = compact
+        self.events.append(message)
+        if len(self.events) > MAX_DEVTOOLS_EVENTS:
+            # Navigation readiness must survive unrelated console/network traffic.
+            discard = next(
+                (
+                    index
+                    for index, event in enumerate(self.events)
+                    if event.get("method") != "Page.loadEventFired"
+                ),
+                0,
+            )
+            del self.events[discard]
 
     def drain(self, method: str) -> bool:
         """Whether an event of this name has already arrived."""

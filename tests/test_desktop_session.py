@@ -332,6 +332,7 @@ def test_an_app_name_matches_regardless_of_case_and_the_tool_lists_the_apps(tmp_
     )
     (tool,) = bridge_tools(BridgeExecutor(installed, LocalPolicy(())))
     assert "Registered applications: expense (Expense Viewer)" in tool.tool.description
+    assert tool.side_effect == SPEC.side_effect
 
 
 def test_save_as_may_replace_an_earlier_file_only_when_asked(tmp_path: Path) -> None:

@@ -518,3 +518,121 @@ def test_a_connection_refused_is_traced_with_the_os_error() -> None:
         WebSocket(f"ws://127.0.0.1:{port}/x", timeout_s=2, trace=trace)
     assert trace.failure is not None and trace.failure["phase"] == "connect"
     assert trace.failure["code"] == "connect_failed"
+
+
+def test_devtools_command_deadline_survives_continuous_unmatched_events(
+    served: list[Server],
+) -> None:
+    import time
+
+    def noisy(connection: socket.socket) -> None:
+        read_frame(connection)
+        end = time.monotonic() + 0.7
+        while time.monotonic() < end:
+            try:
+                connection.sendall(server_frame(TEXT, b'{"method":"Runtime.noise"}'))
+            except OSError:
+                return
+            time.sleep(0.01)
+
+    server = start(served, noisy)
+    with Devtools(server.url, timeout_s=5) as page:
+        page.timeout_s = 0.15
+        began = time.monotonic()
+        with pytest.raises(WebSocketError) as lost:
+            page.call("Runtime.evaluate", expression="1")
+        assert time.monotonic() - began < 0.45
+        assert lost.value.code == "timeout"
+
+
+def test_devtools_keeps_bounded_events_and_retains_navigation_signal(served: list[Server]) -> None:
+    from integrations.websocket import MAX_DEVTOOLS_EVENT_BYTES, MAX_DEVTOOLS_EVENTS
+
+    def noisy_then_answer(connection: socket.socket) -> None:
+        _, asked = read_frame(connection)
+        connection.sendall(server_frame(TEXT, b'{"method":"Page.loadEventFired"}'))
+        for i in range(MAX_DEVTOOLS_EVENTS + 20):
+            event = {"method": "Runtime.noise", "params": {"i": i, "body": "x" * 5000}}
+            connection.sendall(server_frame(TEXT, json.dumps(event).encode()))
+        connection.sendall(
+            server_frame(
+                TEXT, json.dumps({"id": json.loads(asked)["id"], "result": {"ok": True}}).encode()
+            )
+        )
+
+    server = start(served, noisy_then_answer)
+    with Devtools(server.url, timeout_s=5) as page:
+        assert page.call("Page.navigate", url="about:blank") == {"ok": True}
+        assert len(page.events) <= MAX_DEVTOOLS_EVENTS
+        assert all(
+            len(json.dumps(event).encode()) <= MAX_DEVTOOLS_EVENT_BYTES for event in page.events
+        )
+        assert page.drain("Page.loadEventFired")
+
+
+@pytest.mark.parametrize("traffic", ["fragment", "ping"])
+def test_devtools_command_deadline_also_bounds_partial_messages_and_pings(
+    served: list[Server], traffic: str
+) -> None:
+    import time
+
+    def noisy(connection: socket.socket) -> None:
+        read_frame(connection)
+        if traffic == "fragment":
+            connection.sendall(server_frame(TEXT, b'{"id":1,"result":{"done":', final=False))
+        end = time.monotonic() + 0.7
+        while time.monotonic() < end:
+            try:
+                if traffic == "fragment":
+                    connection.sendall(server_frame(0, b" ", final=False))
+                else:
+                    connection.sendall(server_frame(PING, b""))
+                    opcode, _ = read_frame(connection)
+                    if opcode == CLOSE:
+                        return
+            except (OSError, AssertionError):
+                return
+            time.sleep(0.01)
+        final = (
+            server_frame(0, b"true}}")
+            if traffic == "fragment"
+            else server_frame(TEXT, b'{"id":1,"result":{"done":true}}')
+        )
+        try:
+            connection.sendall(final)
+        except OSError:
+            pass
+
+    server = start(served, noisy)
+    with Devtools(server.url, timeout_s=5) as page:
+        page.timeout_s = 0.15
+        began = time.monotonic()
+        with pytest.raises(WebSocketError) as lost:
+            page.call("Runtime.evaluate", expression="1")
+        assert time.monotonic() - began < 0.45
+        assert lost.value.code == "timeout"
+        assert page.socket.socket.gettimeout() == 5
+
+
+def test_each_devtools_command_receives_a_new_deadline_and_restores_socket_timeout(
+    served: list[Server],
+) -> None:
+    import time
+
+    def answer(connection: socket.socket) -> None:
+        for _ in range(2):
+            _, asked = read_frame(connection)
+            time.sleep(0.12)
+            connection.sendall(
+                server_frame(
+                    TEXT,
+                    json.dumps({"id": json.loads(asked)["id"], "result": {"ok": True}}).encode(),
+                )
+            )
+
+    server = start(served, answer)
+    with Devtools(server.url, timeout_s=5) as page:
+        page.timeout_s = 0.25
+        for _ in range(2):
+            assert page.call("Runtime.evaluate", expression="1") == {"ok": True}
+            assert page.socket.socket.gettimeout() == 5

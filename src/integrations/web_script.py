@@ -24,12 +24,13 @@ import json
 import re
 import time
 from collections.abc import Callable, Mapping
-from typing import Any, Literal, Protocol, Self
+from typing import Annotated, Any, Literal, Protocol, Self
 from urllib.parse import urlsplit
 
 from pydantic import Field, JsonValue, model_validator
 
 from common.base import Contract, Symbol, Text
+from common.trace import redact
 
 ScriptMode = Literal["read", "act"]
 _PLACEHOLDER = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
@@ -39,6 +40,8 @@ MAX_TABLE_ROWS = 2000
 class WebScriptError(Exception):
     def __init__(self, code: str) -> None:
         self.code = code
+        self.action_index: int | None = None
+        self.action_kind: str | None = None
         super().__init__(code)
 
 
@@ -79,7 +82,15 @@ class WebAction(Contract):
     # `save_as`; `read_record` reads a two-column table of field names and
     # values (a detail page's header). Both need a runner that supports them.
     do: Literal[
-        "open", "fill", "click", "read_table", "read_text", "download", "read_record", "wait_for"
+        "open",
+        "fill",
+        "click",
+        "read_table",
+        "read_text",
+        "download",
+        "read_record",
+        "wait_for",
+        "inspect_dom",
     ]
     url: Text | None = None
     target: WebTarget | None = None
@@ -90,9 +101,30 @@ class WebAction(Contract):
     header_table: Text | None = None
     pagination: WebPagination | None = None
 
+    scope: Text = Field(
+        default="body",
+        max_length=500,
+        description="inspect_dom only: CSS selector matching exactly one scope element",
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        le=100_000,
+        strict=True,
+        description="inspect_dom only: use next_offset for later elements of an unchanged DOM",
+    )
+    limit: int = Field(
+        default=80,
+        ge=1,
+        le=200,
+        strict=True,
+        description="inspect_dom only: maximum returned elements",
+    )
+
     @model_validator(mode="after")
     def complete(self) -> Self:
         needs = {
+            "inspect_dom": self.save_as is not None,
             "open": self.url is not None,
             "fill": self.target is not None and self.value is not None,
             "click": self.target is not None,
@@ -218,6 +250,243 @@ _ACT = r"""
 })()
 """
 
+
+class DOMElement(Contract):
+    index: int = Field(ge=0, le=100_000)
+    parent: int | None = Field(default=None, ge=0, le=100_000)
+    depth: int = Field(ge=0, le=100_000)
+    tag: str = Field(max_length=80)
+    path: str = Field(max_length=512)
+    path_truncated: bool = False
+    visible: bool = True
+    disabled: bool = False
+    text: str = Field(max_length=200)
+    attributes: dict[
+        Annotated[str, Field(max_length=32)], Annotated[str, Field(max_length=160)]
+    ] = Field(default_factory=dict, max_length=12)
+
+
+class DOMControl(Contract):
+    tag: str = Field(max_length=80)
+    kind: str = Field(default="", max_length=32)
+    label: str = Field(default="", max_length=80)
+    path: str = Field(default="", max_length=200)
+    disabled: bool = False
+    state: dict[
+        Literal["expanded", "pressed", "placeholder", "type"],
+        Annotated[str, Field(max_length=80)],
+    ] = Field(default_factory=dict, max_length=4)
+
+
+class DOMTableHint(Contract):
+    tag: str = Field(max_length=80)
+    path: str = Field(default="", max_length=200)
+
+
+class DOMOverview(Contract):
+    controls: tuple[DOMControl, ...] = Field(default=(), max_length=80)
+    controls_truncated: bool = False
+    text: str = Field(default="", max_length=6000)
+    text_truncated: bool = False
+    tables: tuple[DOMTableHint, ...] = Field(default=(), max_length=20)
+    tables_truncated: bool = False
+    visited_nodes: int = Field(default=0, ge=0, le=100_000)
+    time_limit_reached: bool = False
+    scan_limit_reached: bool = False
+
+
+class DOMInspection(Contract):
+    scope: str = Field(max_length=500)
+    offset: int = Field(ge=0, le=100_000)
+    next_offset: int | None = Field(default=None, ge=0, le=100_000)
+    scan_limit_reached: bool = False
+    overview: DOMOverview | None = None
+    time_limit_reached: bool = False
+    elements: tuple[DOMElement, ...] = Field(max_length=200)
+
+
+def _bounded_overview(overview: DOMOverview) -> DOMOverview:
+    """Keep complete semantic JSON ahead of raw DOM within the tool's preview budget."""
+    value = overview.model_dump(mode="json")
+    while len(json.dumps(value, ensure_ascii=True)) > 9000:
+        text = str(value["text"])
+        controls = list(value["controls"])
+        tables = list(value["tables"])
+        if len(text) > 1000:
+            value["text"] = text[: max(1000, len(text) - 512)]
+            value["text_truncated"] = True
+        elif len(controls) > 1:
+            value["controls"] = controls[:-1]
+            value["controls_truncated"] = True
+        elif len(tables) > 1:
+            value["tables"] = tables[:-1]
+            value["tables_truncated"] = True
+        elif text:
+            value["text"] = text[:-512]
+            value["text_truncated"] = True
+        else:
+            break
+    return DOMOverview.model_validate(value)
+
+
+_INSPECT_DOM = r"""
+(() => {
+  const spec = %(spec)s;
+  const deadline = performance.now() + 1000;
+  let visited = 0, timedOut = false;
+  const budget = () => {
+    if (visited >= 100000) return false;
+    if (performance.now() >= deadline) { timedOut = true; return false; }
+    visited++; return true;
+  };
+  let roots;
+  try { roots = document.querySelectorAll(spec.scope); }
+  catch (_) { return JSON.stringify({error: 'web_selector_invalid'}); }
+  if (!roots.length) return JSON.stringify({error: 'web_scope_missing'});
+  if (roots.length !== 1) return JSON.stringify({error: 'web_scope_ambiguous'});
+  const root = roots[0];
+  const excludedTags = ['SCRIPT', 'STYLE', 'NOSCRIPT', 'OPTION'];
+  const fields = ['INPUT', 'TEXTAREA', 'SELECT'];
+  const excluded = e => excludedTags.includes(e.tagName)
+    || e.isContentEditable || (e.tagName === 'INPUT' && e.type === 'hidden');
+  const privateAncestor = root.closest('script,style,noscript,' +
+    '[contenteditable]:not([contenteditable=false])');
+  if (excluded(root) || privateAncestor) return JSON.stringify({inspection: {
+    scope: spec.scope, offset: spec.offset, next_offset: null,
+    scan_limit_reached: false, elements: []}});
+  const norm = s => (s || '').replace(/\s+/g, ' ').trim();
+  const visible = e => !!e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden';
+  const ownText = (element, limit) => {
+    if (fields.includes(element.tagName)) return {text: '', truncated: false};
+    let text = '', count = 0, truncated = false;
+    for (let node = element.firstChild; node && count < 400; node = node.nextSibling) {
+      if (!budget()) { truncated = true; break; }
+      count++;
+      if (node.nodeType !== Node.TEXT_NODE) continue;
+      const value = node.textContent || '';
+      const room = limit - text.length;
+      text += value.slice(0, room);
+      if (value.length > room) truncated = true;
+      if (text.length >= limit) break;
+    }
+    return {text: norm(text), truncated};
+  };
+  const safeLabel = element => {
+    if (fields.includes(element.tagName)) return '';
+    const labels = document.createTreeWalker(element, NodeFilter.SHOW_ELEMENT, {
+      acceptNode: e => excluded(e) || fields.includes(e.tagName) || !visible(e)
+        ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+    });
+    let current = element, text = '', count = 0;
+    while (current && count < 200 && text.length < 200 && budget()) {
+      count++;
+      text += ' ' + ownText(current, 200 - text.length).text;
+      current = labels.nextNode();
+    }
+    return norm(text).slice(0, 200);
+  };
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
+    acceptNode: e => excluded(e) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+  });
+  const interactive = 'a[href],button,input,select,textarea,[role=button],[role=link],' +
+    '[role=option],[role=combobox],[role=menuitem],[role=menuitemcheckbox],' +
+    '[role=menuitemradio],[role=treeitem],[role=tab],[role=checkbox],[role=radio]';
+  const info = new WeakMap(), out = [], buckets = [[], [], [], [], [], []], tables = [];
+  const selector = (element, fallback) => {
+    for (const attribute of ['data-automation-id', 'data-testid', 'data-test-id', 'id']) {
+      const value = element.getAttribute(attribute);
+      if (!value) continue;
+      const selected = attribute === 'id' ? '#' + CSS.escape(value)
+        : '[' + attribute + '=' + JSON.stringify(value) + ']';
+      if (selected.length <= 200) return selected;
+    }
+    return fallback.length <= 200 ? fallback : '';
+  };
+  let e = root, index = 0, text = '', textTruncated = false;
+  let controlsTruncated = false, tablesTruncated = false;
+  while (e && index < 100000 && budget()) {
+    const p = info.get(e.parentElement);
+    const tag = e.tagName.toLowerCase().slice(0, 80);
+    const own = e.id ? '#' + CSS.escape(e.id) : tag + ':nth-child(' +
+      (e.parentElement ? Array.prototype.indexOf.call(e.parentElement.children, e) + 1 : 1) + ')';
+    const fullPath = e.id || !p ? own : p.path + ' > ' + own;
+    const path = fullPath.slice(0, 512);
+    const path_truncated = fullPath.length > 512 || !!(p && p.path_truncated);
+    const current = {index, parent: p ? p.index : null, depth: p ? p.depth + 1 : 0,
+      path, path_truncated};
+    info.set(e, current);
+    const isVisible = visible(e);
+    const ownValue = isVisible ? ownText(e, 3000) : {text: '', truncated: false};
+    if (ownValue.text) {
+      const value = (text ? '\n' : '') + ownValue.text;
+      const room = 3000 - text.length;
+      text += value.slice(0, room);
+      textTruncated ||= value.length > room || ownValue.truncated;
+    }
+    const record = value => {
+      const attrs = {};
+      for (const name of ['id', 'class', 'role', 'aria-label', 'aria-expanded', 'aria-disabled',
+                          'name', 'type', 'title', 'data-testid', 'data-test-id',
+                          'data-automation-id']) {
+        const attribute = e.getAttribute(name);
+        if (attribute !== null) attrs[name] = norm(attribute).slice(0, 160);
+      }
+      return {...current, tag, visible: isVisible,
+        disabled: !!e.disabled || e.getAttribute('aria-disabled') === 'true',
+        text: value.slice(0, 200), attributes: attrs};
+    };
+    if (index >= spec.offset && out.length < spec.limit) out.push(record(ownValue.text));
+    if (isVisible && e.matches(interactive)) {
+      const role = e.getAttribute('role') || '';
+      const navigation = e.closest('nav,[role=navigation],[role=menu],[role=menubar],' +
+        '[role=tree],[role=tablist]') ||
+        ['menuitem', 'menuitemcheckbox', 'menuitemradio', 'treeitem', 'tab'].includes(role);
+      const field = fields.includes(e.tagName) || ['combobox', 'checkbox', 'radio'].includes(role);
+      const toolbar = e.closest('[role=toolbar]');
+      const link = tag === 'a' || role === 'link';
+      const tableCell = e.closest('td,th,[role=cell],[role=gridcell],[role=rowheader],' +
+        '[role=columnheader]');
+      const priority = navigation ? 0 : field ? 1 : toolbar ? 2 : tableCell ? 5 : link ? 4 : 3;
+      if (buckets[priority].length < 80) {
+        const label = safeLabel(e) || e.getAttribute('aria-label') || e.getAttribute('title') ||
+          (e.labels && e.labels.length ? safeLabel(e.labels[0]) : '');
+        const state = {};
+        const expanded = e.getAttribute('aria-expanded'), pressed = e.getAttribute('aria-pressed');
+        if (['true', 'false'].includes(expanded)) state.expanded = expanded;
+        if (['true', 'false', 'mixed'].includes(pressed)) state.pressed = pressed;
+        const placeholder = e.getAttribute('placeholder'), type = e.getAttribute('type');
+        if (fields.includes(e.tagName) && placeholder !== null)
+          state.placeholder = norm(placeholder).slice(0, 80);
+        if (type !== null) state.type = norm(type).slice(0, 32);
+        buckets[priority].push({tag, kind: (role || type || '').slice(0, 32),
+          label: norm(label).slice(0, 80), path: selector(e, path_truncated ? '' : path), state,
+          disabled: !!e.disabled || e.getAttribute('aria-disabled') === 'true'});
+      } else controlsTruncated = true;
+    }
+    if (isVisible && e.matches('table,[role=table],[role=grid]')) {
+      // Only structure hints: table body values use the common 6000-character text budget.
+      if (tables.length < 20) tables.push({tag, path: selector(e, path_truncated ? '' : path)});
+      else tablesTruncated = true;
+    }
+    index++;
+    e = walker.nextNode();
+  }
+  const more = index > spec.offset + out.length || !!e;
+  const next = spec.offset + out.length;
+  const scanLimit = visited >= 100000 && !!e;
+  const candidates = buckets.flat(), controls = candidates.slice(0, 80);
+  controlsTruncated ||= candidates.length > 80;
+  return JSON.stringify({inspection: {scope: spec.scope, offset: spec.offset,
+    next_offset: more && out.length && next < 100000 ? next : null,
+    scan_limit_reached: scanLimit, time_limit_reached: timedOut, elements: out,
+    overview: {text, text_truncated: textTruncated || !!e, controls,
+      controls_truncated: controlsTruncated || !!e, tables,
+      tables_truncated: tablesTruncated || !!e, visited_nodes: visited,
+      time_limit_reached: timedOut, scan_limit_reached: scanLimit}}});
+})()
+"""
+
+
 _READ_RECORD = r"""
 (() => {
   const norm = s => (s || '').replace(/\s+/g, ' ').trim();
@@ -315,8 +584,18 @@ class ScriptRunner:
             values: dict[str, JsonValue] = dict(checked.values)
             if item is not None:
                 values["item"] = item
-            for action in checked.actions:
-                self._do(action, values, mode, data)
+            for index, action in enumerate(checked.actions):
+                try:
+                    self._do(action, values, mode, data)
+                except WebScriptError as error:
+                    error.action_index = index
+                    error.action_kind = action.do
+                    raise
+                except Exception as error:
+                    failure = WebScriptError(str(getattr(error, "code", "web_action_failed")))
+                    failure.action_index = index
+                    failure.action_kind = action.do
+                    raise failure from None
             if item is not None:
                 done.append(item)
         return WebScriptResult(url=self._url(), data=data, done=tuple(done))
@@ -328,6 +607,12 @@ class ScriptRunner:
         mode: ScriptMode,
         data: dict[str, JsonValue],
     ) -> None:
+        if action.do != "open":
+            self._check_origin()
+        if action.do == "inspect_dom":
+            assert action.save_as is not None
+            data[action.save_as] = self.inspect(action.scope, action.offset, action.limit)
+            return
         if action.do == "wait_for":
             assert action.target is not None and action.value is not None
             deadline = time.monotonic() + self.timeout_s
@@ -392,6 +677,30 @@ class ScriptRunner:
         if action.do == "click":
             self._settle()
             self._check_origin()
+
+    def inspect(
+        self, scope: str = "body", offset: int = 0, limit: int = 80
+    ) -> dict[str, JsonValue]:
+        """Fixed read-only DOM observation; no caller-supplied executable code."""
+        checked = WebAction(
+            do="inspect_dom", scope=scope, offset=offset, limit=limit, save_as="dom"
+        )
+        if not origin_permitted(self._url(), self.allowed):
+            raise WebScriptError("web_origin_not_allowed")
+        answer = self._evaluate(
+            _INSPECT_DOM
+            % {
+                "spec": json.dumps(
+                    {"scope": checked.scope, "offset": checked.offset, "limit": checked.limit}
+                )
+            }
+        )
+        self._check_origin()
+        observation, _ = redact(answer["inspection"])
+        result = DOMInspection.model_validate(observation)
+        if result.overview is not None:
+            result = result.model_copy(update={"overview": _bounded_overview(result.overview)})
+        return result.model_dump(mode="json")
 
     def _table_rows(self, action: WebAction) -> dict[str, Any]:
         deadline = time.monotonic() + self.timeout_s

@@ -31,10 +31,19 @@ from typing import Any
 from pydantic import Field, JsonValue
 
 from capabilities.contracts import CapabilitySpec
-from capabilities.runtime import CapabilityRefused
+from capabilities.runtime import CapabilityExecutionFailed, CapabilityRefused
 from common.base import Contract, Symbol, Text
 from common.execution import RequestContext
-from integrations.web_script import ScriptRunner, WebAction, WebScript, WebScriptError
+from common.trace import redact
+from integrations.web_script import (
+    DOMInspection,
+    DOMOverview,
+    ScriptRunner,
+    WebAction,
+    WebScript,
+    WebScriptError,
+    origin_permitted,
+)
 
 SPEC = CapabilitySpec.model_validate(
     {
@@ -71,7 +80,12 @@ class BrowserResult(Contract):
     data: dict[Symbol, JsonValue] = Field(default_factory=dict)
     items: dict[Text, JsonValue] = Field(default_factory=dict)
     downloads: tuple[Text, ...] = ()
-    page: str = ""
+    page: str = Field(default="", max_length=MAX_PAGE_CHARS)
+    failed_action_index: int | None = Field(default=None, ge=0, le=49)
+    failed_action_kind: str | None = None
+    diagnostics: DOMInspection | None = None
+    overview: DOMOverview | None = None
+    diagnostic_error: str | None = None
 
 
 class BrowserSessionHandler:
@@ -146,13 +160,17 @@ class BrowserSessionHandler:
 
     def run(self, request: BrowserRequest) -> BrowserResult:
         with self._lock:
+            folder = (
+                self._downloads(request.workspace)
+                if any(action.do == "download" for action in request.actions)
+                else None
+            )
             try:
                 browser = self._page()
             except Exception as error:  # noqa: BLE001 - the browser's own typed codes
                 code = str(getattr(error, "code", "browser_would_not_start"))
                 raise CapabilityRefused(code) from None
             saved: list[str] = []
-            folder: Path | None = None
 
             def download(click: Callable[[], None], name: str) -> str:
                 nonlocal folder
@@ -182,38 +200,128 @@ class BrowserSessionHandler:
                             )
                             items[item] = dict(result.data)
             except WebScriptError as error:
-                # A code only; the model looks again with an empty action list.
-                raise CapabilityRefused(error.code) from None
+                observation, diagnostic_error = _diagnostics(runner)
+                failure = BrowserResult(
+                    url=_safe_url(runner),
+                    data=data,
+                    items=items,
+                    downloads=tuple(saved),
+                    page=_described(observation),
+                    overview=observation.overview if observation is not None else None,
+                    diagnostics=observation,
+                    diagnostic_error=diagnostic_error,
+                    failed_action_index=error.action_index,
+                    failed_action_kind=error.action_kind,
+                )
+                where = (
+                    f"actions[{error.action_index}] ({error.action_kind})"
+                    if error.action_index is not None
+                    else None
+                )
+                raise CapabilityExecutionFailed(error.code, failure, where=where) from None
             except Exception as error:  # noqa: BLE001 - the browser's own typed codes
                 raise CapabilityRefused(str(getattr(error, "code", "browser_failed"))) from None
-            url = ""
-            try:
-                url = str(browser.evaluate("document.location.href") or "")
-            except Exception:  # noqa: BLE001
-                pass
+            observation, _ = _diagnostics(runner) if request.look else (None, None)
             return BrowserResult(
-                url=url,
+                url=_safe_url(runner),
                 data=data,
                 items=items,
                 downloads=tuple(saved),
-                page=_described(browser) if request.look else "",
+                page=_described(observation),
+                overview=observation.overview if observation is not None else None,
             )
 
 
 def _edge(profile: Path, headless: bool, timeout_s: float) -> Any:
-    from integrations.browser import Browser
+    from integrations.browser import DESKTOP_VIEWPORT, Browser
 
-    return Browser(profile, headless=headless, timeout_s=timeout_s)
+    return Browser(profile, headless=headless, timeout_s=timeout_s, viewport=DESKTOP_VIEWPORT)
 
 
-def _described(browser: Any) -> str:
+def _safe_url(runner: ScriptRunner) -> str:
+    """Keep navigation state while redacting recognizable credential material."""
+    from urllib.parse import quote, unquote_plus, urlsplit, urlunsplit
+
     try:
-        view = browser.look()
-    except Exception:  # noqa: BLE001 - a look is a courtesy, never the result
+        raw = str(runner.page.evaluate("document.location.href") or "")
+        allowed = {origin.rstrip("/").lower() for origin in runner.allowed}
+        if not origin_permitted(raw, allowed):
+            return ""
+        parts = urlsplit(raw)
+        host = parts.hostname or ""
+        if ":" in host:
+            host = f"[{host}]"
+        if parts.port is not None:
+            host += f":{parts.port}"
+
+        def component(raw_component: str) -> str:
+            chunks: list[str] = []
+            for chunk in raw_component.split("&"):
+                key, separator, value = chunk.partition("=")
+                decoded_key, decoded_value = unquote_plus(key), unquote_plus(value)
+                secret_label = (
+                    "access_token"
+                    if re.fullmatch(
+                        r"token|secret|client_secret|id_token|session_token|authorization|csrf|sessionid",
+                        decoded_key,
+                        re.IGNORECASE,
+                    )
+                    else decoded_key
+                )
+                cleaned, count = redact(decoded_value, secret_label)
+                if not count:
+                    cleaned_chunk, count = redact(unquote_plus(chunk))
+                    chunks.append(quote(str(cleaned_chunk), safe="=/?:[]") if count else chunk)
+                else:
+                    chunks.append(key + separator + quote(str(cleaned), safe="[]"))
+            return "&".join(chunks)
+
+        path, _ = redact(parts.path)
+        return urlunsplit(
+            (parts.scheme, host, str(path), component(parts.query), component(parts.fragment))
+        )
+    except Exception:  # noqa: BLE001 - a lost page is never evidence
         return ""
-    view = view.model_copy(update={"elements": view.elements[:MAX_ELEMENTS]})
-    text: str = view.described(limit=MAX_PAGE_CHARS)
-    return text
+
+
+def _diagnostics(runner: ScriptRunner) -> tuple[DOMInspection | None, str | None]:
+    try:
+        observation, _ = redact(runner.inspect(limit=MAX_ELEMENTS))
+        return DOMInspection.model_validate(observation), None
+    except WebScriptError as error:
+        return None, error.code
+    except Exception:  # noqa: BLE001 - original failure must survive a lost page
+        return None, "web_diagnostics_unavailable"
+
+
+def _described(observation: DOMInspection | None) -> str:
+    if observation is None:
+        return ""
+    if observation.overview is not None:
+        view = observation.overview
+        lines = ["Visible controls (field values omitted):"]
+        for control in view.controls:
+            state = " ".join(f"{key}={value!r}" for key, value in control.state.items())
+            lines.append(
+                f"{control.tag} {control.kind} {control.path} "
+                f"disabled={control.disabled} {state} {control.label}"
+            )
+        if view.controls_truncated:
+            lines.append("More controls exist; narrow inspection scope for details.")
+        for table in view.tables:
+            lines.append(f"Table: {table.tag} {table.path}")
+        lines.append("Visible text:\n" + view.text)
+        if view.time_limit_reached or view.scan_limit_reached:
+            lines.append("Observation scan budget reached; narrow inspection scope.")
+        return "\n".join(lines)[:MAX_PAGE_CHARS]
+    lines = [f"DOM scope={observation.scope}; next_offset={observation.next_offset}"]
+    for element in observation.elements:
+        attrs = " ".join(f"{key}={value!r}" for key, value in element.attributes.items())
+        lines.append(
+            f"[{element.index}] parent={element.parent} {element.tag} "
+            f"visible={element.visible} disabled={element.disabled} {attrs} {element.text}"
+        )
+    return "\n".join(lines)[:MAX_PAGE_CHARS]
 
 
 def _download(

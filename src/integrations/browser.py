@@ -62,6 +62,8 @@ APP_PATHS = (
 PORT_FILE = "DevToolsActivePort"
 #: How long `start` waits for a usable tab before it relaunches once.
 STARTUP_PAGE_SECONDS = 20.0
+# AEP browser/workflow sessions operate desktop sites, including narrow SSO popups.
+DESKTOP_VIEWPORT = (1440, 900)
 #: Chromium names the profile lock differently by platform and distribution.
 #: Edge on Windows uses `lockfile`; Chrome on POSIX uses `SingletonLock`.
 PROFILE_LOCK_FILES = ("lockfile", "SingletonLock")
@@ -241,6 +243,7 @@ class Browser:
     """
 
     #: Class defaults so a `Browser.__new__` stand-in in a test still works.
+    _viewport: tuple[int, int] | None = None
     _diag_dir: Path | None = None
     _diag_stderr: IO[bytes] | None = None
     _diag_sockets: Path | None = None
@@ -254,17 +257,49 @@ class Browser:
         headless: bool = True,
         timeout_s: float = 30.0,
         extra_arguments: tuple[str, ...] = (),
+        viewport: tuple[int, int] | None = None,
     ) -> None:
         self.profile = Path(profile)
         self.executable = executable if executable is not None else browser_path()
         self.headless = headless
         self.timeout_s = timeout_s
         self.extra_arguments = extra_arguments
+        self.viewport = viewport
         self._process: subprocess.Popen[bytes] | None = None
         self._page: Devtools | None = None
         self._port: int | None = None
         configured = os.environ.get(DIAG_DIR_ENV, "").strip()
         self._diag_dir = Path(configured) if configured else None
+
+    @property
+    def viewport(self) -> tuple[int, int] | None:
+        """Optional declared CSS-pixel dimensions, applied to each attached page."""
+        return self._viewport
+
+    @viewport.setter
+    def viewport(self, value: tuple[int, int] | None) -> None:
+        if value is not None and (
+            not isinstance(value, tuple)
+            or len(value) != 2
+            or any(type(dimension) is not int for dimension in value)
+            or not 320 <= value[0] <= 7680
+            or not 240 <= value[1] <= 4320
+        ):
+            raise ValueError("viewport requires integer width 320..7680 and height 240..4320")
+        self._viewport = value
+
+    def _apply_viewport(self, page: Devtools) -> None:
+        if self.viewport is not None:
+            width, height = self.viewport
+            page.call(
+                "Emulation.setDeviceMetricsOverride",
+                width=width,
+                height=height,
+                deviceScaleFactor=1,
+                mobile=False,
+                screenWidth=width,
+                screenHeight=height,
+            )
 
     # -- starting and stopping ----------------------------------------
 
@@ -449,6 +484,7 @@ class Browser:
                     try:
                         page.call("Page.enable")
                         page.call("Runtime.enable")
+                        self._apply_viewport(page)
                     except (DevtoolsRefused, WebSocketError) as failure:
                         # A just-started browser may still be replacing this
                         # tab (CI 2026-10-20): drop it and look again.

@@ -109,9 +109,11 @@ class OpenPage(AbstractContextManager[ScriptPage]):
     """One browser for one step: started on entry, closed on exit."""
 
     def __init__(self, profile: Path, *, headless: bool, timeout_s: float) -> None:
-        from integrations.browser import Browser
+        from integrations.browser import DESKTOP_VIEWPORT, Browser
 
-        self._browser = Browser(profile, headless=headless, timeout_s=timeout_s)
+        self._browser = Browser(
+            profile, headless=headless, timeout_s=timeout_s, viewport=DESKTOP_VIEWPORT
+        )
 
     def __enter__(self) -> ScriptPage:
         self._browser.start()

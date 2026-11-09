@@ -4,6 +4,7 @@ import json
 import sys
 import urllib.request
 from collections.abc import Iterator
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -302,3 +303,388 @@ def test_pagination_waits_for_frozen_key_cells_to_catch_up(browser, site) -> Non
         {"ID": "SO-2", "Amount": "200"},
         {"ID": "SO-3", "Amount": "300"},
     ]
+
+
+def test_inspect_dom_exposes_scoped_structure_beyond_first_page_without_secrets(
+    browser: Any, site: PracticeSite
+) -> None:
+    browser.navigate(site.url)
+    browser.evaluate(
+        "document.body.innerHTML = '<section id=\"report\">' + "
+        "Array.from({length: 100}, (_, i) => '<button data-automation-id=\"action-' "
+        "+ i + '\">Action ' + i + '</button>').join('') + "
+        "'<table id=\"grid\"><thead><tr><th>Order</th></tr></thead>' + "
+        "'<tbody><tr><td>SO-1</td></tr></tbody></table>' + "
+        '\'<input type="password" value="password-secret">'
+        '<input name="token" value="token-secret">\' + '
+        "'<textarea>textarea-secret</textarea>"
+        '<input type="hidden" value="hidden-secret"></section>\';'
+    )
+    first = WebAction.model_validate(
+        {"do": "inspect_dom", "scope": "#report", "limit": 80, "save_as": "dom"}
+    )
+    first_data = runner(browser, site).run(WebScript(actions=(first,)), "read").data["dom"]
+    assert isinstance(first_data, dict) and first_data["next_offset"] == 80
+    later = first.model_copy(update={"offset": 80})
+    data = runner(browser, site).run(WebScript(actions=(later,)), "read").data["dom"]
+    assert isinstance(data, dict) and data["next_offset"] is None
+    serialized = json.dumps(data)
+    assert "action-99" in serialized and "SO-1" in serialized and '"tag": "th"' in serialized
+    assert '"parent"' in serialized and '"path"' in serialized
+    for secret in ("password-secret", "token-secret", "textarea-secret", "hidden-secret"):
+        assert secret not in serialized
+    assert (
+        browser.evaluate("document.querySelector('input[type=password]').value")
+        == "password-secret"
+    )
+
+
+def test_inspect_dom_refuses_ambiguous_scopes_invalid_css_and_other_origins(browser, site) -> None:  # type: ignore[no-untyped-def]
+    browser.navigate(site.url)
+    browser.evaluate("document.body.innerHTML = '<div>A</div><div>B</div>'")
+    for scope, code in (
+        ("div", "web_scope_ambiguous"),
+        ("[", "web_selector_invalid"),
+        ("#missing", "web_scope_missing"),
+    ):
+        action = WebAction.model_validate({"do": "inspect_dom", "scope": scope, "save_as": "dom"})
+        with pytest.raises(WebScriptError) as stopped:
+            runner(browser, site).run(WebScript(actions=(action,)), "read")
+        assert stopped.value.code == code
+        assert stopped.value.action_index == 0 and stopped.value.action_kind == "inspect_dom"
+    with pytest.raises(WebScriptError) as stopped:
+        ScriptRunner(browser, ("https://different.example",)).run(
+            WebScript(actions=(action,)), "read"
+        )
+    assert stopped.value.code == "web_origin_not_allowed"
+
+
+def test_failed_browser_capability_returns_live_page_and_safe_fields(
+    browser: Any, site: PracticeSite, tmp_path: Path
+) -> None:
+    from capabilities.browser_session.handlers import (
+        BrowserRequest,
+        BrowserResult,
+        BrowserSessionHandler,
+    )
+    from capabilities.runtime import CapabilityExecutionFailed
+
+    class ExistingBrowser:
+        def start(self) -> None:
+            pass
+
+        def __getattr__(self, name: str) -> Any:
+            return getattr(browser, name)
+
+    browser.navigate(site.url)
+    browser.evaluate(
+        "document.body.innerHTML = '<h1>Fresh report</h1>' + "
+        '\'<button id="run" data-testid="run-report">Run</button>\' + '
+        '\'<input type="password" value="secret-password">\' + '
+        '\'<input name="api_key" value="secret-token">\' + '
+        "'<textarea>private note</textarea><span>password=inline-secret</span>';"
+    )
+    run = BrowserSessionHandler(
+        (site.url,),
+        tmp_path / "profile",
+        headless=True,
+        timeout_s=0.1,
+        workspace_roots=(),
+        browser_factory=ExistingBrowser,
+    )
+    observed = run.run(BrowserRequest())
+    assert "Fresh report" in observed.page and "run-report" in observed.page
+    with pytest.raises(CapabilityExecutionFailed) as stopped:
+        run.run(
+            BrowserRequest.model_validate(
+                {"actions": [{"do": "click", "target": {"css": "#missing"}}], "look": False}
+            )
+        )
+    result = BrowserResult.model_validate(stopped.value.data)
+    assert result.failed_action_index == 0 and result.failed_action_kind == "click"
+    assert "Fresh report" in result.page and result.diagnostics is not None
+    serialized = json.dumps(result.model_dump(mode="json")) + observed.page
+    for secret in ("secret-password", "secret-token", "private note", "inline-secret"):
+        assert secret not in serialized
+
+
+def test_browser_failure_does_not_inspect_a_disallowed_origin(
+    browser: Any, site: PracticeSite, tmp_path: Path
+) -> None:
+    from capabilities.browser_session.handlers import (
+        BrowserRequest,
+        BrowserResult,
+        BrowserSessionHandler,
+    )
+    from capabilities.runtime import CapabilityExecutionFailed
+
+    class ExistingBrowser:
+        def start(self) -> None:
+            pass
+
+        def __getattr__(self, name: str) -> Any:
+            return getattr(browser, name)
+
+    browser.navigate(site.url)
+    browser.evaluate("document.body.innerHTML = '<h1>Forbidden origin secret</h1>'")
+    run = BrowserSessionHandler(
+        ("https://different.example",),
+        tmp_path / "profile",
+        headless=True,
+        timeout_s=0.1,
+        workspace_roots=(),
+        browser_factory=ExistingBrowser,
+    )
+    with pytest.raises(CapabilityExecutionFailed) as stopped:
+        run.run(
+            BrowserRequest.model_validate({"actions": [{"do": "inspect_dom", "save_as": "dom"}]})
+        )
+    result = BrowserResult.model_validate(stopped.value.data)
+    assert result.diagnostics is None and result.diagnostic_error == "web_origin_not_allowed"
+    assert result.page == "" and result.url == ""
+    assert "Forbidden origin secret" not in json.dumps(result.model_dump(mode="json"))
+
+
+def test_read_only_inspection_alias_reads_real_page_and_preserves_failure(
+    browser: Any, site: PracticeSite, tmp_path: Path
+) -> None:
+    import asyncio
+
+    from pydantic import JsonValue
+
+    from agent.gateway import HostToolOutcome
+    from capabilities.browser_session.handlers import (
+        SPEC,
+        BrowserRequest,
+        BrowserResult,
+        BrowserSessionHandler,
+    )
+    from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
+    from common.assets import ExecutionDependencies
+    from common.execution import RequestContext, TraceIdentifiers
+    from host_runtime.bridge_tools import bridge_tools
+    from workflow.dispatch import BridgeExecutor
+
+    class ExistingBrowser:
+        def start(self) -> None:
+            pass
+
+        def __getattr__(self, name: str) -> Any:
+            return getattr(browser, name)
+
+    browser.navigate(site.url)
+    browser.evaluate(
+        "window.__clicked = 0; document.body.innerHTML = '<h1>Current report</h1>' + "
+        "'<section id=\"report\">' + Array.from({length:100}, (_, i) => "
+        "'<button data-automation-id=\"action-' + i + '\">Action ' + i + "
+        "'</button>').join('') + '</section>';"
+        "document.body.addEventListener('click', () => window.__clicked++);"
+    )
+    installed = InstalledCapabilities()
+    installed.register(
+        SPEC,
+        BrowserSessionHandler(
+            (site.url,),
+            tmp_path / "profile",
+            headless=True,
+            timeout_s=0.1,
+            workspace_roots=(),
+            browser_factory=ExistingBrowser,
+        ),
+        BrowserRequest,
+        BrowserResult,
+        ExecutionDependencies(central_required=False),
+    )
+    grant = CapabilityGrant(
+        actor="owner",
+        asset=SPEC.identity,
+        permissions=SPEC.policy.required_permissions,
+        policy_refs=SPEC.policy.policy_refs,
+        approval_ref="owner-approved",
+    )
+    tool = next(
+        tool
+        for tool in bridge_tools(BridgeExecutor(installed, LocalPolicy((grant,))))
+        if tool.tool.name == "browser__inspect"
+    )
+    context = RequestContext(
+        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+        actor="owner",
+        namespace="engineering",
+        channel="local",
+        message="inspect",
+    )
+
+    async def observe(arguments: dict[str, JsonValue]) -> HostToolOutcome:
+        return await tool.handler(context, arguments)
+
+    result = asyncio.run(observe({"scope": "#report", "offset": 80, "limit": 30}))
+    assert result.status == "succeeded" and isinstance(result.data, dict)
+    assert "action-99" in json.dumps(result.data["data"])
+    assert browser.evaluate("window.__clicked") == 0
+    failure = asyncio.run(observe({"scope": "#missing"}))
+    assert failure.status == "failed" and failure.failure is not None
+    assert failure.failure.code == "web_scope_missing"
+    assert isinstance(failure.data, dict) and failure.data["failed_action_kind"] == "inspect_dom"
+    assert "Current report" in json.dumps(failure.data["diagnostics"])
+    assert browser.evaluate("window.__clicked") == 0
+
+
+def test_browser_overview_finds_late_visible_controls_without_field_values(
+    browser: Any, site: PracticeSite, tmp_path: Path
+) -> None:
+    from capabilities.browser_session.handlers import BrowserRequest, BrowserSessionHandler
+
+    class ExistingBrowser:
+        def start(self) -> None:
+            pass
+
+        def __getattr__(self, name: str) -> Any:
+            return getattr(browser, name)
+
+    browser.navigate(site.url)
+    browser.evaluate(
+        "document.body.innerHTML = '<div hidden>' + '<div>Hidden header</div>'.repeat(500) + "
+        "'</div>' + '<div>Visible report context</div>'.repeat(400) + "
+        '\'<button id="sales" data-automation-id="sales-nav"><span>Sales</span></button>\' + '
+        "'<label for=\"filter\">Customer filter</label>' + "
+        '\'<input id="filter" value="private-field">\' + '
+        '\'<input type="password" value="private-password"><textarea>private-note</textarea>\' + '
+        "'<div contenteditable=true>private-editor</div><span>password=private-inline</span>' + "
+        "'<table id=\"orders\"><thead><tr><th>Order ID</th></tr></thead>' + "
+        "'<tbody><tr><td>SO-1</td></tr></tbody></table>' + "
+        "'<button>Other</button>'.repeat(100);"
+    )
+    run = BrowserSessionHandler(
+        (site.url,),
+        tmp_path / "profile",
+        headless=True,
+        timeout_s=2,
+        workspace_roots=(),
+        browser_factory=ExistingBrowser,
+    )
+    result = run.run(BrowserRequest())
+    assert "Sales" in result.page and "sales-nav" in result.page
+    inspected = (
+        runner(browser, site)
+        .run(
+            WebScript(actions=(WebAction.model_validate({"do": "inspect_dom", "save_as": "dom"}),)),
+            "read",
+        )
+        .data["dom"]
+    )
+    assert isinstance(inspected, dict) and isinstance(inspected["overview"], dict)
+    overview = inspected["overview"]
+    assert isinstance(overview["text"], str) and len(overview["text"]) <= 6000
+    assert overview["text_truncated"] is True and overview["controls_truncated"] is True
+    assert isinstance(overview["controls"], list) and 0 < len(overview["controls"]) <= 80
+    assert "sales-nav" in json.dumps(overview["controls"])
+    assert len(json.dumps(overview)) <= 9000
+    assert "sales-nav" in json.dumps(inspected)[:16000]
+    assert "orders" in json.dumps(overview["tables"])
+    serialized = json.dumps(overview) + result.page
+    for secret in (
+        "private-field",
+        "private-password",
+        "private-note",
+        "private-editor",
+        "private-inline",
+        "Hidden header",
+    ):
+        assert secret not in serialized
+    assert "sales-nav" not in json.dumps(inspected["elements"])
+    assert inspected["next_offset"] == 80
+
+
+def test_overview_prioritizes_late_navigation_and_bounds_serialized_unicode(
+    browser: Any, site: PracticeSite
+) -> None:
+    browser.navigate(site.url)
+    browser.evaluate(
+        "document.body.innerHTML = '<button>Dashboard tile</button>'.repeat(100) + "
+        '\'<nav><button role="menuitem" id="sales">Sales</button></nav>\' + '
+        "'<div>' + '中文測試內容'.repeat(2000) + '</div>' + "
+        "('<button>' + '中文標籤'.repeat(20) + '</button>').repeat(100);"
+    )
+    inspected = runner(browser, site).inspect()
+    overview = inspected["overview"]
+    assert isinstance(overview, dict) and isinstance(overview["controls"], list)
+    assert isinstance(overview["controls"][0], dict)
+    assert overview["controls"][0]["path"] == "#sales"
+    assert len(json.dumps(overview, ensure_ascii=True)) <= 9000
+    assert overview["controls_truncated"] is True
+    assert "Sales" in json.dumps(inspected, ensure_ascii=True)[:16000]
+
+
+def test_overview_reports_its_cooperative_time_budget(browser: Any, site: PracticeSite) -> None:
+    browser.navigate(site.url)
+    browser.evaluate(
+        "document.body.innerHTML = '<button>Sales</button>';"
+        "window.__savedNow = Object.getOwnPropertyDescriptor(performance, 'now');"
+        "window.__nowCalls = 0; Object.defineProperty(performance, 'now', {configurable:true,"
+        "value: () => ++window.__nowCalls * 1001}); true;"
+    )
+    try:
+        inspected = runner(browser, site).inspect()
+        overview = inspected["overview"]
+        assert isinstance(overview, dict) and overview["time_limit_reached"] is True
+        assert overview["visited_nodes"] == 0
+        assert inspected["time_limit_reached"] is True
+    finally:
+        browser.evaluate(
+            "if (window.__savedNow) Object.defineProperty(performance, 'now', window.__savedNow);"
+            "else delete performance.now; true;"
+        )
+
+
+def test_overview_keeps_late_search_fields_and_toolbar_before_table_record_links(
+    browser: Any, site: PracticeSite, tmp_path: Path
+) -> None:
+    from capabilities.browser_session.handlers import BrowserRequest, BrowserSessionHandler
+
+    class ExistingBrowser:
+        def start(self) -> None:
+            pass
+
+        def __getattr__(self, name: str) -> Any:
+            return getattr(browser, name)
+
+    browser.navigate(site.url)
+    rows = "".join(
+        "<tr>"
+        + "".join(f'<td><a href="#record">Record {i}-{j}</a></td>' for j in range(4))
+        + "<td><button>Row action</button></td></tr>"
+        for i in range(100)
+    )
+    html = (
+        f"<table><tbody>{rows}</tbody></table>"
+        '<div role="toolbar"><button id="search" aria-expanded="false" '
+        'aria-pressed="true">Advanced Search</button></div>'
+        '<label for="date">Order Date</label><input id="date" type="date" '
+        'placeholder="Start date" value="2026-01-01">'
+        '<a id="plain" href="#help">Unscoped help</a>'
+        '<nav><a id="sales-nav" href="#sales">Sales</a></nav>'
+    )
+    browser.evaluate("document.body.innerHTML = " + json.dumps(html))
+    inspected = runner(browser, site).inspect()
+    overview = inspected["overview"]
+    assert isinstance(overview, dict) and isinstance(overview["controls"], list)
+    controls = [control for control in overview["controls"] if isinstance(control, dict)]
+    paths = [control["path"] for control in controls]
+    assert paths[0] == "#sales-nav" and "#search" in paths and "#date" in paths
+    search = next(control for control in controls if control["path"] == "#search")
+    date = next(control for control in controls if control["path"] == "#date")
+    assert search["state"] == {"expanded": "false", "pressed": "true"}
+    assert date["state"] == {"placeholder": "Start date", "type": "date"}
+    assert "2026-01-01" not in json.dumps(overview)
+    assert len(json.dumps(overview)) <= 9000 and overview["controls_truncated"] is True
+    run = BrowserSessionHandler(
+        (site.url,),
+        tmp_path / "profile",
+        headless=True,
+        timeout_s=2,
+        workspace_roots=(),
+        browser_factory=ExistingBrowser,
+    )
+    page = run.run(BrowserRequest()).page
+    assert "Advanced Search" in page and "Order Date" in page and "expanded='false'" in page
