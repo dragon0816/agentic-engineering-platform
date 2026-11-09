@@ -142,7 +142,12 @@ from host_runtime.bi_cards_tools import (
 )
 from host_runtime.business_cards_tools import chart_files, with_legend
 from host_runtime.change_proposals import ChangeProposals
-from host_runtime.chat_authoring import ChatAuthoringError, approval_text
+from host_runtime.chat_authoring import (
+    ChatAuthoringError,
+    approval_text,
+    digest,
+    same_workflow_body,
+)
 from host_runtime.choice_sources import ChoiceSources
 from host_runtime.contracts import (
     AgentProfileActivationRequest,
@@ -879,6 +884,13 @@ class AgentWeb:
         # 2026-10-19); an agent-mode backend's tool requests join it.
         self.turn_progress = TurnProgressBoard()
         self.agent_mode.observer = self._agent_tool_progress
+        if self.runtime.chat_authoring is not None:
+
+            def authoring_messages(actor: str, session: str) -> tuple[ConversationMessage, ...]:
+                saved = self.runtime.state.conversation(session, actor)
+                return saved.messages if saved is not None else ()
+
+            self.runtime.chat_authoring.session_messages = authoring_messages
 
     @property
     def request_lock(self) -> threading.RLock:
@@ -1076,12 +1088,156 @@ class AgentWeb:
                         )
                     )
                     message = json.loads(added.model_dump_json())
+        if decided.kind == "run" and decided.session_id and isinstance(decided.result, dict):
+            self._refresh_trial_cards(decided.session_id, decided.candidate_id)
+        repair = None
+        if (
+            decision == "approve"
+            and decided.kind == "run"
+            and decided.session_id
+            and isinstance(decided.result, dict)
+            and decided.result.get("status") in {"failed", "succeeded"}
+        ):
+            repair = self._resume_failed_authoring(decided.session_id)
         return {
             "ok": True,
             "approval": json.loads(decided.model_dump_json()),
             "text": text,
             "message": message,
+            **({"repair": repair} if repair is not None else {}),
         }
+
+    def _resume_failed_authoring(self, session_id: str) -> dict[str, Any] | None:
+        with self._turn_lock(session_id):
+            return self._resume_failed_authoring_locked(session_id)
+
+    def _resume_failed_authoring_locked(self, session_id: str) -> dict[str, Any] | None:
+        """One bounded, read/authoring-only continuation, never a write retry."""
+        chat = self.runtime.chat_authoring
+        record = self.runtime.state.conversation(session_id, self.runtime.actor)
+        if chat is None or record is None or record.backend != "gateway":
+            return None
+        candidates = [
+            c
+            for c in chat.candidates(self.runtime.actor)
+            if c.session_id == session_id and c.authoring_task is not None
+        ]
+        if not candidates:
+            return None
+        active = chat.tasks.load(self.runtime.actor, session_id)
+        if active is not None:
+            candidates = [
+                c
+                for c in candidates
+                if c.authoring_task is not None
+                and c.authoring_task.last_run_id == active.last_run_id
+            ]
+            if not candidates:
+                return None
+        candidate = candidates[0]
+        task = active or candidate.authoring_task
+        assert task is not None
+        if (
+            task.last_status not in {"failed", "succeeded"}
+            or chat.readiness(candidate)["verified"] is True
+            or not task.last_run_id
+            or task.repair_attempts >= 3
+            or task.last_repaired_run_id == task.last_run_id
+        ):
+            return None
+        if any(
+            a.kind == "run"
+            and a.candidate_id == candidate.candidate_id
+            and a.digest == digest(candidate.draft)
+            for a in chat.approvals(self.runtime.actor, session_id=session_id)
+        ):
+            return None
+        with self._record_lock(session_id):
+            current = chat.candidate(candidate.candidate_id, self.runtime.actor)
+            if (
+                current.authoring_task is None
+                or current.authoring_task.last_repaired_run_id == task.last_run_id
+            ):
+                return None
+            latest_task = chat.tasks.load(self.runtime.actor, session_id) or current.authoring_task
+            if (
+                latest_task is None
+                or latest_task.last_run_id != task.last_run_id
+                or latest_task.repair_attempts >= 3
+            ):
+                return None
+            task = latest_task.model_copy(update={"last_repaired_run_id": task.last_run_id})
+            chat._save_candidate(current.model_copy(update={"authoring_task": task}))
+            chat.tasks.save(self.runtime.actor, session_id, task)
+        import asyncio
+        from datetime import UTC, datetime
+
+        started = datetime.now(UTC)
+        note = (
+            "[Host authoring continuation: the previous actual trial is incomplete or failed] "
+            f"Candidate {candidate.candidate_id}; failure {task.last_failure}. "
+            "Diagnose using browser__inspect and the recorded trial result. Preserve every "
+            "saved requirement and supplied input. Revise the candidate and request a new "
+            "trial through authoring__run_workflow. A write trial still requires its normal "
+            "approval; stop when it is pending. Do not ask the user to navigate, transcribe "
+            "columns or provide a file already supplied. Do not claim readiness before the "
+            "exact candidate passes its trial."
+        )
+        history = tuple(
+            ModelMessage(role=m.role, text=with_tools(m)) for m in record.messages[-12:]
+        ) + (ModelMessage(role="user", text=note),)
+        request = LocalAgentRequest(
+            ingress="local",
+            actor=self.runtime.actor,
+            bridge_id=self.runtime.config.device.bridge_id,
+            namespace=self.namespace,
+            message=note,
+            trace=_trace(),
+            session_id=session_id,
+        )
+        permitted = frozenset(
+            {
+                "browser__inspect",
+                "authoring__plan_workflow",
+                "authoring__get_plan",
+                "authoring__needs_input",
+                "authoring__draft_workflow",
+                "authoring__get_workflow",
+                "authoring__run_workflow",
+            }
+        )
+        with self._one_at_a_time:
+            outcome = asyncio.run(
+                self.runtime.agent.converse(request, history, allowed_tools=permitted, max_turns=20)
+            )
+        result = outcome.conversation
+        if result is None:
+            return {"status": "failed", "code": "authoring_repair_unavailable"}
+        self._refresh_trial_cards(session_id, candidate.candidate_id)
+        cards = self.draft_turn_cards(session_id, started)
+        text = self._gateway_conversation_text(result)
+        added = ConversationMessage(
+            message_id=f"message-{uuid.uuid4().hex}",
+            role="assistant",
+            text=text,
+            created_at=datetime.now(UTC),
+            status="answered" if result.status == "answered" else "failed",
+            trace=result.trace,
+            tool_summary=tool_summary(result),
+            action_cards=tuple(cards),
+        )
+        with self._record_lock(session_id):
+            latest = self.runtime.state.conversation(session_id, self.runtime.actor)
+            if latest is not None:
+                self.runtime.state.save_conversation(
+                    latest.model_copy(
+                        update={
+                            "updated_at": added.created_at,
+                            "messages": (*latest.messages, added)[-MAX_STORED_MESSAGES:],
+                        }
+                    )
+                )
+        return {"status": result.status, "message": added.model_dump(mode="json")}
 
     # -- SOP to Workflow authoring --------------------------------------------
 
@@ -2598,6 +2754,10 @@ class AgentWeb:
                 self._update_card_message(
                     str(drafted["session_id"]), shown, drafted.get("workflow_form")
                 )
+            if action == "try" and drafted.get("code") == "tried" and drafted.get("session_id"):
+                repair = self._resume_failed_authoring(str(drafted["session_id"]))
+                if repair is not None:
+                    drafted["repair"] = repair
             return drafted
         if not card_id.startswith("cp-"):
             return {"ok": False, "code": "card_unknown", "message": "That card is unknown here."}
@@ -2621,6 +2781,30 @@ class AgentWeb:
                 )
             except (LocalStateError, ValueError):
                 return
+
+    def _refresh_trial_cards(self, session_id: str, candidate_id: str) -> None:
+        """Redraw current cards when trial evidence changes without a new revision."""
+        chat = self.runtime.chat_authoring
+        if chat is None:
+            return
+        try:
+            candidate = chat.candidate(candidate_id, self.runtime.actor)
+        except ChatAuthoringError:
+            return
+        if candidate.session_id != session_id:
+            return
+        for record in self.draft_cards.store.records():
+            if (
+                record.status == "pending"
+                and record.asset == "workflow"
+                and record.session_id == session_id
+                and record.candidate_id == candidate_id
+                and record.revision == candidate.revision
+                and record.digest == digest(candidate.draft)
+            ):
+                self._update_card_message(
+                    session_id, self.draft_cards.draw(record).model_dump(mode="json")
+                )
 
     # -- install cards for drafts a conversation made (owner 2026-10-16) -----
 
@@ -3117,6 +3301,17 @@ class AgentWeb:
             except AttachmentError as error:
                 return {"ok": False, "code": error.code}
             attachment_note, attachment_images = for_model(attached)
+            chat = self.runtime.chat_authoring
+            if chat is not None and record.backend == "gateway":
+                chat.tasks.observe(
+                    self.runtime.actor,
+                    item.session_id,
+                    item.message + ("\n\n" + attachment_note if attachment_note else ""),
+                    tuple(
+                        {"filename": file.filename, "kind": file.kind, "path": file.path}
+                        for file in attached
+                    ),
+                )
             started = datetime.now(UTC)
             if record.data_classification == "PUBLIC" and item.message.lstrip().startswith("/"):
                 answer = {
@@ -5502,7 +5697,43 @@ class AgentWeb:
         )
         import asyncio
 
+        running_candidate = None
+        chat = self.runtime.chat_authoring
         with self._one_at_a_time:
+            if chat is not None and item.session_id and manifest is not None:
+                for possible in chat.candidates(self.runtime.actor):
+                    if (
+                        possible.session_id == item.session_id
+                        and possible.authoring_task is not None
+                        and same_workflow_body(possible.draft, manifest)
+                    ):
+                        task = (
+                            chat.tasks.load(self.runtime.actor, item.session_id)
+                            or possible.authoring_task
+                        )
+                        supplied = dict(task.supplied_inputs)
+                        for field in manifest.parameters:
+                            if (
+                                field.name in arguments
+                                and not field.confirm
+                                and field.kind != "upload"
+                                and field.file_mode != "output"
+                            ):
+                                supplied[field.name] = {
+                                    "value": arguments[field.name],
+                                    "origin": "form",
+                                    "source_id": "form",
+                                    "recorded_at": datetime.now(UTC).isoformat(),
+                                }
+                        chat.tasks.save(
+                            self.runtime.actor,
+                            item.session_id,
+                            task.model_copy(update={"supplied_inputs": supplied}),
+                        )
+                        running_candidate = chat.begin_trial(
+                            self.runtime.actor, possible, arguments
+                        )
+                        break
             outcome = asyncio.run(self.runtime.agent.execute_workflow(local))
         succeeded = (
             outcome.refusal is None
@@ -5538,11 +5769,25 @@ class AgentWeb:
             if item.session_id is not None
             else None
         )
+        repair = None
+        chat = self.runtime.chat_authoring
+        if (
+            item.session_id is not None
+            and chat is not None
+            and outcome.workflow is not None
+            and running_candidate is not None
+        ):
+            chat.record_trial(
+                self.runtime.actor, running_candidate, outcome.workflow, executed_manifest=manifest
+            )
+            self._refresh_trial_cards(item.session_id, running_candidate.candidate_id)
+            repair = self._resume_failed_authoring(item.session_id)
         return {
             "ok": succeeded,
             "answer": answer,
             "outcome": json.loads(outcome.model_dump_json()),
             **({"message": recorded} if recorded is not None else {}),
+            **({"repair": repair} if repair is not None else {}),
         }
 
     def knowledge_pipeline(self) -> dict[str, Any]:

@@ -95,7 +95,7 @@ MAX_CONVERSATION_MESSAGE_CHARS = 4_000
 # The person's newest message may carry attached files' text (owner 2026-10-08).
 MAX_CURRENT_MESSAGE_CHARS = 40_000
 #: How much of the system prompt the session's produced list may take.
-MAX_SESSION_CONTEXT_CHARS = 4_000
+MAX_SESSION_CONTEXT_CHARS = 12_000
 MAX_TOOL_OBSERVATION_CHARS = 16_000
 # A tool call's recorded arguments (G2 logging, owner 2026-10-18).
 MAX_RECORDED_ARGUMENTS_CHARS = 4_000
@@ -533,6 +533,11 @@ class Gateway:
         # Host-owned conversation tools (G4 authoring); the host may set it after
         # construction, once the services behind the tools exist.
         self.host_tools = host_tools
+        # Persistent authoring proof belongs to the Host's actor/session store,
+        # including on turns that use no tools. The Host binds it after setup.
+        self.authoring_completion_problem: (
+            Callable[[RequestContext, GatewayConversationResult], str | None] | None
+        ) = None
         # `namespace/name` of the Skills installed but switched off, which the
         # model must not mistake for missing ones (live test 2026-10-20); the
         # host sets it.
@@ -710,6 +715,13 @@ class Gateway:
                 request.trace.request_id,
                 person=request.message,
                 can_draft=lambda: bool(offered & DRAFT_TOOLS),
+                completion_problem=lambda result: (
+                    self.authoring_completion_problem(request, result)
+                    if self.authoring_completion_problem is not None
+                    and bool(offered & DRAFT_TOOLS)
+                    and not delegation_scope.in_sub_run()
+                    else None
+                ),
             )
             if used:
                 result = result.model_copy(update={"preferences_used": tuple(sorted(used))[:40]})

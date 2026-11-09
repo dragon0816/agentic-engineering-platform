@@ -2377,7 +2377,12 @@ def build_runtime(
     # What each session produced, so the agent can show it again (owner
     # 2026-10-25): listed in every turn and attachable by its short id.
     session_artifacts = SessionArtifacts(place.workspace_root)
-    gateway.session_context = session_artifacts.guidance
+    gateway.authoring_completion_problem = chat_authoring.completion_problem
+    gateway.session_context = lambda context: "\n\n".join(
+        part
+        for part in (chat_authoring.task_context(context), session_artifacts.guidance(context))
+        if part
+    )
     # Task result summaries: field labels from the installed Workflow, and one
     # bounded call on the approved model client when a run's outputs give
     # too few facts (none when no model is configured).

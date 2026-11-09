@@ -211,6 +211,8 @@ class LocalAgent:
         *,
         persona_guidance: str | None = None,
         max_history_messages: int = 12,
+        allowed_tools: frozenset[str] | None = None,
+        max_turns: int | None = None,
     ) -> LocalConversationOutcome:
         """Run the bounded conversation loop after normal device admission."""
         item = LocalAgentRequest.model_validate(request)
@@ -237,6 +239,8 @@ class LocalAgent:
                 history=history,
                 persona_guidance=persona_guidance,
                 max_history_messages=max_history_messages,
+                allowed_tools=tuple(sorted(allowed_tools)) if allowed_tools is not None else None,
+                **({"max_turns": max_turns} if max_turns is not None else {}),
             )
         )
         runs: list[LocalRunSummary] = []

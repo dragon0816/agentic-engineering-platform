@@ -37,7 +37,7 @@ from typing import Any, Literal
 
 from pydantic import Field, JsonValue, ValidationError
 
-from agent.gateway import HostTool, HostToolOutcome
+from agent.gateway import GatewayConversationResult, HostTool, HostToolOutcome
 from agent.skills import SkillManifest
 from capabilities.coding_change.workspaces import containing_root, workspace_note
 from capabilities.runtime import (
@@ -52,6 +52,16 @@ from common.base import Contract, Symbol, Text
 from common.execution import Failure, RequestContext, TraceIdentifiers
 from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
 from common.workflow_run_form import OFFER_KEY
+from host_runtime.authoring_inputs import bind_supplied_inputs
+from host_runtime.authoring_task import (
+    AuthoringPlanRequest,
+    AuthoringQuestion,
+    AuthoringTask,
+    TaskStore,
+    coverage_problems,
+    task_guidance,
+)
+from host_runtime.conversations import ConversationMessage
 from host_runtime.skill_authoring import (
     SkillCandidate,
     assemble_skill,
@@ -115,6 +125,7 @@ class ChatCandidate(Contract):
     # membership came from (`platform`, `platform_cache` or `declared`).
     member_team: Symbol | None = None
     membership_source: Text | None = None
+    authoring_task: AuthoringTask | None = None
 
 
 REVISION_PREFIX = "revision:"
@@ -199,6 +210,15 @@ def summarize(snapshot: WorkflowRunSnapshot) -> dict[str, JsonValue]:
 
 
 DRAFT_GUIDE = (
+    "First use authoring__plan_workflow to preserve the SOP requirements before exploring. "
+    "Use authoring__get_plan to read saved state. For genuinely missing business choices, "
+    "resources or authentication, use authoring__needs_input and ask only that question. "
+    "Do not replace the requested automation with manual page switching or a smaller task. "
+    "Bind each saved requirement to real output check_ids and procedure assertions; a changed "
+    "candidate needs a successful current-version trial before installation. "
+    "Save and trial intermediate Workflows to validate discovered steps, then revise the "
+    "same candidate. coverage_problems lists remaining requirements; partial trial success "
+    "is not verified readiness. Never invent a candidate_id: use the ID returned by draft. "
     "Draft or revise a Workflow from this conversation so it can be previewed, run and reused. "
     "Use it whenever the person asks for a Workflow for this platform, a reusable Workflow, "
     "anything to keep and reuse (做成可以重複用的, 以後都用這個, 建立一個工具), or a run on the "
@@ -217,6 +237,9 @@ DRAFT_GUIDE = (
     '"script": "<complete script>"}}, "arguments": {"source": "run", "path": []}}; the '
     'script reads the run values with json.load(open(os.environ["AEP_WORKFLOW_PARAMS"])) and '
     "writes only to the workspace's output folder, so the same script reruns with new values. "
+    "If it prints only one complete JSON object, run-python exposes it as output.data. "
+    "Use a prior Python step to prepare locale-specific browser values, then bind the "
+    "browser values input from that step's ['data']; do not freeze formatted dates. "
     'To operate a web system as a step use browser/operate@1.0.0 with inputs {"actions": '
     '{"source": "fixed", "value": [the browser__operate actions]}, "values": '
     '{"source": "run", "path": []}, "workspace": {"source": "fixed", "value": '
@@ -257,6 +280,7 @@ class ChatAuthoring:
         coding_workspace_roots: tuple[str, ...] = (),
         on_installed: Callable[[WorkflowManifest, tuple[CapabilityGrant, ...]], None] | None = None,
         teams: Callable[[str], TeamMembership] | None = None,
+        autonomy_required: bool = False,
     ) -> None:
         self.root = root
         # actor -> the teams they belong to (platform, its cache, or the PC's
@@ -281,6 +305,95 @@ class ChatAuthoring:
         self.workflows_dir = workflows_dir
         self.grants_file = grants_file
         self.run_timeout_seconds = run_timeout_seconds
+        self.autonomy_required = autonomy_required
+        self.tasks = TaskStore(root / "tasks")
+        self.session_messages: Callable[[str, str], Sequence[ConversationMessage]] = (
+            lambda _actor, _session: ()
+        )
+
+    def task_context(self, context: RequestContext) -> str:
+        if context.session_id is None:
+            return ""
+        task = self.tasks.load(context.actor, context.session_id)
+        if (
+            task is None
+            and self.needs_plan(context)
+            and re.search(r"workflow|工作流程|自動化|重複用", context.message, re.IGNORECASE)
+        ):
+            task = self.tasks.save(
+                context.actor,
+                context.session_id,
+                AuthoringTask(objective=context.message[:40000]),
+            )
+        return task_guidance(task) if task is not None else ""
+
+    def completion_problem(
+        self, context: RequestContext, result: GatewayConversationResult
+    ) -> str | None:
+        """A saved task cannot disappear when the model's history window moves."""
+        if context.session_id is None:
+            return None
+        task = self.tasks.load(context.actor, context.session_id)
+        if task is None or task.question is not None:
+            return None
+        candidates = {
+            item.candidate_id: item
+            for item in self.candidates(context.actor)
+            if item.session_id == context.session_id
+        }
+        if any(
+            task.verified_digest == digest(item.draft) and not coverage_problems(task, item.draft)
+            for item in candidates.values()
+        ):
+            return None
+        if any(
+            approval.kind in ("run", "capability")
+            and (
+                approval.kind == "capability"
+                or (
+                    approval.candidate_id in candidates
+                    and approval.digest == digest(candidates[approval.candidate_id].draft)
+                )
+            )
+            for approval in self.approvals(context.actor, session_id=context.session_id)
+        ):
+            return None
+        return (
+            "The saved SOP Workflow task is unfinished. Preserve every requirement, "
+            "use authoring__get_plan and browser__inspect to repair the candidate, then "
+            "trial its current revision with authoring__run_workflow. If a real business "
+            "decision, missing resource or authentication prevents progress, record it "
+            "with authoring__needs_input. Do not hand technical navigation to the person "
+            "or claim the Workflow is complete without current trial evidence."
+        )
+
+    def needs_plan(self, context: RequestContext) -> bool:
+        if self.autonomy_required:
+            return True
+        if context.session_id is None:
+            return False
+        notes = (
+            *self.session_messages(context.actor, context.session_id),
+            *self.tasks.messages(context.actor, context.session_id),
+        )
+        return any(
+            "sop" in note.text.casefold()
+            or any(
+                a.get("filename", "").casefold().endswith((".pdf", ".docx"))
+                for a in note.attachments
+            )
+            for note in notes
+        )
+
+    def repair_scope(self, context: RequestContext, candidate_id: str) -> None:
+        if not context.message.startswith("[Host authoring continuation:"):
+            return
+        found = re.search(r"Candidate (wf-[a-zA-Z0-9-]+);", context.message)
+        if found is None or candidate_id != found[1]:
+            raise ChatAuthoringError("authoring_repair_scope")
+        item = self.candidate(candidate_id, context.actor)
+        if item.session_id != context.session_id:
+            raise ChatAuthoringError("authoring_repair_scope")
 
     @property
     def installed(self) -> InstalledCapabilities:
@@ -375,6 +488,27 @@ class ChatAuthoring:
         )
         if manifest is None:
             return None, problems
+        task = self.tasks.load(actor, session_id) if session_id else None
+        if task is None and previous is not None:
+            task = previous.authoring_task
+        if session_id:
+            manifest, supplied = bind_supplied_inputs(
+                manifest,
+                tuple(
+                    sorted(
+                        (
+                            *self.session_messages(actor, session_id),
+                            *self.tasks.messages(actor, session_id),
+                        ),
+                        key=lambda note: note.created_at,
+                    )
+                ),
+                remembered=task.supplied_inputs if task is not None else None,
+            )
+            if task is not None:
+                task = task.model_copy(
+                    update={"supplied_inputs": {**task.supplied_inputs, **supplied}}
+                )
         self.prepare_workspaces(manifest)
         now = _now()
         if previous is not None and previous.source.startswith(REVISION_PREFIX):
@@ -400,8 +534,24 @@ class ChatAuthoring:
             status="installed"
             if previous is not None and previous.installed_digest == digest(manifest)
             else "draft",
+            authoring_task=task.model_copy(update={"verified_digest": None}) if task else None,
         )
+        if session_id and item.authoring_task is not None:
+            self.tasks.save(actor, session_id, item.authoring_task)
         return self._save_candidate(item), []
+
+    def readiness(self, item: ChatCandidate) -> dict[str, JsonValue]:
+        active = self.tasks.load(item.actor, item.session_id) if item.session_id else None
+        task = active or item.authoring_task
+        if task is None:
+            return {}
+        problems = coverage_problems(task, item.draft)
+        return {
+            "trial_required": True,
+            "verified": not problems and task.verified_digest == digest(item.draft),
+            "coverage_complete": not problems,
+            "coverage_problems": list(problems),
+        }
 
     def check(
         self,
@@ -470,6 +620,23 @@ class ChatAuthoring:
                 )
             else:
                 problems.extend(self._workspace_problems(index, step))
+                binding = self.installed.get(step.capability)
+                assert binding is not None
+                fixed = {
+                    name: value.value
+                    for name, value in step.inputs.items()
+                    if isinstance(value, FixedInput)
+                }
+                try:
+                    binding.input_model.model_validate(fixed)
+                except ValidationError as error:
+                    for problem in error.errors(include_input=False):
+                        location = problem["loc"]
+                        if (location and location[0] in fixed) or len(fixed) == len(step.inputs):
+                            place = ".".join(str(v) for v in location)
+                            problems.append(
+                                f"step {index}: invalid fixed input {place} ({problem['type']})"
+                            )
         if not manifest.steps:
             problems.append("the Workflow has no steps")
         if previous is not None and not raw.get("allow_removed_steps"):
@@ -637,6 +804,11 @@ class ChatAuthoring:
     def execute(
         self, actor: str, candidate: ChatCandidate, arguments: dict[str, JsonValue], ref: str
     ) -> dict[str, JsonValue]:
+        try:
+            arguments = validate_run_parameters(candidate.draft, arguments)
+        except WorkflowParameterError as error:
+            raise ChatAuthoringError("workflow_input_invalid", str(error)) from None
+        candidate = self.begin_trial(actor, candidate, arguments)
         self.prepare_workspaces(candidate.draft)
         engine = self._engine(candidate.draft, actor, ref)
         snapshot = asyncio.run(
@@ -648,12 +820,86 @@ class ChatAuthoring:
                 timeout_seconds=self.run_timeout_seconds,
             )
         )
+        self.record_trial(actor, candidate, snapshot)
         return {
             "candidate_id": candidate.candidate_id,
             "digest": digest(candidate.draft),
             "workflow": _key(candidate.draft.metadata.identity),
             **summarize(snapshot),
+            **self.readiness(self.candidate(candidate.candidate_id, actor)),
         }
+
+    def begin_trial(
+        self, actor: str, candidate: ChatCandidate, arguments: dict[str, JsonValue]
+    ) -> ChatCandidate:
+        if candidate.actor != actor:
+            raise ChatAuthoringError("candidate_unknown")
+        current = self.candidate(candidate.candidate_id, actor)
+        if digest(current.draft) != digest(candidate.draft):
+            raise ChatAuthoringError("candidate_changed")
+        active = self.tasks.load(actor, candidate.session_id) if candidate.session_id else None
+        task = active or current.authoring_task
+        if task is None:
+            return current
+        task = task.model_copy(
+            update={
+                "active_trial_token": secrets.token_hex(16),
+                "last_trial_arguments": arguments,
+                "verified_digest": None,
+                "question": None,
+            }
+        )
+        current = current.model_copy(update={"authoring_task": task})
+        current = self._save_candidate(current)
+        if candidate.session_id:
+            self.tasks.save(actor, candidate.session_id, task)
+        return current
+
+    def record_trial(
+        self,
+        actor: str,
+        candidate: ChatCandidate,
+        snapshot: WorkflowRunSnapshot,
+        executed_manifest: WorkflowManifest | None = None,
+    ) -> None:
+        if candidate.actor != actor:
+            raise ChatAuthoringError("candidate_unknown")
+        current = self.candidate(candidate.candidate_id, actor)
+        if digest(current.draft) != digest(candidate.draft):
+            return
+        if executed_manifest is not None and not same_workflow_body(
+            candidate.draft, executed_manifest
+        ):
+            return
+        expected = candidate.authoring_task
+        active = self.tasks.load(actor, candidate.session_id) if candidate.session_id else None
+        task = active or current.authoring_task
+        if (
+            task is None
+            or expected is None
+            or not expected.active_trial_token
+            or task.active_trial_token != expected.active_trial_token
+        ):
+            return
+        passed = snapshot.run.status == "succeeded" and not coverage_problems(task, current.draft)
+        task = task.model_copy(
+            update={
+                "last_trial_digest": digest(candidate.draft),
+                "verified_digest": digest(candidate.draft) if passed else None,
+                "last_status": snapshot.run.status,
+                "last_run_id": snapshot.run.run_id,
+                "last_failure": snapshot.run.failure.code if snapshot.run.failure else None,
+                "repair_attempts": 0
+                if passed
+                else min(
+                    3, task.repair_attempts + int(snapshot.run.status in ("failed", "succeeded"))
+                ),
+                "active_trial_token": None,
+            }
+        )
+        self._save_candidate(current.model_copy(update={"authoring_task": task}))
+        if candidate.session_id:
+            self.tasks.save(actor, candidate.session_id, task)
 
     def request(
         self,
@@ -823,6 +1069,17 @@ class ChatAuthoring:
     def install(
         self, candidate: ChatCandidate, actor: str, approval_id: str
     ) -> dict[str, JsonValue]:
+        active = self.tasks.load(actor, candidate.session_id) if candidate.session_id else None
+        task = active or candidate.authoring_task
+        if task is not None:
+            problems = coverage_problems(task, candidate.draft)
+            if problems:
+                raise ChatAuthoringError("authoring_coverage_incomplete", "; ".join(problems))
+            if task.verified_digest != digest(candidate.draft):
+                raise ChatAuthoringError(
+                    "authoring_trial_required",
+                    "Run this exact candidate successfully before installing it",
+                )
         identity = candidate.draft.metadata.identity
         name = f"{identity.namespace}__{identity.name}__{identity.version}.json"
         target = self.workflows_dir / name
@@ -1012,6 +1269,7 @@ class ChatAuthoring:
             return None, problems, {}
         self.prepare_workspaces(manifest)
         now = _now()
+        task = self.tasks.load(actor, session_id) if session_id else None
         item = ChatCandidate(
             candidate_id=f"wf-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
             actor=actor,
@@ -1025,7 +1283,10 @@ class ChatAuthoring:
             base_digest=digest(base),
             member_team=member_team,
             membership_source=member.source if member is not None else None,
+            authoring_task=task.model_copy(update={"verified_digest": None}) if task else None,
         )
+        if session_id and item.authoring_task is not None:
+            self.tasks.save(actor, session_id, item.authoring_task)
         return self._save_candidate(item), [], {"continued": False, "forked": not in_place}
 
     def _team_member(self, base: WorkflowManifest, actor: str) -> TeamMembership | None:
@@ -1359,8 +1620,126 @@ class ChatAuthoring:
 
         Args = dict[str, JsonValue]
 
+        async def question_tool(context: RequestContext, args: Args) -> HostToolOutcome:
+            if context.session_id is None:
+                return _refused("authoring_session_required", "A question belongs to this task")
+            task = self.tasks.load(context.actor, context.session_id)
+            if task is None:
+                return _refused("authoring_plan_required", "Preserve the task first")
+            try:
+                question = AuthoringQuestion.model_validate(args)
+            except ValueError:
+                return _refused(
+                    "authoring_question_invalid", "Use a typed business/resource question"
+                )
+            if question.reason == "repair_limit" and task.repair_attempts < 3:
+                return _refused("authoring_repair_remaining", "Use the remaining bounded repairs")
+            if question.reason == "missing_resource":
+                if question.input_name is None:
+                    return _refused(
+                        "authoring_resource_name_required",
+                        "Name the missing input; inspect supplied attachments before asking",
+                    )
+                notes = (
+                    *self.session_messages(context.actor, context.session_id),
+                    *self.tasks.messages(context.actor, context.session_id),
+                )
+                paths = {
+                    str(attachment.get("path", ""))
+                    for note in notes
+                    if note.role == "user"
+                    for attachment in note.attachments
+                }
+                paths.update(
+                    value
+                    for note in notes
+                    if note.role == "user"
+                    for value in re.findall(r"""["'`]([^"'`\r\n]+)["'`]""", note.text)
+                    if Path(value).is_absolute()
+                )
+                existing = [path for path in paths if Path(path).is_file()]
+                name = question.resource_name
+                if existing and (
+                    name is None
+                    or any(
+                        Path(path).name.casefold() == Path(name).name.casefold()
+                        for path in existing
+                    )
+                ):
+                    return _refused(
+                        "authoring_resources_already_supplied",
+                        "Use the supplied file references. If a different resource is missing, "
+                        "specify its exact resource_name and input_name",
+                    )
+            if re.search(r"\b(?:css|xpath|selector|dom)\b", question.question, re.IGNORECASE) or (
+                question.reason != "authentication_required"
+                and re.search(r"手動.{0,20}(?:畫面|頁面|瀏覽器)", question.question)
+            ):
+                return _refused(
+                    "authoring_technical_question",
+                    "Use browser__inspect and repair; do not ask the person for "
+                    "technical navigation",
+                )
+            if question.input_name and question.input_name in task.supplied_inputs:
+                value = task.supplied_inputs[question.input_name].get("value")
+                missing_file = (
+                    question.reason == "missing_resource"
+                    and isinstance(value, str)
+                    and not Path(value).is_file()
+                )
+                if not missing_file:
+                    return _refused(
+                        "authoring_input_already_supplied", "Use the saved input and its origin"
+                    )
+            self.tasks.save(
+                context.actor, context.session_id, task.model_copy(update={"question": question})
+            )
+            return HostToolOutcome(
+                status="succeeded",
+                data={"status": "needs_input", **question.model_dump(mode="json")},
+            )
+
+        async def get_plan_tool(context: RequestContext, args: Args) -> HostToolOutcome:
+            task = (
+                self.tasks.load(context.actor, context.session_id) if context.session_id else None
+            )
+            return HostToolOutcome(
+                status="succeeded",
+                data=task.model_dump(mode="json")
+                if task is not None
+                else {"status": "not_planned"},
+            )
+
+        async def plan_tool(context: RequestContext, args: Args) -> HostToolOutcome:
+            if context.session_id is None:
+                return _refused("authoring_session_required", "Plan belongs to a conversation")
+            try:
+                raw = args.get("requirements")
+                if not isinstance(raw, list) or not raw:
+                    return _refused(
+                        "authoring_requirements_missing", "List the SOP requirements first"
+                    )
+                requirements = list(AuthoringPlanRequest.model_validate(args).requirements)
+                task = self.tasks.plan(
+                    context.actor, context.session_id, context.message[:40000], requirements
+                )
+                return HostToolOutcome(status="succeeded", data=task.model_dump(mode="json"))
+            except ValueError as error:
+                return _refused("authoring_plan_invalid", str(error)[:500])
+
         async def draft_tool(context: RequestContext, args: Args) -> HostToolOutcome:
             def work() -> HostToolOutcome:
+                self.repair_scope(context, str(args.get("candidate_id") or ""))
+                if (
+                    self.needs_plan(context)
+                    and context.session_id
+                    and self.tasks.load(context.actor, context.session_id) is None
+                ):
+                    return _refused(
+                        "authoring_plan_required",
+                        "Use authoring__plan_workflow to preserve every SOP requirement "
+                        "before drafting",
+                    )
                 raw = args.get("workflow")
                 if not isinstance(raw, dict):
                     return _refused("workflow_missing", "give the Workflow as an object")
@@ -1386,6 +1765,7 @@ class ChatAuthoring:
                         "revision": item.revision,
                         "digest": digest(item.draft),
                         "read_only": self.read_only(item.draft),
+                        **self.readiness(item),
                         "next": "preview it, then run it; a run that writes waits for the owner's "
                         "approval",
                     },
@@ -1406,25 +1786,55 @@ class ChatAuthoring:
 
         async def run_tool(context: RequestContext, args: Args) -> HostToolOutcome:
             def work() -> HostToolOutcome:
+                self.repair_scope(context, str(args.get("candidate_id") or ""))
                 item = self.candidate(str(args.get("candidate_id") or ""), context.actor)
                 arguments = _arguments(args)
-                if item.status == "installed" and item.installed_digest == digest(item.draft):
+                active = (
+                    self.tasks.load(context.actor, context.session_id)
+                    if context.session_id
+                    else None
+                )
+                task = active or item.authoring_task
+                if (
+                    task is not None
+                    and task.repair_attempts >= 3
+                    and "Host authoring continuation" in context.message
+                ):
+                    return _refused(
+                        "authoring_repair_limit", "Three unfinished trials; stop for the owner"
+                    )
+                repair = context.message.startswith("[Host authoring continuation:")
+                if (
+                    repair
+                    and task is not None
+                    and task.last_status == "succeeded"
+                    and task.last_trial_digest == digest(item.draft)
+                ):
+                    return _refused(
+                        "authoring_revision_required",
+                        "This partial procedure already ran successfully. Preserve its result "
+                        "and revise the candidate to complete missing requirements; do not "
+                        "repeat the successful execution during continuation",
+                    )
+                if (
+                    item.status == "installed"
+                    and item.installed_digest == digest(item.draft)
+                    and not (repair and not self.read_only(item.draft))
+                ):
                     offer = self._form_instead(context, item.draft, arguments)
                     if offer is not None:
                         return HostToolOutcome(status="succeeded", data={OFFER_KEY: offer})
                     # The installed version, unchanged: installing was the approval.
-                    return HostToolOutcome(
-                        status="succeeded",
-                        data=self.execute(
+                    return _trial_outcome(
+                        self.execute(
                             context.actor, item, arguments, f"chat-installed:{item.candidate_id}"
-                        ),
+                        )
                     )
                 if self.read_only(item.draft):
-                    return HostToolOutcome(
-                        status="succeeded",
-                        data=self.execute(
+                    return _trial_outcome(
+                        self.execute(
                             context.actor, item, arguments, f"chat-read-only:{item.candidate_id}"
-                        ),
+                        )
                     )
                 request = self.request(
                     context.actor, context.session_id, "run", item.candidate_id, arguments
@@ -1433,6 +1843,8 @@ class ChatAuthoring:
                     status="awaiting_approval",
                     data={
                         "approval_id": request.approval_id,
+                        "candidate_id": item.candidate_id,
+                        "digest": digest(item.draft),
                         "summary": request.summary,
                         "next": "Nothing ran yet. Tell the person it waits for their approval "
                         "button; after they approve, the result appears in this conversation.",
@@ -1464,6 +1876,7 @@ class ChatAuthoring:
 
         async def get_tool(context: RequestContext, args: Args) -> HostToolOutcome:
             def work() -> HostToolOutcome:
+                self.repair_scope(context, str(args.get("candidate_id") or ""))
                 reference = str(args.get("workflow") or "").strip()
                 candidate_id = str(args.get("candidate_id") or "").strip()
                 if reference and not candidate_id:
@@ -1484,6 +1897,7 @@ class ChatAuthoring:
                     "digest": digest(item.draft),
                     "parameters": [p.model_dump(mode="json") for p in item.draft.parameters],
                     "steps": [step.model_dump(mode="json") for step in item.draft.steps],
+                    **self.readiness(item),
                 }
                 if item.draft.checks:
                     body["checks"] = [c.model_dump(mode="json") for c in item.draft.checks]
@@ -1495,6 +1909,14 @@ class ChatAuthoring:
 
         async def revise_tool(context: RequestContext, args: Args) -> HostToolOutcome:
             def work() -> HostToolOutcome:
+                if (
+                    self.needs_plan(context)
+                    and context.session_id
+                    and self.tasks.load(context.actor, context.session_id) is None
+                ):
+                    return _refused(
+                        "authoring_plan_required", "Preserve the SOP requirements before revising"
+                    )
                 reference = str(args.get("workflow") or "").strip()
                 if not reference:
                     return _refused("workflow_missing", "name the installed Workflow to revise")
@@ -1596,6 +2018,69 @@ class ChatAuthoring:
         candidate = {"candidate_id": {"type": "string"}}
         values = {"arguments": {"type": "object", "description": "run values by parameter name"}}
         return (
+            HostTool(
+                ModelTool(
+                    name="authoring__needs_input",
+                    description=(
+                        "Record a genuinely missing business decision/resource or authentication "
+                        "step before asking. Supply input_name when asking for a parameter; "
+                        "missing_resource requires input_name and the exact resource_name "
+                        "when other files were already provided. "
+                        "already supplied inputs must be reused. Never request CSS/selectors "
+                        "or manual navigation. Do not use this to reduce the task scope."
+                    ),
+                    input_contract="host.authoring.question.v1",
+                    input_schema=AuthoringQuestion.model_json_schema(),
+                ),
+                guarded(question_tool),
+                "write",
+            ),
+            HostTool(
+                ModelTool(
+                    name="authoring__get_plan",
+                    description=(
+                        "Read this session's saved requirements, input origins and trial state. "
+                        "Do not call plan again merely to read."
+                    ),
+                    input_contract="host.authoring.plan-read.v1",
+                    input_schema={
+                        "type": "object",
+                        "properties": {},
+                        "additionalProperties": False,
+                    },
+                ),
+                guarded(get_plan_tool),
+                "read",
+            ),
+            HostTool(
+                ModelTool(
+                    name="authoring__plan_workflow",
+                    description=(
+                        "Preserve this conversation's complete SOP requirements before "
+                        "exploring/drafting. "
+                        "Each requirement has requirement_id, description, check_ids "
+                        "naming the future Workflow output checks, "
+                        "and assertions over the eventual manifest: "
+                        "{path:[...],operator:present|equals|contains|min_count,expected:J"
+                        "SON}. "
+                        "Use * in paths to visit all steps/actions. Plan unbound "
+                        "requirements first, then add assertions after discovery. "
+                        "Example full-table proof path "
+                        "['steps','*','inputs','actions','value','*','pagination'] "
+                        "operator present; "
+                        "date filters require fill actions, artifacts need fresh file "
+                        "checks. Preserve every requirement ID/description and existing check "
+                        "ID. Correct or relocate procedure assertions after discovery without "
+                        "clearing existing coverage; changes require a fresh current trial. "
+                        "Retrieve persistent plan from session context, and add coverage "
+                        "instead of asking the user for selectors."
+                    ),
+                    input_contract="host.authoring.plan.v1",
+                    input_schema=AuthoringPlanRequest.model_json_schema(),
+                ),
+                guarded(plan_tool),
+                "write",
+            ),
             HostTool(
                 ModelTool(
                     name="authoring__draft_workflow",
@@ -1919,3 +2404,30 @@ def _step_problems(error: ValidationError) -> list[str]:
     if not shown:  # only the nested branch failed: say it as it is
         shown = [f"{'.'.join(str(p) for p in e['loc'])}: {e['msg']}" for e in error.errors()]
     return shown[:8]
+
+
+def _trial_outcome(result: dict[str, JsonValue]) -> HostToolOutcome:
+    if result.get("status") == "succeeded":
+        return HostToolOutcome(status="succeeded", data=result)
+    raw = result.get("failure")
+    code = raw.get("code") if isinstance(raw, dict) else "workflow_trial_failed"
+    return HostToolOutcome(
+        status="failed",
+        data=result,
+        failure=Failure(
+            code=str(code or "workflow_trial_failed"),
+            message="The actual Workflow trial failed; diagnose and revise the candidate",
+        ),
+    )
+
+
+def same_workflow_body(candidate: WorkflowManifest, executed: WorkflowManifest) -> bool:
+    """Publication adds approval metadata, never changes the executable draft."""
+
+    def comparable(manifest: WorkflowManifest) -> dict[str, Any]:
+        value = manifest.model_dump(mode="json")
+        for key in ("lifecycle", "business_approval", "validation_refs"):
+            value["metadata"].pop(key, None)
+        return value
+
+    return comparable(candidate) == comparable(executed)

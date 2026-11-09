@@ -391,9 +391,26 @@ class DraftCards:
         elif not record.read_only:
             effects.append("Its steps change things; each run after installing is yours to start.")
         pending = record.status == "pending"
+        active_task = (
+            chat.tasks.load(item.actor, item.session_id)
+            if chat is not None and isinstance(item, ChatCandidate) and item.session_id
+            else None
+        )
+        task = (active_task or item.authoring_task) if isinstance(item, ChatCandidate) else None
+        needs_trial = (
+            isinstance(item, ChatCandidate)
+            and task is not None
+            and task.verified_digest != digest(item.draft)
+        )
+        if needs_trial:
+            lines.append(
+                "Verification: a successful trial of this exact revision is "
+                "required before installation."
+            )
         buttons: list[CardButton] = []
         if pending:
-            buttons.append(CardButton(action="install", label="Install", style="primary"))
+            if not needs_trial:
+                buttons.append(CardButton(action="install", label="Install", style="primary"))
             if record.tryable and record.channel != "telegram":
                 buttons.append(CardButton(action="try", label="Run once to try"))
             buttons.append(CardButton(action="not_now", label="Not now"))

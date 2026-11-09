@@ -46,12 +46,14 @@ from agent.harness_runner import HarnessActionFailure, run_harness_async
 from agent.skills import SkillHarnessGuidance
 from capabilities.coding_change.workspaces import containing_root
 from common.assets import AssetIdentity
+from common.execution import Failure
 
 _LOG = logging.getLogger(__name__)
 
 CLAIM_CHECK = "no_unbacked_action_claim"
 OUTPUT_CHECK = "named_outputs_exist"
 REUSE_CHECK = "reusable_request_drafted"
+AUTHORING_PROOF_REASON = "Persistent authoring completion proof missing: "
 #: The tools that give the person a Workflow draft and its install card.
 DRAFT_TOOLS = frozenset({"authoring__draft_workflow", "authoring__revise_workflow"})
 #: Memory proposals (accumulated memory M3): a card the person presses; until
@@ -202,6 +204,8 @@ def person_notes(reasons: list[str]) -> list[str]:
             note = PERSISTENT_NOTE
         elif reason == REUSE_REASON:
             note = REUSE_NOTE
+        elif reason.startswith(AUTHORING_PROOF_REASON):
+            note = NOTE_MARK + "目前 Workflow 尚未通過完整試跑驗證，不能視為完成）"
         elif reason.startswith(MISSING_REASON):
             files = (
                 reason.removeprefix(MISSING_REASON)
@@ -256,16 +260,115 @@ def check_answer(
 def check_reuse(
     person: str, tools: tuple[Any, ...], can_draft: bool
 ) -> tuple[HarnessCheckResult, str | None]:
-    """A reusable request answered with one-off code and no Workflow draft."""
+    """Require a reusable artifact and evidence that guarded authoring reached a gate."""
     one_off = any(_succeeded(item) and str(item.name).startswith("coding__") for item in tools)
     drafted = any(_succeeded(item) and item.name in DRAFT_TOOLS for item in tools)
     failed = can_draft and one_off and not drafted and bool(_REUSABLE.search(person or ""))
     reason = REUSE_REASON if failed else None
+    authoring_reason = _authoring_completion_reason(tools)
+    if authoring_reason is not None:
+        failed, reason = True, authoring_reason
     return HarnessCheckResult(
         check_id=REUSE_CHECK,
         status="failed" if failed else "passed",
         evidence_ref="drafts-checked",
     ), reason
+
+
+def _authoring_question_waits(item: Any) -> bool:
+    host = getattr(item, "host", None)
+    if (
+        item.name != "authoring__needs_input"
+        or getattr(item, "failure", None) is not None
+        or host is None
+        or host.failure is not None
+        or host.status != "succeeded"
+        or not isinstance(host.data, dict)
+    ):
+        return False
+    data = host.data
+    return bool(
+        data.get("status") == "needs_input"
+        and data.get("reason")
+        in (
+            "business_decision",
+            "missing_resource",
+            "authentication_required",
+            "capability_gap",
+            "repair_limit",
+        )
+        and isinstance(data.get("question"), str)
+        and data["question"].strip()
+    )
+
+
+def _authoring_completion_reason(tools: tuple[Any, ...]) -> str | None:
+    guarded = [
+        item.host.data
+        for item in tools
+        if item.name in DRAFT_TOOLS
+        and _succeeded(item)
+        and getattr(item, "host", None) is not None
+        and item.host.status == "succeeded"
+        and isinstance(item.host.data, dict)
+        and item.host.data.get("trial_required") is True
+    ]
+    if guarded:
+        if any(_authoring_question_waits(item) for item in tools):
+            return None
+        current = guarded[-1]
+        candidate, digest = current.get("candidate_id"), current.get("digest")
+        for item in tools:
+            host = getattr(item, "host", None)
+            if (
+                item.name == "authoring__run_workflow"
+                and getattr(item, "failure", None) is None
+                and host is not None
+                and host.failure is None
+                and isinstance(host.data, dict)
+                and isinstance(candidate, str)
+                and bool(candidate)
+                and isinstance(digest, str)
+                and bool(digest)
+                and host.data.get("candidate_id") == candidate
+                and host.data.get("digest") == digest
+                and (
+                    host.status == "awaiting_approval"
+                    or (
+                        host.status == "succeeded"
+                        and host.data.get("status") == "succeeded"
+                        and host.data.get("verified") is not False
+                        and not host.data.get("coverage_problems")
+                        and current.get("coverage_complete") is not False
+                    )
+                )
+            ):
+                return None
+        return (
+            f"Run the current exact candidate {candidate} with digest {digest} using "
+            "authoring__run_workflow and inspect the actual result. A failed trial, an older "
+            "digest, partial coverage or another candidate is not proof. Complete the saved "
+            "requirements and obtain the required trial approval "
+            "when necessary; do not ask the person to perform technical navigation."
+        )
+    planned = any(_succeeded(item) and item.name == "authoring__plan_workflow" for item in tools)
+    drafted = any(_succeeded(item) and item.name in DRAFT_TOOLS for item in tools)
+    if not planned or drafted:
+        return None
+    for item in tools:
+        host = getattr(item, "host", None)
+        if host is None or host.failure is not None or getattr(item, "failure", None) is not None:
+            continue
+        if host.status == "awaiting_approval":
+            return None
+        if _authoring_question_waits(item):
+            return None
+    return (
+        "The authoring plan is not a completed Workflow. Continue to authoring__draft_workflow "
+        "and trial it, or report a structured authoring__needs_input business/resource blocker. "
+        "Only an actual pending approval permits waiting; do not ask the person to perform "
+        "technical navigation."
+    )
 
 
 def _succeeded(item: Any) -> bool:
@@ -316,10 +419,12 @@ class ConversationActions:
         message: Callable[[str, str], Any],
         person: str = "",
         can_draft: Callable[[], bool] = lambda: False,
+        completion_problem: Callable[[Any], str | None] | None = None,
     ) -> None:
         self.run_turn, self.history, self.roots, self.message = run_turn, history, roots, message
         # The person's own message, and whether this turn offered a draft tool.
         self.person, self.can_draft = person, can_draft
+        self.completion_problem = completion_problem
         self.result: Any = None
         self.reasons: list[str] = []
         # The answer that failed a check, and why: what the person gets with
@@ -353,6 +458,10 @@ class ConversationActions:
     def validate(self) -> tuple[HarnessCheckResult, ...]:
         checks, self.reasons = check_answer(self.result.text, self.result.tools, self.roots)
         reuse, reason = check_reuse(self.person, self.result.tools, self.can_draft())
+        persistent = self.completion_problem(self.result) if self.completion_problem else None
+        if persistent is not None:
+            reuse = reuse.model_copy(update={"status": "failed"})
+            self.reasons.append(AUTHORING_PROOF_REASON + persistent)
         checks.append(reuse)
         if reason is not None:
             self.reasons.append(reason)
@@ -370,9 +479,12 @@ async def checked_turn(
     *,
     person: str = "",
     can_draft: Callable[[], bool] = lambda: False,
+    completion_problem: Callable[[Any], str | None] | None = None,
 ) -> Any:
     """Run the turn, check it, retry once on a failed check."""
-    actions = ConversationActions(run_turn, history, roots, message, person, can_draft)
+    actions = ConversationActions(
+        run_turn, history, roots, message, person, can_draft, completion_problem
+    )
     plan = build_plan(
         task_id="turn-" + hashlib.sha256(request_id.encode()).hexdigest()[:12],
         task_sha256=hashlib.sha256(request_id.encode()).hexdigest(),
@@ -402,4 +514,15 @@ def _with_note(result: Any, reasons: list[str], request_id: str = "") -> Any:
     the log (telemetry records which check failed)."""
     _LOG.warning("Host check failed for %s: %s", request_id or "a turn", " | ".join(reasons))
     note = "\n\n" + "\n".join(person_notes(reasons))
+    if any(reason.startswith(AUTHORING_PROOF_REASON) for reason in reasons):
+        return result.model_copy(
+            update={
+                "text": (result.text or "") + note,
+                "status": "needs_input",
+                "failure": Failure(
+                    code="authoring_completion_unverified",
+                    message="The current authoring task has not reached a verified completion gate",
+                ),
+            }
+        )
     return result.model_copy(update={"text": (result.text or "") + note})

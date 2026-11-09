@@ -20,6 +20,7 @@ from test_host_models import GatewayReply, binding, endpoint
 from test_host_wiring import ready
 from test_office import make_docx, make_pdf
 
+from host_runtime.chat_authoring import digest
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
 
@@ -28,20 +29,54 @@ class AuthoringGateway:
     def __init__(self) -> None:
         self.workbook = ""
         self.saw_documents = False
+        self.trial_candidate_id = ""
 
     def send(
         self, url: str, body: bytes, headers: Mapping[str, str], timeout_s: float
     ) -> GatewayReply:
         payload = json.loads(body)
-        if any(message["role"] == "tool" for message in payload["messages"]):
-            message: dict[str, Any] = {"role": "assistant", "content": "Workflow draft created."}
-        else:
+        tools = [message for message in payload["messages"] if message["role"] == "tool"]
+        if not tools:
             content = payload["messages"][-1]["content"]
             text = "\n".join(part.get("text", "") for part in content)
             assert "Open Sales Order" in text and "First paragraph" in text
             assert "Sales Name / Owner" in text and "Sub-Dept." in text
             assert sum(part["type"] == "image_url" for part in content) == 2
             self.saw_documents = True
+            name = "authoring__plan_workflow"
+            arguments: dict[str, Any] = {
+                "requirements": [
+                    {
+                        "requirement_id": "read_mapping",
+                        "description": "Read the attached sales mapping",
+                        "check_ids": ["mapping_rows"],
+                        "assertions": [
+                            {
+                                "path": ["steps", 0, "capability", "name"],
+                                "operator": "equals",
+                                "expected": "read-sheet",
+                            }
+                        ],
+                    }
+                ]
+            }
+        else:
+            observed = json.loads(tools[-1]["content"])
+            assert observed["host"]["status"] == "succeeded"
+            if observed["name"] == "authoring__run_workflow":
+                assert observed["host"]["data"]["status"] == "succeeded"
+                assert observed["host"]["data"]["verified"] is True
+                message: dict[str, Any] = {
+                    "role": "assistant",
+                    "content": "Workflow draft created and verified.",
+                }
+                return GatewayReply(200, {"choices": [{"index": 0, "message": message}]})
+            if observed["name"] == "authoring__draft_workflow":
+                self.trial_candidate_id = observed["host"]["data"]["candidate_id"]
+                name = "authoring__run_workflow"
+                arguments = {"candidate_id": self.trial_candidate_id, "arguments": {}}
+                return self._call(name, arguments)
+            assert observed["name"] == "authoring__plan_workflow"
             workflow = {
                 "name": "read-sales-mapping",
                 "description": "Read the attached sales mapping as a reusable Workflow.",
@@ -54,23 +89,27 @@ class AuthoringGateway:
                         },
                     }
                 ],
+                "checks": [{"check_id": "mapping_rows", "step_index": 0, "kind": "data_nonempty"}],
             }
-            message = {
-                "role": "assistant",
-                "content": None,
-                "tool_calls": [
-                    {
-                        "id": "draft-mapping",
-                        "type": "function",
-                        "function": {
-                            "name": "authoring__draft_workflow",
-                            "arguments": json.dumps(
-                                {"title": "Sales mapping", "workflow": workflow}
-                            ),
-                        },
-                    }
-                ],
-            }
+            name = "authoring__draft_workflow"
+            arguments = {"title": "Sales mapping", "workflow": workflow}
+        return self._call(name, arguments)
+
+    def _call(self, name: str, arguments: dict[str, Any]) -> GatewayReply:
+        message = {
+            "role": "assistant",
+            "content": None,
+            "tool_calls": [
+                {
+                    "id": name,
+                    "type": "function",
+                    "function": {
+                        "name": name,
+                        "arguments": json.dumps(arguments),
+                    },
+                }
+            ],
+        }
         return GatewayReply(200, {"choices": [{"index": 0, "message": message}]})
 
 
@@ -138,6 +177,10 @@ def test_documents_cross_http_and_model_wire_then_create_preview_and_install(
             assert chat is not None
             (candidate,) = chat.candidates(runtime.actor)
             assert candidate.session_id == session_id
+            assert candidate.candidate_id == model.trial_candidate_id
+            assert candidate.authoring_task is not None
+            assert candidate.authoring_task.last_status == "succeeded"
+            assert candidate.authoring_task.verified_digest == digest(candidate.draft)
             preview = chat.preview(runtime.actor, candidate.candidate_id, {})
             assert isinstance(preview["preview"], dict)
             assert preview["preview"]["status"] == "previewed"
