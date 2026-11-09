@@ -85,3 +85,27 @@ phase: docs/phases/C4C_LIVE_WORKFLOW_VALIDATION.md; detailed evidence:
 docs/evaluations/C4C_LIVE_WORKFLOW_2026-11-09.md. Earlier attachment/numbering
 acceptance remains in CHAT_DOCUMENT_ATTACHMENTS_2026-11-09.md and the two commits
 named above. Next deployment is separate from this local source commit.
+
+## Follow-up: resident Host draft visibility (2026-11-09, 10:22 UTC)
+
+Owner restarted AEP and could not find c4c-sales-order-report. Earlier work saved
+and tested an external JSON file; it never submitted a resident candidate, and
+its internal asset name was c4c-sales-order-export-analysis (the report name was
+only the package folder). Restart does not discover arbitrary manifest files.
+
+Using aep-workflow-creator and the live AEP MCP catalog/format/capability/check/
+submit/list tools, submitted the same tested steps under the requested searchable
+name engineering/c4c-sales-order-report@1.0.0. Candidate
+wf-20261109-102227-3989e0, revision 1, source external:codex, owner leo.chi.
+Read-back confirms status draft with no installation/approval. Refresh Capabilities
+and search c4c-sales-order-report, including Drafts, to see it. Private receipt:
+Documents/aep-workflows/c4c-sales-order-report/aep-submission.json.
+
+The resident capability schema is still OLD: its WebAction enum lacks wait_for,
+and it has no header_table/pagination/key_columns. Restart did not deploy the
+source changes. Top-level aep_check_workflow returned ok but that is not a deep
+fixed-action compatibility proof; do not install/run the candidate as if this
+Host supports it. Description/title explicitly mark the Host update requirement.
+Next action: update the resident Host through the active-work/restart policy,
+verify its actual action schema, then test/install via the normal approval flow.
+No restart, config edits, run approval or install request was made in this follow-up.
