@@ -447,10 +447,11 @@ class SqliteLocalState:
             old = stored.messages
             new = item.messages
             appended = len(new) >= len(old) and new[: len(old)] == old
-            rolled = (
-                len(old) == MAX_STORED_MESSAGES
-                and len(new) == MAX_STORED_MESSAGES
-                and new[: MAX_STORED_MESSAGES - 2] == old[2:]
+            rolled = any(
+                len(new) == MAX_STORED_MESSAGES
+                and len(old) + added > MAX_STORED_MESSAGES
+                and new[:-added] == old[len(old) + added - MAX_STORED_MESSAGES :]
+                for added in (1, 2)
             )
             if item.updated_at < stored.updated_at or not (appended or rolled):
                 raise LocalStateError("conversation_update_stale")
