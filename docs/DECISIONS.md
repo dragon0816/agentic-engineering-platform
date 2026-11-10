@@ -7119,3 +7119,60 @@ proof. Therefore a narrowly scoped isolation correction is necessary. New failin
 tests preserve callback-disabled baseline and explicit authoring/continuation
 gates. Knowledge retrieval/citation code is unchanged. Do not attribute the older
 Knowledge intent matcher misrouting to this regression without separate evidence.
+
+
+The final isolation audit also reproduced the same pre-routing state mutation
+for supported direct Knowledge commands and named/inferred Knowledge routes.
+Within the owner's existing intake/state isolation consent, Web now records
+input history first and defers task reopening to the already selected work
+branches; exact existing Knowledge capability targets, named/inferred queries
+and /wiki-query retain pending state. No new parser, intent selector, Knowledge
+retrieval behavior, permissions or business branch was added. /run retains work
+resumption. Other wiki work slash commands now preserve pending authoring state;
+their workflow dispatch is unchanged. Rejected alternative: another lexical
+command classifier or deleting persistent authoring proof/context entirely.
+Final focused171 tests and independent full-slice review passed before starting
+the final normal6587-case suite (knowledge-isolation-verified prefix).
+
+Skill-first novice evaluation: the generic SOP development Skill was installed
+on the owner's explicit ok using normal approval. Telemetry skill.selected
+confirms sop_workflow was actually offered/selected (11 of11 tools, rule provider),
+so the three subsequent C4C navigation failures are not attributed merely to
+a missing Skill. This does not prove Skills cannot improve navigation: prepare
+a narrow SAP C4C navigation/fresh-start procedure Skill instead of changing the
+harness. No further C4C retry expansion or business runtime branch is authorized.
+
+#### Domain Skill activation and delivered isolation (2026-11-11)
+
+The owner explicitly approved C4C Skill install card
+ap-20261110-184948-7b7722 in this conversation. The normal approval API installed
+engineering/sap-c4c-workflow-navigation1.0.1 (c4c_navigation), candidate
+sk-20261110-155444-ab60a7 revision2, digest
+8b8439bbbd3dc5d102d36cdda71490f6e524046a1c3e12811908379807ed1b48.
+The reviewed procedure teaches layered C4C menu/workcenter discovery and source
+completeness checks, without business scripts, company records or new grants.
+After a fresh idle/interactions guard, the installed service restarted to load
+this and the generic SOP Skill. This approval is for that exact Skill, not a
+harness modification or final Workflow installation. New novice evaluation uses
+the exact original prompt/files; telemetry confirms both Skills were selected.
+
+Model selection and the separately authorized Knowledge isolation were delivered
+as commits8cde171f/47f28a6b through the official offline bundle and clean canary.
+All559 runtime Python source bytes matched the tested revision in the resident.
+Live UI exposed14 Claude Code and8 Codex IDs without inference; a real pending
+synthetic workflow question remained byteexact across a factual Knowledge query.
+The final full suite initially had6572pass/5fail/10skip; all4 failing modules
+rechecked unchanged78pass. Original causes remain partly unproven, so do not
+describe the initial suite as clean or weaken assertions to certify delivery.
+
+Skill-selected round3 subsequently completed3failed full trials. AEP independently
+authored wf-20261110-191957-9353bc and repaired wait targets twice; failures were
+Sales Orders wait, bare All wait, and an obscured navigation click (specific
+occluder not established). No Excel acceptance, no final Workflow installation,
+no root technical coaching or harness change. Stop at the existing bound.
+This still does not prove a Skill alternative impossible: prepare1.0.2 requiring
+same-contract wait-predicate preflight and safe actionability diagnosis. Check
+passed and normal creator submission produced revision3/digeste99b639a...;
+install card ap-20261110-193334-b00427 awaits separate owner approval under
+aep-skill-creator step5. Approval of1.0.1 does not authorize new content. Retain
+1.0.1 until then; do not restart or run an unapproved Skill revision.

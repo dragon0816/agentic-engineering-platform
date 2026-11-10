@@ -4510,3 +4510,113 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - Limitation recorded: assisted evaluation required root tool guidance; technical
   followups sometimes routed to Knowledge. General one-prompt unattended authoring
   is not established. No Codex-authored business manifest was injected.
+
+- [ ] 2026-11-10 owner novice-acceptance follow-up. Replace the earlier assisted C4C demonstration with simple-prompt business clarification and self-validated output. Add Claude/Codex native model listing/selection. Evaluate creator Skill guidance. Active plan docs/phases/NOVICE_WORKFLOW_AND_NATIVE_MODELS.md. Concurrent model source writer detected; resumed coordinator is holding writes pending owner coordination. Old asset reset remains pending. See current HANDOFF and plan SDD report.
+
+- [x] 2026-11-10 owner governance: AGENTS rule22/ARCHITECTURE/CLAUDE/planning and
+  architecture skills now require Skill-first evidence and explicit scoped owner
+  consent BEFORE every new harness edit. General task approval is insufficient;
+  scope expansion needs new consent. Knowledge isolation received explicit scoped
+  consent after pre/post-model mutation proof; no SOP business branches authorized.
+- [ ] Current integration supersedes the earlier paused coordinator snapshot:
+  native_model_selection owns11 model files (167 focused passed, review clear);
+  knowledge_impact owns only2 runtime files/new33-case isolation test (160 focused
+  passed, review clear). Current root owns integration/docs/clean resident trial.
+  No other source-writer changes were claimed by the paused read-only worker.
+- [x] Old resident c4c-sales-order-report1.0.1/1.0.2 recoverably removed through
+  APIs, authoring records archived, old generated source archived, reports retained.
+  New exact simple-prompt conversation has no prior workflow JSON/scripts/hints.
+- [ ] Clean novice AEP independently built c4c-sales-orders-report1.0.0 and tested
+  Excel writer with samples; first full run failed All-label wait, second failed
+  dynamic date selector. AEP independently patched actual Browser inputs after
+  each failure; no technical user/coordinator hints. Third trial now running.
+  Final output/oracle, source non-reuse audit and native self-validation pending.
+
+- [x] Knowledge isolation attachment edge: actual for_model preview reproduced two failures;
+  classification now excludes appended attachment data while preserving input history,
+  metadata and file bytes. Explicit continue still resumes. 162 focused passed
+  (35 new+127 existing), independent re-review clear. Full6578 run restarted with
+  novice-isolation-release prefix; prior final-prefix run explicitly interrupted.
+- [ ] Novice output business acceptance FAILED: engine thirdtrial succeeded but
+  only11 orders; AEP self-check compared workbook internals without independent
+  source count, then offered installation. Do not approve workflow install
+  ap-20261110-145156-28e5a2; correctness not established. No root technical hints.
+- [ ] Skill-first follow-up: normal creator check+submit passed for
+  engineering/sop-workflow-development1.0.0, candidate sk-20261110-145833-7cd3e7,
+  digest6cb08497eb9b1f90f6a51d6cec8aecf0c635a8442b15b056cd77c9f4d8698667.
+  Generic SOP intake/business questions/independent source-to-Excel comparison
+  guidance only, no harness behavior or permissions. Owner installation approval
+  required before actual Skill-selected novice retest; not yet behaviorally proven.
+
+- [ ] Additional supported direct Knowledge command intake repro: alias command
+  without lexical question still cleared saved question/budget before routing.
+  Same authorized state-isolation correction: defer reopening until the existing
+  route is selected; preserve exact Knowledge/named/inferred/matrix paths and
+  normal authoring behavior. Actual-Web causal regressions in progress; full
+  release-prefix run deliberately interrupted, logs retained, NOT passed.
+  Root whole-module BI Atlas/Browser failure recheck active, no weakened tests.
+- [x] Owner replied ok to Skill installation; normal approval API approved
+  ap-20261110-145903-047b14. Unaccepted workflow install card withdrawn/rejected,
+  draft/report preserved. Resident old-source restart loaded Skill, PID49364.
+  Root corrected initial helper interpreter mistake by terminating only its own
+  helper tree and using installed aep-host.exe; fresh API idle/source proof holds.
+- [ ] Skill-selected fresh replay conversation-942a6f8a767148869969e4640550afb7
+  active, exact initial prompt + original PDF + original Downloads workbook path.
+  Prior generated trial code archived privately; no old scripts/JSON injected.
+
+- [x] 2026-11-11 Knowledge isolation final171 focused/independentreviewclear;
+  native167/legacy20 focused pass. Global Ruff/1438format/mypy1087/pipcheck pass.
+  Final full6587:6572P5F10skip; all4 failing wholemodules rerun unchanged78P.
+  Source559 bytes and filenames unchanged through full and match wheel. Original
+  browser startup/transport/wait causes not fully established; no cleaninitialpass
+  claim, no weakened assertions or runtime patches for those failures. Invalid
+  longpath diagnostic retained separately; corrected shortpath forms5P.
+- [x] Local main8cde171f native choices,47f28a6b Knowledge isolation; no push.
+  sdist+wheel buildPASS; officialofflinebundle47f28a6b3764 PASS.
+- [ ] Isolated canary71742 active, then guarded residentupdate and bounded
+  Knowledge/native UI smoke. New source not yet deployed.
+- [ ] C4CdomainSkill checked/submitted sk-20261110-155444-ab60a7,
+  sap-c4c-workflow-navigation1.0.0,caae6443502c737528292944a405c6890a2fc44963a00c5a56798d4b8d33d432.
+  Not activated; request owner installation approval after runtime update.
+  GenericSkillselected secondreplay failed3navigation trials; no acceptedExcel
+  and no workflowinstallation. No blindretrybudget renewal/harness branches.
+
+### 2026-11-11 delivery and owner-approved C4C Skill (current; supersedes snapshots above)
+
+- [x] Official bundle47f28a6b3764 built; clean canary install/doctor/pipcheck/Agg
+  and all559 source bytes passed. Guarded resident update preserved config and
+  verified the same source. No push; model/Knowledge changes already committed.
+- [x] Live installed model UI: Claude Code14/Codex8 IDs visible and enabled,
+  provider default available, Send enabled, no native inference. Own empty PUBLIC
+  QA conversation deleted and own named browser closed.
+- [x] Live Knowledge isolation: actual pending report_currency task remained
+  byteexact after an unrelated factual query with attachment; no erroneous trial
+  warning or authoring calls. Initial wrong-path setup explicitly inconclusive;
+  corrected proof and synthetic-session cleanup retained.
+- [x] Graphify AST-only update completed:46144nodes/137066edges/2195communities;
+  no semantic/API labeling, no runtime source edits.
+- [x] Owner explicitly approved C4C Skill card ap-20261110-184948-7b7722.
+  Normal API installed engineering/sap-c4c-workflow-navigation1.0.1, alias
+  c4c_navigation, candidate sk-20261110-155444-ab60a7 revision2,
+  digest8b8439bbbd3dc5d102d36cdda71490f6e524046a1c3e12811908379807ed1b48.
+  Guarded restart loaded it alongside sop-workflow-development1.0.0. Earlier
+  domain1.0.0 draft/digest is superseded. No C4C harness change.
+- [x] Clean round3 conversation-e49586c9aec040aeacb0fe28ce720396 completed:
+  original exact prompt/PDF/Downloads path only, old generated code archived,
+  delivered Excel retained. Telemetry confirms both c4c_navigation and
+  sop_workflow selected. AEP independently created wf-20261110-191957-9353bc
+  and repaired2failures. All3 full trials FAILED: actions[5] wait for Sales Orders,
+  actions[8] wait for bare All, then actions[4] web_target_obscured. Actual
+  occluder unproven. No Excel step/acceptance or final Workflow installation.
+  Bounded evaluation stopped and own driver55035 closed. Evidence evaluation.json
+  and raw result-0..3.json in .scratch/c4c-domain-sop-20261111.
+- [ ] Skill-first follow-up1.0.2 prepared/checkpassed/submitted samecandidate
+  sk-20261110-155444-ab60a7 revision3, digest
+  e99b639afcc8af2c572e781e20f5b7ea87b85e442641098615c271c2c11029f9.
+  Owner card ap-20261110-193334-b00427 pending. Requires actual wait predicate
+  preflight/decorated active-view matching and safe occlusion diagnosis;
+  no force/bypass/retry expansion. Format passed; behavioral retest NOT RUN.
+  Installed1.0.1 retained. No new harness edits or restart.
+- [x] Record final verification/evaluation docs locally after the bounded round;
+  HANDOFF rewritten latest-only; diff check passed. New Skill revisions need concrete owner installation
+  approval; further harness changes need separate causal proof/scoped consent.
