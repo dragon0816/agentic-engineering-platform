@@ -43,6 +43,10 @@ completion condition in `docs/PRODUCT_ACCEPTANCE_TESTS.md` and `docs/TASKS.md`.
 Architecture -> Requirements -> Contracts -> Tests -> Implementation -> Verification -> Commit -> Handoff
 
 Before implementation, apply `.agents/skills/architecture-guard/SKILL.md`.
+Before any harness change, follow AGENTS.md rule 22: establish why improving the
+applicable Skill cannot solve the behavior, present the smallest change and its
+checks, and obtain the owner's explicit scoped consent before editing. A general
+feature or bug-fix request does not replace that consent.
 For planning, apply `.agents/skills/implementation-planning/SKILL.md`.
 For shared contracts, apply `.agents/skills/contract-development/SKILL.md`.
 Before completion or transfer, apply `.agents/skills/code-change-verification/SKILL.md` and `.agents/skills/handoff/SKILL.md`.

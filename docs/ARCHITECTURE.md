@@ -10,6 +10,24 @@ Core rule:
 
 > Agent decides **WHAT / WHY / WHICH**. Workflow defines **HOW EXACTLY**. The host's own schedules and triggers decide **WHEN** (no n8n). Skills teach **HOW TO REASON/PROCEED**. Tools perform atomic actions. MCP exposes capabilities. Knowledge provides grounded context. Models are replaceable infrastructure. Evaluation proves behaviour remains acceptable.
 
+### Skill-first harness change gate
+
+Owner decision, 2026-11-10: procedures, clarification strategy, SOP interpretation
+and domain output-validation methods belong in Skills/Workflows. Before every
+harness change, inspect the applicable Skill and its selection, evaluate whether
+a Skill improvement can solve the problem, and provide concrete evaluation or
+causal evidence when it cannot. Present a minimal change, impacts and regression
+checks; obtain explicit owner consent before implementation. General permission
+to complete a feature does not grant harness-change permission. Scope expansion
+requires new consent; retain the evidence and approval in DECISIONS and TASKS.
+
+Harness means behavioral control, including routing, context, persistent task and
+turn state, model/tool dispatch, retries/continuations, completion/verification and
+permission gates. File placement does not change that classification. Deterministic
+state/policy defects may justify a harness proposal, but that justification alone
+does not authorize it. Never move domain procedures into the harness to repair one
+SOP example. See AGENTS.md rule 22.
+
 ## 2. Core requirements
 
 ### Multi-user and contribution-driven platform

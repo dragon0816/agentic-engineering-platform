@@ -7088,3 +7088,34 @@ independent source count/date/mapping/FX/workbook reconciliation remains require
 Native revision59 passed changed-input28 and formal760 independently after AEP
 selected the new action itself. No site-specific route or business code enters
 the shared Browser runtime.
+
+### Require Skill-first evidence and owner consent for harness changes (2026-11-10)
+
+The owner instructed: before every harness modification, establish that changing
+the Skill cannot improve the behavior and obtain the owner's consent. Adopt this
+as AGENTS rule22, architecture guidance, the shared planning/architecture skills
+and CLAUDE entry point. Examine Skill selection/content first; provide an actual
+evaluation or causal impossibility argument, minimal code/behavior scope and
+regressions, then ask before editing. General task approval is insufficient;
+scope expansion needs fresh consent. Harness classification follows behavior
+(routing/context/state/model-tool dispatch/retries/verification/permissions), not
+filenames. Rejected: adding SOP-specific recovery branches to the harness or
+claiming that calling a change a bug fix exempts it from approval.
+
+#### Scoped consent: Knowledge/authoring isolation regression
+
+After the specific negative cross-turn behavior was explained, the owner asked
+"可以把會影響knowledge asking的部份改掉嗎". This authorizes only repairing the
+unrelated-question intake/state/completion interference, retaining actual workflow
+trial, approval and verification gates; it does not authorize other harness work.
+
+Skill alternative/evidence: `TaskStore.observe` changes saved question/budget
+before routing and model/Skill execution; a test that calls observe without any
+model reproduces the mutation. The persistent completion hook can also append an
+unfinished-workflow warning after an otherwise identical correct model answer.
+Skill instructions can guide the answer/procedure, but cannot prevent those
+deterministic pre/post-model mutations or truthfully manufacture missing trial
+proof. Therefore a narrowly scoped isolation correction is necessary. New failing
+tests preserve callback-disabled baseline and explicit authoring/continuation
+gates. Knowledge retrieval/citation code is unchanged. Do not attribute the older
+Knowledge intent matcher misrouting to this regression without separate evidence.

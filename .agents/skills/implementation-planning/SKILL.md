@@ -15,3 +15,7 @@ description: Turn an approved requirement into a small contract-first implementa
 8. Prefer the smallest reversible implementation.
 9. Do not broaden scope merely because adjacent refactoring is attractive.
 10. Record meaningful plan/state changes in HANDOFF when work spans agent sessions.
+11. Before any harness implementation, apply AGENTS.md rule 22: evaluate the Skill
+    alternative, record why it cannot solve the behavior, present the smallest
+    scope and checks, and obtain explicit owner consent. Do not infer it from a
+    general implementation request.

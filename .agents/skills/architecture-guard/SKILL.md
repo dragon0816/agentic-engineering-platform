@@ -18,5 +18,8 @@ Verify:
 - n8n is not introduced in any form (no adapter, trigger or scheduling; owner 2026-10-17);
 - new side effects have policy/approval classification;
 - new capabilities have tests/evaluation coverage.
+- any harness change has concrete evidence that Skill improvement cannot solve
+  the affected behavior and the owner's explicit scoped consent before editing
+  (AGENTS.md rule 22); domain procedures stay in Skills/Workflows.
 
 If a requested implementation conflicts with an invariant, stop implementation and document the conflict rather than silently redesigning the architecture.
