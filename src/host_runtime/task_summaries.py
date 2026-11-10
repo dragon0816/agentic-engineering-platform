@@ -74,7 +74,7 @@ _SKIP_KEYS = frozenset(
 )
 STATUS_WORDS = {
     "succeeded": "成功",
-    "answered": "完成",
+    "answered": "已回覆",
     "failed": "失敗",
     "needs_input": "還需要輸入",
     "unavailable": "無法執行",

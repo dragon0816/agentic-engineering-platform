@@ -35,6 +35,47 @@ from workflow.engine import WorkflowRunSnapshot
 START = datetime(2026, 10, 25, 7, 15, tzinfo=UTC)
 
 
+def test_an_answer_waiting_for_trial_approval_is_not_labeled_completed(tmp_path: Path) -> None:
+    from agent.gateway import (
+        ConversationToolExecution,
+        GatewayConversationResult,
+        HostToolOutcome,
+    )
+
+    result = GatewayConversationResult(
+        trace=TRACE,
+        status="answered",
+        text="Trial is waiting for approval; the Workflow has not completed.",
+        model_turns=1,
+        tools=(
+            ConversationToolExecution(
+                call_id="plan",
+                name="authoring__get_plan",
+                host=HostToolOutcome(status="succeeded", data={"candidate_id": "wf-example"}),
+            ),
+            ConversationToolExecution(
+                call_id="draft",
+                name="authoring__get_workflow",
+                host=HostToolOutcome(status="succeeded", data={"verified": False}),
+            ),
+            ConversationToolExecution(
+                call_id="trial",
+                name="authoring__run_workflow",
+                host=HostToolOutcome(
+                    status="awaiting_approval", data={"approval_id": "ap-example"}
+                ),
+            ),
+        ),
+    )
+    store = SessionArtifacts(tmp_path / "workspace")
+    done = store.finish_turn("chat-1", "engineer", "Create the sales order Workflow", result)
+    assert len(done.summaries) == 1
+    summary = done.summaries[0]
+    assert summary.status == "answered" and summary.run_id is None
+    assert "（已回覆）" in summary.block()
+    assert "（完成）" not in summary.block()
+
+
 class Clock:
     def __init__(self) -> None:
         self.now = START
