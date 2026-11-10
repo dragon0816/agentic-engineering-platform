@@ -45,6 +45,7 @@ def test_each_kind_reaches_the_model_as_text_paths_and_pictures(tmp_path: Path) 
     note, images = for_model(files)
     assert "name,price" in note and "key: value" in note
     assert all(file.path in note for file in files)
+    assert all(f"Host attachment_id: {file.file_id}" in note for file in files)
     assert Path(files[0].path).read_bytes() == b"name,price\nA,10\n"
     assert images == ("data:image/png;base64," + base64.b64encode(PNG).decode(),)
     assert files[3].entries == ("logs/a.txt", "b.json")

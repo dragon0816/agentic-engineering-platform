@@ -45,6 +45,13 @@ def test_guarded_draft_alone_requires_actual_trial() -> None:
     assert "navigation" in reason
 
 
+def test_patch_alone_requires_its_current_exact_trial() -> None:
+    patch = _draft().model_copy(update={"name": "authoring__patch_workflow"})
+    check, reason = check_reuse("Repair the Workflow", (_run(digest="old"), patch), True)
+    assert check.status == "failed" and reason is not None
+    assert check_reuse("Repair", (patch, _run()), True)[0].status == "passed"
+
+
 @pytest.mark.parametrize("pending", [False, True])
 def test_current_exact_trial_or_its_approval_allows_response(pending: bool) -> None:
     check, reason = check_reuse("Build it", (_draft(), _run(pending=pending)), True)

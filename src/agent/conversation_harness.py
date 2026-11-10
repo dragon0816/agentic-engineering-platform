@@ -55,7 +55,9 @@ OUTPUT_CHECK = "named_outputs_exist"
 REUSE_CHECK = "reusable_request_drafted"
 AUTHORING_PROOF_REASON = "Persistent authoring completion proof missing: "
 #: The tools that give the person a Workflow draft and its install card.
-DRAFT_TOOLS = frozenset({"authoring__draft_workflow", "authoring__revise_workflow"})
+DRAFT_TOOLS = frozenset(
+    {"authoring__draft_workflow", "authoring__revise_workflow", "authoring__patch_workflow"}
+)
 #: Memory proposals (accumulated memory M3): a card the person presses; until
 #: then nothing is saved, so they never back a claim of a lasting change.
 PROPOSAL_ONLY_TOOLS = frozenset({"memory__propose_preference", "memory__propose_note"})

@@ -12,13 +12,13 @@ from common.execution import RequestContext
 from models.contracts import ModelTool
 
 
-def _draft_tool() -> HostTool:
+def _draft_tool(name: str = "authoring__draft_workflow") -> HostTool:
     async def run(context: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
         return HostToolOutcome(status="succeeded")
 
     return HostTool(
         ModelTool(
-            name="authoring__draft_workflow",
+            name=name,
             description="Draft",
             input_contract="draft.v1",
             input_schema={},
@@ -27,9 +27,10 @@ def _draft_tool() -> HostTool:
     )
 
 
-def test_persistent_unverified_task_retries_without_current_tool_calls() -> None:
+@pytest.mark.parametrize("tool_name", ["authoring__draft_workflow", "authoring__patch_workflow"])
+def test_persistent_unverified_task_retries_without_current_tool_calls(tool_name: str) -> None:
     built, model = _host_gateway(
-        [_draft_tool()], [_text("請自行逐頁切換完成驗證。"), _text("草稿可供使用。")]
+        [_draft_tool(tool_name)], [_text("請自行逐頁切換完成驗證。"), _text("草稿可供使用。")]
     )
     seen: list[GatewayConversationResult] = []
 

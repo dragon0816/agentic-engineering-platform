@@ -1119,7 +1119,7 @@ class Gateway:
                 # schedule): not offered.
                 del host[person_tool]
                 tools = [tool for tool in tools if tool.name != person_tool]
-        if DRAFT_TOOL in host:
+        if set(host) & DRAFT_TOOLS:
             messages[0] = ModelMessage(
                 role="system", text=f"{messages[0].text} {REUSABLE_GUIDANCE}"
             )

@@ -26,11 +26,13 @@ owner approves. An external agent sees only statuses and codes, never data.
 from __future__ import annotations
 
 import asyncio
+import copy
 import hashlib
 import json
 import re
 import secrets
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterator, Sequence
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal, cast
@@ -53,6 +55,7 @@ from common.execution import Failure, RequestContext, TraceIdentifiers
 from common.trace import redact
 from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
 from common.workflow_run_form import OFFER_KEY
+from host_runtime.attachments import AttachmentError, AttachmentStore
 from host_runtime.authoring_inputs import bind_supplied_inputs
 from host_runtime.authoring_task import (
     BROWSER_TARGET_FIELDS,
@@ -73,6 +76,7 @@ from host_runtime.skill_authoring import (
     skill_digest,
 )
 from host_runtime.team_membership import TeamMembership, membership_note
+from host_runtime.workflow_patch import WorkflowPatchRequest, candidate_lock, existing, replace
 from host_runtime.workflow_revision import (
     capability_source,
     may_revise_in_place,
@@ -614,8 +618,10 @@ class ChatAuthoring:
         on_installed: Callable[[WorkflowManifest, tuple[CapabilityGrant, ...]], None] | None = None,
         teams: Callable[[str], TeamMembership] | None = None,
         autonomy_required: bool = False,
+        attachments: AttachmentStore | None = None,
     ) -> None:
         self.root = root
+        self.attachments = attachments
         # actor -> the teams they belong to (platform, its cache, or the PC's
         # declaration); decides only whether a revision of a team-owned
         # Workflow keeps its name. None: nobody is a team member here.
@@ -748,12 +754,36 @@ class ChatAuthoring:
             raise ChatAuthoringError("candidate_unknown")
         return item
 
-    def _save_candidate(self, item: ChatCandidate) -> ChatCandidate:
-        stamped = item.model_copy(update={"updated_at": _now()})
-        path = self._file("candidate", stamped.candidate_id)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        write_atomically(path, stamped.model_dump_json(indent=2).encode("utf-8"))
-        return stamped
+    @contextmanager
+    def _candidate_lock(self, candidate_id: str) -> Iterator[None]:
+        self._file("candidate", candidate_id)
+        try:
+            with candidate_lock(self.root / "locks" / f"{candidate_id}.lock"):
+                yield
+        except OSError as error:
+            raise ChatAuthoringError("authoring_candidate_busy") from error
+
+    def _save_candidate(
+        self,
+        item: ChatCandidate,
+        *,
+        expected_digest: str | None = None,
+        expected_revision: int | None = None,
+    ) -> ChatCandidate:
+        with self._candidate_lock(item.candidate_id):
+            path = self._file("candidate", item.candidate_id)
+            if path.is_file():
+                current = self.candidate(item.candidate_id, item.actor)
+                if digest(current.draft) != (
+                    expected_digest or digest(item.draft)
+                ) or current.revision != (
+                    expected_revision if expected_revision is not None else item.revision
+                ):
+                    raise ChatAuthoringError("authoring_digest_stale")
+            stamped = item.model_copy(update={"updated_at": _now()})
+            path.parent.mkdir(parents=True, exist_ok=True)
+            write_atomically(path, stamped.model_dump_json(indent=2).encode("utf-8"))
+            return stamped
 
     def candidates(self, actor: str) -> list[ChatCandidate]:
         found = []
@@ -800,6 +830,24 @@ class ChatAuthoring:
     # -- drafting and preview ---------------------------------------------
 
     def draft(
+        self,
+        actor: str,
+        session_id: str | None,
+        title: str,
+        raw: dict[str, Any],
+        candidate_id: str | None = None,
+        *,
+        source: str = "conversation",
+    ) -> tuple[ChatCandidate | None, list[str]]:
+        if candidate_id is not None:
+            before = self.candidate(candidate_id, actor)
+            with self._candidate_lock(candidate_id):
+                if digest(self.candidate(candidate_id, actor).draft) != digest(before.draft):
+                    raise ChatAuthoringError("authoring_digest_stale")
+                return self._draft(actor, session_id, title, raw, candidate_id, source=source)
+        return self._draft(actor, session_id, title, raw, source=source)
+
+    def _draft(
         self,
         actor: str,
         session_id: str | None,
@@ -876,7 +924,162 @@ class ChatAuthoring:
         )
         if session_id and item.authoring_task is not None:
             self.tasks.save(actor, session_id, item.authoring_task)
-        return self._save_candidate(item), []
+        return self._save_candidate(
+            item,
+            expected_digest=digest(previous.draft) if previous else None,
+            expected_revision=previous.revision if previous else None,
+        ), []
+
+    def patch(
+        self, context: RequestContext, raw: dict[str, Any]
+    ) -> tuple[ChatCandidate | None, list[str]]:
+        """Edit canonical existing values without reconstructing or rebinding the asset."""
+        try:
+            if len(json.dumps(raw).encode("utf-8")) > 256 * 1024:
+                raise ValueError("patch too large")
+            request = WorkflowPatchRequest.model_validate(raw)
+        except (ValueError, TypeError, RecursionError) as error:
+            raise ChatAuthoringError("authoring_patch_invalid") from error
+        self.repair_scope(context, request.candidate_id)
+        if (
+            self.needs_plan(context)
+            and context.session_id
+            and self.tasks.load(context.actor, context.session_id) is None
+        ):
+            raise ChatAuthoringError("authoring_plan_required")
+        with self._candidate_lock(request.candidate_id):
+            previous = self.candidate(request.candidate_id, context.actor)
+            if previous.session_id != context.session_id:
+                raise ChatAuthoringError("authoring_patch_scope")
+            if previous.status == "installed":
+                raise ChatAuthoringError("authoring_revise_required")
+            if digest(previous.draft) != request.base_digest:
+                raise ChatAuthoringError("authoring_digest_stale")
+            repair_index = None
+            if context.message.startswith("[Host authoring continuation:"):
+                task = previous.authoring_task
+                diagnostics = task.last_trial_diagnostics if task else None
+                failed = diagnostics.get("failed_steps") if isinstance(diagnostics, dict) else None
+                if (
+                    task is None
+                    or task.last_status != "failed"
+                    or task.last_trial_digest != request.base_digest
+                    or not isinstance(diagnostics, dict)
+                    or diagnostics.get("run_id") != task.last_run_id
+                    or not isinstance(failed, list)
+                    or len(failed) != 1
+                ):
+                    raise ChatAuthoringError("authoring_repair_scope_unavailable")
+                entry = failed[0]
+                index = entry.get("step_index") if isinstance(entry, dict) else None
+                step = (
+                    previous.draft.steps[index]
+                    if type(index) is int and 0 <= index < len(previous.draft.steps)
+                    else None
+                )
+                if (
+                    type(index) is not int
+                    or not 0 <= index < len(previous.draft.steps)
+                    or not isinstance(step, WorkflowStep)
+                    or not isinstance(entry, dict)
+                    or entry.get("capability") != _key(step.capability)
+                ):
+                    raise ChatAuthoringError("authoring_repair_scope_unavailable")
+                repair_index = index
+            body = previous.draft.model_dump(mode="json")
+            try:
+                for operation in request.operations:
+                    path = operation.path
+                    allowed = (
+                        (
+                            len(path) >= 4
+                            and path[0] == "steps"
+                            and type(path[1]) is int
+                            and path[2] == "inputs"
+                        )
+                        or path == ("description",)
+                        or (
+                            len(path) >= 3
+                            and path[0] in {"parameters", "checks"}
+                            and type(path[1]) is int
+                        )
+                    )
+                    if not allowed or (
+                        repair_index is not None
+                        and not (path[:3] == ("steps", repair_index, "inputs"))
+                    ):
+                        raise ChatAuthoringError("authoring_patch_path_refused")
+                    if operation.op == "copy_reference":
+                        if (
+                            not context.session_id
+                            or self.attachments is None
+                            or operation.attachment_id is None
+                            or operation.source_path is None
+                            or "value" in operation.model_fields_set
+                        ):
+                            raise ChatAuthoringError("authoring_patch_reference_invalid")
+                        attachment = self.attachments.get(
+                            context.session_id, operation.attachment_id
+                        )
+                        source = Path(attachment.path).resolve()
+                        expected = self.attachments._folder(context.session_id) / attachment.file_id
+                        if (
+                            source.parent != expected.resolve()
+                            or not source.is_relative_to(self.attachments.root.resolve())
+                            or source.suffix.lower() != ".json"
+                            or not source.is_file()
+                            or source.stat().st_size > 1024 * 1024
+                        ):
+                            raise ChatAuthoringError("authoring_patch_reference_invalid")
+                        source_body = json.loads(source.read_text(encoding="utf-8-sig"))
+                        value = existing(source_body, operation.source_path)
+                    else:
+                        if (
+                            "value" not in operation.model_fields_set
+                            or operation.attachment_id is not None
+                            or operation.source_path is not None
+                        ):
+                            raise ChatAuthoringError("authoring_patch_invalid")
+                        value = operation.value
+                    replace(body, path, copy.deepcopy(value))
+            except (
+                KeyError,
+                IndexError,
+                ValueError,
+                OSError,
+                AttachmentError,
+                RecursionError,
+            ) as error:
+                raise ChatAuthoringError("authoring_patch_reference_or_path_invalid") from error
+            manifest, problems = self._validate_manifest(body, body, previous)
+            if manifest is None:
+                return None, problems
+            task = (
+                self.tasks.load(context.actor, context.session_id) if context.session_id else None
+            )
+            task = task or previous.authoring_task
+            if task is not None:
+                task = capture_collection_obligations(task, previous.draft, request.base_digest)
+                task = capture_collection_obligations(task, manifest, digest(manifest))
+                task = task.model_copy(update={"verified_digest": None, "active_trial_token": None})
+            self.prepare_workspaces(manifest)
+            changed = self._save_candidate(
+                previous.model_copy(
+                    update={
+                        "draft": manifest,
+                        "revision": previous.revision + 1,
+                        "authoring_task": task,
+                        "status": "draft",
+                        "preview_status": None,
+                        "preview_of": None,
+                    }
+                ),
+                expected_digest=request.base_digest,
+                expected_revision=previous.revision,
+            )
+            if task is not None and context.session_id:
+                self.tasks.save(context.actor, context.session_id, task)
+            return changed, []
 
     def readiness(self, item: ChatCandidate) -> dict[str, JsonValue]:
         active = self.tasks.load(item.actor, item.session_id) if item.session_id else None
@@ -941,6 +1144,14 @@ class ChatAuthoring:
             taken.append(_core(previous.draft.metadata.identity.version))
         major, minor, patch = max(taken) if taken else (1, 0, -1)
         identity["version"] = f"{major}.{minor}.{patch + 1}"
+        return self._validate_manifest(raw, assembled, previous)
+
+    def _validate_manifest(
+        self,
+        raw: dict[str, Any],
+        assembled: dict[str, Any],
+        previous: ChatCandidate | None = None,
+    ) -> tuple[WorkflowManifest | None, list[str]]:
         problems: list[str] = []
         unnamed = _unnamed_capabilities(raw)
         if unnamed:
@@ -1138,6 +1349,89 @@ class ChatAuthoring:
         except WorkflowParameterError:
             return self.form_offer(draft.metadata.identity, arguments)
         return None
+
+    def _continue_authoring_trial(
+        self,
+        context: RequestContext,
+        candidate: ChatCandidate,
+        supplied: dict[str, JsonValue],
+    ) -> dict[str, JsonValue]:
+        """Keep actual trial inputs; structural history only corroborates their scope."""
+        self.repair_scope(context, candidate.candidate_id)
+        task = self.tasks.load(context.actor, context.session_id) if context.session_id else None
+        saved = candidate.authoring_task
+        if (
+            task is None
+            or saved is None
+            or task.active_trial_token is not None
+            or saved.active_trial_token is not None
+            or task.last_status not in {"failed", "succeeded"}
+            or not task.last_run_id
+            or not task.last_trial_digest
+            or (
+                task.last_run_id,
+                task.last_trial_digest,
+                task.last_status,
+                task.last_trial_arguments,
+            )
+            != (
+                saved.last_run_id,
+                saved.last_trial_digest,
+                saved.last_status,
+                saved.last_trial_arguments,
+            )
+            or not task.trial_history
+        ):
+            raise ChatAuthoringError("authoring_trial_arguments_unavailable")
+        actual = task.trial_history[-1]
+        if (
+            actual.get("candidate_id") != candidate.candidate_id
+            or actual.get("run_id") != task.last_run_id
+            or actual.get("digest") != task.last_trial_digest
+        ):
+            raise ChatAuthoringError("authoring_trial_arguments_unavailable")
+        arguments = copy.deepcopy(task.last_trial_arguments)
+        try:
+            effective = validate_run_parameters(candidate.draft, arguments)
+        except WorkflowParameterError as error:
+            raise ChatAuthoringError("authoring_trial_arguments_unavailable") from error
+        if effective != arguments:
+            # Older records without effective values cannot safely adopt current defaults.
+            raise ChatAuthoringError("authoring_trial_arguments_unavailable")
+        if not self.read_only(candidate.draft):
+            approved = [
+                a
+                for a in self.approvals(
+                    context.actor, session_id=context.session_id, pending_only=False
+                )
+                if a.kind == "run"
+                and a.status == "approved"
+                and a.candidate_id == candidate.candidate_id
+                and a.digest == task.last_trial_digest
+                and isinstance(a.result, dict)
+                and a.result.get("run_id") == task.last_run_id
+                and a.result.get("digest") == task.last_trial_digest
+                and a.result.get("status") == task.last_status
+            ]
+            if len(approved) != 1:
+                raise ChatAuthoringError("authoring_trial_arguments_unavailable")
+            try:
+                original = validate_run_parameters(candidate.draft, approved[0].arguments)
+            except WorkflowParameterError as error:
+                raise ChatAuthoringError("authoring_trial_arguments_unavailable") from error
+            if original != arguments:
+                raise ChatAuthoringError("authoring_trial_arguments_unavailable")
+        if any(
+            key not in arguments
+            or json.dumps(value, sort_keys=True) != json.dumps(arguments[key], sort_keys=True)
+            for key, value in supplied.items()
+        ):
+            raise ChatAuthoringError(
+                "authoring_trial_arguments_conflict",
+                "Preserve the previous actual trial inputs; "
+                "omit arguments or use a matching subset",
+            )
+        return arguments
 
     def execute(
         self, actor: str, candidate: ChatCandidate, arguments: dict[str, JsonValue], ref: str
@@ -1411,6 +1705,15 @@ class ChatAuthoring:
         )
 
     def install(
+        self, candidate: ChatCandidate, actor: str, approval_id: str
+    ) -> dict[str, JsonValue]:
+        with self._candidate_lock(candidate.candidate_id):
+            current = self.candidate(candidate.candidate_id, actor)
+            if digest(current.draft) != digest(candidate.draft):
+                raise ChatAuthoringError("authoring_digest_stale")
+            return self._install(current, actor, approval_id)
+
+    def _install(
         self, candidate: ChatCandidate, actor: str, approval_id: str
     ) -> dict[str, JsonValue]:
         active = self.tasks.load(actor, candidate.session_id) if candidate.session_id else None
@@ -2076,6 +2379,12 @@ class ChatAuthoring:
         async def draft_tool(context: RequestContext, args: Args) -> HostToolOutcome:
             def work() -> HostToolOutcome:
                 self.repair_scope(context, str(args.get("candidate_id") or ""))
+                if context.message.startswith("[Host authoring continuation:"):
+                    return _refused(
+                        "authoring_patch_required",
+                        "Use authoring__patch_workflow with the current base_digest; "
+                        "preserve unmentioned steps and defaults",
+                    )
                 if (
                     self.needs_plan(context)
                     and context.session_id
@@ -2119,6 +2428,23 @@ class ChatAuthoring:
 
             return await run_sync(work)
 
+        async def patch_tool(context: RequestContext, args: Args) -> HostToolOutcome:
+            def work() -> HostToolOutcome:
+                item, problems = self.patch(context, args)
+                if item is None:
+                    return _refused("workflow_invalid", "; ".join(problems)[:500])
+                return HostToolOutcome(
+                    status="succeeded",
+                    data={
+                        "candidate_id": item.candidate_id,
+                        "digest": digest(item.draft),
+                        "revision": item.revision,
+                        **self.readiness(item),
+                    },
+                )
+
+            return await run_sync(work)
+
         async def preview_tool(context: RequestContext, args: Args) -> HostToolOutcome:
             def work() -> HostToolOutcome:
                 return HostToolOutcome(
@@ -2150,6 +2476,8 @@ class ChatAuthoring:
                         "authoring_repair_limit", "Three unfinished trials; stop for the owner"
                     )
                 repair = context.message.startswith("[Host authoring continuation:")
+                if repair:
+                    arguments = self._continue_authoring_trial(context, item, arguments)
                 if (
                     repair
                     and task is not None
@@ -2447,6 +2775,24 @@ class ChatAuthoring:
                     },
                 ),
                 guarded(draft_tool),
+            ),
+            HostTool(
+                ModelTool(
+                    name="authoring__patch_workflow",
+                    description=(
+                        "Surgically edit an existing draft using its exact base_digest. "
+                        "Paths are canonical JSON key/index arrays, for example "
+                        "['steps',0,'inputs','actions','value']. Replace existing values only; "
+                        "unmentioned scripts, defaults, identity and version remain exact. "
+                        "copy_reference copies source_path from an owned same-session JSON "
+                        "attachment_id without retyping. Automatic repair permits only the "
+                        "actual failed step inputs; run the patched candidate normally."
+                    ),
+                    input_contract="host.authoring.patch.v1",
+                    input_schema=WorkflowPatchRequest.model_json_schema(),
+                ),
+                guarded(patch_tool),
+                "write",
             ),
             HostTool(
                 ModelTool(

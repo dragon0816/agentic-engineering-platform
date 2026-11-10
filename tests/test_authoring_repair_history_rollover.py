@@ -16,6 +16,7 @@ from common.base import Contract
 from common.distribution import LocalStateError
 from common.execution import RequestContext
 from host_runtime.authoring_task import Requirement
+from host_runtime.chat_authoring import digest
 from host_runtime.conversations import MAX_STORED_MESSAGES, ConversationMessage, ConversationRecord
 from host_runtime.host import build_runtime
 from host_runtime.state import SqliteLocalState
@@ -208,11 +209,17 @@ def test_failed_approved_trial_saves_one_real_repair_answer_at_max_history(tmp_p
             {
                 "tools": [
                     (
-                        "authoring__draft_workflow",
+                        "authoring__patch_workflow",
                         {
-                            "title": "Read fixture",
                             "candidate_id": item.candidate_id,
-                            "workflow": raw,
+                            "base_digest": digest(item.draft),
+                            "operations": [
+                                {
+                                    "op": "replace",
+                                    "path": ["steps", 0, "inputs", "value", "value"],
+                                    "value": "good",
+                                }
+                            ],
                         },
                     )
                 ]

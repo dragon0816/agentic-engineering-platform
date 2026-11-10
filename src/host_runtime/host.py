@@ -2367,6 +2367,7 @@ def build_runtime(
     # run or install a Workflow; the owner approves outside the model.
     chat_authoring = ChatAuthoring(
         place.workspace_root / "authoring" / "chat",
+        attachments=AttachmentStore(place.workspace_root),
         bridge=lambda: gateway.bridge,
         namespace=checked.namespace or "engineering",
         workflows_dir=place.workflows,

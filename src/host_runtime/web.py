@@ -1236,7 +1236,11 @@ class AgentWeb:
             + json.dumps(task.last_trial_diagnostics, ensure_ascii=False)
             + "\n"
             "Diagnose using browser__inspect and the recorded trial result. Preserve every "
-            "saved requirement and supplied input. Revise the candidate and request a new "
+            "saved requirement and supplied input. Use authoring__patch_workflow with the "
+            "current base_digest to replace only the actual failed step inputs; preserve "
+            "all unmentioned code, defaults and downstream steps. Full replacement is "
+            "refused during automatic repair. If no trustworthy failed-step scope exists, "
+            "stop with structured needs_input. Request a new "
             "trial through authoring__run_workflow. A write trial still requires its normal "
             "approval; stop when it is pending. Do not ask the user to navigate, transcribe "
             "columns or provide a file already supplied. Do not claim readiness before the "
@@ -1267,7 +1271,7 @@ class AgentWeb:
                 "authoring__plan_workflow",
                 "authoring__get_plan",
                 "authoring__needs_input",
-                "authoring__draft_workflow",
+                "authoring__patch_workflow",
                 "authoring__get_workflow",
                 "authoring__run_workflow",
             }

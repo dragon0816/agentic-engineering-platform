@@ -23,6 +23,7 @@ from typing import IO, Any
 from pydantic import JsonValue
 
 from host_runtime.external_authoring import ExternalAuthoring, guarded
+from host_runtime.workflow_patch import WorkflowPatchRequest
 
 PROTOCOL_VERSIONS = ("2025-06-18", "2025-03-26", "2024-11-05")
 INSTRUCTIONS = (
@@ -116,6 +117,11 @@ TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
             "required": ["title", "workflow"],
         },
     ),
+    "aep_patch_workflow": (
+        "Replace existing canonical draft values with base_digest CAS; copy_reference "
+        "copies exact JSON from an owned same-session attachment. Unmentioned content stays exact.",
+        WorkflowPatchRequest.model_json_schema(),
+    ),
     "aep_run_workflow": (
         "Run a candidate once with test values. Read-only Workflows run now; "
         "others wait for the owner's approval.",
@@ -182,6 +188,7 @@ def dispatch(authoring: ExternalAuthoring, name: str, args: dict[str, Any]) -> d
         "aep_submit_workflow": lambda: authoring.submit_workflow(
             _object(args, "workflow"), title, revise
         ),
+        "aep_patch_workflow": lambda: authoring.patch_workflow(args),
         "aep_run_workflow": lambda: authoring.run_workflow(ident, _object(args, "arguments")),
         "aep_install_workflow": lambda: authoring.install_workflow(ident),
         "aep_check_skill": lambda: authoring.check_skill(_object(args, "skill")),

@@ -94,8 +94,18 @@ def test_failed_authoring_resumes_once_with_only_safe_tools_and_retests(tmp_path
             {
                 "tools": [
                     (
-                        "authoring__draft_workflow",
-                        {"title": "fixture", "candidate_id": item.candidate_id, "workflow": raw},
+                        "authoring__patch_workflow",
+                        {
+                            "candidate_id": item.candidate_id,
+                            "base_digest": digest(item.draft),
+                            "operations": [
+                                {
+                                    "op": "replace",
+                                    "path": ["steps", 0, "inputs", "value", "value"],
+                                    "value": "good",
+                                }
+                            ],
+                        },
                     )
                 ]
             },
@@ -127,7 +137,7 @@ def test_draft_card_trial_failure_starts_safe_repair(tmp_path: Path) -> None:
     _exercise_draft_card_repair(tmp_path, "none")
 
 
-def test_successful_partial_card_trial_continues_until_procedure_is_verified(
+def test_partial_success_without_failed_step_scope_stops_unverified(
     tmp_path: Path,
 ) -> None:
     _exercise_draft_card_repair(tmp_path, "none", partial=True)
@@ -219,11 +229,17 @@ def _exercise_draft_card_repair(tmp_path: Path, pending: str, *, partial: bool =
             {
                 "tools": [
                     (
-                        "authoring__draft_workflow",
+                        "authoring__patch_workflow",
                         {
-                            "title": "fixture",
                             "candidate_id": item.candidate_id,
-                            "workflow": raw,
+                            "base_digest": digest(item.draft),
+                            "operations": [
+                                {
+                                    "op": "replace",
+                                    "path": ["steps", 0, "inputs", "value", "value"],
+                                    "value": "good",
+                                }
+                            ],
                         },
                     )
                 ]
@@ -241,6 +257,40 @@ def _exercise_draft_card_repair(tmp_path: Path, pending: str, *, partial: bool =
             },
             {"text": "Trial passed; review the candidate."},
         )
+        if partial:
+            model = Capturing(
+                {
+                    "tools": [
+                        (
+                            "authoring__patch_workflow",
+                            {
+                                "candidate_id": item.candidate_id,
+                                "base_digest": digest(item.draft),
+                                "operations": [
+                                    {
+                                        "op": "replace",
+                                        "path": ["steps", 0, "inputs", "value", "value"],
+                                        "value": "good",
+                                    }
+                                ],
+                            },
+                        )
+                    ]
+                },
+                {
+                    "tools": [
+                        (
+                            "authoring__needs_input",
+                            {
+                                "reason": "capability_gap",
+                                "question": "Automatic repair lacks failed-step evidence. "
+                                "Continue in an explicit owner turn?",
+                            },
+                        )
+                    ]
+                },
+                {"text": "The prototype is incomplete; its draft remains unverified."},
+            )
         runtime.agent.gateway.router.model = model
 
         result = web.decide_card(card["card_id"], "try")
@@ -252,6 +302,17 @@ def _exercise_draft_card_repair(tmp_path: Path, pending: str, *, partial: bool =
             assert calls == ["bad"] and model.requests == []
             assert active.repair_attempts == 1
             assert "repair" not in result
+        elif partial:
+            assert calls == ["bad"]
+            assert result["repair"]["status"] == "answered"
+            assert active.verified_digest is None and active.repair_attempts == 1
+            assert active.question is not None and active.question.reason == "capability_gap"
+            assert chat.candidate(item.candidate_id, runtime.actor).revision == item.revision
+            assert any(
+                "authoring_repair_scope_unavailable" in m.text
+                for r in model.requests
+                for m in r.messages
+            )
         else:
             assert calls == ["bad", "good"]
             assert result["repair"]["status"] == "answered"

@@ -32,6 +32,7 @@ from typing import Any
 from pydantic import JsonValue
 
 from common.assets import AssetIdentity, WorkflowManifest
+from host_runtime.attachments import AttachmentStore
 from host_runtime.chat_authoring import (
     ChatAuthoring,
     ChatAuthoringError,
@@ -524,6 +525,18 @@ class ExternalAuthoring:
             "next": "run it with test values (aep_run_workflow), then ask to install it",
         }
 
+    def patch_workflow(self, request: dict[str, Any]) -> dict[str, JsonValue]:
+        context = self.chat._context(self.actor, self.chat.namespace, self.session_id, "patch")
+        item, problems = self.chat.patch(context, request)
+        if item is None:
+            return {"ok": False, "problems": list(problems)}
+        return {
+            "ok": True,
+            "candidate_id": item.candidate_id,
+            "digest": digest(item.draft),
+            "revision": item.revision,
+        }
+
     def run_workflow(
         self, candidate_id: str, arguments: dict[str, JsonValue]
     ) -> dict[str, JsonValue]:
@@ -628,6 +641,7 @@ def build(config_path: Path, agent: str) -> ExternalAuthoring:
     )
     chat = ChatAuthoring(
         layout.workspace_root / "authoring" / "chat",
+        attachments=AttachmentStore(layout.workspace_root),
         bridge=lambda: gateway.bridge,
         namespace=config.namespace or "engineering",
         workflows_dir=layout.workflows,

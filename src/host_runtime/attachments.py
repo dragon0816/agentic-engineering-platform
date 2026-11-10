@@ -235,6 +235,7 @@ def for_model(items: list[Attachment]) -> tuple[str, tuple[str, ...]]:
     document_pictures = 0
     for item in items:
         lines.append(f"- {item.filename} ({item.kind}, {item.size_bytes} bytes): {item.path}")
+        lines.append(f"  Host attachment_id: {item.file_id}")
         if item.kind == "image":
             if item.size_bytes <= MAX_IMAGE_BYTES:
                 encoded = base64.b64encode(Path(item.path).read_bytes()).decode("ascii")

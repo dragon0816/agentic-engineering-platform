@@ -10,7 +10,7 @@ import asyncio
 from pathlib import Path
 
 from test_agent_web import base, fetch, served  # noqa: F401 - the server fixture
-from test_chat_authoring import draft, studio
+from test_chat_authoring import studio, workflow
 
 from agent.gateway import HostToolOutcome
 from common.execution import RequestContext, TraceIdentifiers
@@ -27,7 +27,11 @@ def test_the_owner_decides_over_http_and_the_result_joins_the_conversation(
     url, token = base(served), served.token
     session = fetch(url + "/api/conversations", token=token, body={}).json()
     session_id = session["conversation"]["session_id"]
-    candidate = draft(chat, "write-it").data["candidate_id"]
+    chat_candidate, problems = chat.draft(
+        served.web.runtime.actor, session_id, "Echo", workflow("write-it")
+    )
+    assert chat_candidate is not None and not problems
+    candidate = chat_candidate.candidate_id
     run = next(t for t in chat.tools() if t.tool.name == "authoring__run_workflow")
     context = RequestContext(
         trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
@@ -37,10 +41,6 @@ def test_the_owner_decides_over_http_and_the_result_joins_the_conversation(
         session_id=session_id,
         message="run",
     )
-    # The Agent asked as this actor; the stored candidate belongs to "owner",
-    # so re-draft it for the served actor.
-    chat_candidate = chat.candidate(candidate, "owner")
-    chat._save_candidate(chat_candidate.model_copy(update={"actor": served.web.runtime.actor}))
 
     async def ask() -> HostToolOutcome:
         return await run.handler(
