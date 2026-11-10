@@ -4486,3 +4486,27 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - Global mypy1081 passed, Ruff passed, pipcheck passed. Final format/diff cleanup
   and wheel rebuild are finishing; source commit/resident update/owner installation
   remain pending. Actual AEP revision59 formal760/QA28 independent acceptance passed.
+# 2026-11-10: Resident owner acceptance and restart persistence verified
+
+- Sourceed782391 deployed through verified offline bundle/official clean canary.
+  Installed558 Pythonfiles exact; doctor/pipcheck/Agg/freshHTTPMCP patch+network+merge
+  passed. Immediate all-channel idle guards passed before update and restart;
+  semantic configuration preserved. No push.
+- Actual owner AEP (leo.chi) revised `engineering/c4c-sales-order-report@1.0.2`,
+  candidate `wf-20261110-111632-39be5d`, digest
+  `33cc01687fe927f7ff23463ef514c6439aa648e98cf87301e8a1a91cc27dd82c`.
+  Business scripts copied by AEP via owned attachment references; only authorized
+  local workdir/mapping paths changed. Browser actions exact; no private testpaths.
+- Native approved formal run `run-ddd04d6561804cd4a2ec20182ad2e56a` succeeded4steps.
+  Independent QA:762unique orders/109monthlygroups, zeroissues,175 unmatched Owner
+  rows retained. Original mapping upload bytes match; BrowserAll762/formaldates/26of26.
+  Report in Documents/aep-workflows/c4c-sales-order-report/output/ with193607 timestamp.
+- Actual same-version service restart54712->59440 preserved draft visibility,
+  candidate digest and successfulrun in the real `/api/drafts` response. Proofs
+  `.scratch/autonomy-owner-draft-{before,after}-restart.json`; owner native records
+  `.scratch/resident-autonomy-20261110/result-4.json`(run),5(UI),6(installrequest).
+- PENDING OWNER: install approval `ap-20261110-114831-79f2df`, correct digest/actor,
+  persisted native `draft_install` card. Not installed yet; no automatic finalapproval.
+- Limitation recorded: assisted evaluation required root tool guidance; technical
+  followups sometimes routed to Knowledge. General one-prompt unattended authoring
+  is not established. No Codex-authored business manifest was injected.
