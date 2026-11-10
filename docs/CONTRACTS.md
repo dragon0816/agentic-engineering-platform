@@ -7129,3 +7129,54 @@ Browser operate exposes save_as documentation on the real HostTool schema:
 inspect_dom/read_table/read_text/read_record/download require an output alias.
 Dedicated browser__inspect is preferred for ad-hoc inspection. No validator or
 action-default behavior changes are implied by the metadata clarification.
+
+Workflow surgical patch (`host.authoring.patch.v1`, 2026-11-10):
+`authoring__patch_workflow` and `aep_patch_workflow` share `WorkflowPatchRequest`.
+It requires candidate_id, base_digest (SHA-256), and 1..20 operations. A path is
+1..20 exact JSON key/index segments, strict string/nonnegative integer (no bool,
+traversal/slash/NUL segments). Only existing values may change: step inputs,
+description, or existing parameter/check fields. Identity, version, capability,
+policy and whole-step/list replacement are refused. Request JSON is at most256KiB.
+`replace` requires value (including explicit null). `copy_reference` instead requires
+attachment_id and source_path; it resolves an existing same-session JSON attachment
+through AttachmentStore, confined to its stored folder/root, at most1MiB. No copied
+content appears in the external result. Unmentioned canonical JSON values and script
+strings survive exactly; no normal-draft assembly or supplied-input rebinding occurs.
+Native/external results contain candidate id, revision and new digest. Invalid
+manifests retain normal validation failures; stale/busy, installed, scope and missing
+reference states return structured authoring errors. Installed assets require revise.
+Automatic Host continuation forbids full draft replacement and restricts patches to
+the one actual failed step.inputs proven by the current candidate digest, run id,
+step index and capability. No trustworthy scope means refusal. A successful patch
+clears verified_digest and active_trial_token; current trial/approval/install rules
+remain. Per-candidate OS locks and compare/save cover overlapping patch and legacy
+writers, and install admission through publication. Legacy full-draft submissions
+do not carry client base_digest; a stale document first submitted after a committed
+patch remains an explicit full replacement. Automatic continuations cannot use that
+route. No stronger stale-client guarantee is claimed for legacy replacement.
+
+Automatic continuation inherits the previous actual trial's effective arguments;
+omitted/empty arguments do not reapply formal defaults. Explicit matching subsets
+retain all other actual values; contradictions return authoring_trial_arguments_conflict.
+Missing/stale/foreign/in-flight evidence returns authoring_trial_arguments_unavailable.
+No question or new persisted state is added. Cleared-token begin_trial/record_trial
+state must agree between candidate and active actor/session task; latest Host history
+candidate/run/prior-digest identifiers only corroborate scope (never advisory text,
+permissions or trial proof). Write trials also require the matching actual approved
+run record. The previous trial digest remains the reference after a patch. Existing
+parameter defaults, input origins, repair budgets and approval boundaries remain.
+
+
+### Atomic fresh-network click observation
+
+`WebAction.do = click_wait_network` extends the existing Browser action union
+compatibly and accepts the existing click target only. It requires act mode and
+native activation. A script containing it enables private scoped network
+observation before navigation/reload. The action fences/arms a fresh CDP epoch
+before one press, then requires same-origin/main-frame XHR/Fetch completion and
+bounded quiet under its original deadline; timeout/failure/loss is not success.
+No new execution grant, stored asset, HTTP client, payload/URL matcher or output
+field is introduced. Raw Network headers/body/fullURL/query are never retained
+or diagnosed; only bounded necessary protocol metadata is used internally.
+This is transport evidence, not a business or DOM correctness proof. Existing
+Workflow checks, independent output validation and installation approval remain.

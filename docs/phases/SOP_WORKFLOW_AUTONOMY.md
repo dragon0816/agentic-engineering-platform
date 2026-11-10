@@ -220,3 +220,111 @@ suffix and unchanged timestamp/actor/monotonic protections; reject rewrites,
 shrinks, stale snapshots and three-message rollover. Do not invent user input,
 restart/replay the trial or recreate the already persisted candidate/approval.
 This is a narrow gap4 continuation fix; no new capability or side effect.
+
+### Surgical Workflow repair (2026-11-10)
+
+An actual Browser repair resubmitted an entire Workflow and corrupted previously
+tested downstream Python. Authoring now offers existing-value patches against an
+exact candidate digest. Unmentioned canonical identity/version, parameter defaults,
+scripts and other fields remain unchanged; patching does not rebind recent QA inputs.
+The same underlying API serves native and external/MCP authoring. An owned,
+same-session JSON attachment may supply a source field copied without model retyping.
+No arbitrary filesystem path, snapshot store, business script or selector is added.
+
+Automatic continuations may only patch the actual matching failed step inputs.
+Missing/stale diagnostic scope is a structured refusal; successful-but-incomplete
+trials do not invent a failed step. Ordinary explicit owner turns may restore another
+step from an owned source attachment. Installed candidates require revise-first.
+All changes retain coverage/trial/approval gates, invalidate exact proof, and use a
+per-candidate OS advisory lock plus digest comparison; stale/busy admission precedes
+task mutation and workspace preparation. No trial is replayed by storage or patching.
+
+### Actual trial argument continuity (2026-11-10)
+
+An approved QA trial used alternate dates, rates, mapping and output prefix, but
+automatic continuation requested arguments={} and silently selected formal defaults.
+Continuation now inherits Host-recorded effective actual inputs, with exact
+actor/session/candidate/run/prior-digest corroboration. Matching explicit subsets
+preserve the remainder; contradictions or missing evidence fail closed without a
+new question. Read/card trials retain their existing path; write trials retain a
+new approval and corroborate the previous approved run. No state field, default,
+input origin, budget or permission changes. Causal approval and card tests cover
+empty/omitted inputs, matching/conflicting subsets, patches and invalid provenance.
+
+### Fresh asynchronous query completion (2026-11-10)
+
+Actual native revision58 changed-input QA passed28 rows, but a subsequent formal
+run returned the same stable28-row1/1 snapshot before the new query response.
+Read-only actual UI later showed756 rows/26pages and the correct formal date
+condition. Thus stable DOM/pagination is insufficient evidence of a new query;
+the independent complete-collection acceptance failed. The candidate is held.
+
+Add one atomic `click_wait_network` Browser action, with the same target fields
+as click and no new URL/payload/filter/timeout/output parameters. Script presence
+opts into bounded metadata-only observation before its open/reload sequence.
+After normal act/origin/hover/hit-test checks, fence and arm a fresh main-frame,
+same-origin XHR/Fetch epoch immediately before one native press/release. Require
+observed new successful completion and scoped in-flight quiet under the existing
+whole-action deadline/settle interval. Never replay a press or substitute a JS click.
+
+Network facts must be extracted before generic queue truncation/diagnostics;
+headers, bodies, full URLs and queries never enter retained events, diagnostics,
+state or model output. Large raw events remain usable only when all bounded needed
+metadata is available; invalid/oversized metadata, actual loss, overflow,
+disconnect, missing fresh requests or unverified CDP time base fail closed.
+Observation is private, in-memory and scoped; no recorder/store/HTTP client,
+network mutation, site-specific route or dependency is added. Existing write
+approval and origin policy remain. Transport completion still does not certify
+business query identity, committed inputs or rendered content: DOM, source count,
+date/mapping/currency and complete-collection checks remain necessary.
+
+Architecture review: Bridge Browser owns this deterministic timing operation;
+Agent chooses where it belongs in the Workflow. Root reviews the shared tracker
+and adapter contract before production edits. Tests precede implementation:
+old/late events, pending+fresh, frame/origin boundaries, redirect/failure, bounded
+loss/overflow and privacy; native delayed-response fixture must observe one
+trusted click, wait through response body completion, retain no secret event
+fields and preserve deadline/origin/read-policy refusal. Actual AEP then discovers
+and uses the new action itself; root never edits business selectors/scripts.
+Final full verification starts only after both original and changed-input native
+acceptance pass on the frozen source, in the declared project virtual environment.
+### Revision59 native acceptance and final architecture review (2026-11-10)
+
+Actual AEP discovered the new atomic action and patched only the Go action kind;
+root did not supply business selectors or report code. The same unchanged revision
+then passed changed-input QA28 unique orders/11 monthly groups and formal760
+unique orders/109 groups. Independent QA compared every raw-source row and copied
+field, amounts/currencies, requested dates, supplied mapping, FX and monthly sums;
+zero issues. Read-only post-run Browser showed All760, formal dates and26/26.
+These are assisted evaluation cases with repeated operator QA feedback, not a
+one-prompt autonomy claim. No owner-visible installation is proven yet.
+
+Final architecture review: deterministic network timing remains in the Bridge
+Browser; AEP chooses the action and retains business Workflow ownership. Authoring
+patches share native/MCP contracts and preserve publish versus execute approval.
+References are owned same-session attachments, not arbitrary filesystem access.
+No model/provider-specific contract, n8n integration, dependency, order mutation,
+HTTP business client, click replay or permission bypass is introduced. Raw CDP
+headers/bodies/full URLs are excluded from the new retained network evidence.
+Existing diagnostic data paths were not broadened by this slice.
+### Final verification ledger (2026-11-10)
+
+Full normal collection6529 items/546 modules ran in4 shards under the declared
+project virtualenv. Initial result6514P/5F/10skip; source558 Python files unchanged.
+Do not describe the initial full run as clean. Exact logs are retained under
+`.scratch/autonomy-delivery-20261110-*` and environment-source-proof.json.
+
+Two causal fixture corrections: existing actor mutation now fails the intended
+ownership guard, so construct the HTTP candidate with public correct-actor draft;
+nested target context now allows its bracketed CDP reads2s before missing-next
+diagnosis (no timing assertion under test). Both full modules63P147.02s.
+Original two Telegram timing modules passed unchanged in quiet combined rerun;
+the viewport case still failed on missing injected DOM. Its initial createTarget
+navigation had no readiness barrier: the replacement explanation is a hypothesis,
+while that race window is concrete. It now starts blank, navigates explicitly,
+waits bounded correct URL/complete/fixture marker before injection; exact negative
+obscured/.2s check remains, positive native input gets a separate2s budget. Full
+viewport module3P7.39s, all dimensions/overlay/trusted event assertions unchanged.
+The original full viewport trace specifically expired after the native press.
+Ordinary click code path is unchanged from baseline when no network callbacks
+are requested. No production policy/deadline/ownership change was made for tests.

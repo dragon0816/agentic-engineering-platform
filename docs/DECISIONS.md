@@ -1,3 +1,4 @@
+
 # Architecture decisions
 
 ## 2026-10-02 — Incremental backend boundary before native Agent execution
@@ -7017,3 +7018,73 @@ rollover preserving the exact retained suffix, cap, owner and timestamp guards.
 Fabricating a user's request to make a pair and retrying the already-completed
 trial/model side effects were rejected. This narrow storage admission repairs
 existing Host continuation semantics; it does not introduce a new message role.
+
+### Preserve verified Workflow code with scoped patches (2026-11-10)
+
+Real native AEP Browser repairs replaced entire candidates and corrupted an
+already verified downstream Excel script. Add one shared native/MCP typed
+existing-value patch API, admitted by candidate digest and ownership/session.
+Unmentioned canonical fields, identity/version, defaults and scripts remain
+unchanged; patch skips draft reassembly and recent-input rebinding. Same-session
+owned JSON attachments can supply exact reference values without model retyping;
+no arbitrary filesystem path is accepted. Keep attachment root/size limits.
+
+Automatic repair uses patches only on the actual failed step inputs established
+by matching trial digest/run/capability diagnostics. This applies generically to
+all capabilities, preserving failed-Python repair; incomplete successful trials
+without a trustworthy failed step stop with structured needs_input. Whole
+replacement during automatic repair and guessed failed scopes were rejected.
+Explicit user turns may restore another step from an owned reference.
+
+A private standard-library OS advisory candidate lock and revision+digest CAS
+protect concurrent writes and no-op patch proof invalidation. Installation holds
+the same admission across fresh proof checks, publication, grants and status;
+otherwise a patch could make an installation report failed after it had happened.
+Legacy full replacements guarantee overlap protection only: they have no client
+base digest to identify stale documents arriving after a patch completes. A broad
+breaking full-draft contract change and a snapshot subsystem were deferred.
+Exact current-digest verification and separate installation approval still apply.
+
+### Keep actual trial inputs during automatic repair (2026-11-10)
+
+Native QA changed dates, rates and mapping and correctly failed on stale Browser
+rows. The continuation then proposed arguments={} and silently selected formal
+defaults. Preserve the previous actual effective arguments through a deterministic
+Host routing helper, not another model reminder. Reuse existing token-recorded
+trial arguments, exact actor/session/candidate/run/prior-digest corroboration and
+actual approved-write evidence. Structural history IDs only fail closed; history
+text never grants permission/proof. Empty/omitted arguments inherit; a matching
+subset retains all other inputs, and a contradiction refuses. Read/card paths keep
+their existing approval semantics; a new write trial still needs normal approval.
+No state field, default change, budget reset or successful side-effect replay.
+
+### Reject mixed initial paginated observations (2026-11-10)
+
+A local causal fixture proves the initial read could sample old final-page rows
+then new1/1 paginator values and return them together. Bracket rows with paginator
+observations and reuse the existing settle interval to accept a stable whole
+snapshot under one retry/sleep deadline. Retain strict stable non-start, max-page,
+key, truncation and origin refusals and dispatch no UI action for this check.
+This is a consistency check, not evidence that the application's query completed;
+Workflow readiness still needs actual page evidence. Existing blocking CDP calls
+keep their transport timeout, so this is not a new strict per-command time cap.
+### Wait for fresh query transport before collecting rows (2026-11-10)
+
+Actual C4C acceptance showed stable old rows could survive a new Go click and pass
+DOM settling checks. Add one generic Browser `click_wait_network` action: arm a
+bounded private observer immediately before one native trusted click, then require
+fresh successful scoped main-frame same-origin XHR/Fetch completion and quiet.
+Use Chromium CDP monotonic timestamps with verified common TimeTicks origin,
+never Python wall time. Retain bounded metadata only, with no response bodies,
+headers, full URLs or query strings. Lost, malformed, overflowing or out-of-scope
+evidence refuses; no click replay or JavaScript click fallback. Existing origin,
+policy and action deadline checks remain. Old pre-arm failed/cancelled requests
+end their pending state but cannot certify fresh completion.
+
+Stable DOM alone and longer sleeps were rejected because actual formal revision58
+returned the previous28 rows while the new760-row query was still completing.
+Transport completion does not prove business query identity or rendered content;
+independent source count/date/mapping/FX/workbook reconciliation remains required.
+Native revision59 passed changed-input28 and formal760 independently after AEP
+selected the new action itself. No site-specific route or business code enters
+the shared Browser runtime.

@@ -4440,3 +4440,49 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 
 - [x] 2026-11-10 SOP autonomy platform verification: six narrow runtime commits throughf872ca76; full6409=6397pass/2fail/10skip, both failed whole modules unchanged rerun14pass; Ruff1424/mypy1074/build/wheel-source556/pipcheck passed. No push, no weaker assertions.
 - [ ] 2026-11-10 SOP autonomy delivery: deploy verified source after canary/immediate idleguard; finish cold query-readiness repair and owner-resident trial/draft. Warm AEP reports751+QA28 independently pass, but cold reads529pages before latervisible26. Parser already reads actual text/value, so no aria-label parser fix. Keep tested AEP report source; do not manually rewrite business code.
+
+- [x] 2026-11-10 SOP autonomy resident rollout: verified f5258695 offline bundle/canary installed after immediate idle guard; seven source hashes match, configuration semantically preserved (format-only byte change), API/pipcheck healthy. No replacement business workflow installed. Proof `.scratch/autonomy-final-resident-update-proof.json`.
+- [ ] 2026-11-10 SOP autonomy scoped repairs: AEP revision51 changed unrelated verified Excel code while fixing Browser waits and introduced SyntaxError. Pending trial held. Implement typed CAS partial patch/exact owned-reference copy and restrict automatic repair to actual failed Browser inputs; preserve untouched scripts/defaults. Cold full-query acceptance and owner-resident delivery remain open. See current HANDOFF.
+
+- [ ] 2026-11-10 scoped patch final verification: focused283 passed and independent review clear; global Ruff1426/format/mypy1076 pass. Normal full6439-case/542-module six-shard run active (session95512), at least one UI failure not yet classified. Native revision52 exact-copied its own verified report reference (AST valid, all other manifest fields unchanged); cold run failed Browser wait actions17, auto patch53 preserved downstream report/defaults but hardcoded date in wait. Trial050614 held pending parameterized-date repair. Native Host session33744 active. No new deployment/commit/install.
+
+- [ ] 2026-11-10 native freshness gate: revision58 changed-input QA passed28/11groups with independent source/FX/mapping-sheet/tag reconciliation; formal58 engine then succeeded using stale same28 rows, while later read-only UI showed All756, datesJul1..Jun30, page1/26. Thus independent complete-validation FAILED; no install. Generic first-snapshot consistency and exact trial-input inheritance are implemented/focused-tested, but application request completion still lacks a reliable barrier. Source kept frozen; read-only passive CDP barrier design under review. Final full NOT restarted until actual original+QA stable. See `.scratch/autonomy-native-formal58-incomplete-proof.json`.
+# 2026-11-10: Fresh-query acceptance and delivery verification
+
+- Actual native AEP revision59 (`engineering/c4c-sales-orders-monthly-eur@1.0.50`,
+  digest `762501a6088499399f3db2e6acc4671ad58d712267b5752a256092038030ce69`)
+  independently passed both changed-input QA (28 unique orders, 11 monthly groups)
+  and subsequent formal defaults (760 unique orders, 109 groups, zero QA issues).
+  Read-only post-run Browser confirmed All760, formal dates and page26/26.
+  Evidence: `.scratch/autonomy-native-qa59-proof.json`,
+  `.scratch/autonomy-native-formal59-proof.json`, native results111/112.
+- AEP itself patched only the Go action to `click_wait_network`; tested downstream
+  report code and formal defaults were preserved. Root did not author business code.
+  This was an assisted repair evaluation with repeated QA feedback, not evidence
+  of one-prompt autonomous authoring. Private native Host exited cleanly.
+- Scoped regression fixture23 passed; global mypy1081 files passed. Network pure45
+  and integration10 plus separate outer-deadline1 passed; independent review clear.
+- Final package build is running before the full suite, without concurrent pytest.
+  Build subsequently PASSED (sdist and wheel); wheel558 Python files exactly match
+  source. Full final suite is NOW RUNNING:6529 items/546 modules in4 shards, driver
+  `.scratch/autonomy-delivery-20261110-driver.log` (PTY83071). pipcheck passed.
+  Full suite outcome, verified source commit, resident update and owner-visible reusable
+  workflow installation remain unfinished. Do not report installed/completed.
+# 2026-11-10: Final source verification and native reporting acceptance
+
+- Frozen runtime source completed the entire normal6529-item collection in4 shards:
+  6514 passed,5 failed,10 skipped;558 source Python files unchanged throughout.
+  Original failures/logs are preserved, not reported as a clean initial pass.
+- Corrected two test preparations without weakening behavioral assertions:
+  public correct-actor/session draft instead of private ownership mutation;
+  nested-target diagnostics allow bracketed CDP reads within2s (settle0).
+  Both complete modules then63 passed147.02s.
+- Original viewport+Telegram ingress/progress modules:31 passed/1 viewport failure.
+  Both Telegram timing assertions passed unchanged. Viewport fixture now waits for
+  the correct loaded practice document before DOM injection, retains negative.2s
+  obscured refusal, and uses a separate2s positive native-click budget. All viewport
+  dimensions, overlay and trusted-event assertions retained; whole module3 passed7.39s.
+  This closes each initial failure with an actual whole-module recheck.
+- Global mypy1081 passed, Ruff passed, pipcheck passed. Final format/diff cleanup
+  and wheel rebuild are finishing; source commit/resident update/owner installation
+  remain pending. Actual AEP revision59 formal760/QA28 independent acceptance passed.
