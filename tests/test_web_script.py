@@ -264,7 +264,8 @@ def test_pagination_bounds_and_stalled_pages_never_return_partial_data(browser, 
     assert limited.value.code == "web_pagination_limit_exceeded"
     paginated_page(browser, site, stalled=True)
     with pytest.raises(WebScriptError) as stopped:
-        ScriptRunner(browser, (site.url,), timeout_s=0.4).run(
+        # Exercise the later-page stall; initial stabilization has separate coverage.
+        ScriptRunner(browser, (site.url,), settle_s=0, timeout_s=0.4).run(
             WebScript(actions=(paginated_action(),)), "act"
         )
     assert stopped.value.code == "web_pagination_did_not_advance"
@@ -1044,10 +1045,16 @@ def test_icon_only_wait_uses_actual_text_and_presence_not_accessible_name(
 
 @pytest.mark.parametrize("field", ["current", "total", "next"])
 def test_pagination_nested_target_failure_reaches_model_with_field_context(
-    browser: Any, site: PracticeSite, tmp_path: Path, field: str
+    browser: Any,
+    site: PracticeSite,
+    tmp_path: Path,
+    field: str,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     import asyncio
+    from functools import partial
 
+    from capabilities.browser_session import handlers
     from capabilities.browser_session.handlers import (
         SPEC,
         BrowserRequest,
@@ -1059,6 +1066,10 @@ def test_pagination_nested_target_failure_reaches_model_with_field_context(
     from common.execution import RequestContext, TraceIdentifiers
     from host_runtime.bridge_tools import bridge_tools
     from workflow.dispatch import BridgeExecutor
+
+    # Diagnose nested targets after the bracketed snapshot's CDP reads complete.
+    # This fixture tests error context, not initial settling or action deadlines.
+    monkeypatch.setattr(handlers, "ScriptRunner", partial(ScriptRunner, settle_s=0))
 
     class ExistingBrowser:
         def start(self) -> None:
@@ -1077,7 +1088,7 @@ def test_pagination_nested_target_failure_reaches_model_with_field_context(
             (site.url,),
             tmp_path / "profile",
             headless=True,
-            timeout_s=0.2,
+            timeout_s=2.0,
             workspace_roots=(),
             browser_factory=ExistingBrowser,
         ),

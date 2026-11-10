@@ -28,9 +28,13 @@ import socket
 import struct
 import time
 from collections import deque
+from collections.abc import Iterator
+from contextlib import contextmanager
 from types import TracebackType
 from typing import Any, Literal, Self
 from urllib.parse import urlsplit
+
+from integrations.network_barrier import NetworkBarrier, sanitize_network_event
 
 #: RFC 6455's constant, concatenated with the key to prove the server spoke
 #: WebSocket rather than echoing something.
@@ -390,6 +394,20 @@ class Devtools:
         self.socket = WebSocket(url, timeout_s=timeout_s, trace=trace)
         self._last = 0
         self.events: list[dict[str, Any]] = []
+        self.network_observer: NetworkBarrier | None = None
+        self.network_events_lost = False
+
+    @contextmanager
+    def within_deadline(self, deadline: float) -> Iterator[None]:
+        """Give nested commands one absolute transport budget, restored on every exit."""
+        previous = self.socket._deadline
+        previous_timeout = self.socket.socket.gettimeout()
+        self.socket._deadline = deadline if previous is None else min(previous, deadline)
+        try:
+            yield
+        finally:
+            self.socket._deadline = previous
+            self.socket.socket.settimeout(previous_timeout)
 
     def call(self, method: str, **params: Any) -> dict[str, Any]:
         """A command has a wall-clock budget even when events keep arriving."""
@@ -431,6 +449,20 @@ class Devtools:
             return result if isinstance(result, dict) else {}
 
     def _remember(self, message: dict[str, Any]) -> None:
+        method = message.get("method")
+        if isinstance(method, str) and method.startswith("Network."):
+            # A large Cookie is normal. Extract only bounded facts BEFORE the
+            # general queue's size pruning; no raw Network params ever enter it.
+            observer = getattr(self, "network_observer", None)
+            if observer is not None:
+                try:
+                    facts = sanitize_network_event(method, message.get("params", {}))
+                    if facts is not None:
+                        observer.event(method, facts, time.monotonic())
+                except Exception:
+                    self.network_events_lost = True
+                    observer.mark_lost()
+            return
         if len(json.dumps(message).encode("utf-8")) > MAX_DEVTOOLS_EVENT_BYTES:
             # A large console/network payload is not needed to notice load events.
             compact: dict[str, Any] = {}

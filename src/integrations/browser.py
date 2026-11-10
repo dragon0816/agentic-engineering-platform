@@ -26,6 +26,7 @@ Two rules shape all of it, both from the owner's decisions of 2026-09-24:
 from __future__ import annotations
 
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -33,7 +34,8 @@ import sys
 import time
 import urllib.error
 import urllib.request
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from http.client import HTTPException
 from pathlib import Path
 from types import TracebackType
@@ -41,6 +43,7 @@ from typing import IO, Any, Literal, Self
 
 from common.base import Contract, Text
 from integrations.dom_names import DOM_NAME_JS
+from integrations.network_barrier import NetworkBarrier
 from integrations.websocket import Devtools, DevtoolsRefused, SocketTrace, WebSocketError
 
 BrowserErrorCode = Literal[
@@ -53,6 +56,12 @@ BrowserErrorCode = Literal[
     "element_missing",
     "click_failed",
     "browser_lost",
+    "web_network_observer_unavailable",
+    "web_network_observation_lost",
+    "web_network_no_fresh_request",
+    "web_network_request_failed",
+    "web_wait_timeout",
+    "web_origin_not_allowed",
 ]
 
 #: Where Windows records the browsers it knows about, in preference order.
@@ -232,6 +241,121 @@ def browser_path() -> str | None:
             if value and Path(str(value)).is_file():
                 return str(value)
     return None
+
+
+class _NetworkObservation:
+    """One attached connection's metadata-only evidence; never query correctness."""
+
+    def __init__(self, browser: Browser, page: Devtools, allowed: tuple[str, ...]) -> None:
+        self.browser, self.page, self.allowed = browser, page, allowed
+        self.tracker = NetworkBarrier(allowed)
+        self.frame_id = self.origin = ""
+        self.armed = False
+        self.last_deadline: float | None = None
+
+    def _connected(self) -> None:
+        if (
+            self.browser._page is not self.page
+            or self.page.network_observer is not self.tracker
+            or self.page.network_events_lost
+        ):
+            self.tracker.mark_lost()
+            raise BrowserError("web_network_observation_lost")
+        reason = self.tracker.evidence()["failed_reason"]
+        if reason:
+            code: BrowserErrorCode = (
+                "web_network_request_failed"
+                if reason in {"http_error", "request_failed"}
+                else "web_network_observation_lost"
+            )
+            raise BrowserError(code)
+
+    @contextmanager
+    def within_deadline(self, deadline: float) -> Iterator[None]:
+        self._connected()
+        self.last_deadline = deadline
+        try:
+            with self.page.within_deadline(deadline):
+                yield
+        except (DevtoolsRefused, WebSocketError):
+            self.tracker.mark_lost()
+            raise BrowserError("web_network_observation_lost") from None
+
+    def _frame(self, check_origin: Callable[[str], None]) -> tuple[str, str]:
+        self._connected()
+        value = self.page.call("Page.getFrameTree").get("frameTree", {}).get("frame", {})
+        if not isinstance(value, dict) or not isinstance(value.get("id"), str):
+            raise BrowserError("web_network_observer_unavailable")
+        url = value.get("url")
+        if not isinstance(url, str) or not url:
+            raise BrowserError("web_network_observer_unavailable")
+        check_origin(url)
+        from urllib.parse import urlsplit
+
+        parsed = urlsplit(url)
+        origin = f"{parsed.scheme}://{parsed.netloc}".lower()
+        return value["id"], origin
+
+    def arm(self, check_origin: Callable[[str], None]) -> None:
+        self.frame_id, self.origin = self._frame(check_origin)
+        # Chromium emits both this Timestamp and Network timestamps as
+        # base::TimeTicks::since_origin().InSecondsF(), not Python/wall time.
+        metrics = self.page.call("Performance.getMetrics").get("metrics", [])
+        stamps = [
+            m.get("value") for m in metrics if isinstance(m, dict) and m.get("name") == "Timestamp"
+        ]
+        if (
+            len(stamps) != 1
+            or isinstance(stamps[0], bool)
+            or not isinstance(stamps[0], (int, float))
+            or not math.isfinite(stamps[0])
+            or stamps[0] <= 0
+        ):
+            raise BrowserError("web_network_observer_unavailable")
+        self.tracker.arm(self.frame_id, self.origin, float(stamps[0]), time.monotonic())
+        self.armed = True
+        self._connected()
+
+    def assert_scope(self, check_origin: Callable[[str], None]) -> str:
+        frame_id, origin = self._frame(check_origin)
+        if origin != self.origin:
+            raise BrowserError("web_origin_not_allowed")
+        if frame_id != self.frame_id:
+            self.tracker.mark_lost()
+            raise BrowserError("web_network_observation_lost")
+        return origin
+
+    def wait(self, deadline: float, quiet_s: float, check_origin: Callable[[str], None]) -> None:
+        while True:
+            if time.monotonic() >= deadline:
+                code: BrowserErrorCode = (
+                    "web_network_no_fresh_request"
+                    if not self.tracker.evidence()["fresh_started"]
+                    else "web_wait_timeout"
+                )
+                raise BrowserError(code)
+            frame_id, origin = self._frame(check_origin)
+            if origin != self.origin:
+                raise BrowserError("web_origin_not_allowed")
+            if frame_id != self.frame_id:
+                self.tracker.mark_lost()
+            evidence = self.tracker.evidence()
+            if evidence["failed_reason"]:
+                reason = evidence["failed_reason"]
+                code = (
+                    "web_network_request_failed"
+                    if reason in {"http_error", "request_failed"}
+                    else "web_network_observation_lost"
+                )
+                raise BrowserError(code)
+            if self.tracker.ready(time.monotonic(), quiet_s):
+                # The preceding epoch is quiet. Observe intervening activity
+                # before another atomic action in the same script/for_each.
+                self.tracker = NetworkBarrier(self.allowed)
+                self.page.network_observer = self.tracker
+                self.armed = False
+                return
+            time.sleep(min(0.05, max(0.0, deadline - time.monotonic())))
 
 
 class Browser:
@@ -745,6 +869,36 @@ class Browser:
         """Run one expression on the page and return its JSON value; for
         callers that replay recorded steps (`integrations.web_script`)."""
         return self._evaluate(expression)
+
+    @contextmanager
+    def observe_network(
+        self, allowed_origins: tuple[str, ...], *, timeout_s: float | None = None
+    ) -> Iterator[_NetworkObservation]:
+        """Observe before script navigation; never recover a lost observation connection."""
+        page = self.page()
+        if page.network_observer is not None:
+            raise BrowserError("web_network_observer_unavailable")
+        observer = _NetworkObservation(self, page, allowed_origins)
+        page.network_events_lost = False
+        page.network_observer = observer.tracker
+        setup_deadline = time.monotonic() + (self.timeout_s if timeout_s is None else timeout_s)
+        try:
+            with page.within_deadline(setup_deadline):
+                page.call("Network.enable")
+                page.call("Performance.enable", timeDomain="timeTicks")
+            yield observer
+        finally:
+            # Teardown must not turn an already executed result into a retry.
+            cleanup_deadline = observer.last_deadline or setup_deadline
+            for method in ("Network.disable", "Performance.disable"):
+                if time.monotonic() >= cleanup_deadline:
+                    break
+                try:
+                    with page.within_deadline(cleanup_deadline):
+                        page.call(method)
+                except (DevtoolsRefused, WebSocketError, OSError):
+                    pass
+            page.network_observer = None
 
     def navigate(self, url: str, *, settle_s: float = 1.0) -> None:
         page = self.page()

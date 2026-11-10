@@ -278,7 +278,16 @@ class _ObservedRunner(ScriptRunner):
     def _table_pages(self, action: WebAction, mode: ScriptMode) -> list[Any]:
         return [{"id": "one"}]
 
-    def _perform(self, spec: dict[str, Any], *, deadline: float | None = None) -> dict[str, Any]:
+    def _perform(
+        self,
+        spec: dict[str, Any],
+        *,
+        deadline: float | None = None,
+        before_press: Callable[[], None] | None = None,
+        verify_scope: Callable[[], str] | None = None,
+        check_observation: Callable[[], None] | None = None,
+    ) -> dict[str, Any]:
+        assert before_press is None and verify_scope is None and check_observation is None
         return {"text": "overwritten", "ok": True}
 
     def _evaluate(self, expression: str) -> dict[str, Any]:

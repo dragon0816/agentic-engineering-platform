@@ -24,6 +24,7 @@ import json
 import re
 import time
 from collections.abc import Callable, Mapping
+from contextlib import nullcontext
 from typing import Annotated, Any, Literal, Protocol, Self, cast
 from urllib.parse import urlsplit
 
@@ -143,6 +144,7 @@ class WebAction(Contract):
         "reload",
         "fill",
         "click",
+        "click_wait_network",
         "read_table",
         "read_text",
         "download",
@@ -154,6 +156,9 @@ class WebAction(Contract):
         description=(
             "reload: act mode only, reload the current tab once; takes no action arguments. "
             "open navigates to a URL and may preserve the document on SPA/hash navigation."
+            " click_wait_network submits an async query with one native click and requires a "
+            "fresh scoped XHR/Fetch completion; no fresh request fails. "
+            "DOM/data checks remain required."
         )
     )
     url: Text | None = None
@@ -171,6 +176,7 @@ class WebAction(Contract):
             "expression matching the whole actual innerText/value, not the accessible name. "
             "An icon-only target may have empty text; .* is NOT a universal presence predicate "
             "because it does not match multiline text. Caption words may time out."
+            " Placeholders apply only to fill; wait_for regular expressions are not interpolated."
         ),
     )
     table: Text | None = None
@@ -216,6 +222,7 @@ class WebAction(Contract):
             "reload": True,
             "fill": self.target is not None and self.value is not None,
             "click": self.target is not None,
+            "click_wait_network": self.target is not None,
             "read_table": self.table is not None and self.save_as is not None,
             "read_text": self.target is not None and self.save_as is not None,
             "download": self.target is not None and self.save_as is not None,
@@ -227,6 +234,11 @@ class WebAction(Contract):
             for name, value in self.model_dump(exclude={"do"}).items()
         ):
             raise ValueError("reload takes no action arguments")
+        if self.do == "click_wait_network" and any(
+            value != WebAction.model_fields[name].default
+            for name, value in self.model_dump(exclude={"do", "target", "row"}).items()
+        ):
+            raise ValueError("click_wait_network accepts only the existing click target and row")
         if not needs[self.do]:
             raise ValueError(f"a {self.do} action is missing what it needs")
         if self.trigger is not None and self.do != "ensure_visible":
@@ -315,6 +327,8 @@ _ACT = r"""
 (() => {
   const find = %(find)s;
   const spec = %(spec)s;
+  if (spec.expected_origin && location.origin !== spec.expected_origin)
+    return JSON.stringify({error: 'web_origin_not_allowed'});
   const hit = find(spec);
   if (hit.error) return JSON.stringify(hit);
   const e = hit.element;
@@ -343,6 +357,8 @@ _ACT = r"""
       const top = document.elementFromPoint(x, y);
       if (!top || (top !== e && !e.contains(top)))
         return JSON.stringify({error: 'web_target_obscured'});
+      if (spec.expected_origin && location.origin !== spec.expected_origin)
+        return JSON.stringify({error: 'web_origin_not_allowed'});
       return JSON.stringify({ok: true, pointer: {x, y}});
     }
     e.click();
@@ -697,9 +713,39 @@ class ScriptRunner:
         # Given the click that starts a download and the name to keep it
         # under, returns where the file was kept. None: downloads refused.
         self.downloader = downloader
+        self._network_observer: Any = None
 
     def run(self, script: WebScript, mode: ScriptMode) -> WebScriptResult:
         checked = WebScript.model_validate(script)
+        needs_network = any(action.do == "click_wait_network" for action in checked.actions)
+        observe = getattr(self.page, "observe_network", None)
+        if needs_network and mode != "act":
+            raise WebScriptError("web_network_click_not_read_only")
+        if needs_network and (
+            not callable(observe) or not callable(getattr(self.page, "click_at", None))
+        ):
+            raise WebScriptError("web_network_observer_unavailable")
+        if needs_network:
+            assert callable(observe)
+            context = observe(tuple(self.allowed), timeout_s=self.timeout_s)
+        else:
+            context = nullcontext(None)
+        try:
+            with context as observer:
+                self._network_observer = observer
+                return self._run_checked(checked, mode)
+        except WebScriptError:
+            raise
+        except Exception as error:
+            if not needs_network:
+                raise
+            raise WebScriptError(
+                str(getattr(error, "code", "web_network_observer_unavailable"))
+            ) from None
+        finally:
+            self._network_observer = None
+
+    def _run_checked(self, checked: WebScript, mode: ScriptMode) -> WebScriptResult:
         data: dict[str, JsonValue] = {}
         done: list[str] = []
         items: tuple[str | None, ...] = (
@@ -793,12 +839,32 @@ class ScriptRunner:
             data[action.save_as] = self._table_pages(action, mode)
             return
         spec: dict[str, Any] = {
-            "op": "click" if action.do == "download" else action.do,
+            "op": "click" if action.do in {"download", "click_wait_network"} else action.do,
             "mode": mode,
             **(action.target.model_dump() if action.target else {}),
         }
         if action.row is not None:
             spec["row"] = {**action.row.model_dump(), "equals": _fill_in(action.row.equals, values)}
+        if action.do == "click_wait_network":
+            observer = self._network_observer
+            if observer is None:
+                raise WebScriptError("web_network_observer_unavailable")
+            deadline = time.monotonic() + self.timeout_s
+
+            def check_origin(url: str) -> None:
+                if not origin_permitted(url, self.allowed):
+                    raise WebScriptError("web_origin_not_allowed")
+
+            with observer.within_deadline(deadline):
+                self._perform(
+                    spec,
+                    deadline=deadline,
+                    before_press=lambda: observer.arm(check_origin),
+                    verify_scope=lambda: observer.assert_scope(check_origin),
+                    check_observation=observer._connected,
+                )
+                observer.wait(deadline, self.settle_s, check_origin)
+            return
         if action.do == "fill":
             assert action.value is not None
             spec["value"] = _fill_in(action.value, values)
@@ -906,8 +972,8 @@ class ScriptRunner:
             result = result.model_copy(update={"overview": _bounded_overview(result.overview)})
         return result.model_dump(mode="json")
 
-    def _table_rows(self, action: WebAction) -> dict[str, Any]:
-        deadline = time.monotonic() + self.timeout_s
+    def _table_rows(self, action: WebAction, *, deadline: float | None = None) -> dict[str, Any]:
+        deadline = time.monotonic() + self.timeout_s if deadline is None else deadline
         while True:
             self._check_origin()
             try:
@@ -925,7 +991,7 @@ class ScriptRunner:
                     or time.monotonic() >= deadline
                 ):
                     raise
-                time.sleep(0.1)
+                time.sleep(min(0.1, max(0.0, deadline - time.monotonic())))
 
     def _page_numbers(self, paging: WebPagination) -> tuple[int, int]:
         self._check_origin()
@@ -940,16 +1006,41 @@ class ScriptRunner:
         self._check_origin()
         return int(answer["current"]), int(answer["total"])
 
+    def _initial_table_snapshot(
+        self, action: WebAction, paging: WebPagination
+    ) -> tuple[dict[str, Any], int, int]:
+        """Reject mixed observations; stability does not prove query completion."""
+        deadline = time.monotonic() + self.timeout_s
+        candidate: tuple[tuple[int, int], dict[str, Any]] | None = None
+        stable_since = time.monotonic()
+        while True:
+            self._check_deadline(deadline)
+            before = self._page_numbers(paging)
+            self._check_deadline(deadline)
+            answer = self._table_rows(action, deadline=deadline)
+            after = self._page_numbers(paging)
+            self._check_deadline(deadline)
+            if before == after:
+                current, total = after
+                if current != 1 or total < 1:
+                    raise WebScriptError("web_pagination_not_at_start")
+                if total > paging.max_pages:
+                    raise WebScriptError("web_pagination_limit_exceeded")
+                observed = (after, answer)
+                if observed != candidate:
+                    candidate, stable_since = observed, time.monotonic()
+                if time.monotonic() - stable_since >= self.settle_s:
+                    return answer, current, total
+            else:
+                candidate = None
+            self._check_deadline(deadline)
+            time.sleep(min(0.1, max(0.0, deadline - time.monotonic())))
+
     def _table_pages(self, action: WebAction, mode: ScriptMode) -> list[Any]:
-        answer = self._table_rows(action)
         paging = action.pagination
         if paging is None:
-            return list(answer["rows"])
-        current, total = self._page_numbers(paging)
-        if current != 1 or total < 1:
-            raise WebScriptError("web_pagination_not_at_start")
-        if total > paging.max_pages:
-            raise WebScriptError("web_pagination_limit_exceeded")
+            return list(self._table_rows(action)["rows"])
+        answer, current, total = self._initial_table_snapshot(action, paging)
         rows = list(answer["rows"])
 
         def keys(batch: list[Any]) -> set[tuple[str, ...]]:
@@ -1010,9 +1101,19 @@ class ScriptRunner:
             current += 1
         return rows
 
-    def _perform(self, spec: dict[str, Any], *, deadline: float | None = None) -> dict[str, Any]:
+    def _perform(
+        self,
+        spec: dict[str, Any],
+        *,
+        deadline: float | None = None,
+        before_press: Callable[[], None] | None = None,
+        verify_scope: Callable[[], str] | None = None,
+        check_observation: Callable[[], None] | None = None,
+    ) -> dict[str, Any]:
         pointer = getattr(self.page, "click_at", None)
         native = spec["op"] == "click" and callable(pointer)
+        if before_press is not None and not native:
+            raise WebScriptError("web_native_click_required")
         hover = getattr(self.page, "hover_at", None)
         native_hover = native and callable(hover)
         hovered: tuple[float, float] | None = None
@@ -1070,6 +1171,27 @@ class ScriptRunner:
             if guarded_deadline:
                 self._check_origin()
                 self._check_deadline(deadline)
+            if before_press is not None:
+                before_press()
+                expected_origin = verify_scope() if verify_scope is not None else None
+                self._check_deadline(deadline)
+                final_expression = _ACT % {
+                    "find": _FIND,
+                    "spec": json.dumps(
+                        {**spec, "pointer": native, "expected_origin": expected_origin}
+                    ),
+                }
+                final = self._evaluate(final_expression)
+                final_point = final["pointer"]
+                if (float(final_point["x"]), float(final_point["y"])) != (
+                    float(point["x"]),
+                    float(point["y"]),
+                ):
+                    raise WebScriptError("web_target_changed")
+                answer, point = final, final_point
+                self._check_deadline(deadline)
+                if check_observation is not None:
+                    check_observation()
             pointer(float(point["x"]), float(point["y"]))
             if guarded_deadline:
                 self._check_origin()

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -54,7 +55,7 @@ def test_narrow_popup_reaches_desktop_layout_and_native_click_after_reattachment
             lines = (browser.profile / "DevToolsActivePort").read_text().splitlines()
             with Devtools(f"ws://127.0.0.1:{lines[0]}{lines[1]}", timeout_s=10) as control:
                 created = control.call(
-                    "Target.createTarget", url=site.url, newWindow=True, width=500, height=400
+                    "Target.createTarget", url="about:blank", newWindow=True, width=500, height=400
                 )
             target = next(
                 target for target in browser._targets() if target.get("id") == created["targetId"]
@@ -63,6 +64,16 @@ def test_narrow_popup_reaches_desktop_layout_and_native_click_after_reattachment
             browser._page = None
             monkeypatch.setattr(browser, "_targets", lambda port=None: [target])
             popup = browser.page()
+            # Finish the initial navigation before replacing the fixture DOM.
+            browser.navigate(site.url, settle_s=0)
+            ready = (
+                f"location.href === {json.dumps(site.url.rstrip('/') + '/')} && "
+                "document.readyState === 'complete' && !!document.getElementById('customer')"
+            )
+            load_deadline = time.monotonic() + 10
+            while not browser.evaluate(ready):
+                assert time.monotonic() < load_deadline, "practice document did not finish loading"
+                time.sleep(0.05)
             browser.evaluate(
                 "document.body.innerHTML = '<style>#veil{display:none;position:fixed;inset:0;' + "
                 "'z-index:100}' + "
@@ -88,7 +99,8 @@ def test_narrow_popup_reaches_desktop_layout_and_native_click_after_reattachment
                 browser.evaluate("getComputedStyle(document.getElementById('veil')).display")
                 == "none"
             )
-            runner.run(WebScript(actions=(action,)), "act")
+            # This phase tests native input and viewport reattachment, not a .2s deadline.
+            ScriptRunner(browser, (site.url,), timeout_s=2).run(WebScript(actions=(action,)), "act")
             assert browser.evaluate("window.__nativeClicked") is True
             assert json.loads(browser.evaluate("JSON.stringify([innerWidth,innerHeight])")) == [
                 1440,
