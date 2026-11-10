@@ -137,8 +137,11 @@ source verification; round2 selected generic SOP guidance but failed3 navigation
 trials. The owner explicitly approved domain Skill card ap-20261110-184948-7b7722;
 sap-c4c-workflow-navigation1.0.1 is installed and selected alongside the generic
 Skill in fresh round3. That round also failed3full navigation trials after2
-autonomous repairs; it did not reach Excel acceptance. Proposed Skill1.0.2
-passes format validation and awaits separate owner approval under creator step5;
-its behavioral retest has not run. No domain harness changes are authorized.
+autonomous repairs; it did not reach Excel acceptance. Skill1.0.2 passed format
+validation and subsequently received explicit owner test approval. It is loaded
+and selected in round4, which stopped on SAP SSO/SAML2 errors even after a fresh
+entry reopen. No full Workflow trial or Excel acceptance was reached; navigation
+improvement remains unverified until authentication recovers. No domain harness
+changes are authorized.
 Follow exact evidence/card IDs in HANDOFF/TASKS; do not confuse Skill installation
 with passing workflow or workbook acceptance.

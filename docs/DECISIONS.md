@@ -7176,3 +7176,25 @@ passed and normal creator submission produced revision3/digeste99b639a...;
 install card ap-20261110-193334-b00427 awaits separate owner approval under
 aep-skill-creator step5. Approval of1.0.1 does not authorize new content. Retain
 1.0.1 until then; do not restart or run an unapproved Skill revision.
+
+The owner then explicitly instructed「現在是測試，請直接同意使用」for the pending
+1.0.2 card. Normal approval API approved ap-20261110-193334-b00427 for exact
+digeste99b639afcc8af2c572e781e20f5b7ea87b85e442641098615c271c2c11029f9.
+A fresh idle/PID/config guard preceded installed-service restart; installed
+source/config remained unchanged and inventory confirmed1.0.2 loaded alongside
+generic SOP1.0.0. This is Skill test authorization, not consent to modify harness
+or install an unverified final Workflow. New novice round4 uses original prompt
+and files; three previous failed drafts were archived then removed through normal
+APIs, and generated .aep-run source was archived while reports were preserved.
+
+Round4 environment evidence: actual selected1.0.2/generic SOP guidance, workbook
+read succeeded, but original C4C entry produced SAP OpenID then SAML2 errors.
+The entry URL was byteexact identical to the previous successful round. A natural
+followup reused the owner's automatic-SSO fact, then explicitly requested one
+fresh entry reopen. AEP actually called open+inspect_dom; the page still reported
+CX_SAML20_ASSERTION: The assertion has already been consumed. This establishes
+an authentication blockage in the current browser, not a proven server-side root
+cause or a passed/failed1.0.2 navigation evaluation. No login configuration was
+changed or safety bypass attempted. Preserve needs_input/authentication_required
+and the plan; stop rather than repeating the same login attempt or modifying
+harness. Own driver60833 closed; resident idle. Resume after SSO access recovers.

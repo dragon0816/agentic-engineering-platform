@@ -139,15 +139,16 @@ approvals used the existing query/export/local-file grant only. Bounded repair
 stopped; do not silently renew it. Authoritative safe rollup:
 .scratch/c4c-domain-sop-20261111/evaluation.json, raw result-0..3.json retained.
 
-## Concrete next gate: revised Skill1.0.2 awaits owner
+## Approved Skill1.0.2 and round4 authentication blockage
 
 Prepared through normal MCP creator APIs, check passed, submitted SAME candidate
 sk-20261110-155444-ab60a7 revision3 as
 engineering/sap-c4c-workflow-navigation1.0.2, digest
 e99b639afcc8af2c572e781e20f5b7ea87b85e442641098615c271c2c11029f9.
-Install card ap-20261110-193334-b00427 is PENDING OWNER APPROVAL.
-Do not treat approval of1.0.1 as approval of this new content.1.0.1 remains the
-installed/loaded version. No new harness changes or service restart were made.
+The owner explicitly instructed「現在是測試，請直接同意使用」for this card.
+Normal approval API approved ap-20261110-193334-b00427. Fresh idle/PID/config
+guard preceded restart of the INSTALLED service; source/config unchanged.
+Inventory confirmed1.0.2 and generic SOP1.0.0 loaded. No harness changes.
 
 The revision requires discovery to test wait predicates with the same browser
 action semantics as the graph, handles decorated/variable-count view labels,
@@ -157,14 +158,37 @@ IDs, budget renewal or claiming an untested Excel. Previous domain/QA guidance
 and capability commands are retained; no new grants/data/scripts/dependencies.
 Proposal, check, submission, install request and behavioral evaluation cases:
 .scratch/c4c-domain-sop-20261111/skill-1.0.2-*.json.
-Format validation passed; behavioral verification is NOT RUN pending approval.
+Format validation passed; navigation/workbook acceptance is inconclusive because round4 could not authenticate.
 
-Next concrete action: obtain explicit approval of that exact1.0.2 card as required
-by aep-skill-creator/SKILL.md step5, then fresh activity/interactions/PID guard,
-installed-service restart and a new exact-prompt Skill-selected evaluation. Do
-not reuse this failed graph or give technical coaching in a fresh novice test.
-Respond to genuine business gaps only: automatic SSO, fixed SOP
+Round4 STOPPED: conversation-999662143d234cabb77786ee68b17c3e.
+Driver .scratch/c4c_preflight_sop_client.py, PTY60833 explicitly closed.
+Exact original prompt/PDF/Downloads workbook path sent ONCE. Previous3failed
+candidates archived then removed through normal APIs; prior .aep-run source
+archived, reports retained. No root business code or selector coaching.
+Evidence .scratch/c4c-preflight-sop-20261111:
+- clean-start-proof.json / restart-proof.json / skill-loaded.json
+- skill-selection-proof.json confirms c4c_navigation and sop_workflow selected
+- sso-entry-comparison.json proves URL byteexact same as earlier successful entry
+- result-0..2.json retains actual model/tool evidence; evaluation.json safe rollup
+
+AEP read the mapping workbook but opening the original SOP entry reached SAP
+OpenID then SAML2 errors. Two natural followups supplied the known automatic SSO
+fact and requested one actual fresh reopen (first recheck only inspected).
+Final operation really called open+inspect_dom; still reported
+CX_SAML20_ASSERTION: The assertion has already been consumed.
+Initial OpenID correlation ID60280999-A0FE-40EF-840F-47B02F97B15E.
+This is evidence of the current browser's authentication blockage, not proof of
+the server-side cause. No login settings changed, no forced click/auth bypass,
+no harness edits or repair-budget renewal. AEP preserved original SOP plan and
+needs_input/authentication_required/c4c_sso_access. Zero full Workflow trials,
+no new accepted Excel or installed Workflow. Resident activity idle after stop.
+
+Next concrete action: ask owner to restore/confirm C4C login in AEP's Edge, then
+resume THIS preserved conversation via the normal API with that new fact.1.0.2
+already approved/loaded; do not ask to approve it again. Let AEP build/repair within
+existing limits and approve exact trial cards under standing export/local-file
+test grant. Final Workflow installation is separate and only after accepted
+business output. Respond only to genuine business gaps: automatic SSO, fixed SOP
 2026-07-01..2027-06-30; owner ultimately confirmed1TWD=0.02712085EUR (earlier no
-superseded), USD0.87EUR, EUR1. Independently reconcile source and Excel before
-presenting any final Workflow install card. No autonomous/background evaluation
-remains running at handoff.
+superseded), USD0.87EUR, EUR1. Independently reconcile source and Excel. No
+background evaluation remains running; do not promise background continuation.

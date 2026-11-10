@@ -4610,13 +4610,31 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   occluder unproven. No Excel step/acceptance or final Workflow installation.
   Bounded evaluation stopped and own driver55035 closed. Evidence evaluation.json
   and raw result-0..3.json in .scratch/c4c-domain-sop-20261111.
-- [ ] Skill-first follow-up1.0.2 prepared/checkpassed/submitted samecandidate
+- [x] Skill-first follow-up1.0.2 prepared/checkpassed/submitted samecandidate
   sk-20261110-155444-ab60a7 revision3, digest
   e99b639afcc8af2c572e781e20f5b7ea87b85e442641098615c271c2c11029f9.
   Owner card ap-20261110-193334-b00427 pending. Requires actual wait predicate
   preflight/decorated active-view matching and safe occlusion diagnosis;
   no force/bypass/retry expansion. Format passed; behavioral retest NOT RUN.
   Installed1.0.1 retained. No new harness edits or restart.
+- [x] Owner subsequently explicitly authorized test use of1.0.2; normal API
+  approved ap-20261110-193334-b00427. Fresh guarded restart loaded1.0.2 and
+  generic SOP1.0.0 with unchanged source/config. No harness modifications.
+- [x] Fresh round4 conversation-999662143d234cabb77786ee68b17c3e evaluated via
+  .scratch/c4c_preflight_sop_client.py, driver60833 now closed. Original prompt/files only;
+  previous3failed candidates archived/removed through normal APIs, generated
+  code archived, reports retained. Evidence .scratch/c4c-preflight-sop-20261111.
+  Telemetry confirms c4c_navigation/sop_workflow selected. AEP read workbook,
+  but original SOP entry reached SAP OpenID/SAML2 error. URL byteexact matches
+  prior successful entry. Natural followups supplied known automatic SSO fact and
+  requested one fresh reopen; actual open+inspect still showed
+  CX_SAML20_ASSERTION: The assertion has already been consumed. No login setting
+  changes, business code/selector coaching or harness edits. AEP persisted
+  needs_input/authentication_required/c4c_sso_access and original SOP plan.
+- [ ] Resume round4 after C4C SSO works in AEP's browser. Skill1.0.2 is approved,
+  installed and selected; no further Skill approval needed for this revision.
+  Behavioral improvement/workflow trials/independent Excel acceptance remain
+  unverified (0full workflow trials this round). Resident idle, own driver closed.
 - [x] Record final verification/evaluation docs locally after the bounded round;
   HANDOFF rewritten latest-only; diff check passed. New Skill revisions need concrete owner installation
   approval; further harness changes need separate causal proof/scoped consent.
