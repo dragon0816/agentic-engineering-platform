@@ -4631,10 +4631,46 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   CX_SAML20_ASSERTION: The assertion has already been consumed. No login setting
   changes, business code/selector coaching or harness edits. AEP persisted
   needs_input/authentication_required/c4c_sso_access and original SOP plan.
-- [ ] Resume round4 after C4C SSO works in AEP's browser. Skill1.0.2 is approved,
+- [x] Resume round4 after C4C SSO works in AEP's browser. Skill1.0.2 is approved,
   installed and selected; no further Skill approval needed for this revision.
   Behavioral improvement/workflow trials/independent Excel acceptance remain
   unverified (0full workflow trials this round). Resident idle, own driver closed.
+- [x] Owner subsequently confirmed「可以登入」. Round4 same saved conversation
+  resumed via normal API, driver57261, with that business fact and request to
+  complete workflow/trials/Excel reconciliation. No reset, old graph injection,
+  selector coaching or harness change. Authentication recovery and final output
+  still require actual AEP evidence; do not claim completion from owner login alone.
+- [x] Resumed authentication investigation: AEP initially reopened+reloaded and
+  still saw SAML replay errors. Read-only profile/tab metadata established an
+  independent headless browser-profile, distinct from normal Edge. One no-reload
+  contrast still showed the same assertion ID. After fresh idle/single-error-tab
+  guard, root gracefully closed ONLY that dedicated browser via existing API,
+  preserving profile and all login files. Normal AEP capability relaunched it;
+  fresh tab metadata now shows Home - SAP Cloud for Customer. Auth access restored,
+  server-side cause unproven. No config/harness/Skill edits or cookie copying.
+  This environment intervention must remain disclosed in acceptance evidence.
+- [x] Round4 completed bounded development after authentication recovery. AEP
+  independently entered Sales Orders, applied prescribed dates/All and observed
+  765records/26pages, then drafted wf-20261110-201153-ff4b99 and revised twice.
+  All3full trials failed navigation: run-cb7b32190da9402bb950e9583c031808
+  ensure_visible target timeout; run-7cb2bf783a3542909df5687a1b3886c4 click target
+  missing; run-a64cebe6af7846789fe40864b1489517 wait timeout. No Excel acceptance
+  or installed Workflow. Own driver57261 closed; full raw results retained.
+- [x] Causal repair-tool boundary verified read-only: web.py1269 hard allowlist
+  excludes browser__operate/coding__run; gateway.py990 filters tools/bindings/hints
+  before model request. Existing capturing-model regression passed unchanged,
+  1test/11.27s, explicitly asserts those tools absent. Skill cannot grant live
+  incremental browser preflight, although complete approved trials remain possible.
+  Initial graph also failed to preserve tested navigation: separate Skill issue,
+  not proof that preflight alone fixes all authoring. Safe evidence evaluation.json,
+  repair-preflight-causal-proof.json, navigation-compilation-analysis.json.
+- [ ] Owner decision: review docs/phases/AUTHORING_BROWSER_PREFLIGHT_PROPOSAL.md.
+  Recommend narrowly governed browser preflight in automatic repair, bound to
+  active candidate/digest/failed-step/origin, explicit model provenance and normal
+  Bridge approvals; keep trial limits and other tools restricted. Directly adding
+  unrestricted browser__operate is rejected. No code/policy changes implemented;
+  requires scoped owner consent under AGENTS22. No more blind budget renewal or
+  unverified Workflow installation.
 - [x] Record final verification/evaluation docs locally after the bounded round;
   HANDOFF rewritten latest-only; diff check passed. New Skill revisions need concrete owner installation
   approval; further harness changes need separate causal proof/scoped consent.

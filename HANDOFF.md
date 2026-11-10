@@ -139,7 +139,7 @@ approvals used the existing query/export/local-file grant only. Bounded repair
 stopped; do not silently renew it. Authoritative safe rollup:
 .scratch/c4c-domain-sop-20261111/evaluation.json, raw result-0..3.json retained.
 
-## Approved Skill1.0.2 and round4 authentication blockage
+## Approved Skill1.0.2 and completed round4 evaluation
 
 Prepared through normal MCP creator APIs, check passed, submitted SAME candidate
 sk-20261110-155444-ab60a7 revision3 as
@@ -158,37 +158,71 @@ IDs, budget renewal or claiming an untested Excel. Previous domain/QA guidance
 and capability commands are retained; no new grants/data/scripts/dependencies.
 Proposal, check, submission, install request and behavioral evaluation cases:
 .scratch/c4c-domain-sop-20261111/skill-1.0.2-*.json.
-Format validation passed; navigation/workbook acceptance is inconclusive because round4 could not authenticate.
+Format validation passed. Authentication recovered after the disclosed environment intervention; all3full navigation trials subsequently failed, before Excel acceptance.
 
-Round4 STOPPED: conversation-999662143d234cabb77786ee68b17c3e.
-Driver .scratch/c4c_preflight_sop_client.py, PTY60833 explicitly closed.
-Exact original prompt/PDF/Downloads workbook path sent ONCE. Previous3failed
-candidates archived then removed through normal APIs; prior .aep-run source
-archived, reports retained. No root business code or selector coaching.
-Evidence .scratch/c4c-preflight-sop-20261111:
-- clean-start-proof.json / restart-proof.json / skill-loaded.json
-- skill-selection-proof.json confirms c4c_navigation and sop_workflow selected
-- sso-entry-comparison.json proves URL byteexact same as earlier successful entry
-- result-0..2.json retains actual model/tool evidence; evaluation.json safe rollup
+## Round4 finished after owner login confirmation
 
-AEP read the mapping workbook but opening the original SOP entry reached SAP
-OpenID then SAML2 errors. Two natural followups supplied the known automatic SSO
-fact and requested one actual fresh reopen (first recheck only inspected).
-Final operation really called open+inspect_dom; still reported
-CX_SAML20_ASSERTION: The assertion has already been consumed.
-Initial OpenID correlation ID60280999-A0FE-40EF-840F-47B02F97B15E.
-This is evidence of the current browser's authentication blockage, not proof of
-the server-side cause. No login settings changed, no forced click/auth bypass,
-no harness edits or repair-budget renewal. AEP preserved original SOP plan and
-needs_input/authentication_required/c4c_sso_access. Zero full Workflow trials,
-no new accepted Excel or installed Workflow. Resident activity idle after stop.
+Conversation-999662143d234cabb77786ee68b17c3e retained original prompt/PDF/Excel.
+Driver .scratch/c4c_preflight_sop_client.py; PTY60833 and resumed57261 both closed.
+Previous failed candidates/source were recoverably archived/removed, reports
+retained. Skill1.0.2/generic SOP1.0.0 actually selected; no new Skill approval needed.
+Evidence .scratch/c4c-preflight-sop-20261111, result-0..8.json and evaluation.json.
 
-Next concrete action: ask owner to restore/confirm C4C login in AEP's Edge, then
-resume THIS preserved conversation via the normal API with that new fact.1.0.2
-already approved/loaded; do not ask to approve it again. Let AEP build/repair within
-existing limits and approve exact trial cards under standing export/local-file
-test grant. Final Workflow installation is separate and only after accepted
-business output. Respond only to genuine business gaps: automatic SSO, fixed SOP
-2026-07-01..2027-06-30; owner ultimately confirmed1TWD=0.02712085EUR (earlier no
-superseded), USD0.87EUR, EUR1. Independently reconcile source and Excel. No
-background evaluation remains running; do not promise background continuation.
+Owner confirmed「可以登入」. AEP still saw SAML assertion-consumed errors; readonly
+metadata established an independent HEADLESS browser-profile versus normal Edge.
+One open-without-reload contrast retained the same assertion ID. Root freshly
+checked idle and exactly one SAML-error tab, then gracefully closed ONLY that
+owned browser with the existing Browser API. Profile/login files preserved; no
+cookies read/copied/deleted, no config/harness changes. auth-browser-reset.json.
+AEP's next normal capability relaunched the browser and reached Home/Sales Orders.
+Access recovered, server-side cause unproven. Disclose this environment intervention;
+do not describe the full evaluation as zero-intervention. Root gave authentication
+recovery instructions, but no business graph, selectors or processing scripts.
+
+AEP independently selected All/prescribed dates, observed765records/26pages,
+and authored engineering/c4c-sales-orders-export-excel1.0.0,
+candidate wf-20261110-201153-ff4b99; currentrevision3,
+digest4275da4378c38ef637f5d2d19a5b662e106598a4209d2a5ae6c1ca7c1e1613d4.
+All3approved FULL TRIALS FAILED before Excel:
+- run-cb7b32190da9402bb950e9583c031808: actions[2] ensure_visible target timeout.
+- run-7cb2bf783a3542909df5687a1b3886c4: actions[4] click target missing.
+- run-a64cebe6af7846789fe40864b1489517: actions[3] wait timeout.
+AEP self-patched the first2 failures. Downstream merge/Python stayed byteexact;
+only navigation changed. No accepted Excel or Workflow installation. Bounded
+repair stopped, own driver closed. Trial cards approved under standing test grant.
+One root snapshot-audit helper initially hit cp950 decoding; corrective UTF8 audit
+confirmed downstream unchanged. Do not mistake that helper error for a product
+failure or claim its failed check had passed before approval.
+
+## Causal finding and next owner decision (NO implementation consent)
+
+Automatic repair in src/host_runtime/web.py:1269 permits only browser inspection
+and authoring tools, excluding browser__operate/coding__run. agent/gateway.py:990
+filters tool schemas, bindings and hints before the model sees them. Therefore
+Skill1.0.2 cannot grant live incremental browser preflight in that phase; full
+approved Workflow trial validation remains possible. Existing capturing-model
+regression explicitly asserts the absence and passed unchanged:1test/11.27s.
+Command: .venv/Scripts/python.exe -m pytest
+ tests/test_authoring_repair.py::test_failed_authoring_resumes_once_with_only_safe_tools_and_retests -q
+Evidence repair-preflight-causal-proof.json (AST extraction/current sourcehash),
+navigation-compilation-analysis.json (initial successful path not preserved;
+third revision reused an earlier failed pair), evaluation.json. Initial drafting
+also needs Skill improvement; preflight availability alone is no correctness proof.
+
+Next concrete action: obtain owner's EXPLICIT scoped harness consent on
+[proposal](docs/phases/AUTHORING_BROWSER_PREFLIGHT_PROPOSAL.md), then plan/contracts/
+tests/implementation/verification. Proposed scope: govern browser preflight for
+active matching candidate/digest/failed-step/origin, explicit model provenance,
+normal Bridge approval, bounded requests and unchanged3full-trial limit; keep
+coding/desktop/mail/install absent, no Knowledge or global permission changes.
+Simply adding browser__operate to the allowlist is rejected: its current host
+adapter defaults Bridge origin to person, so safe approval/provenance must be
+preserved explicitly. If further continuation/state scope becomes necessary,
+return with the concrete expansion for consent. No code/tests/policy edited.
+
+Do not renew repair budgets or install the failed workflow to make the test pass.
+SOP business facts remain: fixed2026-07-01..2027-06-30; ultimately confirmed
+1TWD=0.02712085EUR (earlier no superseded), USD0.87EUR, EUR1. Original mapping
+workbook is read-only. Future acceptance requires independent source-to-Excel
+reconciliation, not nonempty output or writer input counts. No evaluation remains
+running; never promise background continuation after a final reply.

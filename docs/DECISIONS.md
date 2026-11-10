@@ -7198,3 +7198,37 @@ cause or a passed/failed1.0.2 navigation evaluation. No login configuration was
 changed or safety bypass attempted. Preserve needs_input/authentication_required
 and the plan; stop rather than repeating the same login attempt or modifying
 harness. Own driver60833 closed; resident idle. Resume after SSO access recovers.
+
+#### Browser authentication recovery and repair-preflight proposal (2026-11-11)
+
+The owner confirmed「可以登入」. Root resumed the saved AEP conversation without
+re-uploading inputs or resetting state. AEP still saw SAML errors after open and
+reload; metadata showed its independent headless profile, distinct from normal
+Edge. A no-reload contrast retained the same assertion ID. After fresh idle and
+single-error-tab checks, root gracefully closed ONLY the dedicated browser via
+the existing Browser API; profile data was preserved, no cookies were read/copied,
+no config/harness changes. AEP relaunched normally and reached Home/Sales Orders.
+This resolved access, not a proven server-side cause; disclose the environment
+intervention rather than calling the test entirely unassisted.
+
+AEP then authored wf-20261110-201153-ff4b99 and self-repaired twice. All3approved
+full trials failed navigation before Excel. Root did not supply selectors or
+business scripts. Stop at the existing bound; do not install this candidate.
+
+Causal evidence for a narrower deterministic limitation: automatic repair's
+web.py1269 allowlist excludes browser__operate/coding__run, and gateway.py990
+filters tool schemas/bindings/hints before model execution. The existing
+capturing-model regression explicitly asserts their absence and passed unchanged
+(1test/11.27s). Selected Skill1.0.2 cannot enable live incremental preflight in
+that phase. Full Workflow trial validation is still available, and initial draft
+compilation also failed to preserve tested actions; do not claim this is the only
+cause or that new tool access guarantees final correctness.
+
+No new harness consent has been given. The proposed next scope is documented in
+docs/phases/AUTHORING_BROWSER_PREFLIGHT_PROPOSAL.md: active-candidate/digest/failed-
+step/origin-bound browser preflight, explicit model provenance, normal Bridge
+approval, bounded requests, unchanged full-trial limit and no other tool access.
+Reject simply adding the unrestricted existing host tool: its current adapter
+uses Bridge's default person origin, so approval/provenance needs explicit design.
+Knowledge routing/asking and global state/permission changes remain outside scope.
+Await explicit owner decision under AGENTS22 before any harness implementation.

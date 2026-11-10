@@ -139,9 +139,14 @@ sap-c4c-workflow-navigation1.0.1 is installed and selected alongside the generic
 Skill in fresh round3. That round also failed3full navigation trials after2
 autonomous repairs; it did not reach Excel acceptance. Skill1.0.2 passed format
 validation and subsequently received explicit owner test approval. It is loaded
-and selected in round4, which stopped on SAP SSO/SAML2 errors even after a fresh
-entry reopen. No full Workflow trial or Excel acceptance was reached; navigation
-improvement remains unverified until authentication recovers. No domain harness
-changes are authorized.
+and selected in round4. After initial SAP SSO/SAML2 blockage and owner login
+confirmation, a guarded graceful restart of only the dedicated browser restored
+access; this root environment intervention is disclosed. AEP independently
+created a new draft but all3full trials failed navigation before Excel. Read-only
+causal evidence proves the automatic repair tool filter prevents the Skill's live
+browser preflight; whole approved trials remain available. A small governed
+preflight proposal awaits owner consent, with no runtime implementation. Initial
+draft preservation of tested actions is also incomplete. No domain harness
+changes are authorized or implemented for this evaluation.
 Follow exact evidence/card IDs in HANDOFF/TASKS; do not confuse Skill installation
 with passing workflow or workbook acceptance.
