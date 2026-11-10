@@ -140,6 +140,7 @@ class WebAction(Contract):
     # values (a detail page's header). Both need a runner that supports them.
     do: Literal[
         "open",
+        "reload",
         "fill",
         "click",
         "read_table",
@@ -149,7 +150,12 @@ class WebAction(Contract):
         "wait_for",
         "inspect_dom",
         "ensure_visible",
-    ]
+    ] = Field(
+        description=(
+            "reload: act mode only, reload the current tab once; takes no action arguments. "
+            "open navigates to a URL and may preserve the document on SPA/hash navigation."
+        )
+    )
     url: Text | None = None
     target: WebTarget | None = None
     trigger: WebTarget | None = Field(
@@ -168,14 +174,23 @@ class WebAction(Contract):
         ),
     )
     table: Text | None = None
-    save_as: Symbol | None = None
+    save_as: Symbol | None = Field(
+        default=None,
+        description=(
+            "Required for inspect_dom, read_table, read_text, read_record and download: "
+            "the result key in data. Unused otherwise; omit for other actions."
+        ),
+    )
     header_table: Text | None = None
     pagination: WebPagination | None = None
 
     scope: Text = Field(
         default="body",
         max_length=500,
-        description="inspect_dom only: CSS selector matching exactly one scope element",
+        description=(
+            "inspect_dom only: CSS selector matching exactly one scope element; "
+            "save_as is required for this inline action"
+        ),
     )
     offset: int = Field(
         default=0,
@@ -198,6 +213,7 @@ class WebAction(Contract):
             "inspect_dom": self.save_as is not None,
             "ensure_visible": self.target is not None and self.trigger is not None,
             "open": self.url is not None,
+            "reload": True,
             "fill": self.target is not None and self.value is not None,
             "click": self.target is not None,
             "read_table": self.table is not None and self.save_as is not None,
@@ -206,6 +222,11 @@ class WebAction(Contract):
             "read_record": self.table is not None and self.save_as is not None,
             "wait_for": self.target is not None,
         }
+        if self.do == "reload" and any(
+            value != WebAction.model_fields[name].default
+            for name, value in self.model_dump(exclude={"do"}).items()
+        ):
+            raise ValueError("reload takes no action arguments")
         if not needs[self.do]:
             raise ValueError(f"a {self.do} action is missing what it needs")
         if self.trigger is not None and self.do != "ensure_visible":
@@ -238,6 +259,8 @@ class WebScriptResult(Contract):
 
 
 class ScriptPage(Protocol):
+    def reload(self, *, check_origin: Callable[[str], None], timeout_s: float) -> None: ...
+
     def navigate(self, url: str) -> None: ...
 
     def evaluate(self, expression: str) -> Any: ...
@@ -712,6 +735,16 @@ class ScriptRunner:
         if action.do == "ensure_visible":
             assert action.target is not None and action.trigger is not None
             self._ensure_visible(action.target, action.trigger, mode)
+            return
+        if action.do == "reload":
+            if mode != "act":
+                raise WebScriptError("web_reload_not_read_only")
+
+            def check_reload_origin(url: str) -> None:
+                if not origin_permitted(url, self.allowed):
+                    raise WebScriptError("web_origin_not_allowed")
+
+            self.page.reload(check_origin=check_reload_origin, timeout_s=self.timeout_s)
             return
         if action.do != "open":
             self._check_origin()

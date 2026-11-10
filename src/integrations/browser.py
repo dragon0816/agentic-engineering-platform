@@ -33,6 +33,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Callable
 from http.client import HTTPException
 from pathlib import Path
 from types import TracebackType
@@ -778,6 +779,87 @@ class Browser:
         self._await_load(page)
         # What a page does to itself after loading, which no event announces.
         time.sleep(settle_s)
+
+    def reload(
+        self,
+        *,
+        check_origin: Callable[[str], None] | None = None,
+        timeout_s: float | None = None,
+    ) -> None:
+        """Reload this attached tab once and await a genuinely new document.
+
+        The old document can already be complete during a same-document SPA
+        navigation. Only a changed main-frame loader followed by its complete
+        document proves a reload. Every CDP call shares the absolute budget;
+        a lost socket fails without replaying a possibly submitted request.
+        """
+        page = self._page
+        if page is None:
+            raise BrowserError("no_page")
+        deadline = time.monotonic() + (self.timeout_s if timeout_s is None else timeout_s)
+        previous_timeout = page.timeout_s
+
+        def remaining() -> float:
+            budget = deadline - time.monotonic()
+            if budget <= 0:
+                raise BrowserError("navigation_failed", "reload_timeout")
+            return budget
+
+        def call(method: str, **params: Any) -> dict[str, Any]:
+            page.timeout_s = min(previous_timeout, remaining())
+            try:
+                answer = page.call(method, **params)
+            except (DevtoolsRefused, WebSocketError) as error:
+                raise BrowserError("navigation_failed", type(error).__name__) from None
+            remaining()
+            return answer
+
+        def frame() -> dict[str, Any]:
+            answer = call("Page.getFrameTree")
+            current = answer.get("frameTree", {}).get("frame", {})
+            if (
+                not isinstance(current, dict)
+                or not current.get("loaderId")
+                or not current.get("id")
+            ):
+                raise BrowserError("navigation_failed", "reload_no_loader")
+            url = current.get("url")
+            if not isinstance(url, str) or not url:
+                raise BrowserError("navigation_failed", "reload_no_url")
+            if check_origin is not None:
+                check_origin(url)
+            remaining()
+            return current
+
+        try:
+            original = frame()
+            call("Page.reload")
+            while True:
+                current = frame()
+                if current["loaderId"] != original["loaderId"]:
+                    answer = call(
+                        "Runtime.evaluate",
+                        expression="({ready:document.readyState,url:document.location.href})",
+                        returnByValue=True,
+                    )
+                    state = answer.get("result", {}).get("value")
+                    if isinstance(state, dict) and isinstance(state.get("url"), str):
+                        if check_origin is not None:
+                            check_origin(state["url"])
+                        remaining()
+                        if state.get("ready") == "complete":
+                            # Readiness and FrameTree are separate CDP snapshots.
+                            # A subsequent commit must not inherit the prior
+                            # document's complete state.
+                            confirmed = frame()
+                            if (
+                                confirmed["id"] == current["id"]
+                                and confirmed["loaderId"] == current["loaderId"]
+                            ):
+                                return
+                time.sleep(min(0.05, remaining()))
+        finally:
+            page.timeout_s = previous_timeout
 
     def _await_load(self, page: Devtools) -> None:
         """Wait for *this* navigation's load, not a previous one's.

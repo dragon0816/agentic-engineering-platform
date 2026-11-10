@@ -3,7 +3,7 @@
 import json
 import sys
 import urllib.request
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
 
@@ -1156,6 +1156,9 @@ def test_page_error_only_forwards_allowlisted_target_fields(
     wire_field: Any, expected: str | None
 ) -> None:
     class ErrorPage:
+        def reload(self, *, check_origin: Callable[[str], None], timeout_s: float) -> None:
+            raise AssertionError("no reload")
+
         def navigate(self, url: str) -> None:
             raise AssertionError("no navigation")
 
@@ -1373,6 +1376,9 @@ def test_ensure_visible_rechecks_origin_after_presence_probe() -> None:
     class RedirectingPage:
         url = "https://allowed.test/page"
         clicks = 0
+
+        def reload(self, *, check_origin: Callable[[str], None], timeout_s: float) -> None:
+            raise AssertionError("no reload")
 
         def navigate(self, url: str) -> None:
             raise AssertionError("no navigation")

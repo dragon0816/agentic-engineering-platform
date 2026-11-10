@@ -566,10 +566,16 @@ DRAFT_GUIDE = (
     '{"source": "fixed", "value": [the browser__operate actions]}, "values": '
     '{"source": "run", "path": []}, "workspace": {"source": "fixed", "value": '
     '"<absolute task folder>"}}; a download lands in <workspace>/output/downloads for a later '
-    "coding/run-python step. For repeatable panels use ensure_visible with target naming "
+    "coding/run-python step. For ad-hoc page exploration prefer browser__inspect. "
+    "An inline inspect_dom action requires save_as, such as save_as='inspection'. "
+    "For repeatable panels use ensure_visible with target naming "
     "the desired content and trigger naming its disclosure control, so already-visible "
     "content is not closed. For presence-only wait_for omit value; provide a regular "
     "expression only when matching actual text/value, not an accessible label. "
+    "Opening an SPA hash URL can preserve its old dialogs and in-memory state. For a "
+    "fresh entry, open the authorized URL then use the no-argument reload action in act "
+    "mode; it waits for a new completed document in the same tab. Do not reset through "
+    "an unauthorized URL such as about:blank. Reload is not business-completeness proof. "
     "To operate a desktop application as a step use "
     'desktop/operate@1.0.0 with {"app": fixed, "actions": fixed, "values": run values}. '
     "{placeholders} in those actions take the run values; put run values in output file "

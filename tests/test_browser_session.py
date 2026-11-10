@@ -449,3 +449,31 @@ def test_read_only_inspection_alias_rejects_extra_keys_before_bridge_dispatch(
         ],
         "look": False,
     }
+
+
+def test_exposed_browser_tool_schema_explains_required_result_keys(tmp_path: Path) -> None:
+    installed = InstalledCapabilities()
+    installed.register(
+        SPEC,
+        handler(tmp_path, FakeBrowser()),
+        BrowserRequest,
+        BrowserResult,
+        ExecutionDependencies(central_required=False),
+    )
+    tool = next(
+        binding.tool
+        for binding in bridge_tools(BridgeExecutor(installed, LocalPolicy(())))
+        if binding.tool.name == "browser__operate"
+    )
+    # The serialized installed HostTool is what the conversational model sees.
+    exposed = tool.model_dump(mode="json")
+    properties = exposed["input_schema"]["$defs"]["WebAction"]["properties"]
+    save_as = properties["save_as"].get("description", "")
+    assert "required" in save_as.lower()
+    assert all(
+        action in save_as
+        for action in ("inspect_dom", "read_table", "read_text", "read_record", "download")
+    )
+    assert "unused" in save_as.lower()
+    scope = properties["scope"].get("description", "")
+    assert "save_as" in scope and "required" in scope.lower()
