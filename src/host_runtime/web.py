@@ -3412,6 +3412,7 @@ class AgentWeb:
                         for file in attached
                     ),
                     event_id=f"web-input-{uuid.uuid4().hex}",
+                    reopen=False,
                 )
             if not attached:
                 attachment_note, attachment_images = self._saved_task_references(item.session_id)
@@ -3438,6 +3439,8 @@ class AgentWeb:
                     slash = None
                 else:
                     if slash is not None:
+                        if slash.name == "run_workflow" and chat is not None:
+                            chat.tasks.reopen(self.runtime.actor, item.session_id, item.message)
                         with self._one_at_a_time:
                             answer = self._slash_command(slash)
                     else:
@@ -3648,14 +3651,30 @@ class AgentWeb:
                 )
                 if form_offer_now is not None:
                     route = "workflow_form"
+                # Input history is already recorded. Reopen saved authoring
+                # only on the existing work branches, after Knowledge routing
+                # has resolved; a Knowledge command is not a business answer.
+                knowledge_command = command_match is not None and (
+                    command_match.decision.kind == "capability"
+                    and command_match.decision.target
+                    in (KNOWLEDGE_QUERY_SPEC.identity, MARKET_MATRIX_SPEC.identity)
+                )
+
+                def reopen_task() -> None:
+                    if chat is not None:
+                        chat.tasks.reopen(self.runtime.actor, item.session_id, item.message)
+
                 telemetry.emit(
                     "routing.completed",
                     state="routing",
                     attributes={"router": "agent_web", "route": route},
                 )
                 if form_offer_now is not None:
+                    reopen_task()
                     answer = self._form_answer(form_offer_now)
                 elif command_match is not None and explicit_command:
+                    if not knowledge_command:
+                        reopen_task()
                     with self._one_at_a_time:
                         direct = asyncio.run(self.runtime.agent.handle(local))
                     answer = {
@@ -3675,6 +3694,8 @@ class AgentWeb:
                         else self._knowledge_reply(named_knowledge, routed_message)
                     )
                 elif command_match is not None:
+                    if not knowledge_command:
+                        reopen_task()
                     with self._one_at_a_time:
                         direct = asyncio.run(self.runtime.agent.handle(local))
                     answer = {
@@ -3696,6 +3717,7 @@ class AgentWeb:
                 elif history_error:
                     answer = context_too_large
                 else:
+                    reopen_task()
                     conversational = asyncio.run(
                         self.runtime.agent.converse(
                             local,

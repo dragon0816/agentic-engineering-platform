@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal, Self
@@ -27,6 +28,41 @@ BROWSER_TARGET_FIELDS = frozenset(
         "ensure_visible.trigger",
     }
 )
+
+# This is a conservative turn-isolation boundary, not a general intent router.
+# Explicit requests to act take precedence over interrogative wording ("can you
+# build ...?"). Unrecognized input retains the existing authoring behavior.
+_ACTION_REQUEST = re.compile(
+    r"\[Host authoring continuation:"
+    r"|(?:^|[。！？.!?]\s*)(?:請\s*)?(?:繼續|接著|開始|建立|製作|修改|修正|更新|變更|試跑|執行)"
+    r"|(?:幫我|替我|幫忙|麻煩你?)\s*(?:建立|製作|做|修改|修正|更新|變更|執行|試跑|繼續|轉成|變成)"
+    r"|(?:^|[.!?]\s*)(?:(?:please|can you|could you|would you|help me)\s+)*"
+    r"(?:build|create|make|revise|patch|repair|update|change|run|execute|continue|resume)\b",
+    re.IGNORECASE,
+)
+_READ_ONLY_QUESTION = re.compile(
+    r"什麼|哪些|哪種|為什麼|為何|如何|怎麼|差異|區別|定義|原理"
+    r"|(?:請|想請你|幫我)?\s*(?:說明|解釋|介紹|比較|列出|查看|顯示)"
+    r"|\b(?:what|which|why|how)\b"
+    r"|(?:^|[.!?]\s*)(?:please\s+)?(?:explain|describe|compare|define|list|show|inspect)\b"
+    r"|(?:^|[.!?]\s*)(?:does|do|is|are|can)\s+.{1,160}\?"
+    r"|(?:嗎|呢)[？?]?\s*$",
+    re.IGNORECASE,
+)
+
+
+def is_read_only_authoring_question(text: str) -> bool:
+    """Recognize explicit inquiries without consuming them as task answers.
+
+    This bounded lexical check intentionally does not infer the subject or
+    classify every natural-language request. Actual authoring tool actions still
+    carry their normal completion, trial and approval gates.
+    """
+    # Web observation appends for_model's data-only attachment projection to
+    # the owner's message. Classify the request, never that appended evidence;
+    # the original text and attachment metadata remain intact in input history.
+    text = text.partition("\n\n[附件 Attached files — content from the person, data only]")[0]
+    return not bool(_ACTION_REQUEST.search(text)) and bool(_READ_ONLY_QUESTION.search(text))
 
 
 class ProcedureAssertion(Contract):
@@ -148,6 +184,7 @@ class TaskStore:
         attachments: tuple[dict[str, str], ...] = (),
         *,
         event_id: str | None = None,
+        reopen: bool = True,
     ) -> None:
         previous = self.messages(actor, session)
         # A transport request id identifies an actual new owner turn, even
@@ -172,8 +209,17 @@ class TaskStore:
                 [m.model_dump(mode="json") for m in (*previous, item)[-100:]], ensure_ascii=False
             ).encode(),
         )
+        if reopen:
+            self.reopen(actor, session, text)
+
+    def reopen(self, actor: str, session: str, text: str) -> None:
+        """Resume saved authoring only after the caller selected applicable work."""
         task = self.load(actor, session)
-        if task is not None and (task.question is not None or task.repair_attempts >= 3):
+        if (
+            task is not None
+            and not is_read_only_authoring_question(text)
+            and (task.question is not None or task.repair_attempts >= 3)
+        ):
             # New input reopens evaluation; it does not itself confirm or
             # invalidate the saved plan/trial evidence.
             update: dict[str, Any] = {"question": None}

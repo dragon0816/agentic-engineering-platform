@@ -65,6 +65,7 @@ from host_runtime.authoring_task import (
     TaskStore,
     capture_collection_obligations,
     coverage_problems,
+    is_read_only_authoring_question,
     task_guidance,
 )
 from host_runtime.conversations import ConversationMessage
@@ -651,7 +652,7 @@ class ChatAuthoring:
         )
 
     def task_context(self, context: RequestContext) -> str:
-        if context.session_id is None:
+        if context.session_id is None or is_read_only_authoring_question(context.message):
             return ""
         task = self.tasks.load(context.actor, context.session_id)
         if (
@@ -671,6 +672,22 @@ class ChatAuthoring:
     ) -> str | None:
         """A saved task cannot disappear when the model's history window moves."""
         if context.session_id is None:
+            return None
+        # A saved task is background state during a factual inquiry. If the
+        # model actually changes/runs authoring state, its normal gates apply
+        # even when the person's words were classified as an inquiry.
+        if is_read_only_authoring_question(context.message) and not any(
+            item.name
+            in {
+                "authoring__plan_workflow",
+                "authoring__draft_workflow",
+                "authoring__patch_workflow",
+                "authoring__revise_workflow",
+                "authoring__run_workflow",
+                "authoring__install_workflow",
+            }
+            for item in result.tools
+        ):
             return None
         task = self.tasks.load(context.actor, context.session_id)
         if task is None or task.question is not None:
