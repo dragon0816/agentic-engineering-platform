@@ -10,11 +10,12 @@ from typing import Any, Literal, Self
 
 from pydantic import Field, JsonValue, model_validator
 
-from common.assets import WorkflowManifest
-from common.base import Contract, Symbol, Text
+from common.assets import AssetIdentity, FixedInput, WorkflowManifest, WorkflowStep
+from common.base import Contract, Sha256, Symbol, Text
 from common.trace import redact
 from host_runtime.conversations import ConversationMessage
 from host_runtime.workspace import write_atomically
+from integrations.web_script import WebAction
 
 BROWSER_TARGET_FIELDS = frozenset(
     {
@@ -68,6 +69,18 @@ class AuthoringQuestion(Contract):
     resource_name: Text | None = Field(default=None, max_length=500)
 
 
+class CollectionObligation(Contract):
+    """A previously declared full collection; selectors may be repaired independently."""
+
+    capability: AssetIdentity
+    save_as: Symbol
+    source_digest: Sha256
+
+    @property
+    def collection_key(self) -> tuple[str, str, str]:
+        return self.capability.namespace, self.capability.name, self.save_as
+
+
 class AuthoringTask(Contract):
     objective: Text = Field(max_length=40000)
     requirements: tuple[Requirement, ...] = Field(default=(), max_length=40)
@@ -79,6 +92,7 @@ class AuthoringTask(Contract):
     last_failure: str | None = None
     last_trial_diagnostics: dict[str, JsonValue] | None = None
     trial_history: tuple[dict[str, JsonValue], ...] = Field(default=(), max_length=10)
+    collection_obligations: tuple[CollectionObligation, ...] = ()
     repair_attempts: int = Field(default=0, ge=0, le=3)
     last_repaired_run_id: str | None = None
     active_trial_token: str | None = None
@@ -108,6 +122,13 @@ class TaskStore:
         return AuthoringTask.model_validate_json(path.read_bytes()) if path.is_file() else None
 
     def save(self, actor: str, session: str, task: AuthoringTask) -> AuthoringTask:
+        previous = self.load(actor, session)
+        if previous is not None:
+            # Task updates cannot replace the first source or erase a known collection.
+            obligations = {o.collection_key: o for o in previous.collection_obligations}
+            for obligation in task.collection_obligations:
+                obligations.setdefault(obligation.collection_key, obligation)
+            task = task.model_copy(update={"collection_obligations": tuple(obligations.values())})
         path = self._path(actor, session)
         path.parent.mkdir(parents=True, exist_ok=True)
         write_atomically(path, task.model_dump_json(indent=2).encode())
@@ -214,10 +235,74 @@ def _values(document: Any, path: tuple[str | int, ...]) -> list[Any]:
     return []
 
 
+def _browser_collections(
+    manifest: WorkflowManifest,
+) -> dict[tuple[str, str, str], list[tuple[AssetIdentity, dict[str, JsonValue]]]]:
+    """Count every output alias declaration so another action cannot shadow a table."""
+    collections: dict[tuple[str, str, str], list[tuple[AssetIdentity, dict[str, JsonValue]]]] = {}
+    for step in manifest.steps:
+        if not isinstance(step, WorkflowStep) or (
+            step.capability.namespace,
+            step.capability.name,
+        ) != ("browser", "operate"):
+            continue
+        actions = step.inputs.get("actions")
+        if not isinstance(actions, FixedInput) or not isinstance(actions.value, list):
+            continue
+        for action in actions.value:
+            if not isinstance(action, dict):
+                continue
+            output = action.get("save_as")
+            if isinstance(output, str):
+                key = step.capability.namespace, step.capability.name, output
+                collections.setdefault(key, []).append((step.capability, action))
+    return collections
+
+
+def _paginated_collection(action: dict[str, JsonValue]) -> bool:
+    try:
+        declared = WebAction.model_validate(action)
+        return declared.do == "read_table" and declared.pagination is not None
+    except ValueError:
+        return False
+
+
+def capture_collection_obligations(
+    task: AuthoringTask, manifest: WorkflowManifest, source_digest: str
+) -> AuthoringTask:
+    """Capture only an actual, well-typed paginated declaration, never inferred history."""
+    obligations = {o.collection_key: o for o in task.collection_obligations}
+    for key, declarations in _browser_collections(manifest).items():
+        for capability, action in declarations:
+            if key not in obligations and _paginated_collection(action):
+                obligations[key] = CollectionObligation(
+                    capability=capability, save_as=key[2], source_digest=source_digest
+                )
+    captured = tuple(obligations.values())
+    if captured == task.collection_obligations:
+        return task
+    return task.model_copy(
+        update={
+            "collection_obligations": captured,
+            "verified_digest": None,
+            "active_trial_token": None,
+        }
+    )
+
+
 def coverage_problems(task: AuthoringTask, manifest: WorkflowManifest) -> list[str]:
     checks = {check.check_id for check in manifest.checks}
     document = manifest.model_dump(mode="json")
     problems = []
+    collections = _browser_collections(manifest)
+    for obligation in task.collection_obligations:
+        matches = collections.get(obligation.collection_key, [])
+        if len(matches) != 1 or not _paginated_collection(matches[0][1]):
+            problems.append(
+                f"collection_completeness:{obligation.save_as}: require one paginated "
+                f"{obligation.capability.namespace}/{obligation.capability.name} read_table "
+                "and no other declaration using this save_as; full collection remains unverified"
+            )
     for requirement in task.requirements:
         ident = requirement.requirement_id
         if not requirement.check_ids or not set(requirement.check_ids) <= checks:

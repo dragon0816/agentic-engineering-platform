@@ -60,6 +60,7 @@ from host_runtime.authoring_task import (
     AuthoringQuestion,
     AuthoringTask,
     TaskStore,
+    capture_collection_obligations,
     coverage_problems,
     task_guidance,
 )
@@ -823,6 +824,9 @@ class ChatAuthoring:
         task = self.tasks.load(actor, session_id) if session_id else None
         if task is None and previous is not None:
             task = previous.authoring_task
+        if task is not None:
+            if previous is not None and previous.session_id == session_id:
+                task = capture_collection_obligations(task, previous.draft, digest(previous.draft))
         if session_id:
             manifest, supplied = bind_supplied_inputs(
                 manifest,
@@ -841,6 +845,8 @@ class ChatAuthoring:
                 task = task.model_copy(
                     update={"supplied_inputs": {**task.supplied_inputs, **supplied}}
                 )
+        if task is not None:
+            task = capture_collection_obligations(task, manifest, digest(manifest))
         self.prepare_workspaces(manifest)
         now = _now()
         if previous is not None and previous.source.startswith(REVISION_PREFIX):
@@ -1173,6 +1179,7 @@ class ChatAuthoring:
         task = active or current.authoring_task
         if task is None:
             return current
+        task = capture_collection_obligations(task, current.draft, digest(current.draft))
         task = task.model_copy(
             update={
                 "active_trial_token": secrets.token_hex(16),
@@ -1607,6 +1614,8 @@ class ChatAuthoring:
         self.prepare_workspaces(manifest)
         now = _now()
         task = self.tasks.load(actor, session_id) if session_id else None
+        if task is not None:
+            task = capture_collection_obligations(task, manifest, digest(manifest))
         item = ChatCandidate(
             candidate_id=f"wf-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
             actor=actor,
