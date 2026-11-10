@@ -41,6 +41,22 @@ the history is complete; this table is the index into them.
   Actual trial history and exact nested failure targets are committed through
   a115557e. A conditional disclosure Browser action and value-free presence
   wait are in final regression/review; AEP is revising its blind panel toggle.
+  Update2026-11-10:4fd706fc disclosure source deployed after canary and resident
+  idle guard; config/identity/workspace and old installed workflow preserved.
+  Actual Between exploration returned751/751 distinct IDs in date bounds,
+  but native candidate revision30 still needs successful cold run/workbook QA.
+  Rev27 dropped paging while weak assertions claimed coverage; sticky collection
+  guard plus cross-writer/provenance fixes passed108 affected cases/review.
+  Pending-trial summary label no longer says completed (13 module cases pass).
+  Full CURRENT6358-case suite running; final guard not yet committed/deployed.
+  That6358 run completed6345 passed/3 failed/10 skipped (optional av collection
+  skip retained). Original PowerShell5s-startup module reran unchanged:6 passed.
+  Two BI failures exposed actual stale full-order writes and old overview row
+  handlers; independent controlled Browser regressions confirmed both. Narrow
+  scoped UI fixes and a hidden-panel move regression are in final verification.
+  Explicit fresh-document reload passed121 Browser cases; independent review
+  added post-ready frame/loader race protection, currently being rechecked.
+  Another fully frozen normal suite will cover all final source changes.
   See `docs/phases/SOP_WORKFLOW_AUTONOMY.md` and `HANDOFF.md` for running evidence.
 
 - [x] PDF/Excel/Word chat attachments and numbered replies (2026-11-09):
@@ -4418,4 +4434,9 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [x] 2026-11-09, Codex: submit/read back the tested C4C steps to the resident AEP as engineering/c4c-sales-order-report@1.0.0, candidate wf-20261109-102227-3989e0 (draft). The earlier deliverable was only a JSON file with a different internal name; restarting cannot import it. Resident Browser schema remains old. Deployment and normal test/install approval remain pending; do not mistake the top-level draft check for nested action compatibility. See HANDOFF follow-up.
 
 - [x] 2026-11-09, Codex: diagnose resident SOP-to-Workflow autonomy from the owner's actual conversation, telemetry, installed v1.0.1 and current live capability schema. Host now supports wait/pagination; Agent replaced the full candidate with four actions omitting All/date/paging. Confirmed actual exit_code=1 runs labeled successful and old fixture files passing output checks; minimal current-source reproduction agrees. Diagnosis only, no runtime/asset changes: docs/evaluations/SOP_WORKFLOW_AUTONOMY_DIAGNOSIS_2026-11-09.md.
-- [ ] SOP autonomy P0/P1 follow-up (proposed, not implemented): correct program/run success and fresh-artifact validation first; then scoped browser diagnostics, durable requirement/input binding and bounded authoring repair with existing approvals. Acceptance must be resident AEP-only from original SOP/workbook, with no Codex-provided selectors/scripts or manual navigation. Preserve the installed v1.0.1 as failure evidence before changing it.
+- [ ] SOP autonomy P0/P1 follow-up: platform repairs implemented and partially deployed through4fd706fc; later sticky collection, summary, reload and hover fixes await final verification/commit/rollout. Genuine AEP-only original SOP/workbook acceptance remains incomplete: no final verified native workbook or replacement installation. Preserve installed v1.0.1 as failure evidence. See current HANDOFF and autonomy repair evaluation.
+
+- [ ] 2026-11-10 SOP autonomy final gate: source frozen, focused repairs passed; final6409-case/541-module six-shard suite running. Native AEP revision42 produced original report independently reconciled751 unique orders/106 groups, zero issues;173 unmapped retained. Revision45 completed changed-input report;28-row independent oracle/cold official replay pending. Resident still4fd706fc, new owner draft/install outstanding; no push. See current HANDOFF for exact evidence/processes.
+
+- [x] 2026-11-10 SOP autonomy platform verification: six narrow runtime commits throughf872ca76; full6409=6397pass/2fail/10skip, both failed whole modules unchanged rerun14pass; Ruff1424/mypy1074/build/wheel-source556/pipcheck passed. No push, no weaker assertions.
+- [ ] 2026-11-10 SOP autonomy delivery: deploy verified source after canary/immediate idleguard; finish cold query-readiness repair and owner-resident trial/draft. Warm AEP reports751+QA28 independently pass, but cold reads529pages before latervisible26. Parser already reads actual text/value, so no aria-label parser fix. Keep tested AEP report source; do not manually rewrite business code.

@@ -7094,3 +7094,38 @@ the same safe diagnostic contract. History may retain bounded redacted
 trigger label/css/kind hints, never fill values. No proof or approval is implied.
 `wait_for` with omitted value uses the same presence probe; provided regex
 continues to match complete actual text/value with existing semantics.
+
+AuthoringTask.collection_obligations retains real declared paginated Browser
+collections across revisions/replans/candidate IDs. Each records capability,
+exact save_as and the first actual source manifest digest (after supplied-input
+binding). Matching uses capability namespace/name and save_as; selectors and
+step positions may be repaired. TaskStore cannot clear or replace earlier
+provenance. Coverage requires exactly one declaration/writer of that collection,
+and that writer must be a valid paginated read_table. A later read_text,
+read_record, inspect_dom or download with the same output cannot overwrite it
+and still establish completeness. Missing/renamed/unpaged/dummy/ambiguous
+collections keep the prototype unverified and block installation readiness.
+Legacy tasks default empty, and only actual current/previous same-session
+declarations are captured at draft/revise/trial; approval digests do not invent
+historical bodies. This structural guard does not prove actual business table
+identity or replace independent acceptance. Alternative exports remain prototype
+until an actual deterministic completeness-evidence contract exists.
+
+Task-summary status answered renders as 已回覆, not 完成. A model returning an
+answer or awaiting a trial approval does not prove its requested Workflow ran.
+Actual succeeded/failed run summaries retain their existing explicit statuses.
+
+Browser native activation may hover before pressing. Hover is internal and
+act-authorized; after hover the same target is resolved and hit-tested again
+with origin checks under the original deadline. Movement repeats observation,
+not activation. After a press starts no retry may replay it. Raw click_at
+semantics and read-mode restrictions are preserved. No new public action.
+
+Conversation capped updates admit only one- or two-message appends retaining
+the exact corresponding old suffix. This includes100+1,99+2 and existing100+2;
+actor, monotonic time, immutable retained content and transactional checks remain.
+Host repair records its actual assistant response without fabricating user input.
+Browser operate exposes save_as documentation on the real HostTool schema:
+inspect_dom/read_table/read_text/read_record/download require an output alias.
+Dedicated browser__inspect is preferred for ad-hoc inspection. No validator or
+action-default behavior changes are implied by the metadata clarification.

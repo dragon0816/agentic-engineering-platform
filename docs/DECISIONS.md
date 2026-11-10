@@ -6950,3 +6950,70 @@ otherwise native-click once and verify desired content within a shared bound.
 Keep origin/read policy, permissions, ordinary clicks and business proof gates.
 This is a focused implementation of the approved repeatability repairs; a
 general Workflow condition or browser recorder would be broader than needed.
+
+### Keep declared full-collection obligations through repair (2026-11-10)
+
+Actual native revision27 removed pagination after a failure and weak original
+assertions still reported complete coverage. Preserve real paginated collection
+declarations as sticky actor/session task obligations, keyed to the Browser
+output collection with source digest. Removal/rename/replan/candidate changes
+cannot silently discharge them. Allow incomplete prototypes, refuse verified
+and installation readiness until matching complete extraction is restored.
+An unrelated dummy pagination or model complete=true is insufficient.
+Architecture review approves this narrow stop boundary. Alternative full-file
+export needs deterministic current-run count/provenance evidence in a later
+contract; mere nonempty download was rejected as proof. Language-specific SOP
+heuristics and forcing locators/step indices immutable were rejected. Legacy
+empty defaults stay compatible; do not fabricate old declarations. This closes
+the observed regression, not every possible weak initial requirement plan.
+
+### Make fresh-page reset explicit (2026-11-10)
+
+A real Edge experiment showed open/hash navigation retained the old loader and
+modal while readyState was complete; native trial state likewise kept Date
+popup fields at the Home URL. Expose explicit reload rather than silently
+changing open or authorizing about:blank. Require a fresh main loader and its
+completed document under one deadline, same tab/profile/viewport and origin
+checks. Execute mode is required; no form confirmation is auto-accepted. A
+new browser process, arbitrary script or workflow-engine branch was rejected
+as broader than needed. This adds a deterministic entry reset, not business
+success evidence. Existing architecture review and owner five-gap authorization
+cover the narrow primitive; full verification still applies.
+
+### Serialize BI dashboard intents within their original domain (2026-11-10)
+
+Full autonomy verification exposed an existing lost dashboard update. A real
+Browser test held the first save response body; clicking a second old-DOM
+panel posted a stale full order and removed the first panel. Queue intents
+per vault/domain, reread current server layout when executing, then await the
+write body and refresh. Capture the original scope and retain render-generation
+guards across switches; prior errors must not poison later intentions. All
+add/hide/show/move actions use current layout, with visible-order neighbors for
+moves while preserving hidden membership. Artificial test waits were rejected
+because they hide a real user-visible lost write. A separate current-overview
+guard prevents stale pre-homes row handlers from selecting queries in read-only
+overview; null clears remain valid. Controlled red/green Browser regressions
+precede these narrow fixes; no server API/permissions or new feature is added.
+
+### Revalidate targets after native hover (2026-11-10)
+
+A trusted-event local fixture showed entry events first arrived with a pressed
+button when click_at omitted pointer movement. Keep raw click_at stable and
+add an internal optional hover before ScriptRunner activation. Re-resolve the
+same locator, origin and hit test after movement, sharing the original deadline;
+a moving target may be observed again, but the eventual press cannot replay.
+Architecture and independent read-only reviews found no blocker. No public
+action/permission or app-specific selector is added. Forced DOM clicks and
+blindly retrying a press were rejected. This fixes proven local input fidelity;
+it has not been established as the cause of C4C's navigation failure.
+
+### Preserve truthful repair messages at the conversation window (2026-11-10)
+
+Actual native approved trials35/36 saved their repair candidates and approvals
+but then crashed saving a one-assistant continuation at the100-message cap.
+Three causal regressions cover full-window single append,99-message paired
+append and the real decide_approval repair path. Admit only one/two-message
+rollover preserving the exact retained suffix, cap, owner and timestamp guards.
+Fabricating a user's request to make a pair and retrying the already-completed
+trial/model side effects were rejected. This narrow storage admission repairs
+existing Host continuation semantics; it does not introduce a new message role.

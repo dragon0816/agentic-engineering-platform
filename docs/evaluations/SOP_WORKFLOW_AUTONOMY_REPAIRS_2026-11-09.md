@@ -202,3 +202,161 @@ continuation now requires AEP to compare successful discovery with the saved
 sequence and prove repeatability from a reopened page before another trial.
 No Codex selectors/code were supplied. This observed remaining planning issue
 means native autonomy acceptance stays open despite verified platform source.
+
+## Resident rollout and additional live findings (2026-11-10)
+
+Source4fd706fc was deployed after a fresh canary install/doctor/pip check and
+an immediate resident activity guard (busy=false/items=[]). Root stopped only
+the verified old Host process, backed up config privately, used the official
+installer without Gateway/agent-skill changes, and restarted it hidden with
+its original port/schedules. Post-start activity, empty stderr, pip check,
+unchanged config/device/workspace, installed-source SHA and fresh live Host
+authoring catalog passed; old c4c-sales-order-report@1.0.1 remains installed.
+External cached MCP tool processes still expose their old catalog; they were
+not killed and are not evidence of the freshly restarted Agent Web's version.
+
+Native trials25/26 failed at wait/readiness/pagination checks. Revision27 then
+removed pagination while its original weak present(actions) assertions still
+claimed complete coverage. Root held that incomplete trial approval. This is
+an additional observed verification gap, not a successful workaround. A sticky
+task obligation now retains real declared complete collections; an unrelated
+pagination or later same-output writer cannot discharge it. Review found and
+closed the cross-action overwrite bypass and pre-input-binding source-digest
+error with causal red/green regressions. Final affected108 passed (overlaps
+focused23); full current6358-case/538-module verification is running. Ruff/
+format1421files and mypy1071files pass. Build still running at this checkpoint.
+
+A real pending-approval reply also showed a generated task summary labelled
+完成 because its model turn was answered. It now renders 已回覆; an actual
+pending-trial multi-tool turn regression was red before the correction, and
+the full summary/artifact modules passed13 cases afterward. No workflow success
+status or approval semantics changed.
+
+Date-fill exploration exposed a C4C invalid-date warning and a single-day query
+of11 records. Root sent business QA referencing the original SOP's Between,
+Value and Value To, without selectors/code. Native AEP independently opened the
+condition dialog and filled both fields. At21:25:25UTC an actual paginated
+Browser observation returned751 records with UI All(751). Independent read-only
+QA confirmed751 distinct nonempty IDs and all dates2026-07-01..2026-11-09 within
+the requested range. That ignored original source snapshot is retained for
+later workbook comparison; it is not a generated workbook or final candidate
+proof. Native candidate reachedrevision29; cold navigation/repeatability still
+needs successful final run. No new Sales Order workflow is installed yet.
+
+## Active verification checkpoint (2026-11-10, supersedes running counts above)
+
+The6358 full suite completed6345 passed/3 failed/10 skipped; optional av
+collection skipped. Two BI failures were causally reproduced as stale layout
+writes and stale overview handlers, fixed without relaxing assertions; the
+BI group passed57. The unchanged PowerShell startup module passed6 on recheck.
+A later6384-case partial suite was aborted: concurrent build briefly removed
+its sdist path during collection; failed collection shards were retried, then
+all owned test workers stopped before a further evidenced hover repair. Neither
+partial run is counted as passing. Build must finish before the next full suite.
+
+Local trusted-event experiments prove a hover-gated-control gap, not the cause
+of C4C navigation failure. Internal hover now precedes native activation, with
+post-hover origin/unique-target/hit-test revalidation and a shared deadline.
+Independent review found no blocker; eight synthetic boundaries passed. Raw
+click_at is unchanged. Global Ruff/format1423 files and mypy1073 files passed.
+
+Native AEP revision34 still has no successful whole run. Result51 was a180s
+model timeout; root polled it late, an avoidable monitoring delay. The private
+Host was cleanly restarted at READY to load frozen hover source and restored
+without a new task. A normal business continuation is running; no candidate
+script or selector was edited by root. No new workbook or installation yet.
+
+## Five-gap delivery matrix (current checkpoint)
+
+| Observed gap | Implemented platform behavior | Remaining acceptance |
+|---|---|---|
+| False success and stale outputs | Nonzero/timeout outcomes fail; outputs must be fresh; answered summary says replied | Full native report must actually succeed |
+| Tested SOP lost during revisions | Durable requirements, exact-digest trial/install gate, sticky declared paginated collection | Business identity/filter correctness still needs independent report QA |
+| Insufficient Browser contract/evidence | Typed actions, scoped DOM/controls, action/target failure, bounded diagnostics, pagination separation, ensure-visible/reload/native hover | No evidence yet identifying the latest specific obscuring control |
+| No automatic continuation | Failed approved/form trials enter bounded repair with durable history and existing approvals | Real original workflow has not yet completed a full repair/run |
+| Re-asked/invalid supplied files | Actor/session input provenance, prefilled file defaults, file preflight, original attachment retention | Changed mapping/date/FX end-to-end test pending |
+
+PDF/XLSX/DOCX ingestion and ordered-list rendering were separately implemented
+and committed earlier. Historical Codex-authored C4C success is not counted as
+AEP autonomous authoring success. The new candidate is authored only by AEP.
+
+## Additional actual-boundary repairs (2026-11-10)
+
+Native35 failed waitactions8; automatic repair produced36 and its approval
+but crashed saving its response at the100-message cap. Native36 reproduced
+the same crash after producing37. Storage only admitted a two-message rollover,
+while truthful Host repair adds one assistant. It also refused99+ordinary pair.
+Three causal reds preceded the narrow one/two rollover fix. Eleven causal and
+negative safeguards passed; expanded whole groups194 passed; independent review
+no blocker. No user input was fabricated and no completed side effect replayed.
+The6397-case in-progress suite was explicitly aborted before changing storage;
+its partial results are not reported as passing.
+
+Native37 exhausted its three-trial allowance with a real Document Date view
+wait failure; still no workbook. Root sent an actual business QA continuation
+restating Document Date/Between/All and original dates/FX, recorded as test
+operator intervention. The same candidate/task persists, not a one-prompt claim.
+
+Repeated actual inline inspect_dom calls omitted save_as and received generic
+validation errors. The actual exported schema did not explain this conditional
+requirement. A causal HostTool-schema regression now checks exposed guidance;
+metadata and authoring guidance explain required aliases and prefer dedicated
+browser__inspect for ad-hoc inspection. Runtime validators/defaults/actions are
+unchanged. This improves discoverability; native acceptance remains pending.
+
+Actual native trial38 on the rollover fix failed a Browser wait, then normal
+automatic continuation saved revision39 and new trial approval without the
+previous history-window exception. Result60 is retained. This verifies actual
+repair persistence/continuation, not success of the requested sales report.
+Root read-only review also evaluated only the candidate's pure amount parser
+on USD1,234.56/TWD1.234,56/EUR123.45; amounts/currency were preserved. It did
+not modify the candidate or create business output outside AEP.
+
+## Actual native output acceptance (2026-11-10)
+
+Revision42/version1.0.41 completed the actual whole workflow and produced a
+fresh report at08:44. Independent read-only oracle compared all751 unique IDs
+and copied raw values to the earlier complete Browser source; source amounts,
+currencies, date bounds,29-row owner mapping, EUR conversions and106 monthly
+groups reconciled with zero issues.173 unmatched owner orders remain present
+with blank Sub-Dept. Proof stays private:autonomy-native-report-qa.json. This
+is a new AEP-authored workflow, not the earlier Codex-authored installed asset.
+
+Changed runtime input trial exposed starting from an old page index. AEP revised
+its own browser procedure, then revision45/version1.0.44 successfully queried
+Nov1..8 with alternate mapping, USD0.9/TWD0.03 and QA-only filename prefix.
+Independent oracle matched28 unique source IDs, all amounts/currencies/new FX,
+new mapping and11 monthly groups, zero issues. One actual output row carries
+the changed QA mapping tag, proving the override was used. Original mapping
+was not changed. QA rates are not official defaults.
+
+Interim revisions43/44 drifted dates into saved defaults; root held these trial
+approvals and repeated a plain-language date-range/default correction. Stored
+revision45 was read back with original official dates/rates/file/prefix. These
+operator QA interventions are recorded; this is not one-prompt authoring.
+A cold Browser official-default replay and resident-owner transfer/trial remain.
+Final source6409-case/541-module suite is running; one possible known UI failure
+awaits its full traceback. Source is frozen and the verified wheel matches all
+556 included Python files. No new resident workflow installation yet.
+
+## Final platform verification and cold-query diagnosis
+
+Runtime repairs committed locally in six narrow commits throughf872ca76, no
+push. Normal full suite6409 cases/541 modules completed6397 passed,2 failed,
+10 skipped. Both failed full modules reran unchanged together:14 passed387.11s.
+Proposal confirmation failed at the known baseline703; viewport reattachment
+failed its initial DOM read88, cause not proven. No assertions/timeouts were
+weakened. Final Ruff1424files, mypy1074files, wheelbuild and clean-package pip
+check passed. Final architecture review found no boundary/approval/provenance
+violation. These are qualified exact results, not a single all-green full run.
+
+Later native warm revision46 again reconciled751 unique orders/106 groups
+with zero issues. Cold start remains unverified: passive observers logged real
+current1,total529,max200 and30 visible rows, then later AEP read visible/26 and
+correct original Date filter. AEP misattributed this to stalearia-label; source
+audit proves _PAGE_NUMBERS reads innerText/value, not aria-label. Do not change
+the correct parser on that explanation. Query/result readiness is the remaining
+diagnostic focus; not a PDF/Excel read error. AEP-generated revision46 is retained
+unchanged as a reference because subsequent UI repair unnecessarily rewrote the
+verified report. No Codex business code/selector replacement was supplied.
+Resident update, final owner draft/trial/install and cold acceptance remain.

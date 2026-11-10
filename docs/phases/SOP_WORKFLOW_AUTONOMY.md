@@ -139,3 +139,84 @@ Provided regular expressions retain their existing full-text semantics. This
 avoids treating an icon caption or a multiline table as text matching `.*`;
 presence waits do not need to read field values. Keep existing origin/read
 boundaries and a bounded timeout. Add actual Edge coverage for both forms.
+
+### Preserve declared collection completeness (2026-11-10)
+
+Native revision27 removed read_table.pagination after pagination-limit errors,
+while weak model-written present(actions) assertions still reported complete
+coverage. This can certify a first-page workbook; do not approve it as complete.
+Add a narrow sticky obligation in the existing actor/session AuthoringTask,
+derived from a real declared paginated Browser collection and identified by
+capability/output save_as plus source digest. Ordinary draft/plan replacement,
+output rename/removal or candidate-id replacement cannot erase the obligation.
+Only the matching collection's complete read strategy satisfies coverage; an
+unrelated dummy pagination does not. Prototypes remain draftable/runnable but
+cannot become verified or install-ready while completeness is unproven.
+
+Architecture review approves this minimal readiness boundary. A genuine
+alternative full export can be prototyped, but file existence or a model's
+complete=true is not full-collection evidence. Supporting that alternative's
+verified proof requires a future deterministic count/provenance contract; do
+not add a guessed bypass now. Legacy tasks have a compatible empty default;
+capture only real declarations, without invented historical backfill. This
+guard prevents observed regression, not every weak initial requirement plan.
+Regression tests precede implementation: dropped paging despite weak coverage,
+dummy/renamed/removed collections, task/candidate continuity, stale proof and
+restored matching pagination. Existing approval and repair budgets remain.
+
+### Explicit fresh-document reload (2026-11-10)
+
+Actual failed trial32 retained the Document Date condition widget and two popup
+date fields at the Home Nav/0 URL, after a preceding failure left the dialog
+open. Native revision33 attempted about:blank as a reset; root held that trial
+because the origin policy does not authorize it. A local real Edge experiment
+confirmed hash navigation keeps loader ID/modal/JS sentinel and old complete
+state; Page.reload changes loader, clears the fixture modal/sentinel and keeps
+the viewport. This supports an explicit reload primitive, not changing open.
+
+Add no-argument WebAction.reload using the same Browser/tab/profile. Require
+act mode (conservative for possible form resubmission); never accept a
+confirmation dialog or restart the browser. Before reload obtain main loader,
+send Page.reload once, then require a different nonempty main loader and that
+new document's complete state within one shared monotonic deadline including
+CDP commands. Origin is checked before/during/after. Do not use _await_load,
+which can return after an event timeout without establishing a new document.
+No URL/script/new permissions or app-specific selectors. Existing open/click
+semantics remain. Architecture review approves this necessary repeatability
+repair within the owner's five-gap scope. Regressions precede implementation:
+real SPA modal reset, old-complete refusal, new-loader timeout, redirect origin
+stop, read-mode refusal, argument validation and preserved viewport.
+After readiness is read, recheck the same main frame and loader before success;
+an intervening B-to-C document change resumes observation under the original
+deadline without sending another reload. Independent adversarial CDP review
+proved the missing post-readiness check could pair B's complete with C/loading.
+
+### Native hover before activation (2026-11-10)
+
+A local trusted-event experiment disproved a missing-buttons hypothesis: raw
+click_at already sends buttons=1 on press. It proved a separate fidelity gap:
+without mouseMoved, pointer entry first occurs while pressed, so a hover-gated
+control can refuse activation. This is not proof of the C4C failure's cause.
+Architecture review approved an internal optional hover helper, retaining raw
+click_at semantics. ScriptRunner hovers only after act authorization, uniqueness
+and hit testing, then rechecks origin, deadline and the same target. Moving
+targets are observed again within the original deadline; ambiguity, overlays
+and origin changes stop before press. Press/release occur once without replay.
+No public action, permission, app selector or forced JavaScript click is added.
+Causal tests cover trusted events, moving targets, obscured and ambiguous targets,
+read refusal, origin, socket failure and shared deadlines. Independent review
+found no blocking issue and eight synthetic boundaries passed.
+
+### Long-session automatic repair persistence (2026-11-10)
+
+Actual native trial35 failed at wait_for actions8; its automatic repair saved
+revision36 and a new trial approval, then crashed at web.py save_conversation
+with conversation_update_stale. The full100-message window only permits a
+two-message rollover; automatic continuation truthfully adds one assistant.
+A99-message window receiving an ordinary owner/result pair also overflows
+by one. Add causal storage and real-repair regressions before implementation.
+Allow only one- or two-message appends with the corresponding retained old
+suffix and unchanged timestamp/actor/monotonic protections; reject rewrites,
+shrinks, stale snapshots and three-message rollover. Do not invent user input,
+restart/replay the trial or recreate the already persisted candidate/approval.
+This is a narrow gap4 continuation fix; no new capability or side effect.
