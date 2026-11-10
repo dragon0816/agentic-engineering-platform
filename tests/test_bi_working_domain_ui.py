@@ -54,6 +54,40 @@ def _rows(page: BiPage) -> str:
 
 
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_rows_rendered_before_homes_arrive_cannot_edit_the_overview(tmp_path: Path) -> None:
+    from test_bi_vault import _use_homes
+
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    shared = tmp_path / "shared"
+    shared.mkdir()
+    made = _ok(
+        _call(workspace, "POST", "/api/bi/vaults",
+              {"path": str(shared), "title": "Market", "schema": "bi.schema/v1.1",
+               "author": "alice", "default_pack": False})
+    )  # fmt: skip
+    dataset, vault_id = str(made["vault"]["dataset"]), str(made["vault"]["id"])
+    _use_homes(workspace, vault_id, "AIDC", "Wireless")
+    _question(workspace, vault_id, "whole", None)
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(tmp_path / "browser", server.address) as page:
+            page.choose("bi-dataset", dataset)
+            page.click("#bi-views [data-bi-view=build]")
+            page.wait("(bi.build.homes || []).length > 0")
+            page.stage("test")
+            page.wait("document.querySelectorAll('#bi-b-bq-list tbody tr').length === 1")
+            # A fast checks response can render editable rows before home discovery.
+            page.run(
+                "const homes=bi.build.homes;bi.build.homes=[];"
+                "biBenchDraw(bi.benchReply.reply);bi.build.homes=homes;biOverviewApply();"
+            )
+            assert page.run("biOverview()")
+            page.run("document.querySelector('#bi-b-bq-list tbody tr').click()")
+            assert page.run("!bi.bqSel")
+            assert page.run("document.getElementById('bi-b-bq-pane').hidden")
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
 def test_one_working_domain_carries_through_the_three_steps(tmp_path: Path) -> None:
     config, layout = _bi_host(tmp_path / "pc")
     workspace = layout.workspace_root

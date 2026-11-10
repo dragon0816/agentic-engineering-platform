@@ -37,6 +37,83 @@ QUIET = "window.__aepWatch.open.length === 0"
 
 
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+@pytest.mark.parametrize("first_reply_fails", [False, True], ids=["pending-body", "failed-body"])
+def test_rapid_domain_panel_adds_survive_an_unfinished_first_save(
+    tmp_path: Path, first_reply_fails: bool
+) -> None:
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    shared = tmp_path / "shared"
+    shared.mkdir()
+    made = _ok(
+        _call(
+            workspace,
+            "POST",
+            "/api/bi/vaults",
+            {"path": str(shared), "title": "Market", "schema": "bi.schema/v1.1",
+             "author": "alice", "default_pack": False},
+        )
+    )  # fmt: skip
+    dataset, vault_id = str(made["vault"]["dataset"]), str(made["vault"]["id"])
+    _use_homes(workspace, vault_id, "AIDC", "Wireless")
+    third = {**ALL_CARDS, "title": "Third panel", "slug": "third"}
+    for item in (BY_DOMAIN, ALL_CARDS, third):
+        _ok(_call(workspace, "POST", f"/api/bi/vaults/{vault_id}/analyses", {"save": item}))
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(tmp_path / "browser", server.address) as page:
+            page.choose("bi-dataset", dataset)
+            page.click("#bi-views [data-bi-view=build]")
+            page.wait("(bi.build.homes || []).length > 0")
+            page.stage("test")
+            page.choose("bi-b-src-folder", AIDC)
+            page.see("bi-b-an-state", "0 個分析")
+            page.wait(QUIET, 60)
+            # Headers are complete, but the first save has not consumed its JSON or refreshed.
+            page.run(
+                "window.__saveHold=[];window.__holdFirstSave=true;window.__dashboardPosts=0;"
+                "window.__saveFetch=window.fetch;window.fetch=async(...args)=>{"
+                "const saves=String(args[0]).endsWith('/analyses')"
+                " && args[1] && args[1].method==='POST';if(saves)window.__dashboardPosts++;"
+                "const reply=await window.__saveFetch(...args);"
+                "if(window.__holdFirstSave && saves){"
+                "window.__holdFirstSave=false;const read=reply.json.bind(reply);"
+                "reply.json=async()=>{await new Promise(go=>window.__saveHold.push(go));"
+                + ("throw new Error('controlled body failure');" if first_reply_fails else "")
+                + "return read();};}return reply;};"
+            )
+            for index, title in enumerate((BY_DOMAIN["title"], ALL_CARDS["title"])):
+                page.run(
+                    "[...document.querySelectorAll('#bi-b-an-list button')]"
+                    f".find(b=>b.getAttribute('aria-label')==='把分析 {title} 加到這個領域的"
+                    " Dashboard').click()"
+                )
+                if index == 0:
+                    page.wait("window.__saveHold.length===1", 60)
+                    assert page.run(QUIET)
+            page.run("window.__saveHold.splice(0).forEach(go=>go())")
+            page.wait(page.shows("bi-b-an-state", "2 個分析"), 15)
+            assert page.run("window.__dashboardPosts") == 2
+            page.run("window.fetch=window.__saveFetch")
+            saved = _ok(_call(workspace, "GET", f"/api/bi/vaults/{vault_id}/analyses", home="aidc"))
+            assert saved["order"] == ["by-domain", "all-cards"]
+            if not first_reply_fails:
+                page.click('[aria-label="把分析 Third panel 加到這個領域的 Dashboard"]')
+                page.see("bi-b-an-state", "3 個分析")
+                page.click('[aria-label="在 Dashboard 隱藏分析 虛構：全部"]')
+                page.see("bi-b-an-state", "2 個分析")
+                page.click('[aria-label="在 Dashboard 上移分析 Third panel"]')
+                page.wait(
+                    "document.querySelector('#bi-b-an-list tbody tr strong').textContent"
+                    " === 'Third panel'",
+                    15,
+                )
+                reordered = _ok(
+                    _call(workspace, "GET", f"/api/bi/vaults/{vault_id}/analyses", home="aidc")
+                )
+                assert reordered["order"] == ["third", "by-domain"]
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
 def test_a_domain_starts_empty_chooses_its_panels_and_a_switch_leaves_nothing_behind(
     tmp_path: Path,
 ) -> None:

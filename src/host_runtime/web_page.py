@@ -14310,6 +14310,8 @@ function biBenchDraw(reply) {
 
 function biBqPick(q) {
   // The row chosen goes into the editor beside the table; none means a new question.
+  // Homes may arrive after the row's listener was attached. Check the current view.
+  if (q && biOverview()) return;
   bi.bqSel = q;
   for (const row of el("bi-b-bq-list").querySelectorAll("tbody tr")) {
     row.setAttribute("aria-selected", String(!!q && row.dataset.unit === q.unit));
@@ -14612,12 +14614,32 @@ async function biRunInto(vaultId, item, state, out) {
   shown.replaceChildren(biChart(ran.table, item.chart));
 }
 
-async function biSaveDashboard(vaultId, layout) {
-  await biCall("/api/bi/vaults/" + vaultId + "/analyses",
-    {dashboard: layout, home: biScope()});
-  biVaultState(await call("/api/bi/vaults/" + vaultId + "/status"));
-  await biAnalyses(vaultId);
-  biNotice(true, "已改 Dashboard 的順序（commit 並 push 後大家才會看到）。");
+const biDashboardSaves = new Map();
+function biSaveDashboard(vaultId, change, scope) {
+  const key = JSON.stringify([vaultId, scope]);
+  const here = () => vaultId === bi.verVault && scope === biScope();
+  // Queue intentions, not the old rendered order: a second button can be pressed
+  // before the first response body or its refresh has finished.
+  const previous = biDashboardSaves.get(key) || Promise.resolve();
+  const pending = previous.catch(() => {}).then(async () => {
+    const current = await call("/api/bi/vaults/" + vaultId + "/analyses"
+      + (scope ? "?home=" + encodeURIComponent(scope) : ""));
+    const layout = change({order: [...(scope ? current.dashboard.order : current.order)],
+      hidden: [...(current.dashboard.hidden || [])], visible: [...current.order]});
+    if (!layout) return;
+    await biCall("/api/bi/vaults/" + vaultId + "/analyses", {dashboard: layout, home: scope});
+    if (!here()) return;
+    const status = await call("/api/bi/vaults/" + vaultId + "/status");
+    if (!here()) return;
+    biVaultState(status);
+    await biAnalyses(vaultId);
+    if (here()) biNotice(true, "已改 Dashboard 的順序（commit 並 push 後大家才會看到）。");
+  });
+  biDashboardSaves.set(key, pending);
+  const clean = () => { if (biDashboardSaves.get(key) === pending) biDashboardSaves.delete(key); };
+  // A failed save remains a failure for its caller, without poisoning the next intent.
+  pending.then(clean, clean);
+  return pending;
 }
 
 async function biAnalyses(vaultId) {
@@ -14641,12 +14663,13 @@ async function biAnalyses(vaultId) {
   const rank = (a) => { const i = reply.order.indexOf(a.slug); return i < 0 ? 1e6 : i; };
   const items = [...reply.analyses].sort((a, b) => rank(a) - rank(b));
   const hidden = new Set(reply.dashboard.hidden || []);
-  const move = (slug, step) => {
-    const order = [...reply.order], at = order.indexOf(slug);
-    if (at < 0 || at + step < 0 || at + step >= order.length) return null;
-    [order[at], order[at + step]] = [order[at + step], order[at]];
-    return biSaveDashboard(vaultId, {order, hidden: [...hidden]});
-  };
+  const move = (slug, step) => biSaveDashboard(vaultId, (current) => {
+    const order = [...current.order], at = current.visible.indexOf(slug);
+    if (at < 0 || at + step < 0 || at + step >= current.visible.length) return null;
+    const from = order.indexOf(slug), to = order.indexOf(current.visible[at + step]);
+    [order[from], order[to]] = [order[to], order[from]];
+    return {order, hidden: current.hidden};
+  }, scope);
   // A domain's Dashboard is what it chose; the vault's is every analysis not hidden.
   const onIt = (a) => a.offered && !hidden.has(a.slug) && (!scope || reply.order.includes(a.slug));
   el("bi-b-an-state").textContent = scope
@@ -14662,14 +14685,18 @@ async function biAnalyses(vaultId) {
       : !onIt(item) ? "Dashboard 不顯示" : "Dashboard 第 " + (rank(item) + 1) + " 個";
     const shown = scope && !onIt(item)
       ? biButton("加到這個領域", () => biSaveDashboard(vaultId,
-        {order: [...reply.order, item.slug], hidden: [...hidden].filter((s) => s !== item.slug)}),
+        (current) => ({order: [...current.order.filter((s) => s !== item.slug), item.slug],
+          hidden: current.hidden.filter((s) => s !== item.slug)}), scope),
       "bi-btn", "把分析 " + item.title + " 加到這個領域的 Dashboard")
       : hidden.has(item.slug)
-      ? biButton("在 Dashboard 顯示", () => biSaveDashboard(vaultId, {order: reply.order,
-        hidden: [...hidden].filter((s) => s !== item.slug)}), "bi-btn",
+      ? biButton("在 Dashboard 顯示", () => biSaveDashboard(vaultId,
+        (current) => ({order: current.order,
+          hidden: current.hidden.filter((s) => s !== item.slug)}), scope), "bi-btn",
         "在 Dashboard 顯示分析 " + item.title)
-      : biButton("在 Dashboard 隱藏", () => biSaveDashboard(vaultId, {order: reply.order,
-        hidden: [...hidden, item.slug]}), "bi-btn", "在 Dashboard 隱藏分析 " + item.title);
+      : biButton("在 Dashboard 隱藏", () => biSaveDashboard(vaultId,
+        (current) => ({order: current.order,
+          hidden: [...new Set([...current.hidden, item.slug])]}), scope),
+        "bi-btn", "在 Dashboard 隱藏分析 " + item.title);
     const shownOn = onIt(item);
     if (!shownOn) off += 1;
     const table = shownOn ? onBoard : offBoard;
