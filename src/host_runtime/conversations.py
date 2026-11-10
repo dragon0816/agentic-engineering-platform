@@ -204,11 +204,15 @@ class ConversationBackendSelectRequest(Contract):
 
 
 class ConversationModelSelectRequest(Contract):
-    """The composer's model for one conversation (owner 2026-10-21); the
-    Host checks it against what the configured Gateway serves."""
+    """A backend-scoped choice; empty uses the native provider default.
+
+    The Host validates against that backend's reported catalog. Omitted backend
+    preserves older clients; current clients supply it to reject stale saves.
+    """
 
     session_id: Symbol
-    model: Text = Field(max_length=200)
+    model: str = Field(max_length=200)
+    backend: ConversationBackendName | None = None
 
     @model_validator(mode="after")
     def no_credential_material(self) -> Self:

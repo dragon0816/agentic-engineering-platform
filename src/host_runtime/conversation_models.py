@@ -14,6 +14,8 @@ model is offered. Nothing here holds or returns a secret.
 
 One small JSON file in the workspace, `conversation-models.json`:
 `{"defaults": {actor: model}, "sessions": {session_id: model}}`.
+Gateway keys stay unchanged; native keys are prefixed with `backend::`.
+An empty native choice explicitly uses the provider default and sends no flag.
 """
 
 from __future__ import annotations
@@ -22,6 +24,7 @@ import json
 import threading
 import time
 from collections.abc import Callable, Mapping
+from contextvars import ContextVar
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +34,11 @@ CHOICES_FILE = "conversation-models.json"
 #: How long a read Gateway list is trusted before it is read again.
 LIST_TTL_SECONDS = 300.0
 MAX_MODEL_ID = 200
+# None means no active Web-turn snapshot. A tuple containing None explicitly
+# freezes the provider default, even if another session changes the actor default.
+BACKEND_TURN_MODEL: ContextVar[tuple[str, str | None] | None] = ContextVar(
+    "aep_backend_turn_model", default=None
+)
 
 
 class ConversationModels:
@@ -42,11 +50,14 @@ class ConversationModels:
         *,
         listing: Callable[[], Mapping[str, Any]],
         configured: Callable[[], str | None],
+        native_listing: Callable[[str], Mapping[str, Any]] | None = None,
         clock: Callable[[], float] = time.monotonic,
     ) -> None:
         self.path = workspace_root / CHOICES_FILE
         self.listing = listing
         self.configured = configured
+        self.native_listing = native_listing
+        self._native: dict[str, tuple[float, Mapping[str, Any]]] = {}
         self.clock = clock
         self._lock = threading.Lock()
         self._listed: tuple[str, ...] = ()
@@ -103,7 +114,7 @@ class ConversationModels:
                     stored[key] = {
                         str(name): value
                         for name, value in values.items()
-                        if isinstance(value, str) and value
+                        if isinstance(value, str) and (value or "::" in str(name))
                     }
         return stored
 
@@ -115,35 +126,70 @@ class ConversationModels:
             ),
         )
 
-    def chosen(self, actor: str, session_id: str | None) -> tuple[str | None, str]:
+    def chosen(
+        self, actor: str, session_id: str | None, *, backend: str = "gateway"
+    ) -> tuple[str | None, str]:
         """The stored choice for this conversation and where it came from:
         the conversation itself, the person's default, or nothing."""
         with self._lock:
             stored = self._load()
+        actor = self._key(actor, backend)
+        session_id = self._key(session_id, backend) if session_id else None
         if session_id and session_id in stored["sessions"]:
             return stored["sessions"][session_id], "conversation"
         if actor in stored["defaults"]:
             return stored["defaults"][actor], "default"
         return None, "settings"
 
-    def for_turn(self, actor: str, session_id: str) -> str | None:
+    def for_turn(self, actor: str, session_id: str, *, backend: str = "gateway") -> str | None:
         """The model id a Gateway turn in this conversation asks for; None
         keeps the configured one. A stored id the Gateway no longer serves is
         still returned, so the turn says so instead of silently using another
         model."""
-        model, _ = self.chosen(actor, session_id)
+        snapshot = BACKEND_TURN_MODEL.get()
+        if backend != "gateway" and snapshot is not None and snapshot[0] == backend:
+            return snapshot[1]
+        model, _ = self.chosen(actor, session_id, backend=backend)
+        if backend != "gateway":
+            return model or None
         configured = self.configured()
         return None if model is None or model == configured else model
 
     def forget(self, session_id: str) -> None:
         with self._lock:
             stored = self._load()
-            if stored["sessions"].pop(session_id, None) is not None:
-                self._save(stored)
+            stored["sessions"].pop(session_id, None)
+            for key in list(stored["sessions"]):
+                if key.endswith("::" + session_id):
+                    del stored["sessions"][key]
+            self._save(stored)
 
     # -- what the page asks for ------------------------------------------------
 
-    def listed(self, actor: str, session_id: str | None) -> dict[str, Any]:
+    def listed(
+        self, actor: str, session_id: str | None, *, backend: str = "gateway", refresh: bool = False
+    ) -> dict[str, Any]:
+        if backend != "gateway":
+            answer = self._native_list(backend, refresh=refresh)
+            names = answer.get("models", []) if answer.get("ok") else []
+            model, source = self.chosen(actor, session_id, backend=backend)
+            native_unavailable = model if model and model not in names else None
+            return {
+                "ok": True,
+                "backend": backend,
+                "source": "native",
+                "code": answer.get("code"),
+                "configured": "",
+                "selected": model if model and not native_unavailable else "",
+                "selected_from": source
+                if model is not None and not native_unavailable
+                else "provider",
+                "unavailable": native_unavailable,
+                "models": [
+                    {"id": "", "label": "Provider default", "status": "CLI default"},
+                    *[{"id": name, "label": name, "status": "CLI catalog"} for name in names],
+                ],
+            }
         configured = self.configured()
         if not configured:
             return {"ok": False, "code": "model_not_configured", "models": []}
@@ -170,8 +216,20 @@ class ConversationModels:
             ],
         }
 
-    def choose(self, actor: str, session_id: str, model: str) -> dict[str, Any]:
+    def choose(
+        self, actor: str, session_id: str, model: str, *, backend: str = "gateway"
+    ) -> dict[str, Any]:
         """Remember `model` for this conversation and as the person's default."""
+        if backend != "gateway":
+            answer = self._native_list(backend)
+            if model and (not answer.get("ok") or model not in answer.get("models", [])):
+                return {"ok": False, "code": "model_not_approved"}
+            with self._lock:
+                stored = self._load()
+                stored["sessions"][self._key(session_id, backend)] = model
+                stored["defaults"][self._key(actor, backend)] = model
+                self._save(stored)
+            return {"ok": True, "selected": model, "configured": "", "backend": backend}
         configured = self.configured()
         if not configured:
             return {"ok": False, "code": "model_not_configured"}
@@ -185,3 +243,19 @@ class ConversationModels:
             stored["defaults"][actor] = model
             self._save(stored)
         return {"ok": True, "selected": model, "configured": configured}
+
+    @staticmethod
+    def _key(value: str, backend: str) -> str:
+        return value if backend == "gateway" else backend + "::" + value
+
+    def _native_list(self, backend: str, *, refresh: bool = False) -> Mapping[str, Any]:
+        with self._lock:
+            cached = self._native.get(backend)
+            if not refresh and cached and self.clock() - cached[0] < LIST_TTL_SECONDS:
+                return cached[1]
+            try:
+                answer = self.native_listing(backend) if self.native_listing else {"ok": False}
+            except Exception:  # noqa: BLE001 - metadata failure is an explicit fallback
+                answer = {"ok": False, "code": "model_catalog_unavailable", "models": []}
+            self._native[backend] = (self.clock(), answer)
+            return answer

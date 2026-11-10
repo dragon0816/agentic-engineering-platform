@@ -41,7 +41,7 @@ def test_the_page_has_the_backend_on_top_and_the_model_in_the_composer() -> None
     for hook in (
         '<label class="visually-hidden" for="conversation-model">LLM model</label>',
         'call("/api/conversations/models?session_id="',
-        'call("/api/conversations/model", {session_id: session, model: chosen})',
+        'call("/api/conversations/model", {\n      session_id: session, model: chosen, backend})',
         'el("chat-backend-bar").hidden = name !== "ask";',
         "select.disabled = busy;",
         'id="model-default-note"',

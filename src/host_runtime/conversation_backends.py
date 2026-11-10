@@ -6,11 +6,13 @@ import json
 import os
 import shutil
 import subprocess
+import threading
+import time
 import uuid
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal, Protocol
+from typing import Any, Literal, Protocol
 
 from pydantic import Field
 
@@ -19,6 +21,7 @@ from agent.data_policy import DataPolicy, OutboundContext
 from common.assets import RegistryContract
 from host_runtime.acp_client import AcpError, AcpLauncher, prompt_turn
 from host_runtime.acp_client import launch as acp_launch
+from host_runtime.native_model_catalog import discover, valid_model
 from models.contracts import ModelMessage
 
 ConversationBackendName = Literal["gateway", "claude_code", "codex", "copilot", "copilot_agent"]
@@ -404,6 +407,8 @@ class LocalConversationBackends:
         self._unavailable: dict[ConversationBackendName, str] = {}
         self._authentication_processes: dict[ConversationBackendName, AuthenticationProcess] = {}
         self._authenticated_this_run: set[ConversationBackendName] = set()
+        self._model_lock = threading.Lock()
+        self._model_catalogs: dict[str, tuple[float, dict[str, Any]]] = {}
         # (MCP URL, assistant token) of the running Agent Web, for the agent mode;
         # its authoring tools are at the same URL + "/authoring".
         self.agent_mcp: tuple[str, str] | None = None
@@ -533,6 +538,24 @@ class LocalConversationBackends:
         self._authentication_processes[backend] = process
         return {"ok": True, "backend": backend, "status": "started"}
 
+    def available_models(self, backend: str) -> dict[str, Any]:
+        """Official local CLI metadata only; no inference or account details."""
+        spec = next((item for item in SPECS if item.name == backend), None)
+        if spec is None or backend not in ("claude_code", "codex"):
+            return {"ok": False, "code": "model_catalog_unsupported", "models": []}
+        executable = self._which(spec.executable)
+        if executable is None:
+            return {"ok": False, "code": "backend_not_installed", "models": []}
+        if self._authentication(spec, executable) != "ready":
+            return {"ok": False, "code": "backend_authentication_required", "models": []}
+        with self._model_lock:
+            cached = self._model_catalogs.get(backend)
+            if cached and time.monotonic() - cached[0] < 300:
+                return cached[1]
+            result = discover(backend, executable, self.root, _environment())
+            self._model_catalogs[backend] = (time.monotonic(), result)
+            return result
+
     def complete(
         self,
         backend: ConversationBackendName,
@@ -543,6 +566,7 @@ class LocalConversationBackends:
         max_history_messages: int = 12,
         agent: AgentLaunch | None = None,
         authoring_token: str | None = None,
+        model: str | None = None,
     ) -> ConversationBackendResult:
         """`authoring_token` is this turn's own token for the authoring tools
         of the Copilot agent conversation (`copilot_agent`): its drafts then
@@ -575,11 +599,21 @@ class LocalConversationBackends:
             return ConversationBackendResult(
                 backend=backend, status="unavailable", code="backend_not_installed"
             )
+        if model:
+            catalog = self.available_models(backend)
+            if (
+                not valid_model(model)
+                or not catalog.get("ok")
+                or model not in catalog.get("models", [])
+            ):
+                return ConversationBackendResult(
+                    backend=backend, status="unavailable", code="model_not_approved"
+                )
         if isinstance(max_history_messages, bool) or not 1 <= max_history_messages <= 40:
             raise ValueError("conversation supports one to forty history messages")
         if agent is not None:
             return self._agent_turn(
-                backend, executable, history, persona_guidance, max_history_messages, agent
+                backend, executable, history, persona_guidance, max_history_messages, agent, model
             )
         prompt = self._prompt(history, persona_guidance, max_history_messages)
         extra: list[str] = []
@@ -627,7 +661,7 @@ class LocalConversationBackends:
             )
         try:
             completed = self._runner(
-                [executable, *spec.arguments, *extra],
+                [executable, *(["--model", model] if model else []), *spec.arguments, *extra],
                 cwd=self.root,
                 input=prompt,
                 capture_output=True,
@@ -666,6 +700,7 @@ class LocalConversationBackends:
         persona_guidance: str,
         max_history_messages: int,
         agent: AgentLaunch,
+        model: str | None = None,
     ) -> ConversationBackendResult:
         """One agent-mode turn: Claude Code with its permission prompts sent
         to AEP's `permission` tool, or Copilot over ACP. Codex has no relay."""
@@ -684,13 +719,18 @@ class LocalConversationBackends:
         run_dir = self.root / AGENT_RUNS_DIR / agent.run_id
         try:
             if backend == "claude_code":
-                return self._claude_agent(executable, prompt, agent, run_dir)
+                return self._claude_agent(executable, prompt, agent, run_dir, model)
             return self._copilot_agent(executable, prompt, agent)
         finally:
             shutil.rmtree(run_dir, ignore_errors=True)
 
     def _claude_agent(
-        self, executable: str, prompt: str, agent: AgentLaunch, run_dir: Path
+        self,
+        executable: str,
+        prompt: str,
+        agent: AgentLaunch,
+        run_dir: Path,
+        model: str | None = None,
     ) -> ConversationBackendResult:
         run_dir.mkdir(parents=True, exist_ok=True)
         servers = {
@@ -704,6 +744,7 @@ class LocalConversationBackends:
         plugin = self._write_claude_plugin()
         argv = [
             executable,
+            *(["--model", model] if model else []),
             "--print",
             "--output-format",
             "json",

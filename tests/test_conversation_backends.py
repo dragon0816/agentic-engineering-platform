@@ -6,11 +6,14 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
+import pytest
+
 from agent.data_policy import ContextMaterial, OutboundContext
 from host_runtime.conversation_backends import (
     AUTH_STATUS_TIMEOUT_SECONDS,
     BACKEND_TIMEOUT_SECONDS,
     MAX_BACKEND_OUTPUT_CHARS,
+    AgentLaunch,
     LocalConversationBackends,
 )
 from models.contracts import ModelMessage
@@ -78,6 +81,76 @@ def public_context(messages: tuple[ModelMessage, ...], persona_guidance: str) ->
             )
         )
     return OutboundContext(materials=tuple(materials))
+
+
+def test_selected_native_model_is_validated_and_forwarded(tmp_path: Path) -> None:
+    runner = Runner('{"result":"answer"}')
+    backends = LocalConversationBackends(tmp_path, which=installed, runner=runner)
+    backends.available_models = lambda backend: {"ok": True, "models": ["fixture-native"]}  # type: ignore[method-assign]
+    for backend in ("codex", "claude_code"):
+        result = backends.complete(
+            backend,
+            history(),
+            persona_guidance="",
+            outbound=public_context(history(), ""),
+            model="fixture-native",
+        )
+        assert result.status == "answered"
+        argv = runner.calls[-1][0]
+        assert argv[argv.index("--model") + 1] == "fixture-native"
+        before = len(runner.calls)
+        result = backends.complete(
+            backend,
+            history(),
+            persona_guidance="",
+            outbound=public_context(history(), ""),
+            model="--bad",
+        )
+        assert result.code == "model_not_approved"
+        assert len(runner.calls) == before
+
+
+def test_selected_claude_agent_model_keeps_permission_relay(tmp_path: Path) -> None:
+    runner = Runner('{"result":"answer"}')
+    backends = LocalConversationBackends(tmp_path, which=installed, runner=runner)
+    backends.available_models = lambda backend: {"ok": True, "models": ["fixture-native"]}  # type: ignore[method-assign]
+    result = backends.complete(
+        "claude_code",
+        history(),
+        persona_guidance="",
+        outbound=public_context(history(), ""),
+        model="fixture-native",
+        agent=AgentLaunch(folder=tmp_path, servers={}, on_permission=lambda _: False),
+    )
+    assert result.status == "answered"
+    argv = runner.calls[-1][0]
+    assert argv[argv.index("--model") + 1] == "fixture-native"
+    assert argv[argv.index("--permission-mode") + 1] == "manual"
+    assert argv[argv.index("--permission-prompts") + 1] == "host"
+    assert "--permission-prompt-tool" in argv
+    assert "--dangerously-skip-permissions" not in argv
+
+
+def test_native_catalog_missing_signed_out_and_cached(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    missing = LocalConversationBackends(tmp_path, which=lambda _: None)
+    assert missing.available_models("codex")["code"] == "backend_not_installed"
+    signed_out = LocalConversationBackends(
+        tmp_path, which=installed, status_runner=Runner(returncode=1)
+    )
+    assert signed_out.available_models("codex")["code"] == "backend_authentication_required"
+    calls: list[str] = []
+
+    def metadata(backend: str, *_: Any) -> dict[str, Any]:
+        calls.append(backend)
+        return {"ok": True, "models": [backend + "-m"]}
+
+    monkeypatch.setattr("host_runtime.conversation_backends.discover", metadata)
+    ready = LocalConversationBackends(tmp_path, which=installed, status_runner=Runner())
+    assert ready.available_models("codex")["models"] == ["codex-m"]
+    assert ready.available_models("codex")["models"] == ["codex-m"]
+    assert calls == ["codex"]
 
 
 def test_status_reports_only_fixed_local_cli_names(tmp_path: Path) -> None:

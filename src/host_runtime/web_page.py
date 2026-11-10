@@ -3821,6 +3821,7 @@ let backendStatuses = new Map();
 let activeBackend = "gateway";
 let pendingBackend = "";
 let pendingPublicBackend = "";
+let pendingBackendSession = "", pendingPublicSession = "";
 let activeConversationPublic = false;
 let activeConversationMessages = 0;
 
@@ -5190,7 +5191,8 @@ async function loadConversations(selectId) {
   const readOnly = !!(listed.selected && listed.selected.source === "telegram");
   el("ask").hidden = readOnly;
   el("read-only-note").hidden = !readOnly;
-  backend.disabled = readOnly;
+  backend.disabled = readOnly || backendChanges.has(activeConversation)
+    || sessionBusy(activeConversation);
   send.disabled = false;
   loadAgentSession().catch(() => {});
   loadConversationModels().catch(() => {});
@@ -5198,19 +5200,30 @@ async function loadConversations(selectId) {
 
 // The composer's model (owner 2026-10-21): what the configured Gateway
 // serves, per conversation, applied from the next message.
-let modelChoices = null, modelChoicesFor = "";
+let modelChoices = null, modelChoicesFor = "", modelRequest = 0;
+const backendChanges = new Set();
 
 async function loadConversationModels() {
-  const session = activeConversation;
-  if (modelChoicesFor !== session) { modelChoices = null; renderModelControl(); }
-  const listed = await call("/api/conversations/models?session_id="
-    + encodeURIComponent(session || ""));
-  if (session !== activeConversation) return;
-  modelChoices = listed; modelChoicesFor = session; renderModelControl();
+  const session = activeConversation, backend = activeBackend;
+  const key = backend + ":" + session, request = ++modelRequest;
+  if (modelChoicesFor !== key) { modelChoices = null; renderModelControl(); }
+  let listed;
+  try {
+    listed = await call("/api/conversations/models?session_id="
+      + encodeURIComponent(session || "") + "&backend=" + encodeURIComponent(backend));
+  } catch (_) {
+    listed = {ok: false, code: "model_catalog_unavailable", models: []};
+  }
+  if (session !== activeConversation || backend !== activeBackend
+      || request !== modelRequest) return;
+  modelChoices = listed; modelChoicesFor = key; renderModelControl();
 }
 
 function modelStatusText(data) {
   if (data.unavailable) return data.unavailable + " is not served now · choose another";
+  if (data.source === "native") return data.code
+    ? "CLI catalog unavailable (" + data.code + ") · Provider default"
+    : "CLI catalog · availability depends on your account · from the next message";
   const from = {conversation: "This conversation", default: "Your default"}[data.selected_from]
     || "Settings default";
   return data.source === "gateway" ? from + " · from the next message"
@@ -5219,19 +5232,24 @@ function modelStatusText(data) {
 
 function renderModelControl() {
   const select = el("conversation-model"), fixed = el("model-readonly");
-  const state = el("model-state"), data = modelChoices;
+  const state = el("model-state"), key = activeBackend + ":" + activeConversation;
+  const data = modelChoicesFor === key
+    ? modelChoices : null;
   const showFixed = (label, status) => {
     select.hidden = true; fixed.hidden = false;
     fixed.textContent = label; state.textContent = status;
   };
-  if (activeBackend !== "gateway") {
+  if (!["gateway", "claude_code", "codex"].includes(activeBackend)) {
     const status = backendStatuses.get(activeBackend);
     showFixed("Model: chosen by " + (status ? status.label : "this backend"), "");
     return;
   }
   if (!data) { showFixed("Reading models…", ""); return; }
-  if (!data.ok) { showFixed("No model configured", "Set one in Settings"); return; }
-  if (data.models.length < 2 && !data.unavailable) {
+  if (!data.ok) {
+    showFixed(activeBackend === "gateway" ? "No model configured" : "Model list unavailable",
+      data.code || "Set one in Settings"); return;
+  }
+  if (data.source !== "native" && data.models.length < 2 && !data.unavailable) {
     showFixed(data.models[0].label, data.source === "gateway"
       ? "The only model the Gateway serves" : "Gateway list unavailable · Settings model");
     return;
@@ -5252,24 +5270,29 @@ function renderModelControl() {
   }
   select.value = data.unavailable || data.selected;
   select.hidden = false; fixed.hidden = true;
-  const busy = !!activeConversation && sessionBusy(activeConversation);
+  const busy = !activeConversation || sessionBusy(activeConversation)
+    || el("ask").hidden;
   select.disabled = busy;
-  state.textContent = busy ? "Locked while the answer runs" : modelStatusText(data);
+  state.textContent = busy ? (el("ask").hidden ? "Read-only conversation"
+    : "Locked while the answer runs") : modelStatusText(data);
 }
 
 el("conversation-model").addEventListener("change", async () => {
   const select = el("conversation-model"), chosen = select.value;
   if (!activeConversation || !modelChoices || !modelChoices.ok) return;
-  const session = activeConversation;
+  const session = activeConversation, backend = activeBackend;
   select.disabled = true; el("model-state").textContent = "Saving…";
   try {
-    const saved = await call("/api/conversations/model", {session_id: session, model: chosen});
+    const saved = await call("/api/conversations/model", {
+      session_id: session, model: chosen, backend});
     if (!saved.ok) throw new Error(saved.code);
-    if (session === activeConversation) {
+    if (session === activeConversation && backend === activeBackend) {
+      if (!modelChoices) return;
       Object.assign(modelChoices, {selected: chosen, selected_from: "conversation",
         unavailable: null});
     }
   } catch (failure) {
+    if (session !== activeConversation || backend !== activeBackend) return;
     renderModelControl();
     el("model-state").textContent = "Not changed: " + failure.message;
     return;
@@ -5303,6 +5326,7 @@ function renderBackendState() {
 
 function showBackendAuthentication(status) {
   pendingBackend = status.name;
+  pendingBackendSession = activeConversation;
   el("backend-auth-title").textContent = "Connect " + status.label;
   el("backend-auth-detail").textContent = status.selectable
     ? "Authentication runs in a separate local window. "
@@ -5314,7 +5338,26 @@ function showBackendAuthentication(status) {
   el("backend-auth-dialog").showModal();
 }
 
+async function changeConversationBackend(session, name, publicContext = false) {
+  if (backendChanges.has(session) || sessionBusy(session)) return null;
+  backendChanges.add(session);
+  if (session === activeConversation) el("conversation-backend").disabled = true;
+  try {
+    const body = {session_id: session, backend: name};
+    if (publicContext) body.public_context = true;
+    return await call("/api/conversations/backend", body);
+  } finally {
+    backendChanges.delete(session);
+    if (session === activeConversation) {
+      el("conversation-backend").disabled = el("ask").hidden || sessionBusy(session);
+    }
+  }
+}
+
 async function chooseBackend(name) {
+  if (backendChanges.has(activeConversation)) {
+    el("conversation-backend").value = activeBackend; return;
+  }
   const status = backendStatuses.get(name);
   if (!status) return;
   if (!status.selectable) {
@@ -5325,19 +5368,22 @@ async function chooseBackend(name) {
   }
   if (name !== "gateway" && !activeConversationPublic) {
     pendingPublicBackend = name;
+    pendingPublicSession = activeConversation;
     el("backend-public-result").textContent = "";
     el("conversation-backend").value = activeBackend;
     el("backend-public-dialog").showModal();
     return;
   }
-  const selected = await call("/api/conversations/backend", {
-    session_id: activeConversation, backend: name,
-  });
+  const session = activeConversation;
+  const selected = await changeConversationBackend(session, name);
+  if (!selected) return;
+  if (session !== activeConversation) return;
   if (!selected.ok) throw new Error(selected.code);
   activeBackend = name;
   activeConversationPublic = selected.conversation.data_classification === "PUBLIC";
   el("conversation-backend").value = name; renderBackendState(); renderAgentModeLine();
-  renderModelControl();
+  modelChoices = null; renderModelControl();
+  loadConversationModels().catch(() => {});
 }
 
 async function loadChat(selectId) {
@@ -5391,27 +5437,36 @@ el("conversation-backend").addEventListener("change", async () => {
 });
 el("backend-settings").addEventListener("click", () => selectPrimaryTab("settings"));
 el("backend-public-cancel").addEventListener("click", () => {
-  pendingPublicBackend = ""; el("backend-public-dialog").close();
+  pendingPublicBackend = ""; pendingPublicSession = "";
+  el("backend-public-dialog").close();
 });
 el("backend-public-start").addEventListener("click", async () => {
   const button = el("backend-public-start"); button.disabled = true;
   el("backend-public-result").textContent = "Preparing PUBLIC session…";
   try {
+    const name = pendingPublicBackend, origin = pendingPublicSession;
+    if (!name || origin !== activeConversation) throw new Error("Conversation changed");
     if (activeConversationMessages) {
       const created = await call("/api/conversations", {});
+      if (origin !== activeConversation) throw new Error("Conversation changed");
       await loadChat(created.conversation.session_id);
+      if (activeConversation !== created.conversation.session_id) {
+        throw new Error("Conversation changed");
+      }
     }
-    const selected = await call("/api/conversations/backend", {
-      session_id: activeConversation, backend: pendingPublicBackend, public_context: true,
-    });
+    const session = activeConversation;
+    const selected = await changeConversationBackend(session, name, true);
+    if (!selected || session !== activeConversation) return;
     if (!selected.ok) throw new Error(selected.code);
-    activeBackend = pendingPublicBackend;
+    activeBackend = name;
     activeConversationPublic = true;
     pendingPublicBackend = "";
+    pendingPublicSession = "";
     // Show the new backend at once; the backend list reload below is slow,
     // and a stale "Gateway" entry would swallow the user's switch back.
     el("conversation-backend").value = activeBackend; renderBackendState();
-    renderModelControl();
+    modelChoices = null; renderModelControl();
+    loadConversationModels().catch(() => {});
     el("backend-public-result").textContent = "";
     el("backend-public-dialog").close();
     await loadChat(activeConversation); field.focus();
@@ -5420,7 +5475,7 @@ el("backend-public-start").addEventListener("click", async () => {
   } finally { button.disabled = false; }
 });
 el("backend-auth-cancel").addEventListener("click", () => {
-  pendingBackend = ""; el("backend-auth-dialog").close();
+  pendingBackend = ""; pendingBackendSession = ""; el("backend-auth-dialog").close();
 });
 el("backend-auth-start").addEventListener("click", async () => {
   const button = el("backend-auth-start"); button.disabled = true;
@@ -5433,10 +5488,16 @@ el("backend-auth-start").addEventListener("click", async () => {
   } finally { button.disabled = false; }
 });
 el("backend-auth-check").addEventListener("click", async () => {
+  const name = pendingBackend, session = pendingBackendSession;
   await loadBackends();
-  const status = backendStatuses.get(pendingBackend);
+  if (session !== activeConversation || name !== pendingBackend) {
+    el("backend-auth-result").textContent = "Conversation changed · choose the backend again";
+    return;
+  }
+  const status = backendStatuses.get(name);
   if (status && status.available) {
-    await chooseBackend(pendingBackend); pendingBackend = ""; el("backend-auth-dialog").close();
+    await chooseBackend(name); pendingBackend = ""; pendingBackendSession = "";
+    el("backend-auth-dialog").close();
   } else {
     el("backend-auth-result").textContent = status ? status.detail : "Backend status unavailable.";
   }

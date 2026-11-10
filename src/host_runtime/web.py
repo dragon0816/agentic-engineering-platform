@@ -181,7 +181,7 @@ from host_runtime.conversation_context import (
     ConversationContextStore,
     prepare_history,
 )
-from host_runtime.conversation_models import ConversationModels
+from host_runtime.conversation_models import BACKEND_TURN_MODEL, ConversationModels
 from host_runtime.conversations import (
     MAX_STORED_MESSAGES,
     ConversationBackendAuthenticationRequest,
@@ -829,6 +829,7 @@ class AgentWeb:
             runtime.layout.workspace_root,
             listing=self.available_models,
             configured=self._configured_model,
+            native_listing=self.backends.available_models,
         )
         selectable = getattr(router.model, "client", None)
         if isinstance(selectable, SelectableModelClient):
@@ -1764,11 +1765,21 @@ class AgentWeb:
         )
         return None if endpoint is None else endpoint.model
 
-    def conversation_model_choices(self, session_id: str | None) -> dict[str, Any]:
+    def conversation_model_choices(
+        self, session_id: str | None, backend: str | None = None
+    ) -> dict[str, Any]:
         """The models the composer offers for this conversation (owner
         2026-10-21): what the configured Gateway serves, or the configured
         model alone when its list cannot be read. Names only, never a key."""
-        return self.conversation_models.listed(self.runtime.actor, session_id)
+        record = (
+            self.runtime.state.conversation(session_id, self.runtime.actor) if session_id else None
+        )
+        if session_id and record is None:
+            return {"ok": False, "code": "conversation_unknown", "models": []}
+        actual = record.backend if record else "gateway"
+        if backend is not None and backend != actual:
+            return {"ok": False, "code": "conversation_backend_changed", "models": []}
+        return self.conversation_models.listed(self.runtime.actor, session_id, backend=actual)
 
     def select_conversation_model(self, request: ConversationModelSelectRequest) -> dict[str, Any]:
         item = ConversationModelSelectRequest.model_validate(request)
@@ -1776,7 +1787,17 @@ class AgentWeb:
             return {"ok": False, "code": "conversation_unknown"}
         if self._is_read_only(item.session_id):
             return {"ok": False, "code": "conversation_read_only"}
-        return self.conversation_models.choose(self.runtime.actor, item.session_id, item.model)
+        with self._record_lock(item.session_id):
+            record = self.runtime.state.conversation(item.session_id, self.runtime.actor)
+            if record is None:
+                return {"ok": False, "code": "conversation_unknown"}
+            if self.turn_progress.get(item.session_id) is not None:
+                return {"ok": False, "code": "conversation_busy"}
+            if item.backend is not None and item.backend != record.backend:
+                return {"ok": False, "code": "conversation_backend_changed"}
+            return self.conversation_models.choose(
+                self.runtime.actor, item.session_id, item.model, backend=record.backend
+            )
 
     def _gateway_configured(self) -> bool:
         binding = self.runtime.config.models
@@ -3261,7 +3282,19 @@ class AgentWeb:
                 progress.set_limits(limits.tool_calls, limits.time_limit_seconds)
             except Exception:  # noqa: BLE001 - the Gateway sets them when it starts
                 pass
-        self.turn_progress.begin(progress)
+        # Model saves and the start of a turn share the same boundary: a
+        # selection already being saved finishes before this turn snapshots it.
+        with self._record_lock(item.session_id):
+            self.turn_progress.begin(progress)
+            native_model, _ = self.conversation_models.chosen(
+                self.runtime.actor, item.session_id, backend=backend
+            )
+            native_selection = BACKEND_TURN_MODEL.set((backend, native_model or None))
+            turn_model = (
+                self.conversation_models.for_turn(self.runtime.actor, item.session_id)
+                if backend == "gateway"
+                else None
+            )
         listening = TURN_PROGRESS.set(progress)
         atlas_port = ATLAS_PORT.set(item.atlas_port)
         # The conversation's own model (owner 2026-10-21) for everything the
@@ -3269,15 +3302,12 @@ class AgentWeb:
         # a Workflow draft. A CLI-backend session's model is the backend's
         # own; what AEP itself asks for it uses the Settings model.
         try:
-            with session_model(
-                self.conversation_models.for_turn(self.runtime.actor, item.session_id)
-                if backend == "gateway"
-                else None
-            ):
+            with session_model(turn_model):
                 result = self._conversation_turn(item)
             self._voice_used(item, progress.turn_id)
             return result
         finally:
+            BACKEND_TURN_MODEL.reset(native_selection)
             ATLAS_PORT.reset(atlas_port)
             TURN_PROGRESS.reset(listening)
             self.turn_progress.end(progress)
@@ -3516,6 +3546,9 @@ class AgentWeb:
                         max_history_messages=context_settings.recent_messages,
                         agent=launch,
                         authoring_token=authoring_token,
+                        model=self.conversation_models.for_turn(
+                            self.runtime.actor, item.session_id, backend=record.backend
+                        ),
                     )
                 finally:
                     self._authoring_turns.pop(authoring_token, None)
@@ -6977,7 +7010,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.conversation_backends())
         elif parsed.path == "/api/conversations/models":
             session_id = parse_qs(parsed.query).get("session_id", [None])[0]
-            self._json(200, web.conversation_model_choices(session_id))
+            backend = parse_qs(parsed.query).get("backend", [None])[0]
+            self._json(200, web.conversation_model_choices(session_id, backend))
         elif parsed.path == "/api/commands":
             self._json(200, web.slash_commands())
         elif parsed.path == "/api/conversations/search":
