@@ -1013,25 +1013,43 @@ class ScriptRunner:
     def _perform(self, spec: dict[str, Any], *, deadline: float | None = None) -> dict[str, Any]:
         pointer = getattr(self.page, "click_at", None)
         native = spec["op"] == "click" and callable(pointer)
+        hover = getattr(self.page, "hover_at", None)
+        native_hover = native and callable(hover)
+        hovered: tuple[float, float] | None = None
         expression = _ACT % {"find": _FIND, "spec": json.dumps({**spec, "pointer": native})}
         shared_deadline = deadline is not None
+        guarded_deadline = shared_deadline or native_hover
         deadline = time.monotonic() + self.timeout_s if deadline is None else deadline
         while True:
-            if shared_deadline:
+            if shared_deadline or hovered is not None:
                 self._check_deadline(deadline)
             if native:
                 self._check_origin()
-            if shared_deadline:
+            if shared_deadline or hovered is not None:
                 self._check_deadline(deadline)
             try:
                 answer = self._evaluate(expression)
-                if shared_deadline:
+                if guarded_deadline:
                     self._check_origin()
                     self._check_deadline(deadline)
+                if native_hover:
+                    assert callable(hover)
+                    point = answer["pointer"]
+                    coordinates = (float(point["x"]), float(point["y"]))
+                    if coordinates != hovered:
+                        # Hover can reveal an overlay or move the target. The
+                        # same locator, read policy and hit test must authorize
+                        # the final point again before a single native press.
+                        hover(*coordinates, timeout_s=deadline - time.monotonic())
+                        self._check_origin()
+                        self._check_deadline(deadline)
+                        hovered = coordinates
+                        continue
                 break
             except WebScriptError as error:
                 if (
                     not native
+                    or hovered is not None
                     or error.code
                     not in {
                         "web_target_missing",
@@ -1049,11 +1067,11 @@ class ScriptRunner:
         if native:
             assert callable(pointer)
             point = answer["pointer"]
-            if shared_deadline:
+            if guarded_deadline:
                 self._check_origin()
                 self._check_deadline(deadline)
             pointer(float(point["x"]), float(point["y"]))
-            if shared_deadline:
+            if guarded_deadline:
                 self._check_origin()
                 self._check_deadline(deadline)
         return answer

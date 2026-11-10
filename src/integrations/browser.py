@@ -941,6 +941,29 @@ class Browser:
             )
         return now
 
+    def hover_at(self, x: float, y: float, *, timeout_s: float) -> None:
+        """Move the unpressed native pointer within the caller's remaining budget."""
+        page = self._page
+        if page is None:
+            raise BrowserError("no_page")
+        if timeout_s <= 0:
+            raise BrowserError("click_failed", "hover_timeout")
+        previous_timeout = page.timeout_s
+        page.timeout_s = min(previous_timeout, timeout_s)
+        try:
+            page.call(
+                "Input.dispatchMouseEvent",
+                type="mouseMoved",
+                x=x,
+                y=y,
+                button="none",
+                buttons=0,
+            )
+        except (DevtoolsRefused, WebSocketError) as failure:
+            raise BrowserError("click_failed", type(failure).__name__) from None
+        finally:
+            page.timeout_s = previous_timeout
+
     def click_at(self, x: float, y: float) -> None:
         """Send real pointer events, including trusted press/release for UI controls."""
         page = self.page()
