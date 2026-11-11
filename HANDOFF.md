@@ -154,7 +154,16 @@ depends on the Sales panel state left by the previous run. Resident still runs
 044bd7b5 with Skill 1.0.5; no driver running; no pending approvals in round7.
 
 Do NOT reset the exhausted budget or create a new candidate to renew trials without
-explicit owner consent. If the owner authorizes another attempt: (1) consider a
+explicit owner consent. Codex (2026-11-11): stay stopped; no new candidate, budget
+reset, resume message or browser operation until the owner explicitly authorizes
+a bounded new attempt. The reload/app-ready cause is a strong hypothesis, not
+proven. Skill 1.0.5 step 2 already requires app-ready after reload and 1.0.3+
+already require entry and retained-state replay, so restating them (1.0.6) is
+not a fix. Before any authorized new trial: list the NEW verifiable
+precondition/review evidence versus the old rules, and show the same exact
+sequence passing completely from both Sales panel states (expanded and
+collapsed); only then request at most one new formal trial. Do not send a new
+Skill card first and make the owner press repeatedly. If the owner authorizes another attempt: (1) consider a
 Skill 1.0.6 clause requiring a post-reload app-ready wait on a control that exists
 only in the freshly loaded state, and replaying the exact compiled step twice, once
 after leaving the Sales panel expanded and once collapsed; (2) review every trial
