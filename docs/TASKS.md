@@ -4836,3 +4836,9 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   Gap: 2 blank-Owner orders (EUR 0) not flagged 待確認; UI source total still to compare.
 - [ ] AEP fixing blank-Owner flagging (Excel step only) + reporting UI total/pages; re-trial
   and re-validate.
+- [x] AEP fixed blank-Owner flagging (Excel step only, browser step identical) and reported
+  the UI total (775 records, 26 pages). Trial 6 run-7adcb257cd5a48069e1989748da44a8d of
+  sap-sales-orders-report@1.0.9 (digest 9b0cbe27...caf8d) succeeded, verified=true.
+  Independent validation of sap_sales_orders_report_20261112-040011.xlsx passed all checks;
+  see docs/phases/C4C_ROUND7_ACCEPTANCE.md.
+- [ ] Owner: approve installation of the verified Workflow in Agent Web (not done by Claude).

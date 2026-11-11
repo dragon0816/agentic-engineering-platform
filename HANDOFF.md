@@ -143,7 +143,17 @@ df94b85cad89befcfe18bd2e1625e2b8a8e1e05a2dc939a96179f04d395b4934.
 Existing observation-grant/closed-schema/Knowledge regressions4passed9.78s before
 1.0.4; runtime unchanged, no fresh full suite/build in the latest doc/Skill slice.
 
-## Current state (2026-11-11 ~23:20): round7 FAILED, trial budget exhausted
+## Current state (2026-11-12 ~04:05 Asia/Taipei): round7 ACCEPTED, not installed
+
+Read docs/phases/C4C_ROUND7_ACCEPTANCE.md. Verified candidate
+wf-20261111-142125-2cc6c2 (sap-sales-orders-report@1.0.9, digest 9b0cbe27...caf8d),
+accepted run run-7adcb257cd5a48069e1989748da44a8d, output
+C:/Users/Chi_L/Documents/aep-workflows/sap-sales-orders-report/output/sap_sales_orders_report_20261112-040011.xlsx,
+independent validation passed. Next: the owner approves installation in Agent Web
+(Claude must not self-approve). No driver running; no round7 pending approvals.
+Runtime unchanged since 044bd7b5; Skill 1.0.5 loaded. Earlier history below.
+
+## Earlier: round7 failed first budget (2026-11-11 ~23:20)
 
 See docs/TASKS.md last rows for the full chain. Candidate wf-20261111-142125-2cc6c2
 used all 3 trials (runs run-5487d372125544c79eba680065d592e1,
