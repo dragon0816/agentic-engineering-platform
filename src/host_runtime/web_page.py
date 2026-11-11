@@ -4647,12 +4647,15 @@ async function renderApprovals(session) {
     const card = document.createElement("div"); card.className = "approval-card";
     card.dataset.approvalId = item.approval_id;
     const title = document.createElement("strong");
-    title.textContent = item.kind === "install" ? "安裝請求" : "執行請求";
+    title.textContent = item.browser_preflight ? "瀏覽器修正驗證" :
+      item.kind === "install" ? "安裝請求" : "執行請求";
     const summary = document.createElement("p"); summary.textContent = item.summary;
     const approve = document.createElement("button"); approve.type = "button";
-    approve.className = "approve"; approve.textContent = "核准";
+    approve.className = "approve";
+    approve.textContent = item.browser_preflight ? "允許這次驗證" : "核准";
     const reject = document.createElement("button"); reject.type = "button";
-    reject.className = "reject"; reject.textContent = "拒絕";
+    reject.className = "reject";
+    reject.textContent = item.browser_preflight ? "停止這次驗證" : "拒絕";
     const note = document.createElement("span"); note.className = "approval-note";
     const decide = async (decision) => {
       approve.disabled = reject.disabled = true;
@@ -4668,7 +4671,17 @@ async function renderApprovals(session) {
     };
     approve.addEventListener("click", () => decide("approve"));
     reject.addEventListener("click", () => decide("reject"));
-    card.append(title, summary, approve, reject, note);
+    card.append(title, summary);
+    if (item.browser_preflight) {
+      const details = document.createElement("details");
+      details.className = "browser-preflight-details";
+      const label = document.createElement("summary");
+      label.textContent = "查看本次操作與參數（非完整流程驗收）";
+      const body = document.createElement("pre");
+      body.textContent = JSON.stringify(item.browser_preflight, null, 2);
+      details.append(label, body); card.append(details);
+    }
+    card.append(approve, reject, note);
     log.append(card);
   }
 }

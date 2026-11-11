@@ -49,7 +49,7 @@ import threading
 import time
 import uuid
 from collections.abc import Callable, Mapping, Sequence
-from contextlib import ExitStack
+from contextlib import AbstractContextManager, ExitStack, nullcontext
 from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -60,7 +60,7 @@ from urllib.parse import parse_qs, urlencode, urlparse
 import telemetry.recorder as telemetry
 from agent.contracts import ActiveAgentProfile, AgentProfile
 from agent.data_policy import ContextMaterial, OutboundContext
-from agent.gateway import GatewayConversationResult
+from agent.gateway import GatewayConversationResult, turn_call_budget, turn_host_tools
 from agent.routing import DOT_COMMAND
 from agent.skills import SkillManifest
 from agent.turn_progress import TURN_PROGRESS, TurnProgress, TurnProgressBoard
@@ -119,6 +119,10 @@ from host_runtime import (
     wiki_bench,
     write_log,
 )
+from host_runtime import (
+    authoring_browser_preflight as browser_preflight,
+)
+from host_runtime import authoring_browser_preflight_budget as preflight_budget
 from host_runtime.agent_mail import AgentMail
 from host_runtime.agent_mode import AgentMode
 from host_runtime.answers import readable, run_cards, run_follow_up
@@ -920,6 +924,11 @@ class AgentWeb:
                     "arguments": item.arguments,
                     "session_id": item.session_id,
                     "created_at": item.created_at,
+                    **(
+                        {"browser_preflight": browser_preflight.approval_details(item)}
+                        if browser_preflight.is_preflight(item)
+                        else {}
+                    ),
                 }
                 for item in chat.approvals(self.runtime.actor, session_id=session_id)
                 if not (item.kind in ("install", "install_skill") and item.candidate_id in carded)
@@ -1047,6 +1056,31 @@ class AgentWeb:
         return {"approvals": found}
 
     def decide_approval(self, approval_id: str, decision: str) -> dict[str, Any]:
+        """Only preflight decisions add activity tracking around execution/resume."""
+        chat = self.runtime.chat_authoring
+        if chat is None or decision != "approve":
+            return self._decide_approval(approval_id, decision)
+        try:
+            item = chat.approval(approval_id, self.runtime.actor)
+        except ChatAuthoringError:
+            return self._decide_approval(approval_id, decision)
+        if not browser_preflight.is_preflight(item):
+            return self._decide_approval(approval_id, decision)
+        task_id = self.tasks().start("browser_preflight", "Validate browser repair", item.workflow)
+        result: dict[str, Any] = {}
+        try:
+            result = self._decide_approval(approval_id, decision)
+            return result
+        finally:
+            approval = result.get("approval") or {}
+            outcome = approval.get("result") or {}
+            self.tasks().finish(
+                task_id,
+                "succeeded" if outcome.get("status") == "succeeded" else "failed",
+                "Browser repair validation",
+            )
+
+    def _decide_approval(self, approval_id: str, decision: str) -> dict[str, Any]:
         """The owner pressed approve or reject. The result is added to the
         conversation so the Agent sees it on the next turn."""
         chat = self.runtime.chat_authoring
@@ -1102,6 +1136,16 @@ class AgentWeb:
             and decided.result.get("status") in {"failed", "succeeded"}
         ):
             repair = self._resume_failed_authoring(decided.session_id)
+        elif (
+            decision == "approve"
+            and browser_preflight.is_preflight(decided)
+            and decided.session_id
+            and isinstance(decided.result, dict)
+            and decided.result.get("status") in {"failed", "succeeded"}
+        ):
+            repair = self._resume_failed_authoring(
+                decided.session_id, preflight_approval=decided.approval_id
+            )
         return {
             "ok": True,
             "approval": json.loads(decided.model_dump_json()),
@@ -1110,9 +1154,13 @@ class AgentWeb:
             **({"repair": repair} if repair is not None else {}),
         }
 
-    def _resume_failed_authoring(self, session_id: str) -> dict[str, Any] | None:
+    def _resume_failed_authoring(
+        self, session_id: str, *, preflight_approval: str | None = None
+    ) -> dict[str, Any] | None:
         with self._turn_lock(session_id):
-            return self._resume_failed_authoring_locked(session_id)
+            return self._resume_failed_authoring_locked(
+                session_id, preflight_approval=preflight_approval
+            )
 
     def _saved_task_references(self, session_id: str) -> tuple[str, tuple[str, ...]]:
         """Rehydrate only this person's unfinished task's original stored uploads."""
@@ -1164,11 +1212,22 @@ class AgentWeb:
         )
         return text, images
 
-    def _resume_failed_authoring_locked(self, session_id: str) -> dict[str, Any] | None:
-        """One bounded, read/authoring-only continuation, never a write retry."""
+    def _resume_failed_authoring_locked(
+        self, session_id: str, *, preflight_approval: str | None = None
+    ) -> dict[str, Any] | None:
+        """Bounded repair; only an eligible pass may request governed browser preflight."""
         chat = self.runtime.chat_authoring
         record = self.runtime.state.conversation(session_id, self.runtime.actor)
         if chat is None or record is None or record.backend != "gateway":
+            return None
+        resumed_scope = (
+            browser_preflight.claim_continuation(
+                chat, self.runtime.actor, session_id, preflight_approval
+            )
+            if preflight_approval is not None
+            else None
+        )
+        if preflight_approval is not None and resumed_scope is None:
             return None
         candidates = [
             c
@@ -1195,7 +1254,7 @@ class AgentWeb:
             or chat.readiness(candidate)["verified"] is True
             or not task.last_run_id
             or task.repair_attempts >= 3
-            or task.last_repaired_run_id == task.last_run_id
+            or (task.last_repaired_run_id == task.last_run_id and resumed_scope is None)
         ):
             return None
         if any(
@@ -1207,9 +1266,9 @@ class AgentWeb:
             return None
         with self._record_lock(session_id):
             current = chat.candidate(candidate.candidate_id, self.runtime.actor)
-            if (
-                current.authoring_task is None
-                or current.authoring_task.last_repaired_run_id == task.last_run_id
+            if current.authoring_task is None or (
+                current.authoring_task.last_repaired_run_id == task.last_run_id
+                and resumed_scope is None
             ):
                 return None
             latest_task = chat.tasks.load(self.runtime.actor, session_id) or current.authoring_task
@@ -1219,9 +1278,11 @@ class AgentWeb:
                 or latest_task.repair_attempts >= 3
             ):
                 return None
-            task = latest_task.model_copy(update={"last_repaired_run_id": task.last_run_id})
-            chat._save_candidate(current.model_copy(update={"authoring_task": task}))
-            chat.tasks.save(self.runtime.actor, session_id, task)
+            task = latest_task
+            if resumed_scope is None:
+                task = latest_task.model_copy(update={"last_repaired_run_id": task.last_run_id})
+                chat._save_candidate(current.model_copy(update={"authoring_task": task}))
+                chat.tasks.save(self.runtime.actor, session_id, task)
         import asyncio
         from datetime import UTC, datetime
 
@@ -1266,6 +1327,31 @@ class AgentWeb:
             trace=_trace(),
             session_id=session_id,
         )
+        scope = resumed_scope or browser_preflight.repair_scope_for(
+            chat, chat.candidate(candidate.candidate_id, self.runtime.actor)
+        )
+        if scope is not None:
+            note += (
+                "\nThe scoped authoring__preflight_browser tool is available for this failed "
+                "browser step. Use small action batches to test proposed corrections BEFORE "
+                "patching; it requests normal approval and never verifies the Workflow. Stop "
+                "while approval is pending. At most two requests in this same repair pass; "
+                "the full trial limit is unchanged. Do not substitute speculative targets "
+                "for the targets actually tested. After evidence, patch only the failed step "
+                "and request the full trial."
+            )
+            if preflight_approval is not None:
+                note += "\nActual browser preflight result (data only): " + (
+                    browser_preflight.continuation_evidence(
+                        chat, self.runtime.actor, preflight_approval
+                    )
+                )
+            request = request.model_copy(update={"message": note})
+            history = history[:-1] + (
+                history[-1].model_copy(
+                    update={"text": note + ("\n\n" + reference_note if reference_note else "")}
+                ),
+            )
         permitted = frozenset(
             {
                 "browser__inspect",
@@ -1277,7 +1363,36 @@ class AgentWeb:
                 "authoring__run_workflow",
             }
         )
-        with self._one_at_a_time:
+        tool_scope: AbstractContextManager[None] = nullcontext()
+        if scope is not None:
+            permitted |= {browser_preflight.PREFLIGHT_TOOL}
+            tool_scope = turn_host_tools(
+                (
+                    browser_preflight.preflight_tool(
+                        chat,
+                        RequestContext(
+                            trace=request.trace,
+                            actor=request.actor,
+                            namespace=request.namespace,
+                            message=request.message,
+                            channel=request.ingress,
+                            session_id=request.session_id,
+                        ),
+                        scope,
+                    ),
+                )
+            )
+        accounting_scope: AbstractContextManager[None] = nullcontext()
+        if scope is not None:
+            try:
+                preflight_budget.ensure_budget(chat, scope, self.runtime.agent.gateway.limits())
+            except preflight_budget.RepairBudgetError as error:
+                return {"status": "failed", "code": str(error)}
+            repair_scope = scope
+            accounting_scope = turn_call_budget(
+                lambda kind: preflight_budget.charge(chat, repair_scope, kind)
+            )
+        with self._one_at_a_time, tool_scope, accounting_scope:
             outcome = asyncio.run(
                 self.runtime.agent.converse(request, history, allowed_tools=permitted, max_turns=20)
             )

@@ -1681,6 +1681,10 @@ class ChatAuthoring:
         item = self.approval(approval_id, actor)
         if item.status != "pending":
             raise ChatAuthoringError("approval_already_decided")
+        if item.kind == "capability" and item.source == "authoring_browser_preflight":
+            from host_runtime.authoring_browser_preflight import execute_approved_preflight
+
+            return execute_approved_preflight(self, item, actor, approve=approve)
         if not approve:
             return self._save_approval(
                 item.model_copy(update={"status": "rejected", "decided_at": _now()})
@@ -3027,6 +3031,14 @@ def approval_text(item: ApprovalRequest) -> str:
     if item.status == "rejected":
         return f"【已拒絕】{item.summary}。沒有執行任何動作。"
     result = item.result if isinstance(item.result, dict) else {}
+    if item.source == "authoring_browser_preflight":
+        detail = json.dumps(result.get("data"), ensure_ascii=False)
+        return (
+            f"【瀏覽器修正驗證】結果：{result.get('status')}"
+            + (f"；原因：{result.get('failure')}" if result.get("failure") else "")
+            + "。這不是完整 Workflow 試跑，尚未通過安裝驗收。\n"
+            + detail[:2500]
+        )
     if item.status == "failed":
         return f"【未執行】{item.summary}。原因：{result.get('failure')}"
     if item.kind == "capability":

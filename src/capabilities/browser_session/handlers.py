@@ -24,7 +24,9 @@ import asyncio
 import re
 import threading
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
+from contextvars import ContextVar
 from pathlib import Path
 from typing import Any
 
@@ -65,6 +67,21 @@ SPEC = CapabilitySpec.model_validate(
 MAX_PAGE_CHARS = 6_000
 MAX_ELEMENTS = 80
 _SAFE_NAME = re.compile(r"[^A-Za-z0-9._-]+")
+
+# Host-owned, request-local narrowing for an approved repair preflight. Ordinary
+# requests and their model input contract are unchanged; threads copy this scope.
+_ORIGIN_SCOPE: ContextVar[tuple[str, ...] | None] = ContextVar(
+    "authoring_browser_origin_scope", default=None
+)
+
+
+@contextmanager
+def browser_origin_scope(origins: tuple[str, ...]) -> Iterator[None]:
+    token = _ORIGIN_SCOPE.set(origins)
+    try:
+        yield
+    finally:
+        _ORIGIN_SCOPE.reset(token)
 
 
 class BrowserRequest(Contract):
@@ -162,6 +179,14 @@ class BrowserSessionHandler:
 
     def run(self, request: BrowserRequest) -> BrowserResult:
         with self._lock:
+            allowed = self.allowed_origins
+            scoped = _ORIGIN_SCOPE.get()
+            if scoped is not None:
+                if not scoped or not all(
+                    origin_permitted(origin, set(allowed)) for origin in scoped
+                ):
+                    raise CapabilityRefused("web_origin_not_allowed")
+                allowed = scoped
             folder = (
                 self._downloads(request.workspace)
                 if any(action.do == "download" for action in request.actions)
@@ -182,9 +207,7 @@ class BrowserSessionHandler:
                 saved.append(kept)
                 return kept
 
-            runner = ScriptRunner(
-                browser, self.allowed_origins, timeout_s=self.timeout_s, downloader=download
-            )
+            runner = ScriptRunner(browser, allowed, timeout_s=self.timeout_s, downloader=download)
             data: dict[str, JsonValue] = {}
             items: dict[str, JsonValue] = {}
             try:

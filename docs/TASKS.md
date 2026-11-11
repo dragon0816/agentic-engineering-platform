@@ -4664,13 +4664,30 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   Initial graph also failed to preserve tested navigation: separate Skill issue,
   not proof that preflight alone fixes all authoring. Safe evidence evaluation.json,
   repair-preflight-causal-proof.json, navigation-compilation-analysis.json.
-- [ ] Owner decision: review docs/phases/AUTHORING_BROWSER_PREFLIGHT_PROPOSAL.md.
+- [x] Owner decision: approved docs/phases/AUTHORING_BROWSER_PREFLIGHT_PROPOSAL.md.
   Recommend narrowly governed browser preflight in automatic repair, bound to
   active candidate/digest/failed-step/origin, explicit model provenance and normal
   Bridge approvals; keep trial limits and other tools restricted. Directly adding
-  unrestricted browser__operate is rejected. No code/policy changes implemented;
-  requires scoped owner consent under AGENTS22. No more blind budget renewal or
+  unrestricted browser__operate is rejected. Scoped owner consent was required
+  under AGENTS22 and was subsequently received, as recorded below. No more blind budget renewal or
   unverified Workflow installation.
+- [x] Owner explicitly approved that scoped harness proposal, twice. Record of
+  consent/causal evidence in DECISIONS; no broader permission inferred.
+- [x] Contract/tests: typed repair scope and1..8action requests, exact approval
+  envelope, origin/actor/session/digest/failed-step eligibility and legacy failclosed.
+- [x] Implement per-repair-only tool, approved model-origin execution, per-call
+  origin scope, two-request cap and exactly-once approval/continuation claims.
+- [x] Verify nonbrowser/Knowledge compatibility and focused/global checks:
+  177passed; Ruff/1444format/mypy1092/pipcheck passed; independent35passed.
+  Normal full6622items:6610passed/2failed/10skipped, source562unchanged. Unchanged
+  Atlas53passed1skip and WebScript60passed whole-module rechecks. Raw initial
+  failures retained; not an initially clean full suite.
+- [ ] Commit/package/canary/idle-guard update and fresh C4C novice/output acceptance.
 - [x] Record final verification/evaluation docs locally after the bounded round;
   HANDOFF rewritten latest-only; diff check passed. New Skill revisions need concrete owner installation
   approval; further harness changes need separate causal proof/scoped consent.
+
+- [x] Independent preflight review completed; fixed both Important findings:
+  durable same-pass model/tool/deadline accounting across approvals and exact
+  operations visible on approval cards. Independent35tests passed52.14s; no
+  concrete remaining blocker. Actual C4C acceptance remains unverified.

@@ -349,6 +349,21 @@ class HostTool:
 #: replace one of the same name, for this turn and nothing else.
 _TURN_HOST_TOOLS: ContextVar[tuple[HostTool, ...]] = ContextVar("aep_turn_host_tools", default=())
 
+# Optional Host-owned accounting for a continuation of the same bounded pass.
+# Unmarked conversations keep their existing budgets and dispatch unchanged.
+_TURN_CALL_BUDGET: ContextVar[Callable[[Literal["model", "tool"]], str | None] | None] = ContextVar(
+    "aep_turn_call_budget", default=None
+)
+
+
+@contextmanager
+def turn_call_budget(check: Callable[[Literal["model", "tool"]], str | None]) -> Iterator[None]:
+    token = _TURN_CALL_BUDGET.set(check)
+    try:
+        yield
+    finally:
+        _TURN_CALL_BUDGET.reset(token)
+
 
 @contextmanager
 def turn_host_tools(tools: Sequence[HostTool]) -> Iterator[None]:
@@ -1169,6 +1184,9 @@ class Gateway:
                 return self._stopped(
                     context, "turn_time_limit", turn - 1, evidence, limits, started
                 )
+            shared_budget = _TURN_CALL_BUDGET.get()
+            if shared_budget is not None and (code := shared_budget("model")) is not None:
+                return self._conversation_failure(context, code, turn - 1, tuple(evidence))
             model_request = ModelRequest(
                 trace=context.trace,
                 model_alias=self.router.model_alias,
@@ -1248,15 +1266,19 @@ class Gateway:
             )
             # Calls that may run side by side (read-only delegations) start
             # together; each still passes the guards below, in order.
-            prefetched = await self._prefetch_parallel(
-                context,
-                response.tool_calls,
-                turn,
-                host,
-                bindings,
-                bound,
-                anchor,
-                cap - len(evidence),
+            prefetched = (
+                {}
+                if shared_budget is not None
+                else await self._prefetch_parallel(
+                    context,
+                    response.tool_calls,
+                    turn,
+                    host,
+                    bindings,
+                    bound,
+                    anchor,
+                    cap - len(evidence),
+                )
             )
             for call in response.tool_calls:
                 if len(evidence) >= cap:
@@ -1282,6 +1304,8 @@ class Gateway:
                     return self._stopped(
                         context, "turn_time_limit", turn, evidence, limits, started
                     )
+                if shared_budget is not None and (code := shared_budget("tool")) is not None:
+                    return self._conversation_failure(context, code, turn, tuple(evidence))
                 key = _call_key(call)
                 if since_new.get(key, 0) >= MAX_IDENTICAL_CALLS:
                     # The same call again with nothing new in between: spinning.

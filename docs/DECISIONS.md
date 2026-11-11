@@ -7232,3 +7232,55 @@ Reject simply adding the unrestricted existing host tool: its current adapter
 uses Bridge's default person origin, so approval/provenance needs explicit design.
 Knowledge routing/asking and global state/permission changes remain outside scope.
 Await explicit owner decision under AGENTS22 before any harness implementation.
+
+#### Scoped owner consent for governed browser preflight (2026-11-11)
+
+The owner replied「好的同意修改」to the concrete
+AUTHORING_BROWSER_PREFLIGHT_PROPOSAL.md and repeated that consent. This approves
+only candidate/session/digest/failed-browser-step/origin-bound preflight during
+automatic repair, normal Bridge authorization/approval and model provenance,
+bounded requests with unchanged three-full-trial limit. Knowledge is excluded.
+The Skill alternative is causally insufficient for this tool-availability boundary:
+the actual repair filter excludes operations before Skill execution; the unchanged
+capturing-model regression proves it. Initial graph quality remains a Skill concern.
+
+Use existing turn_host_tools for eligible repair only. Keep typed preflight scope
+and continuation claims outside AuthoringTask. Reuse capability approvals with a
+reserved source and a closed envelope that legacy BrowserRequest validation refuses,
+rather than exposing an unrestricted browser host tool or adding global grants.
+An approved single-call confirmation adapter retains model provenance and delegates
+existing authorization. Scope browser origins per invocation, never by mutating
+global configuration. No general Knowledge/routing/context-memory change approved.
+
+#### Preflight review corrections within approved scope (2026-11-11)
+
+Independent review found that approval continuations could renew model/tool/time
+budgets and the card did not expose exact actions. Preserve the approved original
+pass bound with a separate durable budget sidecar and request-local Gateway
+accounting callback, charging before actual requests. Returned conversation counts
+cannot be used: Host-check retries return only one pass's evidence. Unmarked turns
+and Knowledge never set the callback. Preserve exact approval review with actions,
+values, origins and digest in an expandable textContent block. These implement the
+explicitly approved budget/approval constraints; no general budget redesign.
+
+Approved preflight uses the same explicit trial authorization mechanism narrowed
+to only the failed browser capability in a temporary LocalPolicy; it never changes
+resident grants, owner mode or allowed origins. Initial wording about delegating
+the resident policy was inaccurate because normal approved-trial grants are also
+ephemeral. The exact model invocation and per-request origin bound remain enforced.
+Independent re-review found no concrete remaining blocker;35focused tests passed.
+
+#### Governed preflight verification checkpoint (2026-11-11)
+
+Final architecture review retained control/execution separation, model provenance,
+normal approvals, deterministic routing, unchanged Knowledge state and no domain
+selectors/rates in harness. Focus177passed; independent review35passed. Ruff,
+1444format files, mypy1092files and pipcheck passed. Full normal6622items finished:
+6610passed/2failed/10skipped, all562source bytes unchanged. Do not represent that
+as an initially clean full suite. Original failures are in unchanged modules:
+Atlas malformed HTTP status on a closed ephemeral port (BadStatusLine echoing HEAD,
+exact mechanism unproven), and WebScript0.3s target timeout before invalid-trigger
+validation. Entire unchanged modules reran53passed1skip and60passed respectively.
+No assertion/fixture changes, extra full-trial budget or unrelated source fixes.
+Preserve raw evidence and limits in local delivery records; actual C4C business
+acceptance remains separate and unverified at this checkpoint.

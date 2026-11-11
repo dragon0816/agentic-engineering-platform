@@ -1,6 +1,6 @@
 # Governed browser preflight during authoring repair
 
-Status: proposal awaiting explicit owner consent; no implementation authorized.
+Status: owner approved this scope on2026-11-11; implementation complete; full verification in progress, not deployed.
 Date: 2026-11-11. Owner rule: AGENTS.md22.
 
 ## Problem and observed boundary
@@ -88,4 +88,49 @@ Keep C4C selectors, date/FX/mapping logic and output methods in Skills/Workflows
 - Run applicable focused tests, normal full suite, lint/format/typecheck/build
   and official canary/resident checks before claiming implementation delivered.
 
-No harness code, tests or permission policy has been changed for this proposal.
+## Approved implementation contract and slices
+
+The owner explicitly replied「好的同意修改」twice after reviewing this proposal.
+Consent applies to this bounded repair preflight only. No broader harness work.
+
+1. Add closed local contracts for a repair scope (actor/session/candidate, actual
+   failed trial/digest/attempt, failed browser step and original origins) and a
+   preflight action request (current digest,1..8 documented browser actions).
+   Resolve only fixed/run inputs from the saved actual trial values; reject
+   previous-step-dependent inputs and unsupported collection loops for preflight.
+2. Offer authoring__preflight_browser through existing turn_host_tools ONLY in
+   an eligible repair pass. The model tests small proposed corrections BEFORE
+   its existing scoped patch. No general tool registry or Knowledge changes.
+3. Reuse capability approvals with a reserved authoring-preflight source and a
+   typed envelope in arguments. This preserves ApprovalRequest's schema; older
+   code rejects the envelope as invalid BrowserRequest before any handler call.
+   Approval commits the scope, candidate digest and exact browser arguments.
+   Always wait for explicit approval before executing, at most2requests/pass.
+4. On approval, revalidate scope/digest/origins/arguments and durably claim the
+   request before dispatch. Use model provenance and a single-call confirmation
+   adapter with the normal approved-trial authorization narrowed to that failed
+   capability. Its temporary grant is never added to the resident policy.
+   Scope origins through a host-only ContextVar in the existing browser handler;
+   normal requests are unchanged. Return real observations/failure evidence.
+5. Only these approvals can resume the SAME bounded repair pass; durably claim
+   continuation once. Keep its original trial/attempt and do not renew budgets,
+   mark verification or permit downstream replacement. Track execution as active
+   work so restarts cannot interrupt it. Preflight records stay separate from
+   AuthoringTask/Knowledge state. Rejected/stale requests stop without acting.
+6. Tests first: contract negatives, fake-browser integration, authorization and
+   at-most-once checks, eligible-only model tool discovery, approval continuation,
+   unchanged nonbrowser repair and Knowledge isolation. Then focused/global/full
+   verification, package/canary/guarded resident update and fresh novice C4C replay.
+
+Implemented source scope: three host_runtime preflight modules, small integration
+changes in chat_authoring.py/web.py/web_page.py and a request-local origin scope
+in the browser-session handler. Independent review found that consuming returned
+Gateway counts cannot preserve the approved same-pass budget: Host-check retry
+returns only one pass's evidence. Therefore agent/gateway.py has an optional
+request-local accounting callback, charged before each actual model/tool request.
+Only eligible repair passes set it; ordinary conversations and Knowledge leave it
+unset. Persistent counters and a fixed deadline include approval continuations,
+without renewing the three-trial limit. This implements the approved no-renewal
+constraint, not a general turn-budget redesign. Approval cards show exact actions,
+values, sites and digest before execution. No new dependency, global tool exposure
+or general permission-policy modification.
