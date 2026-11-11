@@ -1,8 +1,9 @@
 # Capability approval continuation — harness proposal (NOT approved)
 
 Date: 2026-11-11. Author: Claude Code, after taking over C4C from Codex.
-Status: awaiting explicit scoped owner consent under AGENTS.md rule 22.
-Nothing in this document has been implemented.
+Status: owner approved on 2026-11-11 (「同意提案的範圍，但要確保knowledge
+asking不會有問題」) and implemented in `web.py::_continue_after_capability`.
+See "As implemented" at the end. The secondary finding remains unapproved.
 
 ## Problem
 
@@ -81,3 +82,22 @@ stays bounded by the owner's button.
 - One bounded live check: resume the preserved round 7 conversation and
   confirm a single approval leads to an automatic next turn. Not a new
   unbounded novice loop.
+
+## As implemented (2026-11-11)
+
+- Trigger: approved `kind == "capability"`, not preflight, result status
+  succeeded/failed, Gateway conversation.
+- Knowledge condition (owner's requirement): continue only when the session's
+  authoring task has planned requirements, no verified digest and no open
+  question. Knowledge and ordinary conversations have no planned requirements
+  and keep exact current behavior; Knowledge routing of the person's messages
+  is untouched because the continuation calls the model directly.
+- Locking: per-session turn lock, non-blocking (active turn → no
+  continuation). Unlike the repair path it does not hold `_one_at_a_time`,
+  mirroring the ordinary user turn whose normal tools it offers.
+- Activity: an `authoring_continuation` Agent Web task while it runs, so the
+  idle guard defers restarts.
+- At most once per approval: `decide` refuses an already decided approval.
+- The existing completion check still applies: a text-only end on an
+  unfinished task is re-asked once and then held as needs_input.
+- Tests: `tests/test_capability_approval_continuation.py` (7 cases).

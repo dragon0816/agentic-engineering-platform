@@ -7387,3 +7387,24 @@ No new harness proposal was approved or implemented. Transfer authorization is
 not harness consent; Claude must apply AGENTS22 independently and preserve
 Knowledge/permissions/budgets. No further live testing by the handing-off agent.
 See docs/phases/C4C_SKILL104_EVALUATION.md and latest HANDOFF.
+
+#### Owner approves capability approval continuation, Knowledge must stay safe (2026-11-11)
+
+Owner:「同意提案的範圍，但要確保knowledge asking不會有問題」. This is explicit
+AGENTS22 consent for exactly docs/phases/CAPABILITY_APPROVAL_CONTINUATION_PROPOSAL.md:
+one model continuation after an approved ordinary capability decision. The
+result-clipping/failure-text finding is NOT approved.
+
+Knowledge condition, implemented as narrowing inside the approved scope: the
+continuation runs only when the Gateway conversation holds an unfinished
+authoring task with planned requirements, no verified digest and no open
+business question. Ordinary and Knowledge conversations (no planned
+requirements) keep their exact current behavior. The continuation is a direct
+model turn, so Knowledge routing of the person's own messages is untouched. It
+takes only the per-session turn lock (non-blocking: an active turn means no
+continuation), mirroring the ordinary user turn, and not the global
+`_one_at_a_time` lock that the restricted repair toolset uses, so Knowledge or
+other normal tools called inside it cannot contend with that lock. At most once
+per approval follows from `decide` refusing an already decided approval.
+Rejected alternative: a separate Knowledge-only tool restriction, which would
+change normal turn tools beyond the approved scope.
