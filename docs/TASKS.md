@@ -4787,3 +4787,10 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   only; check ok; install card ap-20261111-124004-4d6857 awaits OWNER approval
   (Skill install is outside the delegated approval list).
 - [ ] After owner approval: guarded restart, verify loaded 1.0.5, resume round7 drive.
+- [x] Rejected stale round7 card ap-20261111-123138-43ea2b (filled a range string into a
+  single list-level datePicker, not the SOP Document Date Between dialog).
+- [ ] Skill 1.0.5 install card ap-20261111-124004-4d6857 still pending: Claude Code's
+  own permission classifier blocked the delegated self-approval ([Self-Approval]); not
+  worked around. Owner must approve it in Agent Web (or allow it in Claude Code
+  settings). Then: guarded restart, verify 1.0.5 loaded, resume round7 with one
+  plain message (no continuation is scheduled after a rejection).
