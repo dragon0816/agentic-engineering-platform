@@ -1,187 +1,153 @@
-# C4C authoring: Skill 1.0.3 failed; 1.0.4 awaits approval
+# C4C autonomous workflow development — Claude Code handoff
 
-Date: 2026-11-11. Branch main. Runtime source513784d01b8f463733ef40cb08e95a1a7ea26a75
-is committed locally and delivered. No push. Use .venv/Scripts/python.exe.
+Date: 2026-11-11. Owner requested transfer because repeated testing was taking
+too long. This agent has stopped live testing. No active AEP turn, pending
+session approval or unanswered business question at the final checkpoint.
 
-## Active evaluation / next action
+## Task and acceptance
 
-Owner explicitly approved Skill card ap-20261111-034133-58c53f and retest with
-「同意套用 Skill 並重測」. Normal owner API installed C4C navigation1.0.3,
-candidate sk-20261110-155444-ab60a7 revision4, digest
-b08668b0ae5cf6c9a4233bdde08dc5f6bfd56159b8355e784f7b7e187dcb2e5c.
-Guarded installed-runtime restart passed, config/source unchanged; currentPID34892,
-port53583. Fresh installed bootstrap proves actual1.0.3 instructions match5704chars
-(SHA0d1df9e41f133ff0f837a43eae8ad0f694242ae11e862d71eb1b2718fc7c29bd),
-SOP Skill1.0.0 present, harness_guidance None. No extra harness edits.
+Make AEP itself develop a reusable C4C Sales Orders -> Excel Workflow from the
+original novice prompt plus SOP and workbook, asking only missing business
+questions. Do not have the coding agent secretly author the business Workflow
+and call that autonomous AEP development. Do not restart another unbounded
+end-to-end test loop; independently diagnose and narrow the next change first.
 
-Live Knowledge smoke in exhausted round5 session: concept question answered,
-NO tool calls, task JSON byte-identical and repair_attempts remains3. Proof
-.scratch/c4c-skill103-knowledge-smoke-proof.json. Then old failed candidate+6
-approval records archived and removed using normal API, prior reports preserved,
-no generated .aep-run source found. Do not renew old candidate's trials.
+Original prompt:
+我想要到C4C取得sales order並且把檔案export出來貼到excel中。附件sales_order.pdf是操作SOP，"C:\Users\Chi_L\Downloads\Sales name and Dept.xlsx"是要export出來的樣子。請幫我實作這個workflow.
 
-Round6 conversation-48e4ae52be9048b891d0d86892224807 is CLOSED/INACTIVE; client
-76741 exited normally. Exact original request/PDF/internal Gateway; no technical
-prompt injection. Eight approved normal capability calls:2failed,6succeeded.
-Eight plain manual continuations required. Discovery paged body offsets0/200/400/
-600 then requested0again. Final repeat ap-20261111-045721-17ffe7 rejected normally.
-No pending session approvals/questions. No candidate/full trials/Excel produced;
-novice acceptance FAILED. Sales Orders content appeared, but no prescribed query
-or repeatable phase/output proof. No root browser close/profile/credential edits.
+Original SOP: C:/Users/Chi_L/.paseo/uploads/upload_5213e6eb-db55-46e5-8e44-7ee1884c2992/Sales_order.pdf
+Workbook: C:/Users/Chi_L/Downloads/Sales name and Dept.xlsx
+Known owner facts: automatic SSO; 2026-07-01..2027-06-30; EUR1,
+USD0.87EUR, TWD0.02712085EUR (initial no was superseded by yes); new local Excel.
+Latest explicit answer: for currencies absent from SOP rates, preserve original
+currency amount, leave EUR blank and list items needing confirmation. Do not
+invent other rates, drop those records or conceal incomplete EUR aggregates.
+Scope: query/export/local Excel only; no C4C order writes or mail.
 
-Causal ordinary-approval continuation gap confirmed; responses also exceed
-approval_text's2000char clipping. Clipping's role in the loop is a hypothesis.
-Existing authorized browser__inspect gives a Skill-level alternative; do not
-claim Skill changes exhausted or edit harness without new scoped owner consent.
-Full evidence/limits: docs/phases/C4C_SKILL103_EVALUATION.md and local
-.scratch/c4c-skill103-novice-20261111/evaluation.json. Do not expose enterprise
-rows/auth URLs. Known factual Knowledge smoke already passed as described above.
+Acceptance requires an actual full replay of the compiled Workflow and independent
+output reconciliation: source IDs/counts/page coverage, active filters/dates,
+owner/department mapping, FX and monthly totals. Engine success, file existence
+and writer-input counts alone are insufficient. No unverified installation.
 
-Next Skill1.0.4 format check/submission passed; NOT INSTALLED/NOT TESTED.
-Same candidate sk-20261110-155444-ab60a7 revision5, digest
-e3a8bce449022d0e07d9e27391b16b5e01d9eeb821e333e95d2f49ace02d91e2,
-card ap-20261111-050002-b78d8a. Only adds read-only observation tool preference,
-overview-first/scoped discovery and bounded no-progress scanning. Commands,
-normal approvals/permissions/replay/Excel obligations unchanged. Await exact
-owner installation approval under creator step5, then guarded idle restart/load
-and fresh behavior evaluation. No automatic approval from1.0.3consent.
+## Mandatory constraints
 
-This slice changes repository documentation only. Existing read-only tool grant,
-closed-schema and Knowledge-isolation targeted regressions:4passed in9.78s,
-using .venv/Scripts/python.exe -m pytest -q with the three selected node IDs
-in test_browser_session.py and test_authoring_knowledge_isolation.py. Skill1.0.4
-normal contract check passed. No new runtime build/install required.
-Known business facts may answer actual missing questions. Only normal query/
-export/local-Excel approvals are authorized; no final unverified installation.
-Actual Skill1.0.3 novice/Excel acceptance remains UNVERIFIED. Next: poll76741,
-inspect statuses/question input_name and preserve source/trial/output evidence.
+Read AGENTS.md, CLAUDE.md, docs/ARCHITECTURE.md, docs/REQUIREMENTS.md,
+docs/ROADMAP.md, docs/DECISIONS.md and docs/TASKS.md before implementation.
+AGENTS22: Skill-first; before EVERY harness edit show causal/evaluation evidence
+why Skill improvement cannot solve the behavior, smallest scope, impacts and
+regressions, then obtain explicit scoped owner consent BEFORE editing. This
+handoff is not consent. Harness includes routing/context/state/dispatch/retry/
+continuation/completion/permission behavior regardless of filename.
+Owner only previously approved docs/phases/AUTHORING_BROWSER_PREFLIGHT_PROPOSAL.md,
+already implemented. No new continuation/context/Knowledge/permission fix is
+approved. Domain procedures remain Skills/Workflows. Preserve budgets and gates.
+Never weaken tests. Follow .agents/skills procedures. Use .venv/Scripts/python.exe
+(system Python ABI differs). Local main commits authorized; NO push.
 
-## Owner goal and constraints
+Enterprise rows/amounts stay within internal AEP Gateway/local validators; coding
+models receive statuses/counts only. Raw result JSON may contain enterprise data:
+do not dump it to Claude's context. Never print auth URLs/tokens/cookies.
 
-Original novice request and PDF plus Downloads/Sales name and Dept.xlsx should
-let AEP clarify missing BUSINESS facts, develop/trial/self-repair a Workflow, and
-independently reconcile its Excel with source IDs/counts, dates, mapping, FX and
-monthly totals. Do not inject selectors, old graph or business scripts into the
-novice conversation. Business facts already provided: automatic SSO; fixed
-2026-07-01..2027-06-30; EUR1,USD0.87,TWD0.02712085 in EUR; new local Excel.
-Query/export/local-file scope only, no C4C order changes or mail.
+## Current resident and installed Skills
 
-AGENTS22: before EVERY harness change, evaluate applicable/selected Skill,
-provide causal/evaluation evidence why Skill cannot improve that behavior, state
-minimal scope/impacts/checks and obtain explicit owner consent BEFORE editing.
-Owner twice approved only docs/phases/AUTHORING_BROWSER_PREFLIGHT_PROPOSAL.md.
-No additional harness change is authorized. Remaining C4C procedure work belongs
-in Skills/Workflows. Generic Knowledge/routing/context-memory/policy changes are
-outside scope. New Skill installation still has its own exact owner approval.
+%LOCALAPPDATA%/AgenticEngineeringPlatform/preview-0.1.0; actor leo.chi,
+Bridge bridge-tp401555, port53583. Read fresh host.json and workspace/agent-web.json
+privately for local API auth. Do not print the credential URL. Use installed
+.venv/Scripts/aep-host.exe hidden, not development launcher. Before restart/update
+freshly check activity/questions/forms/PID/config, preserve active work.
 
-## Delivered generic preflight implementation
+Runtime source is513784d01b8f463733ef40cb08e95a1a7ea26a75. Later commits are docs.
+No runtime changes/build during Skill1.0.3/1.0.4 evaluation.
+SOP development1.0.0 and C4C navigation1.0.4 are installed and approved.
+Skill candidate sk-20261110-155444-ab60a7 revision5, digest
+e3a8bce449022d0e07d9e27391b16b5e01d9eeb821e333e95d2f49ace02d91e2;
+card ap-20261111-050002-b78d8a approved by owner「同意核淮」.
+Guarded restart preserved config/source. Fresh installed bootstrap proved6501chars,
+SHA0089a105cd6678e0d8ef6e13061e2556666b21ccc9bc91b56d9ad788d93c1b7e,
+SOP1.0.0 present, harness_guidance None. Normal authoring APIs only; no direct
+Host manifest edits. New Skill revisions need normal separate installation approval.
 
-513784d0 adds3 host_runtime modules (contracts, preflight execution, persistent
-budget) plus scoped integrations in chat_authoring/web/web_page/browser handler
-and optional Gateway turn_call_budget. Only an actual approved failed browser
-step of the active actor/session/candidate/digest/origin gets the ephemeral tool.
-1..8actions,2requests/repair pass; no downloads/paginated export. Normal exact
-approval, model-origin execution and normal approved-trial authorization narrowed
-to that capability in TEMPORARY policy, no global grants. Per-call origin context.
-Durable exactly-once execution/continuation. Shared persistent deadline/model/tool
-counters include approvals and actual Host-check retries; never renewed. Unmarked
-conversations/Knowledge unchanged. Preflight never marks full Workflow verified.
-Owner approval UI exposes exact actions/values/origins/digest using textContent.
+## Latest actual test: round7, incomplete
 
-Independent review initially found budget renewal and inadequate approval detail;
-both fixed. Re-review found no concrete remaining blocker;35tests passed52.14s.
-Root35passed49.13s; expanded focused177passed127.66s including Knowledge, repair,
-patch, collection completeness, browser, effects and approvals. Ruff passed,
-1444formatfiles passed, mypy1092files passed, pipcheck passed.
+Conversation-77223c69b5b24dc3aa6868789f440014 (lowercase conversation prefix in IDs).
+Exact request/PDF/internal Gateway proof passed; no selectors, old graph or
+business script injected. Owner's unsupported-currency answer was sent verbatim
+in plain business language; question cleared.
 
-Full NORMAL6622items/553modules in4shards:6610passed/2failed/10skipped, all562
-source bytes unchanged. This is NOT an initially clean full suite. Unchanged
-Atlas probe received BadStatusLine containing HEAD request text on a closed
- ephemeral port; exact mechanism unproven. Whole module reran53passed/1skip.
-Unchanged WebScript0.3s target wait timed out before invalid-trigger validation;
-whole module reran60passed. No weakened assertions/fixtures or unrelated source
-fixes. Raw browser-preflight-verified-20261111 logs/XML and recheck proofs retained.
-Rollup .scratch/browser-preflight-verification-rollup.json.
+21 browser__inspect calls:16succeeded/5failed (missing/ambiguous scope). Skill
+tool-selection improvement was observed, unlike round6's blind body-offset loop.
+11 normal browser capability approvals:9succeeded/2failed (navigation wait timeout,
+All click target missing). Ordinary exploratory navigation/view/advanced-search/
+date-fill/query/dropdown operations ran. Full requested filters/source total were
+NOT independently verified. AEP also chose existing browser__operate Host tools
+itself; coding agent did not execute these directly or change authorization.
 
-sdist/wheel build passed; all562wheel source bytes matched. Official bundle:
-.scratch/browser-preflight-offline-bundle/aep-windows-preview-0.1.0-513784d01b8f.zip
-SHA256 df94b85cad89befcfe18bd2e1625e2b8a8e1e05a2dc939a96179f04d395b4934.
-Fresh canary install/doctor/pipcheck/Agg/isolated new-module imports and all562
-source bytes passed. Guarded resident normal installer update preserved semantic
-config. Fresh HTTP, pipcheck, isolated imports and all562installed bytes passed.
-Proofs .scratch/browser-preflight-{wheel,canary,resident-update}-proof.json and
-browser-preflight-resident-verification.json. Runtime source remains513784d0 even
-if later docs commits advance main. Do not rebuild for documentation-only changes.
+All11ordinary approvals returned without model continuation.10plain「請繼續」
+messages were manually sent. This is NOT autonomous completion. Last approval
+ap-20261111-055255-66ae4a succeeded; result-22.json. NO continuation was sent after
+it. Client34048 closed normally. Final progress inactive, pending approvals0,
+question null. No candidate, full trial or Excel; independent acceptance pending.
 
-Resident: %LOCALAPPDATA%/AgenticEngineeringPlatform/preview-0.1.0, actor leo.chi,
-Bridge bridge-tp401555, port53583, latest observed serverPID17824. Read fresh
-workspace/agent-web.json privately, never print auth URL/token. Launch installed
-.venv/Scripts/aep-host.exe hidden, not dev launcher. Fresh activity/PID/config
-checks before every restart/update; do not interrupt active work/questions/forms.
-The update driver may retain a PTY while the launched resident holds inherited
-handles; do NOT kill the resident just to close that tool session.
+Evidence: .scratch/c4c-skill104-novice-20261111/{session,initial-request-proof,
+evaluation,tool-observation-summary}.json and result-0..22.json (raw stay local).
+Safe metadata helpers: .scratch/c4c_skill104_status.py,
+.scratch/summarize_c4c104.py. Driver .scratch/c4c_skill104_client.py resumes SAME
+session; do not use --new blindly. Normal commands: send <plain message>,
+approve <reviewed approval ID>, quit. Launch tty:true for ongoing stdin.
+Proofs .scratch/c4c-skill104-{owner-approval,loaded,resident-update-proof}.json.
+Restart helper's legacy installer=passed key means restart only, no reinstall.
+Read docs/phases/C4C_SKILL104_EVALUATION.md for exact outcomes/limits.
 
-## Actual novice round5: FAILED acceptance
+## Confirmed boundary versus unresolved hypotheses
 
-conversation-a6f1812e95784453ab71178cb3c9cfa0, candidate
-wf-20261111-024316-0a6ec1 engineering/c4c-sales-orders-export-excel1.0.0 rev3.
-Exact original prompt/PDF once, internal Gateway UNCLASSIFIED; hashes and exact
-prompt equality verified in .scratch/c4c-governed-preflight-20261111/
-initial-request-proof.json. Only known automatic-SSO fact supplied as a natural
-answer. No graph/selectors/business code supplied. No browser-auth reset or manual
-page switch this round. AEP read workbook, explored C4C itself and collected767
-unique IDs (not old765); independent UI-total reconciliation was NOT reached.
-Initial discovery/drafting took71model turns/71tool calls in its second turn.
+web.py::_decide_approval resumes full trial and governed repair-preflight results,
+not ordinary capability results.11actual decisions confirm the missing automatic
+continuation. A Skill cannot schedule a model after that controller returns.
+This is evidence for a scoped proposal, NOT authorization to edit harness.
 
-All3full approved trials failed BEFORE Python/Excel:
-1 run-a9f68923168c48d98527f28bfa50b6cf: actions[7] wait_for timeout.
-2 run-001b6f9bb6cb4806ac69fc2f9223ae0f: actions[9] click target missing.
-3 run-67b00a4c97334cdea9a10250788842a6: actions[2] ensure_visible.trigger timeout.
-Three auxiliary preflights actually executed with model provenance and exact owner
-approvals: first timed out, second and third succeeded. AEP independently patched
-actions7 then9; all downstream Excel code unchanged. First repair pass persistent
-counter10model/10tools observed, same20/150limit and fixed deadline; full-trial
-attempt count unchanged by preflights. No claim that auxiliary success verified
-whole Workflow. This proves the new access path works, not business acceptance.
+chat_authoring.py::approval_text clips generic capability data at2000characters.
+Clipping is confirmed; its role in locator failures is NOT proven. Do not bundle
+an unapproved context rewrite into a scheduling change. Domain state/target
+reliability remains unresolved; successful fragments do not prove full replay.
+Independently evaluate these causes rather than treating one as the whole problem.
 
-No Excel produced or installed Workflow. Keep failed draft unverified; do not
-approve installation or claim writer/financial checks passed. Client59498 closed
-normally with quit. All raw result0..7, candidate revisions, preflight cards and
-proofs in .scratch/c4c-governed-preflight-20261111; evaluation.json is concise.
-Source baseline records are in result-1.json at
-answer.outcome.conversation.tools[66].host.data.data.sales_orders. IDs767unique.
-Do not print rows/amounts or send them to native models. A test-summary extractor
-briefly matched Discount by substring; corrected artifact now keeps exact count
-fields and skips records. Do not reuse that unsafe substring extraction.
+## Prior evaluation and delivered runtime verification
 
-Older round4 and765row observation are in .scratch/c4c-preflight-sop-20261111.
-Its draft/3approvals were archived and removed via normal APIs before round5;
-previous reports preserved. Older round4 SAML recovery involved root gracefully
-closing ONLY a dedicated idle error-tab browser; preserve that historical
-intervention in any cross-round narrative, not as this round's action.
+Round5 .scratch/c4c-governed-preflight-20261111: AEP discovered767unique order IDs
+(not independently UI-total verified). Candidate wf-20261111-024316-0a6ec1 failed
+all3full trials before Excel: wait7,click9,ensure_visible.trigger2. Governed
+preflight1failed/2passed; actual path worked but business acceptance failed.
+Old failed draft/6approvals recoverably archived/deleted before round6, reports
+preserved. Do NOT reset exhausted old candidate to renew trials.
 
-## Historical Skill 1.0.3 revision rationale
+Round6 Skill1.0.3:8approved calls/8manual continuations, repeated body DOM offsets,
+no candidate/Excel. Final repeated inspection rejected normally. Read
+docs/phases/C4C_SKILL103_EVALUATION.md. Live factual Knowledge smoke in exhausted
+round5 answered without tools; task bytes identical, repair_attempts stayed3.
 
-Read aep_catalog/skill_format/current Skill and both command capability contracts
-through the available mcp__aep__ tools. Submitted through normal authoring tools,
-never wrote Host manifests directly. Skill1.0.3 commands/alias unchanged, no
-harness_guidance/global routing/permissions. Instructions reduced6641->5704chars
-and restructured: verify entire ordered browser phase from entry AND retained
-state before first full trial; prefer small control-state steps separate from
-paged collection; inventory stable observed targets, forbid persisting generated
-numeric IDs; conditional menus/search panels; exact label vs wait regex semantics;
-normal approvals/origin bounds; factual Knowledge guard; full source/Excel checks.
-Format check passed; behavior remains untested. Draft:
-.scratch/c4c-navigation-1.0.3.skill.json; expected cases and pending status:
-.scratch/c4c-navigation-1.0.3-evaluation.json. The original1.0.2 already mentioned
-state/ID safety, but live compilation still used generated IDs and tested only
-fragments. Do not claim new wording alone has solved that noncompliance.
+Delivered513784d0: governed browser preflight restricted to actual approved failed
+browser step, current actor/session/candidate/digest/origin, model provenance,
+exact owner approval,1..8actions,2requests per repair pass, durable at-most-once
+execution/continuation and persistent original model/tool/deadline accounting.
+Full-trial limit3 unchanged. No generic permission/Knowledge expansion.
+Independent35tests passed52.14s; root35passed49.13s; expanded177passed127.66s.
+Ruff, format1444files, mypy1092files, pipcheck passed. Full6622items:
+6610passed/2failed/10skipped, all562source bytes unchanged. NOT initially all green.
+Unchanged Atlas ephemeral-port BadStatusLine whole-module recheck53passed1skip;
+unchanged WebScript0.3s timing failure whole-module recheck60passed. No weakened
+tests. Raw logs .scratch/browser-preflight-verified-20261111-* and rollup JSON.
+Build/wheel/offline bundle/canary/resident562source matches and doctor/import/
+pipcheck/HTTP passed. Bundle .scratch/browser-preflight-offline-bundle/
+aep-windows-preview-0.1.0-513784d01b8f.zip SHA256
+df94b85cad89befcfe18bd2e1625e2b8a8e1e05a2dc939a96179f04d395b4934.
+Existing observation-grant/closed-schema/Knowledge regressions4passed9.78s before
+1.0.4; runtime unchanged, no fresh full suite/build in the latest doc/Skill slice.
 
-Next evaluations after approval: fresh/retained states, dynamic IDs, accessible
-name/text difference, complete phase replays, preserved budgets/collection,
-factual C4C/Knowledge question makes no authoring/browser calls. Then fresh exact
-novice prompt and independent Excel oracle. Old .scratch/verify_c4c_live.py is NOT
-adequate as-is (writer-input comparison and prints amounts). Validate against
-independent source and output metadata, not an engine success or file-exists flag.
-No additional harness edits; assess Skill effect first and ask owner for any
-concrete further harness expansion with evidence.
+## Next recommended action
+
+Independently read the evidence summaries and relevant controller/Skill contracts,
+report a bounded diagnosis and smallest next slice. Avoid another open-ended live
+loop. Skill fixes may proceed via normal check/submit/owner install; ANY new
+harness scope needs a concrete proposal and explicit owner consent first. Once
+appropriate, resume the preserved round7 session and verify actual final output.
+Codex is handing off and will not continue tests concurrently.

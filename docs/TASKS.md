@@ -4727,6 +4727,23 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   read-only inspector provides a Skill-level alternative; no harness changes.
 - [x] Prepare/check/submit Skill1.0.4 revision5: prefer authorized read-only
   inspection, overview-first/scoped discovery and bounded no-progress scanning.
-- [ ] Owner installation approval for ap-20261111-050002-b78d8a, then actual
-  tool-selection/novice/output evaluation. No success claim for untested wording.
+- [x] Owner explicitly approved ap-20261111-050002-b78d8a with「同意核淮」;
+  normal exact-digest install and idle-guarded restart passed. Fresh installed
+  bootstrap proves Skill1.0.4 instructions6501chars match, SOP1.0.0 remains.
+- [ ] Round7 conversation-77223c69b5b24dc3aa6868789f440014: exact original prompt/
+  PDF/Gateway proof passed, no technical prompt injection. Initial turn made
+  plan_workflow/needs_input calls only. Owner answered unsupported_currency_rule:
+  preserve original amount, EUR blank, list exceptions. Actual answer submitted
+  into the same session. Later read-tool selection improved; complete behavior
+  remains unverified. Driver34048 now closed for Claude Code handoff; see below.
   See docs/phases/C4C_SKILL103_EVALUATION.md for exact evidence and limits.
+
+- [x] Stop round7 on owner's request to hand off to Claude Code. Eleven normal
+  browser decisions (9passed/2failed), ten manual continuations, 21read inspections
+  (16passed/5failed). No candidate/full trial/Excel; autonomous acceptance FAILED,
+  functional evaluation incomplete. Driver34048 closed; no active turn/pending
+  session approval/question. Preserve the same session and supplied business rule.
+- [x] Record Skill1.0.4 load/procedure effects, causal continuation boundary and
+  unresolved domain/diagnostic gaps in docs/phases/C4C_SKILL104_EVALUATION.md.
+- [ ] Claude Code takeover: independently narrow the next change before another
+  live loop. No new harness consent; no unverified Workflow installation.

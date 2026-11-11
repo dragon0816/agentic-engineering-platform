@@ -7351,3 +7351,39 @@ new scoped harness consent exists. Normal format check/submission passed, same
 candidate revision5/digeste3a8bce4..., cardap-20261111-050002-b78d8a awaits exact
 owner approval. No installation or behavioral-success claim. Full details and
 acceptance cases: docs/phases/C4C_SKILL103_EVALUATION.md.
+
+#### Owner approves Skill 1.0.4; preserve missing business decision (2026-11-11)
+
+Owner answered「同意核淮」to exact cardap-20261111-050002-b78d8a.
+Normal owner decision verified candidate/revision digest before installation.
+Idle-guarded restart preserved config/source. Fresh installed bootstrap loaded
+1.0.4instructions6501chars, SHA0089a105cd6678e0d8ef6e13061e2556666b21ccc9bc91b56d9ad788d93c1b7e;
+SOP1.0.0 remains, harness_guidance None. No runtime/harness changes or new build.
+
+Round7 uses the exact original prompt/PDF/internal Gateway. First turn correctly
+requested a missing business decision: treatment of currencies absent from the
+SOP's USD/EUR/TWD rates. Ask owner rather than invent a rate or business rule.
+Question unsupported_currency_rule remains pending; no browser evaluation or
+Excel acceptance claim. Keep this session/question intact and resume on answer,
+not by starting over or supplying technical instructions.
+
+Owner subsequently chose: preserve original currency amount, leave EUR blank,
+and list items needing confirmation for any currency without a SOP rate. This
+actual business answer was sent into the same round7 conversation; do not guess
+other FX values or drop these records from the original-amount output. Any EUR
+aggregate with unresolved items must preserve that incompleteness explicitly.
+
+#### Owner requests Claude Code handoff (2026-11-11)
+
+Owner:「目前好像沒完沒了，先交接給claude code試看看吧」. Stop this
+agent's live testing and transfer durable evidence instead of continuing the
+manual loop. Round7 Skill1.0.4 improved read-tool selection (21inspections,
+16succeeded), but eleven normal approvals still required ten plain manual
+continuations. No candidate/full trial/Excel. All11decisions lacked automatic
+continuation; source controller confirms this is outside Skill scheduling power.
+Locator/state problems also remain unverified, so no single-cause success claim.
+
+No new harness proposal was approved or implemented. Transfer authorization is
+not harness consent; Claude must apply AGENTS22 independently and preserve
+Knowledge/permissions/budgets. No further live testing by the handing-off agent.
+See docs/phases/C4C_SKILL104_EVALUATION.md and latest HANDOFF.
