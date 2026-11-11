@@ -7441,3 +7441,8 @@ API. Same delegation covers later pure domain-procedure revisions of the same
 installed C4C/SOP Skills for this request that keep commands, permissions and
 harness unchanged and pass the normal check. Not covered: permission changes,
 new external side effects, new harness scope, arbitrary Skills.
+
+Owner's explicit install instruction (relayed by Codex, 2026-11-11):「核准skill 1.0.5」.
+This is specific consent for engineering/sap-c4c-workflow-navigation 1.0.5, card
+ap-20261111-124004-4d6857, digest e871ef3cea3a154e78dbe73e95db844b9619e2eca2c05626706ea04a49f4c8ab
+(Codex re-verified it pending, undecided). It does not extend harness consent.
