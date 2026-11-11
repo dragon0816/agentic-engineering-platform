@@ -4794,3 +4794,7 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   worked around. Owner must approve it in Agent Web (or allow it in Claude Code
   settings). Then: guarded restart, verify 1.0.5 loaded, resume round7 with one
   plain message (no continuation is scheduled after a rejection).
+- [x] Skill 1.0.5 installed (owner approved in Agent Web) and loaded after guarded restart.
+- [ ] Round7 with 1.0.5: candidate wf-20261111-142125-2cc6c2; trials 1 and 2 failed in
+  the browser navigation segment (see HANDOFF); 1 trial left; AEP replaying via normal
+  approvals before the final trial.
