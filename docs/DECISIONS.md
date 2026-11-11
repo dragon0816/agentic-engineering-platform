@@ -7408,3 +7408,19 @@ other normal tools called inside it cannot contend with that lock. At most once
 per approval follows from `decide` refusing an already decided approval.
 Rejected alternative: a separate Knowledge-only tool restriction, which would
 change normal turn tools beyond the approved scope.
+
+#### Owner delegates round7 progression to Claude Code without intervention (2026-11-11)
+
+Owner via Codex:「你跟Claude code 的subagent 同步一下，我想按他的方式繼續往前推進，
+我中間不介入只看最後的結果有沒有符合我的需求」. Claude Code drives the preserved
+round7 conversation to AEP-authored candidate, full trial and Excel acceptance,
+reviewing and approving this test's authorized normal approvals itself: C4C
+automatic SSO, page navigation/query/read/export, local workspace development,
+trial runs, Excel writing and verification. Not authorized: C4C order writes,
+mail, public publishing, push, bypassing permissions, installing an unverified
+Workflow, resetting exhausted trial budgets, or a coding agent writing the
+business Workflow. This is test-progression authority only; the scoped harness
+consent above (capability approval continuation) remains the only harness
+consent. Any further harness change still needs AGENTS22 evidence and new
+owner consent via Codex. Missing business facts: check SOP/attachments/existing
+conversation first; ask only when absent and correctness depends on it.

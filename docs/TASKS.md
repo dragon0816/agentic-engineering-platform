@@ -4771,3 +4771,6 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   the next approval itself; no manual continue. Next approval left pending.
 - [ ] Continue round7 toward candidate/full trial/Excel with independent output
   reconciliation; continuation fix alone does not prove acceptance.
+- [ ] Owner delegated round7 progression to Claude Code (no intervention): drive
+  AEP to candidate, full trial, replay and independently reconciled Excel under
+  the recorded approval boundary (DECISIONS 2026-11-11).
