@@ -7484,3 +7484,22 @@ no sleep/timeout padding, no session churn to renew chances. Harness scope follo
 AGENTS22 and is NOT granted: stop with evidence, minimal scope and regression checks.
 Platform note: the normal reopen on new user input resets repair_attempts from 3 to 0;
 trials remain owner-approval gated and each run is recorded.
+
+## 2026-11-12 — Stage remote integration with a Knowledge non-regression gate
+
+Owner accepted the recommendation with「先按你的建議執行」and added that
+usable Workflow generation must not lower Knowledge asking quality. Authorized
+first slice: ae1becf3 safe numeric Outlook diagnostics,3b3da4d5 explicit opt-in
+for live Outlook tests,c0553d76 queued-message feedback. Keep e564e1ad chat
+Workflow persistence out of implementation; assess it separately under AGENTS22.
+Its deterministic form/state path cannot be made durable by Skill wording, but
+that causal finding is not permission to merge the harness feature.
+
+Integrate in a native managed worktree from verified097b2521, preserve its C4C
+history, compare the same Knowledge cases before/after, and require full checks
+before pushing the verified branch. Do not modify the resident or run live
+mailbox/C4C tests. Normal Knowledge retrieval/routing/prompts/evidence/scope and
+authoring isolation stay unchanged. Any observed regression blocks delivery;
+record limitations rather than promise every stochastic model answer is identical.
+Rejected: merge all remote commits because source text auto-merges, force-push
+main, weaken tests, or use the earlier package's verification for new code.

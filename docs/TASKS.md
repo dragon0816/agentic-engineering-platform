@@ -4850,3 +4850,16 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   documented. Install request card ap-20261111-202432-5d212d created (pending, not
   self-approved). See docs/phases/C4C_ROUND7_ACCEPTANCE.md.
 - [ ] Owner: review and approve installation card ap-20261111-202432-5d212d in Agent Web.
+
+### Low-risk remote integration (2026-11-12)
+
+- [x] Owner approved staged integration: numeric Outlook diagnostics, explicit
+  live-Outlook test opt-in, and queued-message status only.
+- [x] Native isolated worktree and source import confinement verified; baseline
+  affected tests13passed33.50s and complete Knowledge-named set445passed294.16s.
+- [ ] Apply ae1becf3,3b3da4d5,c0553d76, preserving all cumulative decisions.
+- [ ] Verify affected tests, same445Knowledge cases within full suite, lint,
+  format, typecheck, build and pipcheck; no live Outlook/C4C or resident update.
+- [ ] Push verified result to c4c-verified-20261112; leave origin/main unchanged.
+- [x] Separate harness assessment only: CHAT_WORKFLOW_PERSISTENCE_MERGE_REVIEW.md.
+  e564e1ad remains excluded; explicit scoped owner consent needed before merge.
