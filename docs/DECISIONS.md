@@ -7330,3 +7330,24 @@ Gateway session and changed approved Skill. This is evaluation of a meaningful
 approved Skill change; do not reset the exhausted old candidate or inject technical
 instructions. Standalone Skill behavior and independent Excel acceptance remain
 pending real evidence. No further harness changes authorized or implemented.
+
+#### Skill 1.0.3 fails novice acceptance; retain Skill-first scope (2026-11-11)
+
+Round6 made eight normal approved browser calls and required eight plain manual
+continuations. It returned to whole-body DOM offset0 after offsets200/400/600;
+no candidate, full trial or Excel resulted. Rejected the last repeated inspection
+normally and closed the driver. Source remains513784d0, no new harness edits.
+
+Ordinary capability approval does not schedule model continuation; Skill cannot
+change that controller. Generic browser result text is also clipped at2000chars;
+the live responses exceeded it, but clipping's role in the loop is not proven.
+Do not conclude all Skill alternatives are exhausted: existing browser__inspect
+can supply authorized fresh observations without using the broad operate command.
+
+Chosen next slice is Skill1.0.4 only: prioritize that read-only tool, overview-first
+scoped discovery and bounded no-progress scanning. Rejected immediate controller
+or context-length modification because a Skill-level alternative remains and no
+new scoped harness consent exists. Normal format check/submission passed, same
+candidate revision5/digeste3a8bce4..., cardap-20261111-050002-b78d8a awaits exact
+owner approval. No installation or behavioral-success claim. Full details and
+acceptance cases: docs/phases/C4C_SKILL103_EVALUATION.md.

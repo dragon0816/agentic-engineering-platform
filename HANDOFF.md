@@ -1,4 +1,4 @@
-# C4C authoring: governed preflight delivered, Skill approval pending
+# C4C authoring: Skill 1.0.3 failed; 1.0.4 awaits approval
 
 Date: 2026-11-11. Branch main. Runtime source513784d01b8f463733ef40cb08e95a1a7ea26a75
 is committed locally and delivered. No push. Use .venv/Scripts/python.exe.
@@ -20,12 +20,37 @@ NO tool calls, task JSON byte-identical and repair_attempts remains3. Proof
 approval records archived and removed using normal API, prior reports preserved,
 no generated .aep-run source found. Do not renew old candidate's trials.
 
-Fresh round6 is ACTIVE, client PTY76741:
-conversation-48e4ae52be9048b891d0d86892224807. Exact original request/PDF once;
-internal Gateway UNCLASSIFIED,0messages before request; no selectors/graph/code
-or extra engineering prompt. Folder .scratch/c4c-skill103-novice-20261111.
-Status .scratch/c4c_skill103_status.py, driver .scratch/c4c_skill103_client.py.
-Wait for current turn to finish; do not send duplicate requests or restart.
+Round6 conversation-48e4ae52be9048b891d0d86892224807 is CLOSED/INACTIVE; client
+76741 exited normally. Exact original request/PDF/internal Gateway; no technical
+prompt injection. Eight approved normal capability calls:2failed,6succeeded.
+Eight plain manual continuations required. Discovery paged body offsets0/200/400/
+600 then requested0again. Final repeat ap-20261111-045721-17ffe7 rejected normally.
+No pending session approvals/questions. No candidate/full trials/Excel produced;
+novice acceptance FAILED. Sales Orders content appeared, but no prescribed query
+or repeatable phase/output proof. No root browser close/profile/credential edits.
+
+Causal ordinary-approval continuation gap confirmed; responses also exceed
+approval_text's2000char clipping. Clipping's role in the loop is a hypothesis.
+Existing authorized browser__inspect gives a Skill-level alternative; do not
+claim Skill changes exhausted or edit harness without new scoped owner consent.
+Full evidence/limits: docs/phases/C4C_SKILL103_EVALUATION.md and local
+.scratch/c4c-skill103-novice-20261111/evaluation.json. Do not expose enterprise
+rows/auth URLs. Known factual Knowledge smoke already passed as described above.
+
+Next Skill1.0.4 format check/submission passed; NOT INSTALLED/NOT TESTED.
+Same candidate sk-20261110-155444-ab60a7 revision5, digest
+e3a8bce449022d0e07d9e27391b16b5e01d9eeb821e333e95d2f49ace02d91e2,
+card ap-20261111-050002-b78d8a. Only adds read-only observation tool preference,
+overview-first/scoped discovery and bounded no-progress scanning. Commands,
+normal approvals/permissions/replay/Excel obligations unchanged. Await exact
+owner installation approval under creator step5, then guarded idle restart/load
+and fresh behavior evaluation. No automatic approval from1.0.3consent.
+
+This slice changes repository documentation only. Existing read-only tool grant,
+closed-schema and Knowledge-isolation targeted regressions:4passed in9.78s,
+using .venv/Scripts/python.exe -m pytest -q with the three selected node IDs
+in test_browser_session.py and test_authoring_knowledge_isolation.py. Skill1.0.4
+normal contract check passed. No new runtime build/install required.
 Known business facts may answer actual missing questions. Only normal query/
 export/local-Excel approvals are authorized; no final unverified installation.
 Actual Skill1.0.3 novice/Excel acceptance remains UNVERIFIED. Next: poll76741,
@@ -135,7 +160,7 @@ previous reports preserved. Older round4 SAML recovery involved root gracefully
 closing ONLY a dedicated idle error-tab browser; preserve that historical
 intervention in any cross-round narrative, not as this round's action.
 
-## Pending domain Skill revision
+## Historical Skill 1.0.3 revision rationale
 
 Read aep_catalog/skill_format/current Skill and both command capability contracts
 through the available mcp__aep__ tools. Submitted through normal authoring tools,

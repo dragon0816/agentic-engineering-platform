@@ -4716,6 +4716,17 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [x] Skill1.0.3 normal install/guarded restart/load proof; no runtime changes.
   Factual question in exhausted round5 answered without tools; task bytes and
   3trial budget preserved. Active source remains513784d0, newserverPID34892.
-- [ ] Fresh round6 conversation-48e4ae52be9048b891d0d86892224807 ACTIVE via normal
+- [x] Fresh round6 conversation-48e4ae52be9048b891d0d86892224807 completed via normal
   APIs/client76741: exact original prompt/PDF/internal Gateway, old failed draft
-  recoverably removed, no selectors/graph/scripts injected. Actual acceptance pending.
+  recoverably removed, no selectors/graph/scripts injected. Acceptance FAILED:
+  eight approved capability calls, eight plain manual continuations, repeated
+  whole-page DOM discovery, no candidate/full trial/Excel. Final repeat rejected
+  normally; driver76741 closed and session inactive with no pending approvals.
+- [x] Record causal continuation gap and observed 2,000-character result clipping;
+  clipping's contribution to repeated discovery remains a hypothesis. Existing
+  read-only inspector provides a Skill-level alternative; no harness changes.
+- [x] Prepare/check/submit Skill1.0.4 revision5: prefer authorized read-only
+  inspection, overview-first/scoped discovery and bounded no-progress scanning.
+- [ ] Owner installation approval for ap-20261111-050002-b78d8a, then actual
+  tool-selection/novice/output evaluation. No success claim for untested wording.
+  See docs/phases/C4C_SKILL103_EVALUATION.md for exact evidence and limits.
