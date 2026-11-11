@@ -143,10 +143,25 @@ df94b85cad89befcfe18bd2e1625e2b8a8e1e05a2dc939a96179f04d395b4934.
 Existing observation-grant/closed-schema/Knowledge regressions4passed9.78s before
 1.0.4; runtime unchanged, no fresh full suite/build in the latest doc/Skill slice.
 
+## Claude Code diagnosis (2026-11-11, docs only)
+
+Claude Code took over, committed Codex's docs (e5a0f996) and narrowed the
+cause without any live test. Primary blocker: ordinary capability approvals
+never resume the model (code-confirmed; exploration has no continuation path at
+all before a candidate exists). Secondary, unproven contribution: approval_text
+clips all round7 results (2,650-72,390 chars) to 2,000 chars and reduces failed
+results to a code plus a wrong "not executed" claim. Scoped proposal for the
+primary fix only: docs/phases/CAPABILITY_APPROVAL_CONTINUATION_PROPOSAL.md.
+Awaiting owner's explicit consent; nothing implemented.
+
 ## Next recommended action
 
-Independently read the evidence summaries and relevant controller/Skill contracts,
-report a bounded diagnosis and smallest next slice. Avoid another open-ended live
+1. Obtain owner decision on the continuation proposal (harness, AGENTS22).
+2. If approved: tests first, implement, full verification against the
+   6610/2/10 baseline, build, idle-guarded resident update.
+3. One bounded resume of round7 conversation (do not restart the novice loop)
+   to confirm automatic continuation, then follow AEP to candidate/trial.
+Previous guidance: avoid another open-ended live
 loop. Skill fixes may proceed via normal check/submit/owner install; ANY new
 harness scope needs a concrete proposal and explicit owner consent first. Once
 appropriate, resume the preserved round7 session and verify actual final output.

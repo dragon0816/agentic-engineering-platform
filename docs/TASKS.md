@@ -4747,3 +4747,13 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   unresolved domain/diagnostic gaps in docs/phases/C4C_SKILL104_EVALUATION.md.
 - [ ] Claude Code takeover: independently narrow the next change before another
   live loop. No new harness consent; no unverified Workflow installation.
+- [x] Claude Code takeover diagnosis (2026-11-11): committed Codex handoff docs
+  (e5a0f996). Code confirms ordinary capability decisions never resume the model,
+  and exploration has no continuation path before a candidate exists. Metadata of
+  round7 results: all11 results 2,650-72,390 chars versus the 2,000-char clip;
+  failed results drop failed_action_index/diagnostics/overview and claim "not
+  executed" even when action0 ran. Scoped harness proposal written to
+  docs/phases/CAPABILITY_APPROVAL_CONTINUATION_PROPOSAL.md; NOT approved, NOT
+  implemented. No runtime, Skill, permission or live-test change in this slice.
+- [ ] Owner decision on the continuation proposal; then implement with tests or
+  pursue the Skill-only batching alternative. Then one bounded resume of round7.
