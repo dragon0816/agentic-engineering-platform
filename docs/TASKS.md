@@ -4757,3 +4757,9 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   implemented. No runtime, Skill, permission or live-test change in this slice.
 - [ ] Owner decision on the continuation proposal; then implement with tests or
   pursue the Skill-only batching alternative. Then one bounded resume of round7.
+- [x] Owner approved continuation scope (Knowledge must stay safe). Implemented
+  044bd7b5 with 7 tests; ruff/format/mypy and focused 594 (incl. Knowledge) pass;
+  bundle 044bd7b599df built and canary verified. Full suite partially run before
+  owner reboot (see HANDOFF).
+- [ ] Finish full suite (shards 1, 4, PowerShell rerun), update resident under
+  idle guard, one bounded round7 live continuation check.
