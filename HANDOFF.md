@@ -170,11 +170,23 @@ src matches) and started hidden aep-host web on 53583 with --schedules; proof
 Round7 conversation: 0 pending approvals; task has 9 requirements, unverified,
 no question, so it qualifies for continuation.
 
-Next: one bounded live check in round7 (owner consent for the live browser run
-requested 18:25). Because the last round7 approval predates the fix, one plain
-message is needed to resume; after that AEP's next browser approval must be
-followed by an automatic turn (no「請繼續」). Stop after confirming that, then
-evaluate whether AEP reaches a candidate; do not rerun the novice loop.
+Live check (owner said「現在可以開始做」, 2026-11-11 ~19:00) PASSED for continuation:
+driver .scratch/c4c_cont_check.py (metadata-only output), raw results local in
+.scratch/c4c-cont-check-20261111/. One plain「請繼續」resumed round7 (its last
+approval predated the fix); AEP recorded authentication_required because the
+reboot closed the browser (web_origin_not_allowed). Owner-style factual answer
+(reboot closed the browser, SSO is automatic, reopen it yourself) was sent.
+AEP then requested ap-20261111-105816-f5edf9 (open C4C origin, reload,
+inspect_dom; read-only), approved: succeeded, and the decision itself ran the
+continuation (status answered, browser__inspect) which requested the next
+operation ap-20261111-105933-29a82a WITHOUT any manual continue. That approval
+is left pending, by design of the bounded check.
+
+Next: resume normal development from the pending approval (review actions,
+approve read-only ones); watch whether AEP reaches a candidate and full trial
+on its own. Not yet proven: date filters, source total, full replay, Excel.
+The approval_text clipping/failure-text finding remains unapproved (separate
+consent needed if evidence shows it blocks progress).
 
 ## Claude Code diagnosis (2026-11-11, docs only)
 
