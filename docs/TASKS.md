@@ -4816,3 +4816,6 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   missed it. No Excel produced; nothing installed. trials 3/3, repair_attempts 3/3.
 - [ ] Owner decision needed for any further attempt (a new candidate/trial budget is
   a budget renewal; not done without explicit consent).
+- [ ] 2026-11-12 bounded extra attempt (owner「同意」): two full replays (panel expanded /
+  collapsed) of the exact compiled browser phase, then at most ONE extra formal trial;
+  then independent Excel acceptance. See DECISIONS 2026-11-12.

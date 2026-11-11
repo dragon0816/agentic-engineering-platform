@@ -7446,3 +7446,23 @@ Owner's explicit install instruction (relayed by Codex, 2026-11-11):「核准ski
 This is specific consent for engineering/sap-c4c-workflow-navigation 1.0.5, card
 ap-20261111-124004-4d6857, digest e871ef3cea3a154e78dbe73e95db844b9619e2eca2c05626706ea04a49f4c8ab
 (Codex re-verified it pending, undecided). It does not extend harness consent.
+
+#### Owner authorizes one bounded extra round7 attempt (2026-11-12, Asia/Taipei)
+
+Codex's proposal:「是否同意再做一輪有限測試：先在面板展開／收合兩種狀態完整重播通過，才新增最多1次
+正式試跑？不修改harness，也不清除舊失敗紀錄。」 Owner's reply:「同意」.
+Scope: read/query/export/local-file development and verification continue. AEP must
+fix and fully replay the exact browser phase that will be compiled (entry/open/reload,
+fresh-page app-ready precondition, SOP query and collection) once with the Sales panel
+left expanded and once left collapsed by the prior run; any failure means fix and
+replay again, never a formal trial; piecewise successes do not count. Only after both
+pass: AT MOST ONE additional formal trial through normal platform mechanisms. The
+original 3/3 trials and their run reports stay; no direct edits to task store, grants
+or manifests, no silent budget increase. If the platform cannot provide one recorded
+extra test, report to Codex instead of changing the harness. A new candidate/session,
+if unavoidable, is labelled as carrying only this one exception and keeps the original
+lineage/digests/failure evidence. Any second formal trial request: stop, do not
+approve. No harness change; this is not harness consent. Skill revisions only if they
+add a concretely new verifiable procedure beyond 1.0.5 step 2 and the replay rules;
+Self-Approval guard stays. One failure ends the attempt; no install unless accepted.
+The reload/transitional-DOM cause remains a hypothesis to verify.
