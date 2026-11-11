@@ -1,123 +1,162 @@
-# Governed browser preflight: verification in progress
+# C4C authoring: governed preflight delivered, Skill approval pending
 
-Date: 2026-11-11. Branch: main. Latest committed revision13a7c3b0; new source
-is UNCOMMITTED and NOT DEPLOYED. No push authorized. Use .venv/Scripts/python.exe.
+Date: 2026-11-11. Branch main. Runtime source513784d01b8f463733ef40cb08e95a1a7ea26a75
+is committed locally and delivered. No push. Use .venv/Scripts/python.exe.
 
-## Goal and scoped consent
+## Active evaluation / next action
 
-A novice gives the original simple C4C request, Sales_order.pdf and
-C:/Users/Chi_L/Downloads/Sales name and Dept.xlsx. AEP itself develops/trials/
-repairs the Workflow and independently reconciles Excel with source totals/IDs,
-dates, mapping, FX and monthly totals. Do not inject selectors, graph or scripts.
-Business facts: automatic SSO;2026-07-01..2027-06-30; EUR1,USD0.87,TWD0.02712085
-in EUR. Query/export/local Excel authorized; no C4C mutations/mail.
+Owner explicitly approved Skill card ap-20261111-034133-58c53f and retest with
+「同意套用 Skill 並重測」. Normal owner API installed C4C navigation1.0.3,
+candidate sk-20261110-155444-ab60a7 revision4, digest
+b08668b0ae5cf6c9a4233bdde08dc5f6bfd56159b8355e784f7b7e187dcb2e5c.
+Guarded installed-runtime restart passed, config/source unchanged; currentPID34892,
+port53583. Fresh installed bootstrap proves actual1.0.3 instructions match5704chars
+(SHA0d1df9e41f133ff0f837a43eae8ad0f694242ae11e862d71eb1b2718fc7c29bd),
+SOP Skill1.0.0 present, harness_guidance None. No extra harness edits.
 
-AGENTS22 applies. Owner twice explicitly approved the concrete governed-browser-
-preflight proposal, docs/phases/AUTHORING_BROWSER_PREFLIGHT_PROPOSAL.md. Only that
-scope: actual failed approved browser step, same actor/session/candidate/digest/
-origin, model provenance, normal exact approval,1..8actions,2requests/pass,
-unchanged3full trials and same repair model/tool/time budget. No general Knowledge,
-routing, memory, policy changes or domain selectors. Expansion needs new consent.
-Skill1.0.2 was installed/selected but cannot grant a tool excluded before model
-execution; existing capturing regression proves this deterministic boundary.
+Live Knowledge smoke in exhausted round5 session: concept question answered,
+NO tool calls, task JSON byte-identical and repair_attempts remains3. Proof
+.scratch/c4c-skill103-knowledge-smoke-proof.json. Then old failed candidate+6
+approval records archived and removed using normal API, prior reports preserved,
+no generated .aep-run source found. Do not renew old candidate's trials.
 
-## Implemented, not delivered
+Fresh round6 is ACTIVE, client PTY76741:
+conversation-48e4ae52be9048b891d0d86892224807. Exact original request/PDF once;
+internal Gateway UNCLASSIFIED,0messages before request; no selectors/graph/code
+or extra engineering prompt. Folder .scratch/c4c-skill103-novice-20261111.
+Status .scratch/c4c_skill103_status.py, driver .scratch/c4c_skill103_client.py.
+Wait for current turn to finish; do not send duplicate requests or restart.
+Known business facts may answer actual missing questions. Only normal query/
+export/local-Excel approvals are authorized; no final unverified installation.
+Actual Skill1.0.3 novice/Excel acceptance remains UNVERIFIED. Next: poll76741,
+inspect statuses/question input_name and preserve source/trial/output evidence.
 
-New host_runtime modules: authoring_browser_preflight_contracts.py,
-authoring_browser_preflight.py, authoring_browser_preflight_budget.py. Integrations
-in chat_authoring.py/web.py/web_page.py and browser_session/handlers.py. Only
-eligible repair gets authoring__preflight_browser via existing turn_host_tools.
-Approvals use a closed envelope refused by legacy BrowserRequest; durable claims
-prevent duplicate execution/continuation. Model-origin dispatch uses normal trial
-authorization narrowed to failed capability in TEMPORARY LocalPolicy, never global
-grants. Browser origins narrowed per invocation ContextVar. Preflight never marks
-full Workflow verified/installable. Exact actions/values/origins/digest in owner UI.
+## Owner goal and constraints
 
-Independent reviewer found budget renewal and insufficient approval details; both
-fixed. Optional Gateway turn_call_budget ContextVar charges before ACTUAL model/
-tool requests, including Host-check/truncation retries. Returned conversation
-counts omit earlier passes and cannot be used. Persistent sidecar deadline and
-counters never renew on approval. Unmarked turns/Knowledge unchanged.
-Independent re-review: no concrete remaining blocker;35tests passed52.14s exit0.
-No real C4C was run by reviewer. Tests use fakes plus own PUBLIC local-browser UI.
+Original novice request and PDF plus Downloads/Sales name and Dept.xlsx should
+let AEP clarify missing BUSINESS facts, develop/trial/self-repair a Workflow, and
+independently reconcile its Excel with source IDs/counts, dates, mapping, FX and
+monthly totals. Do not inject selectors, old graph or business scripts into the
+novice conversation. Business facts already provided: automatic SSO; fixed
+2026-07-01..2027-06-30; EUR1,USD0.87,TWD0.02712085 in EUR; new local Excel.
+Query/export/local-file scope only, no C4C order changes or mail.
 
-## Verification and live jobs
+AGENTS22: before EVERY harness change, evaluate applicable/selected Skill,
+provide causal/evaluation evidence why Skill cannot improve that behavior, state
+minimal scope/impacts/checks and obtain explicit owner consent BEFORE editing.
+Owner twice approved only docs/phases/AUTHORING_BROWSER_PREFLIGHT_PROPOSAL.md.
+No additional harness change is authorized. Remaining C4C procedure work belongs
+in Skills/Workflows. Generic Knowledge/routing/context-memory/policy changes are
+outside scope. New Skill installation still has its own exact owner approval.
 
-Source562Python files frozen. New tests test_authoring_browser_preflight.py and
-test_authoring_preflight_accounting.py: root35passed49.13s. Expanded focus177passed
-127.66s, including repair/patch/completeness/Knowledge/browser/effects/approvals.
-Ruff passed;1444format files passed; mypy1092files passed; pipcheck passed.
-Diff check passed. No new dependency.
+## Delivered generic preflight implementation
 
-Full NORMAL suite6622items/553modules finished in4shards, driver
-.scratch/run_browser_preflight_verified_suite.py. Raw result6610passed/2failed/
-10skipped; maximum shard4264.81s (~71.1minutes). Source562files byte-unchanged.
-This is NOT an initially clean full suite. Both failed source/test modules are
-unchanged from HEAD and the entire modules passed independent recheck:
-- Atlas closed-ephemeral-port probe received BadStatusLine containing HEAD request
-  text; exact mechanism unproven.53passed/1skip249.77s.
-- WebScript0.3s ensure_visible target timed out BEFORE invalid trigger validation;
-  later trigger assertions not reached in that raw run.60passed116.60s.
-Retain raw logs/XML and recheck proofs, no weakened assertions/fixture changes.
-Freeze proof browser-preflight-verified-environment-source-proof.json,
-browser-preflight-verification-rollup.json and unchanged-recheck-modules.json.
-No C4C acceptance yet. Bundle/canary/resident delivery are next.
+513784d0 adds3 host_runtime modules (contracts, preflight execution, persistent
+budget) plus scoped integrations in chat_authoring/web/web_page/browser handler
+and optional Gateway turn_call_budget. Only an actual approved failed browser
+step of the active actor/session/candidate/digest/origin gets the ephemeral tool.
+1..8actions,2requests/repair pass; no downloads/paginated export. Normal exact
+approval, model-origin execution and normal approved-trial authorization narrowed
+to that capability in TEMPORARY policy, no global grants. Per-call origin context.
+Durable exactly-once execution/continuation. Shared persistent deadline/model/tool
+counters include approvals and actual Host-check retries; never renewed. Unmarked
+conversations/Knowledge unchanged. Preflight never marks full Workflow verified.
+Owner approval UI exposes exact actions/values/origins/digest using textContent.
 
-## Installed resident and latest actual C4C result
+Independent review initially found budget renewal and inadequate approval detail;
+both fixed. Re-review found no concrete remaining blocker;35tests passed52.14s.
+Root35passed49.13s; expanded focused177passed127.66s including Knowledge, repair,
+patch, collection completeness, browser, effects and approvals. Ruff passed,
+1444formatfiles passed, mypy1092files passed, pipcheck passed.
 
-Resident remains47f28a6b3764fe1ffde9c9ff69bd4ebbb91fb657 (native model catalog fix
-8cde171f and Knowledge isolation47f28a6b). Official prior zip in
-.scratch/knowledge-isolation-offline-bundle; SHA in old canary proof. All559old
-source files were independently bytechecked. Installed root is
-%LOCALAPPDATA%/AgenticEngineeringPlatform/preview-0.1.0, actor leo.chi,
-Bridge bridge-tp401555, port53583. Read fresh workspace/agent-web.json privately;
-never print auth URL/token. Launch INSTALLED .venv/Scripts/aep-host.exe hidden,
-not dev launcher. Fresh activity/PID/config guard before every restart/update.
-Do not interrupt active turns/tasks/questions/forms; persisted pending state safe.
+Full NORMAL6622items/553modules in4shards:6610passed/2failed/10skipped, all562
+source bytes unchanged. This is NOT an initially clean full suite. Unchanged
+Atlas probe received BadStatusLine containing HEAD request text on a closed
+ ephemeral port; exact mechanism unproven. Whole module reran53passed/1skip.
+Unchanged WebScript0.3s target wait timed out before invalid-trigger validation;
+whole module reran60passed. No weakened assertions/fixtures or unrelated source
+fixes. Raw browser-preflight-verified-20261111 logs/XML and recheck proofs retained.
+Rollup .scratch/browser-preflight-verification-rollup.json.
 
-Installed Skills: engineering/sop-workflow-development1.0.0 (sop_workflow),
-engineering/sap-c4c-workflow-navigation1.0.2 (c4c_navigation). Already explicitly
-owner approved; do not ask again. No skill edits this implementation.
+sdist/wheel build passed; all562wheel source bytes matched. Official bundle:
+.scratch/browser-preflight-offline-bundle/aep-windows-preview-0.1.0-513784d01b8f.zip
+SHA256 df94b85cad89befcfe18bd2e1625e2b8a8e1e05a2dc939a96179f04d395b4934.
+Fresh canary install/doctor/pipcheck/Agg/isolated new-module imports and all562
+source bytes passed. Guarded resident normal installer update preserved semantic
+config. Fresh HTTP, pipcheck, isolated imports and all562installed bytes passed.
+Proofs .scratch/browser-preflight-{wheel,canary,resident-update}-proof.json and
+browser-preflight-resident-verification.json. Runtime source remains513784d0 even
+if later docs commits advance main. Do not rebuild for documentation-only changes.
 
-Last actual novice round4 conversation-999662143d234cabb77786ee68b17c3e failed all
-3full approved trials in navigation before Excel. AEP independently observed765
-rows/26pages then; do not hardcode this future count. Candidate
-wf-20261110-201153-ff4b99 rev3 failed run-cb7b32190da9402bb950e9583c031808,
-run-7cb2bf783a3542909df5687a1b3886c4,run-a64cebe6af7846789fe40864b1489517.
-No accepted Excel/installed Workflow. Evidence .scratch/c4c-preflight-sop-20261111.
-Earlier SAML replay was resolved by fresh idle/single-error-tab guard then graceful
-close of ONLY the owned dedicated browser, preserving profile. AEP relaunched and
-logged in normally. Disclose this intervention; server-side cause unproven.
+Resident: %LOCALAPPDATA%/AgenticEngineeringPlatform/preview-0.1.0, actor leo.chi,
+Bridge bridge-tp401555, port53583, latest observed serverPID17824. Read fresh
+workspace/agent-web.json privately, never print auth URL/token. Launch installed
+.venv/Scripts/aep-host.exe hidden, not dev launcher. Fresh activity/PID/config
+checks before every restart/update; do not interrupt active work/questions/forms.
+The update driver may retain a PTY while the launched resident holds inherited
+handles; do NOT kill the resident just to close that tool session.
 
-Preparation for next replay completed: old candidate+3approval records archived in
-.scratch/c4c-governed-preflight-20261111/archive, normal /api/drafts/delete used,
-old report files preserved, old workflows absent from installed catalog. No old
-generated Python source in its workspace. clean-start-proof.json. No NEW session
-created. Old drivers57261/60833 closed; no live C4C developer session running.
+## Actual novice round5: FAILED acceptance
 
-## Next actions in order
+conversation-a6f1812e95784453ab71178cb3c9cfa0, candidate
+wf-20261111-024316-0a6ec1 engineering/c4c-sales-orders-export-excel1.0.0 rev3.
+Exact original prompt/PDF once, internal Gateway UNCLASSIFIED; hashes and exact
+prompt equality verified in .scratch/c4c-governed-preflight-20261111/
+initial-request-proof.json. Only known automatic-SSO fact supplied as a natural
+answer. No graph/selectors/business code supplied. No browser-auth reset or manual
+page switch this round. AEP read workbook, explored C4C itself and collected767
+unique IDs (not old765); independent UI-total reconciliation was NOT reached.
+Initial discovery/drafting took71model turns/71tool calls in its second turn.
 
-1. Full suite finished; retain its two original failures and successful whole-
-   module rechecks. No actual preflight/Knowledge regression found.
-2. Final architecture/diff/source freeze checks; update TASKS/DECISIONS/results.
-   Commit coherent verified code locally to main, no push. Record source revision.
-3. Build .scratch/browser-preflight-distribution (python -m build), verify wheel
-   bytes against all562frozen source files. Official scripts/build_windows_preview.py
-   with dependency wheels .scratch/autonomy-final-core-wheels and gateway wheels
-   C:/Temp/aep-kb-bundle-47f28a6b37/aep-windows-preview-0.1.0/wheels-gateway.
-4. Adapted drivers .scratch/verify_browser_preflight_canary.py,
-   apply-browser-preflight-resident.ps1, verify_browser_preflight_resident.py
-   expect browser-preflight-source-revision.txt and browser-preflight-offline-bundle.
-   Canary first; guarded normal install/restart then all562installed bytes and
-   fresh HTTP. These drivers were prepared but NOT run.
-5. Fresh exact novice request with original PDF through normal resident APIs,
-   .scratch/c4c_governed_preflight_client.py --new. Do not reuse exhausted round4
-   or inject technical instructions. Standing known business answers may be given
-   when asked. Normal preflight/trial cards may be approved under owner test grant;
-   inspect exact actions for scope. No unverified final Workflow install.
-6. Independently reconcile Excel against SOURCE, not writer input or success flag.
-   Old .scratch/verify_c4c_live.py is insufficient as-is: it compares writer input
-   and prints amounts; adapt for independent source and statuses/counts only.
-   Company data must stay in internal Gateway/local validation, no native transfer.
-7. Final docs/handoff/commit; graph AST update if needed, no semantic/API labeling.
-   Report precise verification and C4C acceptance limits, never promise hidden work.
+All3full approved trials failed BEFORE Python/Excel:
+1 run-a9f68923168c48d98527f28bfa50b6cf: actions[7] wait_for timeout.
+2 run-001b6f9bb6cb4806ac69fc2f9223ae0f: actions[9] click target missing.
+3 run-67b00a4c97334cdea9a10250788842a6: actions[2] ensure_visible.trigger timeout.
+Three auxiliary preflights actually executed with model provenance and exact owner
+approvals: first timed out, second and third succeeded. AEP independently patched
+actions7 then9; all downstream Excel code unchanged. First repair pass persistent
+counter10model/10tools observed, same20/150limit and fixed deadline; full-trial
+attempt count unchanged by preflights. No claim that auxiliary success verified
+whole Workflow. This proves the new access path works, not business acceptance.
+
+No Excel produced or installed Workflow. Keep failed draft unverified; do not
+approve installation or claim writer/financial checks passed. Client59498 closed
+normally with quit. All raw result0..7, candidate revisions, preflight cards and
+proofs in .scratch/c4c-governed-preflight-20261111; evaluation.json is concise.
+Source baseline records are in result-1.json at
+answer.outcome.conversation.tools[66].host.data.data.sales_orders. IDs767unique.
+Do not print rows/amounts or send them to native models. A test-summary extractor
+briefly matched Discount by substring; corrected artifact now keeps exact count
+fields and skips records. Do not reuse that unsafe substring extraction.
+
+Older round4 and765row observation are in .scratch/c4c-preflight-sop-20261111.
+Its draft/3approvals were archived and removed via normal APIs before round5;
+previous reports preserved. Older round4 SAML recovery involved root gracefully
+closing ONLY a dedicated idle error-tab browser; preserve that historical
+intervention in any cross-round narrative, not as this round's action.
+
+## Pending domain Skill revision
+
+Read aep_catalog/skill_format/current Skill and both command capability contracts
+through the available mcp__aep__ tools. Submitted through normal authoring tools,
+never wrote Host manifests directly. Skill1.0.3 commands/alias unchanged, no
+harness_guidance/global routing/permissions. Instructions reduced6641->5704chars
+and restructured: verify entire ordered browser phase from entry AND retained
+state before first full trial; prefer small control-state steps separate from
+paged collection; inventory stable observed targets, forbid persisting generated
+numeric IDs; conditional menus/search panels; exact label vs wait regex semantics;
+normal approvals/origin bounds; factual Knowledge guard; full source/Excel checks.
+Format check passed; behavior remains untested. Draft:
+.scratch/c4c-navigation-1.0.3.skill.json; expected cases and pending status:
+.scratch/c4c-navigation-1.0.3-evaluation.json. The original1.0.2 already mentioned
+state/ID safety, but live compilation still used generated IDs and tested only
+fragments. Do not claim new wording alone has solved that noncompliance.
+
+Next evaluations after approval: fresh/retained states, dynamic IDs, accessible
+name/text difference, complete phase replays, preserved budgets/collection,
+factual C4C/Knowledge question makes no authoring/browser calls. Then fresh exact
+novice prompt and independent Excel oracle. Old .scratch/verify_c4c_live.py is NOT
+adequate as-is (writer-input comparison and prints amounts). Validate against
+independent source and output metadata, not an engine success or file-exists flag.
+No additional harness edits; assess Skill effect first and ask owner for any
+concrete further harness expansion with evidence.

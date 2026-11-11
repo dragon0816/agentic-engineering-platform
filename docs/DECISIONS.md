@@ -7284,3 +7284,49 @@ validation. Entire unchanged modules reran53passed1skip and60passed respectively
 No assertion/fixture changes, extra full-trial budget or unrelated source fixes.
 Preserve raw evidence and limits in local delivery records; actual C4C business
 acceptance remains separate and unverified at this checkpoint.
+
+#### Delivered preflight and remaining domain Skill gap (2026-11-11)
+
+Runtime513784d0 was built, canary-installed and guarded-updated locally, all562
+wheel/canary/resident source bytes matched and config preserved. No push.
+Fresh round5 used exact original novice request/PDF, internal Gateway, only the
+standing auto-SSO fact as an answer. AEP independently collected767unique IDs,
+authored a2step Workflow and repaired it. Actual new preflight path worked with
+model provenance and explicit owner approval:1timeout and2successes, same-pass
+persistent counters and unchanged full-trial limit. Auxiliary success did NOT
+mark the Workflow verified. All3full trials failed before Excel (wait7,click9,
+ensure_visible.trigger2); no output or installed Workflow. Do not present this as
+successful novice automation or independently validated business output.
+
+Remaining failure is discovery-to-replay state/locator reliability. Installed
+Skill1.0.2 already says to avoid positional IDs and verify state, yet compilation
+used generated IDs and successful fragments did not prove a fresh full phase.
+Next scope is Skill procedure refinement, not another harness change: shorter,
+prioritized full-phase replay evidence from entry/retained states; conditional
+panels and stable observed targets; small control-state steps separated from
+collection; exact target/wait semantics; factual Knowledge guard and original
+approval/budget limits. Normal creator check passed for1.0.3, candidate revision4,
+digestb08668b0ae5cf6c9a4233bdde08dc5f6bfd56159b8355e784f7b7e187dcb2e5c.
+Install card ap-20261111-034133-58c53f awaits exact owner approval under creator
+SKILL.md step5. No installation/behavioral-success claim or extra harness consent.
+Preserve evaluation.json and expected pending cases under .scratch; after owner
+approval verify actual Skill selection and novice/Excel behavior before drawing
+conclusions about instruction improvement. No budget renewal without a meaningful
+approved change, no unverified Workflow installation.
+
+#### Owner approval and isolated Skill-only evaluation (2026-11-11)
+
+Owner explicitly answered「同意套用 Skill 並重測」for card
+ap-20261111-034133-58c53f. Normal decision API approved the exact1.0.3digest;
+installed-runtime idle/PID/config guard restart loaded the5704char instructions,
+SOP1.0.0 still loaded and harness_guidance None. Source513784d0 unchanged.
+Live factual Knowledge query in exhausted round5 answered without any tools;
+task bytes remained identical and repair_attempts stayed3. This is an actual
+non-interference check, not evidence that novice C4C development now succeeds.
+
+Round5 failed graph/6approvals were recoverably archived/deleted via normal API,
+reports retained. New round6 uses the original exact prompt/PDF in a new internal
+Gateway session and changed approved Skill. This is evaluation of a meaningful
+approved Skill change; do not reset the exhausted old candidate or inject technical
+instructions. Standalone Skill behavior and independent Excel acceptance remain
+pending real evidence. No further harness changes authorized or implemented.

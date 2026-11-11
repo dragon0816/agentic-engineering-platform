@@ -1,6 +1,7 @@
 # Governed browser preflight during authoring repair
 
-Status: owner approved this scope on2026-11-11; implementation complete; full verification in progress, not deployed.
+Status: owner approved scope delivered as513784d0; actual preflight path exercised.
+C4C novice business acceptance still failed; domain Skill revision awaits approval.
 Date: 2026-11-11. Owner rule: AGENTS.md22.
 
 ## Problem and observed boundary

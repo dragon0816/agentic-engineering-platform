@@ -4682,7 +4682,10 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   Normal full6622items:6610passed/2failed/10skipped, source562unchanged. Unchanged
   Atlas53passed1skip and WebScript60passed whole-module rechecks. Raw initial
   failures retained; not an initially clean full suite.
-- [ ] Commit/package/canary/idle-guard update and fresh C4C novice/output acceptance.
+- [x] Local commit513784d0, sdist/wheel build and official offline bundle; all562
+  wheel/canary/resident source bytes match, isolated imports/doctor/pipcheck/fresh
+  HTTP passed. Guarded resident update preserved config and port53583. No push.
+- [ ] Fresh C4C novice development and independent output acceptance.
 - [x] Record final verification/evaluation docs locally after the bounded round;
   HANDOFF rewritten latest-only; diff check passed. New Skill revisions need concrete owner installation
   approval; further harness changes need separate causal proof/scoped consent.
@@ -4691,3 +4694,28 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   durable same-pass model/tool/deadline accounting across approvals and exact
   operations visible on approval cards. Independent35tests passed52.14s; no
   concrete remaining blocker. Actual C4C acceptance remains unverified.
+
+### Governed preflight actual C4C evaluation (2026-11-11)
+
+- [x] Fresh exact novice prompt/PDF/internal Gateway, only known auto-SSO fact
+  answered. AEP independently discovered767unique orders and drafted/revised
+  wf-20261111-024316-0a6ec1; no root graph/selector/code injection.
+- [x] Real governed preflight executed3calls (1failed,2passed), explicit model
+  provenance/approval; AEP patched its waits/clicks. Same-pass counters accumulated,
+  no renewal of3full trials and unrelated Excel code remained unchanged.
+- [ ] Business acceptance NOT passed: all3full trials failed navigation at wait7,
+  click9 and ensure_visible.trigger2. No Excel produced/independent financial
+  validation, no Workflow installed. Driver closed; do not blindly reset budget.
+- [x] Skill-first next slice: normal aep_skill_creator contract check and submit
+  sap-c4c-workflow-navigation1.0.3 revision4, exact full-phase replay/stable-target
+  procedure and factual Knowledge guard. No further harness edits.
+- [x] Owner explicitly approved install ap-20261111-034133-58c53f, digestb08668b0...
+  Candidate sk-20261110-155444-ab60a7. Behavior not yet tested. After approval,
+  guarded installed restart/load proof, then new novice and independent Excel eval.
+
+- [x] Skill1.0.3 normal install/guarded restart/load proof; no runtime changes.
+  Factual question in exhausted round5 answered without tools; task bytes and
+  3trial budget preserved. Active source remains513784d0, newserverPID34892.
+- [ ] Fresh round6 conversation-48e4ae52be9048b891d0d86892224807 ACTIVE via normal
+  APIs/client76741: exact original prompt/PDF/internal Gateway, old failed draft
+  recoverably removed, no selectors/graph/scripts injected. Actual acceptance pending.
