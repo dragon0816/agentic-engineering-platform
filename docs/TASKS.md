@@ -4842,3 +4842,11 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   Independent validation of sap_sales_orders_report_20261112-040011.xlsx passed all checks;
   see docs/phases/C4C_ROUND7_ACCEPTANCE.md.
 - [ ] Owner: approve installation of the verified Workflow in Agent Web (not done by Claude).
+- [x] Codex review follow-ups: strict validator (grand/month/owner totals vs detail, half
+  cent) showed trial-6 output inconsistent; AEP adopted per-line cent rounding then summing
+  and a year-free date locator; both-state full replays passed; trial 7
+  run-8782ad04c94e47de87b71015479b220a (1.0.9, digest dae0b636...3d4d) verified; strict
+  independent validation passed (165/165 cells, 0 consistency diffs). Blank Owner exception
+  documented. Install request card ap-20261111-202432-5d212d created (pending, not
+  self-approved). See docs/phases/C4C_ROUND7_ACCEPTANCE.md.
+- [ ] Owner: review and approve installation card ap-20261111-202432-5d212d in Agent Web.
