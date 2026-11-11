@@ -4763,3 +4763,7 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   owner reboot (see HANDOFF).
 - [ ] Finish full suite (shards 1, 4, PowerShell rerun), update resident under
   idle guard, one bounded round7 live continuation check.
+- [x] Full suite after reboot: 6608 passed/11 skipped; 11 parallel-load failures
+  all pass alone (four also pass on base). Resident installed with 044bd7b5 and
+  started hidden (config preserved, sources match).
+- [ ] Bounded round7 live continuation check (awaiting owner go-ahead).

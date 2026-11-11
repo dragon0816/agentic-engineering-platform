@@ -143,40 +143,38 @@ df94b85cad89befcfe18bd2e1625e2b8a8e1e05a2dc939a96179f04d395b4934.
 Existing observation-grant/closed-schema/Knowledge regressions4passed9.78s before
 1.0.4; runtime unchanged, no fresh full suite/build in the latest doc/Skill slice.
 
-## Current state (2026-11-11 ~17:30, owner rebooting the PC)
+## Current state (2026-11-11 ~18:25): continuation delivered to resident
 
 Owner approved the continuation proposal「同意提案的範圍，但要確保knowledge
-asking不會有問題」(DECISIONS.md). Implemented and committed locally as
-044bd7b5 (NOT pushed): web.py::_continue_after_capability plus
+asking不會有問題」(DECISIONS.md). Implemented in 044bd7b5 (local, NOT pushed):
+web.py::_continue_after_capability plus
 tests/test_capability_approval_continuation.py (7 pass). Knowledge safeguard:
-continuation only for Gateway sessions with planned, unverified requirements
-and no open question; see docs/phases/CAPABILITY_APPROVAL_CONTINUATION_PROPOSAL.md.
+continuation only for Gateway sessions with planned, unverified requirements and
+no open question; docs/phases/CAPABILITY_APPROVAL_CONTINUATION_PROPOSAL.md.
 
-Verification so far: ruff, format (1449), mypy (1093) pass. Focused set incl.
-all Knowledge tests 594 pass (one long-path test failed only because of a deep
---basetemp; passes rerun). Full suite in 6 shards was interrupted by the reboot:
-shards 0/3/5 complete 3262 passed 6 skipped 0 failed; shard 2 1122 passed,
-5 failed -> 4 pass on rerun (browser_ticket, restricted_runner,
-shared_platform_settings, knowledge_stage long name with default basetemp);
-test_script_tools::test_powershell_fixture_uses_noninteractive_json_io still
-script_timeout under load (does not touch web.py) - rerun when idle. Shards 1
-and 4 (~30-36%) did NOT finish: rerun them (.scratch/cont-full/shard-1.txt,
-shard-4.txt list their files; use a medium --basetemp such as C:/tmp/cfN).
+Verification: ruff, format (1449), mypy (1093) pass. Focused set incl. all
+Knowledge tests 594 pass. Full suite (12 parallel shards/parts, owner reboot in
+between): 6608 passed, 11 skipped, 11 failed only under parallel load; every one
+of the 11 passed when rerun alone (browser_ticket, restricted_runner,
+shared_platform_settings, knowledge_stage long name, script_tools PowerShell,
+browser x2, workflow_preview, bi_step3_ui, memory_notes_ui, telegram_ingress);
+the last four also passed on base 8b3d9b69, same as HEAD. No test weakened.
+Logs .scratch/cont-full/.
 
-Build: wheel + bundle .scratch/cont-offline-bundle/aep-windows-preview-0.1.0-044bd7b599df.zip
-SHA256 502e7daa31f325cde1d5a9bded8cfc9f224000f7137a2ec53f8cae1591844a16.
-Canary C:/Temp/aep-cont-canary-044bd7b599 passed (install/pipcheck/import,
-562 sources match); proof .scratch/cont-canary-proof.json.
-Resident NOT yet updated (still runs 513784d0 code). Round7 task metadata
-qualifies (9 requirements, unverified, no question).
+Build: bundle .scratch/cont-offline-bundle/aep-windows-preview-0.1.0-044bd7b599df.zip
+SHA256 502e7daa31f325cde1d5a9bded8cfc9f224000f7137a2ec53f8cae1591844a16; canary
+passed (.scratch/cont-canary-proof.json). Resident was stopped by the reboot, so
+.scratch/install-cont-resident-stopped.ps1 installed it (config preserved, all
+src matches) and started hidden aep-host web on 53583 with --schedules; proof
+.scratch/cont-resident-update-proof.json. New pid answered /api/activity idle.
+Round7 conversation: 0 pending approvals; task has 9 requirements, unverified,
+no question, so it qualifies for continuation.
 
-Next: 1) rerun shards 1 and 4 and the PowerShell test; 2) run
-.scratch/apply-cont-resident.ps1 -SourceRevision 044bd7b599df43716121720af23b7e1842ef2370
--BundleRoot C:/Temp/aep-cont-bundle-044bd7b599/aep-windows-preview-0.1.0
--CanaryProof .scratch/cont-canary-proof.json (idle guard built in; after reboot
-the resident may not be running - check agent-web.json/PID first and adapt);
-3) one bounded live check in round7 conversation: AEP's next browser approval
-should continue automatically without「請繼續」.
+Next: one bounded live check in round7 (owner consent for the live browser run
+requested 18:25). Because the last round7 approval predates the fix, one plain
+message is needed to resume; after that AEP's next browser approval must be
+followed by an automatic turn (no「請繼續」). Stop after confirming that, then
+evaluate whether AEP reaches a candidate; do not rerun the novice loop.
 
 ## Claude Code diagnosis (2026-11-11, docs only)
 
