@@ -7424,3 +7424,20 @@ consent above (capability approval continuation) remains the only harness
 consent. Any further harness change still needs AGENTS22 evidence and new
 owner consent via Codex. Missing business facts: check SOP/attachments/existing
 conversation first; ask only when absent and correctness depends on it.
+
+#### Delegated approval of reviewed C4C Skill 1.0.5 (2026-11-11)
+
+Owner's words (relayed by Codex):「我想按他的方式繼續往前推進，我中間不介入只看最後的結果有沒有
+符合我的需求」. The owner did NOT personally approve card ap-20261111-124004-4d6857.
+Codex read-only reviewed candidate sk-20261110-155444-ab60a7 revision 6,
+engineering/sap-c4c-workflow-navigation 1.0.5, digest
+e871ef3cea3a154e78dbe73e95db844b9619e2eca2c05626706ea04a49f4c8ab: versus 1.0.4 only
+instructions step 3a is added; commands browser/operate@1.0.0 and
+workflow-author/draft@1.0.0, alias, selector hint unchanged; harness_guidance None;
+no new tool, permission or Knowledge procedure. Codex judged this within the
+owner's delegation of reversible domain Skill improvements for this request and
+asked Claude Code to approve that exact card through the normal owner decision
+API. Same delegation covers later pure domain-procedure revisions of the same
+installed C4C/SOP Skills for this request that keep commands, permissions and
+harness unchanged and pass the normal check. Not covered: permission changes,
+new external side effects, new harness scope, arbitrary Skills.
