@@ -4774,3 +4774,16 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [ ] Owner delegated round7 progression to Claude Code (no intervention): drive
   AEP to candidate, full trial, replay and independently reconciled Excel under
   the recorded approval boundary (DECISIONS 2026-11-11).
+- [x] Round7 delegated drive (.scratch/c4c_drive.py, metadata log
+  .scratch/c4c-drive-20261111/drive.log): 20 approvals, every one continued
+  automatically (no manual continue). Reached Sales Orders, All, Advanced Search,
+  Document Date Between, filled both dates, OK/Go. Dates were typed mm/dd/yyyy while
+  the field placeholder shows dd.mm.yyyy; after the format error AEP switched to a
+  different list-level "Filter by Date" control and looped 5 approvals. Driver stopped.
+  Cause: missing domain knowledge (format hint, return to the same SOP condition,
+  generated-id date inputs without accessible names), Skill scope, not harness.
+- [x] Skill navigation 1.0.5 (candidate sk-20261110-155444-ab60a7 revision 6, digest
+  e871ef3cea3a154e78dbe73e95db844b9619e2eca2c05626706ea04a49f4c8ab) adds step 3a
+  only; check ok; install card ap-20261111-124004-4d6857 awaits OWNER approval
+  (Skill install is outside the delegated approval list).
+- [ ] After owner approval: guarded restart, verify loaded 1.0.5, resume round7 drive.
