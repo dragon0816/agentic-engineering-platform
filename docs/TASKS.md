@@ -4798,3 +4798,21 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [ ] Round7 with 1.0.5: candidate wf-20261111-142125-2cc6c2; trials 1 and 2 failed in
   the browser navigation segment (see HANDOFF); 1 trial left; AEP replaying via normal
   approvals before the final trial.
+- [x] Round7 final result (2026-11-11 ~23:20): FAILED acceptance, trial budget exhausted.
+  Candidate wf-20261111-142125-2cc6c2 (engineering/sap-sales-orders-report@1.0.8).
+  Trial 1 run-5487d372125544c79eba680065d592e1: label ensure_visible timeout (compiled
+  without replay). Claude rejected a preflight using generated #__panel3 and the first
+  "last trial" card because the replay was piecewise; AEP then replayed the exact
+  21-action browser step in one browser__operate call from open/reload (succeeded,
+  identical to compiled). Trials 2 run-21905a52f2ee48a79a8f57a92098af9f and 3
+  run-2e3e02f444f04b0484190971e8224b38 both failed at action 3 click Sales Orders
+  (web_target_missing) right after ensure_visible reported the link present; failure
+  DOM shows the Sales panel collapsed. Converged cause (strongly supported, not
+  proven): no application-ready wait after reload, so ensure_visible's presence
+  check can see a stale/transitional expanded panel and skip the trigger; outcome
+  depends on the panel state left by the previous run (the successful replay started
+  from a collapsed state, both trials from an expanded one). Skill step 2 already
+  requires an app-ready check after open/reload; AEP omitted it and Claude's review
+  missed it. No Excel produced; nothing installed. trials 3/3, repair_attempts 3/3.
+- [ ] Owner decision needed for any further attempt (a new candidate/trial budget is
+  a budget renewal; not done without explicit consent).

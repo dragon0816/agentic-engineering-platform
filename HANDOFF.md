@@ -143,50 +143,26 @@ df94b85cad89befcfe18bd2e1625e2b8a8e1e05a2dc939a96179f04d395b4934.
 Existing observation-grant/closed-schema/Knowledge regressions4passed9.78s before
 1.0.4; runtime unchanged, no fresh full suite/build in the latest doc/Skill slice.
 
-## Current state (2026-11-11 ~23:05): round7 delegated drive, 1 trial left
+## Current state (2026-11-11 ~23:20): round7 FAILED, trial budget exhausted
 
-Read first: docs/DECISIONS.md entries of 2026-11-11 (continuation consent,
-owner delegation, delegated + explicit approval of Skill 1.0.5) and docs/TASKS.md.
+See docs/TASKS.md last rows for the full chain. Candidate wf-20261111-142125-2cc6c2
+used all 3 trials (runs run-5487d372125544c79eba680065d592e1,
+run-21905a52f2ee48a79a8f57a92098af9f, run-2e3e02f444f04b0484190971e8224b38); repair
+attempts 3/3; no Excel; nothing installed. Converged cause of trials 2/3: missing
+application-ready wait after reload before a presence-based ensure_visible; result
+depends on the Sales panel state left by the previous run. Resident still runs
+044bd7b5 with Skill 1.0.5; no driver running; no pending approvals in round7.
 
-Runtime: resident runs 044bd7b5 (capability approval continuation; verified,
-see the section below). Skill sap-c4c-workflow-navigation 1.0.5 (candidate
-sk-20261110-155444-ab60a7 rev6, digest e871ef3c...c8ab, adds step 3a date/condition
-rules) was approved by the owner in Agent Web (card ap-20261111-124004-4d6857,
-13:51Z) after Claude Code's own guard refused self-approval twice. Idle-guarded
-restart; resident pid 29552 loaded 1.0.5 (7701 chars) and SOP 1.0.0.
-
-Round7 progress (conversation-77223c69b5b24dc3aa6868789f440014):
-- Drivers: .scratch/c4c_drive.py (reviews and approves only authorized
-  read/navigate/query browser operations; trials now STOP for Claude review),
-  .scratch/c4c_cont_check.py (send/approve/status), .scratch/c4c_trial_status.py,
-  .scratch/c4c_last_msgs.py. Metadata logs/results: .scratch/c4c-drive-20261111/.
-  Never run two drivers at once.
-- With 1.0.5 AEP navigated with caption-anchored locators, set All, Document
-  Date Between with dd.mm.yyyy, Go, and read 774 rows (count only seen).
-- Candidate wf-20261111-142125-2cc6c2 (engineering/sap-sales-orders-report@1.0.8;
-  steps browser/operate + coding/run-python writing Excel under
-  C:/Users/Chi_L/Documents/aep-workflows/sap-sales-orders-report/output).
-  Trial 1 run-5487d372125544c79eba680065d592e1 failed (label ensure_visible Sales
-  Orders, compiled without replay). Repair preflight using generated
-  #__panel3-CollapsedImg was REJECTED by Claude (temporary id, criterion 2).
-  After reviewer feedback AEP patched to structural locators + dd.mm.yyyy +
-  condition verification (digest b7fd...0a0); trial 2
-  run-21905a52f2ee48a79a8f57a92098af9f failed at action 3 click Sales Orders
-  (web_target_missing) right after ensure_visible succeeded. Repair pass 2 hit
-  authoring__preflight_browser preflight_invalid (no detail returned) and stopped
-  correctly without patching. trials 2/3, repair_attempts 2/3.
-- ~23:00 a plain message asked AEP to replay the whole browser phase via normal
-  browser approvals, patch, then request the LAST trial only after replay
-  succeeds. That turn was running at handoff time.
-
-Next: when that turn ends, run ONE driver (`c4c_drive.py 40`) for browser
-replay approvals; review the trial card (replay evidence, locators, date format)
-before approving the final trial; after success, independently reconcile the
-Excel (source total/IDs/pages, All, dates, owner/dept, FX, monthly totals,
-unsupported currencies). Do not install the Workflow without passing acceptance.
-Known risks: date input located by placeholder containing the year (2026);
-preflight_invalid gives no diagnostic (harness, unapproved); failed-capability
-text says "not executed" even after partial execution (harness, unapproved).
+Do NOT reset the exhausted budget or create a new candidate to renew trials without
+explicit owner consent. If the owner authorizes another attempt: (1) consider a
+Skill 1.0.6 clause requiring a post-reload app-ready wait on a control that exists
+only in the freshly loaded state, and replaying the exact compiled step twice, once
+after leaving the Sales panel expanded and once collapsed; (2) review every trial
+card against that evidence (driver already stops on trials). Remaining unproven:
+source total vs UI count, Excel content, owner mapping, FX and monthly totals.
+Unapproved harness observations (not required for the above): preflight_invalid
+returns no detail; failed-capability text says "not executed" after partial runs;
+approval results clipped at 2,000 chars.
 
 ## Earlier: continuation delivered to resident (2026-11-11 ~18:25)
 
