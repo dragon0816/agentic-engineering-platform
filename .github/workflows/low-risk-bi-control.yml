@@ -1,0 +1,48 @@
+name: Low-risk BI comparison
+on:
+  push:
+    branches: [ci-diag/c4c-bi-control-20261112]
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: before
+            ref: 097b2521cf2ef93731d10f70bfc712233bf7a51b
+          - label: after
+            ref: e69371e62ec2a01d31eead91f67ff9e4404a4254
+    name: BI original tests (${{ matrix.label }})
+    env:
+      AEP_GUI_TESTS: '0'
+      AEP_OUTLOOK_TESTS: '0'
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -e ".[dev,office]"
+      - name: Record source and browser versions
+        shell: pwsh
+        run: |
+          git rev-parse HEAD
+          Get-Item 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','C:/Program Files/Microsoft/Edge/Application/msedge.exe' -ErrorAction SilentlyContinue | ForEach-Object { $_.VersionInfo.ProductVersion }
+      - name: Original BI assertions first pass
+        run: python -m pytest -q tests/test_bi_create_domain_ui.py::test_a_domain_is_created_in_the_row_and_becomes_the_working_domain tests/test_bi_version_link_ui.py::test_the_status_line_opens_commit_and_push_from_any_tab --junitxml=bi-first.xml
+      - name: Original BI assertions second pass
+        if: ${{ always() && !cancelled() }}
+        run: python -m pytest -q tests/test_bi_create_domain_ui.py::test_a_domain_is_created_in_the_row_and_becomes_the_working_domain tests/test_bi_version_link_ui.py::test_the_status_line_opens_commit_and_push_from_any_tab --junitxml=bi-second.xml
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && !cancelled() }}
+        with:
+          name: bi-control-${{ matrix.label }}
+          path: bi-*.xml
+          if-no-files-found: warn
