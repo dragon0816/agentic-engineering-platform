@@ -4819,3 +4819,5 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [ ] 2026-11-12 bounded extra attempt (owner「同意」): two full replays (panel expanded /
   collapsed) of the exact compiled browser phase, then at most ONE extra formal trial;
   then independent Excel acceptance. See DECISIONS 2026-11-12.
+- [ ] 2026-11-12 owner extended authority: keep trying grounded methods after failures until
+  acceptance or a genuine harness decision (supersedes the one-trial cap).

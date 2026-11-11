@@ -7466,3 +7466,21 @@ approve. No harness change; this is not harness consent. Skill revisions only if
 add a concretely new verifiable procedure beyond 1.0.5 step 2 and the replay rules;
 Self-Approval guard stays. One failure ends the attempt; no install unless accepted.
 The reload/transitional-DOM cause remains a hypothesis to verify.
+
+#### Owner authorizes continued attempts until a harness decision is needed (2026-11-12, Asia/Taipei)
+
+Owner (relayed by Codex):「接下來如果測試失敗，請接著試可能的方法，直到最後需要改harness再停下來等我決定」.
+This replaces the one-extra-trial cap above. Within the existing C4C read/query/export
+and local Excel goal, after a failure Claude Code continues causally grounded Skill,
+Workflow, locator/readiness/decomposition/replay and verification methods until full
+acceptance, or stops when a new harness change is genuinely required. New recorded
+tests (and, if necessary, candidate lineage) through normal platform mechanisms do not
+need a fresh owner budget question each round. Unchanged: original round7 runs and the
+3/3 fact are kept; no edits to task counters/store/manifests/grants; no bypass of Host
+technical limits or the Self-Approval guard; no order writes, mail or push. Each method
+states hypothesis, minimal fix and pass/fail criteria; the exact browser phase must pass
+complete replays from both Sales panel states before a full trial; no identical retries,
+no sleep/timeout padding, no session churn to renew chances. Harness scope follows
+AGENTS22 and is NOT granted: stop with evidence, minimal scope and regression checks.
+Platform note: the normal reopen on new user input resets repair_attempts from 3 to 0;
+trials remain owner-approval gated and each run is recorded.
