@@ -4821,3 +4821,18 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   then independent Excel acceptance. See DECISIONS 2026-11-12.
 - [ ] 2026-11-12 owner extended authority: keep trying grounded methods after failures until
   acceptance or a genuine harness decision (supersedes the one-trial cap).
+- [x] 2026-11-12 bounded attempt progress: AEP compiled a 23-action browser step (post-reload
+  readiness wait; Sales panel handled by its aria-expanded state). Two complete one-call
+  replays identical to the compiled step passed: from an expanded panel (prior inspect
+  expanded=true) and from a collapsed panel. Trial 4 run-27759de762d64b3f8116055aa725245c
+  succeeded but was unverified (plan assertions still indexed to the old 21-action step);
+  AEP relocated assertions; a normal-turn trial 5 run-728331372d264cd5b659b29727899999 of
+  the same unchanged digest fcb92dd3... succeeded with verified=true, coverage_complete=true.
+  Output C:/Users/Chi_L/Documents/aep-workflows/sap-sales-orders-report/output/
+  sap_sales_orders_report_20261112-034505.xlsx. Independent validator
+  (.scratch/c4c_excel_validator.py, metadata only) vs the trial's source rows: 775 rows /
+  775 unique IDs, all dates in range, copy sheet 0 cell mismatches, Sub-Dept 775/775, EUR
+  775/775, monthly cells 160/160; Grand Total differs from detail by 0.11 EUR (rounding).
+  Gap: 2 blank-Owner orders (EUR 0) not flagged 待確認; UI source total still to compare.
+- [ ] AEP fixing blank-Owner flagging (Excel step only) + reporting UI total/pages; re-trial
+  and re-validate.
