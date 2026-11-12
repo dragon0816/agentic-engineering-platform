@@ -1269,3 +1269,13 @@ Phase 5: provider adapters/model gateway and external integrations.
 Phase 6: guardrails, approvals, tracing and full evaluation harness, including cross-model and multi-agent evaluation.
 
 Phase 7: end-to-end validation and controlled deprecation of source repositories.
+
+
+## IT-owned execution environment (owner2026-11-12)
+
+The Bridge remains the execution plane and Registry remains distribution/control plane. LocalPolicy is a compatibility identity adapter, not an application permission engine. ToolAccess provides shared catalog/describe/invoke/install-MCP surfaces to Gateway and native MCP adapters. Native HTTP turn tokens bind assistant/authoring calls to one TurnEffects record. Dynamic connection refreshes typed Bridge bindings; local asset installation refreshes the running registry without forging grants/review. OS/service identity enforces access. Purpose-specific retrieval and validation helper contracts remain bounded; they are not general Agent tool profiles.
+
+The scoped design and regression matrix are in
+`phases/IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md`; historical approval requirements
+for local tool installation/execution are superseded for this scope. Shared
+publication and model/data-routing decisions are unchanged.

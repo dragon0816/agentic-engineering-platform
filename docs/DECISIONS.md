@@ -7606,3 +7606,27 @@ claim that IT approved an individual tool or a delegation to change model/data
 policy, shared publishing, unrelated chat-form persistence or the running
 resident. Work proceeds on it-owned-tool-access-20261112, managed worktree
 wks_9e3f85169bdceb9b, with contract/red-green/verification stages in the plan.
+
+
+## 2026-11-12 — Direct tool execution preserves evidence rather than approval artifacts
+
+Within the owner's already approved four-part IT-owned harness scope, normal
+browser repair probes and actual trial-input continuation use persisted trial
+identity/history and effective inputs, not historical approval records. A red
+fixture proved a direct failed trial could not continue despite valid evidence;
+removing that admission check preserves the same QA inputs and existing actor/
+session/digest/history conflict tests. Old explicit card APIs remain history and
+are never automatically approved/replayed. A probe never verifies a Workflow.
+
+The legacy SOP Studio also installs local valid drafts without a preview gate,
+grant or fictional business reviewer. Preview is plan evidence, not a passed full
+trial. Local availability, actual verification and shared business publication are
+separate, as in the approved design. Reject the alternative of automatically
+approving cards or marking every install published/verified: it fabricates evidence.
+
+Native CLI tests that might inherit actual IT credentials are explicit opt-in
+(AEP_NATIVE_CLI_TESTS=1), with ordinary regression coverage using fake CLI/ACP/MCP
+and existing model/data-policy assertions. The application no longer rewrites
+provider safeguards/settings; this is not permission to bypass external guards.
+No live mail/send is used for implementation acceptance. Details and raw evidence:
+IT_OWNED_TOOL_ACCESS_LEDGER_20261112.md and its .scratch verification paths.

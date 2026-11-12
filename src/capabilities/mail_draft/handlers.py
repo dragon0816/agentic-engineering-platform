@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable
+from pathlib import Path
 
 from capabilities.contracts import CapabilitySpec
 from capabilities.runtime import CapabilityRefused
@@ -17,6 +18,7 @@ from common.base import Contract, Text
 from common.execution import RequestContext
 from integrations import outlook_draft
 from integrations.outlook_draft import DraftError, DraftWriter, MailDraft
+from integrations.outlook_send import draft_fingerprint
 
 DRAFT_SPEC = CapabilitySpec.model_validate(
     {
@@ -63,6 +65,7 @@ class MailDraftResult(Contract):
     attachments: int = 0
     entry_id: str = ""
     folder: str = ""
+    fingerprint: str = ""
     # The refusal code when a best-effort draft was not saved.
     error: str = ""
 
@@ -106,4 +109,9 @@ class MailDraftHandler:
             attachments=len(draft.attachments),
             entry_id=receipt.entry_id,
             folder=receipt.folder,
+            fingerprint=draft_fingerprint(
+                draft.to, draft.cc, draft.subject, [Path(path).name for path in draft.attachments]
+            )
+            if receipt.saved
+            else "",
         )

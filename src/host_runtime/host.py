@@ -200,6 +200,8 @@ from capabilities.mail_read.handlers import (
     MailSearchRequest,
     MailSearchResult,
 )
+from capabilities.mail_send.handlers import SPEC as MAIL_SEND_SPEC
+from capabilities.mail_send.handlers import MailSendHandler, MailSendRequest, MailSendResult
 from capabilities.ncc_plan.contracts import (
     NccPlan,
     NccPlanStepInput,
@@ -296,12 +298,11 @@ from common.workflow_run_form import agent_prefill, form_offer
 from dut.adapters import DutAdapter, SubprocessDutAdapter
 from dut.contracts import DutPhysicalValidationRequest, DutValidationEvidence
 from dut.runtime import PhysicalDutValidationService
-from harness.network_block import create_rule_command, outbound_rule_present
+from harness.environment_runner import EnvironmentRunner
+from harness.network_block import outbound_rule_present
 from harness.restricted_runner import (
-    RestrictedRunner,
     RunnerError,
     RunnerLimits,
-    is_venv_launcher,
 )
 from host_runtime import bi_bench, wiki_bench
 from host_runtime.agent import LocalAgent
@@ -357,6 +358,7 @@ from integrations.github_project import GitHubProjectClient
 from integrations.jira import JiraClient
 from integrations.outlook_draft import DraftError, DraftWriter, OutlookComDraft
 from integrations.outlook_draft import require_com as require_outlook
+from integrations.outlook_send import OutlookComDraftSender
 from integrations.web_script import WebScript, WebScriptResult
 from knowledge import wiki_repos
 from knowledge.describe import ImageDescriber
@@ -894,6 +896,13 @@ def build_integrations(
         ExecutionDependencies(central_required=False),
     )
     # Legacy mail settings are loaded only when a read/search is invoked.
+    installed.register(
+        MAIL_SEND_SPEC,
+        MailSendHandler(OutlookComDraftSender),
+        MailSendRequest,
+        MailSendResult,
+        ExecutionDependencies(central_required=False),
+    )
     from host_runtime.agent_mode_settings import AgentModeStore
     from integrations.outlook_mail import OutlookComMailbox
 
@@ -1165,7 +1174,7 @@ def build_gateway(
         installed.offer(spec)
     installed.register(
         READ_FILE_SPEC,
-        ReadFileHandler(layout.workspace_root),
+        ReadFileHandler(layout.workspace_root, restrict_root=False),
         ReadFileInput,
         ReadFileOutput,
         ExecutionDependencies(central_required=False),
@@ -1296,14 +1305,14 @@ def build_gateway(
         installed.register(
             spec, handler, request, response, ExecutionDependencies(central_required=False)
         )
-    if config.coding is not None and config.coding.workspace_roots:
-        installed.register(
-            CODING_RUN_SPEC,
-            RunPythonHandler(config.coding),
-            RunPythonStepInput,
-            RunPythonResult,
-            ExecutionDependencies(central_required=False),
-        )
+    installed.register(
+        CODING_RUN_SPEC,
+        RunPythonHandler(config.coding),
+        RunPythonStepInput,
+        RunPythonResult,
+        ExecutionDependencies(central_required=False),
+        timeout_seconds=(config.coding.timeout_seconds if config.coding else 120) + 10,
+    )
     if config.coding is not None:
         installed.register(
             CODING_CHANGE_SPEC,
@@ -1901,21 +1910,19 @@ def _runner_probe(python: Path) -> str | None:
     import tempfile
 
     try:
-        runner = RestrictedRunner(python, RunnerLimits(timeout_seconds=60))
+        runner = EnvironmentRunner(python, RunnerLimits(timeout_seconds=60))
         with tempfile.TemporaryDirectory(prefix="aep-runner-probe-") as folder:
             result = runner.run(
-                ["-c", "import pytest, openpyxl; print('ok')"],
+                ["-c", "import pytest; print('ok')"],
                 cwd=Path(folder),
                 run_dir=Path(folder),
             )
     except (RunnerError, OSError) as error:
-        return f"the runner interpreter cannot start restricted ({type(error).__name__})"
+        return f"the runner interpreter cannot start ({type(error).__name__})"
     if result.exit_code == 0 and result.output.strip().endswith("ok"):
         return None
     code = result.exit_code if result.exit_code is None else hex(result.exit_code & 0xFFFFFFFF)
-    return (
-        f"the runner interpreter does not start restricted or lacks pytest/openpyxl (exit {code})"
-    )
+    return f"the runner interpreter does not start or lacks pytest (exit {code})"
 
 
 def inspect_coding(
@@ -1932,8 +1939,6 @@ def inspect_coding(
     problems: list[str] = []
     if not python.is_file():
         problems.append("the runner interpreter is missing")
-    elif is_venv_launcher(python):
-        problems.append("the runner interpreter is a venv launcher; use a standalone Python")
     else:
         # Started the way a coding run starts it (low integrity, one-process
         # Job): a folder the low-integrity token cannot read fails only here,
@@ -1941,11 +1946,6 @@ def inspect_coding(
         problem = _runner_probe(python)
         if problem is not None:
             problems.append(problem)
-        if binding.require_network_block and not rule_present(python):
-            problems.append(
-                f"no outbound firewall block names the runner; run elevated: "
-                f"{create_rule_command(python)}"
-            )
     problems.extend(
         f"repository {item.name} is not a git checkout"
         for item in binding.repositories
@@ -1956,7 +1956,7 @@ def inspect_coding(
     return DoctorCheck(
         name="coding",
         status="passed",
-        detail=f"restricted pytest ready for {', '.join(i.name for i in binding.repositories)}",
+        detail=f"environment pytest ready for {', '.join(i.name for i in binding.repositories)}",
     )
 
 

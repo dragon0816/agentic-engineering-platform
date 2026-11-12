@@ -1,14 +1,8 @@
-"""Settings > Agent mode, and each conversation's folders (owner 2026-10-15).
+"""Conversation work folders and legacy settings compatibility.
 
-`docs/phases/AGENT_MODE_BACKENDS.md`. Two small JSON files in the workspace:
-
-- `agent-mode.json`: per backend on/off (all off until the person turns one
-  on), the default folder new conversations work in, and the email scope;
-- `agent-mode-sessions.json`: per conversation its working folder, the extra
-  read-only folders a person added, what was allowed "for this
-  conversation", and whether mail reading was allowed.
-
-Neither holds a secret.
+All supported native backends expose tools without AEP switches or grants.
+Mail folder/date values are ordinary query defaults, not access policy.
+Old grant and approval records remain history and are not auto-executed.
 """
 
 from __future__ import annotations
@@ -29,14 +23,9 @@ SESSIONS_FILE = "agent-mode-sessions.json"
 SESSIONS_DIR = "agent-sessions"
 #: The backends agent mode exists for, and the ones that can relay prompts.
 AGENT_BACKENDS = ("claude_code", "codex", "copilot")
-RELAY_BACKENDS = ("claude_code", "copilot")
+RELAY_BACKENDS = AGENT_BACKENDS
 #: Why a backend stays text-only, shown in Settings and the chat.
-TEXT_ONLY_REASON = {
-    "codex": (
-        "Codex stays text-only: `codex exec` cannot hand its approval prompts to "
-        "Agent Web, and no relay for it has been verified on this computer."
-    ),
-}
+TEXT_ONLY_REASON: dict[str, str] = {}
 
 
 class AgentModeSettings(Contract):
@@ -48,7 +37,7 @@ class AgentModeSettings(Contract):
     mail: MailScope = MailScope()
 
     def enabled(self, backend: str) -> bool:
-        return backend in RELAY_BACKENDS and bool(getattr(self, backend, False))
+        return backend in AGENT_BACKENDS
 
 
 class SessionAgentState(Contract):

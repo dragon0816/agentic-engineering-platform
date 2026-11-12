@@ -1917,36 +1917,36 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
     </div>
     <div class="card settings" id="agent-mode-card" style="margin-top: 14px">
       <h2>Agent mode</h2>
-      <p class="note">When a conversation uses Claude Code or GitHub Copilot, the agent can
-        work in that conversation's own folder with AEP's skills and tools. Inside the folder
-        it works freely; reading elsewhere, changing files outside it, every command and
-        sending each email ask you with a card in the chat (no answer in 10 minutes means
-        Deny). Credentials and protected system settings are never touched, and installing,
-        approving or publishing stays with you. Off until you turn a backend on. In Telegram
-        these backends stay text-only.</p>
+      <p class="note">Claude Code, Codex and GitHub Copilot can discover and use AEP tools,
+        connect new tools and use them in the same conversation. AEP does not ask for tool
+        installation or execution approval. Your company's IT, operating system and services
+        control access. Working folders organize files; they do not restrict file access.
+        Drafting saves a draft; sending is a separate requested action. Model data rules
+        and Knowledge sources and citations still apply.</p>
       <form id="agent-mode-form" autocomplete="off">
         <div id="agent-mode-backends" class="empty">reading&hellip;</div>
         <label for="agent-mode-root">Default folder for conversations</label>
         <input id="agent-mode-root">
         <p id="agent-mode-root-note" class="note"></p>
-        <h3>Email the agent may read</h3>
+        <h3>Default email search</h3>
         <label for="agent-mail-folders">Folders (one per line, for example Inbox or
           Inbox/Projects)</label>
         <textarea id="agent-mail-folders" rows="2"></textarea>
-        <label for="agent-mail-days">Days back, at most</label>
+        <label for="agent-mail-days">Default days back</label>
         <input id="agent-mail-days" type="number" min="1" max="365">
-        <label for="agent-mail-senders">Never read mail from (an address or @domain per
-          line)</label>
-        <textarea id="agent-mail-senders" rows="2"></textarea>
-        <label for="agent-mail-excluded">Never read these folders (one per line)</label>
-        <textarea id="agent-mail-excluded" rows="2"></textarea>
+        <p class="note">The agent can request other folders and dates.
+          These values are search defaults.</p>
+        <label for="agent-mail-senders" hidden>Legacy sender exclusions (inactive)</label>
+        <textarea id="agent-mail-senders" rows="2" hidden></textarea>
+        <label for="agent-mail-excluded" hidden>Legacy folder exclusions (inactive)</label>
+        <textarea id="agent-mail-excluded" rows="2" hidden></textarea>
         <p><button class="go" id="agent-mode-save" type="submit">Save agent mode</button></p>
         <p id="agent-mode-result" class="note" role="status"></p>
       </form>
     </div>
     <div class="card settings" style="margin-top: 14px">
       <h2>Agent profile</h2>
-      <p class="note">Profiles narrow the Agent's Skills, Knowledge, capabilities and
+      <p class="note">Profiles select the Agent's Skills, Knowledge and
         model requirements. Restart after activation.</p>
       <div id="profiles" class="empty">reading&hellip;</div>
     </div>
@@ -5824,7 +5824,7 @@ function renderAgentModeSettings(data) {
     const row = document.createElement("label"); row.className = "agent-mode-backend";
     const check = document.createElement("input"); check.type = "checkbox";
     check.dataset.backend = backend.name; check.checked = backend.enabled;
-    check.disabled = !backend.relay;
+    check.disabled = true; // Tool access is IT-managed, not an AEP switch.
     const words = document.createElement("span");
     words.append(text(backend.label + (backend.relay ? ": agent mode" : "")));
     if (backend.note) {
@@ -5837,7 +5837,7 @@ function renderAgentModeSettings(data) {
   el("agent-mode-root").value = settings.default_root;
   el("agent-mode-root").placeholder = data.default_root;
   el("agent-mode-root-note").textContent = "Each conversation gets its own folder inside it. "
-    + "It must be under " + [data.default_root, ...data.coding_roots].join(" or ") + ".";
+    + "Choose any absolute folder accessible to your operating-system account.";
   el("agent-mail-folders").value = mail.folders.join("\n");
   el("agent-mail-days").value = mail.max_days;
   el("agent-mail-senders").value = mail.excluded_senders.join("\n");

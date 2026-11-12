@@ -4907,3 +4907,12 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [x] After consent, create the implementation plan and a separate managed
   worktree; contract/tests/implementation/verification follow in that order.
 - [ ] Implement and validate; do not edit harness before the scoped consent.
+
+- [x] IT-owned tools implementation slices1–7: unified typed discovery/invocation,
+  direct local/MCP installation and same-session refresh, no AEP mail/folder/CLI
+  approval admission; real outcomes and turn receipts retained. Latest focused
+  checks118passed and61passed/2live-Outlook-skipped. Exact445baseline Knowledge
+  cases/outcomes match (445passed162.21s). See IT_OWNED_TOOL_ACCESS_LEDGER_20261112.md.
+- [ ] IT-owned tools final acceptance: one independent whole-branch review,
+  final frozen lint/format/type/full pytest/build/pipcheck and full-run445baseline
+  comparison. No deployment/push/resident/shared Gateway changes yet.

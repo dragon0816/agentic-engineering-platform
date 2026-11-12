@@ -1,35 +1,22 @@
-"""Email for a conversation's coding agent: read in scope, send only by a press (owner 2026-10-15).
+"""Email tools use the signed-in IT/service identity without AEP approval cards.
 
-`docs/phases/AGENT_MODE_BACKENDS.md`, "Revised rules":
-
-- **Read** (`outlook_search`, `outlook_read`): read only, within the scope the
-  person set in Settings > Agent mode (folders, days back, excluded senders
-  and folders). The first read of a conversation shows one card; after
-  "Allow for this conversation" later reads are free. Attachments are saved
-  into the conversation's working folder. Credential-shaped text in a mail
-  is cut out before the agent sees it.
-- **Send** (`outlook_draft`): the agent's message is saved as an Outlook
-  draft (the existing `outlook.draft` writer) and an `ml-` card shows to, cc,
-  subject, body and attachments with **Send**, **Keep as draft** and
-  **Cancel**. Every message needs its own press; there is no
-  conversation-wide allow. `integrations.outlook_send` is called from
-  `AgentMail.decide` only, after a Send press in Agent Web.
-"""
+Search filters are query defaults, not access policy. Draft and send are distinct
+actions. Historical card APIs remain readable; normal tools do not create cards.
+Credential-shaped text is redacted and bounded reads expose continuation metadata."""
 
 from __future__ import annotations
 
 import html
 import threading
 from collections.abc import Callable
-from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
 from common.action_cards import ActionCard, CardButton
-from common.agent_guard import inside, path_refusal, resolved
+from common.agent_guard import resolved
 from common.assets import SECRET_PATTERN
-from host_runtime.agent_mode import AgentMode, AgentRun, redact
-from host_runtime.card_store import CardStore, PendingRecord, new_card_id
+from host_runtime.agent_mode import AgentMode, AgentRun
+from host_runtime.card_store import CardStore, PendingRecord
 from integrations.outlook_draft import DraftError, DraftWriter, MailDraft, recipients
 from integrations.outlook_mail import (
     MailError,
@@ -150,6 +137,8 @@ class AgentMail:
         run.free.append(f"outlook.search ({len(found)})")
         return {
             "ok": True,
+            "complete": False,
+            "note": "Bounded results; refine folder/date/query before claiming full coverage.",
             "messages": [
                 {
                     **item.model_dump(mode="json"),
@@ -167,7 +156,13 @@ class AgentMail:
         message_id = str(arguments.get("message_id") or "")
         reader = self._reader()
         try:
-            found = read(reader, self.scope(), message_id)
+            found = read(
+                reader,
+                self.scope(),
+                message_id,
+                body_offset=int(arguments.get("body_offset") or 0),
+                body_limit=int(arguments.get("body_limit") or 20000),
+            )
         except MailError as error:
             return {"ok": False, "code": error.code}
         saved: list[str] = []
@@ -202,7 +197,7 @@ class AgentMail:
     # -- sending -------------------------------------------------------------
 
     def draft(self, run: AgentRun, arguments: dict[str, Any]) -> dict[str, Any]:
-        """Save the draft, show the card, wait for the person's press."""
+        """Save a draft; sending is a distinct explicit action."""
         to = recipients([str(item) for item in arguments.get("to") or []])
         cc = recipients([str(item) for item in arguments.get("cc") or []])
         subject = str(arguments.get("subject") or "").strip()
@@ -218,17 +213,13 @@ class AgentMail:
                 "message": "A mail carrying a credential is never written through the agent.",
             }
         files: list[Path] = []
-        roots = [run.folder, *run.read_roots]
         for item in arguments.get("attachments") or []:
             path = resolved(str(item), run.folder)
-            problem = path_refusal(path, self.mode.places, write=False)
-            if problem is not None:
-                return {"ok": False, "code": "attachment_refused", "message": problem}
-            if not any(inside(path, root) for root in roots) or not path.is_file():
+            if not path.is_file():
                 return {
                     "ok": False,
-                    "code": "attachment_outside",
-                    "message": f"{item} is not a file in this conversation's folder.",
+                    "code": "attachment_missing",
+                    "message": "The attachment is not an existing file.",
                 }
             files.append(path)
         markup = "<p>" + html.escape(body).replace("\n", "<br>") + "</p>"
@@ -245,53 +236,31 @@ class AgentMail:
         except DraftError as error:
             return {"ok": False, "code": error.code}
         names = tuple(path.name for path in files)
-        now = self.cards.now()
-        record = MailCard(
-            card_id=new_card_id(CARD_PREFIX),
-            created_at=now,
-            expires_at=now + timedelta(seconds=self.mode.timeout_s),
-            session_id=run.session_id,
-            run_id=run.run_id,
-            entry_id=receipt.entry_id,
-            fingerprint=draft_fingerprint(to, cc, subject, names),
-            to=to,
-            cc=cc,
-            subject=subject,
-            body=body[:12_000],
-            attachments=names,
-        )
-        tasks = self.mode.tasks()
-        task = tasks.start("agent_mail", f"Send mail: {redact(subject)}"[:160], run.session_id)
-        tasks.finish(task, "needs_input", "Waiting for Send: to " + ", ".join(to)[:200])
-        event = threading.Event()
-        self._events[record.card_id] = event
-        self.cards.put(record.model_copy(update={"task_id": task}))
-        run.cards.append(record.card_id)
-        self.mode.audit(
-            {
-                "session": run.session_id,
-                "run": run.run_id,
-                "tool": "outlook.draft",
-                "card": record.card_id,
-                "to": list(to),
-                "subject": subject,
-            }
-        )
-        try:
-            event.wait(self.mode.timeout_s)
-        finally:
-            self._events.pop(record.card_id, None)
-        with self.cards.lock:
-            current = self.cards.get(record.card_id)
-            if current is not None and current.status == "pending":
-                current = self._settle(current, "expired", "Kept as a draft in Outlook.", None)
-        status = current.status if current is not None else "expired"
+        run.free.append("outlook.draft")
         return {
-            "ok": status == "sent",
-            "status": status,
-            "message": STATUS_LABELS.get(status, status)
-            + (f": {current.outcome}" if current is not None and status == "failed" else ""),
+            "ok": bool(receipt.saved),
+            "status": "drafted" if receipt.saved else "draft_failed",
+            "entry_id": receipt.entry_id,
+            "fingerprint": draft_fingerprint(to, cc, subject, names),
+            "sent": False,
         }
+
+    def send(self, run: AgentRun, arguments: dict[str, Any]) -> dict[str, Any]:
+        """An explicit send request uses the draft receipt, without a new card."""
+        from pydantic import ValidationError
+
+        from capabilities.mail_send.handlers import MailSendRequest
+
+        try:
+            request = MailSendRequest.model_validate(arguments)
+        except ValidationError:
+            return {"ok": False, "code": "invalid_input"}
+        try:
+            self._sender().send(request.entry_id, request.fingerprint)
+        except SendError as error:
+            return {"ok": False, "code": error.code, "sent": False}
+        run.free.append("outlook.send")
+        return {"ok": True, "sent": True, "entry_id": request.entry_id}
 
     # -- cards ---------------------------------------------------------------
 

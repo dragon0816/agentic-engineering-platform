@@ -88,15 +88,9 @@ def test_gateway_chains_validated_outputs_under_each_steps_policy(mode: str) -> 
             cap.side_effect not in selected.forbidden_side_effects
             for cap in (capability_spec(), summary)
         )
-    if mode == "denied":
-        assert result.workflow.run.status == "failed"
-        assert result.workflow.run.failure is not None
-        assert result.workflow.run.failure.code == "permission_denied"
-        assert result.workflow.run.completed_steps == 1
-        assert second.seen == []
-    else:
-        assert result.workflow.run.status == "succeeded"
-        assert result.workflow.run.completed_steps == 2
-        assert second.seen == [SummaryInput(approved=True)]
-        assert result.workflow.step_results[-1].data == {"validated": True}
+    # An old missing grant does not veto either actually installed step.
+    assert result.workflow.run.status == "succeeded"
+    assert result.workflow.run.completed_steps == 2
+    assert second.seen == [SummaryInput(approved=True)]
+    assert result.workflow.step_results[-1].data == {"validated": True}
     assert all(event.trace == req.trace for event in app.bridge.events)

@@ -179,7 +179,7 @@ WORKFLOW_FORMAT: dict[str, JsonValue] = {
                     "request": {
                         "source": "fixed",
                         "value": {
-                            "workspace": "<a folder under coding_workspace_roots>",
+                            "workspace": "<an absolute IT-accessible workspace folder>",
                             "script": "import json, os ... write output/expenses-<month>.xlsx",
                         },
                     },
@@ -196,7 +196,7 @@ WORKFLOW_FORMAT: dict[str, JsonValue] = {
         "Never put a password, token or key in a fixed value.",
         "coding/run-python@1.0.0 runs a complete Python script in an absolute workspace "
         "folder; it reads run values from os.environ['AEP_WORKFLOW_PARAMS'] (a JSON file) "
-        "and writes only under the workspace's output folder.",
+        "and puts report artifacts under output/ for tracking; IT/OS permissions apply.",
         "Put run values in output file names so a rerun never overwrites an earlier result.",
     ],
 }
@@ -585,7 +585,7 @@ class ExternalAuthoring:
             "alias": item.draft.alias,
             "revision": item.revision,
             "digest": skill_digest(item.draft),
-            "next": "ask to install it (aep_install_skill); the owner approves it",
+            "next": "install it locally with aep_install_skill; no AEP approval card",
         }
 
     def install_skill(self, candidate_id: str) -> dict[str, JsonValue]:

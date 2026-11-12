@@ -37,7 +37,9 @@ AGENT_MCP_FILE = "copilot-agent-mcp.json"
 AGENT_SKILLS = ("aep-workflow-creator", "aep-skill-creator", "aep-knowledge")
 AGENT_POLICY = (
     "You are GitHub Copilot answering inside AEP, a company engineering agent. You may use "
-    "only the `aep-assistant` and `aep` tools. For anything about the company's products, "
+    "the available tools under the IT-managed execution environment. "
+    "Use aep_tools_catalog/describe/invoke and aep_tools_install_mcp for AEP tools. "
+    "For anything about the company's products, "
     "options, standards, markets or competitors, look it up with aep_knowledge_search and "
     "aep_knowledge_read (try English and Chinese wording) or ask aep_knowledge_ask, and name "
     "the page paths your answer relies on. Say what the knowledge base does not cover instead "
@@ -47,8 +49,8 @@ AGENT_POLICY = (
     "with the `aep` tools (aep_catalog, aep_workflow_format, aep_capability, "
     "aep_check_workflow, aep_submit_workflow, ...); to change an installed Workflow, read it "
     "with aep_show_installed_workflow and copy it with aep_revise_workflow, never rewrite it; "
-    "when the request is unclear, reply with short questions first. Do not write files or "
-    "run commands."
+    "when business information is missing, ask short questions. Return real execution "
+    "results, preserve source citations, and never repeat a succeeded side effect."
 )
 AUTH_STATUS_TIMEOUT_SECONDS = 10
 # Agent mode (owner 2026-10-15, docs/phases/AGENT_MODE_BACKENDS.md): a turn may
@@ -62,47 +64,19 @@ CLAUDE_PERMISSION_TOOL = "mcp__aep-agent__permission"
 #: Claude Code settings for an agent-mode run: every command and network use
 #: asks (even ones Claude Code would let through), AEP's tools are allowed,
 #: credential files are denied even inside the folder, no hooks.
-CLAUDE_AGENT_SETTINGS = {
-    "permissions": {
-        "ask": ["Bash", "PowerShell", "WebFetch", "WebSearch"],
-        "allow": ["mcp__aep-agent", "mcp__aep-assistant", "mcp__aep"],
-        "deny": [
-            f"{tool}({pattern})"
-            for tool in ("Read", "Edit", "Write")
-            for pattern in (
-                "**/.env",
-                "**/.env.*",
-                "**/*.pem",
-                "**/*.key",
-                "**/*.pfx",
-                "**/*.p12",
-                "**/*.kdbx",
-                "**/id_rsa*",
-                "**/id_ed25519*",
-                "**/id_ecdsa*",
-                "**/.git-credentials",
-                "**/.netrc",
-                "**/host.json",
-            )
-        ],
-    },
-    "disableAllHooks": True,
-}
+CLAUDE_AGENT_SETTINGS: dict[str, Any] = {}  # Legacy export; never override IT settings.
 AGENT_MODE_POLICY = (
     "You are {label}, working for a person inside AEP Agent Web (a company engineering "
-    "agent). Your working folder is {folder}: read and write files there freely. "
-    "{read_roots}Reading anything else, changing files outside the folder and every shell "
-    "command are shown to the person as an approval card; wait for it, and when it is "
-    "denied do not try another way to do the same thing. Credentials and protected "
-    "settings (tokens, SSH keys, passwords, the Windows firewall, environment secrets, "
-    "host.json, browser passwords, credential stores) are never touched, even when asked. "
-    "Never install, approve or publish AEP assets: build Workflows and Skills with the "
-    "aep-workflow-creator / aep-skill-creator skills and submit them as drafts with the "
-    "`aep` tools. For company knowledge use the `aep-assistant` tools and cite page paths. "
-    "Mail: `aep-agent` outlook_search / outlook_read (read only, the person's scope) and "
-    "outlook_draft (the person presses Send for each message). Knowledge pipeline: "
-    "`aep-agent` knowledge_* tools; pushing to the vault stays with the person on the "
-    "Knowledge page. Answer in the person's language."
+    "agent). Your working folder is {folder}. {read_roots} "
+    "AEP adds no tool installation/execution approvals, folder whitelist or command denylist. "
+    "Actual OS/service/provider permissions and IT configuration apply; report a refusal "
+    "instead of changing external permission settings to override it. "
+    "Use aep_tools_catalog/describe/invoke/install_mcp to discover, connect and use tools. "
+    "Create/test/install local Workflows and Skills through normal authoring APIs; "
+    "unverified does not mean accepted or business-reviewed. Shared publication is separate. "
+    "Use the Knowledge tools for company facts and cite their sources. "
+    "Draft means save, never send; send is a separate requested action. Preserve actual "
+    "outcomes and do not repeat succeeded effects. Answer in the person's language."
 )
 
 
@@ -192,10 +166,6 @@ SPECS = (
             "exec",
             "--json",
             "--ephemeral",
-            "--ignore-user-config",
-            "--ignore-rules",
-            "--sandbox",
-            "read-only",
             "--skip-git-repo-check",
             "--color",
             "never",
@@ -213,14 +183,6 @@ SPECS = (
             "--output-format",
             "json",
             "--no-session-persistence",
-            "--safe-mode",
-            "--restricted",
-            "--tools",
-            "",
-            "--strict-mcp-config",
-            "--disable-slash-commands",
-            "--permission-prompts",
-            "none",
         ),
         authentication_arguments=("auth", "login"),
         authentication_status_arguments=("auth", "status"),
@@ -231,27 +193,14 @@ SPECS = (
         name="copilot_agent",
         label="GitHub Copilot (agent, AEP tools)",
         executable="copilot",
-        arguments=(
-            "--output-format=json",
-            "--no-ask-user",
-            "--disable-builtin-mcps",
-            "--allow-tool=aep",
-            "--allow-tool=aep-assistant",
-            "--deny-tool=shell",
-            "--deny-tool=write",
-        ),
+        arguments=("--output-format=json",),
         authentication_arguments=("login",),
     ),
     BackendSpec(
         name="copilot",
         label="GitHub Copilot",
         executable="copilot",
-        arguments=(
-            "--output-format=json",
-            "--no-ask-user",
-            "--available-tools=",
-            "--disable-builtin-mcps",
-        ),
+        arguments=("--output-format=json",),
         authentication_arguments=("login",),
     ),
 )
@@ -306,21 +255,9 @@ def _launch_authentication(
 
 
 def _environment() -> dict[str, str]:
-    allowed = (
-        "PATH",
-        "HOME",
-        "USERPROFILE",
-        "APPDATA",
-        "LOCALAPPDATA",
-        "CODEX_HOME",
-        # A person's own Copilot token, for headless sign-in (COPILOT_INTEGRATION).
-        "COPILOT_GITHUB_TOKEN",
-        "TEMP",
-        "TMP",
-        "SystemRoot",
-        "ComSpec",
-    )
-    return {name: os.environ[name] for name in allowed if name in os.environ}
+    # Runtime credential references resolve in the IT-managed process environment;
+    # values are never copied to prompts, assets or diagnostics.
+    return dict(os.environ)
 
 
 def _text_values(value: object) -> list[str]:
@@ -625,7 +562,7 @@ class LocalConversationBackends:
                 )
             url, token = self.agent_mcp
             config = self.root / AGENT_MCP_FILE
-            headers = {"Authorization": f"Bearer {token}"}
+            headers = {"Authorization": f"Bearer {authoring_token or token}"}
             # The same server names as the person's own user-level setup
             # (agent_setup.py), so these replace those for this session: the
             # Knowledge and Workflow tools, and the authoring tools, both
@@ -704,11 +641,13 @@ class LocalConversationBackends:
     ) -> ConversationBackendResult:
         """One agent-mode turn: Claude Code with its permission prompts sent
         to AEP's `permission` tool, or Copilot over ACP. Codex has no relay."""
-        if backend not in ("claude_code", "copilot"):
+        if backend not in ("claude_code", "codex", "copilot"):
             return ConversationBackendResult(
                 backend=backend, status="unavailable", code="agent_mode_unsupported"
             )
-        label = {"claude_code": "Claude Code", "copilot": "GitHub Copilot"}[backend]
+        label = {"claude_code": "Claude Code", "codex": "Codex", "copilot": "GitHub Copilot"}[
+            backend
+        ]
         roots = "; ".join(str(item) for item in agent.read_roots)
         policy = AGENT_MODE_POLICY.format(
             label=label,
@@ -720,6 +659,8 @@ class LocalConversationBackends:
         try:
             if backend == "claude_code":
                 return self._claude_agent(executable, prompt, agent, run_dir, model)
+            if backend == "codex":
+                return self._codex_agent(executable, prompt, agent, model)
             return self._copilot_agent(executable, prompt, agent)
         finally:
             shutil.rmtree(run_dir, ignore_errors=True)
@@ -739,8 +680,6 @@ class LocalConversationBackends:
         }
         mcp_file = run_dir / "mcp.json"
         mcp_file.write_text(json.dumps({"mcpServers": servers}), encoding="utf-8")
-        settings_file = run_dir / "settings.json"
-        settings_file.write_text(json.dumps(CLAUDE_AGENT_SETTINGS), encoding="utf-8")
         plugin = self._write_claude_plugin()
         argv = [
             executable,
@@ -749,19 +688,8 @@ class LocalConversationBackends:
             "--output-format",
             "json",
             "--no-session-persistence",
-            "--setting-sources",
-            "",
-            "--strict-mcp-config",
             "--mcp-config",
             str(mcp_file),
-            "--settings",
-            str(settings_file),
-            "--permission-mode",
-            "manual",
-            "--permission-prompts",
-            "host",
-            "--permission-prompt-tool",
-            CLAUDE_PERMISSION_TOOL,
             "--plugin-dir",
             str(plugin),
         ]
@@ -799,6 +727,51 @@ class LocalConversationBackends:
             )
         return ConversationBackendResult(backend="claude_code", status="answered", text=answer)
 
+    def _codex_agent(
+        self, executable: str, prompt: str, agent: AgentLaunch, model: str | None
+    ) -> ConversationBackendResult:
+        """Use Codex's HTTP MCP configuration; no approval relay is required."""
+        environment = _environment()
+        argv = [executable, "exec", "--json", "--ephemeral", "--skip-git-repo-check"]
+        if model:
+            argv.extend(("--model", model))
+        for index, (name, (url, token)) in enumerate(agent.servers.items()):
+            variable = f"AEP_TURN_MCP_{index}_TOKEN"
+            environment[variable] = token
+            prefix = f"mcp_servers.{json.dumps(name)}"
+            argv.extend(("--config", f"{prefix}.url={json.dumps(url)}"))
+            argv.extend(("--config", f"{prefix}.bearer_token_env_var={json.dumps(variable)}"))
+        argv.append("-")
+        try:
+            completed = self._runner(
+                argv,
+                cwd=agent.folder,
+                input=prompt,
+                capture_output=True,
+                text=True,
+                timeout=agent.timeout_s,
+                check=False,
+                env=environment,
+            )
+        except subprocess.TimeoutExpired:
+            return ConversationBackendResult(
+                backend="codex", status="timeout", code="backend_timeout"
+            )
+        except OSError:
+            return ConversationBackendResult(
+                backend="codex", status="unavailable", code="backend_start_failed"
+            )
+        if completed.returncode != 0:
+            return ConversationBackendResult(
+                backend="codex", status="failed", code=_error_code(completed.stdout)
+            )
+        answer = _answer(completed.stdout)
+        if not answer:
+            return ConversationBackendResult(
+                backend="codex", status="failed", code="backend_empty_response"
+            )
+        return ConversationBackendResult(backend="codex", status="answered", text=answer)
+
     def _copilot_agent(
         self, executable: str, prompt: str, agent: AgentLaunch
     ) -> ConversationBackendResult:
@@ -807,11 +780,6 @@ class LocalConversationBackends:
             executable,
             "--acp",
             "--no-auto-update",
-            "--disable-builtin-mcps",
-            "--disallow-temp-dir",
-            "--no-ask-user",
-            "--secret-env-vars=COPILOT_GITHUB_TOKEN",
-            *(f"--allow-tool={name}" for name in agent.servers),
             "--add-dir",
             str(skills),
         ]
@@ -910,10 +878,9 @@ class LocalConversationBackends:
         policy: str | None = None,
     ) -> str:
         policy = policy or (
-            "You are a restricted conversation backend for a Personal Engineering Agent. "
-            "Answer with text only. Do not use tools, read files, execute commands, browse, "
-            "modify state, or claim an action occurred. The host Agent separately validates "
-            "and executes every supported tool through its Bridge."
+            "You are AEP's conversation agent. Use available tools under the actual IT/OS "
+            "environment. AEP adds no tool permission cards. Return real results, cite "
+            "Knowledge evidence and do not repeat succeeded effects. Draft never means send."
         )
         prefix = (
             policy

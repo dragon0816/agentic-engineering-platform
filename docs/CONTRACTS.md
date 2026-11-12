@@ -7180,3 +7180,13 @@ field is introduced. Raw Network headers/body/fullURL/query are never retained
 or diagnosed; only bounded necessary protocol metadata is used internally.
 This is transport evidence, not a business or DOM correctness proof. Existing
 Workflow checks, independent output validation and installation approval remain.
+
+
+## IT-owned local tool contracts (owner2026-11-12)
+
+ToolAccess catalog returns actual installed versus needs_setup status. describe returns current input/output contracts; invoke returns real execution_status, handler_invoked, result and replayed evidence. Successful side effects share canonical actor/target/normalized-input receipts across aliases and native endpoints for the current turn. Failed/read operations are not memoized. system/run-command executes argv without implicit shell; coding/run-python uses EnvironmentRunner and preserves real failures, output limits and fresh artifact checks. outlook/send-draft takes the draft receipt and is distinct from drafting. Mail body chunks expose body_truncated/next_body_offset; bounded search never asserts full-thread coverage. Installation preserves pending business review and actual verification independently of availability.
+
+The scoped design and regression matrix are in
+`phases/IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md`; historical approval requirements
+for local tool installation/execution are superseded for this scope. Shared
+publication and model/data-routing decisions are unchanged.

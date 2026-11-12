@@ -1,10 +1,9 @@
-"""`outlook.search` and `outlook.read`: the person's mail, read only, in their scope.
+"""Read-only Outlook tools under the actual signed-in service identity.
 
-The scope (folders, days back, excluded senders and folders) is the one set
-in Agent Web Settings > Agent mode, read on every call, so a Workflow and the
-coding agent see the same mail. Bodies have credential-shaped text cut out.
-Nothing here writes to the mailbox; attachments are saved only by the
-agent-mode tool, into the conversation's own folder.
+Folder/date settings are query defaults, not access ACLs. Read/search never
+modify the mailbox. Body chunks explicitly identify truncation; search is
+bounded, not a claim of complete thread coverage. Credential-shaped text is
+redacted before returning data.
 """
 
 from __future__ import annotations
@@ -21,6 +20,7 @@ from common.assets import REDACTED, SECRET_PATTERN
 from common.base import Contract
 from common.execution import RequestContext
 from integrations.outlook_mail import (
+    MAX_BODY_CHARS,
     MailError,
     MailReader,
     MailScope,
@@ -50,17 +50,19 @@ def _spec(name: str, description: str) -> CapabilitySpec:
 
 SEARCH_SPEC = _spec(
     "search",
-    "Search the person's Outlook mail within the scope set in "
-    "Settings (folders, days, excluded senders); read only",
+    "Search IT-accessible Outlook mail with requested folder/date/text filters; "
+    "bounded results, read only, no AEP approval",
 )
-READ_SPEC = _spec("read", "Read one Outlook message within the scope set in Settings; read only")
+READ_SPEC = _spec(
+    "read", "Read one IT-accessible Outlook message by id; bounded body chunks, read only"
+)
 
 
 class MailSearchRequest(Contract):
     query: str = Field(default="", max_length=400)
     sender: str = Field(default="", max_length=200)
     folder: str = Field(default="", max_length=200)
-    days: int | None = Field(default=None, ge=1, le=365)
+    days: int | None = Field(default=None, ge=1)
     limit: int = Field(default=20, ge=1, le=50)
 
 
@@ -77,15 +79,24 @@ class MailSearchItem(Contract):
 
 class MailSearchResult(Contract):
     messages: tuple[MailSearchItem, ...] = ()
+    complete: bool = False
+    note: str = (
+        "Bounded results; not proof of complete thread coverage. "
+        "Refine date/folder/query as needed."
+    )
 
 
 class MailReadRequest(Contract):
     message_id: str = Field(min_length=1, max_length=400)
+    body_offset: int = Field(default=0, ge=0)
+    body_limit: int = Field(default=MAX_BODY_CHARS, ge=1, le=MAX_BODY_CHARS)
 
 
 class MailReadResult(MailSearchItem):
     cc: str = ""
     body: str = ""
+    body_truncated: bool = False
+    next_body_offset: int | None = None
 
 
 def scrub(text: str) -> str:
@@ -135,7 +146,13 @@ class MailReadHandler:
         request = MailReadRequest.model_validate(inputs)
         try:
             message = await asyncio.to_thread(
-                lambda: read(self._reader(), self._scope(), request.message_id)
+                lambda: read(
+                    self._reader(),
+                    self._scope(),
+                    request.message_id,
+                    body_offset=request.body_offset,
+                    body_limit=request.body_limit,
+                )
             )
         except MailError as error:
             raise CapabilityRefused(error.code) from None

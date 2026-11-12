@@ -137,3 +137,23 @@ def test_generic_capability_then_workflow_does_not_repeat_the_same_write(tmp_pat
         result = authoring.chat.execute("owner", item, {"month": "once"}, "fixture")
         assert result["status"] == "succeeded"
         assert recorder.calls == ["once"]
+
+
+def test_legacy_studio_installs_without_preview_or_forged_business_review(tmp_path: Path) -> None:
+    from test_authoring_conversation import Scripted
+    from test_authoring_sessions import ACTOR, draft, studio
+    from test_workflow_preview import Calls
+
+    from common.assets import WorkflowManifest
+
+    room = studio(
+        tmp_path, Scripted({"reply": "draft", "questions": [], "workflow": draft()}), Calls()
+    )
+    session = room.start(ACTOR, title="fixture", sop_text="fixture SOP")
+    installed, path = room.install(session.session_id, ACTOR)
+    assert installed.status == "installed"
+    manifest = WorkflowManifest.model_validate_json(path.read_text(encoding="utf-8"))
+    assert manifest.metadata.lifecycle == "draft"
+    assert manifest.metadata.business_approval.status == "pending"
+    assert manifest.metadata.business_approval.reviewer is None
+    assert not (tmp_path / "grants.json").exists()

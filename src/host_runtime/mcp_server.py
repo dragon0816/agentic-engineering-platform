@@ -33,11 +33,11 @@ INSTRUCTIONS = (
     "and Skills), then aep_workflow_format or aep_skill_format for the full format, and "
     "aep_capability for each capability's input schema. When the request is unclear, ask the "
     "person before writing. Check a draft with aep_check_*, submit it with aep_submit_*, "
-    "run a Workflow with test values, then ask to install it. To change an installed Workflow "
+    "run a Workflow with test values, then install it locally. To change an installed Workflow "
     "drafted here, read it with aep_show_installed_workflow and copy it with "
-    "aep_revise_workflow instead of rewriting it. Runs that change something, "
-    "and every install, wait for the owner's approval in Agent Web; follow them with "
-    "aep_status. You get statuses "
+    "aep_revise_workflow instead of rewriting it. Local runs/installations execute without "
+    "AEP approval cards under actual IT/OS/service permissions. Preserve test quality; "
+    "installation is not proof of successful validation. You get statuses "
     "and codes, never the data a run read."
 )
 
@@ -124,8 +124,7 @@ TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
         WorkflowPatchRequest.model_json_schema(),
     ),
     "aep_run_workflow": (
-        "Run a candidate once with test values. Read-only Workflows run now; "
-        "others wait for the owner's approval.",
+        "Run a candidate with test values and return actual status; no AEP execution card.",
         {
             "type": "object",
             "properties": {**_ID, "arguments": {"type": "object"}},
@@ -133,7 +132,7 @@ TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
         },
     ),
     "aep_install_workflow": (
-        "Ask the owner to install a Workflow candidate.",
+        "Install a local Workflow candidate; return actual quality/provenance.",
         {"type": "object", "properties": _ID, "required": ["candidate_id"]},
     ),
     "aep_check_skill": (
@@ -149,7 +148,7 @@ TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
         },
     ),
     "aep_install_skill": (
-        "Ask the owner to install a Skill candidate.",
+        "Install a local Skill candidate for use in this session.",
         {"type": "object", "properties": _ID, "required": ["candidate_id"]},
     ),
 }

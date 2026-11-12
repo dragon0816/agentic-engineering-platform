@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from _thread import RLock
 from collections.abc import Iterator
 from contextlib import contextmanager
 from contextvars import ContextVar
@@ -63,6 +64,9 @@ class TurnEffects:
     calls: dict[str, Any] = field(default_factory=dict)
     workflow_runs: dict[str, Any] = field(default_factory=dict)
     capability_calls: dict[str, Any] = field(default_factory=dict)
+    operations: dict[str, Any] = field(default_factory=dict)
+    operations_lock: RLock = field(default_factory=RLock, repr=False)
+    native_calls_lock: RLock = field(default_factory=RLock, repr=False)
     recorded: int = 0
     replayed: int = 0
 
@@ -101,6 +105,17 @@ class TurnEffects:
         # nested Workflow steps and calls made through a different Bridge wrapper.
         self.capability_calls.setdefault(key, result)
 
+    def replay_operation(self, key: str) -> Any | None:
+        result = self.operations.get(key)
+        if result is not None:
+            self.replayed += 1
+        return result
+
+    def record_operation(self, key: str, result: Any) -> None:
+        if key not in self.operations:
+            self.operations[key] = result
+            self.recorded += 1
+
     def counts(self) -> dict[str, int]:
         return {"side_effects_recorded": self.recorded, "side_effects_replayed": self.replayed}
 
@@ -111,6 +126,16 @@ _CURRENT: ContextVar[TurnEffects | None] = ContextVar("aep_turn_effects", defaul
 def current() -> TurnEffects | None:
     """The record of the turn being run, if any (none outside a turn)."""
     return _CURRENT.get()
+
+
+@contextmanager
+def use_effects(effects: TurnEffects) -> Iterator[None]:
+    """Authenticated native-turn adapters carry receipts across HTTP requests."""
+    token = _CURRENT.set(effects)
+    try:
+        yield
+    finally:
+        _CURRENT.reset(token)
 
 
 @contextmanager

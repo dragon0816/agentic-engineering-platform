@@ -1,26 +1,9 @@
-"""Workflows drafted, previewed, run and installed from a conversation (G4).
+"""Local Workflow/Skill authoring with real execution and quality evidence.
 
-Conversational authoring slices A4-A6 (`docs/phases/CONVERSATIONAL_AUTHORING.md`):
-the Agent drafts a Workflow from the conversation, previews it, and asks to
-run it once or to install it. The owner's decisions of 2026-10-06 bound it:
-
-- the model has no tool that approves, installs or runs a change; a run whose
-  steps only read runs directly, anything else becomes an approval request
-  the owner decides with a button (Agent Web) outside the model's reach;
-- a candidate is private to its author, local and unpublished until the
-  owner installs it; install writes it published with the owner as business
-  approver and adds the grants its steps need;
-- every run goes through the Bridge with exactly the grants the candidate's
-  steps need for this actor, as a preview does.
-
-Records live under `<workspace>/authoring/chat/`: one JSON file per
-candidate and per approval request.
-
-External authoring (owner 2026-10-08, `docs/phases/EXTERNAL_AUTHORING.md`)
-uses the same candidates and approvals: Claude Code, Codex or Copilot submit
-through `aep-host assets` or `aep-host mcp`, marked `source: external:<agent>`,
-and may also submit Skills, which install into the skills folder once the
-owner approves. An external agent sees only statuses and codes, never data.
+Normal run/install tools do not require AEP approval or tool grants. Strict
+schemas, identity/version checks, trial tokens, coverage and actual provenance
+remain. Historical explicit approval APIs remain readable and are not replayed.
+External authoring retains its existing status-only data boundary.
 """
 
 from __future__ import annotations
@@ -43,7 +26,7 @@ from agent.gateway import GatewayConversationResult, HostTool, HostToolOutcome, 
 from agent.skills import SkillManifest
 from agent.turn_effects import current as current_effects
 from agent.turn_effects import workflow_effect_key
-from capabilities.coding_change.workspaces import containing_root, workspace_note
+from capabilities.coding_change.workspaces import workspace_note
 from capabilities.runtime import (
     CapabilityGrant,
     CapabilityInvocation,
@@ -1260,13 +1243,11 @@ class ChatAuthoring:
         source = self._fixed_workspace(step)
         if source is None:
             return []
-        roots = self.coding_workspace_roots
-        if containing_root(source, roots) is None:
-            allowed = "; ".join(roots) if roots else "none are configured on this host"
-            return [
-                f"step {index}: workspace {source} is outside the allowed task folders "
-                f"({allowed}); use a folder under one of them"
-            ]
+        path = Path(source)
+        if not path.is_absolute():
+            return [f"step {index}: workspace must be an absolute path"]
+        if path.exists() and not path.is_dir():
+            return [f"step {index}: workspace is not a folder"]
         return []
 
     def prepare_workspaces(self, manifest: WorkflowManifest) -> None:
@@ -1276,9 +1257,7 @@ class ChatAuthoring:
             if not isinstance(step, WorkflowStep):
                 continue
             source = self._fixed_workspace(step)
-            resolved = (
-                None if source is None else containing_root(source, self.coding_workspace_roots)
-            )
+            resolved = None if source is None else Path(source).resolve()
             if resolved is not None and not resolved.is_dir():
                 for part in ("input", "output"):
                     (resolved / part).mkdir(parents=True, exist_ok=True)
@@ -1426,29 +1405,8 @@ class ChatAuthoring:
         if effective != arguments:
             # Older records without effective values cannot safely adopt current defaults.
             raise ChatAuthoringError("authoring_trial_arguments_unavailable")
-        if not self.read_only(candidate.draft):
-            approved = [
-                a
-                for a in self.approvals(
-                    context.actor, session_id=context.session_id, pending_only=False
-                )
-                if a.kind == "run"
-                and a.status == "approved"
-                and a.candidate_id == candidate.candidate_id
-                and a.digest == task.last_trial_digest
-                and isinstance(a.result, dict)
-                and a.result.get("run_id") == task.last_run_id
-                and a.result.get("digest") == task.last_trial_digest
-                and a.result.get("status") == task.last_status
-            ]
-            if len(approved) != 1:
-                raise ChatAuthoringError("authoring_trial_arguments_unavailable")
-            try:
-                original = validate_run_parameters(candidate.draft, approved[0].arguments)
-            except WorkflowParameterError as error:
-                raise ChatAuthoringError("authoring_trial_arguments_unavailable") from error
-            if original != arguments:
-                raise ChatAuthoringError("authoring_trial_arguments_unavailable")
+        # The persisted trial token/history and saved effective inputs above are
+        # execution evidence. A withdrawn approval record is not required.
         if any(
             key not in arguments
             or json.dumps(value, sort_keys=True) != json.dumps(arguments[key], sort_keys=True)
@@ -2470,8 +2428,8 @@ class ChatAuthoring:
                         "digest": digest(item.draft),
                         "read_only": self.read_only(item.draft),
                         **self.readiness(item),
-                        "next": "preview it, then run it; a run that writes waits for the owner's "
-                        "approval",
+                        "next": "preview and trial it; report actual results, then install locally "
+                        "without an AEP approval card",
                     },
                 )
 
@@ -2547,7 +2505,7 @@ class ChatAuthoring:
                     offer = self._form_instead(context, item.draft, arguments)
                     if offer is not None:
                         return HostToolOutcome(status="succeeded", data={OFFER_KEY: offer})
-                    # The installed version, unchanged: installing was the approval.
+                    # The installed version uses the same direct execution contract.
                     return _trial_outcome(
                         self.execute(
                             context.actor, item, arguments, f"chat-installed:{item.candidate_id}"

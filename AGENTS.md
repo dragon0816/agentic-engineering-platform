@@ -42,7 +42,7 @@ Build a multi-user, contribution-driven agentic engineering platform without sac
 
 ## Safety / side effects
 
-Classify capabilities as `read`, `write`, `execute`, or `external_side_effect`. Destructive, release, deployment, message-sending, production, credential and external-system write operations require an explicit approval policy. Do not let an LLM silently bypass tests, approval gates, version rules or protected release semantics.
+Classify capabilities as `read`, `write`, `execute`, or `external_side_effect`. **IT-owned application tool access (owner, 2026-11-12)** supersedes earlier AEP tool-grant and per-install/per-execution approvals: the Agent can discover, install/connect and use IT/OS/service-accessible tools in the same session. AEP does not add command, folder or mailbox access allowlists. Keep authenticated user/session/Bridge identity, real errors/results, at-most-once side effects, strict contracts, secrets redaction and actual verification. A draft is never a send. Shared publication/business review and model/data-routing rules remain separate; local installation never fabricates either. Historical pending cards are not automatically approved or replayed. This application policy does not authorize coding agents to bypass external provider guards, change the running resident without checking active work, or skip tests and AGENTS.md rule 22 for future harness changes.
 
 Secrets must come from environment variables, secret stores or runtime configuration. Never commit live tokens, passwords, bot tokens, JWTs or API keys. Logs/traces must redact them.
 

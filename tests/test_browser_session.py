@@ -141,7 +141,7 @@ def test_other_sites_and_downloads_outside_a_task_workspace_are_refused(tmp_path
     download = {"do": "download", "target": {"css": "#export"}, "save_as": "rows.csv"}
     for workspace, code in (
         (None, "browser_workspace_missing"),
-        (str(tmp_path / "elsewhere"), "browser_workspace_not_allowed"),
+        ("relative", "browser_workspace_not_absolute"),
     ):
         with pytest.raises(CapabilityRefused) as refused:
             run.run(BrowserRequest.model_validate({"actions": [download], "workspace": workspace}))
@@ -170,7 +170,7 @@ def test_the_conversation_tool_goes_through_the_bridge_and_its_grants(tmp_path: 
     tool = next(tool for tool in ungranted if tool.tool.name == "browser__operate")
     assert tool.tool.name == "browser__operate"
     refused = asyncio.run(_settled(tool.handler(context, args)))
-    assert refused.status == "failed" and browser.visited == []
+    assert refused.status == "succeeded" and browser.visited == [SITE + "/orders"]
     grant = CapabilityGrant(
         actor="owner",
         asset=SPEC.identity,
@@ -184,7 +184,7 @@ def test_the_conversation_tool_goes_through_the_bridge_and_its_grants(tmp_path: 
         if tool.tool.name == "browser__operate"
     )
     done = asyncio.run(_settled(granted.handler(context, args)))
-    assert done.status == "succeeded" and browser.visited == [SITE + "/orders"]
+    assert done.status == "succeeded" and browser.visited == [SITE + "/orders"] * 2
     assert bridge_tools(BridgeExecutor(InstalledCapabilities(), LocalPolicy(()))) == []
 
 
@@ -353,7 +353,7 @@ def test_browser_observation_redacts_secret_query_fields_without_losing_navigati
     assert "view=All" in result.url and "Nav=report" in result.url
 
 
-def test_read_only_inspection_alias_has_closed_schema_and_still_requires_bridge_grant(
+def test_read_only_inspection_alias_has_closed_schema_and_needs_no_application_grant(
     tmp_path: Path,
 ) -> None:
     browser = FakeBrowser()
@@ -383,7 +383,8 @@ def test_read_only_inspection_alias_has_closed_schema_and_still_requires_bridge_
     )
     result = asyncio.run(_settled(tool.handler(context, {})))
     assert result.status == "failed" and result.failure is not None
-    assert browser.started == 0
+    assert result.failure.code == "web_origin_not_allowed"  # real about:blank state
+    assert browser.started == 1
 
 
 def test_read_only_inspection_alias_rejects_extra_keys_before_bridge_dispatch(

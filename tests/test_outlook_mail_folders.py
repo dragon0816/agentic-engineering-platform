@@ -23,13 +23,13 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from test_agent_mail import _call, _mail, _press
+from test_agent_mail import _call, _mail
 from test_business_cards_capabilities import BODY, SignatureModel, _bridge, _run
 
 from capabilities.mail_read.handlers import MailReadHandler, MailReadRequest
 from common.execution import RequestContext, TraceIdentifiers
 from integrations import outlook_mail
-from integrations.outlook_mail import MailError, MailScope, OutlookComMailbox
+from integrations.outlook_mail import MailScope, OutlookComMailbox
 
 NOW = datetime.now(UTC)
 OL_NAMESPACE, OL_FOLDER, OL_MAIL = 1, 2, 43
@@ -163,7 +163,7 @@ def test_a_localised_inbox_is_still_the_inbox() -> None:
     assert box.get("in-2").folder == "Inbox/Projects"
 
 
-def test_read_accepts_an_inbox_message_and_keeps_other_stores_out() -> None:
+def test_read_keeps_store_paths_distinct_without_an_application_access_acl() -> None:
     _, box = _outlook()
     scope = MailScope(folders=("Inbox",), max_days=30)
     assert outlook_mail.read(box, scope, "in-1").message_id == "in-1"
@@ -171,9 +171,9 @@ def test_read_accepts_an_inbox_message_and_keeps_other_stores_out() -> None:
     # Another store's Inbox is not the person's Inbox: the path names the store.
     assert box.get("pst-1").folder == "Shared PST/Inbox"
     for outside in ("pst-1", "ar-1"):
-        with pytest.raises(MailError) as refused:
-            outlook_mail.read(box, scope, outside)
-        assert refused.value.code == "message_unknown"
+        found = outlook_mail.read(box, scope, outside)
+        assert found.message_id == outside
+        assert found.folder == box.get(outside).folder
 
 
 def _context() -> RequestContext:
@@ -200,9 +200,7 @@ def test_agent_mode_reads_an_inbox_message(tmp_path: Path) -> None:
     _, box = _outlook()
     mail._reader = lambda: box
     run = mode.begin("s1", "claude_code")
-    presser = _press(mode.open_cards, "allow_session")
     found = _call(mode, run, "outlook_search", {})
-    presser.join()
     # Outlook lists a folder's own items; a subfolder is read by its id.
     assert [item["message_id"] for item in found["messages"]] == ["in-1"]
     read = _call(mode, run, "outlook_read", {"message_id": "in-1"})
@@ -210,7 +208,9 @@ def test_agent_mode_reads_an_inbox_message(tmp_path: Path) -> None:
     assert read["message"]["folder"] == "Inbox"
     nested = _call(mode, run, "outlook_read", {"message_id": "in-2"})
     assert nested["ok"] and nested["message"]["folder"] == "Inbox/Projects"
-    assert _call(mode, run, "outlook_read", {"message_id": "pst-1"})["code"] == "message_unknown"
+    shared = _call(mode, run, "outlook_read", {"message_id": "pst-1"})
+    assert shared["ok"] and shared["message"]["folder"] == "Shared PST/Inbox"
+    assert not run.cards
 
 
 def test_signature_harvest_reads_inbox_mail_through_outlook(tmp_path: Path) -> None:

@@ -116,6 +116,16 @@ def test_one_conversation_installs_discovers_and_invokes_without_restart(tmp_pat
     script.write_text(FAKE_SERVER, encoding="utf-8")
     model = Scripted(
         [
+            _reply(("tools__catalog", {"query": "validate-release"})),
+            _reply(
+                (
+                    "tools__invoke",
+                    {
+                        "target": "engineering/validate-release@1.0.0",
+                        "arguments": {"args": "fixture"},
+                    },
+                )
+            ),
             _reply(
                 (
                     "tools__install_mcp",
@@ -140,17 +150,21 @@ def test_one_conversation_installs_discovers_and_invokes_without_restart(tmp_pat
             _reply(text="fixture completed"),
         ]
     )
-    built = gateway(Handler(), model)
+    existing = Handler()
+    built = gateway(existing, model)
     hub = McpHub(tmp_path, built.bridge.installed, lambda: built.bridge.policy, "engineer")
     access = ToolAccess(built.bridge, mcp=hub)
     built.host_tools = access.tools
-    message = "Install and use the fixture tool"
+    message = "Use the installed validator, then connect and use the fixture tool"
     try:
         result = asyncio.run(
             built.converse(request(message), (ModelMessage(role="user", text=message),))
         )
-        assert result.status == "answered" and len(result.tools) == 3
+        assert result.status == "answered" and len(result.tools) == 5
         assert all(item.host and item.host.status == "succeeded" for item in result.tools)
+        assert existing.calls == 1
+        existing_result = result.tools[1].host
+        assert existing_result and result_data(existing_result)["validated"] is True
         final = result.tools[-1].host
         assert final and result_data(final)["text"] == "echo: one-turn"
         assert not list(tmp_path.rglob("ap-*.json"))
@@ -223,3 +237,64 @@ def test_agent_connects_http_and_invokes_the_same_bridge_target(tmp_path: Path) 
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)
+
+
+def test_native_turn_install_retry_reuses_the_connection_receipt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from agent.turn_effects import turn_scope
+
+    script = tmp_path / "fixture.py"
+    script.write_text(FAKE_SERVER, encoding="utf-8")
+    hub, bridge, _ = hub_with(tmp_path)
+    access = ToolAccess(bridge, mcp=hub)
+    saved = []
+    original = hub.save
+
+    def save(*args: Any, **kwargs: Any) -> None:
+        saved.append(1)
+        original(*args, **kwargs)
+
+    monkeypatch.setattr(hub, "save", save)
+    config = {
+        "name": "fixture",
+        "transport": "stdio",
+        "command": sys.executable,
+        "args": [str(script)],
+        "timeout_seconds": 10,
+    }
+    try:
+        with turn_scope():
+            first = asyncio.run(access.install_mcp(context(), config))
+            again = asyncio.run(access.install_mcp(context(), config))
+            assert first.status == again.status == "succeeded"
+            assert saved == [1]
+            assert isinstance(again.data, dict) and again.data["replayed"] is True
+    finally:
+        hub.close()
+
+
+def test_stdio_close_delivers_eof_and_redacts_fixture_stderr(tmp_path: Path) -> None:
+    import time
+
+    from integrations.mcp_client import StdioMcpClient
+
+    marker = tmp_path / "closed.txt"
+    script = tmp_path / "close_fixture.py"
+    script.write_text(
+        "import sys\nfrom pathlib import Path\n"
+        "print('password=synthetic-mcp-only', file=sys.stderr, flush=True)\n"
+        "for line in sys.stdin: pass\nPath(sys.argv[1]).write_text('closed')\n",
+        encoding="utf-8",
+    )
+    log = tmp_path / "mcp.log"
+    client = StdioMcpClient(sys.executable, (str(script), str(marker)), log=log)
+    client._start()
+    time.sleep(0.2)
+    client.close()
+    deadline = time.monotonic() + 3
+    while not marker.exists() and time.monotonic() < deadline:
+        time.sleep(0.02)
+    assert marker.read_text() == "closed"
+    assert "synthetic-mcp-only" not in log.read_text(encoding="utf-8")
+    assert "[redacted]" in log.read_text(encoding="utf-8")

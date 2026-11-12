@@ -167,3 +167,93 @@ final whole-feature static/full/build checks remain mandatory in Task8.
 Task6 red (uncommitted test_it_tool_boundaries.py):4fail confirms legacy folder/
 sender/date hiding, missing body continuation metadata, mode switches/cards and
 generic file folder restriction. This red file is excluded from the Task5 commit.
+
+
+## Task6 in progress — mailbox/native execution and cross-endpoint receipts
+
+Uncommitted implementation removes application mail folder/sender/date admission,
+read cards and native backend switches/permission relays; adds bounded mail body
+continuations and explicit send-draft capability. Draft remains draft. Production
+legacy mail aliases use the same Bridge target/turn receipts. Native HTTP turn
+tokens now scope assistant and authoring endpoints to one TurnEffects record;
+a loopback cross-endpoint test proves one handler invocation and token expiry.
+No external provider guards/settings are bypassed. Codex uses native HTTP MCP
+config with bearer token references in child environment, never token argv.
+Model/data-routing requirements are unchanged.
+
+General commands/Python validation use actual IT/OS identity. The EnvironmentRunner
+shares typed subprocess execution with command capability, retains timeout,
+redacted bounded output, real exit statuses and fresh-artifact evidence. Purpose-
+specific coding/change writable/test contracts and Knowledge helper isolation
+remain. Default Python execution no longer needs host coding roots, low-token
+setup or a firewall rule. Desktop/browser output paths accept absolute accessible
+paths; overwrite intent and actual path kinds remain validated.
+
+Actual checks so far: task6-mail-native.xml85passed/1failed/2deselected34.70s;
+sole remaining failure was new test importing SPEC as SEND_SPEC, corrected.
+Initial Python adapter9failures/20passed exposed CRLF output and killed-process
+exit compatibility; normalized text newlines and preserved timeout exit=None at
+the Python adapter, without weakening failed-run/output JSON assertions. The
+85pass run includes those corrected Python tests. task6-boundaries.xml17passed
+5.38s includes direct preflight without cards or false verification and replay.
+task6-mcp-lifecycle.xml22passed25.92s. New EOF/log redaction test first failed
+because close killed the launcher without reaching child EOF; fixed by EOF-first
+shutdown, owned-tree fallback and redacted stderr drain. No real mailbox/send.
+Static review found native Knowledge read steps could be memoized by the new
+wrapper; corrected classification and added fresh-read regression before final
+verification. Final whole-tree lint/type/full/build are still pending.
+
+Old decision/request APIs remain explicit compatibility paths. Preflight's old
+request builder is private and tested as historical behavior; the normal model
+tool directly returns the actual Bridge result. No historical pending cards are
+auto-approved or replayed. Broad affected test run is in progress; no full suite,
+build, resident deployment, push or shared Gateway change has occurred.
+
+
+## Task6/7 focused acceptance and current verification boundary
+
+Latest focused checks: task6-final-focused.xml118passed61.74s; task6-tail.xml
+61passed/2live-Outlook-skipped84.50s. These cover direct read/draft/send, native
+fake adapters, actual local Python, legacy SOP install, real trial-input reuse,
+normal direct browser preflight, old-card compatibility and MCP connect/cleanup.
+The updated one-conversation fixture now discovers/uses an existing validator,
+installs a missing MCP fixture, discovers it and invokes it in the SAME turn:
+five actual successful tool calls, one existing handler call, no approval files.
+Earlier task6-affected3 had187passed/3failed/3skipped121.72s; those3 required old
+approval records for actual input continuity. They now assert the same QA values
+are replayed from actual trial history independently of removed/foreign/stale
+legacy cards, and are included in the latest118passing focused tests. Stronger
+same-actor/session/digest/run-history conflict checks remain unchanged.
+
+Legacy SOP Studio had an additional preview-as-install-admission/fake-review
+path. A new red proved direct installation was refused. It now accepts a valid
+local draft, never fabricates business review or a successful full trial from a
+preview, writes no grant, and the authenticated Web endpoint refreshes the live
+workflow registry. Invalid/missing draft, missing capability and version conflict
+remain real failures. The changed draft cannot inherit old preview evidence.
+This is within the approved local-install scope, not new shared publishing policy.
+
+Ruff check and format check passed (1158 files). Whole-tree mypy passed1112files
+before the final small legacy-Studio/comment/test edits; final freeze recheck is
+mandatory. Real native-provider tests now opt in with AEP_NATIVE_CLI_TESTS=1,
+analogous to existing live Outlook/GUI checks: inheriting IT environment must not
+silently use a developer's live credentials in routine tests. Fake CLI/ACP/MCP
+protocol/error/data-policy assertions remain and have run. Actual provider help
+was inspected read-only; no live provider model prompt, mailbox/send or C4C run.
+
+Task7 Knowledge: exact baseline445 node IDs executed,445passed162.21s,0skipped.
+knowledge-comparison.json proves identical445 identities AND outcomes, not merely
+a count. Initial runner hit Windows argv length before pytest started; switched
+to pytest.main in one Python process with the same exact node IDs (no dropped
+cases). Raw log/JUnit retained. This measures deterministic regressions, not all
+possible live model answers. Final frozen full-suite must compare the same445
+again. No query ranking/evidence/model-data eligibility implementation was edited.
+Knowledge helper scope and shared publication remain purpose-specific contracts.
+
+Updated application Settings copy, backend tool exposure, MCP tool descriptions,
+creator/Knowledge guides and AGENTS/CLAUDE/requirements/architecture/contracts to
+avoid instructions to wait for removed local approval gates. AGENTS22, IT/OS
+permissions, actual outcomes, dry-run intent and model/data policy remain intact.
+No resident, delivered package, shared Gateway, remote branch or main changes.
+Task8 whole-branch independent review, frozen full suite, build and pipcheck are
+still pending. This is NOT final feature completion or deployment acceptance.

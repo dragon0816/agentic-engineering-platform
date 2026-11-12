@@ -14,7 +14,7 @@ from pathlib import Path
 
 from common.assets import REDACTED, SECRET_PATTERN
 from harness.contracts import CodingHarnessRequest, ValidationCase, ValidationFailure
-from harness.restricted_runner import RestrictedRunner
+from harness.environment_runner import CommandRunner
 from harness.workspace import BoundedWorkspace
 
 FILES_PLACEHOLDER = "{files}"
@@ -33,7 +33,7 @@ class ModuleCheck:
         name: str,
         module: str,
         args: Sequence[str],
-        runner: RestrictedRunner,
+        runner: CommandRunner,
         run_dir: Path,
         extra_env: Mapping[str, str] | None = None,
     ) -> None:

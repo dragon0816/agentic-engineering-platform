@@ -115,15 +115,15 @@ Interfaces: existing read/search use IT-accessible messages; legacy scope fields
 are at most ordinary query defaults, never deny filters. Draft remains draft;
 send invokes the existing sender through a normal callable contract.
 
-- [ ] Red: fake mailbox outside old folder/date/exclusion ceiling is readable;
+- [x] Red: fake mailbox outside old folder/date/exclusion ceiling is readable;
   requested query filters still work. Requested draft sends0; send calls1 without
   a card. Long/cut mail results are identified, not complete-thread claims.
-- [ ] Red: CLI tool exposure is not gated by Agent-mode flags/approval relay;
+- [x] Red: CLI tool exposure is not gated by Agent-mode flags/approval relay;
   AEP adds no command/folder deny rules; actual unsupported provider reports its
   limitation. External guards are never bypassed by this coding agent.
-- [ ] Green: remove AEP-added gates, retain actual authentication/OS errors and
+- [x] Green: remove AEP-added gates, retain actual authentication/OS errors and
   unchanged model/data eligibility; update UI/Skill text to the new contract.
-- [ ] Run mail/native adapter tests using fakes, no real mailbox/send; commit.
+- [x] Run mail/native adapter tests using fakes, no real mailbox/send; commit.
 
 ## Task7: Knowledge and integrated user-flow acceptance
 
@@ -131,15 +131,15 @@ Files: regression tests for generic discovery/effects plus existing Knowledge
 and novice-flow fixtures; docs/CONTRACTS/ARCHITECTURE/REQUIREMENTS and AGENTS/CLAUDE
 alignment only for the approved application-tool policy.
 
-- [ ] Prove ordinary Knowledge questions still retrieve/cite sources without
+- [x] Prove ordinary Knowledge questions still retrieve/cite sources without
   writes; preserve query/helper isolation, citations, artifacts and route rules.
-- [ ] Compare the same445 baseline Knowledge cases, outcome IDs and failures.
+- [x] Compare the same445 baseline Knowledge cases, outcome IDs and failures.
   Baseline source is e69371e6; pre-change code at394ca4d2 is identical apart from
   documents, so existing recorded baseline/full proofs may be reused after Git
   object equivalence verification instead of repeating an unchanged full suite.
-- [ ] User-flow fixture: one prompt discovers an existing tool, installs a missing
+- [x] User-flow fixture: one prompt discovers an existing tool, installs a missing
   fixture tool, uses both and returns real output with no AEP approval cards.
-- [ ] Update obsolete approval-specific expectations with explicit new behavioral
+- [x] Update obsolete approval-specific expectations with explicit new behavioral
   assertions; preserve all unrelated guarantees. Commit regression/docs slice.
 
 ## Task8: final verification, review and handoff

@@ -63,6 +63,7 @@ from agent.data_policy import ContextMaterial, OutboundContext
 from agent.gateway import GatewayConversationResult, turn_call_budget, turn_host_tools
 from agent.routing import DOT_COMMAND
 from agent.skills import SkillManifest
+from agent.turn_effects import TurnEffects, use_effects
 from agent.turn_progress import TURN_PROGRESS, TurnProgress, TurnProgressBoard
 from capabilities.knowledge_pipeline.handlers import (
     ADOPT_SPEC,
@@ -335,6 +336,7 @@ from host_runtime.telegram_settings import (
     telegram_status,
     windows_user_environment,
 )
+from host_runtime.tool_access import ToolAccess
 from host_runtime.turn_summary import stop_reply, tool_summary
 from host_runtime.workflow_form_tool import resolve as resolve_workflow
 from host_runtime.workflow_settings import (
@@ -850,6 +852,7 @@ class AgentWeb:
             form_offer=self._installed_form,
         )
         self._authoring_turns: dict[str, tuple[str, str]] = {}
+        self._authoring_effects: dict[str, TurnEffects] = {}
         gateway = runtime.agent.gateway
         earlier_tools = gateway.host_tools
         gateway.host_tools = lambda: (
@@ -884,6 +887,9 @@ class AgentWeb:
             self.agent_mode, reader=_outlook_mailbox, writer=_outlook_drafts, sender=_outlook_sender
         )
         self.agent_mode.mail = self.agent_mail
+        self.agent_mode.tool_access = ToolAccess(runtime.agent.gateway.bridge, mcp=runtime.mcp)
+        self.agent_mode.actor = runtime.actor
+        self.agent_mode.namespace = runtime.config.namespace or "engineering"
         # Send cards of the loan reply Workflow (owner 2026-10-20): one press,
         # one mail, in Agent Web only.
         self.loan_cards = LoanReplyCards(runtime.layout.workspace_root, sender=_outlook_sender)
@@ -1618,9 +1624,14 @@ class AgentWeb:
                         self.runtime.agent.gateway.bridge,
                     )
             elif action == "install":
-                session, _path = self.authoring.install(str(body.get("session_id")), actor)
+                session, path = self.authoring.install(str(body.get("session_id")), actor)
+                manifest = WorkflowManifest.model_validate_json(path.read_text(encoding="utf-8"))
+                workflows = self.runtime.agent.gateway.engine.workflows
+                if workflows.get(manifest.metadata.identity) is None:
+                    workflows.register(manifest)
                 view = self._authoring_view(session)
-                view["restart_required"] = True
+                view["restart_required"] = False
+                view["verified"] = False
                 return view
             else:
                 return {"ok": False, "code": "authoring_action_unknown"}
@@ -2161,7 +2172,16 @@ class AgentWeb:
     def assistant_token(self) -> str:
         return assistant_token(self.runtime.layout.workspace_root)
 
-    def assistant_mcp(self, message: dict[str, Any]) -> dict[str, Any] | None:
+    def assistant_mcp(
+        self, message: dict[str, Any], turn: tuple[str, str] | None = None
+    ) -> dict[str, Any] | None:
+        if turn is not None:
+            session_id = turn[0]
+            effects = self.agent_mode.effects_for_session(
+                session_id
+            ) or self._authoring_effects.get(session_id)
+            with use_effects(effects) if effects is not None else nullcontext():
+                return assistant_handle(AssistantTools(self, session_id=session_id), message)
         if getattr(self, "_assistant_tools", None) is None:
             self._assistant_tools = AssistantTools(self)
         return assistant_handle(self._assistant_tools, message)
@@ -2236,7 +2256,9 @@ class AgentWeb:
         is: an agent-mode run, or a Copilot agent conversation turn."""
         run = self.agent_mode.run_for_token(token) if token else None
         if run is not None:
-            return run.session_id, "claude-code" if run.backend == "claude_code" else "copilot"
+            return run.session_id, {"claude_code": "claude-code", "codex": "codex"}.get(
+                run.backend, "copilot"
+            )
         for given, turn in list(self._authoring_turns.items()):
             if token and hmac.compare_digest(given, token):
                 return turn
@@ -2263,7 +2285,11 @@ class AgentWeb:
                     raise ChatAuthoringError("authoring_unavailable")
                 return ExternalAuthoring(chat, self.runtime.actor, agent, session_id=session_id)
 
-            answered: dict[str, Any] | None = Server(attributed, "agent-web").handle(message)
+            effects = self.agent_mode.effects_for_session(session_id)
+            if effects is None:
+                effects = self._authoring_effects.get(session_id)
+            with use_effects(effects) if effects is not None else nullcontext():
+                answered: dict[str, Any] | None = Server(attributed, "agent-web").handle(message)
             return answered
         if getattr(self, "_authoring_server", None) is None:
             from host_runtime.external_authoring import ExternalAuthoring
@@ -3777,6 +3803,9 @@ class AgentWeb:
                     agent_run, launch = self._agent_launch(item.session_id, record.backend)
                 authoring_token = secrets.token_urlsafe(32)
                 self._authoring_turns[authoring_token] = (item.session_id, "copilot")
+                self._authoring_effects[item.session_id] = (
+                    agent_run.effects if agent_run else TurnEffects()
+                )
                 try:
                     completed = self.backends.complete(
                         record.backend,
@@ -3794,6 +3823,7 @@ class AgentWeb:
                     )
                 finally:
                     self._authoring_turns.pop(authoring_token, None)
+                    self._authoring_effects.pop(item.session_id, None)
                 if agent_run is not None:
                     answer_cards = self.agent_mode.finish(
                         agent_run, completed.status, completed.code or ""
@@ -4190,7 +4220,7 @@ class AgentWeb:
             folder=run.folder,
             servers={
                 "aep-agent": (base + "/agent", run.token),
-                "aep-assistant": (base, assistant),
+                "aep-assistant": (base, run.token),
                 # The run's own token: its drafts belong to this conversation.
                 "aep": (base + "/authoring", run.token),
             },
@@ -6943,11 +6973,7 @@ class _Handler(BaseHTTPRequestHandler):
         agent_route = urlparse(self.path).path == "/mcp/agent"
         # A turn's own token on the authoring tools: drafts belong to that
         # conversation (owner 2026-10-16).
-        turn = (
-            self.server.web.authoring_turn(given)
-            if given and urlparse(self.path).path == "/mcp/authoring"
-            else None
-        )
+        turn = self.server.web.authoring_turn(given) if given else None
         if agent_route:
             if not given or self.server.web.agent_mode.run_for_token(given) is None:
                 self._refuse_unread(401, {"error": "this request carried no usable token"})
@@ -6977,12 +7003,12 @@ class _Handler(BaseHTTPRequestHandler):
             return
         batch = message if isinstance(message, list) else [message]
         web = self.server.web
-        serve = (
+        serve: Callable[[dict[str, Any]], dict[str, Any] | None] = (
             (lambda item: web.authoring_mcp(item, turn))
             if urlparse(self.path).path == "/mcp/authoring"
             else (lambda item: web.agent_mcp(given, item))
             if agent_route
-            else web.assistant_mcp
+            else (lambda item: web.assistant_mcp(item, turn))
         )
         replies = [
             reply

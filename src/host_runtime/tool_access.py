@@ -10,11 +10,14 @@ from __future__ import annotations
 
 import asyncio
 import uuid
+from contextlib import nullcontext
 from typing import Any
 
 from pydantic import Field, JsonValue, ValidationError
 
 from agent.gateway import HostTool, HostToolOutcome, ToolEffect, capability_effect
+from agent.turn_effects import TurnEffects, effect_key
+from agent.turn_effects import current as current_effects
 from capabilities.runtime import CapabilityInvocation
 from common.assets import AssetIdentity
 from common.base import Contract
@@ -116,11 +119,38 @@ class ToolAccess:
             checked = McpServerConfig.model_validate(config)
         except ValidationError:
             return _invalid()
+        return await asyncio.to_thread(self._install_mcp, context, checked, current_effects())
+
+    def _install_mcp(
+        self, context: RequestContext, checked: McpServerConfig, effects: TurnEffects | None
+    ) -> HostToolOutcome:
+        assert self.mcp is not None
+        key = effect_key(
+            "mcp-install",
+            {
+                "manager": str(self.mcp.path.resolve()),
+                "actor": context.actor,
+                "namespace": context.namespace,
+                "config": checked.model_dump(mode="json"),
+            },
+        )
+        with effects.operations_lock if effects is not None else nullcontext():
+            earlier = effects.replay_operation(key) if effects is not None else None
+            if earlier is not None:
+                data = earlier.data if isinstance(earlier.data, dict) else {}
+                return HostToolOutcome(status="succeeded", data={**data, "replayed": True})
+            result = self._configure_mcp(checked)
+            if effects is not None and result.status == "succeeded":
+                effects.record_operation(key, result)
+            return result
+
+    def _configure_mcp(self, checked: McpServerConfig) -> HostToolOutcome:
         hub = self.mcp
+        assert hub is not None
         try:
-            await asyncio.to_thread(hub.save, checked, {}, connect=False)
+            hub.save(checked, {}, connect=False)
             if checked.enabled:
-                await asyncio.to_thread(hub.connect, checked.name)
+                hub.connect(checked.name)
         except OSError:
             return HostToolOutcome(
                 status="failed",
@@ -337,6 +367,7 @@ class ToolAccess:
                 ),
                 install_mcp,
                 side_effect="execute",
+                records_effect=True,
             ),
             HostTool(
                 ModelTool(

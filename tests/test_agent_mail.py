@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-import re
 import threading
 import time
 from datetime import UTC, datetime, timedelta
@@ -81,7 +80,7 @@ class FakeMailbox:
                 **{
                     key: value
                     for key, value in item.model_dump().items()
-                    if key not in ("cc", "body")
+                    if key in MailSummary.model_fields
                 }
             )
             for item in self.messages.values()
@@ -122,23 +121,23 @@ SCOPE = MailScope(
 )
 
 
-def test_search_and_read_keep_to_the_persons_scope() -> None:
+def test_query_parameters_filter_results_without_legacy_mail_admission() -> None:
     box = FakeMailbox(MAILBOX)
-    found = outlook_mail.search(box, SCOPE)
-    assert {item.message_id for item in found} == {"m1", "m2", "m7"}
+    assert {item.message_id for item in outlook_mail.search(box, SCOPE)} == {
+        "m1",
+        "m2",
+        "m3",
+        "m4",
+        "m7",
+    }
     assert [item.message_id for item in outlook_mail.search(box, SCOPE, query="release")] == ["m1"]
-    assert outlook_mail.search(box, SCOPE, folder="Inbox/Projects")[0].message_id == "m2"
-    with pytest.raises(MailError):
-        outlook_mail.search(box, SCOPE, folder="Inbox/HR")
-    with pytest.raises(MailError):
-        outlook_mail.search(box, SCOPE, folder="Sent Items")
-    # Days cannot widen the scope.
-    assert "m5" not in {item.message_id for item in outlook_mail.search(box, SCOPE, days=90)}
-    for outside in ("m3", "m4", "m5", "m6"):
-        with pytest.raises(MailError) as refused:
-            outlook_mail.read(box, SCOPE, outside)
-        assert refused.value.code == "message_unknown"
-    assert outlook_mail.read(box, SCOPE, "m1").subject == "Release plan"
+    assert outlook_mail.search(box, SCOPE, folder="Inbox/HR")[0].message_id == "m4"
+    assert outlook_mail.search(box, SCOPE, folder="Sent Items")[0].message_id == "m6"
+    assert "m5" in {item.message_id for item in outlook_mail.search(box, SCOPE, days=90)}
+    for number in range(1, 8):
+        assert outlook_mail.read(box, SCOPE, f"m{number}").message_id == f"m{number}"
+    with pytest.raises(MailError, match="message_unknown"):
+        outlook_mail.read(box, SCOPE, "missing")
 
 
 def test_the_read_only_modules_have_no_verb_that_changes_a_mailbox() -> None:
@@ -218,44 +217,29 @@ def _call(mode: AgentMode, run: AgentRun, name: str, arguments: dict[str, Any]) 
     return json.loads(reply["result"]["content"][0]["text"])  # type: ignore[index]
 
 
-def test_the_first_read_asks_once_per_conversation(tmp_path: Path) -> None:
+def test_mail_reads_need_no_card_and_keep_attachments_and_redaction(tmp_path: Path) -> None:
     mode, tasks, mail, box, _, _ = _mail(tmp_path)
     run = mode.begin("s1", "claude_code")
-    presser = _press(mode.open_cards, "deny")
-    refused = _call(mode, run, "outlook_search", {"query": "release"})
-    presser.join()
-    assert refused["code"] == "not_allowed"
-    presser = _press(mode.open_cards, "allow_session")
     found = _call(mode, run, "outlook_search", {"query": "release"})
-    presser.join()
+    assert found["ok"] and found["complete"] is False
     assert [item["message_id"] for item in found["messages"]] == ["m1"]
-    card = mode.card(run.cards[-1])
-    assert card is not None and card.title == "Read your email in this conversation"
-    assert "Inbox" in card.preview and "@private.com" in card.preview
-    assert [button.action for button in card.buttons] == ["allow_session", "deny"]
-    # Later reads in this conversation, also in a later turn, ask no more.
-    second = mode.begin("s1", "claude_code")
-    read = _call(mode, second, "outlook_read", {"message_id": "m1", "save_attachments": True})
-    assert read["ok"] and not second.cards
+    read = _call(mode, run, "outlook_read", {"message_id": "m1", "save_attachments": True})
+    assert read["ok"]
     saved = [Path(path) for path in read["saved_attachments"]]
     assert [path.name for path in saved] == ["plan.xlsx", "notes.txt"]
-    assert all(path.parent == second.folder / "mail-attachments" for path in saved)
-    secret = _call(mode, second, "outlook_read", {"message_id": "m7"})
-    assert "hunter2" not in str(secret)
-    assert _call(mode, second, "outlook_read", {"message_id": "m3"})["code"] == "message_unknown"
-    # Another conversation asks again.
+    assert all(path.parent == run.folder / "mail-attachments" and path.is_file() for path in saved)
+    assert "hunter2" not in str(_call(mode, run, "outlook_read", {"message_id": "m7"}))
+    assert _call(mode, run, "outlook_read", {"message_id": "m3"})["ok"]
     other = mode.begin("s2", "claude_code")
-    mode.timeout_s = 0.2
-    assert _call(mode, other, "outlook_search", {})["code"] == "not_allowed"
-    assert any(
-        row["title"] == "Read your email in this conversation" for row in tasks.rows.values()
-    )
+    assert _call(mode, other, "outlook_search", {})["ok"]
+    assert not run.cards and not other.cards and not mail.open_cards()
+    assert not any(row["kind"] == "agent_permission" for row in tasks.rows.values())
 
 
 # -- agent mode: sending ---------------------------------------------------------------
 
 
-def test_sending_needs_a_press_on_each_message(tmp_path: Path) -> None:
+def test_draft_and_explicit_send_are_distinct_and_success_is_not_repeated(tmp_path: Path) -> None:
     mode, tasks, mail, _, writer, sender = _mail(tmp_path)
     run = mode.begin("s1", "claude_code")
     report = run.folder / "report.txt"
@@ -267,98 +251,30 @@ def test_sending_needs_a_press_on_each_message(tmp_path: Path) -> None:
         "body": "Hello team,\nthe numbers are attached.",
         "attachments": ["report.txt"],
     }
-
-    def fingerprint_drafts() -> None:
-        # What Outlook holds now for each saved draft: as drafted.
-        for number, draft in enumerate(writer.drafts, start=1):
-            sender.fingerprints[f"recorded-{number}"] = draft_fingerprint(
-                draft.to, draft.cc, draft.subject, [Path(path).name for path in draft.attachments]
-            )
-
-    def press(action: str) -> threading.Thread:
-        def run_press() -> None:
-            deadline = time.monotonic() + 20
-            while time.monotonic() < deadline:
-                cards = mail.open_cards("s1")
-                if cards:
-                    fingerprint_drafts()
-                    mail.decide(cards[0].card_id, action)
-                    return
-                time.sleep(0.05)
-
-        thread = threading.Thread(target=run_press, daemon=True)
-        thread.start()
-        return thread
-
-    presser = press("send")
-    sent = _call(mode, run, "outlook_draft", first)
-    presser.join()
-    assert sent["ok"] and sent["status"] == "sent"
-    assert sender.sent == ["recorded-1"]
-    card = mail.card(run.cards[-1])
-    assert card is not None and card.card_id.startswith("ml-")
-    for shown in (
-        "To: team@rs.com",
-        "Cc: lead@rs.com",
-        "Subject: Weekly numbers",
-        "the numbers are attached.",
-        "Attachments: report.txt",
-    ):
-        assert shown in card.preview, shown
-    assert [b.label for b in card.buttons] == ["Send", "Keep as draft", "Cancel"]
-    # The same message again is a new draft and a new card: nothing is remembered.
-    presser = press("keep_draft")
-    kept = _call(mode, run, "outlook_draft", first)
-    presser.join()
-    assert kept["status"] == "kept" and sender.sent == ["recorded-1"]
-    presser = press("cancel")
-    cancelled = _call(mode, run, "outlook_draft", {**first, "attachments": []})
-    presser.join()
-    assert cancelled["status"] == "cancelled" and sender.discarded == ["recorded-3"]
-
-    # A draft edited in Outlook after the card is not sent.
-    def edited() -> None:
-        deadline = time.monotonic() + 20
-        while time.monotonic() < deadline:
-            cards = mail.open_cards("s1")
-            if cards:
-                fingerprint_drafts()
-                sender.fingerprints["recorded-4"] = "changed"
-                mail.decide(cards[0].card_id, "send")
-                return
-            time.sleep(0.05)
-
-    thread = threading.Thread(target=edited, daemon=True)
-    thread.start()
-    changed = _call(mode, run, "outlook_draft", first)
-    thread.join()
-    assert changed["status"] == "failed" and "changed in Outlook" in changed["message"]
-    assert sender.sent == ["recorded-1"]
-    # No answer: the draft stays a draft.
-    mode.timeout_s = 0.2
-    late = _call(mode, run, "outlook_draft", first)
-    assert late["status"] == "expired" and sender.sent == ["recorded-1"]
-    mail_rows = [row for row in tasks.rows.values() if row["kind"] == "agent_mail"]
-    assert [row["status"] for row in mail_rows] == [
-        "succeeded",
-        "stopped",
-        "stopped",
-        "failed",
-        "stopped",
-    ]
-    # The answer keeps every mail card as decided.
-    finished = mode.finish(run, "answered")
-    assert [card["status"] for card in finished] == [
-        "sent",
-        "kept",
-        "cancelled",
-        "failed",
-        "expired",
-    ]
-    assert all(card["card_id"].startswith("ml-") for card in finished)
+    drafted = _call(mode, run, "outlook_draft", first)
+    assert drafted["ok"] and drafted["status"] == "drafted" and drafted["sent"] is False
+    assert sender.sent == [] and len(writer.drafts) == 1
+    assert writer.drafts[0].attachments == (str(report),)
+    assert "the numbers are attached." in writer.drafts[0].html_body
+    assert _call(mode, run, "outlook_draft", first)["replayed"] is True
+    assert len(writer.drafts) == 1
+    sender.fingerprints[drafted["entry_id"]] = drafted["fingerprint"]
+    arguments = {key: drafted[key] for key in ("entry_id", "fingerprint")}
+    assert _call(mode, run, "outlook_send", arguments)["sent"] is True
+    assert _call(mode, run, "outlook_send", arguments)["replayed"] is True
+    assert sender.sent == [drafted["entry_id"]]
+    changed = _call(mode, run, "outlook_draft", {**first, "subject": "Changed"})
+    sender.fingerprints[changed["entry_id"]] = "changed"
+    refused = _call(
+        mode, run, "outlook_send", {key: changed[key] for key in ("entry_id", "fingerprint")}
+    )
+    assert refused["ok"] is False and refused["code"] == "draft_changed"
+    assert sender.sent == [drafted["entry_id"]]
+    assert not run.cards and not mail.open_cards()
+    assert not any(row["kind"] in {"agent_mail", "agent_permission"} for row in tasks.rows.values())
 
 
-def test_a_draft_is_refused_before_outlook_when_it_is_unsafe(tmp_path: Path) -> None:
+def test_draft_contract_and_credentials_remain_checked_without_folder_acl(tmp_path: Path) -> None:
     mode, _, mail, _, writer, _ = _mail(tmp_path)
     run = mode.begin("s1", "claude_code")
     base = {"to": ["a@rs.com"], "subject": "s", "body": "b"}
@@ -368,88 +284,58 @@ def test_a_draft_is_refused_before_outlook_when_it_is_unsafe(tmp_path: Path) -> 
     assert (
         _call(mode, run, "outlook_draft", {**base, "body": SECRET})["code"] == "credential_refused"
     )
-    outside = tmp_path / "elsewhere.txt"
-    outside.write_text("x", encoding="utf-8")
-    assert (
-        _call(mode, run, "outlook_draft", {**base, "attachments": [str(outside)]})["code"]
-        == "attachment_outside"
-    )
-    key = run.folder / "deploy.pem"
-    key.write_text("x", encoding="utf-8")
-    assert (
-        _call(mode, run, "outlook_draft", {**base, "attachments": ["deploy.pem"]})["code"]
-        == "attachment_refused"
-    )
     assert writer.drafts == []
+    outside = tmp_path / "elsewhere.txt"
+    outside.write_text("fixture", encoding="utf-8")
+    assert _call(mode, run, "outlook_draft", {**base, "attachments": [str(outside)]})["ok"]
+    key = run.folder / "deploy.pem"
+    key.write_text("fixture, not a key", encoding="utf-8")
+    assert _call(mode, run, "outlook_draft", {**base, "attachments": ["deploy.pem"]})["ok"]
+    assert (
+        _call(mode, run, "outlook_draft", {**base, "attachments": ["missing"]})["code"]
+        == "attachment_missing"
+    )
+    assert len(writer.drafts) == 2
 
 
-def test_mail_cards_are_answered_in_agent_web_only(tmp_path: Path) -> None:
-    mode, _, mail, _, _, sender = _mail(tmp_path, timeout_s=1)
-    run = mode.begin("s1", "claude_code")
-    answers: list[dict[str, Any]] = []
+def test_historical_mail_cards_remain_readable_without_replaying_them(tmp_path: Path) -> None:
+    from host_runtime.agent_mail import MailCard
 
-    def telegram() -> None:
-        deadline = time.monotonic() + 10
-        while time.monotonic() < deadline:
-            cards = mail.open_cards("s1")
-            if cards:
-                answers.append(mail.decide(cards[0].card_id, "send", channel="telegram"))
-                return
-            time.sleep(0.05)
-
-    thread = threading.Thread(target=telegram, daemon=True)
-    thread.start()
-    result = _call(mode, run, "outlook_draft", {"to": ["a@rs.com"], "subject": "s", "body": "b"})
-    thread.join()
-    assert answers[0]["code"] == "web_only" and result["status"] == "expired"
+    mode, _, mail, _, _, sender = _mail(tmp_path)
+    now = mail.cards.now()
+    record = MailCard(
+        card_id="ml-123456789abc",
+        session_id="old",
+        entry_id="old-draft",
+        fingerprint="a" * 64,
+        created_at=now,
+        expires_at=now + timedelta(minutes=1),
+    )
+    mail.cards.put(record)
+    assert mail.decide(record.card_id, "send", channel="telegram")["code"] == "web_only"
+    assert mail.record(record.card_id) is not None
     assert sender.sent == []
+    run = mode.begin("new", "claude_code")
+    assert (
+        _call(mode, run, "outlook_draft", {"to": ["a@rs.com"], "subject": "s", "body": "b"})[
+            "status"
+        ]
+        == "drafted"
+    )
+    assert sender.sent == [] and not run.cards
 
 
-def test_no_send_verb_is_reachable_except_a_mail_cards_decision() -> None:
-    """`integrations.outlook_send` is used by the mail card's decision only:
-    no tool, route, capability or Workflow step reaches it."""
-    root = Path(__file__).resolve().parents[1] / "src"
-    importing = re.compile(
-        r"^\s*(from\s+\S*outlook_send\s+import|import\s+\S*outlook_send"
-        r"|from\s+integrations\s+import\s+[^\n]*outlook_send)",
-        re.M,
-    )
-    users = sorted(
-        str(path.relative_to(root)).replace("\\", "/")
-        for path in root.rglob("*.py")
-        if importing.search(path.read_text(encoding="utf-8"))
-    )
-    # The loan reply send cards (owner 2026-10-20) are the second card whose
-    # press sends one draft; tests/test_loan_reply_send.py pins them the same way.
-    assert users == [
-        "host_runtime/agent_mail.py",
-        "host_runtime/loan_reply_cards.py",
-        "host_runtime/web.py",
-    ]
-    web_source = (root / "host_runtime" / "web.py").read_text(encoding="utf-8")
-    assert len(importing.findall(web_source)) == 1  # the factory handed to both card kinds
-    mail_source = inspect.getsource(AgentMail)
-    assert mail_source.count("self._sender().send(") == 1
-    decide = inspect.getsource(AgentMail.decide)
-    assert "self._sender().send(" in decide
-    from host_runtime.loan_reply_cards import LoanReplyCards
-
-    assert inspect.getsource(LoanReplyCards).count(".send(") == 1
-    assert "self.sender().send(" in inspect.getsource(LoanReplyCards.decide)
-    # Nothing else in the source tree presses a sender's send.
-    senders = sorted(
-        str(path.relative_to(root)).replace("\\", "/")
-        for path in root.rglob("*.py")
-        if re.search(r"sender\(\)\.send\(", path.read_text(encoding="utf-8"))
-    )
-    assert senders == ["host_runtime/agent_mail.py", "host_runtime/loan_reply_cards.py"]
+def test_send_is_an_explicit_tool_and_drafting_and_reading_never_send() -> None:
+    from capabilities.mail_send.handlers import SPEC as SEND_SPEC
     from host_runtime.agent_mode import MCP_TOOLS
-
-    assert not any("send" in name for name in MCP_TOOLS)
-    # The draft module keeps its own never-send promise.
     from integrations import outlook_draft
 
+    assert SEND_SPEC.side_effect == "external_side_effect"
+    assert "outlook_send" in MCP_TOOLS
     assert ".Send(" not in inspect.getsource(outlook_draft)
+    assert ".Send(" not in inspect.getsource(outlook_mail)
+    assert "self._sender().send(" not in inspect.getsource(AgentMail.draft)
+    assert "self._sender().send(" in inspect.getsource(AgentMail.send)
 
 
 def test_the_outlook_sender_sends_only_the_draft_the_card_showed() -> None:
@@ -503,71 +389,43 @@ class FakeKnowledge:
         return {"ok": True, "report": None}
 
 
-def test_knowledge_reads_are_free_writes_are_carded_and_push_is_not_offered(tmp_path: Path) -> None:
+def test_knowledge_steps_execute_without_cards_and_keep_publication_separate(
+    tmp_path: Path,
+) -> None:
     mode, tasks = _mode(tmp_path)
     knowledge = FakeKnowledge()
     mode.knowledge = knowledge
     run = mode.begin("s1", "claude_code")
     assert _call(mode, run, "knowledge_sandboxes", {})["bases"] == ["product"]
-    assert _call(mode, run, "knowledge_step", {"step": "lint", "arguments": {"sandbox_id": "sb1"}})[
-        "ok"
-    ]
-    assert _call(
-        mode,
-        run,
-        "knowledge_step",
-        {"step": "convert", "arguments": {"sandbox_id": "sb1", "mode": "dry_run"}},
-    )["ok"]
-    assert not run.cards
+    for step, arguments in (
+        ("lint", {"sandbox_id": "sb1"}),
+        ("convert", {"sandbox_id": "sb1", "mode": "dry_run"}),
+        ("pull", {"sandbox_id": "sb1", "folders": ["drop/a"]}),
+        ("convert", {"sandbox_id": "sb1", "mode": "apply"}),
+    ):
+        values = {"step": step, "arguments": arguments}
+        assert _call(mode, run, "knowledge_step", values)["ok"]
+        if step == "pull":
+            assert _call(mode, run, "knowledge_step", values)["replayed"] is True
+            assert knowledge.calls.count((step, arguments)) == 1
     for step in ("merge", "sandbox-discard", "adopt", "rule-write", "push", "publish"):
         assert _call(mode, run, "knowledge_step", {"step": step})["code"] == "step_not_offered"
-    presser = _press(mode.open_cards, "deny")
-    denied = _call(
-        mode,
-        run,
-        "knowledge_step",
-        {"step": "pull", "arguments": {"sandbox_id": "sb1", "folders": ["drop/a"]}},
-    )
-    presser.join()
-    assert denied["code"] == "not_allowed"
-    assert ("pull", {"sandbox_id": "sb1", "folders": ["drop/a"]}) not in knowledge.calls
-    presser = _press(mode.open_cards, "allow_session")
-    assert _call(
-        mode,
-        run,
-        "knowledge_step",
-        {"step": "pull", "arguments": {"sandbox_id": "sb1", "folders": ["drop/a"]}},
-    )["ok"]
-    presser.join()
-    before = len(run.cards)
-    assert _call(
-        mode,
-        run,
-        "knowledge_step",
-        {"step": "pull", "arguments": {"sandbox_id": "sb1", "folders": ["drop/b"]}},
-    )["ok"]
-    assert len(run.cards) == before  # allowed for this conversation
-    presser = _press(mode.open_cards, "allow")
-    assert _call(
-        mode,
-        run,
-        "knowledge_step",
-        {"step": "convert", "arguments": {"sandbox_id": "sb1", "mode": "apply"}},
-    )["ok"]
-    presser.join()
-    presser = _press(mode.open_cards, "allow")
     assert (
         _call(mode, run, "knowledge_run_questions", {"sandbox_id": "sb1", "sets": ["core"]})[
             "run_id"
         ]
         == "bench-1"
     )
-    presser.join()
-    titles = [mode.record(card).title for card in run.cards]  # type: ignore[union-attr]
-    assert titles == [
-        "Knowledge: pull in a sandbox",
-        "Knowledge: pull in a sandbox",
-        "Knowledge: convert in a sandbox",
-        "Knowledge: run questions in a sandbox",
-    ]
-    assert sum(row["kind"] == "agent_permission" for row in tasks.rows.values()) == 4
+    assert not run.cards
+    assert not any(row["kind"] == "agent_permission" for row in tasks.rows.values())
+
+
+def test_knowledge_read_steps_are_fresh_and_not_success_receipts(tmp_path: Path) -> None:
+    mode, _ = _mode(tmp_path)
+    knowledge = FakeKnowledge()
+    mode.knowledge = knowledge
+    run = mode.begin("fresh", "claude_code")
+    values = {"step": "lint", "arguments": {"sandbox_id": "sb1"}}
+    assert _call(mode, run, "knowledge_step", values)["ok"]
+    assert _call(mode, run, "knowledge_step", values)["ok"]
+    assert knowledge.calls.count(("lint", {"sandbox_id": "sb1"})) == 2

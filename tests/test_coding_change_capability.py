@@ -144,23 +144,16 @@ def test_what_a_person_can_fix_is_refused_before_anything_runs(
     assert not (tmp_path / "runs").exists()
 
 
-def test_no_model_no_network_block_or_a_venv_runner_is_refused(tmp_path: Path) -> None:
-    # A venv launcher of its own: CI runs without a venv, so sys.executable is
-    # not one there (2026-10-16).
-    venv = tmp_path / "some-venv"
-    (venv / "Scripts").mkdir(parents=True)
-    (venv / "pyvenv.cfg").write_text("home = C:\\Python312\n", encoding="utf-8")
-    launcher = venv / "Scripts" / "python.exe"
-    launcher.write_bytes(b"")
-    for kwargs, code in (
-        ({"model": None}, "coding_model_unavailable"),
-        ({"model": Replies(), "blocked": False}, "coding_network_block_missing"),
-        ({"model": Replies(), "python": str(launcher)}, "runner_python_is_venv_launcher"),
-    ):
-        run, _ = handler(tmp_path / code, **kwargs)
-        with pytest.raises(CapabilityRefused) as refused:
-            run.change(TRACE, ask())
-        assert refused.value.code == code
+def test_missing_model_is_technical_and_no_firewall_rule_is_required(tmp_path: Path) -> None:
+    run, _ = handler(tmp_path / "missing", model=None)
+    with pytest.raises(CapabilityRefused, match="coding_model_unavailable"):
+        run.change(TRACE, ask())
+    # The normal isolated workflow still validates, using the actual OS identity.
+    model = Replies(PLAN, {"content": RIGHT})
+    run, _ = handler(tmp_path / "allowed", model=model, blocked=False)
+    result = run.change(TRACE, ask())
+    assert result.commands
+    assert all(command.status == "passed" for command in result.commands)
 
 
 def test_test_paths_are_never_writable() -> None:
@@ -219,10 +212,11 @@ def test_doctor_names_what_coding_still_needs(tmp_path: Path) -> None:
     config = plain.model_copy(update={"coding": CodingHostBinding.model_validate(binding)})
     check = inspect_coding(config, rule_present=lambda _python: False)
     assert check.status == "failed"
-    assert "New-NetFirewallRule" in check.detail and "plain is not a git checkout" in check.detail
+    assert "New-NetFirewallRule" not in check.detail
+    assert "plain is not a git checkout" in check.detail
     launcher = plain.model_copy(
         update={
             "coding": CodingHostBinding.model_validate({**binding, "runner_python": sys.executable})
         }
     )
-    assert "venv launcher" in inspect_coding(launcher).detail
+    assert "venv launcher" not in inspect_coding(launcher).detail

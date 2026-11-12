@@ -1,99 +1,81 @@
-# IT-owned tool access — active implementation
+# IT-owned tools — final review/verification pending
 
-Date2026-11-12. Branch it-owned-tool-access-20261112; native managed worktree
-C:/Users/Chi_L/.paseo/worktrees/2qnenase/it-owned-tools-20261112,
-workspace wks_9e3f85169bdceb9b, project prj_dec237428b9faaef.
-Base394ca4d2; plan/consent3817892c; Task1 execution52a4de64.
+Date2026-11-12. Active isolated worktree:
+C:/Users/Chi_L/.paseo/worktrees/2qnenase/it-owned-tools-20261112
+Branch it-owned-tool-access-20261112; base394ca4d2. Main/original resident and
+previous C4C delivery/package are unchanged. No push/deployment for this feature.
 
-## Owner goal and authorization
+## Owner scope
 
-Owner explicitly requires all AEP tools and agent-driven tool installation,
-without AEP grants/installation/per-call approvals or extra command/folder/mail
-restrictions. IT/OS/service identity decides usability. Owner replied to the
-concrete four-part harness scope:「同意上述 harness 範圍並開始實作」.
-This satisfies AGENTS22 for this stated scope; do not ask the same approval
-again. Read IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md, PLAN and LEDGER.
-No new model/data-policy, shared publication or unrelated chat-form-persistence
-change is approved. Scope expansion still requires evidence and new consent.
+Owner explicitly approved: common Bridge/MCP/all-backend tool visibility;
+remove application tool grants, install/execution approval and extra command/
+folder/mail ACLs; agent install/connect/use in same session; retain real outcomes,
+at-most-once effects and Knowledge evidence/citations. Model/data classification
+and shared publication are unchanged. Consent recorded in DECISIONS; do not ask
+again. AGENTS22 still applies to future scope expansions. Applicable Skill cannot
+change deterministic registry/policy branches; causal evidence is in design.
 
-## Work completed and actual verification
+Read docs/phases/IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md, PLAN and LEDGER.
+Tasks1–7 implemented, Task8 remains. Latest code is not yet final accepted release.
 
-Task1: LocalPolicy is now a compatibility identity facade, with no per-tool
-permission/approval decision. It accepts old constructor/add interfaces without
-making fake grants. Unknown tools, strict inputs, real dependencies/handler errors
-remain.64focused tests passed5.47s, Ruff and runtime.py mypy passed. Old default-
-deny/review-as-admission assertions intentionally now assert real execution.
+## Implementation and actual evidence
 
-Task2: portable blocks (Outlook search/read/draft, data/Excel, release/NCC/loan
-blocks) no longer need an asset reference. BI/contacts no longer need a procedure
-Skill to register. Local Skill/Workflow/script availability no longer uses legacy
-member tool selections. No startup runtime grant synthesis. Old grants are not
-an admission input; authenticated device/Knowledge selection/model eligibility
-remain. Doctor counts actual installed assets.52focused host/discovery/external-
-authoring tests passed22.22s; Ruff and host.py mypy passed.46Knowledge isolation/
-pipeline host tests passed25.86s. No COM/mail access in discovery tests.
+Task1 LocalPolicy compatibility/no app grants; Task2 asset-independent built-in
+registration; Task3 ToolAccess catalog/describe/invoke and argv commands; Task4
+live MCP connect; Task5 direct Workflow/Skill installs with honest quality and
+cross-wrapper normalized successful-effect receipts. Commits52a4de64,ddadf949,
+ae61a7a1,536eda3c,48eb768b. Latest Task6/7 commit/status: inspect Git.
 
-Evidence: .scratch/it-owned-verification/task1-red.log (corrected causal red),
-task1-green.xml/log, task2-red/expanded-red, task2-affected.xml/log,
-registration-knowledge.xml/log and mypy logs. Initial red fixture omitted required
-central_required; fixed before accepting causal red; original log preserved.
-Full suite/build has NOT run for this feature yet. It is not complete.
+Task6 removes mail scope admission and native mode switches/permission relays;
+mail body continuation and explicit send-draft capability (draft never sends).
+Native HTTP turn tokens share effects across assistant/authoring endpoints;
+expired tokens fail. Codex uses native HTTP MCP, tokens in child env references.
+No provider guard/settings bypass. Commands and Python use actual IT/OS identity
+via shared process execution, retain timeout/real exits/redacted bounded output/
+fresh artifact checks. Legacy Studio install and browser preflight now direct,
+quality/trial checks are truthful. Historical explicit decision APIs remain;
+private legacy preflight request builder is for compatibility tests, not normal
+model tools. Purpose-specific retrieval/check helpers stay isolated.
 
-## Baseline and environment
+Latest focused: task6-final-focused.xml118passed61.74s; task6-tail.xml61passed/
+2live-Outlook-skipped84.50s. Earlier failure history and policy-only expectation
+migrations are in ledger. Ruff check/format passed1158files. Whole-tree mypy
+passed1112files before final minor Studio/comment/test edits; recheck final freeze.
+No full suite/build has run for THIS feature yet. Do not claim completed.
 
-Use C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/.venv/Scripts/
-python.exe with this worktree src first on PYTHONPATH. Do not repoint the shared
-editable install. AEP_OUTLOOK_TESTS=0/AEP_GUI_TESTS=0; use fakes, no real mail/send.
-Before changes, Git confirmed e69371e6 and394ca4d2 source/tests/evaluation/benchmarks
-identical. The prior verified baseline is6619passed/13skipped and445Knowledge
-cases; copied knowledge-baseline.xml into this worktree's verification folder.
-At final freeze compare the SAME445identities/outcomes, run full pytest once,
-Ruff/format/mypy/build/pipcheck; record original failures, never weaken tests.
-Known earlier CI BI UI failures/control evidence remains in LOW_RISK report.
+Task7 same445Knowledge baseline node IDs:445passed162.21s, identical IDs/outcomes
+confirmed in knowledge-comparison.json. Baseline copied from prior e69371e6;
+source-equivalent to394ca4d2 before feature changes. Tests are deterministic,
+not a guarantee of all live model answers. Final full-suite must compare445again.
+Updated built-in creator/Knowledge guides and Settings/policy docs.
 
-## Remaining implementation
+## Next steps
 
-Task3 completed at ae61a7a1: common catalog/description/Bridge invocation for
-Gateway/assistant/authoring MCP, truthful needs_setup descriptors and OS command
-execution with real output/exit/timeout. Canonical effect resolution prevents
-duplicate aliases and avoids caching reads.112focused+1legacy assertion passed;
-whole-tree mypy1101files/Ruff/format passed. No full suite/build yet.
-Keep actual data internal on eligible company Gateway; external authoring MCP's
-status-only data boundary is not permission to forward private rows/mail to a
-PUBLIC native model. Do not silently change model/data eligibility.
+1. Follow executing-plans requirement: one fresh read-only whole-branch reviewer
+   (no per-task agents); inspect entire diff against394ca4d2, scoped consent,
+   actual errors/dedupe/privacy/Knowledge and tests. Fix substantive findings
+   with causal red/green, ledger deferred minors. A noted review question: raw
+   MCP names can normalize to the same slug; ensure no wrong-target dispatch.
+2. Final freeze: Ruff check/format, whole-tree mypy, focused findings, then full
+   pytest ONCE. Compare full JUnit same445 IDs/outcomes. Fix real failures;
+   migrate only withdrawn governance assertions, never weaken unrelated checks.
+3. Build/pipcheck after full tests (not concurrently); required project checks
+   in pyproject.toml/.github CI. No repeated full run without new changes/failures.
+4. Update TASKS/DECISIONS/HANDOFF and commit verified results. No automatic main
+   merge/push/resident restart; do not overwrite previously delivered package.
 
-Task4 completed (see latest Git/ledger): Agent MCP connection through existing
-save/connect, SAME conversation fixture installs/catalogs/invokes, stdio+HTTP,
-schema refresh/disable and real MCP error classification.34focused passed7.07s;
-whole-tree mypy1102files passed. No real external installation or network call.
-Task5 completed (see latest ledger/Git): direct local Skill/Workflow run/install,
-Gateway Skill draft/install and live refresh; no fake review/grants or new cards.
-Unverified installs remain draft, verified become validated; business review stays
-pending.435authoring/effect/dispatch regressions passed133.90s, then50focused
-passed33.17s after final metadata tightening. Shared Bridge success receipts cover
-generic/Workflow aliases; read/failure outcomes never memoize. Mypy541focused files
-passed; full feature checks still pending. Historical explicit cards are not replayed.
-Task6:
-remove legacy mail/folder/command/backend gating, direct send distinct from draft,
-retain external technical errors and model/data rules. Task7: regression/docs/
-Knowledge and user-flow acceptance. Task8: final freeze/checks/fresh review/handoff.
+Use ORIGINAL interpreter C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/
+.venv/Scripts/python.exe with this worktree src on PYTHONPATH; NEVER rebind editable
+install. AEP_OUTLOOK_TESTS=0/AEP_GUI_TESTS=0; AEP_NATIVE_CLI_TESTS absent/0. Fake
+mail/CLI/MCP only, no real company mail/send/SSO/C4C or model prompts. Verification
+logs/JUnit under .scratch/it-owned-verification. No test watcher/driver remains;
+prior sessions92872/34237/30214 have finished (read log/XML, poll if needed).
 
-Important implementation details: HostTool.effect resolves the actual target's
-classification/key; direct Skill and MCP aliases share it. Generic catalog is
-dynamic, so new tools need no conversation restart. MCP no longer invents grants.
-TurnEffects remains in agent/turn_effects.py. Loan send remains
-card-only legacy code and must be addressed with Task6, not claimed available now.
+## Operational boundaries
 
-## State and next action
-
-Task1–4 are committed (Task3 ae61a7a1, Task4 536eda3c). Task5 is ready for its
-coherent commit. No process is active. Task6 red tests exist uncommitted in
-test_it_tool_boundaries.py (4failed); do not include them in Task5 commit. Next:
-commit Task5, then Task6 implementation. Continue autonomously
-through all approved tasks; do not finish at this partial checkpoint.
-
-Original checkout main097b2521, origin/main267c75e4 and delivered C4C branch/package
-are untouched. Current resident044bd7b5 at LOCALAPPDATA preview-0.1.0 is not updated.
-Do not restart it during active tasks/forms. Do not touch shared Gateway config:
-prior package canary had an isolation incident; future canaries require explicit
-AEP_GATEWAY_HOME and no user-env export, or -NoGateway. See package report.
+Do not touch shared Gateway/environment or original editable Python/resident.
+Prior delivery c4c-verified-20261112 at07ca1607, prior sourcee69371e6; original
+resident044bd7b5 at port53583 (PID must be freshly verified before any later
+restart). Any future canary must use temp AEP_GATEWAY_HOME and NoGateway/isolated
+settings. Live provider tests require explicit AEP_NATIVE_CLI_TESTS=1; routine
+suite must not inherit credentials and make unrequested real model calls.

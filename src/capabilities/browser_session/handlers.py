@@ -169,10 +169,9 @@ class BrowserSessionHandler:
         if not path.is_absolute():
             raise CapabilityRefused("browser_workspace_not_absolute")
         resolved = path.resolve()
-        if not any(resolved == root or root in resolved.parents for root in self.workspace_roots):
-            raise CapabilityRefused("browser_workspace_not_allowed")
-        if not resolved.is_dir():
-            raise CapabilityRefused("browser_workspace_missing")
+        if resolved.exists() and not resolved.is_dir():
+            raise CapabilityRefused("browser_workspace_not_a_folder")
+        resolved.mkdir(parents=True, exist_ok=True)
         folder = resolved / "output" / "downloads"
         folder.mkdir(parents=True, exist_ok=True)
         return folder

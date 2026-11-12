@@ -86,8 +86,9 @@ class ReadFileHandler:
     existence so nothing about paths outside the root is revealed.
     """
 
-    def __init__(self, allowed_root: Path) -> None:
+    def __init__(self, allowed_root: Path, *, restrict_root: bool = True) -> None:
         self.allowed_root = allowed_root.resolve()
+        self.restrict_root = restrict_root
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = ReadFileInput.model_validate(inputs)
@@ -96,7 +97,7 @@ class ReadFileHandler:
     def _read(self, request: ReadFileInput) -> ReadFileOutput:
         try:
             path = Path(request.path).resolve()
-            if not path.is_relative_to(self.allowed_root):
+            if self.restrict_root and not path.is_relative_to(self.allowed_root):
                 return ReadFileOutput(outcome="outside_root")
             if not path.exists():
                 return ReadFileOutput(outcome="not_found")

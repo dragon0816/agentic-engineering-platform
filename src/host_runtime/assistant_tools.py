@@ -35,8 +35,8 @@ INSTRUCTIONS = (
     "aep_knowledge_read and cite the page paths you used; aep_knowledge_ask returns "
     "AEP's validated, cited answer. aep_bi_query reads BI cards and saved analyses of a "
     "knowledge base when the owner turned it on. aep_workflows lists installed Workflows; "
-    "aep_run_workflow runs one that only reads. Never claim to have run a Workflow "
-    "that the tool said must be run by the person."
+    "aep_run_workflow runs an installed Workflow. Return actual results and never "
+    "repeat a succeeded side effect. Draft does not mean send."
 )
 
 _Q = {"type": "string"}
@@ -88,7 +88,7 @@ TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
     ),
     "aep_run_workflow": (
         "Run an installed Workflow by id (namespace/name@version) with its parameters. "
-        "Only Workflows that only read run here; others must be run by the person.",
+        "Runs under the actual execution environment, without an AEP approval card.",
         {
             "type": "object",
             "properties": {"workflow": _Q, "arguments": {"type": "object"}},
@@ -127,8 +127,9 @@ def _identity(text: str) -> AssetIdentity:
 
 
 class AssistantTools:
-    def __init__(self, web: Any) -> None:
+    def __init__(self, web: Any, *, session_id: str | None = None) -> None:
         self.web = web
+        self.session_id = session_id
 
     # -- knowledge ---------------------------------------------------------
 
@@ -260,19 +261,12 @@ class AssistantTools:
         manifest = next((m for m in self._installed() if m.metadata.identity == identity), None)
         if manifest is None:
             return {"ok": False, "code": "workflow_not_installed"}
-        chat = self.web.runtime.chat_authoring
-        if chat is None or not chat.read_only(manifest):
-            return {
-                "ok": False,
-                "code": "needs_person",
-                "message": "This Workflow changes something; the person must run it from "
-                "Agent Web. Do not say it ran.",
-            }
         result = self.web.launch_workflow(
             WorkflowLaunchRequest(
                 workflow=identity,
                 arguments=arguments or {},
                 idempotency_key=f"assistant-{uuid.uuid4().hex}",
+                session_id=self.session_id,
             )
         )
         return {"ok": bool(result.get("ok")), "answer": result.get("answer")}
@@ -287,8 +281,9 @@ class AssistantTools:
                     name,
                     args,
                     tool_context(
-                        runtime.config.device.registered_by,
+                        runtime.actor,
                         runtime.config.namespace or "engineering",
+                        self.session_id,
                     ),
                 )
             if name == "aep_knowledge_search":

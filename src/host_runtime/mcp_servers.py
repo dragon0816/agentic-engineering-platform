@@ -1,18 +1,8 @@
-"""MCP servers added on the Agent Web settings page (owner 2026-10-08).
+"""Installed MCP connections expose live typed tools through the Bridge.
 
-The owner adds a server: a local command (stdio) or a remote URL (Streamable
-HTTP). Adding it is the owner's approval for every tool it offers (owner
-decision), so each tool becomes a Bridge capability `mcp-<server>/<tool>@1.0.0`
-granted to this host's actor. The Agent then uses it as a conversation tool,
-during coding too, and a Workflow can name it as a step. Every call still goes
-through the Bridge as a `CapabilityInvocation`.
-
-Settings live in `<workspace>/mcp-servers.json`. A secret the page accepts (an
-environment value for a command, or a bearer token for a URL) is written only
-to this Windows user's environment, as the Telegram token is. The file keeps
-its name, and the page shows only whether a value is present. Servers connect
-in the background, so a slow one never holds up the host.
-"""
+Local stdio and HTTP servers use actual environment/service credentials; saving
+or connecting creates no fake owner approval or tool grant. Reconnecting refreshes
+current schemas; disabling/closing removes stale callable bindings."""
 
 from __future__ import annotations
 

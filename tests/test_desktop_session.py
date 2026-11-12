@@ -139,21 +139,19 @@ def test_a_running_process_is_kept_and_a_dead_one_is_started_again(tmp_path: Pat
     assert fakes.processes[1].code == 1
 
 
-def test_save_as_lands_only_in_an_output_folder_of_an_allowed_workspace(tmp_path: Path) -> None:
+def test_save_as_uses_it_accessible_paths_and_requires_explicit_overwrite(tmp_path: Path) -> None:
     fakes = Fakes()
     run = handler(tmp_path, fakes)
     workspace = tmp_path / "tasks" / "t1"
-    refused_paths = [
-        "relative/output/x.csv",
-        str(tmp_path / "elsewhere" / "output" / "x.csv"),
-        str(workspace / "x.csv"),
-        str(workspace / "output" / ".." / "x.csv"),
-    ]
-    for path in refused_paths:
-        with pytest.raises(CapabilityRefused) as refused:
-            run.run(request(actions=[{"do": "save_as", "path": path}]))
-        assert refused.value.code == "desktop_path_not_allowed", path
-    assert fakes.requests == []
+    with pytest.raises(CapabilityRefused, match="desktop_path_not_allowed"):
+        run.run(request(actions=[{"do": "save_as", "path": "relative/x.csv"}]))
+    for target in (
+        tmp_path / "elsewhere" / "x.csv",
+        workspace / "x.csv",
+        workspace / "output" / ".." / "x.csv",
+    ):
+        run.run(request(actions=[{"do": "save_as", "path": str(target)}]))
+        assert fakes.requests[-1]["actions"][0]["path"] == str(target.resolve())
     target = workspace / "output" / "exports" / "rows.csv"
     run.run(request(actions=[{"do": "save_as", "path": str(target)}]))
     assert fakes.requests[-1]["actions"] == [{"do": "save_as", "path": str(target.resolve())}]

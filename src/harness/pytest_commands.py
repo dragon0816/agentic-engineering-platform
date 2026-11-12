@@ -17,7 +17,7 @@ from typing import Literal
 
 from common.assets import REDACTED, SECRET_PATTERN
 from harness.contracts import CodingHarnessRequest, ValidationCase, ValidationFailure
-from harness.restricted_runner import RestrictedRunner
+from harness.environment_runner import CommandRunner
 from harness.workspace import BoundedWorkspace
 
 NEW_COMMAND = "pytest-new"
@@ -54,7 +54,7 @@ class PytestCommand:
     def __init__(
         self,
         which: Literal["new", "suite"],
-        runner: RestrictedRunner,
+        runner: CommandRunner,
         run_dir: Path,
         extra_env: Mapping[str, str] | None = None,
     ) -> None:

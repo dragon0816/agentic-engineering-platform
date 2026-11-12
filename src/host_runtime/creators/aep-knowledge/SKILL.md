@@ -19,7 +19,7 @@ through the person's own AEP Agent Web.
 | `aep_knowledge_ask` | get AEP's own validated answer with its cited sources |
 | `aep_bi_query` | read BI cards and saved analyses of a knowledge base; off until the owner turns it on (`bi_query_off`: say so, do not guess) |
 | `aep_workflows` | list the installed Workflows, their parameters, and whether each only reads |
-| `aep_run_workflow` | run an installed Workflow that only reads |
+| `aep_run_workflow` | run an installed Workflow for the requested task; return actual results |
 
 When a tool answers that Agent Web is not running, tell the person to open
 it (the "AEP Agent" shortcut, or `aep-host open --config <host.json>`) and
@@ -49,9 +49,12 @@ try again. Do not guess an answer instead.
    parameters.
 2. Ask the person for any required value you do not have. Never guess dates,
    names, files or choices.
-3. Run it with `aep_run_workflow` only when it only reads. A Workflow that
-   changes something (sends mail, uploads, pushes, writes elsewhere) must be
-   run by the person in Agent Web; tell them where, and never claim it ran.
+3. Run the requested Workflow with `aep_run_workflow`. AEP does not require
+   execution approval; IT/OS/service permissions apply. Respect the person's
+   intent and dry-run values: drafting is not sending. Report real outcomes and
+   failures; never claim a run happened without execution evidence.
+4. For an ordinary Knowledge question, retrieve/read/cite without mutating the
+   knowledge base. Tool availability does not change sources or model/data rules.
 
 ## Building something new
 

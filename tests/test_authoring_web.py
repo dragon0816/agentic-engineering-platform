@@ -60,7 +60,7 @@ def test_start_discuss_preview_and_install_over_http(
     assert [item["session_id"] for item in listed["sessions"]] == [session]
 
     early = fetch(url + "/api/authoring/install", token=token, body={"session_id": session})
-    assert early.status == 409 and early.json()["code"] == "authoring_preview_required"
+    assert early.status == 409 and early.json()["code"] == "authoring_no_draft"
 
     ready = fetch(
         url + "/api/authoring/discuss",
@@ -85,7 +85,11 @@ def test_start_discuss_preview_and_install_over_http(
     installed = fetch(
         url + "/api/authoring/install", token=token, body={"session_id": session}
     ).json()
-    assert installed["status"] == "installed" and installed["restart_required"] is True
+    assert (
+        installed["status"] == "installed"
+        and installed["restart_required"] is False
+        and installed["verified"] is False
+    )
     assert (tmp_path / "workflows" / "engineering__daily-sop__1.0.0.json").is_file()
 
 

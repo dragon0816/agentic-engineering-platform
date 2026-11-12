@@ -4,7 +4,7 @@ A browser or a desktop window is operated in small steps the model chooses
 from what it saw, so these tools take free-form action lists that a Workflow
 parameter form cannot describe. They are host tools for that reason only:
 every call is still a `CapabilityInvocation` through the Bridge, under the
-actor's grants and the capability's own bounds, exactly as a Workflow step
+actual execution identity and the capability's typed contract, exactly as a Workflow step
 using the same capability would be.
 """
 
@@ -86,7 +86,7 @@ DESKTOP_GUIDE = (
     'reads the rows shown now; {"do": "dialog", "save_as": name} reads the open dialog; '
     '{"do": "dismiss"} presses its first button ("button" names another); {"do": '
     '"wait_dialog", "title": .., "seconds": N}; {"do": "save_as", "path": <absolute '
-    "path under the task workspace's output folder>} fills the Save As dialog an export button "
+    "absolute IT-accessible path>} fills the Save As dialog an export button "
     'opened (add "replace": true to overwrite a file of an earlier run); {"do": "wait", '
     '"seconds": N}; {"do": "clear_dialogs"} closes any dialog left open. In a Workflow '
     "step, start with clear_dialogs and end with every dialog dismissed, so the next run finds "

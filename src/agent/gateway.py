@@ -1424,7 +1424,8 @@ class Gateway:
                         effects.record_call(
                             effect_id,
                             item,
-                            counted=not item.replayed and (
+                            counted=not item.replayed
+                            and (
                                 not host[call.name].records_effect
                                 if call.name in host
                                 else bindings.get(call.name) is None
@@ -1969,7 +1970,9 @@ class Gateway:
         # starting a run), the same Workflow with the same arguments succeeds
         # at most once; outside a turn (a form, a schedule, a remote job) the
         # engine's own idempotency key is the guard.
-        effects = current_effects() if workflow_idempotency_key is None else None
+        # A caller-generated persistent key must not bypass an active turn's
+        # receipt (native HTTP adapters can issue several requests in that turn).
+        effects = current_effects()
         manifest = self.engine.workflows.get(workflow) if effects is not None else None
         key = (
             workflow_effect_key(request.actor, manifest.model_dump(mode="json"), arguments)
