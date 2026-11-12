@@ -4862,7 +4862,10 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [x] Apply ae1becf3,3b3da4d5,c0553d76, preserving all cumulative decisions.
 - [x] Verify affected tests, same445Knowledge cases within full suite, lint,
   format, typecheck, build and pipcheck; no live Outlook/C4C or resident update.
-- [ ] Push verified result to c4c-verified-20261112; leave origin/main unchanged.
+- [x] Push verified result to c4c-verified-20261112; leave origin/main unchanged.
+  First delivery dfd73c1a9fe2efcede8266dfaa2dd40aafefd67e was normally
+  fast-forward pushed and independently matched with git ls-remote;
+  origin/main remained267c75e4c917e523ad72a52d93890d8d7837bbb5.
 - [x] Separate harness assessment only: CHAT_WORKFLOW_PERSISTENCE_MERGE_REVIEW.md.
   e564e1ad remains excluded; explicit scoped owner consent needed before merge.
 
@@ -4874,6 +4877,6 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [x] Finish ZIP payload verification and isolated installation; include
   Traditional Chinese guides and document fixed-path portability limits.
   Final archive SHA33963cf8...cd49,588 payloads; install/doctor/pip checks passed,
- 562 installed source files and three assets match. Shared Gateway initialization
+  562 installed source files and three assets match. Shared Gateway initialization
   incident and non-exact functional normalization are explicitly recorded in
   C4C_WINDOWS_PACKAGE_20261112.md; current-PC update guide uses -NoGateway.

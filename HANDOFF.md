@@ -103,7 +103,14 @@ Temporary evidence is under C:/TEMP/aep-package-20261112; private shared-setting
 backup is outside the distributable. Keep the canary evidence until delivery
 review is complete; do not remove live Gateway files/processes.
 
-Next: commit these verification/handoff documents, normal fast-forward push to
-c4c-verified-20261112 and confirm remote SHA; record delivery receipt. Origin/main
-and original resident/source checkout remain untouched. Do not merge e564e1ad.
-No full-test rerun is needed for documentation-only receipt edits.
+Delivery receipt: dfd73c1a9fe2efcede8266dfaa2dd40aafefd67e was normally
+fast-forward pushed to c4c-verified-20261112 and matched git ls-remote.
+Origin/main remained267c75e4c917e523ad72a52d93890d8d7837bbb5. This follow-up
+receipt changes documentation only; runtime/package source remains e69371e6.
+Original resident/source checkout remain untouched. Do not merge e564e1ad.
+No full-test rerun is needed for this documentation-only receipt.
+
+Next action belongs to the owner: use the delivered Chinese current-PC guide
+and update.cmd -NoGateway when ready to update the installed AEP. Packaging did
+not deploy the integrated runtime. Any later portability revision must use normal
+AEP authoring/trial/approval; any harness change needs separate scoped consent.
