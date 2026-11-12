@@ -245,6 +245,7 @@ from capabilities.script_tools import (
     ScriptToolOutput,
     load_script_tools,
 )
+from capabilities.system_command.handlers import register as register_system_command
 from capabilities.team_tickets.contracts import TeamTicketsPreview
 from capabilities.team_tickets.handlers import (
     PREVIEW_SPEC as TEAM_TICKETS_PREVIEW_SPEC,
@@ -339,6 +340,7 @@ from host_runtime.task_artifacts import LocalTaskArtifacts
 from host_runtime.team_membership import TeamMembershipStore
 from host_runtime.telegram_history import TelegramHistory
 from host_runtime.telegram_settings import windows_user_environment
+from host_runtime.tool_access import ToolAccess
 from host_runtime.workflow_form_tool import workflow_form_tools
 from host_runtime.workflow_settings import SETTINGS_FILE, WorkflowSettingsStore, settings_key
 from host_runtime.workflow_uploads import UPLOADS_FOLDER, WorkflowUploadStore
@@ -1144,6 +1146,23 @@ def build_gateway(
         except ValueError as error:
             raise HostError("asset_invalid", layout.workflows) from error
     installed = InstalledCapabilities()
+    register_system_command(installed)
+    for spec in (
+        BROWSER_SPEC,
+        DESKTOP_SPEC,
+        WEB_READ_SPEC,
+        WEB_ACT_SPEC,
+        CHIPSET_PREVIEW_SPEC,
+        CHIPSET_APPLY_SPEC,
+        PROJECT_SEARCH_SPEC,
+        TEAM_TICKETS_PREVIEW_SPEC,
+        RESOLVE_WINDOW_SPEC,
+        READ_SCRATCH_SHEET_SPEC,
+        PLAN_SPEC,
+        APPLY_SPEC,
+        MAIL_SPEC,
+    ):
+        installed.offer(spec)
     installed.register(
         READ_FILE_SPEC,
         ReadFileHandler(layout.workspace_root),
@@ -2310,6 +2329,7 @@ def build_runtime(
         ledger=session_artifacts,
     )
     gateway.host_tools = lambda: (
+        *ToolAccess(gateway.bridge).tools(),
         *chat_authoring.tools(),
         *bridge_tools(gateway.bridge),
         *business_cards_tools(gateway),

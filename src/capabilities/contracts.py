@@ -1,9 +1,5 @@
 """Atomic capability descriptions, never executable callables."""
 
-from typing import Self
-
-from pydantic import model_validator
-
 from common.assets import AssetIdentity, RegistryContract, TechnicalPolicy
 from common.base import Symbol, Text
 from common.execution import SideEffect
@@ -18,10 +14,5 @@ class CapabilitySpec(RegistryContract):
     side_effect: SideEffect
     policy: TechnicalPolicy
 
-    @model_validator(mode="after")
-    def side_effect_policy(self) -> Self:
-        if self.side_effect != "read" and (
-            not self.policy.approval_required or not self.policy.policy_refs
-        ):
-            raise ValueError("side-effecting capabilities require explicit approval policy refs")
-        return self
+    # Legacy policy metadata remains readable. Side effects are execution facts;
+    # they do not require an application approval policy to be describable.

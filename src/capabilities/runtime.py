@@ -76,6 +76,7 @@ class InstalledCapability:
     output_model: type[Contract]
     dependencies: ExecutionDependencies
     secrets: tuple[SecretRef, ...]
+    timeout_seconds: float | None = None
 
 
 class InstalledCapabilities:
@@ -83,6 +84,21 @@ class InstalledCapabilities:
 
     def __init__(self) -> None:
         self._bindings: dict[tuple[str, str, str], InstalledCapability] = {}
+        self._offered: dict[tuple[str, str, str], CapabilitySpec] = {}
+
+    def offer(self, spec: CapabilitySpec) -> None:
+        """Advertise a known integration requiring setup, without a handler."""
+        checked = CapabilitySpec.model_validate(spec)
+        self._offered[checked.identity.key] = checked
+
+    def offered(self) -> tuple[CapabilitySpec, ...]:
+        return tuple(
+            self._offered[key] for key in sorted(self._offered) if key not in self._bindings
+        )
+
+    def unregister(self, identity: AssetIdentity) -> None:
+        """Remove a disconnected binding; never pretend its cached schema is live."""
+        self._bindings.pop(identity.key, None)
 
     def register(
         self,
@@ -92,8 +108,12 @@ class InstalledCapabilities:
         output_model: type[Contract],
         dependencies: ExecutionDependencies,
         secrets: tuple[SecretRef, ...] = (),
+        *,
+        timeout_seconds: float | None = None,
     ) -> None:
         checked = CapabilitySpec.model_validate(spec)
+        if timeout_seconds is not None and not 0 < timeout_seconds <= 3600:
+            raise ValueError("capability timeout must be finite and positive, at most one hour")
         if checked.identity.key in self._bindings:
             raise ValueError("capability version already installed")
         if not issubclass(input_model, Contract) or not issubclass(output_model, Contract):
@@ -105,6 +125,7 @@ class InstalledCapabilities:
             output_model,
             ExecutionDependencies.model_validate(dependencies),
             tuple(SecretRef.model_validate(secret) for secret in secrets),
+            timeout_seconds,
         )
 
     def get(self, identity: AssetIdentity) -> InstalledCapability | None:

@@ -755,6 +755,11 @@ class ChatAuthoring:
     def installed(self) -> InstalledCapabilities:
         return self._bridge().installed
 
+    @property
+    def bridge(self) -> BridgeExecutor:
+        """The same execution plane used by authoring, Gateway and MCP tools."""
+        return self._bridge()
+
     # -- records -----------------------------------------------------------
 
     def _file(self, kind: str, ident: str) -> Path:

@@ -22,6 +22,7 @@ from typing import Any
 
 from common.assets import AssetIdentity, WorkflowManifest
 from common.execution import TraceIdentifiers
+from host_runtime.tool_access import ToolAccess, mcp_definitions, tool_context
 from knowledge.query import RetrievalSnapshot
 from knowledge.vault import normalize
 
@@ -95,6 +96,7 @@ TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
         },
     ),
 }
+TOOLS.update(mcp_definitions())
 
 
 def assistant_token(workspace: Path) -> str:
@@ -279,6 +281,16 @@ class AssistantTools:
 
     def call(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
         try:
+            if name in mcp_definitions():
+                runtime = self.web.runtime
+                return ToolAccess(runtime.agent.gateway.bridge).call(
+                    name,
+                    args,
+                    tool_context(
+                        runtime.config.device.registered_by,
+                        runtime.config.namespace or "engineering",
+                    ),
+                )
             if name == "aep_knowledge_search":
                 return self.knowledge_search(
                     str(args.get("query") or ""), int(args.get("limit") or 8)

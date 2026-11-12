@@ -149,7 +149,8 @@ class BridgeExecutor:
         try:
             with guard:
                 output = await asyncio.wait_for(
-                    binding.handler(call.context, inputs), self.timeout_seconds
+                    binding.handler(call.context, inputs),
+                    binding.timeout_seconds or self.timeout_seconds,
                 )
         except TimeoutError:
             return self._failure(call, "timeout", invoked=True)

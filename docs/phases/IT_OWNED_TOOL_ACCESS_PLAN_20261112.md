@@ -68,14 +68,14 @@ invoke(context,target,arguments); each returns existing JSON/HostToolOutcome
 contracts. CommandRequest carries argv,cwd,timeout; CommandResult preserves the
 actual exit code/output. Execute through Bridge as system/run-command@1.0.0.
 
-- [ ] Red: all installed tool identities remain searchable/pageable; description
+- [x] Red: all installed tool identities remain searchable/pageable; description
   gives real schema; invocation without selected Skill works and preserves actual
   failure. Same effect through a different alias/retry executes at most once.
-- [ ] Red: local fictional command succeeds, nonzero exit/timeout/OS-denied do
+- [x] Red: local fictional command succeeds, nonzero exit/timeout/OS-denied do
   not become success; no AEP folder/command permission prompt is created.
-- [ ] Green: implement common tools with real side-effect classification, reuse
+- [x] Green: implement common tools with real side-effect classification, reuse
   Bridge execution/turn effect records; no shell interpolation or command allowlist.
-- [ ] Verify Gateway/MCP expose the same underlying targets; commit this slice.
+- [x] Verify Gateway/MCP expose the same underlying targets; commit this slice.
 
 ## Task4: agent installation and live MCP connection
 

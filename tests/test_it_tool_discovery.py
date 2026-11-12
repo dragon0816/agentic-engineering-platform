@@ -32,8 +32,12 @@ def test_data_and_bi_tools_do_not_need_a_procedure_skill(tmp_path: Path) -> None
     config, layout = ready(tmp_path)
     with build_runtime(config, layout=layout) as runtime:
         targets = {item.identity.key for item in runtime.agent.gateway.bridge.installed.discover()}
+        assert runtime.agent.gateway.host_tools is not None
+        tools = {tool.tool.name for tool in runtime.agent.gateway.host_tools()}
     assert ("bi-cards", "query", "1.0.0") in targets
     assert ("business-cards", "find", "1.0.0") in targets
+    assert ("system", "run-command", "1.0.0") in targets
+    assert {"tools__catalog", "tools__describe", "tools__invoke"} <= tools
 
 
 def test_local_assets_are_usable_without_member_tool_selections(

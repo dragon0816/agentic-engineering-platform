@@ -347,7 +347,7 @@ def test_an_installed_workflow_runs_without_asking_again_and_is_usable_at_once(
     assert again.status == "awaiting_approval" and recorder.calls == ["2026-10"]
 
 
-def test_the_host_registers_an_install_and_its_grants_while_running() -> None:
+def test_legacy_grant_updates_are_not_tool_authority() -> None:
     from capabilities.runtime import CapabilityGrant, LocalPolicy
     from common.assets import AssetIdentity
 
@@ -360,8 +360,18 @@ def test_the_host_registers_an_install_and_its_grants_while_running() -> None:
         approval_ref="x",
     )
     policy.add(grant)
-    policy.add(grant.model_copy(update={"approval_ref": "y"}))  # the first one stays
-    assert policy._grants[("owner", grant.asset.key)].approval_ref == "x"
+    policy.add(grant.model_copy(update={"approval_ref": "y"}))
+    context = RequestContext(
+        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+        actor="another-user",
+        namespace="lab",
+        message="fixture",
+        channel="test",
+    )
+    decision = policy.authorize(context, spec("write-it", "write"))
+    assert decision.allowed and decision.actor == "another-user"
+    assert decision.policy_ref == "execution-environment"
+    assert not policy.confirmation_needed(spec("write-it", "write"), "model")
 
 
 def test_a_revision_that_drops_a_step_must_say_so(tmp_path: Path) -> None:

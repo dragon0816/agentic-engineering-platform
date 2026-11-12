@@ -66,3 +66,41 @@ command block is also Task3; Task2 covers existing portable built-ins.
 
 Next: commit Task2 and implement Task3 common catalog/description/invocation.
 No test/build process remains; no resident or shared configuration was touched.
+
+## Task3 — common execution contracts (implementation in progress)
+
+Added common paginated catalog, schema description and Bridge invocation tools
+to Gateway, authoring MCP and assistant MCP. External authoring returns status
+metadata only; its pre-existing model/data boundary remains. Known integrations
+without handlers are shown as needs_setup, independently of permission metadata.
+system/run-command runs argv under the OS account, preserves actual exit code,
+bounded/redacted output and real timeout/start failures. Windows timeout cleanup
+terminates the command tree because a venv launcher can leave child pipe handles.
+
+Red/green: common alias tests initially exposed duplicate writes and incorrectly
+memoized reads. Gateway now resolves the actual capability effect identity and
+classification, shared across generic/Skill aliases. Corrected fixture errors
+(Skill namespace and result field name) are not treated as causal evidence.
+Legacy approval callback does not block execution; actual environment refusals
+remain unrecorded and are tested on repeat. Pending Host outcomes retain their
+existing separate regression coverage.
+
+task3-green.log/xml:112passed10.70s, covering common tools, command, effects,
+host discovery, dispatch/contracts and authoring/assistant adapters. Ruff passes;
+focused source mypy7files passed before the final offered-descriptor addition.
+Interim whole-tree mypy is still running; do not claim it passed. A legacy test
+still accesses removed LocalPolicy._grants, to migrate in Task5 with its original
+technical-refusal assertion preserved. Whole-feature verification is pending.
+
+Ruling: binding-specific execution timeout is runtime metadata, not permission;
+the command handler owns its requested timeout with a bounded cleanup margin.
+CapabilitySpec accepts side-effect descriptions without fabricated approval refs;
+shared publishing governance is separate and unchanged by this contract removal.
+
+Task3 checkpoint:112 focused passed plus the migrated legacy-grant assertion
+1passed; whole-tree mypy1101files passed, Ruff check/format src/tests passed.
+This is not full-suite/build acceptance. The interim whole-tree mypy first found
+one stale private-grant assertion; it now asserts no grant admission/no fake
+approval, rather than reaching into a removed implementation dictionary.
+Task4 red:4failed confirms agent MCP installation interface is absent; tests
+are deliberately not included in the Task3 execution-contract commit.

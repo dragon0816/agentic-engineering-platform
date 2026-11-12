@@ -40,6 +40,7 @@ from host_runtime.chat_authoring import (
     run_codes,
 )
 from host_runtime.skill_authoring import installed_skills, skill_digest
+from host_runtime.tool_access import ToolAccess, tool_context
 
 
 def _target(identity: AssetIdentity) -> str:
@@ -287,6 +288,14 @@ class ExternalAuthoring:
         self.session_id = session_id
 
     # -- reading -----------------------------------------------------------
+
+    def tool_call(self, name: str, args: dict[str, Any]) -> dict[str, JsonValue]:
+        return ToolAccess(self.chat.bridge).call(
+            name,
+            args,
+            tool_context(self.actor, self.chat.namespace, self.session_id),
+            metadata_only=True,
+        )
 
     def catalog(self) -> dict[str, JsonValue]:
         """A compact catalog that fits an agent's tool-output limit (live

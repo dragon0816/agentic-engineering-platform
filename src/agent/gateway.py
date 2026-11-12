@@ -327,6 +327,39 @@ class HostToolOutcome(Contract):
 
 
 @dataclass(frozen=True)
+class ToolEffect:
+    """Execution identity shared by aliases of one installed capability."""
+
+    key: str
+    side_effect: SideEffect
+
+
+def capability_effect(
+    bridge: BridgeExecutor,
+    context: RequestContext,
+    target: AssetIdentity,
+    arguments: dict[str, JsonValue],
+) -> ToolEffect | None:
+    binding = bridge.installed.get(target)
+    if binding is None:
+        return None
+    return ToolEffect(
+        effect_key(
+            "capability",
+            {
+                "bridge": id(bridge),
+                "binding": id(binding),
+                "actor": context.actor,
+                "namespace": context.namespace,
+                "target": target.model_dump(mode="json"),
+                "arguments": arguments,
+            },
+        ),
+        binding.spec.side_effect,
+    )
+
+
+@dataclass(frozen=True)
 class HostTool:
     """A conversation tool the host implements itself, such as drafting a
     Workflow. It never approves, installs or runs a change on its own: any
@@ -342,6 +375,9 @@ class HostTool:
     # of the same model reply that say so too (read-only delegations). None:
     # never; the call runs in order, alone.
     parallel: Callable[[RequestContext, dict[str, JsonValue]], bool] | None = None
+    # Dispatch wrappers resolve the actual target, rather than pretending every
+    # invocation has the same side effect or identifying it by a public alias.
+    effect: Callable[[RequestContext, dict[str, JsonValue]], ToolEffect | None] | None = None
 
 
 #: Host tools added for one turn only (BI benchmarks and the skill AI,
@@ -1324,14 +1360,39 @@ class Gateway:
                     seen_calls.add(key)
                     since_new.clear()
                 since_new[key] = since_new.get(key, 0) + 1
-                effects = (
-                    current_effects() if self._side_effecting(call.name, host, bindings) else None
+                resolved = None
+                resolver = host[call.name].effect if call.name in host else None
+                if resolver is not None:
+                    resolved = resolver(context, call.arguments)
+                elif (
+                    binding := bindings.get(call.name)
+                ) is not None and binding.kind == "capability":
+                    fixed = bound.get(call.name)
+                    actual = (
+                        call.arguments
+                        if fixed is None
+                        else {k: v for k, v in call.arguments.items() if k == "question"} | fixed
+                    )
+                    resolved = capability_effect(self.bridge, context, binding.target, actual)
+                effect_id = key if resolved is None else resolved.key
+                changes = (
+                    self._side_effecting(call.name, host, bindings)
+                    if resolved is None
+                    else resolved.side_effect != "read"
                 )
-                earlier = effects.replay_call(key) if effects is not None else None
+                effects = current_effects() if changes else None
+                earlier = effects.replay_call(effect_id) if effects is not None else None
                 if earlier is not None:
                     # P0-2: already done in this turn with the same arguments
                     # (a Host-check retry, or a delegated sub-run): not again.
-                    item = earlier.model_copy(update={"call_id": call.call_id, "replayed": True})
+                    item = earlier.model_copy(
+                        update={
+                            "call_id": call.call_id,
+                            "name": call.name,
+                            "arguments": _recorded_arguments(call.arguments),
+                            "replayed": True,
+                        }
+                    )
                     telemetry.emit(
                         "tool.replayed",
                         status="skipped",
@@ -1354,7 +1415,7 @@ class Gateway:
                     if effects is not None and _effect_done(item):
                         # A Workflow tool's run is counted once, as the run.
                         effects.record_call(
-                            key,
+                            effect_id,
                             item,
                             counted=bindings.get(call.name) is None
                             or bindings[call.name].kind != "workflow",

@@ -23,6 +23,7 @@ from typing import IO, Any
 from pydantic import JsonValue
 
 from host_runtime.external_authoring import ExternalAuthoring, guarded
+from host_runtime.tool_access import mcp_definitions
 from host_runtime.workflow_patch import WorkflowPatchRequest
 
 PROTOCOL_VERSIONS = ("2025-06-18", "2025-03-26", "2024-11-05")
@@ -152,6 +153,7 @@ TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
         {"type": "object", "properties": _ID, "required": ["candidate_id"]},
     ),
 }
+TOOLS.update(mcp_definitions())
 
 
 def _object(args: dict[str, Any], key: str) -> dict[str, Any]:
@@ -167,6 +169,8 @@ def _int(value: Any) -> int:
 
 
 def dispatch(authoring: ExternalAuthoring, name: str, args: dict[str, Any]) -> dict[str, JsonValue]:
+    if name in mcp_definitions():
+        return authoring.tool_call(name, args)
     ident = str(args.get("candidate_id") or "")
     revise = ident or None
     title = str(args.get("title") or "")
