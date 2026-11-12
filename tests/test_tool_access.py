@@ -176,6 +176,26 @@ def test_generic_reads_are_not_memoized_as_side_effects() -> None:
     assert not any(tool.replayed for tool in result.tools)
 
 
+def test_reconnecting_same_target_cannot_reset_a_successful_effect_identity() -> None:
+    from agent.gateway import capability_effect
+
+    access, handler = _access("write")
+    context = invocation().context
+    target = spec().identity
+    before = capability_effect(access.bridge, context, target, {"count": 1})
+    access.bridge.installed.unregister(target)
+    access.bridge.installed.register(
+        spec().model_copy(update={"side_effect": "write"}),
+        handler,
+        Input,
+        Output,
+        ExecutionDependencies(central_required=False),
+    )
+    after = capability_effect(access.bridge, context, target, {"count": 1})
+    assert before is not None and after is not None
+    assert before.key == after.key
+
+
 def test_external_mcp_uses_same_target_and_metadata_boundary(tmp_path: Path) -> None:
     from test_external_authoring import _items, _obj, desk
 

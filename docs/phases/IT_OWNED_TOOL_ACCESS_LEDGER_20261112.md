@@ -104,3 +104,29 @@ one stale private-grant assertion; it now asserts no grant admission/no fake
 approval, rather than reaching into a removed implementation dictionary.
 Task4 red:4failed confirms agent MCP installation interface is absent; tests
 are deliberately not included in the Task3 execution-contract commit.
+
+## Task4 — agent MCP connection and live catalog
+
+Agent ToolAccess.install_mcp saves through existing McpHub with background
+connection disabled, then connects synchronously in a worker thread. Gateway,
+assistant and authoring MCP expose this operation. Credentials stay environment
+references. No approval record, synthetic grant or restart. Catalog/invoke read
+the live registry, so the static generic tools work in the SAME bounded model
+conversation after installation. Skill selection is not involved.
+
+MCP replacement/disable/delete disconnects its stale bindings; current schema is
+registered on reconnect. Explicit MCP isError now yields a failed execution with
+typed diagnostics, rather than success. Direct MCP aliases declare their effect
+and resolve the same capability identity. A reconnect cannot reset a successful
+effect receipt for the same logical target/arguments within the turn.
+
+Evidence: task4-red.log4failed (missing interface); task4-green.xml/log22passed;
+task4-conversation.xml/log27passed; task4-final.xml/log34passed7.07s (including
+single-conversation install/catalog/invoke, stdio+HTTP fixtures, schema refresh,
+disable, invalid transport/executable, real MCP error, effect regressions).
+Whole-tree mypy1102files passed; Ruff check/format passed before final HTTP test,
+which was formatted/import-sorted. Final source freeze still owes full checks.
+No real install/network/mail was used; HTTP fixture listens only on loopback.
+
+Next Task5: direct local asset install with honest unverified quality/provenance,
+no approval cards; preserve central publishing rules and historical cards.

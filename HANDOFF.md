@@ -53,34 +53,35 @@ Known earlier CI BI UI failures/control evidence remains in LOW_RISK report.
 
 ## Remaining implementation
 
-Task3: common discovery/description/invocation + system/run-command. All installed
-tools must remain reachable despite context/catalog paging or selected procedure.
-Configured-only tools need truthful setup descriptors, not an absent/denied label.
-New interfaces and task tests are in the plan; no ToolAccess implementation yet.
+Task3 completed at ae61a7a1: common catalog/description/Bridge invocation for
+Gateway/assistant/authoring MCP, truthful needs_setup descriptors and OS command
+execution with real output/exit/timeout. Canonical effect resolution prevents
+duplicate aliases and avoids caching reads.112focused+1legacy assertion passed;
+whole-tree mypy1101files/Ruff/format passed. No full suite/build yet.
 Keep actual data internal on eligible company Gateway; external authoring MCP's
 status-only data boundary is not permission to forward private rows/mail to a
 PUBLIC native model. Do not silently change model/data eligibility.
 
-Task4: agent installs/connects MCP via existing McpHub.save/connect and command
-capability, same-session discovery, no fake approval or restart. Task5: direct
+Task4 completed (see latest Git/ledger): Agent MCP connection through existing
+save/connect, SAME conversation fixture installs/catalogs/invokes, stdio+HTTP,
+schema refresh/disable and real MCP error classification.34focused passed7.07s;
+whole-tree mypy1102files passed. No real external installation or network call.
+Task5: direct
 local Skill/Workflow installs and honest provenance/quality, no cards. Task6:
 remove legacy mail/folder/command/backend gating, direct send distinct from draft,
 retain external technical errors and model/data rules. Task7: regression/docs/
 Knowledge and user-flow acceptance. Task8: final freeze/checks/fresh review/handoff.
 
-Important implementation details: HostTool.side_effect is currently static;
-Gateway turn effects key calls by tool name+arguments. New invocation paths must
-not bypass at-most-once execution or incorrectly memoize reads. Canonical aliases
-need real classification/identity and tests. TurnEffects is in agent/turn_effects.py.
-McpHub currently synthesizes owner grants and omits side_effect on HostTool:
-update those in Task4 with tests, not an approval workaround. Loan send remains
+Important implementation details: HostTool.effect resolves the actual target's
+classification/key; direct Skill and MCP aliases share it. Generic catalog is
+dynamic, so new tools need no conversation restart. MCP no longer invents grants.
+TurnEffects remains in agent/turn_effects.py. Loan send remains
 card-only legacy code and must be addressed with Task6, not claimed available now.
 
 ## State and next action
 
-Task2 source/test changes and discovery test are ready for its coherent commit;
-check git status and ledger before changing more. No process is active. Next:
-commit Task2, then Task3 red tests and implementation. Continue autonomously
+Task1/2/3 are committed; Task4 is ready for its coherent commit. No process is
+active. Next: commit Task4, then Task5 red tests and implementation. Continue autonomously
 through all approved tasks; do not finish at this partial checkpoint.
 
 Original checkout main097b2521, origin/main267c75e4 and delivered C4C branch/package

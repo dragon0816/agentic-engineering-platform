@@ -2305,6 +2305,7 @@ def build_runtime(
         checked.device.registered_by,
         store_secret=windows_user_environment,
     )
+    chat_authoring.mcp = mcp
     gateway.capability_approval = chat_authoring.capability_approval_tool_data
     # What each session produced, so the agent can show it again (owner
     # 2026-10-25): listed in every turn and attachable by its short id.
@@ -2329,7 +2330,7 @@ def build_runtime(
         ledger=session_artifacts,
     )
     gateway.host_tools = lambda: (
-        *ToolAccess(gateway.bridge).tools(),
+        *ToolAccess(gateway.bridge, mcp=mcp).tools(),
         *chat_authoring.tools(),
         *bridge_tools(gateway.bridge),
         *business_cards_tools(gateway),

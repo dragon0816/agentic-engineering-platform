@@ -290,7 +290,7 @@ class ExternalAuthoring:
     # -- reading -----------------------------------------------------------
 
     def tool_call(self, name: str, args: dict[str, Any]) -> dict[str, JsonValue]:
-        return ToolAccess(self.chat.bridge).call(
+        return ToolAccess(self.chat.bridge, mcp=self.chat.mcp).call(
             name,
             args,
             tool_context(self.actor, self.chat.namespace, self.session_id),

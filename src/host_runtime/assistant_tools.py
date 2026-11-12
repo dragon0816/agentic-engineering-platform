@@ -283,7 +283,7 @@ class AssistantTools:
         try:
             if name in mcp_definitions():
                 runtime = self.web.runtime
-                return ToolAccess(runtime.agent.gateway.bridge).call(
+                return ToolAccess(runtime.agent.gateway.bridge, mcp=runtime.mcp).call(
                     name,
                     args,
                     tool_context(

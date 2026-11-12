@@ -19,6 +19,7 @@ from capabilities.runtime import CapabilityInvocation
 from common.assets import AssetIdentity
 from common.base import Contract
 from common.execution import Failure, RequestContext, TraceIdentifiers
+from host_runtime.mcp_servers import McpHub, McpServerConfig
 from models.contracts import ModelTool
 from workflow.dispatch import BridgeExecutor
 
@@ -37,6 +38,10 @@ class InvokeRequest(DescribeRequest):
     arguments: dict[str, JsonValue] = Field(default_factory=dict)
 
 
+class InstallMcpRequest(Contract):
+    config: McpServerConfig
+
+
 def mcp_definitions() -> dict[str, tuple[str, dict[str, Any]]]:
     return {
         "aep_tools_catalog": (
@@ -50,6 +55,11 @@ def mcp_definitions() -> dict[str, tuple[str, dict[str, Any]]]:
         "aep_tools_invoke": (
             "Invoke an installed tool under the execution environment; return actual outcome.",
             InvokeRequest.model_json_schema(),
+        ),
+        "aep_tools_install_mcp": (
+            "Save/connect an MCP server and use its tools in this session. "
+            "Use IT-provisioned environment credential references; never put secrets in config.",
+            InstallMcpRequest.model_json_schema(),
         ),
     }
 
@@ -90,8 +100,57 @@ def status_only(outcome: HostToolOutcome) -> dict[str, JsonValue]:
 
 
 class ToolAccess:
-    def __init__(self, bridge: BridgeExecutor) -> None:
+    def __init__(self, bridge: BridgeExecutor, *, mcp: McpHub | None = None) -> None:
         self.bridge = bridge
+        self.mcp = mcp
+
+    async def install_mcp(self, context: RequestContext, config: dict[str, Any]) -> HostToolOutcome:
+        if self.mcp is None:
+            return HostToolOutcome(
+                status="failed",
+                failure=Failure(
+                    code="mcp_manager_unavailable", message="This execution host has no MCP manager"
+                ),
+            )
+        try:
+            checked = McpServerConfig.model_validate(config)
+        except ValidationError:
+            return _invalid()
+        hub = self.mcp
+        try:
+            await asyncio.to_thread(hub.save, checked, {}, connect=False)
+            if checked.enabled:
+                await asyncio.to_thread(hub.connect, checked.name)
+        except OSError:
+            return HostToolOutcome(
+                status="failed",
+                failure=Failure(
+                    code="mcp_configuration_write_failed",
+                    message="The environment could not save/connect this server",
+                ),
+            )
+        state = next(
+            (item for item in hub.status() if item["config"]["name"] == checked.name), None
+        )
+        if state is None or state["status"] not in {"connected", "disabled"}:
+            code = (
+                "mcp_connection_failed"
+                if state is None
+                else str(state["error"] or "mcp_connection_failed")
+            )
+            return HostToolOutcome(
+                status="failed",
+                data={"server": checked.name, "connected": False},
+                failure=Failure(code=code, message="The MCP server did not connect"),
+            )
+        return HostToolOutcome(
+            status="succeeded",
+            data={
+                "server": checked.name,
+                "connected": state["status"] == "connected",
+                "tools": state["tools"],
+            },
+        )
 
     def call(
         self,
@@ -113,6 +172,10 @@ class ToolAccess:
                 result = asyncio.run(self.invoke(context, invoke.target, invoke.arguments))
                 if metadata_only:
                     return status_only(result)
+                return {"ok": result.status == "succeeded", **result.model_dump(mode="json")}
+            if name == "aep_tools_install_mcp":
+                config = InstallMcpRequest.model_validate(args).config
+                result = asyncio.run(self.install_mcp(context, config.model_dump(mode="json")))
                 return {"ok": result.status == "succeeded", **result.model_dump(mode="json")}
         except ValidationError:
             return {"ok": False, "code": "invalid_input"}
@@ -254,7 +317,26 @@ class ToolAccess:
                 return _invalid()
             return await self.invoke(context, asked.target, asked.arguments)
 
+        async def install_mcp(
+            context: RequestContext, args: dict[str, JsonValue]
+        ) -> HostToolOutcome:
+            try:
+                asked = InstallMcpRequest.model_validate(args)
+            except ValidationError:
+                return _invalid()
+            return await self.install_mcp(context, asked.config.model_dump(mode="json"))
+
         return [
+            HostTool(
+                ModelTool(
+                    name="tools__install_mcp",
+                    description=mcp_definitions()["aep_tools_install_mcp"][0],
+                    input_contract="host.tools.install-mcp.v1",
+                    input_schema=InstallMcpRequest.model_json_schema(),
+                ),
+                install_mcp,
+                side_effect="execute",
+            ),
             HostTool(
                 ModelTool(
                     name="tools__catalog",

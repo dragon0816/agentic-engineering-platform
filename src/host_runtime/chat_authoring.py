@@ -69,6 +69,7 @@ from host_runtime.authoring_task import (
     task_guidance,
 )
 from host_runtime.conversations import ConversationMessage
+from host_runtime.mcp_servers import McpHub
 from host_runtime.skill_authoring import (
     SkillCandidate,
     assemble_skill,
@@ -641,6 +642,7 @@ class ChatAuthoring:
         # at draft time so a Workflow never fails only at its approved run.
         self.coding_workspace_roots = coding_workspace_roots
         self._bridge = bridge
+        self.mcp: McpHub | None = None
         self.namespace = namespace
         self.workflows_dir = workflows_dir
         self.grants_file = grants_file

@@ -85,13 +85,13 @@ Interfaces: ToolAccess.install_mcp(context,config) calls existing
 McpHub.save(config,secrets) and connect(name), with IT-provided credential
 references. Existing command capability installs other tooling under OS identity.
 
-- [ ] Red: agent connects a local fixture server with no approval, finds/calls its
+- [x] Red: agent connects a local fixture server with no approval, finds/calls its
   tool in the same conversation; install command executes once. Missing executable,
   authentication, package error, stale version and unsupported transport are real
   structured failures. No fake IT/owner approval is persisted.
-- [ ] Green: expose normal installation/connection and refreshed catalog, using
+- [x] Green: expose normal installation/connection and refreshed catalog, using
   actual existing manager return/status contracts; record any interface ruling.
-- [ ] Verify stdio and HTTP fixtures, no restart/no external network; commit.
+- [x] Verify stdio and HTTP fixtures, no restart/no external network; commit.
 
 ## Task5: local Skill/Workflow installs without approval cards
 

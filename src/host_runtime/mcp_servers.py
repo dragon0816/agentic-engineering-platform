@@ -26,14 +26,13 @@ from typing import Any, Literal, Self
 
 from pydantic import ConfigDict, Field, JsonValue, SecretStr, model_validator
 
-from agent.gateway import HostTool, HostToolOutcome
+from agent.gateway import HostTool, HostToolOutcome, capability_effect
 from capabilities.contracts import CapabilitySpec
 from capabilities.runtime import (
-    CapabilityGrant,
+    CapabilityExecutionFailed,
     CapabilityInvocation,
     CapabilityRefused,
     InstalledCapabilities,
-    LocalPolicy,
 )
 from common.assets import AssetIdentity, ExecutionDependencies, reject_embedded_secrets
 from common.base import Contract, Slug
@@ -157,7 +156,9 @@ class McpHub:
             self.path, (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
         )
 
-    def save(self, config: McpServerConfig, secrets: dict[str, SecretStr]) -> None:
+    def save(
+        self, config: McpServerConfig, secrets: dict[str, SecretStr], *, connect: bool = True
+    ) -> None:
         """Add or replace a server, keep its secrets, and connect it now."""
         checked = McpServerConfig.model_validate(config)
         allowed = {*checked.secret_env, *(("TOKEN",) if checked.bearer_token else ())}
@@ -176,7 +177,7 @@ class McpHub:
             self._write([*configs, checked])
             self._close(checked.name)
             self._servers[checked.name] = _Server(checked)
-        if checked.enabled:
+        if checked.enabled and connect:
             self._connect_later(checked.name)
 
     def delete(self, name: str) -> None:
@@ -226,6 +227,8 @@ class McpHub:
             server = self._servers.get(name)
             if server is None or not server.config.enabled:
                 return
+            if server.status == "connected":
+                return
             server.status, server.error = "connecting", ""
             server.client = self._client(server.config)
             client = server.client
@@ -233,13 +236,17 @@ class McpHub:
             tools = client.list_tools_sync()
         except McpError as error:
             with self._lock:
-                server.status, server.error = "failed", f"{error.code}: {error}"
+                server.status, server.error = "failed", error.code
+                client.close()
             return
         except Exception as error:  # noqa: BLE001 - a broken server is a status
             with self._lock:
                 server.status, server.error = "failed", type(error).__name__
             return
         with self._lock:
+            if self._servers.get(name) is not server:
+                client.close()
+                return
             server.tools = [item for item in tools if item.get("name")]
             for tool in server.tools:
                 self._bind(server.config.name, tool)
@@ -247,6 +254,9 @@ class McpHub:
 
     def _close(self, name: str) -> None:
         server = self._servers.get(name)
+        if server is not None:
+            for tool in server.tools:
+                self.installed.unregister(self.identity(name, str(tool["name"])))
         if server is not None and server.client is not None:
             try:
                 server.client.close()
@@ -266,8 +276,7 @@ class McpHub:
         return AssetIdentity(namespace=f"mcp-{server}", name=_slug(tool), version=VERSION)
 
     def _bind(self, server: str, tool: dict[str, Any]) -> None:
-        """Register the tool as a capability once, and grant it: adding the
-        server was the owner's approval (owner decision 2026-10-08)."""
+        """Register the connected tool's current schema, without approval records."""
         name = str(tool["name"])
         identity = self.identity(server, name)
         read_only = bool((tool.get("annotations") or {}).get("readOnlyHint"))
@@ -284,9 +293,9 @@ class McpHub:
                 "output_contract": f"mcp.{server}.{_slug(name)}.output.v1",
                 "side_effect": "read" if read_only else "external_side_effect",
                 "policy": {
-                    "required_permissions": [f"mcp.{server}"],
-                    "policy_refs": [POLICY_REF],
-                    **({} if read_only else {"approval_required": True}),
+                    "required_permissions": [],
+                    "policy_refs": [],
+                    "approval_required": False,
                 },
             }
         )
@@ -297,17 +306,6 @@ class McpHub:
                 _arguments_model(tool.get("inputSchema") or {}),
                 McpToolResult,
                 ExecutionDependencies(central_required=False),
-            )
-        policy = self._policy()
-        if isinstance(policy, LocalPolicy):
-            policy.add(
-                CapabilityGrant(
-                    actor=self.actor,
-                    asset=identity,
-                    permissions=(f"mcp.{server}",),
-                    policy_refs=(POLICY_REF,),
-                    approval_ref=f"settings:mcp:{server}",
-                )
             )
 
     def _handler(self, server: str, tool: str) -> Callable[..., Any]:
@@ -322,7 +320,7 @@ class McpHub:
             except McpError as error:
                 raise CapabilityRefused(error.code) from None
             data = result.data if isinstance(result.data, dict) else {"text": str(result.data)}
-            return McpToolResult(
+            output = McpToolResult(
                 text=str(data.get("text") or ""),
                 other_content=[*other]
                 if isinstance(other := data.get("other_content"), list)
@@ -330,6 +328,9 @@ class McpHub:
                 structured=data.get("structured"),
                 is_error=result.is_error,
             )
+            if result.is_error:
+                raise CapabilityExecutionFailed("mcp_tool_error", output)
+            return output
 
         return invoke
 
@@ -375,6 +376,10 @@ class McpHub:
                 input_schema=schema,
             ),
             call,
+            side_effect="read"
+            if bool((tool.get("annotations") or {}).get("readOnlyHint"))
+            else "external_side_effect",
+            effect=lambda context, arguments: capability_effect(bridge, context, target, arguments),
         )
 
     # -- what the page shows -------------------------------------------------------

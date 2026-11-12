@@ -348,7 +348,6 @@ def capability_effect(
             "capability",
             {
                 "bridge": id(bridge),
-                "binding": id(binding),
                 "actor": context.actor,
                 "namespace": context.namespace,
                 "target": target.model_dump(mode="json"),
