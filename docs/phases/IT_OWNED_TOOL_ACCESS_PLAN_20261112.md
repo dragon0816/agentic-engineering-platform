@@ -144,13 +144,19 @@ alignment only for the approved application-tool policy.
 
 ## Task8: final verification, review and handoff
 
-- [ ] Source-freeze once; Ruff check/format, mypy, focused checks then full pytest,
+- [x] Source-freeze once; Ruff check/format, mypy, focused checks then full pytest,
   build/pipcheck. Record first results and real failures; no repeated full suite
   without changes/failures. Do not build concurrently with full pytest.
-- [ ] Whole-branch fresh review after implementation; fix substantive findings
+- [x] Whole-branch fresh review after implementation; fix substantive findings
   with red/green checks. A final reviewer may be used as required by execution
   Skill; no per-task delegation is needed.
-- [ ] Update TASKS/HANDOFF/DECISIONS and acceptance evidence. Do not update the
+- [x] Update TASKS/HANDOFF/DECISIONS and acceptance evidence. Do not update the
   resident during active work, touch shared Gateway settings or silently replace
   the previous accepted package. Final packaging/deployment follows actual
   acceptance and the appropriate explicit owner delivery instruction.
+
+Task8 evidence: IT_OWNED_TOOL_ACCESS_ACCEPTANCE_20261113.md and matching
+VERIFICATION JSON. Core full finished6724passed2failed15skipped; both failures
+have causal long-path diagnoses and named passing supplemental runs. Current BI
+delta55passed; combined case evidence6726passed15skipped, not a single green full.
+Known baseline long-workspace session-I/O limitation remains explicitly open.

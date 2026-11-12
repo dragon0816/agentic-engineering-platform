@@ -7630,3 +7630,62 @@ and existing model/data-policy assertions. The application no longer rewrites
 provider safeguards/settings; this is not permission to bypass external guards.
 No live mail/send is used for implementation acceptance. Details and raw evidence:
 IT_OWNED_TOOL_ACCESS_LEDGER_20261112.md and its .scratch verification paths.
+
+
+### 2026-11-12 — Preserve result eligibility while removing tool admission
+
+Within the owner's explicitly approved IT-owned tool-access harness scope,
+new generic native MCP calls execute without AEP grants/cards, but return status
+only with an explicit `result_eligibility_not_established` diagnostic when no
+result classification and eligible receiving-model route is established. Native
+initial-history checks do not classify later arbitrary tool results. Rejected:
+implicitly treating unknown results as PUBLIC, broadening an older Copilot data
+approval to Codex/Claude, or reintroducing tool approval. Gateway and existing
+Knowledge data routes remain separate; no model classification rule is changed.
+Evidence and regression boundaries are in the IT_OWNED_TOOL_ACCESS ledger.
+Historical pending approval records remain history, never current task proof.
+
+
+### 2026-11-13 — Preserve version and execution truth under IT-owned tools
+
+Within the owner's November12 scoped harness consent, retained Skill versions
+remain rollback evidence: use exact profile versions when a profile is active,
+otherwise the explicit procedure-version preference or highest installed SemVer.
+This chooses guidance, not tool permission. Removed the surviving capability-
+selection prerequisite from profile activation; Skill/Knowledge references and
+model endpoint eligibility remain. Actual Bridge errors decide unavailable tools.
+
+Direct authoring records real metadata without approval cards or quality claims.
+Its shared async execution lease prevents duplicate workflow IDs across native
+threads; successful outcomes survive display-metadata lock contention. Replayed
+old revisions cannot borrow current verification. Rejected fake approval records,
+using display receipts as verification, and reintroducing tool grants. Causal
+red/green evidence and first full results are in the IT-owned tools ledger.
+
+
+### 2026-11-13 — Remove the remaining BI-local code execution approval
+
+The same November12 scope includes BI data-processing tools, not only Bridge
+capability grants/MCP. Three causal tests proved the per-PC hash approval branch
+still blocked local runs. Removed that gate and the corresponding prompt/UI
+permission step; historical reviews remain history, never auto-approved. This
+does not change the purpose-specific read-only source/output contract, source
+classification/lineage/withdrawal, model eligibility or Knowledge card review.
+A Skill cannot change the runtime approval branch. See the BI addendum and55
+actual runtime/UI/agent/guard regressions; the ongoing core full predates this
+local delta and is not claimed as its acceptance evidence.
+
+### 2026-11-13 — Record combined verification without expanding session I/O scope
+
+The final core full had two long-root failures, not an all-green result. Keep the
+raw reports and reconcile exact cases with separately named BI and long-path
+reruns. Isolate the long-destination-path test's input fixture from pytest root
+depth, preserving all destination-length/Raw/publication/digest assertions.
+Generic session atomic writes also fail beyond Win32's path limit; baseline and
+current writer controls both reproduce it, and both writer/authoring-task modules
+are unchanged. Normal short-root Knowledge conversation module6passed. Record
+this existing limitation instead of silently expanding the approved harness
+scope into unrelated state persistence, raising timeouts or weakening assertions.
+Combined current-case evidence6726passed15skipped is not a single full-run claim.
+All445baseline Knowledge cases/outcomes match after the named fixture rerun;
+this deterministic evidence is not proof of stochastic model answer quality.

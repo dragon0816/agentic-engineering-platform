@@ -1,0 +1,623 @@
+{
+  "basis": "Full core snapshot plus named current-component reruns; not a single all-green full run.",
+  "raw_full_final": {
+    "skipped": 15,
+    "passed": 6724,
+    "failed": 2
+  },
+  "raw_full_final_failures": [
+    [
+      "tests.test_knowledge_repo_long_paths",
+      "test_a_long_path_imports_publishes_and_reads"
+    ],
+    [
+      "tests.test_vault_asking_e2e",
+      "test_a_bi_vault_without_the_grant_or_the_skill_answers_nothing"
+    ]
+  ],
+  "current_collection_cases": 6740,
+  "collection_level_skips": [
+    [
+      "",
+      "tests.test_voice_codecs"
+    ]
+  ],
+  "effective_case_outcomes": {
+    "skipped": 15,
+    "passed": 6726
+  },
+  "missing_current_cases": [],
+  "extra_noncollection_cases": [],
+  "dynamic_parameter_case_matching": {
+    "reason": "Three JWT fixture cases embed collection-time expiry timestamps in IDs.",
+    "family_counts_match": true,
+    "cases": 3
+  },
+  "supplemental_case_sources": [
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[a builtin it calls-analysis]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[a builtin it calls-tool]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[a child process through _winapi-analysis]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[a child process through _winapi-tool]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[a function it calls-analysis]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[a function it calls-tool]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[a socket-analysis]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[a socket-tool]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[a trace function-analysis]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[a trace function-tool]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[a traceback's frame-analysis]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[a traceback's frame-tool]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[ctypes from sys.modules-analysis]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[ctypes from sys.modules-tool]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[empty its list through __main__-analysis]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[empty its list through __main__-tool]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[import ctypes-analysis]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[import ctypes-tool]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[the frame that runs the script-analysis]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[the frame that runs the script-tool]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[the garbage collector-analysis]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[the garbage collector-tool]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[the module that resolves paths-analysis]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[the module that resolves paths-tool]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[turn the guard off through __main__-analysis]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_an_attempt_is_refused_and_writes_nothing_outside[turn the guard off through __main__-tool]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_with_numpy_installed_ctypes_stays_out_of_reach[ctypes memory write-analysis]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_with_numpy_installed_ctypes_stays_out_of_reach[ctypes memory write-tool]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_with_numpy_installed_ctypes_stays_out_of_reach[ctypes through numpy-analysis]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_with_numpy_installed_ctypes_stays_out_of_reach[ctypes through numpy-tool]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_a_denied_module_loaded_before_the_guard_stops_the_run"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_guard_attacks",
+        "test_openpyxl_still_works_in_a_tool"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_skill_agent",
+        "test_the_agent_tries_its_draft_and_its_suggestion_is_checked"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_skill_agent",
+        "test_the_agent_proposes_a_tool_and_tries_it_only_once_approved"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_the_output_is_a_new_source_and_never_a_card"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_withdrawing_a_source_takes_what_a_tool_made_from_it"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_the_guard_refuses[import socket-socket]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_the_guard_refuses[import subprocess-subprocess]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_the_guard_refuses[import os\\nos.system('echo x')-os.system]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_the_guard_refuses[import ctypes-ctypes]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_the_guard_refuses[import sqlite3\\nsqlite3.connect('x.sqlite')-sqlite3.connect]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_the_guard_refuses[open('outside.txt', 'w').write('x')-outside]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_the_guard_refuses[import os\\nos.mkdir('elsewhere')-outside]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_the_guard_refuses[raise ValueError('\\u865b\\u69cb\\u7684\\u932f\\u8aa4')-\\u865b\\u69cb\\u7684\\u932f\\u8aa4]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_shutil_cannot_copy_out_of_the_output_folder"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_a_tool_may_write_into_its_output_folder_only"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_output_that_is_not_a_csv_or_markdown_is_refused[print('nothing written')]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_output_that_is_not_a_csv_or_markdown_is_refused[import os\\nopen(os.path.join(OUTPUT, 'a.exe'), 'w').write('x')]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_output_that_is_not_a_csv_or_markdown_is_refused[import os\\nopen(os.path.join(OUTPUT, 'a.csv'), 'w').close()]"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_a_tool_that_runs_too_long_is_stopped"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_only_python_runs"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tools_ui",
+        "test_a_tool_is_approved_run_and_its_output_previewed"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_knowledge_repo_long_paths",
+        "test_a_long_path_imports_publishes_and_reads"
+      ],
+      "outcome": "passed",
+      "report": "longpath-deep-isolated.xml"
+    },
+    {
+      "case": [
+        "tests.test_vault_asking_e2e",
+        "test_a_joined_wiki_repository_is_answered_and_cited_from_its_published_version"
+      ],
+      "outcome": "passed",
+      "report": "vault-short-control.xml"
+    },
+    {
+      "case": [
+        "tests.test_vault_asking_e2e",
+        "test_an_imported_copy_never_published_is_answered_from_the_pushed_head_and_says_so"
+      ],
+      "outcome": "passed",
+      "report": "vault-short-control.xml"
+    },
+    {
+      "case": [
+        "tests.test_vault_asking_e2e",
+        "test_a_wiki_repository_without_the_grant_or_the_skill_answers_nothing"
+      ],
+      "outcome": "passed",
+      "report": "vault-short-control.xml"
+    },
+    {
+      "case": [
+        "tests.test_vault_asking_e2e",
+        "test_a_joined_bi_vault_is_answered_and_cited_from_its_published_version"
+      ],
+      "outcome": "passed",
+      "report": "vault-short-control.xml"
+    },
+    {
+      "case": [
+        "tests.test_vault_asking_e2e",
+        "test_a_vault_never_published_is_answered_from_the_pushed_head_and_says_so"
+      ],
+      "outcome": "passed",
+      "report": "vault-short-control.xml"
+    },
+    {
+      "case": [
+        "tests.test_vault_asking_e2e",
+        "test_a_bi_vault_without_the_grant_or_the_skill_answers_nothing"
+      ],
+      "outcome": "passed",
+      "report": "vault-short-control.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_new_revisions_execute_without_app_approval_and_keep_review_metadata"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_synced_tools_execute_without_a_per_pc_approval"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    },
+    {
+      "case": [
+        "tests.test_bi_tool_runs",
+        "test_an_ai_draft_runs_without_approval_and_stages_nothing"
+      ],
+      "outcome": "passed",
+      "report": "bi-tool-policy-final.xml"
+    }
+  ],
+  "knowledge": {
+    "baseline_cases": 445,
+    "raw_full_changed": [
+      [
+        "tests.test_knowledge_repo_long_paths",
+        "test_a_long_path_imports_publishes_and_reads"
+      ]
+    ],
+    "effective_changed": [],
+    "boundary": "Deterministic regression coverage, not live model answer quality."
+  },
+  "source_delta": [
+    {
+      "path": "src/capabilities/bi_cards/tool_runs.py",
+      "before": "68e3ba33277c1a3ae47ff315c9b6a0513c206f1b0bec5d5cdde9acebc8ea899c",
+      "after": "304737a4fb0ab67c3aa96a74711739bb92f7140102026fd2a0bd8ccad9577a0a"
+    },
+    {
+      "path": "src/host_runtime/bi_skill_agent.py",
+      "before": "3af104d1d94bc4303b3b952ea60f26f0b4d936e0fe802cfa0356966ac64af2df",
+      "after": "98c2f2a082112a7ace721a704be3da62936599aeda071df8ee6f7316e1ebce26"
+    },
+    {
+      "path": "src/host_runtime/web_page.py",
+      "before": "903a3132df54483ac8a5c627015959db1dba00a71be9c0167507f7f65cabfb98",
+      "after": "0c2aa27cd0ccb8efeba0bfffabad50dbf5ae7ab0e0c338741980422e6bccfce7"
+    },
+    {
+      "path": "tests/test_bi_skill_agent.py",
+      "before": "e991841c4295e525fee3f3f99609bafa6ee71a636152245f1340540656bcc42e",
+      "after": "20aa7435f24fd28ebd1eeafa8965acb8c9acf5e51fdf8fd3950af4fab21005b9"
+    },
+    {
+      "path": "tests/test_bi_tool_runs.py",
+      "before": "8d940dd7d5a6d82a75c21ade6ed9d5eb791c2358c585ee06b129f82d1f0090f9",
+      "after": "f80eec60da32fab2969f5dce280d57e5f328004aabcc0dfa62a6c9678ebf3ee8"
+    },
+    {
+      "path": "tests/test_bi_tools_ui.py",
+      "before": "867890bcb16b12b8105b550d3783cac701e9363f31442bae20bd687aca36997a",
+      "after": "2f2366f2a614a736fadc3c64cc27b3c36c9a6e17cd31707a1d0d3e38e1d9d1e2"
+    },
+    {
+      "path": "tests/test_knowledge_repo_long_paths.py",
+      "before": "6b83b15552665f0c8d1b2ed9ddaf0637a06eb15bbb432ef683940732fd631346",
+      "after": "e74347c79e817caec0b99a70b312c0d3d94015dcc89acaca75cbe1809aeac000"
+    }
+  ],
+  "unchanged_long_path_session_io_vs_base": {
+    "src/host_runtime/workspace.py": true,
+    "src/host_runtime/authoring_task.py": true
+  },
+  "web_page_outside_bi_tools_function_unchanged": true,
+  "evidence_sha256": {
+    "full-initial.xml": "2facb7bb478fe948f4411ef3de7ca8024e7be04f24ba6a4f2b3deef01f6fcd30",
+    "full-final.xml": "16628e03b0727531fc421a8106b2168b62e0239ef26f9af592917804fa87cc74",
+    "bi-tool-policy-final.xml": "77e6e748b5cb5e5f2797bd1efa3ce1c99e66bf1fa43bb0ef2246bc344dc32407",
+    "longpath-deep-isolated.xml": "20b83fb745d9df9fca5d5de3de67f38bb84d6591e0976a5a819df437614bf5e2",
+    "longpath-short-isolated.xml": "405526502d50de20e14ca7123c702e1e3f89325a2527eb2aefc51da84b9c810c",
+    "vault-short-control.xml": "e3783653677936cc89ba6ebeb15a572c03669fef61d9aa236f464affa9c0f7b4",
+    "knowledge-baseline.xml": "eb6fd7d7852951269fac5cb8997eec5603e61711ee153c9f73d1b3b699d936c7",
+    "collection-final.log": "04803339ca54756cbf04badd38a4abdf8f74f3cbcd7cd468b2bd7c82fe21f832",
+    "source-freeze-final.json": "5db79d1c4be5165c6eb7baa5bc28a8aeb955b2475b3dd3437d30f22a8a2c3026"
+  },
+  "build": {
+    "command": "python -m build --no-isolation",
+    "outcome": "passed",
+    "wheel_sha256": "7749306a69514f94ae81e1d4dc2da6b76cc4066621913fa8acc91ddc0f4754db",
+    "wheel_python_sources": 571,
+    "missing": [],
+    "changed_after_newline_normalization": [],
+    "extra": [],
+    "isolated_install_and_import_smoke": "passed; four imports resolve under C:/TEMP/aep-it-tools-wheel-smoke-20261113",
+    "pip_check": "No broken requirements found."
+  },
+  "static_checks": {
+    "ruff_check": "passed",
+    "ruff_format": "1481 files formatted",
+    "mypy": "1117 source files passed",
+    "git_diff_check": "passed"
+  },
+  "long_path_session_io_control": {
+    "path_length": 290,
+    "outcomes": {
+      "base394ca4d2": "FileNotFoundError",
+      "current": "FileNotFoundError"
+    },
+    "boundary": "Pre-existing generic workspace persistence limitation at long Win32 paths; current full six-case Knowledge conversation module passes at short test root. No harness state I/O edit."
+  }
+}

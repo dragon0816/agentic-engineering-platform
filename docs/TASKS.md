@@ -4906,13 +4906,35 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   「同意上述 harness 範圍並開始實作」. See latest DECISIONS.
 - [x] After consent, create the implementation plan and a separate managed
   worktree; contract/tests/implementation/verification follow in that order.
-- [ ] Implement and validate; do not edit harness before the scoped consent.
+- [x] Implement and validate; do not edit harness before the scoped consent.
 
 - [x] IT-owned tools implementation slices1–7: unified typed discovery/invocation,
   direct local/MCP installation and same-session refresh, no AEP mail/folder/CLI
   approval admission; real outcomes and turn receipts retained. Latest focused
   checks118passed and61passed/2live-Outlook-skipped. Exact445baseline Knowledge
   cases/outcomes match (445passed162.21s). See IT_OWNED_TOOL_ACCESS_LEDGER_20261112.md.
-- [ ] IT-owned tools final acceptance: one independent whole-branch review,
+- [x] IT-owned tools final acceptance: one independent whole-branch review,
   final frozen lint/format/type/full pytest/build/pipcheck and full-run445baseline
   comparison. No deployment/push/resident/shared Gateway changes yet.
+
+- [x] IT-owned tools final review repairs: required same fresh reviewer reports
+  Critical0/Important0 remaining. Concurrent effects, MCP collision/ownership,
+  schedule gates, owned process deadlines and generic native result eligibility
+  repaired. Targeted89passed; migrated business/recovery/schedule119passed1skip.
+  Final Ruff/format pass1481files; mypy1117files pass. Final full pytest running
+  in isolated worktree; source frozen, no build/deployment yet.
+
+- [x] IT-owned tools first full run completed6682passed37failed15skipped; all445
+  baseline Knowledge IDs/outcomes match. Old-policy expectations migrated; real
+  Skill-version/profile and direct-run receipt/concurrency/digest issues repaired.
+  Final focused161passed and required same-reviewer Critical0/Important0.
+- [x] Final frozen full rerun completed:6724passed2failed15skipped; raw failures
+  retained. Both diagnosed long-path cases pass named supplemental checks; BI
+  delta55passed. Current combined evidence6726passed15skipped (not one green
+  full). Same445Knowledge outcomes match baseline. Lint/format/mypy/build/pipcheck
+  and isolated571-source wheel smoke pass. Acceptance report and machine evidence
+  in docs/phases/IT_OWNED_TOOL_ACCESS_{ACCEPTANCE,VERIFICATION}_20261113.*.
+- [ ] Separate known limitation: pre-existing generic session persistence fails
+  at Win32 paths beyond260 characters. Baseline/current control both reproduce;
+  normal short-root Knowledge conversations6passed. No extra state-I/O harness
+  change authorized or made in this task.
