@@ -131,3 +131,25 @@ An old BI guide says AI cannot draft processing programs, contradicting current
 code/tests; report records this without rewriting the delivered package.
 No assessment process remains active. No implementation/remediation is authorized
 by this assessment alone; any harness proposal still requires owner consent.
+## Active owner request: IT-owned tool access (2026-11-12)
+
+Owner now explicitly cancels AEP tool installation/execution approvals, including
+send/delete/external writes. IT/OS/service policy decides usability. This is a
+new product direction, superseding local tool-governance decisions, not an
+instruction to fake old approvals or activate a temporary development bypass.
+Read IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md and latest DECISIONS/TASKS.
+
+Design/source assessment only so far: no harness, settings, resident, install or
+package change. Skill-first cause is proven by direct missing Outlook binding
+probes plus deterministic registration/grant/approval branches. The draft design
+covers unified discovery/exposure, removing AEP tool policy/approval admission,
+agent installation and same-session refresh, then backend/UI integration.
+Model/data policy and shared publication are outside the tool-access scope.
+Knowledge helper/query contracts and445baseline cases must remain reliable.
+
+A single asynchronous question presents that concrete harness scope and asks
+for owner consent under AGENTS22; policy direction is approved, harness scope
+approval is pending. Never infer approval from silence or from the policy answer.
+After explicit scope approval, make the implementation plan and new managed
+worktree; otherwise finish the design review with no implementation. The existing
+C4C package and running resident remain unchanged. No test/build process is active.

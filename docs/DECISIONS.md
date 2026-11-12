@@ -7568,3 +7568,26 @@ and other settings matched the post-canary backup, rendered YAML bytes stayed
 unchanged during repair, and the original external PID/starttime did not change.
 No service/token/user-env operation was performed. Preserve this limitation in
 the package acceptance report rather than describing the canary as state-free.
+## 2026-11-12 — IT owns tool availability; remove AEP tool approvals
+
+Owner direction:「我們在開發階段，不要有這麼多限制，我想要讓Agent可以AEP裡面的所有工具，並且可以安裝任何的工具，除非這個工具是這台電腦不能使用了，這是由公司的IT人員來決定，寫這一個application不做這種工具管控的設計。」
+Explicit clarification:「取消工具安裝與執行核准，由公司 IT 控制」.
+
+This changes the product policy for local tool/Skill/Workflow installation and
+tool execution, including send/delete/external writes: no AEP per-tool grants,
+installation approval or per-call approval/risk gate. IT-managed OS/service
+identities and the actual execution environment decide what can run. Do not
+implement a development auto-approve flag while retaining the unwanted control
+layer as the target architecture. This direction supersedes the earlier local
+tool approval decisions to this extent; publishing shared assets and model/data
+routing are separate and are not silently changed by it.
+
+Policy consent is explicit. Implementation consent under AGENTS22 is a separate
+checkpoint: the concrete Skill-first causal evidence, minimal harness surfaces,
+alternatives, boundaries and regression matrix are recorded in
+IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md and presented for review. Live read-only
+Skill probes already prove instructions cannot bind the unregistered Outlook
+search/read capabilities; source registration/grant/install checks run outside
+Skill reasoning. No harness/config/runtime change has been made before the
+owner reviews that concrete scope. Keep user intent, truthful evidence,
+at-most-once effects and the Knowledge regression baseline intact.

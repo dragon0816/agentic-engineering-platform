@@ -4891,3 +4891,19 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   Document whole-thread retrieval/completeness gap; do not claim live acceptance.
 - [x] Record findings and stale BI guide text in
   DATA_DASHBOARD_MAIL_CAPABILITY_ASSESSMENT_20261112.md. No harness/config edits.
+### IT-owned tool availability and installation (2026-11-12)
+
+- [x] Explore current registry/Bridge/MCP/native/install approval paths and
+  applicable Skills; capture direct missing-capability/Skill binding evidence.
+- [x] Clarify the policy: owner cancels AEP installation and execution approvals,
+  including send/delete/external writes; company IT decides tool availability.
+- [x] Compare three approaches; propose one inventory/no app tool-policy layer,
+  rather than a development-mode auto-approve switch.
+- [x] Write and self-review IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md with stages,
+  concrete harness surfaces and Knowledge/side-effect/install regressions.
+  No visual design question arose; no visual companion was needed.
+- [ ] Owner reviews the written scope and gives AGENTS22 harness consent;
+  an asynchronous concrete approval question is pending. Do not infer it.
+- [ ] After consent, create the implementation plan and a separate managed
+  worktree; contract/tests/implementation/verification follow in that order.
+- [ ] Implement and validate; do not edit harness before the scoped consent.
