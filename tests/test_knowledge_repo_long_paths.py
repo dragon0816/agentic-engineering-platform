@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import pytest
 from test_knowledge_repos_api import _call, _ok
@@ -39,13 +40,17 @@ def test_a_long_path_imports_publishes_and_reads(tmp_path: Path) -> None:
     workspace.mkdir()
     shared = tmp_path / "s"
     shared.mkdir()
-    given = {
-        "source": str(_source(tmp_path)),
-        "path": str(shared),
-        "id": "long-wiki",
-        "author": "x",
-    }
-    done = wiki_repos.import_copy(workspace, given, "x")
+    # The subject is a long destination workspace. Keep input-fixture creation
+    # within Win32's normal path limit even when pytest's own base is deep.
+    # Removing it after import also proves subsequent reads use the copied Raw.
+    with TemporaryDirectory(prefix="aep-wiki-src-") as raw_fixture:
+        given = {
+            "source": str(_source(Path(raw_fixture))),
+            "path": str(shared),
+            "id": "long-wiki",
+            "author": "x",
+        }
+        done = wiki_repos.import_copy(workspace, given, "x")
     assert done["imported"]["raw"] == 1 and done["imported"]["pages"] >= 1
     folder = workspace / "knowledge-repos" / "long-wiki" / "work" / "files" / "sources"
     assert len(str(folder)) + len(NAME) + 9 > LIMIT  # what this test is about
