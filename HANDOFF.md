@@ -114,3 +114,20 @@ Next action belongs to the owner: use the delivered Chinese current-PC guide
 and update.cmd -NoGateway when ready to update the installed AEP. Packaging did
 not deploy the integrated runtime. Any later portability revision must use normal
 AEP authoring/trial/approval; any harness change needs separate scoped consent.
+## Post-delivery capability assessment (2026-11-12)
+
+Owner asked whether simple dialogue can create data-processing Skills/Dashboards
+and whether Outlook mail/thread reading exists. See
+docs/phases/DATA_DASHBOARD_MAIL_CAPABILITY_ASSESSMENT_20261112.md.
+Assessment only: dedicated BI rule/program-drafting and Dashboard paths exist;
+47 fixture tests passed. Outlook28passed/2live tests skipped. No actual mailbox,
+live-model novice acceptance, new asset or harness/config change occurred.
+Current resident044 and packaged e693 have identical assessed BI/mail sources.
+Live catalog/Skill checks show Outlook read/search uninstalled in this general
+capability path; native Agent mode has separate tools but its flags are all off
+on this PC.180day/one-folder scope excludes Sent. No whole-thread retrieval or
+completeness proof exists. No colleague's machine was inspected.
+An old BI guide says AI cannot draft processing programs, contradicting current
+code/tests; report records this without rewriting the delivered package.
+No assessment process remains active. No implementation/remediation is authorized
+by this assessment alone; any harness proposal still requires owner consent.

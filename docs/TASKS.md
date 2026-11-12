@@ -4880,3 +4880,14 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   562 installed source files and three assets match. Shared Gateway initialization
   incident and non-exact functional normalization are explicitly recorded in
   C4C_WINDOWS_PACKAGE_20261112.md; current-PC update guide uses -NoGateway.
+### Data Skills, Dashboards and Outlook assessment (2026-11-12)
+
+- [x] Confirm dedicated BI AI rule/program drafting and Dashboard proposal paths;
+  distinguish general Ask from BI sessions. Fixture regressions47passed.
+- [x] Confirm Outlook draft versus mailbox read/search exposure; live catalog and
+  read-only Skill binding checks show read/search absent from this Host's catalog.
+  Current Agent mode flags all off; current180day/one-folder scope excludes Sent.
+- [x] Verify mail contracts with fake mailboxes:28passed/2live-tests skipped.
+  Document whole-thread retrieval/completeness gap; do not claim live acceptance.
+- [x] Record findings and stale BI guide text in
+  DATA_DASHBOARD_MAIL_CAPABILITY_ASSESSMENT_20261112.md. No harness/config edits.
