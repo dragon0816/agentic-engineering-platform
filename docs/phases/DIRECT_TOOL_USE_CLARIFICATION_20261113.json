@@ -1,0 +1,57 @@
+{
+  "base": "8728cb41",
+  "scope": "No IT approval/identity/managed allowlist prerequisite; wording only, no execution branch or model-data change.",
+  "initial_focused": {
+    "passed": 92,
+    "skipped": 2,
+    "failed": 1
+  },
+  "initial_failed_cases": [
+    [
+      "tests.test_system_command",
+      "test_exited_root_cannot_leave_pipe_draining_outside_the_deadline"
+    ]
+  ],
+  "control": {
+    "passed": 7
+  },
+  "effective_focused": {
+    "passed": 93,
+    "skipped": 2
+  },
+  "timing_failure_boundary": "Original deadline assertion 2.062s versus <2s, preserved. Unchanged command module7passes in9.39s on rerun; cause not independently proved, not a first-run-green claim.",
+  "copy_only_ast_proof": {
+    "base": "8728cb41",
+    "python_files": [
+      "src/capabilities/bi_cards/tool_runs.py",
+      "src/capabilities/coding_change/handlers.py",
+      "src/capabilities/runtime.py",
+      "src/host_runtime/agent_mode.py",
+      "src/host_runtime/authoring.py",
+      "src/host_runtime/conversation_backends.py",
+      "src/host_runtime/external_authoring.py",
+      "src/host_runtime/mcp_server.py",
+      "src/host_runtime/profiles.py",
+      "src/host_runtime/web_page.py",
+      "src/integrations/outlook_mail.py"
+    ],
+    "unchanged_ast_except_string_literals": true
+  },
+  "verification": {
+    "ruff_check": "passed",
+    "ruff_format": "1482 files formatted",
+    "mypy": "1117 source files passed",
+    "pip_check": "passed",
+    "build": "sdist and wheel passed",
+    "wheel_python_sources": 571,
+    "wheel_source_match_after_newline_normalization": true
+  },
+  "sha256": {
+    "direct-tools-wording.xml": "e0f13f4d284cf38b2d3033b47480d36c32c7f91271e54de8cbc15bc1fede3838",
+    "direct-tools-command-control.xml": "96090a48c080d96ac6c80aee5009c2e1bdc5a04b56f7dd0cb3869c62b28fc108",
+    "direct-tools-copy-only.json": "a4725b2346a31acbfe5a44bfc8dd753810ee9197e2b31a2969f26ec52e65aacb",
+    "build-direct-tools.log": "411054a523a8ba43e08f68b0ecd3a381665855bc9aa90c06d6c1be188455e992"
+  },
+  "wheel_sha256": "181bfe51efb57cfaa22c558ad86a83385217b95f9659b2cb563535a14b8841b5",
+  "boundary": "No full rerun for string-only clarification. Prior full/Knowledge evidence retains its documented boundaries. Resident/main/shared Gateway not updated."
+}

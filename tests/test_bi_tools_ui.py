@@ -80,6 +80,7 @@ def test_a_tool_is_approved_run_and_its_output_previewed(
             page.set_value("bi-b-tl-code", TOOL)
             page.click("#bi-b-tl-save")
             page.see("bi-b-tl-list", "不需核准")
+            page.see("bi-b-tl-list", "直接執行工具；若環境不支援，會顯示實際錯誤。")
             page.see("bi-b-tl-list", MARK)
             assert "看過了，核准" not in page.text_of("bi-b-tl-list")
             assert "對選取的來源執行" in page.text_of("bi-b-tl-list")

@@ -7302,7 +7302,7 @@ function showSharedPlatform(info, saved) {
   el("shared-this-pc").textContent = "This PC: Bridge " + info.bridge_id + ", registered by "
     + info.registered_by + (info.login_saved ? " · Personal Agent code saved"
       : " · no Personal Agent code yet")
-    + (info.assets_only ? " · IT/OS/service permissions decide execution; synchronizing "
+    + (info.assets_only ? " · OS/service permissions decide execution; synchronizing "
       + "installs files only" : "");
   const parts = [];
   if (info.enrolled) {
@@ -8761,7 +8761,7 @@ function marketCard(item, index) {
     if (sharedPlatform.assets_only && (item.kind === "skill" || item.kind === "workflow")) {
       const only = document.createElement("p"); only.className = "note";
       only.append(text("On this PC adding installs the file only: "
-        + "access comes from IT/OS/service permissions."));
+        + "access comes from OS/service permissions."));
       aside.append(only);
     }
     body.append(content, aside); detail.append(body);
@@ -15633,7 +15633,7 @@ function biToolsDraw(vaultId, reply) {
     const shown = bh("details", "", bh("summary", "", "程式碼"), code);
     shown.open = Boolean(item.code && !item.approved);
     if (shown.open) {
-      shown.append(bh("p", "bi-meta", "工具執行不需 AEP 核准；實際存取依公司 IT 與執行環境。"
+      shown.append(bh("p", "bi-meta", "直接執行工具；若環境不支援，會顯示實際錯誤。"
         + "輸出維持新來源的預覽與審核流程，不會自動變更知識卡。"));
     }
     biRowDetail(list).cell.append(shown);

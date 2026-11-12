@@ -1,4 +1,4 @@
-"""Read-only Outlook search/read using IT/OS/service mailbox permissions.
+"""Read-only Outlook search/read using OS/service mailbox permissions.
 
 Requested folder/date/sender filters still apply. Legacy exclusions and maximum
 scope fields do not hide messages. Reads expose bounded body continuation fields;

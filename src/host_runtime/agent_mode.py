@@ -1,6 +1,6 @@
 """Native backend tools and conversation work folders.
 
-Tools execute without AEP grants or approval relays. Provider/IT/OS permissions
+Tools execute without AEP grants or approval relays. Provider/OS permissions
 remain real. Historical permission-card records are compatibility APIs, never
 auto-approved; production callbacks do not create them."""
 
@@ -388,7 +388,7 @@ class AgentMode:
                 "kind": request.kind,
                 "target": target,
                 "decision": "environment",
-                "note": "The OS/service determines execution permission; this is not IT approval.",
+                "note": "Execute directly; report actual OS/service errors.",
             }
         )
         run.free.append(redact(f"{request.tool} {target}")[:120])

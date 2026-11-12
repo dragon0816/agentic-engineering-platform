@@ -113,9 +113,9 @@ Finally, demonstrate SOP-to-Workflow, Knowledge and ordinary Skill use from
 user-level entry points with independent validation.
 
 
-## IT-owned application tool access (owner2026-11-12)
+## Environment-available application tools (owner2026-11-13 clarification)
 
-All supported AEP conversation backends expose a common typed tool catalog. Tools do not require selected Skills, member grants or per-call/per-install AEP approval. Agents can install/connect tooling and use it in the same session. Actual IT/OS/service errors are reported, never relabeled as success. Mail search filters are query values, not access ACLs. Drafting and sending remain distinct. Model data eligibility, Knowledge evidence/citations, artifact ownership and successful-effect receipts remain mandatory.
+All supported AEP conversation backends expose a common typed tool catalog. Tools do not require selected Skills, member grants or per-call/per-install AEP approval. Agents can install/connect tooling and use it in the same session whenever the execution environment can actually run it. No separate IT approval, IT identity or IT-managed allowlist is required. Actual OS/service errors are reported, never relabeled as success. Mail search filters are query values, not access ACLs. Drafting and sending remain distinct. Model data eligibility, Knowledge evidence/citations, artifact ownership and successful-effect receipts remain mandatory.
 
 The scoped design and regression matrix are in
 `phases/IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md`; historical approval requirements

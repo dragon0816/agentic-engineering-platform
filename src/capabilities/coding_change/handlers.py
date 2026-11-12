@@ -1,7 +1,7 @@
 """`coding/change@1.0.0`: validate a declared change in an isolated repository.
 
 The declared target/test contract prevents the author from weakening its own
-validation. Commands run under actual IT/OS permissions, with real exit/timeout
+validation. Commands run under actual OS permissions, with real exit/timeout
 results; no AEP low-token or firewall-rule admission gate. Failed validation is
 retained as evidence and is never reported as a successful change."""
 

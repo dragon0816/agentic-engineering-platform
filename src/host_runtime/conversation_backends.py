@@ -878,7 +878,7 @@ class LocalConversationBackends:
         policy: str | None = None,
     ) -> str:
         policy = policy or (
-            "You are AEP's conversation agent. Use available tools under the actual IT/OS "
+            "You are AEP's conversation agent. Use available tools under the actual OS "
             "environment. AEP adds no tool permission cards. Return real results, cite "
             "Knowledge evidence and do not repeat succeeded effects. Draft never means send."
         )

@@ -12,7 +12,7 @@ An AEP Skill tells the resident AEP Agent:
 - **which commands** it may run (`commands`, each bound to an installed
   capability or Workflow).
 
-A Skill is procedure guidance. Tools run under IT/OS/service permissions; AEP does
+A Skill is procedure guidance. Tools run under OS/service permissions; AEP does
 not require tool grants or local installation/execution approval.
 
 ## Tools

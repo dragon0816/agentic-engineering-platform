@@ -7,6 +7,12 @@ The original resident, delivered package and remote main remain unchanged.
 
 ## Owner decision and acceptance
 
+Current clarification2026-11-13:「不用保留IT，在電腦上可以執行，就可以用」.
+Tools available in the actual execution environment can run directly; no IT
+approval, IT identity or IT-managed allowlist is required by AEP. The following
+November12 wording is historical, not an additional prerequisite. Existing file
+names retain the original phase identifier for traceability.
+
 Owner,2026-11-12: AEP agents should access all AEP tools and install any tool
 usable in the execution environment; company IT decides whether a computer may
 use a tool. Explicit clarification:「取消工具安裝與執行核准，由公司 IT 控制」.
@@ -14,7 +20,7 @@ use a tool. Explicit clarification:「取消工具安裝與執行核准，由公
 Consequently AEP will not have an application tool allowlist, per-tool grant,
 risk-based execution approval or installation approval. This is the requested
 product behavior, not an optional development bypass. The currently signed-in
-OS/service identity and IT-managed environment determine actual execution.
+OS/service identity and actual environment determine execution results.
 AEP must not claim an operation was approved by IT without evidence; it reports
 the actual execution result or technical dependency/authentication/OS error.
 

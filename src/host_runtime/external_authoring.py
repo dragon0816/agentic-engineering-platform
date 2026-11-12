@@ -196,7 +196,7 @@ WORKFLOW_FORMAT: dict[str, JsonValue] = {
         "Never put a password, token or key in a fixed value.",
         "coding/run-python@1.0.0 runs a complete Python script in an absolute workspace "
         "folder; it reads run values from os.environ['AEP_WORKFLOW_PARAMS'] (a JSON file) "
-        "and puts report artifacts under output/ for tracking; IT/OS permissions apply.",
+        "and puts report artifacts under output/ for tracking; OS permissions apply.",
         "Put run values in output file names so a rerun never overwrites an earlier result.",
     ],
 }

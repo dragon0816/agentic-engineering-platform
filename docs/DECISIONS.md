@@ -7689,3 +7689,18 @@ scope into unrelated state persistence, raising timeouts or weakening assertions
 Combined current-case evidence6726passed15skipped is not a single full-run claim.
 All445baseline Knowledge cases/outcomes match after the named fixture rerun;
 this deterministic evidence is not proof of stochastic model answer quality.
+
+### 2026-11-13 — Tool usability does not require an IT approval layer
+
+Owner clarification:「不用保留IT，在電腦上可以執行，就可以用」.
+AEP requires neither IT approval nor IT identity/management enrollment nor an
+IT-managed tool allowlist. Tools usable at their execution environment can be
+installed/connected and called directly; actual OS/service errors remain real.
+This supersedes the earlier phrase「由公司 IT 控制」as an application prerequisite;
+historical quotes and phase filenames are retained for traceability. Code review
+found no IT authorization branch: LocalPolicy already allows the authenticated
+call independently of old grants. This follow-up aligns UI, bundled Skill and
+native-agent wording, audit copy and current requirements with that behavior;
+no routing, permission logic, model/data classification or Knowledge change.
+Rejected adding an IT approval service or interpreting an execution failure as
+policy approval. Existing provider guards are not bypassed by the coding agent.

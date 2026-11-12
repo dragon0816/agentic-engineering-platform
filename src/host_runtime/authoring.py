@@ -2,7 +2,7 @@
 
 Preview is optional evidence of a plan, never proof that writes ran successfully.
 Installation uses valid local manifests and retains pending business review;
-normal IT/OS/service controls apply, without AEP grants or approval cards.
+normal OS/service controls apply, without AEP grants or approval cards.
 """
 
 from __future__ import annotations

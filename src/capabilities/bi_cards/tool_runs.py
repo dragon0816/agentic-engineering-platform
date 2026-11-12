@@ -10,7 +10,7 @@ A tool runs under the guard of `analyses.run_python`: its own process (`-I`, emp
 environment, a time limit); an audit hook refuses network, child processes, native
 libraries and writes outside the output folder. It may still read files. That is
 a guard for this read-only data-transformation contract. Application tool approval
-is not required: IT/OS/service access and the declared source/output contract
+is not required: OS/service access and the declared source/output contract
 control actual execution. Historical review records remain metadata only.
 
 The skill assistant can draft and try a tool without a permission question.

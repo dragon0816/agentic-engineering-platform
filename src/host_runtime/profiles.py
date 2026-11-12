@@ -80,7 +80,7 @@ def _check_references(
             layout.knowledge, knowledge, KnowledgeManifest
         ):
             raise ProfileError("profile_dependency_unavailable")
-    # Tool declarations are role guidance; IT/OS/service access is checked at execution.
+    # Tool declarations are role guidance; OS/service access is checked at execution.
     binding = config.models
     endpoint = (
         None

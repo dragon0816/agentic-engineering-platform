@@ -50,7 +50,7 @@ try again. Do not guess an answer instead.
 2. Ask the person for any required value you do not have. Never guess dates,
    names, files or choices.
 3. Run the requested Workflow with `aep_run_workflow`. AEP does not require
-   execution approval; IT/OS/service permissions apply. Respect the person's
+   execution approval; OS/service permissions apply. Respect the person's
    intent and dry-run values: drafting is not sending. Report real outcomes and
    failures; never claim a run happened without execution evidence.
 4. For an ordinary Knowledge question, retrieve/read/cite without mutating the

@@ -4938,3 +4938,10 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   at Win32 paths beyond260 characters. Baseline/current control both reproduce;
   normal short-root Knowledge conversations6passed. No extra state-I/O harness
   change authorized or made in this task.
+- [x] Owner clarification2026-11-13: no IT approval/identity/management prerequisite;
+  align UI, native-agent/bundled Skill wording and requirements. LocalPolicy
+  already permits actual execution without such a gate. Verify focused tests,
+  static checks and build; no new harness control flow or model-data rule change.
+  Focused first92passed1timing-failure2skipped; unchanged command module rerun7pass,
+  combined93passed2skipped. Ruff/format/mypy/build/pipcheck pass; all571wheel
+  Python sources match. Exact evidence: DIRECT_TOOL_USE_CLARIFICATION_20261113.json.

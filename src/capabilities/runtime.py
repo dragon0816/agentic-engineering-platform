@@ -154,11 +154,11 @@ class CapabilityGrant(Contract):
 class LocalPolicy:
     """Compatibility facade for execution under the environment's identity.
 
-    Owner2026-11-12: IT, the OS and the source service decide tool usability.
+    Owner2026-11-13: tools usable in the execution environment can run directly.
     Legacy grants and owner_mode are accepted for configuration compatibility;
     neither controls tool execution. The Bridge still checks the real target,
     dependencies, input/output contracts and handler outcome. This facade does
-    not assert that IT reviewed or approved a particular operation.
+    not add a separate tool approval requirement.
     """
 
     def __init__(

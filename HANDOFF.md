@@ -18,6 +18,16 @@ No change to model/data classification. Skill-first causal evidence and explicit
 scope consent are in DECISIONS and IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md.
 AGENTS22 still applies to expansions. Do not ask again for already covered work.
 
+Latest owner clarification2026-11-13: no IT prerequisite; if tools can execute in
+the environment, they can be used. No IT approval branch existed. Follow-up edits
+are only UI/prompt/Skill/audit wording and current requirements, not control flow.
+Historic IT-owned phase filenames are identifiers, not an authorization system.
+Follow-up verification: focused first92pass1timing-failure2skip (2.062s vs<2s),
+unchanged command module rerun7pass9.39s; combined93pass2skip, not first-run green.
+Ruff/format1482/mypy1117/build/pipcheck pass;571wheel Python files match source.
+Python ASTs unchanged except string literals in11files, no new full run needed.
+See docs/phases/DIRECT_TOOL_USE_CLARIFICATION_20261113.json for exact provenance.
+
 ## Completed
 
 Tasks1–8 complete. Typed ToolAccess discovery/invoke/install; current-session MCP

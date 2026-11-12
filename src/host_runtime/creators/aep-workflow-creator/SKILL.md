@@ -9,7 +9,7 @@ An AEP Workflow is a JSON manifest: parameters the person gives at each run, and
 steps that each call one installed capability. The AEP Host runs it, not you.
 Your job is to write it, check it, test it on the Host, then install it locally
 and report actual verification. AEP does not require tool grants or execution/
-local installation approval; actual IT/OS/service permissions still apply.
+local installation approval; actual OS/service permissions still apply.
 
 ## Tools
 
@@ -183,7 +183,7 @@ refused.
   Web.
 - Never put passwords, tokens or keys in a fixed value.
 - Never write manifests directly into the Host's workspace folders. Doing so
-  fabricates verification or bypasses actual IT/OS/service controls.
+  fabricates verification or bypasses actual OS/service controls.
 - Never claim it ran on AEP unless `aep_run_workflow` or an approved run says
   so.
 - The host assigns namespace, owner and version. A name already installed by

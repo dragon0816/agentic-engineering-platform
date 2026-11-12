@@ -1,6 +1,8 @@
 # IT-owned tool access: implementation acceptance
 
 Date: 2026-11-13. Branch: `it-owned-tool-access-20261112`.
+Later clarification: no IT approval/identity/managed allowlist is required. This
+historical phase filename is retained as an identifier, not a permission system.
 Authorization: the owner's explicit consent to the four harness changes in
 `IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md`, recorded in DECISIONS. This report
 covers local implementation and verification, not deployment to the resident.
@@ -86,7 +88,8 @@ Knowledge baseline comparison does not use this normalization.
 更新到本分支實作後，使用者可直接在對話說明工作，例如「找出這封郵件的
 往來內容並整理待辦」或「安裝並連接這個 MCP，再用它處理附件」。Agent 可
 探索已安裝工具、連接工具並在同一 session 呼叫，AEP 不再要求工具授權卡。
-工具需要的帳號登入、電腦軟體及公司 IT／來源系統權限仍須實際具備。
+工具在執行環境能實際執行就可使用，AEP 不要求 IT 核准、IT 身分或管理名單；
+缺少軟體、登入失敗或來源系統拒絕時，回報實際錯誤。
 資料是否能交給所選模型，仍依既有資料規則判斷；原生後端若只收到執行摘要，
 應呈現資料未放行的原因，不能宣稱已讀取或分析完整內容。
 
@@ -100,3 +103,19 @@ certified end-to-end data-egress isolation boundary.
 Main, resident AEP, shared Gateway configuration, and the previously accepted
 C4C distribution were not updated. This branch is locally committed; deployment
 and a replacement end-user package are separate delivery steps.
+
+## Wording clarification follow-up
+
+Owner:「不用保留IT，在電腦上可以執行，就可以用」. No IT gate existed; the
+follow-up aligns UI, prompt/Skill/audit wording and current requirements. All11
+changed Python ASTs are identical except string literals; no execution branch,
+Knowledge or model-data rule changed. The preceding full-suite evidence describes
+the accepted pre-clarification tree; no new full run is claimed for this copy edit.
+
+Follow-up focused run:92passed1failed2skipped107.65s. The unchanged subprocess
+deadline case took2.062s against its<2s assertion; its entire7-case module passed
+on rerun9.39s without changing assertions. The timing cause was not independently
+proved. Combined focused evidence93passed2skipped. Ruff/format1482/mypy1117,
+pipcheck and rebuilt sdist/wheel pass; all571wheel Python sources match the new
+tree after newline normalization. Details/hashes:
+`DIRECT_TOOL_USE_CLARIFICATION_20261113.json`. Resident remains unchanged.

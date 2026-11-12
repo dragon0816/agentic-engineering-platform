@@ -36,7 +36,7 @@ INSTRUCTIONS = (
     "run a Workflow with test values, then install it locally. To change an installed Workflow "
     "drafted here, read it with aep_show_installed_workflow and copy it with "
     "aep_revise_workflow instead of rewriting it. Local runs/installations execute without "
-    "AEP approval cards under actual IT/OS/service permissions. Preserve test quality; "
+    "AEP approval cards under actual OS/service permissions. Preserve test quality; "
     "installation is not proof of successful validation. You get statuses "
     "and codes, never the data a run read."
 )

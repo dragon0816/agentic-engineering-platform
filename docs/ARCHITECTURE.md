@@ -1271,9 +1271,9 @@ Phase 6: guardrails, approvals, tracing and full evaluation harness, including c
 Phase 7: end-to-end validation and controlled deprecation of source repositories.
 
 
-## IT-owned execution environment (owner2026-11-12)
+## Actual execution environment (owner2026-11-13 clarification)
 
-The Bridge remains the execution plane and Registry remains distribution/control plane. LocalPolicy is a compatibility identity adapter, not an application permission engine. ToolAccess provides shared catalog/describe/invoke/install-MCP surfaces to Gateway and native MCP adapters. Native HTTP turn tokens bind assistant/authoring calls to one TurnEffects record. Dynamic connection refreshes typed Bridge bindings; local asset installation refreshes the running registry without forging grants/review. OS/service identity enforces access. Purpose-specific retrieval and validation helper contracts remain bounded; they are not general Agent tool profiles.
+The Bridge remains the execution plane and Registry remains distribution/control plane. LocalPolicy is a compatibility identity adapter, not an application permission engine. ToolAccess provides shared catalog/describe/invoke/install-MCP surfaces to Gateway and native MCP adapters. Native HTTP turn tokens bind assistant/authoring calls to one TurnEffects record. Dynamic connection refreshes typed Bridge bindings; local asset installation refreshes the running registry without forging grants/review. Actual OS/service errors determine execution failures; no separate IT authorization system exists in AEP. Purpose-specific retrieval and validation helper contracts remain bounded; they are not general Agent tool profiles.
 
 The scoped design and regression matrix are in
 `phases/IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md`; historical approval requirements
