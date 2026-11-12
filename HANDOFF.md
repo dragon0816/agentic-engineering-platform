@@ -66,8 +66,14 @@ Task4 completed (see latest Git/ledger): Agent MCP connection through existing
 save/connect, SAME conversation fixture installs/catalogs/invokes, stdio+HTTP,
 schema refresh/disable and real MCP error classification.34focused passed7.07s;
 whole-tree mypy1102files passed. No real external installation or network call.
-Task5: direct
-local Skill/Workflow installs and honest provenance/quality, no cards. Task6:
+Task5 completed (see latest ledger/Git): direct local Skill/Workflow run/install,
+Gateway Skill draft/install and live refresh; no fake review/grants or new cards.
+Unverified installs remain draft, verified become validated; business review stays
+pending.435authoring/effect/dispatch regressions passed133.90s, then50focused
+passed33.17s after final metadata tightening. Shared Bridge success receipts cover
+generic/Workflow aliases; read/failure outcomes never memoize. Mypy541focused files
+passed; full feature checks still pending. Historical explicit cards are not replayed.
+Task6:
 remove legacy mail/folder/command/backend gating, direct send distinct from draft,
 retain external technical errors and model/data rules. Task7: regression/docs/
 Knowledge and user-flow acceptance. Task8: final freeze/checks/fresh review/handoff.
@@ -80,8 +86,10 @@ card-only legacy code and must be addressed with Task6, not claimed available no
 
 ## State and next action
 
-Task1/2/3 are committed; Task4 is ready for its coherent commit. No process is
-active. Next: commit Task4, then Task5 red tests and implementation. Continue autonomously
+Task1–4 are committed (Task3 ae61a7a1, Task4 536eda3c). Task5 is ready for its
+coherent commit. No process is active. Task6 red tests exist uncommitted in
+test_it_tool_boundaries.py (4failed); do not include them in Task5 commit. Next:
+commit Task5, then Task6 implementation. Continue autonomously
 through all approved tasks; do not finish at this partial checkpoint.
 
 Original checkout main097b2521, origin/main267c75e4 and delivered C4C branch/package

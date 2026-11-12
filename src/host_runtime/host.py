@@ -2196,6 +2196,16 @@ def _use_now(
             policy.add(grant)
 
 
+def _use_skill_now(gateway: Gateway, manifest: SkillManifest) -> None:
+    registry = gateway.router.commands.skills
+    identity = manifest.metadata.identity
+    for previous in registry.manifests():
+        prior = previous.metadata.identity
+        if (prior.namespace, prior.name) == (identity.namespace, identity.name):
+            registry.remove(prior)
+    registry.register(manifest)
+
+
 def model_condenser(gateway: Any) -> Callable[[str], list[str]]:
     """One bounded structured call that condenses a run's text preview into
     at most five key results (task result summaries, owner 2026-10-25), on
@@ -2297,6 +2307,7 @@ def build_runtime(
             () if checked.coding is None else tuple(checked.coding.workspace_roots)
         ),
         on_installed=lambda manifest, grants: _use_now(gateway, manifest, grants),
+        on_skill_installed=lambda manifest: _use_skill_now(gateway, manifest),
     )
     mcp = McpHub(
         place.workspace_root,

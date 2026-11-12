@@ -100,12 +100,12 @@ tests/test_external_authoring.py, draft/install and live-refresh fixture tests.
 Interfaces: retain normal check/submit/install APIs; install directly with honest
 local provenance and separate unverified quality status, not a forged review.
 
-- [ ] Red: valid local asset installs and is available to the same session with
+- [x] Red: valid local asset installs and is available to the same session with
   zero pending approval; broken schema/dependency/version conflicts fail honestly.
   Historical pending cards are not approved/replayed or silently counted as done.
-- [ ] Green: remove local installation/business-review gates; preserve actual
+- [x] Green: remove local installation/business-review gates; preserve actual
   verification evidence, ownership/version and shared publishing distinction.
-- [ ] Run authoring/install/continuation/idempotence regressions; commit.
+- [x] Run authoring/install/continuation/idempotence regressions; commit.
 
 ## Task6: mailbox and native execution without AEP permission boundaries
 

@@ -41,12 +41,28 @@ def effect_key(name: str, arguments: Any) -> str:
     return hashlib.sha256(f"{name}\0{canonical}".encode()).hexdigest()
 
 
+def workflow_effect_key(actor: str, manifest: dict[str, Any], arguments: Any) -> str:
+    """Install/review provenance changes do not repeat an identical procedure."""
+    body = dict(manifest)
+    identity = body.pop("metadata")["identity"]
+    return effect_key(
+        "workflow-run",
+        {
+            "workflow": identity,
+            "manifest": body,
+            "arguments": arguments or {},
+            "actor": actor,
+        },
+    )
+
+
 @dataclass
 class TurnEffects:
     """One turn's succeeded side effects and its counts (telemetry: counts only)."""
 
     calls: dict[str, Any] = field(default_factory=dict)
     workflow_runs: dict[str, Any] = field(default_factory=dict)
+    capability_calls: dict[str, Any] = field(default_factory=dict)
     recorded: int = 0
     replayed: int = 0
 
@@ -73,6 +89,17 @@ class TurnEffects:
         if key not in self.workflow_runs:
             self.workflow_runs[key] = snapshot
             self.recorded += 1
+
+    def replay_capability(self, key: str) -> Any | None:
+        found = self.capability_calls.get(key)
+        if found is not None:
+            self.replayed += 1
+        return found
+
+    def record_capability(self, key: str, result: Any) -> None:
+        # Logical tool/run wrappers count the effect. This receipt also protects
+        # nested Workflow steps and calls made through a different Bridge wrapper.
+        self.capability_calls.setdefault(key, result)
 
     def counts(self) -> dict[str, int]:
         return {"side_effects_recorded": self.recorded, "side_effects_replayed": self.replayed}

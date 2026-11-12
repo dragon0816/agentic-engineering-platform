@@ -111,28 +111,20 @@ def test_a_workflow_is_checked_submitted_and_its_read_only_run_returns_codes_onl
     assert "SECRET-2026-09" not in json.dumps(ran)
 
 
-def test_a_writing_run_and_an_install_wait_for_the_owner_and_report_without_data(
+def test_a_writing_run_and_install_execute_directly_and_report_without_data(
     tmp_path: Path,
 ) -> None:
     authoring, recorder = desk(tmp_path)
     submitted = authoring.submit_workflow(workflow("write-it"), "Echo")
     candidate_id = str(submitted["candidate_id"])
     asked = authoring.run_workflow(candidate_id, {"month": "PRIVATE-08"})
-    assert asked["ran"] is False and recorder.calls == []
-    approval_id = str(asked["approval_id"])
-    assert authoring.status(approval_id)["status"] == "pending"
-    decided = authoring.chat.decide(approval_id, "owner", True)  # the owner's button
-    assert decided.source == "external:codex" and recorder.calls == ["PRIVATE-08"]
-    view = authoring.status(approval_id)
-    assert view["status"] == "approved" and _obj(view["run"])["status"] == "succeeded"
-    assert "PRIVATE-08" not in json.dumps(view)
+    assert asked["ran"] is True and recorder.calls == ["PRIVATE-08"]
+    assert _obj(asked["run"])["status"] == "succeeded"
+    assert "PRIVATE-08" not in json.dumps(asked)
     install = authoring.install_workflow(candidate_id)
-    assert not (tmp_path / "workflows").exists()
-    authoring.chat.decide(str(install["approval_id"]), "owner", True)
-    assert (
-        authoring.status(str(install["approval_id"]))["installed_as"]
-        == "engineering/echo-month@1.0.0"
-    )
+    assert install["installed_as"] == "engineering/echo-month@1.0.0"
+    assert len(list((tmp_path / "workflows").glob("*.json"))) == 1
+    assert authoring.chat.approvals("owner") == []
     listed = authoring.list()
     assert _items(listed["workflows"])[0]["status"] == "installed"
 
@@ -148,7 +140,7 @@ def test_another_actors_approvals_and_candidates_are_unknown(tmp_path: Path) -> 
 # -- Skills ---------------------------------------------------------------------
 
 
-def test_a_skill_installs_only_after_approval_and_sets_earlier_versions_aside(
+def test_a_skill_installs_directly_and_sets_earlier_versions_aside(
     tmp_path: Path,
 ) -> None:
     authoring, _ = desk(tmp_path)
@@ -156,18 +148,15 @@ def test_a_skill_installs_only_after_approval_and_sets_earlier_versions_aside(
     submitted = authoring.submit_skill(skill(), "Echo helper")
     assert submitted["ok"] and submitted["skill"] == "engineering/echo-helper@1.0.1"
     asked = authoring.install_skill(str(submitted["candidate_id"]))
-    assert not (tmp_path / "skills" / "engineering__echo-helper__1.0.1.json").exists()
-    pending = authoring.chat.approval(str(asked["approval_id"]), "owner")
-    assert pending.kind == "install_skill" and "alias echo" in pending.summary
-    authoring.chat.decide(pending.approval_id, "owner", True)
+    assert asked["ok"] and authoring.chat.approvals("owner") == []
     written = tmp_path / "skills" / "engineering__echo-helper__1.0.1.json"
     data = json.loads(written.read_text(encoding="utf-8"))
-    assert data["metadata"]["lifecycle"] == "published"
+    assert data["metadata"]["lifecycle"] == "draft"
     assert data["metadata"]["owner"] == {"type": "user", "id": "owner"}
-    assert data["metadata"]["business_approval"]["reviewer"] == "owner"
+    assert data["metadata"]["business_approval"]["reviewer"] is None
     assert sorted(p.name for p in (tmp_path / "skills").glob("*.json")) == [written.name]
     assert (tmp_path / "skills" / "disabled" / "engineering__echo-helper__1.0.0.json").exists()
-    assert authoring.status(pending.approval_id)["installed_as"] == "engineering/echo-helper@1.0.1"
+    assert asked["installed_as"] == "engineering/echo-helper@1.0.1"
 
 
 @pytest.mark.parametrize(
@@ -214,9 +203,9 @@ def test_a_skill_changed_after_its_request_is_not_installed(tmp_path: Path) -> N
     authoring, _ = desk(tmp_path)
     submitted = authoring.submit_skill(skill(), "Echo")
     candidate_id = str(submitted["candidate_id"])
-    asked = authoring.install_skill(candidate_id)
+    asked = authoring.chat.request_skill_install("owner", candidate_id)
     authoring.submit_skill(skill(instructions="Different now."), "Echo", candidate_id)
-    decided = authoring.chat.decide(str(asked["approval_id"]), "owner", True)
+    decided = authoring.chat.decide(asked.approval_id, "owner", True)
     assert decided.status == "failed"
     assert not list((tmp_path / "skills").glob("*.json"))
 
@@ -350,7 +339,7 @@ def test_the_catalog_names_installed_assets_without_what_people_wrote_about_them
     secret = dict(workflow("read-it"), description="Station Taipei-7 customer ACME cost report")
     submitted = authoring.submit_workflow(secret, "Echo")
     asked = authoring.install_workflow(str(submitted["candidate_id"]))
-    authoring.chat.decide(str(asked["approval_id"]), "owner", True)
+    assert asked["ok"]
     installed_skill(tmp_path / "skills", "ncc", "ncc", "owner", "1.0.0")
     catalog = authoring.catalog()
     assert catalog["workflows"] == [
@@ -369,9 +358,7 @@ def test_an_installed_unchanged_workflow_runs_directly_for_an_external_agent(
     authoring, recorder = desk(tmp_path)
     submitted = authoring.submit_workflow(workflow("write-it"), "Echo")
     candidate_id = str(submitted["candidate_id"])
-    authoring.chat.decide(
-        str(authoring.install_workflow(candidate_id)["approval_id"]), "owner", True
-    )
+    assert authoring.install_workflow(candidate_id)["ok"]
     ran = authoring.run_workflow(candidate_id, {"month": "SECRET-11"})
     assert ran["ran"] is True and recorder.calls == ["SECRET-11"]
     assert "SECRET-11" not in json.dumps(ran)

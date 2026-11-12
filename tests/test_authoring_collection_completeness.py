@@ -14,7 +14,7 @@ from common.assets import ExecutionDependencies
 from common.base import Contract
 from common.execution import RequestContext
 from host_runtime.authoring_task import AuthoringTask, Requirement, TaskStore
-from host_runtime.chat_authoring import ChatAuthoring, ChatAuthoringError, ChatCandidate, digest
+from host_runtime.chat_authoring import ChatAuthoring, ChatCandidate, digest
 from integrations.web_script import ScriptMode, ScriptRunner, WebAction, WebScript
 
 
@@ -96,7 +96,7 @@ def _draft(
     return item
 
 
-def test_dropping_pagination_stays_runnable_but_cannot_verify_or_install(tmp_path: Path) -> None:
+def test_dropping_pagination_stays_runnable_and_installs_only_as_unverified(tmp_path: Path) -> None:
     chat = _studio(tmp_path)
     original = _draft(chat, _raw())
     assert chat.execute("owner", original, {}, "owner-full-trial")["verified"] is True
@@ -107,8 +107,10 @@ def test_dropping_pagination_stays_runnable_but_cannot_verify_or_install(tmp_pat
     result = chat.execute("owner", partial, {}, "owner-partial-trial")
     assert result["status"] == "succeeded" and result["verified"] is False
     current = chat.candidate(partial.candidate_id, "owner")
-    with pytest.raises(ChatAuthoringError, match="authoring_coverage_incomplete"):
-        chat.install(current, "owner", "explicit-owner-install")
+    installed = chat.install(current, "owner")
+    assert installed["verified"] is False
+    assert isinstance(installed["quality"], dict)
+    assert installed["quality"]["coverage_complete"] is False
 
 
 @pytest.mark.parametrize(

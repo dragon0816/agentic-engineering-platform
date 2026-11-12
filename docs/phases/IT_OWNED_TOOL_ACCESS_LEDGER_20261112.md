@@ -130,3 +130,40 @@ No real install/network/mail was used; HTTP fixture listens only on loopback.
 
 Next Task5: direct local asset install with honest unverified quality/provenance,
 no approval cards; preserve central publishing rules and historical cards.
+
+## Task5 — direct local asset installation and truthful receipts
+
+Normal Gateway/authoring MCP run/install paths execute directly. Added Gateway
+Skill draft/install tools and live procedure refresh. Local installations retain
+pending business review, actual candidate/digest provenance and draft/validated
+quality; an Install press or reference string is not business acceptance. No new
+grant file or approval card. Old explicit request/decision APIs remain readable
+and tested as history; no pending historical action is automatically decided.
+Contract/dependency/name/version checks remain; unverified quality is visible,
+not fabricated and not a local-install admission gate. Completion/coverage still
+requires actual verification; dropping pagination is never verified by installing.
+
+New direct execution exposed two real duplication gaps. Added run receipts shared
+with Gateway (installation metadata does not repeat the procedure), plus Bridge
+success-only normalized capability receipts shared across wrappers of the same
+registry. Actual handler invocation is false on replay, warnings identify it;
+failures/read calls are not memoized. Shared registry write lock protects receipt
+check/execution/record across Bridge wrappers. No caller may reset a successful
+receipt by reconnecting or installing in the same turn.
+
+Evidence: task5-red4failed (missing direct semantics), live Skill refresh red,
+repeat-run and generic-then-Workflow-write reds (actual duplicate handler calls),
+invented-review-reference red (false approved metadata). New local tests passed;
+task5-final.xml/log435passed133.90s across authoring/repair/input continuity/
+pagination/preflight/history/revision/Knowledge isolation/effects/dispatch.
+That broad run preceded the final metadata tightening; final provenance/related
+tests task5-review-provenance.xml/log50passed33.17s. Earlier diagnostic run had
+7 stale policy expectations/428passed; migrated only approval-as-admission
+assertions, preserving stronger input, original-file, coverage and no-egress
+checks. That diagnostic overlapped later edits and is not final acceptance.
+Task5 focused mypy541files and Ruff passed before final metadata tightening;
+final whole-feature static/full/build checks remain mandatory in Task8.
+
+Task6 red (uncommitted test_it_tool_boundaries.py):4fail confirms legacy folder/
+sender/date hiding, missing body continuation metadata, mode switches/cards and
+generic file folder restriction. This red file is excluded from the Task5 commit.

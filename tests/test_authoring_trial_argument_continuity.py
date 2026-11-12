@@ -162,7 +162,7 @@ def test_approved_failure_continuation_cannot_replace_qa_inputs_with_defaults(
         )
         model = Capturing(
             *responses,
-            {"text": "The QA trial awaits approval."},
+            {"text": "The QA trial failed."},
             {"text": "The QA trial remains unverified."},
         )
         runtime.agent.gateway.router.model = model
@@ -179,7 +179,7 @@ def test_approved_failure_continuation_cannot_replace_qa_inputs_with_defaults(
 
         assert calls == (
             ["QA-report", "patched-step" if supplied == "patched" else "QA-report"]
-            if entry == "card" and supplied != "conflicting"
+            if supplied != "conflicting"
             else ["QA-report"]
         )
         pending = [
@@ -188,7 +188,7 @@ def test_approved_failure_continuation_cannot_replace_qa_inputs_with_defaults(
             if a.kind == "run" and a.candidate_id == item.candidate_id
         ]
         if supplied != "conflicting" and entry == "approval":
-            assert len(pending) == 1 and pending[0].arguments == approved
+            assert pending == []  # continuation uses the original actual trial inputs
         elif supplied == "conflicting":
             assert all(a.arguments == approved for a in pending)
             assert any(

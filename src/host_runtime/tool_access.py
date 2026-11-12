@@ -276,6 +276,7 @@ class ToolAccess:
                 "execution_status": result.status,
                 "result": result.data,
                 "handler_invoked": result.handler_invoked,
+                "replayed": "capability_replayed" in result.warnings,
             },
             failure=result.failure,
         )

@@ -344,7 +344,7 @@ def test_approval_is_model_origin_with_one_trial_grant_and_no_global_grant_chang
         assert "preflight_only" not in chat.external_view(result)
 
 
-def test_technical_authorization_denial_is_not_bypassed_by_owner_confirmation(
+def test_legacy_preflight_does_not_need_synthetic_tool_grants(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -354,9 +354,9 @@ def test_technical_authorization_denial_is_not_bypassed_by_owner_confirmation(
         before = list(browser.visited)
         monkeypatch.setattr(chat, "grants", lambda *_args: ())
         result = chat.decide(asked.data["approval_id"], runtime.actor, True)
-        assert result.result["failure"] == "permission_denied"
-        assert result.result["handler_invoked"] is False and browser.visited == before
-        assert claim_continuation(chat, runtime.actor, session, result.approval_id) is None
+        assert result.result["failure"] is None
+        assert result.result["handler_invoked"] is True and browser.visited != before
+        assert claim_continuation(chat, runtime.actor, session, result.approval_id) is not None
 
 
 def test_redirect_scope_stops_before_other_actions_and_does_not_leak_to_normal_calls(

@@ -1,5 +1,6 @@
 """Explicit host-installed handlers and policy, distinct from Platform Registry assets."""
 
+import threading
 from dataclasses import dataclass
 from typing import Literal, Protocol
 
@@ -85,6 +86,7 @@ class InstalledCapabilities:
     def __init__(self) -> None:
         self._bindings: dict[tuple[str, str, str], InstalledCapability] = {}
         self._offered: dict[tuple[str, str, str], CapabilitySpec] = {}
+        self.exclusive = threading.RLock()
 
     def offer(self, spec: CapabilitySpec) -> None:
         """Advertise a known integration requiring setup, without a handler."""

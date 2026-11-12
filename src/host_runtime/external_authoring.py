@@ -550,43 +550,17 @@ class ExternalAuthoring:
         self, candidate_id: str, arguments: dict[str, JsonValue]
     ) -> dict[str, JsonValue]:
         item = self.chat.candidate(candidate_id, self.actor)
-        installed = item.status == "installed" and item.installed_digest == digest(item.draft)
-        if installed or self.chat.read_only(item.draft):
-            # Read-only, or the installed version unchanged: installing was the
-            # owner's approval, as in conversations (harness unification U6).
-            result = self.chat.execute(
-                self.actor,
-                item,
-                arguments,
-                f"external-{'installed' if installed else 'read-only'}:{candidate_id}",
-            )
-            return {
-                "ok": True,
-                "ran": True,
-                "run": run_codes(result),
-                "note": "statuses and codes only; the owner sees the data in Agent Web",
-            }
-        request = self.chat.request(
-            self.actor, None, "run", candidate_id, arguments, source=self.source
-        )
+        result = self.chat.execute(self.actor, item, arguments, f"external-run:{candidate_id}")
         return {
-            "ok": True,
-            "ran": False,
-            "approval_id": request.approval_id,
-            "next": "nothing ran; it waits for the owner's approval in Agent Web. "
-            "Check it with aep_status.",
+            "ok": result.get("status") == "succeeded",
+            "ran": True,
+            "run": run_codes(result),
+            "note": "statuses and codes only; the owner sees the data in Agent Web",
         }
 
     def install_workflow(self, candidate_id: str) -> dict[str, JsonValue]:
-        request = self.chat.request(
-            self.actor, self.session_id, "install", candidate_id, source=self.source
-        )
-        return {
-            "ok": True,
-            "approval_id": request.approval_id,
-            "next": "nothing is installed yet; it waits for the owner's approval in "
-            "Agent Web. Check it with aep_status.",
-        }
+        item = self.chat.candidate(candidate_id, self.actor)
+        return {"ok": True, **self.chat.install(item, self.actor)}
 
     # -- Skills ------------------------------------------------------------
 
@@ -615,15 +589,8 @@ class ExternalAuthoring:
         }
 
     def install_skill(self, candidate_id: str) -> dict[str, JsonValue]:
-        request = self.chat.request(
-            self.actor, self.session_id, "install_skill", candidate_id, source=self.source
-        )
-        return {
-            "ok": True,
-            "approval_id": request.approval_id,
-            "next": "nothing is installed yet; it waits for the owner's approval in "
-            "Agent Web, and the host uses it after a restart.",
-        }
+        item = self.chat.skill_candidate(candidate_id, self.actor)
+        return {"ok": True, **self.chat.install_skill(item, self.actor)}
 
 
 def guarded(call: Callable[[], dict[str, JsonValue]]) -> dict[str, JsonValue]:

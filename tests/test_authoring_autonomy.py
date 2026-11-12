@@ -6,7 +6,6 @@ from test_chat_authoring import call, context, studio, workflow
 
 from agent.gateway import GatewayConversationResult, HostToolOutcome
 from host_runtime.authoring_task import Requirement
-from host_runtime.chat_authoring import ChatAuthoringError
 
 
 def test_resident_draft_cannot_skip_the_requirement_plan(tmp_path: Path) -> None:
@@ -23,7 +22,7 @@ def test_resident_draft_cannot_skip_the_requirement_plan(tmp_path: Path) -> None
     assert outcome.failure.code == "authoring_plan_required"
 
 
-def test_install_requires_successful_current_digest_trial(tmp_path: Path) -> None:
+def test_verified_status_requires_successful_current_digest_trial(tmp_path: Path) -> None:
     chat, _ = studio(tmp_path)
     chat.tasks.plan(
         "owner",
@@ -48,16 +47,16 @@ def test_install_requires_successful_current_digest_trial(tmp_path: Path) -> Non
     raw["checks"] = [{"check_id": "echoed", "step_index": 0, "kind": "data_nonempty"}]
     item, problems = chat.draft("owner", "session-1", "Echo", raw)
     assert not problems and item is not None
-    with pytest.raises(ChatAuthoringError, match="authoring_trial_required"):
-        chat.install(item, "owner", "approved-install")
+    assert chat.readiness(item)["verified"] is False
     assert (
         chat.execute("owner", item, {"month": "2026-11"}, "approved-run")["status"] == "succeeded"
     )
     current = chat.candidate(item.candidate_id, "owner")
-    assert chat.install(current, "owner", "approved-install")["installed_as"]
+    installed = chat.install(current, "owner")
+    assert installed["installed_as"] and installed["verified"] is True
 
 
-def test_incomplete_prototype_can_be_saved_and_tried_but_cannot_be_installed(
+def test_incomplete_prototype_installs_with_explicit_unverified_quality(
     tmp_path: Path,
 ) -> None:
     chat, _ = studio(tmp_path)
@@ -91,8 +90,11 @@ def test_incomplete_prototype_can_be_saved_and_tried_but_cannot_be_installed(
     assert current.authoring_task is not None
     assert current.authoring_task.verified_digest is None
     assert current.authoring_task.repair_attempts == 1
-    with pytest.raises(ChatAuthoringError, match="authoring_coverage_incomplete"):
-        chat.install(current, "owner", "approved-install")
+    installed = chat.install(current, "owner")
+    assert installed["installed_as"] and installed["verified"] is False
+    assert isinstance(installed["quality"], dict)
+    assert installed["quality"]["coverage_complete"] is False
+    assert installed["quality"]["coverage_problems"]
 
 
 def test_observed_sop_creates_unfinished_task_before_model_answers(tmp_path: Path) -> None:

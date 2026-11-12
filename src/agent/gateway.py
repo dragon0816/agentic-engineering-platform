@@ -41,7 +41,13 @@ from agent.harness_handoff import capped, harness_reply, with_unverified_note
 from agent.routing import RequestRouter, RoutingOutcome
 from agent.skills import CommandBinding, SkillManifest
 from agent.tool_recovery import RECOVERY_GUIDANCE, ToolRecovery, recovery_for
-from agent.turn_effects import REPLAY_INSTRUCTION, REPLAY_NOTE, effect_key, turn_scope
+from agent.turn_effects import (
+    REPLAY_INSTRUCTION,
+    REPLAY_NOTE,
+    effect_key,
+    turn_scope,
+    workflow_effect_key,
+)
 from agent.turn_effects import current as current_effects
 from capabilities.runtime import CapabilityInvocation
 from common.action_cards import CARD_KEY
@@ -377,6 +383,8 @@ class HostTool:
     # Dispatch wrappers resolve the actual target, rather than pretending every
     # invocation has the same side effect or identifying it by a public alias.
     effect: Callable[[RequestContext, dict[str, JsonValue]], ToolEffect | None] | None = None
+    # Workflow wrappers record their run themselves, including cross-entry retries.
+    records_effect: bool = False
 
 
 #: Host tools added for one turn only (BI benchmarks and the skill AI,
@@ -1416,8 +1424,12 @@ class Gateway:
                         effects.record_call(
                             effect_id,
                             item,
-                            counted=bindings.get(call.name) is None
-                            or bindings[call.name].kind != "workflow",
+                            counted=not item.replayed and (
+                                not host[call.name].records_effect
+                                if call.name in host
+                                else bindings.get(call.name) is None
+                                or bindings[call.name].kind != "workflow"
+                            ),
                         )
                 evidence.append(item)
                 if _tool_succeeded(item):
@@ -1696,7 +1708,12 @@ class Gateway:
                 name=call.name,
                 failure=Failure(code="host_tool_failed", message=type(error).__name__),
             )
-        return ConversationToolExecution(call_id=call.call_id, name=call.name, host=outcome)
+        return ConversationToolExecution(
+            call_id=call.call_id,
+            name=call.name,
+            host=outcome,
+            replayed=isinstance(outcome.data, dict) and outcome.data.get("replayed") is True,
+        )
 
     async def _execute_conversation_tool(
         self,
@@ -1819,24 +1836,12 @@ class Gateway:
                     arguments=invocation_arguments,
                 )
             )
-            if (
-                result.failure is not None
-                and result.failure.code == "approval_required"
-                and self.capability_approval is not None
-            ):
-                pending = await asyncio.to_thread(
-                    self.capability_approval, context, binding.target, invocation_arguments
-                )
-                return ConversationToolExecution(
-                    call_id=call.call_id,
-                    name=call.name,
-                    host=HostToolOutcome(status="awaiting_approval", data=pending),
-                )
             return ConversationToolExecution(
                 call_id=call.call_id,
                 name=call.name,
                 decision=decision,
                 capability=result,
+                replayed="capability_replayed" in result.warnings,
             )
         arguments: dict[str, JsonValue] = dict(call.arguments)
         manifest = self.engine.workflows.get(binding.target)
@@ -1967,17 +1972,8 @@ class Gateway:
         effects = current_effects() if workflow_idempotency_key is None else None
         manifest = self.engine.workflows.get(workflow) if effects is not None else None
         key = (
-            effect_key(
-                "workflow-run",
-                {
-                    "workflow": workflow.model_dump(mode="json"),
-                    # A revised draft with the same identity is another run.
-                    "manifest": manifest.model_dump(mode="json") if manifest else None,
-                    "arguments": arguments or {},
-                    "actor": request.actor,
-                },
-            )
-            if effects is not None
+            workflow_effect_key(request.actor, manifest.model_dump(mode="json"), arguments)
+            if effects is not None and manifest is not None
             else ""
         )
         earlier = effects.replay_run(key) if effects is not None else None

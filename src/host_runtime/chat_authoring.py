@@ -39,8 +39,10 @@ from typing import Any, Literal, cast
 
 from pydantic import Field, JsonValue, ValidationError
 
-from agent.gateway import GatewayConversationResult, HostTool, HostToolOutcome
+from agent.gateway import GatewayConversationResult, HostTool, HostToolOutcome, ToolEffect
 from agent.skills import SkillManifest
+from agent.turn_effects import current as current_effects
+from agent.turn_effects import workflow_effect_key
 from capabilities.coding_change.workspaces import containing_root, workspace_note
 from capabilities.runtime import (
     CapabilityGrant,
@@ -618,6 +620,7 @@ class ChatAuthoring:
         skills_dir: Path | None = None,
         coding_workspace_roots: tuple[str, ...] = (),
         on_installed: Callable[[WorkflowManifest, tuple[CapabilityGrant, ...]], None] | None = None,
+        on_skill_installed: Callable[[SkillManifest], None] | None = None,
         teams: Callable[[str], TeamMembership] | None = None,
         autonomy_required: bool = False,
         attachments: AttachmentStore | None = None,
@@ -632,6 +635,7 @@ class ChatAuthoring:
         # (owner 2026-10-08: a Workflow installed from the draft list said
         # workflow_not_installed when run from the Capabilities page).
         self.on_installed = on_installed
+        self.on_skill_installed = on_skill_installed
         # (installed Workflow, the model's run values) -> its run form offer,
         # set by the host; None keeps the plain run (owner 2026-10-15).
         self.form_offer: (
@@ -1300,7 +1304,7 @@ class ChatAuthoring:
         bridge = self._bridge()
         trial = BridgeExecutor(
             bridge.installed,
-            LocalPolicy(self.grants(manifest, actor, ref)),
+            LocalPolicy(),
             timeout_seconds=bridge.timeout_seconds,
         )
         return WorkflowEngine(workflows, trial, settings_provider=lambda _manifest: {})
@@ -1464,6 +1468,18 @@ class ChatAuthoring:
             arguments = validate_run_parameters(candidate.draft, arguments)
         except WorkflowParameterError as error:
             raise ChatAuthoringError("workflow_input_invalid", str(error)) from None
+        effects = current_effects()
+        effect_id = workflow_effect_key(actor, candidate.draft.model_dump(mode="json"), arguments)
+        earlier = effects.replay_run(effect_id) if effects is not None else None
+        if earlier is not None:
+            return {
+                "candidate_id": candidate.candidate_id,
+                "digest": digest(candidate.draft),
+                "workflow": _key(candidate.draft.metadata.identity),
+                **summarize(cast(WorkflowRunSnapshot, earlier)),
+                **self.readiness(self.candidate(candidate.candidate_id, actor)),
+                "replayed": True,
+            }
         candidate = self.begin_trial(actor, candidate, arguments)
         self.prepare_workspaces(candidate.draft)
         engine = self._engine(candidate.draft, actor, ref)
@@ -1477,6 +1493,8 @@ class ChatAuthoring:
             )
         )
         self.record_trial(actor, candidate, snapshot)
+        if effects is not None and snapshot.run.status == "succeeded":
+            effects.record_run(effect_id, snapshot)
         return {
             "candidate_id": candidate.candidate_id,
             "digest": digest(candidate.draft),
@@ -1733,7 +1751,7 @@ class ChatAuthoring:
         )
 
     def install(
-        self, candidate: ChatCandidate, actor: str, approval_id: str
+        self, candidate: ChatCandidate, actor: str, approval_id: str | None = None
     ) -> dict[str, JsonValue]:
         with self._candidate_lock(candidate.candidate_id):
             current = self.candidate(candidate.candidate_id, actor)
@@ -1742,19 +1760,14 @@ class ChatAuthoring:
             return self._install(current, actor, approval_id)
 
     def _install(
-        self, candidate: ChatCandidate, actor: str, approval_id: str
+        self, candidate: ChatCandidate, actor: str, approval_id: str | None
     ) -> dict[str, JsonValue]:
-        active = self.tasks.load(actor, candidate.session_id) if candidate.session_id else None
-        task = active or candidate.authoring_task
-        if task is not None:
-            problems = coverage_problems(task, candidate.draft)
-            if problems:
-                raise ChatAuthoringError("authoring_coverage_incomplete", "; ".join(problems))
-            if task.verified_digest != digest(candidate.draft):
-                raise ChatAuthoringError(
-                    "authoring_trial_required",
-                    "Run this exact candidate successfully before installing it",
-                )
+        # Quality evidence is reported, never fabricated or used as tool admission.
+        readiness = self.readiness(candidate)
+        verified = readiness.get("verified") is True
+        manifest, problems = self._validate_manifest({}, candidate.draft.model_dump(mode="json"))
+        if manifest is None or problems:
+            raise ChatAuthoringError("workflow_no_longer_valid", "; ".join(problems))
         identity = candidate.draft.metadata.identity
         name = f"{identity.namespace}__{identity.name}__{identity.version}.json"
         target = self.workflows_dir / name
@@ -1763,12 +1776,10 @@ class ChatAuthoring:
         metadata = candidate.draft.metadata.model_dump(mode="json")
         metadata.update(
             {
-                "lifecycle": "published",
-                "business_approval": {
-                    "status": "approved",
-                    "reviewer": actor,
-                    "evidence": f"chat-approval:{approval_id}",
-                },
+                "lifecycle": "validated" if verified else "draft",
+                # Installing is availability, including the legacy Install button;
+                # neither a reference string nor that button proves business review.
+                "business_approval": {"status": "pending"},
                 "validation_refs": [
                     f"chat-candidate:{candidate.candidate_id}:{digest(candidate.draft)}"
                 ],
@@ -1785,8 +1796,6 @@ class ChatAuthoring:
                 json.dumps(published.model_dump(mode="json"), ensure_ascii=False, indent=2) + "\n"
             ).encode("utf-8"),
         )
-        ref = f"chat-approval:{approval_id}"
-        self._add_grants(published, actor, ref)
         self._save_candidate(
             candidate.model_copy(
                 update={
@@ -1798,11 +1807,13 @@ class ChatAuthoring:
         )
         live = self.on_installed is not None
         if self.on_installed is not None:
-            self.on_installed(published, self.grants(published, actor, ref))
+            self.on_installed(published, ())
         return {
             "installed_as": _key(identity),
             "file": target.name,
             "digest": digest(candidate.draft),
+            "verified": verified,
+            "quality": readiness or {"verified": False, "reason": "no_trial_evidence"},
             "note": "It runs now, in conversations and from the Capabilities page."
             if live
             else "Reuse it from a conversation now; other channels see it after a restart.",
@@ -2120,7 +2131,16 @@ class ChatAuthoring:
         )
 
     def install_skill(
-        self, candidate: SkillCandidate, actor: str, approval_id: str
+        self, candidate: SkillCandidate, actor: str, approval_id: str | None = None
+    ) -> dict[str, JsonValue]:
+        with self._candidate_lock(candidate.candidate_id):
+            current = self.skill_candidate(candidate.candidate_id, actor)
+            if skill_digest(current.draft) != skill_digest(candidate.draft):
+                raise ChatAuthoringError("authoring_digest_stale")
+            return self._install_skill(current, actor, approval_id)
+
+    def _install_skill(
+        self, candidate: SkillCandidate, actor: str, approval_id: str | None
     ) -> dict[str, JsonValue]:
         """Write the Skill published, and set the actor's earlier versions of
         the name aside: one installed version per name."""
@@ -2150,12 +2170,8 @@ class ChatAuthoring:
         metadata = candidate.draft.metadata.model_dump(mode="json")
         metadata.update(
             {
-                "lifecycle": "published",
-                "business_approval": {
-                    "status": "approved",
-                    "reviewer": actor,
-                    "evidence": f"chat-approval:{approval_id}",
-                },
+                "lifecycle": "draft",
+                "business_approval": {"status": "pending"},
                 "validation_refs": [
                     f"skill-candidate:{candidate.candidate_id}:{skill_digest(candidate.draft)}"
                 ],
@@ -2185,12 +2201,17 @@ class ChatAuthoring:
                 }
             )
         )
+        if self.on_skill_installed is not None:
+            self.on_skill_installed(published)
         return {
             "installed_as": _key(identity),
             "file": target.name,
             "digest": skill_digest(candidate.draft),
             "set_aside": list(set_aside),
-            "note": "The host uses it after a restart.",
+            "verified": False,
+            "note": "Available in this session."
+            if self.on_skill_installed
+            else "Installed locally; this adapter has no live Skill registry.",
         }
 
     # -- the owner's draft list in Agent Web (owner 2026-10-08) -------------
@@ -2532,46 +2553,17 @@ class ChatAuthoring:
                             context.actor, item, arguments, f"chat-installed:{item.candidate_id}"
                         )
                     )
-                if self.read_only(item.draft):
-                    return _trial_outcome(
-                        self.execute(
-                            context.actor, item, arguments, f"chat-read-only:{item.candidate_id}"
-                        )
-                    )
-                request = self.request(
-                    context.actor, context.session_id, "run", item.candidate_id, arguments
-                )
-                return HostToolOutcome(
-                    status="awaiting_approval",
-                    data={
-                        "approval_id": request.approval_id,
-                        "candidate_id": item.candidate_id,
-                        "digest": digest(item.draft),
-                        "summary": request.summary,
-                        "next": "Nothing ran yet. Tell the person it waits for their approval "
-                        "button; after they approve, the result appears in this conversation.",
-                    },
+                return _trial_outcome(
+                    self.execute(context.actor, item, arguments, f"chat-run:{item.candidate_id}")
                 )
 
             return await run_sync(work)
 
         async def install_tool(context: RequestContext, args: Args) -> HostToolOutcome:
             def work() -> HostToolOutcome:
-                request = self.request(
-                    context.actor,
-                    context.session_id,
-                    "install",
-                    str(args.get("candidate_id") or ""),
-                )
+                candidate = self.candidate(str(args.get("candidate_id") or ""), context.actor)
                 return HostToolOutcome(
-                    status="awaiting_approval",
-                    data={
-                        "approval_id": request.approval_id,
-                        "summary": request.summary,
-                        "next": (
-                            "Nothing is installed yet; it waits for the person's approval button."
-                        ),
-                    },
+                    status="succeeded", data=self.install(candidate, context.actor)
                 )
 
             return await run_sync(work)
@@ -2719,7 +2711,92 @@ class ChatAuthoring:
 
         candidate = {"candidate_id": {"type": "string"}}
         values = {"arguments": {"type": "object", "description": "run values by parameter name"}}
+
+        def run_effect(context: RequestContext, args: Args) -> ToolEffect | None:
+            try:
+                item = self.candidate(str(args.get("candidate_id") or ""), context.actor)
+                arguments = validate_run_parameters(item.draft, _arguments(args))
+            except (ChatAuthoringError, WorkflowParameterError):
+                return None
+            return ToolEffect(
+                workflow_effect_key(context.actor, item.draft.model_dump(mode="json"), arguments),
+                "execute",
+            )
+
+        async def draft_skill_tool(context: RequestContext, args: Args) -> HostToolOutcome:
+            def work() -> HostToolOutcome:
+                raw = args.get("skill")
+                if not isinstance(raw, dict):
+                    return _refused("skill_missing", "Give the Skill as an object")
+                item, problems = self.draft_skill(
+                    context.actor,
+                    str(args.get("title") or ""),
+                    raw,
+                    str(args["candidate_id"]) if args.get("candidate_id") else None,
+                    session_id=context.session_id,
+                )
+                if item is None:
+                    return _refused("skill_invalid", "; ".join(problems))
+                return HostToolOutcome(
+                    status="succeeded",
+                    data={
+                        "candidate_id": item.candidate_id,
+                        "digest": skill_digest(item.draft),
+                        "skill": _key(item.draft.metadata.identity),
+                    },
+                )
+
+            return await run_sync(work)
+
+        async def install_skill_tool(context: RequestContext, args: Args) -> HostToolOutcome:
+            def work() -> HostToolOutcome:
+                item = self.skill_candidate(str(args.get("candidate_id") or ""), context.actor)
+                return HostToolOutcome(
+                    status="succeeded", data=self.install_skill(item, context.actor)
+                )
+
+            return await run_sync(work)
+
         return (
+            HostTool(
+                ModelTool(
+                    name="authoring__draft_skill",
+                    description=(
+                        "Create or revise a local Skill. skill has name, alias, instructions, "
+                        "commands [{name,kind:capability|workflow,target:namespace/name@version}]. "
+                        "Instructions guide the task; commands name installed targets."
+                    ),
+                    input_contract="host.authoring.skill-draft.v1",
+                    input_schema={
+                        "type": "object",
+                        "properties": {
+                            "title": {"type": "string"},
+                            "skill": {"type": "object"},
+                            **candidate,
+                        },
+                        "required": ["skill", "title"],
+                    },
+                ),
+                guarded(draft_skill_tool),
+                side_effect="write",
+            ),
+            HostTool(
+                ModelTool(
+                    name="authoring__install_skill",
+                    description=(
+                        "Install a Skill locally and refresh this session's procedures. "
+                        "No AEP approval card; preserve actual quality/provenance."
+                    ),
+                    input_contract="host.authoring.skill-install.v1",
+                    input_schema={
+                        "type": "object",
+                        "properties": candidate,
+                        "required": ["candidate_id"],
+                    },
+                ),
+                guarded(install_skill_tool),
+                side_effect="write",
+            ),
             HostTool(
                 ModelTool(
                     name="authoring__needs_input",
@@ -2843,8 +2920,7 @@ class ChatAuthoring:
                     name="authoring__run_workflow",
                     description=(
                         "Run a drafted or installed Workflow once with run values. A Workflow "
-                        "whose steps only read runs now and returns its result; otherwise it "
-                        "waits for the person's approval button and nothing runs yet. If a "
+                        "executes now under the actual environment and returns its result. If a "
                         "platform run failed, fix the cause (revise the candidate when its "
                         "steps were wrong) and run it again here; do not redo the work "
                         "outside the Workflow."
@@ -2857,13 +2933,16 @@ class ChatAuthoring:
                     },
                 ),
                 guarded(run_tool),
+                side_effect="execute",
+                effect=run_effect,
+                records_effect=True,
             ),
             HostTool(
                 ModelTool(
                     name="authoring__install_workflow",
                     description=(
-                        "Ask the person to install a drafted Workflow for reuse; it waits for "
-                        "their approval button."
+                        "Install a drafted Workflow locally for reuse. Report actual quality; "
+                        "untested does not mean verified or business-reviewed."
                     ),
                     input_contract="host.authoring.install.v1",
                     input_schema={
@@ -2873,6 +2952,7 @@ class ChatAuthoring:
                     },
                 ),
                 guarded(install_tool),
+                side_effect="write",
             ),
             HostTool(
                 ModelTool(
