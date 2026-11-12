@@ -493,3 +493,57 @@ def test_checking_has_no_side_effects_and_submitting_prepares_the_workspace(
     assert _tree(tmp_path) == before and not task.exists()  # nothing created, nothing kept
     assert authoring.submit_workflow(draft, "Merge")["ok"] is True
     assert (task / "input").is_dir() and (task / "output").is_dir()
+
+
+def test_direct_trial_keeps_metadata_receipt_without_forging_approval_or_verification(
+    tmp_path: Path,
+) -> None:
+    from test_chat_authoring import workflow
+
+    authoring, recorder = desk(tmp_path)
+    submitted = authoring.submit_workflow(workflow("write-it"), "Echo")
+    candidate_id = str(submitted["candidate_id"])
+    result = authoring.chat.execute(
+        authoring.actor,
+        authoring.chat.candidate(candidate_id, authoring.actor),
+        {"month": "PRIVATE-FIXTURE-ONLY"},
+        "receipt-fixture",
+    )
+    assert result["status"] == "succeeded" and recorder.calls == ["PRIVATE-FIXTURE-ONLY"]
+    candidate = authoring.chat.candidate(candidate_id, authoring.actor)
+    assert candidate.last_run is not None and candidate.last_run.status == "succeeded"
+    assert candidate.last_run.run_id == result["run_id"]
+    assert "PRIVATE-FIXTURE-ONLY" not in candidate.last_run.model_dump_json()
+    assert authoring.chat.approvals(authoring.actor, pending_only=False) == []
+    assert authoring.chat.readiness(candidate).get("verified") is not True
+
+
+def test_busy_display_receipt_cannot_replace_real_success_or_repeat_the_effect(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from collections.abc import Iterator
+    from contextlib import contextmanager
+
+    from test_chat_authoring import workflow
+
+    from agent.turn_effects import turn_scope
+    from host_runtime.chat_authoring import ChatAuthoringError
+
+    authoring, recorder = desk(tmp_path)
+    submitted = authoring.submit_workflow(workflow("write-it"), "Echo")
+    item = authoring.chat.candidate(str(submitted["candidate_id"]), authoring.actor)
+
+    @contextmanager
+    def busy(candidate_id: str) -> Iterator[None]:
+        raise ChatAuthoringError("authoring_candidate_busy")
+        yield
+
+    monkeypatch.setattr(authoring.chat, "_candidate_lock", busy)
+    with turn_scope():
+        first = authoring.chat.execute(authoring.actor, item, {"month": "fixture"}, "receipt-1")
+        second = authoring.chat.execute(authoring.actor, item, {"month": "fixture"}, "receipt-2")
+    assert first["status"] == second["status"] == "succeeded"
+    assert second["replayed"] is True and first["run_id"] == second["run_id"]
+    assert first["verified"] is False and recorder.calls == ["fixture"]
+    assert first["warnings"] == ["authoring_candidate_busy"]
+    assert authoring.chat.candidate(item.candidate_id, authoring.actor).last_run is None

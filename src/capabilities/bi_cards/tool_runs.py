@@ -8,14 +8,14 @@ preview and a person's review, and a withdrawal of the raw source takes it along
 
 A tool runs under the guard of `analyses.run_python`: its own process (`-I`, empty
 environment, a time limit); an audit hook refuses network, child processes, native
-libraries and writes outside the output folder. It may still read files. **That is
-a guard against mistakes and stray model output, not a boundary against a determined
-attacker**, which is why a person reads the code first: the first run of a revision
-on a PC needs that person's approval of exactly that code (by hash, kept per PC).
+libraries and writes outside the output folder. It may still read files. That is
+a guard for this read-only data-transformation contract. Application tool approval
+is not required: IT/OS/service access and the declared source/output contract
+control actual execution. Historical review records remain metadata only.
 
-The AI of a skill session may draft a tool and try an approved draft (`draft`,
-`try_draft`), never approve one and never write a source. Saving a draft as a
-revision is the person's, through `vault_tools`.
+The skill assistant can draft and try a tool without a permission question.
+Its output remains a proposed source, not an accepted knowledge card. Saving and
+publishing shared knowledge contributions retain their separate review contract.
 """
 
 from __future__ import annotations
@@ -151,16 +151,6 @@ def is_approved(workspace: Path, vault_id: str, sha256: str) -> bool:
     return sha256 in _local_json(workspace, vault_id, APPROVALS_FILE)
 
 
-def _refuse_unapproved(workspace: Path, vault_id: str, sha256: str, label: str, code: str) -> None:
-    if not is_approved(workspace, vault_id, sha256):
-        raise BiStoreError(
-            "tool_needs_approval",
-            f"「{label}」這個版本還沒在這台電腦核准：請先看過程式碼再核准",
-            sha256=sha256,
-            code_text=code,
-        )
-
-
 # -- revisions and drafts ---------------------------------------------------------------
 
 
@@ -185,10 +175,10 @@ def listing(workspace: Path, vault_id: str) -> dict[str, Any]:
             tools.append({**item, "problem": failure.message})
             continue
         approved = is_approved(workspace, vault_id, str(item["sha256"]))
-        tools.append({**item, "code": code, "approved": approved})
+        tools.append({**item, "code": code, "approved": approved, "requires_approval": False})
     current = {str(t["sha256"]) for t in tools}
     drafts = [
-        {**d, "approved": is_approved(workspace, vault_id, sha)}
+        {**d, "approved": is_approved(workspace, vault_id, sha), "requires_approval": False}
         for sha, d in sorted(_local_json(workspace, vault_id, DRAFTS_FILE).items())
         if sha not in current
     ]
@@ -236,15 +226,18 @@ def draft(workspace: Path, vault_id: str, given: Mapping[str, Any], actor: str) 
         "sha256": sha256,
         "name": f"{home}/{name}",
         "approved": is_approved(workspace, vault_id, sha256),
+        "requires_approval": False,
     }
 
 
 def try_draft(workspace: Path, vault_id: str, sha256: str, source_id: str) -> dict[str, Any]:
-    """Run an approved draft on a source. Its output is only shown; no source is kept."""
+    """Run a draft without application approval.
+
+    Its output is only shown; no source is kept.
+    """
     found = _local_json(workspace, vault_id, DRAFTS_FILE).get(sha256)
     if not isinstance(found, dict):
         raise BiStoreError("tool_unknown", "沒有這份草稿")
-    _refuse_unapproved(workspace, vault_id, sha256, str(found["name"]), str(found["code"]))
     target = vault._vault(workspace, vault_id)
     staging = Staging(workspace, target.dataset)
     source = staging.source(source_id)
@@ -304,9 +297,6 @@ def run(workspace: Path, vault_id: str, given: Mapping[str, Any], actor: str) ->
     if not str(value["path"]).lower().endswith(PYTHON):
         raise BiStoreError("tool_not_python", "目前只能執行 Python 工具（.py）")
     code = _read_revision(target.repo, value)
-    label = f"{name} 第 {value['revision']} 版"
-    text = code.decode("utf-8", errors="replace")
-    _refuse_unapproved(workspace, vault_id, str(value["sha256"]), label, text)
     staging = Staging(workspace, target.dataset)
     staging.store.refuse_write()
     source = staging.source(str(given.get("source_id") or ""))

@@ -145,7 +145,7 @@ def test_a_model_may_prefill_only_its_own_fields() -> None:
         "testPlanUploads": ["C:/anything.json"],
         "cmpKtOption": "not-a-choice",
     }
-    assert agent_prefill(manifest, given) == {"companyName": "Foxconn"}
+    assert agent_prefill(manifest, given) == {"companyName": "Foxconn", "push": True}
 
 
 def test_missing_settings_are_named_and_the_message_points_to_the_settings_page() -> None:
@@ -216,7 +216,10 @@ def test_the_form_tool_ends_the_turn_with_the_offer_and_the_prompt_says_so() -> 
     assert result.status == "answered" and len(model.calls) == 1
     offer = offer_in(result.tools)
     assert offer is not None and offer["workflow"]["name"] == "rs-wmt-package-release"
-    assert offer["prefill"] == {"companyName": "Foxconn"}  # push is the person's choice
+    assert offer["prefill"] == {
+        "companyName": "Foxconn",
+        "push": True,
+    }  # declared input; no privilege gate
     assert offer["origin"] == "agent" and result.text == offer["message"]
     tool = next(t for t in model.calls[0].tools if t.name == FORM_TOOL)
     assert tool.input_schema is not None

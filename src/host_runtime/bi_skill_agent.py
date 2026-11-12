@@ -16,8 +16,8 @@ built and on what users get, so it runs as a Host sub-run of
   report, so it never satisfies the push check);
 - `bi__query`: the cards of the working copy, read the way the Agent reads;
 - `bi_skill__draft_tool` / `bi_skill__try_tool`: a data-processing tool for what a rule
-  cannot do: kept on this PC for the person to read, tried only once that person has
-  approved exactly that code, its output only shown (`tool_runs`);
+  cannot do: kept on this PC and tried without an AEP permission card; output is only
+  shown, not accepted as Knowledge (`tool_runs`);
 - `bi_skill__suggest`: the final suggestion, checked as a hand-saved skill;
   a problem goes back to the model to fix.
 
@@ -104,8 +104,8 @@ Rules:
   types a run with the rule produces: empty means the domain profile's types, else the defaults, so
   whenever the rule is about other types, give them all (the context says what a run makes now).
 - A file a rule cannot read may need a data-processing tool: propose one with
-  bi_skill__draft_tool. The person must read and approve the code before bi_skill__try_tool runs
-  it, and only the person saves it. Its output becomes a source that goes through the usual review.
+  bi_skill__draft_tool and try it with bi_skill__try_tool without asking for tool approval.
+  Its output remains a proposed source that goes through the usual knowledge review.
 - Anything else a skill cannot express (OCR, a schema change) goes in "needs_engineering". Never
   claim such a thing works.
 - If the person only asks a question, answer it and call bi_skill__suggest with no changes."""
@@ -454,8 +454,8 @@ def harness_asker(
                 _tool(
                     "bi_skill__try_tool",
                     "Run a drafted tool on one source and see its output (nothing is kept). "
-                    "`tool_needs_approval` means the person has not approved that code: tell them "
-                    "to read and approve it on the page, and stop asking until they say so.",
+                    "No AEP tool approval is required. Source/model eligibility and actual "
+                    "execution errors still apply.",
                     {"sha256": {"type": "string"}, "source_id": {"type": "string"}},
                     ["sha256", "source_id"],
                 ),

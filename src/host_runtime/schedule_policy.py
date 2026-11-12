@@ -1,18 +1,8 @@
-"""Per-occurrence authorization for scheduled work.
+"""Resolve owned schedule targets under actual environment permissions.
 
-A saved schedule is not permission. Before a due occurrence may run
-unattended, the Host requires all of:
-
-1. the owner's active, unexpired `ScheduleExecutionGrant` naming the
-   schedule's exact target;
-2. every capability the target can reach declares an effect class no higher
-   than the grant's `max_side_effect`;
-3. the Bridge's own durable `CapabilityGrant` authorizes each of those
-   capabilities for the owner (the Bridge checks again at dispatch);
-4. for an `external_side_effect` target, a human approval of this very run.
-
-The decision is computed from Host-owned records and installed manifests
-only. No schedule definition, asset or model output contributes to it.
+Legacy grant records remain audit history, not admission. Authenticated schedule
+owner/Bridge identity, installed targets and task model/data contracts remain.
+No effect ceiling or per-occurrence AEP approval is added.
 """
 
 from collections.abc import Callable, Mapping
@@ -31,7 +21,7 @@ from common.execution import (
     SideEffect,
     TraceIdentifiers,
 )
-from common.scheduling import ScheduleRecord, max_side_effect, within_side_effect
+from common.scheduling import ScheduleRecord, max_side_effect
 from host_runtime.agent import LocalAgent
 from host_runtime.schedules import SqliteScheduleStore
 
@@ -135,7 +125,7 @@ def schedule_context(schedule: ScheduleRecord, trace: TraceIdentifiers) -> Reque
 
 
 class ScheduleGrantAuthorizer:
-    """The Host's schedule policy over the store's grants and the Bridge policy."""
+    """Compatibility name for the environment-backed owned-target resolver."""
 
     def __init__(
         self,
@@ -159,30 +149,14 @@ class ScheduleGrantAuthorizer:
         now: datetime,
     ) -> ScheduleDecision:
         definition = schedule.definition
-        record = self.store.active_grant(definition.schedule_id, owner=definition.owner)
-        if record is None:
-            return ScheduleDecision(code="schedule_grant_missing")
-        grant = record.grant
-        if grant.expired(now):
-            return ScheduleDecision(code="schedule_grant_expired")
-        if not grant.covers(definition):
-            return ScheduleDecision(code="schedule_grant_mismatch")
+        if self.agent.membership.member() != definition.owner:
+            return ScheduleDecision(code="schedule_owner_mismatch")
         specs = target_capabilities(
             self.agent, definition.target_kind, definition.target, self.task_templates
         )
         if isinstance(specs, str):
             return ScheduleDecision(code=specs)
         effect = max_side_effect(spec.side_effect for spec in specs)
-        if not within_side_effect(effect, grant.max_side_effect):
-            return ScheduleDecision(code="schedule_effect_above_grant", side_effect=effect)
-        context = schedule_context(schedule, trace)
-        policy = self.agent.gateway.engine.bridge.policy
-        if not all(policy.authorize(context, spec).allowed for spec in specs):
-            return ScheduleDecision(code="bridge_grant_missing", side_effect=effect)
-        if effect == "external_side_effect" and not run_approved:
-            return ScheduleDecision(
-                code="run_approval_required", side_effect=effect, approval_required=True
-            )
         return ScheduleDecision(
             allowed=True,
             code="schedule_authorized",
@@ -192,10 +166,10 @@ class ScheduleGrantAuthorizer:
                 actor=definition.owner,
                 asset=definition.target,
                 trace=trace,
-                policy_ref=grant.policy_ref,
+                policy_ref="execution-environment",
             ),
         )
 
     def __call__(self, schedule: ScheduleRecord, trace: TraceIdentifiers) -> ExecutionAuthorization:
-        """The plain authorizer shape: never approves a run needing a human."""
+        """Legacy callback shape, with no synthetic owner approval."""
         return self.decide(schedule, trace, run_approved=False, now=self._clock()).authorization

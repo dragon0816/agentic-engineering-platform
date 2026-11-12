@@ -167,3 +167,55 @@ def test_supplied_workbook_cannot_be_reasked_before_first_draft(
         },
     )
     assert result.status == "failed"
+
+
+def test_historical_pending_card_is_not_current_completion_evidence(tmp_path: Path) -> None:
+    chat, _ = studio(tmp_path)
+    chat.tasks.plan("owner", "session-1", "Please make a workflow from this SOP", [])
+    chat.request_capability("owner", "session-1", chat.installed.discover()[0].identity, {})
+    ctx = context().model_copy(update={"message": "Please finish the SOP workflow"})
+    result = GatewayConversationResult(
+        trace=ctx.trace, status="answered", text="Ready", model_turns=1
+    )
+    assert chat.completion_problem(ctx, result) is not None
+
+
+def test_replayed_old_revision_does_not_inherit_new_revision_verification(tmp_path: Path) -> None:
+    from agent.turn_effects import turn_scope
+
+    chat, recorder = studio(tmp_path)
+    chat.tasks.plan(
+        "owner",
+        "session-1",
+        "Echo the month",
+        [
+            Requirement(
+                requirement_id="echo",
+                description="Echo the month",
+                check_ids=("echoed",),
+                assertions=(
+                    {
+                        "path": ["steps", 0, "capability", "name"],
+                        "operator": "equals",
+                        "expected": "write-it",
+                    },
+                ),
+            )
+        ],
+    )
+    old, problems = chat.draft("owner", "session-1", "Echo", workflow("write-it"))
+    assert old is not None and not problems
+    with turn_scope():
+        first = chat.execute("owner", old, {"month": "fixture"}, "old")
+        assert first["status"] == "succeeded" and first["verified"] is False
+        revised = workflow("write-it")
+        revised["checks"] = [{"check_id": "echoed", "step_index": 0, "kind": "data_nonempty"}]
+        new, problems = chat.draft("owner", "session-1", "Echo", revised, old.candidate_id)
+        assert new is not None and not problems
+        verified = chat.execute("owner", new, {"month": "fixture"}, "new")
+        assert verified["status"] == "succeeded" and verified["verified"] is True
+        replayed = chat.execute("owner", old, {"month": "fixture"}, "old-again")
+    assert replayed["status"] == "succeeded" and replayed["replayed"] is True
+    assert replayed["run_id"] == first["run_id"]
+    assert replayed["verified"] is False and replayed["coverage_complete"] is False
+    assert recorder.calls == ["fixture"]

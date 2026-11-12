@@ -69,3 +69,51 @@ def test_os_errors_remain_real_failures(
     result = run("print('unused')")
     assert result.status == "failed" and result.failure and result.failure.code == code
     assert "not included" not in str(result)
+
+
+def test_exited_root_cannot_leave_pipe_draining_outside_the_deadline() -> None:
+    from time import monotonic
+
+    from integrations.process_execution import CommandRequest, run_command
+
+    code = (
+        "import subprocess,sys; "
+        "subprocess.Popen([sys.executable,'-c','import time; time.sleep(3)']); "
+        "print('root finished',flush=True)"
+    )
+    started = monotonic()
+    result = asyncio.run(
+        run_command(CommandRequest(argv=(sys.executable, "-c", code), timeout_seconds=0.5))
+    )
+    assert monotonic() - started < 2
+    assert result.timed_out or result.exit_code == 0
+
+
+def test_cancel_after_root_exit_does_not_leave_an_owned_child(tmp_path: Path) -> None:
+    from integrations.process_execution import CommandRequest, run_command
+
+    marker = tmp_path / "orphan.txt"
+    child = (
+        "import time; from pathlib import Path; time.sleep(1.2); "
+        f"Path({str(marker)!r}).write_text('orphan')"
+    )
+    code = (
+        f"import subprocess,sys; subprocess.Popen([sys.executable,'-c',{child!r}]); "
+        "print('root finished',flush=True)"
+    )
+
+    async def scenario() -> None:
+        task = asyncio.create_task(
+            run_command(CommandRequest(argv=(sys.executable, "-c", code), timeout_seconds=5))
+        )
+        await asyncio.sleep(0.5)
+        if not task.done():
+            task.cancel()
+            with pytest.raises(asyncio.CancelledError):
+                await task
+        else:
+            assert task.result().exit_code == 0
+        await asyncio.sleep(1.4)
+
+    asyncio.run(scenario())
+    assert not marker.exists()

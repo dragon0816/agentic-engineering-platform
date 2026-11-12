@@ -1,6 +1,7 @@
 """An agent connects a fixture MCP server and uses it without a restart/card."""
 
 import asyncio
+import hashlib
 import sys
 from pathlib import Path
 from typing import Any
@@ -8,7 +9,7 @@ from typing import Any
 import pytest
 from test_mcp_servers import FAKE_SERVER, context, hub_with
 
-from agent.gateway import HostToolOutcome
+from agent.gateway import HostTool, HostToolOutcome
 from host_runtime.tool_access import ToolAccess
 
 
@@ -298,3 +299,93 @@ def test_stdio_close_delivers_eof_and_redacts_fixture_stderr(tmp_path: Path) -> 
     assert marker.read_text() == "closed"
     assert "synthetic-mcp-only" not in log.read_text(encoding="utf-8")
     assert "[redacted]" in log.read_text(encoding="utf-8")
+
+
+def test_normalized_and_truncated_mcp_names_never_dispatch_another_tool(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from capabilities.mcp import MCPCallResult
+
+    canonical_clone = "a-b-" + hashlib.sha256(b"a.b").hexdigest()[:24]
+    alias_clone = "a_b-" + hashlib.sha256(b'["fixture", "a.b"]').hexdigest()[:24]
+    names = ("a.b", "a_b", "a-b", canonical_clone, alias_clone, "x" * 100 + "a", "x" * 100 + "b")
+
+    class Client:
+        calls: list[str] = []
+
+        def list_tools_sync(self) -> list[dict[str, Any]]:
+            return [{"name": name, "inputSchema": {"type": "object"}} for name in names]
+
+        async def call_tool(self, name: str, arguments: dict[str, Any]) -> MCPCallResult:
+            self.calls.append(name)
+            return MCPCallResult(data={"text": name})
+
+        def close(self) -> None:
+            pass
+
+    client = Client()
+    hub, bridge, _ = hub_with(tmp_path)
+    monkeypatch.setattr(hub, "_client", lambda config: client)
+    from host_runtime.mcp_servers import McpServerConfig
+
+    try:
+        hub.save(
+            McpServerConfig(name="fixture", transport="stdio", command="fixture"), {}, connect=False
+        )
+        hub.connect("fixture")
+        advertised = hub.status()[0]["tools"]
+        assert len({tool["capability"] for tool in advertised}) == len(names)
+        tools = hub.tools(bridge)
+        assert len({tool.tool.name for tool in tools}) == len(names)
+        for name, tool in zip(names, tools, strict=True):
+
+            async def invoke(selected: HostTool = tool) -> HostToolOutcome:
+                return await selected.handler(context(), {})
+
+            result = asyncio.run(invoke())
+            assert result.status == "succeeded"
+            assert isinstance(result.data, dict) and result.data["text"] == name
+        assert client.calls == list(names)
+    finally:
+        hub.close()
+
+
+def test_mcp_install_collision_does_not_claim_or_remove_an_existing_binding(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from test_dispatch import Handler, Input, Output, spec
+
+    from capabilities.contracts import CapabilitySpec
+    from common.assets import ExecutionDependencies
+    from host_runtime.mcp_servers import McpHub, McpServerConfig
+
+    hub, bridge, _ = hub_with(tmp_path)
+    identity = McpHub.identity("fixture", "echo")
+    raw = spec().model_dump(mode="json")
+    raw["identity"] = identity.model_dump(mode="json")
+    bridge.installed.register(
+        CapabilitySpec.model_validate(raw),
+        Handler(),
+        Input,
+        Output,
+        ExecutionDependencies(central_required=False),
+    )
+    original = bridge.installed.get(identity)
+
+    class Client:
+        def list_tools_sync(self) -> list[dict[str, Any]]:
+            return [{"name": "echo", "inputSchema": {"type": "object"}}]
+
+        def close(self) -> None:
+            pass
+
+    monkeypatch.setattr(hub, "_client", lambda config: Client())
+    try:
+        hub.save(
+            McpServerConfig(name="fixture", transport="stdio", command="fixture"), {}, connect=False
+        )
+        hub.connect("fixture")
+        assert hub.status()[0]["status"] == "failed"
+    finally:
+        hub.close()
+    assert bridge.installed.get(identity) is original

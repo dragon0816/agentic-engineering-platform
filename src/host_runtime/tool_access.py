@@ -56,7 +56,8 @@ def mcp_definitions() -> dict[str, tuple[str, dict[str, Any]]]:
             DescribeRequest.model_json_schema(),
         ),
         "aep_tools_invoke": (
-            "Invoke an installed tool under the execution environment; return actual outcome.",
+            "Invoke an installed tool under the execution environment; return actual status. "
+            "Native routes without established result eligibility withhold result contents.",
             InvokeRequest.model_json_schema(),
         ),
         "aep_tools_install_mcp": (
@@ -210,6 +211,26 @@ class ToolAccess:
         except ValidationError:
             return {"ok": False, "code": "invalid_input"}
         return {"ok": False, "code": "unknown_tool"}
+
+    def native_call(
+        self, name: str, args: dict[str, Any], context: RequestContext, backend: str | None
+    ) -> dict[str, JsonValue]:
+        """Execute without treating unknown result classification as public data.
+
+        Native initial-history eligibility does not classify subsequent tool outputs.
+        Keep tools executable, but use the existing authoring status boundary until
+        this route has evidence that the receiving model is eligible for the result.
+        """
+        result = self.call(name, args, context, metadata_only=True)
+        if name == "aep_tools_invoke":
+            result["data_route"] = {
+                "backend": backend or "unknown",
+                "result_data_withheld": True,
+                "code": "result_eligibility_not_established",
+                "message": "Execution status only. Use an eligible company Gateway route "
+                "to analyze source contents.",
+            }
+        return result
 
     def catalog(self, query: str = "", cursor: int = 0, limit: int = 40) -> dict[str, Any]:
         asked = CatalogRequest(query=query, cursor=cursor, limit=limit)

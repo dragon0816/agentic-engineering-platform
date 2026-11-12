@@ -3,14 +3,20 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import os
+import signal
 import subprocess
+import sys
+import tempfile
 from collections.abc import Mapping
+from pathlib import Path
 
 from pydantic import Field
 
 from common.assets import REDACTED, SECRET_PATTERN
 from common.base import Contract
+from integrations.process_job import WINDOWS_COMMAND_SUPERVISOR
 
 OUTPUT_LIMIT = 65_536
 
@@ -47,79 +53,119 @@ async def _drain(stream: asyncio.StreamReader | None) -> tuple[str, bool]:
     return SECRET_PATTERN.sub(REDACTED, kept.decode("utf-8", errors="replace")), total > len(kept)
 
 
+async def _stop_owned(process: asyncio.subprocess.Process) -> None:
+    if os.name == "nt" and process.returncode is None:
+        # The owned venv launcher waits for the supervisor. Closing its job
+        # kills descendants even when the requested executable already exited.
+        try:
+            await asyncio.to_thread(
+                subprocess.run,
+                [
+                    os.path.join(
+                        os.environ.get("SystemRoot", r"C:\Windows"), "System32", "taskkill.exe"
+                    ),
+                    "/PID",
+                    str(process.pid),
+                    "/T",
+                    "/F",
+                ],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=subprocess.CREATE_NO_WINDOW,
+                timeout=5,
+                check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+    elif sys.platform != "win32":
+        try:
+            kill_group = os.killpg
+            kill_group(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+    if process.returncode is None:
+        try:
+            process.kill()
+        except ProcessLookupError:
+            pass
+    await process.wait()
+
+
 async def run_command(
     request: CommandRequest,
     *,
     extra_env: Mapping[str, str] | None = None,
 ) -> CommandResult:
-    """Shared OS execution, including timeout cleanup, without a new policy layer."""
-    try:
-        process = await asyncio.create_subprocess_exec(
-            *request.argv,
-            cwd=request.cwd,
-            stdin=asyncio.subprocess.DEVNULL,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
-            env={**os.environ, **extra_env} if extra_env else None,
+    """The deadline covers process exit AND pipe draining; clean only owned work."""
+    with tempfile.TemporaryDirectory(prefix="aep-command-") as scratch:
+        status_path = Path(scratch) / "start-status.txt"
+        argv_path = Path(scratch) / "argv.json"
+        if os.name == "nt":
+            argv_path.write_text(json.dumps(request.argv), encoding="utf-8")
+        argv = (
+            request.argv
+            if os.name != "nt"
+            else (
+                sys.executable,
+                "-c",
+                WINDOWS_COMMAND_SUPERVISOR,
+                str(status_path),
+                str(argv_path),
+            )
         )
-    except PermissionError:
-        raise ProcessStartError("environment_denied") from None
-    except FileNotFoundError:
-        raise ProcessStartError("executable_not_found") from None
-    except OSError:
-        raise ProcessStartError("process_start_failed") from None
-    stdout = asyncio.create_task(_drain(process.stdout))
-    stderr = asyncio.create_task(_drain(process.stderr))
-    timed_out = False
-    try:
         try:
-            await asyncio.wait_for(process.wait(), request.timeout_seconds)
+            process = await asyncio.create_subprocess_exec(
+                *argv,
+                cwd=request.cwd,
+                stdin=asyncio.subprocess.DEVNULL,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                start_new_session=os.name != "nt",
+                env={**os.environ, **extra_env} if extra_env else None,
+            )
+        except PermissionError:
+            raise ProcessStartError("environment_denied") from None
+        except FileNotFoundError:
+            raise ProcessStartError("executable_not_found") from None
+        except OSError:
+            raise ProcessStartError("process_start_failed") from None
+        stdout = asyncio.create_task(_drain(process.stdout))
+        stderr = asyncio.create_task(_drain(process.stderr))
+        finished = asyncio.gather(process.wait(), stdout, stderr)
+        timed_out = False
+        try:
+            await asyncio.wait_for(asyncio.shield(finished), request.timeout_seconds)
         except TimeoutError:
             timed_out = True
-        finally:
-            if process.returncode is None:
-                if os.name == "nt":
-                    # A venv launcher can have a child holding the output pipes.
-                    # Terminate this command's tree, not just its launcher.
-                    try:
-                        await asyncio.to_thread(
-                            subprocess.run,
-                            [
-                                os.path.join(
-                                    os.environ.get("SystemRoot", r"C:\Windows"),
-                                    "System32",
-                                    "taskkill.exe",
-                                ),
-                                "/PID",
-                                str(process.pid),
-                                "/T",
-                                "/F",
-                            ],
-                            stdin=subprocess.DEVNULL,
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL,
-                            creationflags=subprocess.CREATE_NO_WINDOW,
-                            timeout=5,
-                            check=False,
-                        )
-                    except (OSError, subprocess.TimeoutExpired):
-                        pass
-                if process.returncode is None:
-                    process.kill()
-                await process.wait()
-    except BaseException:
-        stdout.cancel()
-        stderr.cancel()
-        await asyncio.gather(stdout, stderr, return_exceptions=True)
-        raise
-    out, err = await asyncio.gather(stdout, stderr)
-    result = CommandResult(
-        exit_code=process.returncode,
-        stdout=out[0],
-        stderr=err[0],
-        timed_out=timed_out,
-        stdout_truncated=out[1],
-        stderr_truncated=err[1],
-    )
-    return result
+            await _stop_owned(process)
+            try:
+                await asyncio.wait_for(asyncio.shield(finished), 5)
+            except TimeoutError:
+                finished.cancel()
+                await asyncio.gather(finished, return_exceptions=True)
+        except BaseException:
+            await _stop_owned(process)
+            finished.cancel()
+            await asyncio.gather(finished, return_exceptions=True)
+            raise
+        if status_path.is_file():
+            code = status_path.read_text(encoding="ascii")
+            if code in {
+                "environment_denied",
+                "executable_not_found",
+                "process_start_failed",
+                "process_job_unavailable",
+            }:
+                raise ProcessStartError(code)
+        out = ("", True) if stdout.cancelled() else stdout.result()
+        err = ("", True) if stderr.cancelled() else stderr.result()
+        return CommandResult(
+            exit_code=process.returncode,
+            stdout=out[0],
+            stderr=err[0],
+            timed_out=timed_out,
+            stdout_truncated=out[1],
+            stderr_truncated=err[1],
+        )

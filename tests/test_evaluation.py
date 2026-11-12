@@ -144,6 +144,9 @@ def test_the_runner_really_sees_an_effect_rather_than_declaring_that_it_would(
     assert effects_of(bridge, installed) == ("execute",)
 
     # A dispatch refused before the handler was reached did not happen.
+    from execution_fixtures import unavailable_dependency
+
+    unavailable_dependency(installed, spec.identity)
     denied = BridgeExecutor(installed, LocalPolicy(()))
     asyncio.run(
         denied.execute(

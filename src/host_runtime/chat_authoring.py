@@ -35,7 +35,7 @@ from capabilities.runtime import (
 )
 from capabilities.workflow_author.conversation import assemble
 from common.assets import AssetIdentity, FixedInput, WorkflowManifest, WorkflowStep
-from common.base import Contract, Symbol, Text
+from common.base import Contract, Sha256, Symbol, Text
 from common.execution import Failure, RequestContext, TraceIdentifiers
 from common.trace import redact
 from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
@@ -407,6 +407,15 @@ class ChatAuthoringError(Exception):
         super().__init__(code)
 
 
+class AuthoringRunReceipt(Contract):
+    """Display metadata from a real execution; never verification evidence."""
+
+    run_id: Text
+    digest: Sha256
+    status: Text
+    at: Text
+
+
 class ChatCandidate(Contract):
     candidate_id: Symbol
     actor: Symbol
@@ -433,6 +442,7 @@ class ChatCandidate(Contract):
     member_team: Symbol | None = None
     membership_source: Text | None = None
     authoring_task: AuthoringTask | None = None
+    last_run: AuthoringRunReceipt | None = None
 
 
 REVISION_PREFIX = "revision:"
@@ -691,18 +701,7 @@ class ChatAuthoring:
             for item in candidates.values()
         ):
             return None
-        if any(
-            approval.kind in ("run", "capability")
-            and (
-                approval.kind == "capability"
-                or (
-                    approval.candidate_id in candidates
-                    and approval.digest == digest(candidates[approval.candidate_id].draft)
-                )
-            )
-            for approval in self.approvals(context.actor, session_id=context.session_id)
-        ):
-            return None
+        # Historical approval cards are not evidence that the current task ran.
         return (
             "The saved SOP Workflow task is unfinished. Preserve every requirement, "
             "use authoring__get_plan and browser__inspect to repair the candidate, then "
@@ -1422,44 +1421,99 @@ class ChatAuthoring:
     def execute(
         self, actor: str, candidate: ChatCandidate, arguments: dict[str, JsonValue], ref: str
     ) -> dict[str, JsonValue]:
+        if candidate.actor != actor:
+            raise ChatAuthoringError("candidate_unknown")
         try:
             arguments = validate_run_parameters(candidate.draft, arguments)
         except WorkflowParameterError as error:
             raise ChatAuthoringError("workflow_input_invalid", str(error)) from None
-        effects = current_effects()
-        effect_id = workflow_effect_key(actor, candidate.draft.model_dump(mode="json"), arguments)
-        earlier = effects.replay_run(effect_id) if effects is not None else None
-        if earlier is not None:
-            return {
-                "candidate_id": candidate.candidate_id,
-                "digest": digest(candidate.draft),
-                "workflow": _key(candidate.draft.metadata.identity),
-                **summarize(cast(WorkflowRunSnapshot, earlier)),
-                **self.readiness(self.candidate(candidate.candidate_id, actor)),
-                "replayed": True,
-            }
-        candidate = self.begin_trial(actor, candidate, arguments)
-        self.prepare_workspaces(candidate.draft)
-        engine = self._engine(candidate.draft, actor, ref)
-        snapshot = asyncio.run(
-            run_workflow_checked(
+        return asyncio.run(self._execute_once(actor, candidate, arguments, ref))
+
+    async def _execute_once(
+        self, actor: str, candidate: ChatCandidate, arguments: dict[str, JsonValue], ref: str
+    ) -> dict[str, JsonValue]:
+        # Share the same async lease as normal Gateway runs; keep the receipt
+        # check, actual execution and success record atomic across HTTP threads.
+        async with self.installed.exclusive.hold():
+            effects = current_effects()
+            effect_id = workflow_effect_key(
+                actor, candidate.draft.model_dump(mode="json"), arguments
+            )
+            earlier = effects.replay_run(effect_id) if effects is not None else None
+            if earlier is not None:
+                replay_quality: dict[str, JsonValue] = {
+                    "verified": False,
+                    "coverage_complete": False,
+                }
+                try:
+                    current = self.candidate(candidate.candidate_id, actor)
+                    if digest(current.draft) == digest(candidate.draft):
+                        replay_quality = self.readiness(current)
+                except (ChatAuthoringError, OSError, ValidationError):
+                    # An existing real result remains replayable even if display
+                    # metadata is gone. Never borrow another revision's proof.
+                    pass
+                return {
+                    "candidate_id": candidate.candidate_id,
+                    "digest": digest(candidate.draft),
+                    "workflow": _key(candidate.draft.metadata.identity),
+                    **summarize(cast(WorkflowRunSnapshot, earlier)),
+                    **replay_quality,
+                    "replayed": True,
+                }
+            candidate = self.begin_trial(actor, candidate, arguments)
+            self.prepare_workspaces(candidate.draft)
+            engine = self._engine(candidate.draft, actor, ref)
+            snapshot = await run_workflow_checked(
                 engine,
                 self._context(actor, self.namespace, candidate.session_id, "run"),
                 candidate.draft.metadata.identity,
                 arguments,
                 timeout_seconds=self.run_timeout_seconds,
             )
-        )
-        self.record_trial(actor, candidate, snapshot)
-        if effects is not None and snapshot.run.status == "succeeded":
-            effects.record_run(effect_id, snapshot)
-        return {
-            "candidate_id": candidate.candidate_id,
-            "digest": digest(candidate.draft),
-            "workflow": _key(candidate.draft.metadata.identity),
-            **summarize(snapshot),
-            **self.readiness(self.candidate(candidate.candidate_id, actor)),
-        }
+            if effects is not None and snapshot.run.status == "succeeded":
+                effects.record_run(effect_id, snapshot)
+            metadata_warning: str | None = None
+            quality: dict[str, JsonValue] = {"verified": False}
+            try:
+                self.record_trial(actor, candidate, snapshot)
+                # Display-only metadata cannot turn a completed operation into failure.
+                with self._candidate_lock(candidate.candidate_id):
+                    current = self.candidate(candidate.candidate_id, actor)
+                    if digest(current.draft) == digest(candidate.draft):
+                        current = self._save_candidate(
+                            current.model_copy(
+                                update={
+                                    "last_run": AuthoringRunReceipt(
+                                        run_id=snapshot.run.run_id,
+                                        digest=digest(candidate.draft),
+                                        status=snapshot.run.status,
+                                        at=_now(),
+                                    )
+                                }
+                            )
+                        )
+                        quality = self.readiness(current)
+                    else:
+                        metadata_warning = "candidate_changed_after_execution"
+            except ChatAuthoringError as error:
+                if error.code not in {
+                    "authoring_candidate_busy",
+                    "authoring_digest_stale",
+                    "candidate_unknown",
+                }:
+                    raise
+                metadata_warning = error.code
+            except OSError:
+                metadata_warning = "execution_metadata_write_failed"
+            return {
+                "candidate_id": candidate.candidate_id,
+                "digest": digest(candidate.draft),
+                "workflow": _key(candidate.draft.metadata.identity),
+                **summarize(snapshot),
+                **quality,
+                **({"warnings": [metadata_warning], "verified": False} if metadata_warning else {}),
+            }
 
     def begin_trial(
         self, actor: str, candidate: ChatCandidate, arguments: dict[str, JsonValue]

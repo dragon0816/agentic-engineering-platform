@@ -27,6 +27,8 @@ from contextvars import ContextVar
 from dataclasses import dataclass, field
 from typing import Any
 
+from common.async_lock import ExecutionLock
+
 #: What the model is told about a call that was not executed again.
 REPLAY_NOTE = "這個動作在本回合已執行過，未重複執行"
 REPLAY_INSTRUCTION = (
@@ -65,6 +67,8 @@ class TurnEffects:
     workflow_runs: dict[str, Any] = field(default_factory=dict)
     capability_calls: dict[str, Any] = field(default_factory=dict)
     operations: dict[str, Any] = field(default_factory=dict)
+    capability_locks: dict[str, ExecutionLock] = field(default_factory=dict, repr=False)
+    capability_locks_guard: RLock = field(default_factory=RLock, repr=False)
     operations_lock: RLock = field(default_factory=RLock, repr=False)
     native_calls_lock: RLock = field(default_factory=RLock, repr=False)
     recorded: int = 0
@@ -93,6 +97,10 @@ class TurnEffects:
         if key not in self.workflow_runs:
             self.workflow_runs[key] = snapshot
             self.recorded += 1
+
+    def capability_lock(self, key: str) -> ExecutionLock:
+        with self.capability_locks_guard:
+            return self.capability_locks.setdefault(key, ExecutionLock(reentrant=False))
 
     def replay_capability(self, key: str) -> Any | None:
         found = self.capability_calls.get(key)

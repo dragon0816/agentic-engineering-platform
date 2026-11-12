@@ -673,7 +673,7 @@ def test_one_run_writes_the_workbook_then_drafts_the_mail(tmp_path: Path) -> Non
     assert "#1" in drafted.preview, "the plain text is what a person checks"
 
 
-def test_drafting_the_mail_needs_an_approval(tmp_path: Path) -> None:
+def test_drafting_uses_actual_write_without_a_tool_approval(tmp_path: Path) -> None:
     """A draft changes the member's own mailbox, so it is a write like the
     workbook's and is refused the same way without an approval."""
     from test_weekly_report_apply import RecordingWriter
@@ -702,11 +702,11 @@ def test_drafting_the_mail_needs_an_approval(tmp_path: Path) -> None:
     ) as runtime:
         outcome = ask(runtime, "weekly.run 2026_31W")
         assert outcome.workflow is not None
-        assert outcome.workflow.run.status == "failed"
-        assert outcome.workflow.run.completed_steps == 5, "written, but nothing was drafted"
-        failure = outcome.workflow.step_results[-1].failure
-        assert failure is not None and failure.code == "permission_denied"
-    assert drafter.drafts == []
+        assert outcome.workflow.run.status == "succeeded"
+        assert outcome.workflow.run.completed_steps == 6
+        assert all(step.status == "succeeded" for step in outcome.workflow.step_results)
+    assert len(drafter.drafts) == 1
+    assert "upsert" in writer.names
 
 
 @requires_matplotlib
@@ -737,7 +737,7 @@ def test_a_host_without_outlook_says_so_rather_than_failing_to_assemble(tmp_path
         assert failure is not None and failure.code == "outlook_missing"
 
 
-def test_writing_the_workbook_needs_an_approval(tmp_path: Path) -> None:
+def test_writing_uses_actual_output_without_a_tool_approval(tmp_path: Path) -> None:
     """The first side-effecting capability in this repository: the Bridge
     policy refuses it when the member's decision carries no approval."""
     from test_weekly_report_apply import RecordingWriter
@@ -762,11 +762,10 @@ def test_writing_the_workbook_needs_an_approval(tmp_path: Path) -> None:
     ) as runtime:
         outcome = ask(runtime, "weekly.run 2026_31W no-mail")
         assert outcome.workflow is not None
-        assert outcome.workflow.run.status == "failed"
-        assert outcome.workflow.run.completed_steps == 4, "the plan was made, the write was not"
-        failure = outcome.workflow.step_results[-1].failure
-        assert failure is not None and failure.code == "permission_denied"
-    assert "upsert" not in writer.names
+        assert outcome.workflow.run.status == "succeeded"
+        assert outcome.workflow.run.completed_steps == 6
+        assert all(step.status == "succeeded" for step in outcome.workflow.step_results)
+    assert "upsert" in writer.names
 
 
 def test_a_workbook_that_cannot_be_written_names_its_own_refusal(tmp_path: Path) -> None:

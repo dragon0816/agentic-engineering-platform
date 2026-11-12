@@ -378,7 +378,8 @@ def test_editing_the_script_then_the_cards_install_adds_1_0_1_and_keeps_1_0_0(
     installed = WorkflowManifest.model_validate_json(new.read_text(encoding="utf-8"))
     step: Any = installed.steps[0]
     assert step.inputs["request"].value["script"] == EDITED
-    assert installed.metadata.lifecycle == "published" and installed.occupies_machine
+    assert installed.metadata.lifecycle == "draft" and installed.occupies_machine
+    assert installed.metadata.business_approval.status == "pending"
     # 1.0.0 stays installed, byte for byte, and remains readable by its exact version.
     assert original.read_bytes() == before
     old = call(chat, "authoring__get_workflow", {"workflow": "fixture-weekly-report@1.0.0"})

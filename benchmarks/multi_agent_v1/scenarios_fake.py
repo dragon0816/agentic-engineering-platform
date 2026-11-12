@@ -38,7 +38,7 @@ from agent.data_policy import (
     OutboundContext,
 )
 from agent.gateway import GatewayConversationResult
-from capabilities.runtime import CapabilityGrant, CapabilityInvocation
+from capabilities.runtime import CapabilityInvocation
 from common.execution import RequestContext, TraceIdentifiers
 from host_runtime.session_artifacts import SessionArtifactError, SessionArtifacts
 from models.approved import ApprovedModelClient
@@ -452,117 +452,91 @@ def workflow_recovery(workspace: Path) -> ScenarioResult:
 
 
 def bridge_safety(workspace: Path) -> ScenarioResult:
+    """IT owns admission; the benchmark still executes only its inert fixture."""
     out = ScenarioResult("bridge_safety")
     objective = "Measure TX power on band n78, channel 630000, with the CMP180"
-    scripts = {
-        "parent": [
-            reply(delegate(objective, "bench/instrument-operator")),
-            reply(text="沒有量測：這台測試儀沒有授權給你。"),
-        ],
-        objective: [
-            reply(("cmp180__measure", {"band": "n78", "channel": 630000})),
-            reply(text="NEEDS_INPUT: 這台測試儀沒有授權給這個帳號，要向誰申請授權？"),
-        ],
-    }
-    model = ScriptedModel(scripts)
+    model = ScriptedModel(
+        {
+            "parent": [
+                reply(delegate(objective, "bench/instrument-operator")),
+                reply(text="Simulated fixture measurement completed."),
+            ],
+            objective: [
+                reply(("cmp180__measure", {"band": "n78", "channel": 630000})),
+                reply(text="Simulated fixture measurement completed."),
+            ],
+        }
+    )
     host = build(workspace, model)
-    result, seconds = host.converse("請用 instrument-operator 量 n78 的 TX power")
+    result, seconds = host.converse("Use instrument-operator for the fixture measurement")
     out.routes["delegation"] = measure(
         result, seconds, len(model.calls), expected_profiles=["bench/instrument-operator"]
     )
     [found] = delegations(result) or [{}]
-    offered = sorted(
-        set().union(*(host.tool_names(item) for item in model.by_key.get(objective, [])))
+    offered = set().union(*(host.tool_names(item) for item in model.by_key.get(objective, [])))
+    out.check(
+        "tool available without an AEP grant", "cmp180__measure" in offered, True, sorted(offered)
     )
     out.check(
-        "the sub-agent was never offered the instrument tool",
-        "cmp180__measure" not in offered,
-        "absent",
-        offered,
-    )
-    out.check(
-        "the sub-agent's forged call failed",
-        [item["status"] for item in found.get("tool_calls") or []] == ["failed"],
-        ["failed"],
-        found.get("tool_calls"),
-    )
-    out.check(
-        "the sub-agent handed the question back",
-        found.get("status") == "needs_input",
-        "needs_input",
+        "delegation executes successfully",
+        found.get("status") == "succeeded",
+        "succeeded",
         found.get("status"),
     )
     out.check(
-        "no instrument action ran",
-        host.handlers.counters["measure"] == 0,
-        0,
+        "only the fixture handler ran once",
+        host.handlers.counters["measure"] == 1,
+        1,
         host.handlers.counters["measure"],
     )
-    # A forged direct Bridge call: denied before the handler, with an audit event.
     context = RequestContext(
-        trace=TraceIdentifiers(trace_id="bench", request_id="forged-1", span_id="span-f"),
+        trace=TraceIdentifiers(trace_id="bench", request_id="direct-1", span_id="span-f"),
         actor=ACTOR,
         namespace="engineering",
         message="measure",
         channel="test",
     )
     target = identity("cmp180-measure")
-    invocation = CapabilityInvocation(
-        context=context, target=target, arguments={"band": "n78", "channel": 630000}, origin="model"
-    )
-    denied = asyncio.run(host.bridge.execute(invocation))
-    code = denied.failure.code if denied.failure is not None else None
-    out.check(
-        "a direct call without a grant is denied",
-        code == "permission_denied",
-        "permission_denied",
-        code,
-    )
-    audit = [event for event in host.bridge.events if event.asset == target]
-    out.check(
-        "the denial is recorded",
-        [(event.status, event.code, event.trace.request_id) for event in audit]
-        == [("failed", "permission_denied", "forged-1")],
-        [("failed", "permission_denied", "forged-1")],
-        [(event.status, event.code, event.trace.request_id) for event in audit],
-    )
-    out.check(
-        "still no instrument action",
-        host.handlers.counters["measure"] == 0,
-        0,
-        host.handlers.counters["measure"],
-    )
-    # Control: with a grant only the mock answers, marked simulated.
-    host.policy.add(
-        CapabilityGrant(
-            actor=ACTOR,
-            asset=target,
-            permissions=("bench.instrument.operate",),
-            policy_refs=("bench-policy",),
-            approval_ref="bench-approval",
+    actual = asyncio.run(
+        host.bridge.execute(
+            CapabilityInvocation(
+                context=context,
+                target=target,
+                arguments={"band": "n78", "channel": 630000},
+                origin="model",
+            )
         )
     )
-    granted = asyncio.run(host.bridge.execute(invocation.model_copy(update={"origin": "person"})))
     out.check(
-        "with a grant, only the mock answers (simulated)",
-        granted.status == "succeeded"
-        and isinstance(granted.data, dict)
-        and granted.data.get("simulated") is True
+        "direct execution is real and simulated",
+        actual.status == "succeeded"
+        and isinstance(actual.data, dict)
+        and actual.data.get("simulated") is True
         and host.handlers.instrument.physical is False,
         "succeeded, simulated",
-        granted.data,
+        actual.data,
+    )
+    audit = [event for event in host.bridge.events if event.trace.request_id == "direct-1"]
+    out.check(
+        "real execution is audited",
+        len(audit) == 1 and audit[0].status == "succeeded",
+        "one succeeded event",
+        [(event.status, event.code) for event in audit],
+    )
+    out.check(
+        "separate direct request executes once",
+        host.handlers.counters["measure"] == 2,
+        2,
+        host.handlers.counters["measure"],
     )
     try:
         MockCmp180(address="TCPIP::192.0.2.10::inst0::INSTR")
         refused = False
     except RealInstrumentRefused:
         refused = True
-    out.check("the fixture refuses any real instrument address", refused, True, refused)
-    out.routes["delegation"]["policy_denied_events"] = len(audit)
+    out.check("fixture rejects every real instrument address", refused, True, refused)
+    out.routes["delegation"]["policy_denied_events"] = 0
     return out
-
-
-# -- 6. model routing and classification -------------------------------------------------------
 
 
 class CountingProvider(ScriptedModel):

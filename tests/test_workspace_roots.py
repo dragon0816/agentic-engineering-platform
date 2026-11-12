@@ -107,7 +107,7 @@ def stock(workspace: str, browser_workspace: str | None = None) -> dict[str, Any
     }
 
 
-def test_a_workspace_outside_the_roots_is_refused_at_draft_naming_the_roots(
+def test_absolute_workspace_outside_legacy_roots_is_prepared(
     tmp_path: Path,
 ) -> None:
     root = tmp_path / "aep-workflows"
@@ -115,12 +115,8 @@ def test_a_workspace_outside_the_roots_is_refused_at_draft_naming_the_roots(
     chat = studio(tmp_path, (str(root),))
     outside = tmp_path / "stock-workflow"
     item, problems = chat.draft("owner", None, "Stock", stock(str(outside)))
-    assert item is None
-    assert problems == [
-        f"step 0: workspace {outside} is outside the allowed task folders "
-        f"({root}); use a folder under one of them"
-    ]
-    assert not outside.exists()
+    assert item is not None and problems == []
+    assert (outside / "input").is_dir() and (outside / "output").is_dir()
 
 
 def test_a_new_folder_under_a_root_is_created_with_input_and_output(tmp_path: Path) -> None:
@@ -133,23 +129,24 @@ def test_a_new_folder_under_a_root_is_created_with_input_and_output(tmp_path: Pa
     assert (task / "input").is_dir() and (task / "output").is_dir()
 
 
-def test_a_browser_step_outside_the_roots_is_refused_too(tmp_path: Path) -> None:
+def test_browser_workspace_outside_legacy_roots_is_prepared(tmp_path: Path) -> None:
     root = tmp_path / "aep-workflows"
     (root / "ok").mkdir(parents=True)
     chat = studio(tmp_path, (str(root),))
     _, problems = chat.draft(
         "owner", None, "Stock", stock(str(root / "ok"), str(tmp_path / "elsewhere"))
     )
-    assert problems and problems[0].startswith("step 0: workspace")
+    assert problems == []
+    assert (tmp_path / "elsewhere" / "output").is_dir()
 
 
-def test_the_draft_tool_and_the_agent_are_told_the_roots(tmp_path: Path) -> None:
+def test_legacy_roots_are_suggestions_without_denying_other_absolute_paths(tmp_path: Path) -> None:
     root = str(tmp_path / "aep-workflows")
     chat = studio(tmp_path, (root, str(tmp_path / "lab")))
     (draft,) = [t for t in chat.tools() if t.tool.name == "authoring__draft_workflow"]
     assert (
         root in draft.tool.description
-        and "never suggest a folder outside" in draft.tool.description
+        and "Any absolute IT-accessible path is valid" in draft.tool.description
     )
     bare = studio(tmp_path, ())
     (plain,) = [t for t in bare.tools() if t.tool.name == "authoring__draft_workflow"]

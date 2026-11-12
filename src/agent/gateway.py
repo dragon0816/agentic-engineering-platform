@@ -1979,21 +1979,20 @@ class Gateway:
             if effects is not None and manifest is not None
             else ""
         )
-        earlier = effects.replay_run(key) if effects is not None else None
-        if earlier is not None:
-            telemetry.emit(
-                "tool.replayed",
-                status="skipped",
-                state="tool",
-                attributes={
-                    "tool_id": f"{workflow.namespace}/{workflow.name}",
-                    "replayed": effects.replayed if effects is not None else 0,
-                },
-            )
-            return cast(WorkflowRunSnapshot, earlier)
-        # The engine's run table belongs to one event loop at a time, and a
-        # workflow may change shared resources: serialize runs across threads.
-        with self.bridge.exclusive:
+        # Serialize engine access across loops without blocking their threads.
+        async with self.bridge.exclusive.hold():
+            earlier = effects.replay_run(key) if effects is not None else None
+            if earlier is not None:
+                telemetry.emit(
+                    "tool.replayed",
+                    status="skipped",
+                    state="tool",
+                    attributes={
+                        "tool_id": f"{workflow.namespace}/{workflow.name}",
+                        "replayed": effects.replayed if effects is not None else 0,
+                    },
+                )
+                return cast(WorkflowRunSnapshot, earlier)
             # Through the shared Harness: steps, then the Workflow's output checks.
             snapshot = await run_workflow_checked(
                 self.engine,
@@ -2003,9 +2002,9 @@ class Gateway:
                 timeout_seconds=workflow_timeout_seconds,
                 idempotency_key=workflow_idempotency_key,
             )
-        if effects is not None and snapshot.run.status == "succeeded":
-            effects.record_run(key, snapshot)
-        return snapshot
+            if effects is not None and snapshot.run.status == "succeeded":
+                effects.record_run(key, snapshot)
+            return snapshot
 
     def inspect(self, request: RequestContext, run_id: RunId) -> RunControlResult:
         """Classify a run's steps for its owner; never executes anything.

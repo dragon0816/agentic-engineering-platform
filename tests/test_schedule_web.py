@@ -237,7 +237,9 @@ def test_resolve_needs_confirmation_and_records_the_decision(served: Served) -> 
     ) == (409, {"ok": False, "code": "not_claimed"})
 
 
-def test_approve_rechecks_every_grant_and_deny_settles_without_running(served: Served) -> None:
+def test_historical_pending_can_be_explicitly_settled_without_new_tool_grants(
+    served: Served,
+) -> None:
     first, second = _open_claims(served, 2)
     with served.store() as store:
         for key in (first, second):
@@ -251,8 +253,8 @@ def test_approve_rechecks_every_grant_and_deny_settles_without_running(served: S
         "/api/schedules/approve", {"idempotency_key": second, "note": "ok"}
     )
     assert status == 200
-    assert approved["run"]["status"] == "needs_input"
-    assert approved["run"]["result_code"] == "schedule_grant_missing"
+    assert approved["run"]["status"] == "succeeded"
+    assert approved["run"]["result_code"] == "workflow_succeeded"
     assert served.call("/api/schedules/approve", {"idempotency_key": second})[1] == {
         "ok": False,
         "code": "not_awaiting_approval",

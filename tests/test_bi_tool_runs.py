@@ -53,14 +53,18 @@ def _execute(code: str, tmp_path: Path) -> Any:
     return tool_runs.execute(code.encode(), raw, "raw.txt", seconds=120)
 
 
-def test_a_new_revision_needs_a_persons_approval_with_the_code_visible(tmp_path: Path) -> None:
+def test_new_revisions_execute_without_app_approval_and_keep_review_metadata(
+    tmp_path: Path,
+) -> None:
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
     source = _source(a, dataset)
     first = _save(a, vault_id)
-    refused = _refused(_run(a, vault_id, source["id"]), 409, "tool_needs_approval")
-    assert refused["code_text"] == TOOL and refused["sha256"] == first["sha256"]
+    executed = _ok(_run(a, vault_id, source["id"]))
+    assert executed["sources"][0]["name"] == "normalized.csv"
+    assert not tool_runs.is_approved(a, vault_id, first["sha256"])
     listed = _ok(_call(a, "GET", f"/api/bi/vaults/{vault_id}/tools"))
     assert listed["tools"][0]["code"] == TOOL and listed["tools"][0]["approved"] is False
+    assert listed["tools"][0]["requires_approval"] is False
     assert "不是" in listed["guard"]
     body = {"sha256": first["sha256"]}
     path = f"/api/bi/vaults/{vault_id}/tool-approve"
@@ -69,25 +73,24 @@ def test_a_new_revision_needs_a_persons_approval_with_the_code_visible(tmp_path:
     _approve(a, vault_id, first["sha256"])
     assert _ok(_call(a, "GET", f"/api/bi/vaults/{vault_id}/tools"))["tools"][0]["approved"] is True
     _ok(_run(a, vault_id, source["id"]))
-    # Another revision is other code: it asks again.
+    # A new revision remains unreviewed but is executable.
     second = _save(a, vault_id, TOOL + "\nprint('more')\n")
     assert second["path"] == "applications/aidc/tools/normalize/rev-2-alice.py"
-    _refused(_run(a, vault_id, source["id"]), 409, "tool_needs_approval")
+    assert _ok(_run(a, vault_id, source["id"]))["tool"]["revision"] == 2
 
 
-def test_the_approval_is_per_pc(tmp_path: Path) -> None:
+def test_synced_tools_execute_without_a_per_pc_approval(tmp_path: Path) -> None:
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
     source = _source(a, dataset)
     saved = _save(a, vault_id)
-    _approve(a, vault_id, saved["sha256"])
     _ok(_run(a, vault_id, source["id"]))
     _commit(a, vault_id, "工具與來源")
     _push(a, vault_id)
     drive.deliver("a", "b", vault_id)
     _ok(_call(b, "POST", f"/api/bi/vaults/{vault_id}/sync", {}))
-    _refused(_run(b, vault_id, source["id"]), 409, "tool_needs_approval")
-    _approve(b, vault_id, saved["sha256"])
-    _ok(_run(b, vault_id, source["id"]))
+    assert _ok(_run(b, vault_id, source["id"]))["sources"][0]["name"] == "normalized.csv"
+    assert not tool_runs.is_approved(a, vault_id, saved["sha256"])
+    assert not tool_runs.is_approved(b, vault_id, saved["sha256"])
 
 
 def test_the_output_is_a_new_source_and_never_a_card(tmp_path: Path) -> None:
@@ -203,26 +206,24 @@ def test_only_python_runs(tmp_path: Path) -> None:
     _refused(_run(a, vault_id, source["id"], "aidc/none"), 404, "tool_unknown")
 
 
-def test_an_ai_draft_waits_for_the_person_and_stages_nothing(tmp_path: Path) -> None:
+def test_an_ai_draft_runs_without_approval_and_stages_nothing(tmp_path: Path) -> None:
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
     source = _source(a, dataset)
     before = vault.Vault(a, vault_id).repo.working_units()
     given = {"home": "aidc", "name": "normalize", "code": TOOL}
     made = tool_runs.draft(a, vault_id, given, "alice via web")
-    assert made["approved"] is False
+    assert made["approved"] is False and made["requires_approval"] is False
     assert vault.Vault(a, vault_id).repo.working_units() == before
-    with pytest.raises(BiStoreError) as failure:
-        tool_runs.try_draft(a, vault_id, made["sha256"], source["id"])
-    assert failure.value.code == "tool_needs_approval"
+    initial = tool_runs.try_draft(a, vault_id, made["sha256"], source["id"])
+    assert initial["files"][0]["name"] == "normalized.csv"
     listed = _ok(_call(a, "GET", f"/api/bi/vaults/{vault_id}/tools"))
     assert listed["drafts"][0]["code"] == TOOL
-    _approve(a, vault_id, made["sha256"])
     tried = tool_runs.try_draft(a, vault_id, made["sha256"], source["id"])
     assert tried["files"][0]["name"] == "normalized.csv" and "虛構甲" in tried["files"][0]["text"]
     # Only shown: no source was kept and nothing was staged.
     assert len(Staging(a, dataset).sources()) == 1
     assert vault.Vault(a, vault_id).repo.working_units() == before
-    # Saved as a revision it is the same code, already read and approved here.
+    # Saved as a revision it is the same code, still without a review claim.
     saved = _save(a, vault_id)
     assert saved["sha256"] == made["sha256"]
     _ok(_run(a, vault_id, source["id"]))

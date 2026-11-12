@@ -170,9 +170,9 @@ def test_reads_run_writes_are_planned_and_nothing_else_is_dispatched() -> None:
     assert result.steps[3].failure.code == "preview_input_from_unrun_step"
 
 
-def test_a_step_the_actor_may_not_run_is_shown_as_not_permitted() -> None:
+def test_preview_plans_a_write_without_a_legacy_grant_and_never_executes_it() -> None:
     result, calls = preview(CHAIN, grant_write=False)
-    assert result.status == "failed" and result.steps[1].state == "not_permitted"
+    assert result.status == "previewed" and result.steps[1].state == "planned"
     assert calls.ran == ["read"]
 
 

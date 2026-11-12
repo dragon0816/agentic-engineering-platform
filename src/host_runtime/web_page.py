@@ -6553,8 +6553,9 @@ function showDraftDetail(content, draft) {
     ["Last run", run ? (run.result || run.status) + " (" + run.at + ")" : "Not run yet"],
     ["Updated", draft.updated_at]]);
   const note = document.createElement("p"); note.className = "note";
-  note.append(text("Install is your approval; the Agent never installs a draft on its own. "
-    + "A Workflow is usable at once, a Skill after the host restarts. Running it once is "
+  note.append(text("Install makes this local asset available; "
+    + "the Agent can also install it directly. "
+    + "Workflows and Skills are usable immediately on a live host. Running once is "
     + "not installing it."));
   const details = document.createElement("details");
   const label = document.createElement("summary"); label.textContent = "Full content";
@@ -7301,7 +7302,7 @@ function showSharedPlatform(info, saved) {
   el("shared-this-pc").textContent = "This PC: Bridge " + info.bridge_id + ", registered by "
     + info.registered_by + (info.login_saved ? " · Personal Agent code saved"
       : " · no Personal Agent code yet")
-    + (info.assets_only ? " · grants.json decides what this PC may run; synchronizing "
+    + (info.assets_only ? " · IT/OS/service permissions decide execution; synchronizing "
       + "installs files only" : "");
   const parts = [];
   if (info.enrolled) {
@@ -8582,8 +8583,8 @@ function workflowContent(m) {
     Number.isInteger(c.step_index) ? "after step " + (c.step_index + 1) : "", c.pattern || ""]);
   const dependencies = m.dependencies || {};
   const effects = [["Risk", policy.risk || "low"],
-    ["Required permissions", (policy.required_permissions || []).join(", ") || "none"],
-    ["Approval required", policy.approval_required === false ? "No" : "Yes"],
+    ["Tool access", "IT / operating system / source service"],
+    ["AEP execution approval", "Not required"],
     ["Side effect", m.occupies_machine
       ? "Occupies the machine: no other such run at the same time" : "None declared"],
     ["Runs", m.execution ? m.execution.mode : "Not declared"],
@@ -8760,7 +8761,7 @@ function marketCard(item, index) {
     if (sharedPlatform.assets_only && (item.kind === "skill" || item.kind === "workflow")) {
       const only = document.createElement("p"); only.className = "note";
       only.append(text("On this PC adding installs the file only: "
-        + "permissions come from this PC's grants.json."));
+        + "access comes from IT/OS/service permissions."));
       aside.append(only);
     }
     body.append(content, aside); detail.append(body);
@@ -8900,7 +8901,7 @@ async function synchronizePlatform() {
       result.textContent = "Synchronization complete: " + synchronized.installed.length
         + " installed, " + synchronized.selections + " active selections."
         + (synchronized.assets_only ? " Installed files only; permissions come from this "
-          + "PC's grants.json." : "");
+          + "PC's IT-managed execution environment." : "");
     } else {
       const failure = synchronized.failure || {code: synchronized.status};
       result.textContent = "Synchronization " + synchronized.status + ": " + failure.code;
@@ -9090,11 +9091,8 @@ function renderScheduleList(container, data, actions) {
       + " · reaches " + (item.side_effect || "unknown effects")));
     card.append(scheduleNode("p", "schedule-meta",
       scheduleRecurrence(item.recurrence) + " · next " + item.next_due_at));
-    const grant = item.grant;
-    card.append(scheduleNode("p", "schedule-meta", grant
-      ? "Granted up to " + grant.max_side_effect + " by " + grant.approved_by
-        + (grant.expires_at ? " until " + grant.expires_at : "")
-      : "Not granted: due runs stop as needs input."));
+    card.append(scheduleNode("p", "schedule-meta",
+      "Access is managed by IT, the operating system and source services."));
     if (item.blocked_by) {
       card.append(scheduleNode("p", "schedule-warning",
         "Blocked by an unresolved run. Open History to resolve it."));
@@ -9103,27 +9101,8 @@ function renderScheduleList(container, data, actions) {
     bar.append(item.status === "active"
       ? scheduleButton("Pause", () => actions.pause(item))
       : scheduleButton("Resume", () => actions.resume(item)));
-    const effect = scheduleNode("select");
-    effect.setAttribute("aria-label", "Highest effect to allow");
-    for (const name of SCHEDULE_EFFECTS) {
-      const option = scheduleNode("option", "", name);
-      option.value = name;
-      if (name === (item.side_effect || "read")) option.selected = true;
-      effect.append(option);
-    }
-    const days = scheduleNode("input");
-    days.type = "number"; days.min = "1"; days.max = "3650";
-    days.placeholder = "days (optional)";
-    days.setAttribute("aria-label", "Grant expires after days");
-    bar.append(effect, days,
-      scheduleButton("Grant", () => actions.grant(item, effect.value, days.value), true));
-    if (grant) bar.append(scheduleButton("Revoke grant", () => actions.revoke(item)));
     bar.append(scheduleButton("History", () => actions.history(item)));
     card.append(bar);
-    if (item.side_effect === "external_side_effect") {
-      card.append(scheduleNode("p", "schedule-warning",
-        "Sending is never automatic: every run waits for your approval."));
-    }
     if (item.runs.length) card.append(scheduleRunRows(item.runs.slice(0, 3)));
     container.append(card);
   }
@@ -15621,12 +15600,6 @@ async function biTools(vaultId) {
 
 function biToolsDraw(vaultId, reply) {
   const box = el("bi-b-tl-list"); box.replaceChildren();
-  const approve = async (item) => {
-    try {
-      await biVerRun(vaultId, "tool-approve", {sha256: item.sha256, confirm: true});
-      biNotice(true, "已核准「" + item.name + "」這份程式碼（只在這台電腦）。");
-    } catch (failure) { biNotice(false, "沒有核准：" + failure.message); }
-  };
   const runOn = async (item) => {
     if (!bi.build.sourceId) { biNotice(false, "請先在上面選一份來源。"); return; }
     try {
@@ -15637,17 +15610,14 @@ function biToolsDraw(vaultId, reply) {
       biBuildSave();
       biNotice(true, "產出新來源並已選取：" + done.sources.map((s) => s.name).join("、")
         + "；接著走一樣的試跑、預覽和審核。");
-    } catch (failure) { biNotice(false, "沒有執行：" + failure.message); }
+    } catch (failure) { biNotice(false, "工具處理未完成：" + failure.message); }
   };
   const list = biListTable(["程式", "狀態", "動作"]);
   const row = (item, draft) => {
     const title = item.name + (draft ? "（AI 提出的草稿）" : "（第 " + item.revision + " 版）");
     const code = bh("pre", "bi-meta", item.code || item.problem || "");
     const actions = [];
-    if (item.code && !item.approved) {
-      actions.push(biButton("看過了，核准", () => approve(item), "bi-btn", "核准：" + item.name));
-    }
-    if (!draft && item.approved) {
+    if (!draft && item.code && !item.problem) {
       actions.push(biButton("對選取的來源執行", () => runOn(item), "bi-btn", "執行：" + item.name));
     }
     if (draft) {
@@ -15657,15 +15627,14 @@ function biToolsDraw(vaultId, reply) {
       }, "bi-btn", "填入：" + item.name));
     }
     biRow(list, [bh("strong", "", title),
-      item.approved ? biBadge("已核准", "good") : biBadge("等待核准", "warn"),
+      item.problem ? biBadge("程式無法讀取", "warn") : biBadge("不需核准", "good"),
       biRowActions(actions)]);
-    // Code waiting for approval is shown open: approving means having read it.
+    // Code stays inspectable; historical review metadata does not admit execution.
     const shown = bh("details", "", bh("summary", "", "程式碼"), code);
     shown.open = Boolean(item.code && !item.approved);
     if (shown.open) {
-      // The person's reading is the real control; the guard only catches mistakes.
-      shown.append(bh("p", "bi-meta", "核准＝你讀過並信任這段程式。執行時的防護只擋常見的失誤，"
-        + "不是沙箱；看不懂或來源不明的程式，不要核准。"));
+      shown.append(bh("p", "bi-meta", "工具執行不需 AEP 核准；實際存取依公司 IT 與執行環境。"
+        + "輸出維持新來源的預覽與審核流程，不會自動變更知識卡。"));
     }
     biRowDetail(list).cell.append(shown);
   };

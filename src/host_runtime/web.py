@@ -977,7 +977,15 @@ class AgentWeb:
                         if hasattr(s, "capability")
                     ],
                     "parameters": [p.name for p in workflow.draft.parameters],
-                    "last_run": runs.get(workflow.candidate_id),
+                    "last_run": {
+                        "status": workflow.last_run.status,
+                        "result": workflow.last_run.status,
+                        "at": workflow.last_run.at,
+                        "run_id": workflow.last_run.run_id,
+                    }
+                    if workflow.last_run is not None
+                    and workflow.last_run.digest == digest(workflow.draft)
+                    else runs.get(workflow.candidate_id),
                     "detail": workflow.draft.model_dump_json(indent=2),
                 }
             )
@@ -2181,7 +2189,9 @@ class AgentWeb:
                 session_id
             ) or self._authoring_effects.get(session_id)
             with use_effects(effects) if effects is not None else nullcontext():
-                return assistant_handle(AssistantTools(self, session_id=session_id), message)
+                return assistant_handle(
+                    AssistantTools(self, session_id=session_id, backend=turn[1]), message
+                )
         if getattr(self, "_assistant_tools", None) is None:
             self._assistant_tools = AssistantTools(self)
         return assistant_handle(self._assistant_tools, message)

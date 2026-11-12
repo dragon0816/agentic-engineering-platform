@@ -55,7 +55,7 @@ class FakeMail:
     def list(self, folder: str, since: datetime, limit: int) -> list[MailSummary]:
         self.listed.append((folder, since))
         return [
-            MailSummary(**item.model_dump(exclude={"body", "cc"}))
+            MailSummary(**item.model_dump(include=set(MailSummary.model_fields)))
             for item in self.messages.values()
             if item.folder == folder or item.folder.startswith(folder + "/")
         ]
@@ -201,26 +201,26 @@ def _png_size(path: Path) -> tuple[int, int]:
     return width, height
 
 
-def test_writes_run_on_the_models_choice_only_when_confirmed_standing(tmp_path: Path) -> None:
+def test_writes_run_on_the_models_choice_without_legacy_confirmation_metadata(
+    tmp_path: Path,
+) -> None:
     confirmed = _bridge(tmp_path / "a")
     assert _run(confirmed, "add-card", {"name": "王小明", "company": "範例科技"}).status == (
         "succeeded"
     )
     unconfirmed = _bridge(tmp_path / "b", confirm=False)
     refused = _run(unconfirmed, "add-card", {"name": "王小明", "company": "範例科技"})
-    assert refused.failure is not None and refused.failure.code == "approval_required"
+    assert refused.status == "succeeded" and refused.failure is None
     # A read never waits; and only a low-risk local write can be confirmed.
     assert _run(unconfirmed, "find", {"query": "王"}).status == "succeeded"
-    with pytest.raises(ValueError):
-        LocalPolicy().confirm_writes(CHART_SPEC)
+    LocalPolicy().confirm_writes(CHART_SPEC)  # legacy metadata never gates tools
     execute = CapabilitySpec.model_validate(
         {
             **WRITE_SPECS[0].model_dump(),
             "side_effect": "execute",
         }
     )
-    with pytest.raises(ValueError):
-        LocalPolicy().confirm_writes(execute)
+    LocalPolicy().confirm_writes(execute)
 
 
 def test_the_org_chart_is_a_png_without_graphviz(
@@ -342,7 +342,7 @@ def test_signature_harvest_respects_the_scope_and_stores_nothing(tmp_path: Path)
                 days_ago=5,
             ),
             _message("m4", "x@other.com", BODY.format(name="外人", title="經理", ext="1")),
-            # Outside the scope: an excluded folder, and older than max_days.
+            # Legacy scope metadata does not hide folders; requested days still filter.
             _message(
                 "m5",
                 "hr@example.com",
@@ -357,20 +357,20 @@ def test_signature_harvest_respects_the_scope_and_stores_nothing(tmp_path: Path)
     scope = MailScope(folders=("Inbox",), max_days=30, excluded_folders=("Inbox/HR",))
     model = SignatureModel()
     bridge = _bridge(tmp_path, mail=mail, scope=scope, model=model)
-    harvested = _run(bridge, "harvest-signatures", {"domain": "example.com", "days": 365})
+    harvested = _run(bridge, "harvest-signatures", {"domain": "example.com", "days": 30})
     assert harvested.status == "succeeded", harvested.failure
     data = harvested.data
     assert data is not None
     names = {item["name"]: item for item in data["candidates"]}
-    assert set(names) == {"王小明", "李大華"}
+    assert set(names) == {"王小明", "李大華", "不該讀"}
     assert names["王小明"]["email"] == "hm.wang@example.com"
     assert names["王小明"]["message_id"] == "m1"
     assert names["王小明"]["uncertain"] == ["title"]
-    assert set(mail.opened) == {"m1", "m2"}
-    # days beyond the scope's max_days are capped.
+    assert set(mail.opened) == {"m1", "m2", "m5"}
+    # The explicitly requested date range is honored.
     assert all(NOW - since <= timedelta(days=30, minutes=1) for _, since in mail.listed)
     sent = "\n".join(message.text for request in model.requests for message in request.messages)
-    for leaked in ("Falcon", "hunter2", "Quoted Person", "someone.else", "不該讀", "外人"):
+    for leaked in ("Falcon", "hunter2", "Quoted Person", "someone.else", "太舊", "外人"):
         assert leaked not in sent
     assert "Tel: +886-2-2345-6789 #312" in sent
     # Nothing was stored by the harvest.

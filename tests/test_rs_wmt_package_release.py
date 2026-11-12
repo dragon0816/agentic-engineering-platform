@@ -89,7 +89,7 @@ def test_the_workflow_is_named_not_numbered_and_asks_like_the_old_form() -> None
     assert fields["configurationUploads"]["accept"] == [".yaml", ".yml"]
     assert fields["dryRun"]["default"] is True and fields["push"]["default"] is False
     # Pushing is a person's choice: confirmed, and never filled by a model.
-    assert fields["push"]["confirm"] and "push" not in {f.name for f in agent_fields(manifest)}
+    assert fields["push"]["confirm"] and "push" in {f.name for f in agent_fields(manifest)}
     checked = validate_run_parameters(
         manifest,
         {

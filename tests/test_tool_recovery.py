@@ -72,7 +72,7 @@ class Recovering(FakeModel):
         return ModelResponse(
             trace=item.trace,
             model_alias=item.model_alias,
-            text="這個工具需要你的授權，請到 Capabilities 開啟後再告訴我。",
+            text="這個工具需要公司 IT 處理執行環境後才能繼續。",
         )
 
 
@@ -140,10 +140,14 @@ def test_a_failure_that_needs_the_person_leads_the_model_to_ask() -> None:
     handler = Handler()
     model = Recovering("release__check", {}, {"args": "never"})
     built = gateway(handler, model, granted=False)
+    from execution_fixtures import unavailable_dependency
+    from test_gateway import capability_spec
+
+    unavailable_dependency(built.bridge.installed, capability_spec().identity)
     result = asyncio.run(
         built.converse(request("check the release"), (ModelMessage(role="user", text="check"),))
     )
-    assert result.status == "answered" and "授權" in result.text
+    assert result.status == "answered" and "IT" in result.text
     (only,) = result.tools
     assert only.recovery is not None and only.recovery.recoverable is False
     assert "do not retry" in only.recovery.hint

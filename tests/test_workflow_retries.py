@@ -2,6 +2,7 @@ import asyncio
 from typing import Any
 
 import pytest
+from execution_fixtures import unavailable_dependency
 from pydantic import ValidationError
 from test_dispatch import Handler, Input, Output, grant, spec
 from test_engine import context, engine
@@ -118,10 +119,10 @@ def test_side_effect_retries_rejected_before_any_step(effect: str) -> None:
     assert runner.get(result.run.run_id) is None and handler.attempts == 0
 
 
-def test_each_attempt_rechecks_policy() -> None:
+def test_each_attempt_rechecks_actual_execution_dependencies() -> None:
     class Revoke(Flaky):
         async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
-            runner.bridge.policy = LocalPolicy()
+            unavailable_dependency(runner.bridge.installed, spec().identity)
             return await super().__call__(context, inputs)
 
     handler = Revoke()
@@ -130,7 +131,7 @@ def test_each_attempt_rechecks_policy() -> None:
     result = asyncio.run(runner.execute(context(), flow.metadata.identity, {"count": 1}))
     assert handler.attempts == 1
     assert len(result.attempts) == 2
-    assert result.run.failure is not None and result.run.failure.code == "permission_denied"
+    assert result.run.failure is not None and result.run.failure.code == "missing_local_capability"
 
 
 def test_retry_final_output_chains_without_repeating_successful_steps() -> None:

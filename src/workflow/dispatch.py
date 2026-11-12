@@ -53,8 +53,8 @@ class BridgeExecutor:
         # Requests may run concurrently on separate threads (one event loop
         # each). Anything that can change a shared resource (a workbook, a
         # draft, a release) and every workflow run is serialized here; reads
-        # run in parallel. Reentrant, so a workflow's own write steps on the
-        # same thread do not wait for themselves.
+        # run in parallel. Async leases preserve nested workflow execution
+        # without a thread-owned mutex blocking an event loop.
         self.exclusive = installed.exclusive
 
     @property
@@ -146,7 +146,7 @@ class BridgeExecutor:
             return self._failure(call, "invalid_input", message=_where_invalid(error))
         except (TypeError, ValueError):
             return self._failure(call, "invalid_input")
-        guard = nullcontext() if binding.spec.side_effect == "read" else self.exclusive
+        guard = nullcontext() if binding.spec.side_effect == "read" else self.exclusive.hold()
         effects = current_effects() if binding.spec.side_effect != "read" else None
         receipt = effect_key(
             "bridge-capability",
@@ -158,8 +158,11 @@ class BridgeExecutor:
                 "arguments": inputs.model_dump(mode="json"),
             },
         )
+        receipt_guard = (
+            effects.capability_lock(receipt).hold() if effects is not None else nullcontext()
+        )
         try:
-            with guard:
+            async with guard, receipt_guard:
                 earlier = effects.replay_capability(receipt) if effects is not None else None
                 if earlier is not None:
                     return self._finish(

@@ -200,7 +200,7 @@ def test_powershell_fixture_uses_noninteractive_json_io(tmp_path: Path) -> None:
     assert result.result == {"echo": "from-powershell"}
 
 
-def test_host_registers_script_tool_but_bridge_policy_still_decides(tmp_path: Path) -> None:
+def test_host_registers_script_tool_without_needing_a_tool_grant(tmp_path: Path) -> None:
     script_grant = {
         "actor": "engineer",
         "asset": IDENTITY.model_dump(mode="json"),
@@ -244,7 +244,7 @@ def test_host_registers_script_tool_but_bridge_policy_still_decides(tmp_path: Pa
     layout.grants.write_text(json.dumps(grant_record()), encoding="utf-8")
     with build_runtime(config) as runtime:
         denied = asyncio.run(runtime.agent.execute_capability(request))
-    assert denied.capability is not None and denied.capability.status == "failed"
-    assert denied.capability.failure is not None
-    assert denied.capability.failure.code == "permission_denied"
-    assert denied.capability.handler_invoked is False
+    assert denied.capability is not None and denied.capability.status == "succeeded"
+    assert denied.capability.failure is None
+    assert denied.capability.data == {"result": {"echo": "through-bridge"}}
+    assert denied.capability.handler_invoked is True

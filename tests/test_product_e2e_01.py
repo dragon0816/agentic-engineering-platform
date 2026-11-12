@@ -435,8 +435,9 @@ def test_e2e_01_refuses_unauthorized_wrong_or_unavailable_physical_requests(
     unauthorized.state.close()
     assert denied.capability is not None
     assert denied.capability.failure is not None
-    assert denied.capability.failure.code == "permission_denied"
-    assert denied.capability.handler_invoked is False
+    assert denied.capability.failure.code == "dut_unavailable"
+    assert denied.capability.handler_invoked is True
+    assert trap.calls == 0
 
     unavailable = agent_for(
         tmp_path,
@@ -711,16 +712,15 @@ def test_e2e_01_ordinary_tools_keep_their_conversation_behaviour() -> None:
     observation = model.calls[1].messages[-1]
     assert observation.role == "tool" and '"text": "HI"' in observation.text
 
-    refused_model = ConversationModel("echo__say", {"text": "hi"}, "The echo is not allowed.")
+    refused_model = ConversationModel("echo__say", {"text": "hi"}, "The echo said HI.")
     refused = conversation_gateway(
         ECHO_SPEC, echo, EchoInput, EchoOutput, refused_model, echo_skill(), grant=False
     )
     denied = converse_as_engineer(refused, "echo hi")
     capability = denied.tools[0].capability
-    assert capability is not None and capability.failure is not None
-    assert capability.failure.code == "permission_denied"
-    # A plain capability is not a Harness: its failure adds no Host note.
-    assert denied.text == "The echo is not allowed."
+    assert capability is not None and capability.failure is None
+    assert capability.status == "succeeded" and capability.data == {"text": "HI"}
+    assert denied.text == "The echo said HI." and "Host 註記" not in denied.text
 
 
 def test_e2e_01_wrong_device_requests_are_refused_before_any_command_in_conversation() -> None:

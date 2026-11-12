@@ -1728,7 +1728,9 @@ def test_uninstalled_knowledge_skill_cannot_create_a_harness_run(tmp_path: Path)
     assert result["outcome"] is None
 
 
-def test_installed_knowledge_skill_still_obeys_bridge_permission(tmp_path: Path) -> None:
+def test_installed_knowledge_skill_retains_grounded_evidence_without_tool_grants(
+    tmp_path: Path,
+) -> None:
     skill = AssetIdentity(namespace="company-agent", name="knowledge-query", version="1.1.0")
     with knowledge_runtime(tmp_path, harness_skill=True, authorized=False) as runtime:
         result = AgentWeb(runtime).ask_knowledge(
@@ -1736,10 +1738,11 @@ def test_installed_knowledge_skill_still_obeys_bridge_permission(tmp_path: Path)
                 asset=V1, question="What firmware does Safe mode require?", skill=skill
             )
         )
-    assert result["ok"] is False
-    assert result["harness"]["phase"] == "failed"
-    assert result["harness"]["failure_code"] == "permission_denied"
-    assert result["outcome"]["capability"]["failure"]["code"] == "permission_denied"
+    assert result["ok"] is True
+    assert result["harness"]["phase"] == "validated"
+    assert result["record"]["cited_passages"]
+    assert result["answer"] == "Safe mode requires firmware 2.0 [1]."
+    assert result["outcome"]["capability"]["status"] == "succeeded"
 
 
 def test_unassessed_skill_evidence_cannot_validate_a_grounded_answer(tmp_path: Path) -> None:
@@ -1992,7 +1995,7 @@ def test_skill_guided_host_rejects_unrelated_cited_model_answer(tmp_path: Path) 
     assert "Safe mode" not in result["answer"]
 
 
-def test_named_knowledge_chat_keeps_bridge_denial_visible(tmp_path: Path) -> None:
+def test_named_knowledge_chat_keeps_grounding_without_legacy_grants(tmp_path: Path) -> None:
     with knowledge_runtime(tmp_path, authorized=False) as runtime:
         web = AgentWeb(runtime)
         created = web.create_conversation()["conversation"]
@@ -2002,9 +2005,9 @@ def test_named_knowledge_chat_keeps_bridge_denial_visible(tmp_path: Path) -> Non
                 message="According to widget-guide, what firmware does Safe mode require?",
             )
         )
-    assert asked["answer"]["status"] == "failed"
-    assert "permission_denied" in asked["answer"]["answer"]
-    assert asked["answer"]["outcome"]["capability"]["failure"]["code"] == ("permission_denied")
+    assert asked["answer"]["status"] == "answered"
+    assert "Safe mode requires firmware 2.0 [1]." in asked["answer"]["answer"]
+    assert asked["answer"]["outcome"]["capability"]["status"] == "succeeded"
 
 
 def test_named_knowledge_market_matrix_uses_exact_read_capability(tmp_path: Path) -> None:
@@ -2042,7 +2045,9 @@ def test_single_installed_knowledge_can_answer_matrix_without_exact_name(tmp_pat
     assert "Oscilloscopes" in asked["answer"]["answer"]
 
 
-def test_named_knowledge_market_matrix_requires_exact_grant(tmp_path: Path) -> None:
+def test_named_knowledge_market_matrix_retains_evidence_status_without_a_tool_grant(
+    tmp_path: Path,
+) -> None:
     with knowledge_runtime(tmp_path) as runtime:
         web = AgentWeb(runtime)
         created = web.create_conversation()["conversation"]
@@ -2052,8 +2057,12 @@ def test_named_knowledge_market_matrix_requires_exact_grant(tmp_path: Path) -> N
                 message="請根據 widget_guide 做市場矩陣",
             )
         )
-    assert asked["answer"]["status"] == "failed"
-    assert "permission_denied" in asked["answer"]["answer"]
+    assert asked["answer"]["status"] == "answered"
+    assert "Vector network analyzers" in asked["answer"]["answer"]
+    assert "缺 Raw" in asked["answer"]["answer"]
+    assert asked["answer"]["outcome"]["decision"][
+        "target"
+    ] == MARKET_MATRIX_SPEC.identity.model_dump(mode="json")
 
 
 def test_missing_knowledge_vault_reports_its_configured_path(tmp_path: Path) -> None:
@@ -2094,7 +2103,9 @@ def test_knowledge_ask_contract_cannot_claim_identity_model_or_vault(
     assert secret.status == 400
 
 
-def test_knowledge_asking_still_requires_bridge_policy(tmp_path: Path) -> None:
+def test_knowledge_asking_uses_exact_grounded_capability_without_tool_grants(
+    tmp_path: Path,
+) -> None:
     with knowledge_runtime(tmp_path, authorized=False) as runtime:
         result = AgentWeb(runtime).ask_knowledge(
             KnowledgeAskRequest(
@@ -2102,9 +2113,10 @@ def test_knowledge_asking_still_requires_bridge_policy(tmp_path: Path) -> None:
                 question="What firmware does Safe mode require?",
             )
         )
-    assert result["ok"] is False
-    assert result["outcome"]["capability"]["status"] == "failed"
-    assert result["outcome"]["capability"]["failure"]["code"] == "permission_denied"
+    assert result["ok"] is True
+    assert result["answer"] == "Safe mode requires firmware 2.0 [1]."
+    assert result["record"]["cited_passages"]
+    assert result["outcome"]["capability"]["status"] == "succeeded"
 
 
 def test_page_asks_one_exact_knowledge_version_and_renders_citations(

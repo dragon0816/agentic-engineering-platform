@@ -2,6 +2,7 @@ import asyncio
 from typing import Any
 
 import pytest
+from execution_fixtures import unavailable_dependency
 from test_dispatch import Handler, Input, Output, grant, spec
 
 from capabilities.runtime import InstalledCapabilities, LocalPolicy
@@ -116,15 +117,16 @@ def test_secret_requirements_fail_before_a_run_exists() -> None:
     assert runner.get(snapshot.run.run_id) is None
 
 
-def test_denied_step_ends_the_run_with_its_code() -> None:
+def test_unavailable_execution_dependency_ends_the_run_without_a_handler() -> None:
     handler = Handler()
     runner, flow = engine(handler, granted=False)
+    unavailable_dependency(runner.bridge.installed, spec().identity)
     snapshot = asyncio.run(
         runner.execute(context(), flow.metadata.identity, {"count": 1}, timeout_seconds=10)
     )
-    assert snapshot.run.status == "failed"
+    assert snapshot.run.status == "unavailable"
     assert snapshot.run.failure is not None
-    assert snapshot.run.failure.code == "permission_denied"
+    assert snapshot.run.failure.code == "missing_local_capability"
     assert snapshot.run.completed_steps == 0
     assert handler.calls == []
 

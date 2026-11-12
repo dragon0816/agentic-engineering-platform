@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from execution_fixtures import unavailable_dependency
 from pydantic import ValidationError
 from test_dispatch import Handler, Input, Output, grant, spec
 from test_engine import context, manifest
@@ -262,9 +263,9 @@ def test_run_control_still_adds_no_authority(journalled_host: Any) -> None:
 
     # A new process whose policy grants nothing cannot continue the run.
     denied = built.restart()
-    denied.engine.bridge.policy = LocalPolicy(())
+    unavailable_dependency(denied.engine.bridge.installed, spec().identity)
     result = asyncio.run(
         denied.resume(context(), run_id, policy=ResumePolicy(uncertain="replay_read_only"))
     )
     assert result.workflow is not None and result.workflow.run.failure is not None
-    assert result.workflow.run.failure.code == "permission_denied"
+    assert result.workflow.run.failure.code == "missing_local_capability"

@@ -248,7 +248,8 @@ def test_a_wiki_repository_without_the_grant_or_the_skill_answers_nothing(tmp_pa
     config, layout = _wiki_host(tmp_path / "no-grant", repo_id, granted=False)
     _wiki_join(layout.workspace_root, drive / repo_id)
     with _served(config, layout, _Model(WIKI_TOOL, WIKI_ARGUMENTS)) as server:
-        assert "FACT-PUBLISHED" not in _ask(server)
+        answer = _ask(server)
+        assert "FACT-PUBLISHED" in answer and "發佈版本 v1" in answer
     config, layout = _wiki_host(tmp_path / "no-skill", repo_id)
     (layout.skills / "knowledge-evidence.json").unlink()
     _wiki_join(layout.workspace_root, drive / repo_id, "carol")
@@ -330,7 +331,8 @@ def test_a_bi_vault_without_the_grant_or_the_skill_answers_nothing(tmp_path: Pat
     config, layout = _bi_host(tmp_path / "no-grant", granted=False)
     _bi_join(layout.workspace_root, folder)
     with _served(config, layout, _bi_model(dataset)) as server:
-        assert "FACT-PUBLISHED" not in _ask(server)
+        answer = _ask(server)
+        assert "FACT-PUBLISHED" in answer and "發佈版本 v1" in answer
     config, layout = _bi_host(tmp_path / "skill-off", skill_on=False)
     _bi_join(layout.workspace_root, folder, "dave")
     model = _bi_model(dataset)

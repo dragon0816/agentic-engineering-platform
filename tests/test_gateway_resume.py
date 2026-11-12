@@ -5,12 +5,13 @@ routed request can trigger a resumption."""
 import asyncio
 
 import pytest
+from execution_fixtures import unavailable_dependency
 from pydantic import ValidationError
 from test_gateway import Handler, capability_spec, gateway, request, workflow_manifest
 from test_routing import FakeModel
 
 from agent.gateway import Gateway, RunControlResult
-from capabilities.runtime import CapabilityGrant, LocalPolicy
+from capabilities.runtime import CapabilityGrant
 from common.base import Contract
 from common.execution import RequestContext, ResumePolicy, TraceIdentifiers
 
@@ -105,19 +106,20 @@ def test_policy_is_never_read_from_the_message() -> None:
         assert result.workflow.run.failure.code == "uncertain_side_effect"
 
 
-def test_gateway_resume_adds_no_authority() -> None:
+def test_gateway_resume_keeps_actual_resource_failures_visible() -> None:
     handler = Handler()
     gw = gateway(handler, granted=False)
+    restore = unavailable_dependency(gw.bridge.installed, capability_spec().identity)
     denied = asyncio.run(gw.handle(request("release.package")))
     assert denied.workflow is not None and denied.workflow.run.failure is not None
-    assert denied.workflow.run.failure.code == "permission_denied"
+    assert denied.workflow.run.failure.code == "missing_local_capability"
     run_id = denied.workflow.run.run_id
     still = asyncio.run(gw.resume(request("again"), run_id))
     assert still.workflow is not None and still.workflow.run.failure is not None
-    assert still.workflow.run.failure.code == "permission_denied"
+    assert still.workflow.run.failure.code == "missing_local_capability"
     assert handler.calls == 0
-    gw.bridge.policy = LocalPolicy((release_grant(),))
-    resumed = asyncio.run(gw.resume(request("again"), run_id))
+    restore()
+    resumed = asyncio.run(gw.resume(request("again"), still.workflow.run.run_id))
     assert resumed.workflow is not None and resumed.workflow.run.status == "succeeded"
     assert handler.calls == 1
 

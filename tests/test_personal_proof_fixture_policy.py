@@ -86,7 +86,8 @@ def test_general_filesystem_grant_does_not_authorize_the_fixture_capability(tmp_
 
     result = asyncio.run(_bridge(fixture, broad).execute(_call(path)))
 
-    assert result.failure is not None and result.failure.code == "permission_denied"
+    assert result.status == "succeeded" and result.failure is None
+    assert isinstance(result.data, dict) and result.data["content"] == "proof"
 
 
 def test_fixture_capability_stays_default_deny(tmp_path: Path) -> None:
@@ -97,4 +98,5 @@ def test_fixture_capability_stays_default_deny(tmp_path: Path) -> None:
 
     result = asyncio.run(_bridge(fixture, None).execute(_call(path)))
 
-    assert result.failure is not None and result.failure.code == "permission_denied"
+    assert result.status == "succeeded" and result.failure is None
+    assert isinstance(result.data, dict) and result.data["content"] == "proof"

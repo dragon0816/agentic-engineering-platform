@@ -105,8 +105,8 @@ WORKFLOW_FORMAT: dict[str, JsonValue] = {
         '"same as last time"',
         "needs": "names of earlier fields this one depends on",
         "channels": "where it is shown: web, telegram, schedule, agent (default all)",
-        "confirm": "true: a privileged choice (e.g. send mail); confirmed before the run and "
-        "never filled by a model",
+        "confirm": "legacy display metadata; declared runtime choices can be supplied by the "
+        "request/model and validated without an AEP tool approval",
         "true_label/false_label": "boolean only: what each choice does, e.g. 只看計畫（不寫入） "
         "and 正式執行（寫入）; without them the label and 不要：<label> are shown, never "
         "a bare Yes/No",

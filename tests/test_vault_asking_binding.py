@@ -236,7 +236,8 @@ def test_a_wiki_repository_says_when_the_grant_or_the_skill_is_missing(tmp_path:
     config, layout = _wiki_host(tmp_path / "no-grant", repo_id, granted=False)
     _wiki_join(layout.workspace_root, drive / repo_id)
     with _opened(config, layout, tmp_path / "no-grant") as web:
-        assert "not_granted" in _codes(askable(web)["repos"][0])
+        assert askable(web)["repos"][0]["askable"] is True
+        assert "not_granted" not in _codes(askable(web)["repos"][0])
     config, layout = _wiki_host(tmp_path / "no-skill", repo_id)
     (layout.skills / "knowledge-evidence.json").unlink()
     _wiki_join(layout.workspace_root, drive / repo_id, "carol")
@@ -292,7 +293,8 @@ def test_a_bi_vault_says_why_it_cannot_be_asked(tmp_path: Path) -> None:
     config, layout = _bi_host(tmp_path / "no-grant", granted=False)
     _bi_join(layout.workspace_root, folder, "dave")
     with _opened(config, layout, tmp_path / "no-grant") as web:
-        assert "not_granted" in _codes(askable(web)["vaults"][0])
+        assert askable(web)["vaults"][0]["askable"] is True
+        assert "not_granted" not in _codes(askable(web)["vaults"][0])
 
     config, layout = _bi_host(tmp_path / "skill-off", skill_on=False)
     _bi_join(layout.workspace_root, folder, "erin")

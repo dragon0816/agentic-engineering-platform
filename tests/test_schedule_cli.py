@@ -154,7 +154,7 @@ def _due_an_hour_ago(layout_root: Path, schedule_id: str) -> None:
         store.create(definition, now=now - timedelta(hours=2))
 
 
-def test_tick_runs_only_a_granted_schedule_and_never_twice(
+def test_tick_runs_due_schedules_without_grants_and_never_twice(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     config, layout = ready(tmp_path)
@@ -170,7 +170,7 @@ def test_tick_runs_only_a_granted_schedule_and_never_twice(
     assert command("tick") == 0
     output = capsys.readouterr().out
     assert "granted" in output and "succeeded (workflow_succeeded) [read]" in output
-    assert "ungranted" in output and "needs_input (schedule_grant_missing)" in output
+    assert "ungranted" in output and output.count("succeeded (workflow_succeeded) [read]") == 2
     assert command("tick") == 0
     assert capsys.readouterr().out.strip() == "nothing was due"
     assert command("revoke", "granted") == 0

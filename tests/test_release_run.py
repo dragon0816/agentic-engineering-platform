@@ -469,7 +469,8 @@ def test_the_release_capabilities_exist_once_this_install_has_release_settings(
     with build_runtime(config, layout=layout) as runtime:
         installed = runtime.agent.gateway.bridge.installed
         assert all(
-            installed.get(spec.identity) is None for spec in (PREPARE_SPEC, COMMIT_SPEC, PUSH_SPEC)
+            installed.get(spec.identity) is not None
+            for spec in (PREPARE_SPEC, COMMIT_SPEC, PUSH_SPEC)
         )
 
     WorkflowSettingsStore(layout.workspace_root / SETTINGS_FILE).save(

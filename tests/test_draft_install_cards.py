@@ -306,8 +306,8 @@ def test_pending_changes_leave_draft_cards_to_their_answer(served: Any) -> None:
     assert [item["asset"] for item in web.drafts()["drafts"]] == ["engineering/echo-month@1.0.0"]
 
 
-def test_the_models_install_request_is_answered_on_the_card(served: Any) -> None:
-    web, _server, _recorder, _ = served
+def test_model_install_is_immediate_without_creating_approval_cards(served: Any) -> None:
+    web, _server, recorder, _ = served
     session = web.create_conversation()["conversation"]["session_id"]
     _gateway_turn(
         web,
@@ -316,28 +316,19 @@ def test_the_models_install_request_is_answered_on_the_card(served: Any) -> None
         {"tools": [(DRAFT, {"title": "Echo", "workflow": workflow("write-it")})]},
         {"text": "Drafted."},
     )
-    candidate = web.runtime.chat_authoring.candidates(web.runtime.actor)[0].candidate_id
+    chat = web.runtime.chat_authoring
+    candidate = chat.candidates(web.runtime.actor)[0].candidate_id
     asked = _gateway_turn(
         web,
         session,
         "install it",
         {"tools": [(INSTALL, {"candidate_id": candidate})]},
-        {"text": "It waits for your approval."},
+        {"text": "Installed."},
     )
-    (card,) = _draft_cards(asked["answer"])  # the earlier card moved down, not doubled
-    statuses = [
-        card["status"]
-        for message in _stored(web, session)
-        for card in message.get("action_cards", [])
-    ]
-    assert statuses == ["superseded", "pending"]
-    # No second, old-style approval card for the same install.
-    assert web.approvals(session)["approvals"] == []
-    (pending,) = web.runtime.chat_authoring.approvals(web.runtime.actor)
-    assert web.decide_card(card["card_id"], "install")["ok"]
-    assert web.runtime.chat_authoring.approval(pending.approval_id, web.runtime.actor).status == (
-        "approved"
-    )
+    assert asked["ok"] and _draft_cards(asked["answer"]) == []
+    assert chat.candidate(candidate, web.runtime.actor).status == "installed"
+    assert (web.runtime.layout.workflows / "engineering__echo-month__1.0.0.json").is_file()
+    assert chat.approvals(web.runtime.actor) == [] and recorder.calls == []
 
 
 def test_run_once_to_try_only_for_read_only_and_keeps_the_card_open(served: Any) -> None:
@@ -438,26 +429,20 @@ def test_agent_mode_drafts_show_the_card_in_their_conversation(served: Any) -> N
     assert (web.runtime.layout.workflows / "engineering__echo-month__1.0.0.json").is_file()
 
 
-def test_agent_mode_install_request_waits_on_the_card_and_status_follows(served: Any) -> None:
-    web, _server, _recorder, claude = served
+def test_agent_mode_install_has_real_immediate_status_and_no_pending_card(served: Any) -> None:
+    web, _server, recorder, claude = served
     session = _claude_session(web)
     claude.calls = [("aep_submit_workflow", {"workflow": workflow("write-it"), "title": "Echo"})]
     web.conversation_turn(ConversationTurnRequest(session_id=session, message="build it"))
     candidate = str(claude.replies[-1]["candidate_id"])
     claude.calls = [("aep_install_workflow", {"candidate_id": candidate})]
     asked = web.conversation_turn(ConversationTurnRequest(session_id=session, message="install"))
-    approval_id = str(claude.replies[-1]["approval_id"])
-    (card,) = _draft_cards(asked["answer"])
-    assert web.approvals(session)["approvals"] == []
-    # Still listed for review in Capabilities, as every external request is.
-    assert [a["approval_id"] for a in web.external_approvals()["approvals"]] == [approval_id]
-    assert web.decide_card(card["card_id"], "install")["ok"]
-    status = web.runtime.chat_authoring.external_view(
-        web.runtime.chat_authoring.approval(approval_id, web.runtime.actor)
-    )
-    assert status["status"] == "approved" and status["installed_as"] == (
-        "engineering/echo-month@1.0.0"
-    )
+    assert claude.replies[-1]["ok"] and "approval_id" not in claude.replies[-1]
+    assert _draft_cards(asked["answer"]) == []
+    assert web.external_approvals()["approvals"] == []
+    assert web.runtime.chat_authoring.candidate(candidate, web.runtime.actor).status == "installed"
+    assert (web.runtime.layout.workflows / "engineering__echo-month__1.0.0.json").is_file()
+    assert recorder.calls == []
 
 
 def test_the_authoring_endpoint_attributes_only_a_running_turns_token(served: Any) -> None:
@@ -501,22 +486,18 @@ def test_the_authoring_endpoint_attributes_only_a_running_turns_token(served: An
 # -- an external agent outside Agent Web: unchanged ---------------------------------------
 
 
-def test_an_external_agent_outside_agent_web_still_waits_in_capabilities(served: Any) -> None:
-    web, _server, _recorder, _ = served
+def test_external_install_is_available_without_waiting_in_capabilities(served: Any) -> None:
+    web, _server, recorder, _ = served
     session = web.create_conversation()["conversation"]["session_id"]
     outside = ExternalAuthoring(web.runtime.chat_authoring, web.runtime.actor, "claude-code")
     submitted = outside.submit_workflow(workflow("write-it"), "Echo")
-    asked = outside.install_workflow(str(submitted["candidate_id"]))
+    installed = outside.install_workflow(str(submitted["candidate_id"]))
+    assert installed["ok"] and installed["installed_as"] == "engineering/echo-month@1.0.0"
+    assert "approval_id" not in installed
     quiet = _gateway_turn(web, session, "hello", {"text": "Hi."})
     assert _draft_cards(quiet["answer"]) == []
-    assert [a["approval_id"] for a in web.external_approvals()["approvals"]] == [
-        asked["approval_id"]
-    ]
-    assert [d["candidate_id"] for d in web.drafts()["drafts"]] == [submitted["candidate_id"]]
-    assert web.draft_cards.store.records() == []
-
-
-# -- Telegram -------------------------------------------------------------------------------
+    assert web.external_approvals()["approvals"] == [] and web.drafts()["drafts"] == []
+    assert web.draft_cards.store.records() == [] and recorder.calls == []
 
 
 def test_telegram_shows_the_card_with_install_and_not_now(served: Any, tmp_path: Path) -> None:

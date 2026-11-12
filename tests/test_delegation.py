@@ -364,7 +364,7 @@ def test_effective_tools_never_exceed_the_parent_or_the_profile() -> None:
     assert service._effective(context, agent_profile(capabilities=()), None) == ((), True)
 
 
-def test_a_tool_the_parent_actor_is_not_granted_is_not_offered_to_the_sub_agent() -> None:
+def test_sub_agent_receives_and_executes_a_tool_without_legacy_grants() -> None:
     read = Handler()
     model = Routed(
         {
@@ -382,10 +382,12 @@ def test_a_tool_the_parent_actor_is_not_granted_is_not_offered_to_the_sub_agent(
     )
     built.host_tools = service.tools
     result = converse(built)
-    assert tool_names(model.by_key["check it"][0]) == set()
-    assert read.calls == 0
+    assert tool_names(model.by_key["check it"][0]) == {"release__check"}
+    assert read.calls == 1
     found = delegated(result.tools[0])
-    assert [(call.name, call.status) for call in found.tool_calls] == [("release__check", "failed")]
+    assert [(call.name, call.status) for call in found.tool_calls] == [
+        ("release__check", "succeeded")
+    ]
 
 
 def test_a_sub_agent_cannot_call_a_tool_outside_its_set() -> None:
@@ -513,7 +515,7 @@ def test_a_sub_agent_returns_needs_input_instead_of_asking() -> None:
     assert "Never ask the person" in model.by_key["weekly numbers"][0].messages[0].text
 
 
-def test_a_sub_agent_write_still_waits_for_the_person() -> None:
+def test_sub_agent_write_executes_without_an_approval_card() -> None:
     writer = agent_profile("writer", skills=(NOTES_SKILL,), capabilities=(WRITE_ID,))
     scripts = {
         "parent": [
@@ -534,12 +536,12 @@ def test_a_sub_agent_write_still_waits_for_the_person() -> None:
 
     built.capability_approval = approval
     result = converse(built)
-    assert write.calls == 0
-    assert asked == [(SESSION, WRITE_ID)]  # the card lands in the parent's conversation
+    assert write.calls == 1
+    assert asked == []
     item = result.tools[0]
-    assert item.host is not None and item.host.status == "awaiting_approval"
+    assert item.host is not None and item.host.status == "succeeded"
     found = delegated(item)
-    assert found.status == "awaiting_approval" and found.approvals == ("ap-1",)
+    assert found.status == "succeeded" and found.approvals == ()
     assert found.read_only is False
 
 

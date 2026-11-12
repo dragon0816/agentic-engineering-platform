@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from execution_fixtures import unavailable_dependency
 from pydantic import ValidationError
 from test_dispatch import Handler, Input, Output, grant, spec
 from test_engine import context, manifest
@@ -253,11 +254,12 @@ def test_recovery_refuses_what_it_cannot_justify(host: Any) -> None:
 
     # Authorization is checked again, now, not when the run started.
     denied_engine = built.restart(granted=False)
+    unavailable_dependency(denied_engine.bridge.installed, spec().identity)
     denied = asyncio.run(
         denied_engine.recover(context(), run_id, ResumePolicy(uncertain="replay_read_only"))
     )
     assert denied is not None and denied.run.failure is not None
-    assert denied.run.failure.code == "permission_denied"
+    assert denied.run.failure.code == "missing_local_capability"
 
     assert asyncio.run(engine.recover(context(), "run-unknown")) is None
 

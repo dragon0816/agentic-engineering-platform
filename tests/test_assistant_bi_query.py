@@ -161,12 +161,15 @@ def test_only_vaults_are_read_and_a_missing_one_names_those_there_are(tmp_path: 
         assert _call(server, dataset="vault-no-such")["code"] == "not_a_vault"
 
 
-def test_without_the_grant_or_the_skill_it_answers_nothing(tmp_path: Path) -> None:
+def test_no_tool_grant_is_needed_and_missing_query_procedure_is_still_explicit(
+    tmp_path: Path,
+) -> None:
     with _joined(tmp_path / "no-grant", granted=False) as (server, _, dataset, _):
         _switch(server, True)
         denied = _call(server, **_search(dataset))
-    assert denied["ok"] is False and "FACT" not in json.dumps(denied)
-    assert denied["code"] == "permission_denied"
+    assert denied["ok"] is True
+    assert "FACT-PUBLISHED" in json.dumps(denied["cards"])
+    assert denied["reads"]["tag"] == "v1"
     with _joined(tmp_path / "skill-off", skill_on=False) as (server, _, dataset, _):
         _switch(server, True)
         off = _call(server, **_search(dataset))

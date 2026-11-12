@@ -294,6 +294,7 @@ from common.base import Contract
 from common.distribution import LocalStateError
 from common.execution import Failure, TraceIdentifiers
 from common.local_agent import BridgeMembership
+from common.ownership import version_key
 from common.workflow_run_form import agent_prefill, form_offer
 from dut.adapters import DutAdapter, SubprocessDutAdapter
 from dut.contracts import DutPhysicalValidationRequest, DutValidationEvidence
@@ -1141,7 +1142,33 @@ def build_gateway(
         raise HostError("profile_invalid", layout.active_profile) from error
     profile_skills = None if profile is None else {item.key for item in profile.skills}
     skills = SkillRegistry()
-    for manifest in _load_all(layout.skills, SkillManifest):
+    skill_versions = _load_all(layout.skills, SkillManifest)
+    # A retained prior version is rollback evidence, not another alias owner.
+    # Member selections choose a procedure version, never tool permission.
+    preferred = {
+        (item.asset.namespace, item.asset.name): item.asset.version
+        for item in (authorization.selections if authorization is not None else ())
+        if profile is None and item.kind == "skill" and item.actor == config.device.registered_by
+    }
+    chosen_skills: dict[tuple[str, str], SkillManifest] = {}
+    for manifest in skill_versions:
+        identity = manifest.metadata.identity
+        if profile_skills is not None and identity.key not in profile_skills:
+            continue
+        family = (identity.namespace, identity.name)
+        pinned = preferred.get(family)
+        if pinned is not None and identity.version != pinned:
+            continue
+        previous = chosen_skills.get(family)
+        if previous is None or version_key(identity.version) > version_key(
+            previous.metadata.identity.version
+        ):
+            chosen_skills[family] = manifest
+    for manifest in (
+        tuple(chosen_skills.values())
+        if profile_skills is None
+        else tuple(m for m in skill_versions if m.metadata.identity.key in profile_skills)
+    ):
         if profile_skills is not None and manifest.metadata.identity.key not in profile_skills:
             continue
         try:

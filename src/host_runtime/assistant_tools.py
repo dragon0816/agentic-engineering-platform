@@ -1,15 +1,10 @@
-"""AEP's assistant tools for an external agent such as GitHub Copilot (CP1).
+"""Authenticated assistant MCP tools served by the loaded Agent Web host.
 
-`docs/phases/COPILOT_INTEGRATION.md`. Served by the running Agent Web at
-`POST /mcp` (MCP over HTTP, JSON-RPC 2.0), so Copilot in Agent Web or in
-VS Code uses the Host's loaded Knowledge and models. The tools are read only:
-Knowledge search, page reading and the Knowledge Harness's validated answer,
-the installed Workflows, and running an installed Workflow that only reads.
-A Workflow that changes something is left to the person in Agent Web, because
-an agent chose it (owner mode: model-chosen side effects wait for a person).
-
-Unlike the authoring tools (statuses and codes only), these return content:
-the owner approved sending all data to Copilot (2026-10-12).
+Installed Bridge/MCP tools execute without application grant or approval cards.
+New generic native result contents are withheld when receiving-model eligibility
+is not established; execution status remains truthful. Existing Knowledge/BI
+content endpoints retain their own data-route contracts. An older Copilot content
+approval does not classify arbitrary new tool output or extend to other backends.
 """
 
 from __future__ import annotations
@@ -127,9 +122,12 @@ def _identity(text: str) -> AssetIdentity:
 
 
 class AssistantTools:
-    def __init__(self, web: Any, *, session_id: str | None = None) -> None:
+    def __init__(
+        self, web: Any, *, session_id: str | None = None, backend: str | None = None
+    ) -> None:
         self.web = web
         self.session_id = session_id
+        self.backend = backend
 
     # -- knowledge ---------------------------------------------------------
 
@@ -277,7 +275,7 @@ class AssistantTools:
         try:
             if name in mcp_definitions():
                 runtime = self.web.runtime
-                return ToolAccess(runtime.agent.gateway.bridge, mcp=runtime.mcp).call(
+                return ToolAccess(runtime.agent.gateway.bridge, mcp=runtime.mcp).native_call(
                     name,
                     args,
                     tool_context(
@@ -285,6 +283,7 @@ class AssistantTools:
                         runtime.config.namespace or "engineering",
                         self.session_id,
                     ),
+                    self.backend,
                 )
             if name == "aep_knowledge_search":
                 return self.knowledge_search(

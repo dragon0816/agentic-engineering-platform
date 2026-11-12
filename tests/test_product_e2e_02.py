@@ -382,7 +382,7 @@ def test_e2e_02_wrong_observable_output_does_not_complete(tmp_path: Path) -> Non
         raise AssertionError("a failed validator must block publication")
 
 
-def test_e2e_02_publication_alone_does_not_authorize_execution(tmp_path: Path) -> None:
+def test_e2e_02_installed_workflow_runs_without_application_grants(tmp_path: Path) -> None:
     outcome, _model, bridge = run(tmp_path, manifest())
     published = publish_validated_workflow(
         outcome,
@@ -402,5 +402,6 @@ def test_e2e_02_publication_alone_does_not_authorize_execution(tmp_path: Path) -
     result = asyncio.run(
         gateway.execute_workflow(context, published.metadata.identity, FIXTURE["arguments"])
     )
-    assert result.run.status == "failed"
-    assert result.run.failure is not None and result.run.failure.code == "permission_denied"
+    assert result.run.status == "succeeded" and result.run.failure is None
+    assert result.run.completed_steps == len(published.steps)
+    assert all(step.status == "succeeded" for step in result.step_results)

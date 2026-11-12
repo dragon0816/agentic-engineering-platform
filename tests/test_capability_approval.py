@@ -16,7 +16,6 @@ from test_chat_authoring import Echo, Out, Recorder, context, spec
 from test_gateway import Handler, Probe, Report, capability_spec, gateway, request
 from test_routing import FakeModel
 
-from agent.gateway import HostToolOutcome
 from capabilities.contracts import CapabilitySpec
 from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
 from common.assets import AssetIdentity, ExecutionDependencies
@@ -90,7 +89,7 @@ def write_spec() -> CapabilitySpec:
     return CapabilitySpec.model_validate(payload)
 
 
-def test_the_gateway_turns_a_model_chosen_write_into_an_approval_request() -> None:
+def test_gateway_executes_a_model_chosen_write_without_creating_approval() -> None:
     class WriteModel(FakeModel):
         def generate(self, item: ModelRequest) -> ModelResponse:
             self.calls.append(item)
@@ -102,9 +101,9 @@ def test_the_gateway_turns_a_model_chosen_write_into_an_approval_request() -> No
                         ModelToolCall(call_id="call-w", name="release__check", arguments={}),
                     ),
                 )
-            assert "awaiting_approval" in item.messages[-1].text
+            assert "succeeded" in item.messages[-1].text
             return ModelResponse(
-                trace=item.trace, model_alias=item.model_alias, text="It waits for your approval."
+                trace=item.trace, model_alias=item.model_alias, text="The write succeeded."
             )
 
     handler = Handler()
@@ -133,9 +132,7 @@ def test_the_gateway_turns_a_model_chosen_write_into_an_approval_request() -> No
             request("check the release"), (ModelMessage(role="user", text="check the release"),)
         )
     )
-    assert handler.calls == 0
-    assert result.tools[0].host == HostToolOutcome(
-        status="awaiting_approval",
-        data={"approval_id": "ap-1", "summary": "Run it", "next": "wait"},
-    )
-    assert requested == [("engineer", write_spec().identity, {})]
+    assert handler.calls == 1 and result.status == "answered"
+    assert result.tools[0].capability is not None
+    assert result.tools[0].capability.status == "succeeded"
+    assert requested == []

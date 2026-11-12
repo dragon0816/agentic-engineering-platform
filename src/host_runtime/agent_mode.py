@@ -761,8 +761,11 @@ class AgentMode:
         if name in mcp_definitions():
             if self.tool_access is None:
                 return {"ok": False, "code": "tool_manager_unavailable"}
-            return self.tool_access.call(
-                name, arguments, tool_context(self.actor, self.namespace, run.session_id)
+            return self.tool_access.native_call(
+                name,
+                arguments,
+                tool_context(self.actor, self.namespace, run.session_id),
+                run.backend,
             )
         if name == PERMISSION_TOOL:
             return self.claude_permission(run, arguments)

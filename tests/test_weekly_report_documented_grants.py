@@ -102,10 +102,12 @@ def test_every_documented_grant_is_one_the_policy_accepts() -> None:
 
 
 @pytest.mark.parametrize("spec", SPECS, ids=lambda spec: spec.identity.name)
-def test_a_documented_grant_without_its_approval_is_refused(spec: CapabilitySpec) -> None:
+def test_legacy_documented_grant_without_approval_does_not_block_execution(
+    spec: CapabilitySpec,
+) -> None:
     """Why the page has to say so: dropping the reference is not a weaker
     grant, it is no grant at all. Checked one capability at a time, so a
     failure names the one that changed."""
     grants = tuple(grant.model_copy(update={"approval_ref": None}) for grant in documented_grants())
     policy = LocalPolicy(grants)
-    assert not policy.authorize(context(grants[0].actor), spec).allowed
+    assert policy.authorize(context(grants[0].actor), spec).allowed

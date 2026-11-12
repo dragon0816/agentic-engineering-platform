@@ -1,13 +1,8 @@
-"""Local schedule execution through the resident Agent's boundaries.
+"""Run owned local schedules without AEP execution grants or approval cards.
 
-This worker is deliberately not started by Host construction. A trusted host
-control must provide an exact per-occurrence authorization before a target may
-run. Unresolved claims are never submitted again after a restart.
-
-Regardless of which authorizer is supplied, a target that can reach an
-`external_side_effect` capability never runs without a per-run human
-approval: its occurrence waits as `awaiting_approval` until the owner
-approves or denies it.
+Retain membership/Bridge identity, actual installed target/task validation and
+atomic due claims. Uncertain or historical pending work is never auto-approved
+or dispatched again. External service/OS permission failures remain real.
 """
 
 import math
@@ -20,14 +15,14 @@ from agent.task_execution import TaskScopeError
 from common.assets import WorkflowManifest
 from common.execution import ExecutionAuthorization, SideEffect, TraceIdentifiers
 from common.local_agent import LocalWorkflowRequest
-from common.scheduling import ScheduledRun, ScheduleRecord, max_side_effect
+from common.scheduling import ScheduledRun, ScheduleRecord
 from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
 from host_runtime.agent import LocalAgent
 from host_runtime.schedule_policy import (
     UNAVAILABLE_CODES,
     ScheduleDecider,
     ScheduleDecision,
-    target_capabilities,
+    ScheduleGrantAuthorizer,
 )
 from host_runtime.schedules import DEFAULT_CATCH_UP, ScheduleStoreError, SqliteScheduleStore
 
@@ -103,43 +98,10 @@ class ScheduleWorker:
         run_approved: bool,
         now: datetime,
     ) -> ScheduleDecision:
-        """The authorizer's decision, then the worker's own invariants."""
-        definition = schedule.definition
-        decision = ScheduleDecision(code="schedule_approval_required")
-        decide = getattr(self.authorizer, "decide", None)
-        try:
-            if callable(decide):
-                decision = ScheduleDecision.model_validate(
-                    decide(schedule, trace, run_approved=run_approved, now=now)
-                )
-            elif callable(self.authorizer):
-                legacy = ExecutionAuthorization.model_validate(self.authorizer(schedule, trace))
-                if legacy.allowed:
-                    decision = ScheduleDecision(
-                        allowed=True, code="schedule_authorized", authorization=legacy
-                    )
-        except Exception:  # noqa: BLE001 - a failing authorizer authorizes nothing
-            decision = ScheduleDecision(code="schedule_approval_required")
-        if not decision.allowed:
-            return decision
-        authorization = decision.authorization
-        if not (
-            authorization.actor == definition.owner
-            and authorization.asset == definition.target
-            and authorization.trace == trace
-        ):
-            return ScheduleDecision(code="schedule_approval_required")
-        specs = target_capabilities(
-            self.agent, definition.target_kind, definition.target, self.task_templates
-        )
-        if isinstance(specs, str):
-            return ScheduleDecision(code=specs)
-        effect = max_side_effect(spec.side_effect for spec in specs)
-        if effect == "external_side_effect" and not run_approved:
-            return ScheduleDecision(
-                code="run_approval_required", side_effect=effect, approval_required=True
-            )
-        return decision.model_copy(update={"side_effect": effect})
+        """Resolve the actual owned target, independent of legacy approval callbacks."""
+        return ScheduleGrantAuthorizer(
+            self.store, self.agent, task_templates=self.task_templates
+        ).decide(schedule, trace, run_approved=run_approved, now=now)
 
     def _settle(
         self,
@@ -262,10 +224,6 @@ class ScheduleWorker:
         if self.agent.admit(owner, self.store.bridge_id) is not None:
             return self._settle(claim, owner, "needs_input", "schedule_not_admitted")
         decision = self._decide(schedule, trace, run_approved=run_approved, now=now)
-        if decision.approval_required and decision.side_effect is not None:
-            return self.store.await_approval(
-                claim.idempotency_key, owner=owner, side_effect=decision.side_effect
-            )
         if not decision.allowed:
             status = "unavailable" if decision.code in UNAVAILABLE_CODES else "needs_input"
             return self._settle(claim, owner, status, decision.code, decision.side_effect)

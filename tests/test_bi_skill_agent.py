@@ -175,7 +175,7 @@ def test_the_agent_proposes_a_tool_and_tries_it_only_once_approved(tmp_path: Pat
         agent.then(
             {"tools": [("bi_skill__draft_tool", drafted)]},
             {"tools": [("bi_skill__try_tool", tried)]},
-            {"text": "請先看過程式碼並核准。"},
+            {"text": "草稿已試跑，尚未寫入知識庫。"},
             {"tools": [("bi_skill__try_tool", tried)]},
             {"tools": [("bi_skill__try_tool", {"sha256": sha, "source_id": secret})]},
             {"text": "試跑成功。"},
@@ -201,17 +201,15 @@ def test_the_agent_proposes_a_tool_and_tries_it_only_once_approved(tmp_path: Pat
         first = turn("這份來源規則讀不了，寫個程式")
         assert [(t["name"], t["ok"]) for t in first["sent"]["tools"]] == [
             ("bi_skill__draft_tool", True),
-            ("bi_skill__try_tool", False),
+            ("bi_skill__try_tool", True),
         ]
         told = "\n".join(m.text for m in agent.requests[2].messages if m.role == "tool")
-        assert "tool_needs_approval" in told
-        # The code waits for the person; nothing was staged, and the model cannot approve it.
+        assert "客戶會議紀錄" in told and "tool_needs_approval" not in told
+        # Execution needs no approval; no review or staged data is fabricated.
         listed = _ok(_call(ws, "GET", f"/api/bi/vaults/{vault_id}/tools"))
         assert listed["drafts"][0]["code"] == code and listed["drafts"][0]["approved"] is False
         assert not any("approve" in t.name for t in agent.requests[0].tools)
-        _ok(_call(ws, "POST", f"/api/bi/vaults/{vault_id}/tool-approve",
-                  {"sha256": sha, "confirm": True}))  # fmt: skip
-        second = turn("核准了，試試看")
+        second = turn("再試一次，保持來源分類限制")
         assert [t["ok"] for t in second["sent"]["tools"]] == [True, False]
     shown = "\n".join(m.text for m in agent.requests[-1].messages if m.role == "tool")
     assert "客戶會議紀錄" in shown

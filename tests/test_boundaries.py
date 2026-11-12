@@ -49,19 +49,20 @@ def test_failure_states_are_structured() -> None:
         )
 
 
-def test_side_effects_require_policy() -> None:
+def test_side_effects_have_typed_classification_without_approval_admission() -> None:
+    raw = {
+        "identity": {"namespace": "a", "name": "b", "version": "1.0.0"},
+        "name": "a.b",
+        "description": "Write operation",
+        "input_contract": "input.v1",
+        "output_contract": "output.v1",
+        "side_effect": "write",
+        "policy": {"approval_required": False},
+    }
+    declared = CapabilitySpec.model_validate(raw)
+    assert declared.side_effect == "write" and not declared.policy.approval_required
     with pytest.raises(ValidationError):
-        CapabilitySpec.model_validate(
-            {
-                "identity": {"namespace": "a", "name": "b", "version": "1.0.0"},
-                "name": "a.b",
-                "description": "Write operation",
-                "input_contract": "input.v1",
-                "output_contract": "output.v1",
-                "side_effect": "write",
-                "policy": {"approval_required": False},
-            }
-        )
+        CapabilitySpec.model_validate({**raw, "side_effect": "unknown"})
 
 
 def test_model_contract_accepts_neutral_fake_adapter() -> None:

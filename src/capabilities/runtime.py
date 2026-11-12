@@ -1,6 +1,5 @@
 """Explicit host-installed handlers and policy, distinct from Platform Registry assets."""
 
-import threading
 from dataclasses import dataclass
 from typing import Literal, Protocol
 
@@ -8,6 +7,7 @@ from pydantic import Field, JsonValue, TypeAdapter
 
 from capabilities.contracts import CapabilitySpec
 from common.assets import AssetIdentity, ExecutionDependencies, SecretRef
+from common.async_lock import ExecutionLock
 from common.base import Contract, Symbol, Text
 from common.execution import ExecutionAuthorization, RequestContext
 
@@ -86,7 +86,7 @@ class InstalledCapabilities:
     def __init__(self) -> None:
         self._bindings: dict[tuple[str, str, str], InstalledCapability] = {}
         self._offered: dict[tuple[str, str, str], CapabilitySpec] = {}
-        self.exclusive = threading.RLock()
+        self.exclusive = ExecutionLock()
 
     def offer(self, spec: CapabilitySpec) -> None:
         """Advertise a known integration requiring setup, without a handler."""

@@ -125,15 +125,15 @@ def _worker(store: SqliteScheduleStore, resident: LocalAgent) -> ScheduleWorker:
     )
 
 
-def test_scheduled_agent_task_needs_a_grant_then_runs_through_run_task(tmp_path: Path) -> None:
+def test_scheduled_agent_task_runs_without_a_tool_grant_through_run_task(tmp_path: Path) -> None:
     model = AnswerModel()
     service, state = executor(tmp_path, model, approved())
     resident = LocalAgent(company(), service.backend.gateway, state, task_executor=service)
     with SqliteScheduleStore(tmp_path / "schedules.sqlite", bridge_id="bridge-company") as store:
         store.create(definition(), now=DUE)
         (refused,) = asyncio.run(_worker(store, resident).poll_once(now=DUE))
-        assert (refused.status, refused.result_code) == ("needs_input", "schedule_grant_missing")
-        assert model.calls == [] and state.task_runs("engineer") == ()
+        assert (refused.status, refused.result_code) == ("succeeded", "task_validated")
+        assert len(model.calls) == 1 and len(state.task_runs("engineer")) == 1
         store.grant(
             ScheduleExecutionGrant(
                 schedule_id="weekly-answer",
@@ -153,7 +153,7 @@ def test_scheduled_agent_task_needs_a_grant_then_runs_through_run_task(tmp_path:
             "task_validated",
             "read",
         )
-        assert len(model.calls) == 1
-        (run,) = state.task_runs("engineer")
-        assert run.task_id.startswith("scheduled-")
+        assert len(model.calls) == 2
+        runs = state.task_runs("engineer")
+        assert len(runs) == 2 and all(run.task_id.startswith("scheduled-") for run in runs)
     state.close()
