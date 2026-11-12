@@ -78,6 +78,34 @@ runtime was silently changed as part of this assessment.
    capability. Investigate normal asset/setup options first; any routing/tool
    registration harness edit still needs the owner's separately scoped consent.
 
+## Follow-up: enabling tools in the same session
+
+Saving Settings > Agent mode is reread on the next turn. An already-selected
+Claude Code/Copilot Agent Web conversation can therefore acquire the per-turn
+aep-agent MCP launch without restarting AEP; test_agent_mode's
+test_a_turn_relays_permissions_through_agent_web covers off then on in the same
+fictional conversation. First mailbox access still requires the conversation's
+read-mail approval and scope. It does not expose those tools to the company
+Gateway backend or to an independent Paseo/Codex session's authoring MCP.
+This build refuses Codex Agent mode; do not confuse that with other Codex tool
+connections outside Agent Web.
+
+Important data-routing boundary: select_conversation_backend currently requires
+PUBLIC classification for native CLI backends and rejects a nonempty non-PUBLIC
+conversation with public_context_requires_empty_session. Therefore a populated
+company Gateway session cannot simply be switched to gain mail tools. Do not
+declare enterprise email PUBLIC as a workaround. Tool scope/permission and the
+model route's data eligibility are separate requirements. Company email should
+remain on an approved eligible route; the missing general Gateway mail-tool
+registration still requires a normal setup/asset investigation before any scoped
+harness proposal. No setting was enabled in this assessment.
+
+Bridge registration/execution permission, MCP connectivity/tool exposure and
+installed enabled Skill/Workflow selection are distinct. Connecting an MCP
+server does not automatically expose all tools to every model session. The
+present mail flow has a specialized agent-mode switch rather than one unified
+user-facing Enable Outlook control for all supported routes.
+
 ## Mail thread analysis boundary
 
 Models can summarize multiple retrieved related messages: chronology, decisions,
