@@ -1,8 +1,9 @@
 # IT-owned tool access and installation
 
-Status: owner policy confirmed; concrete harness implementation scope awaits
-owner review. Design only: no implementation, settings, grants, installs,
-resident, delivered package or remote branches changed in this task.
+Status: owner policy and the concrete four-part harness scope explicitly
+approved2026-11-12:「同意上述 harness 範圍並開始實作」. Implementation proceeds
+in the isolated it-owned-tool-access-20261112 worktree according to the plan.
+The original resident, delivered package and remote main remain unchanged.
 
 ## Owner decision and acceptance
 

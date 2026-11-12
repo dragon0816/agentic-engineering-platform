@@ -7591,3 +7591,18 @@ search/read capabilities; source registration/grant/install checks run outside
 Skill reasoning. No harness/config/runtime change has been made before the
 owner reviews that concrete scope. Keep user intent, truthful evidence,
 at-most-once effects and the Knowledge regression baseline intact.
+## 2026-11-12 — Approve the concrete IT-owned tool harness scope
+
+Owner answered「同意上述 harness 範圍並開始實作」to the question covering:
+unified Bridge/MCP/backend registration and visibility; removing AEP tool grants,
+installation/execution approvals and extra command/folder/mail restrictions;
+agent installation/connection and same-session use; preserving truthful results,
+at-most-once effects and Knowledge evidence/citations, without changing model
+data classification. Skill-first evidence, minimum surfaces and regressions were
+presented in IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md before this consent.
+
+This is AGENTS22 implementation consent for that concrete scope. It is not a
+claim that IT approved an individual tool or a delegation to change model/data
+policy, shared publishing, unrelated chat-form persistence or the running
+resident. Work proceeds on it-owned-tool-access-20261112, managed worktree
+wks_9e3f85169bdceb9b, with contract/red-green/verification stages in the plan.

@@ -4902,8 +4902,8 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [x] Write and self-review IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md with stages,
   concrete harness surfaces and Knowledge/side-effect/install regressions.
   No visual design question arose; no visual companion was needed.
-- [ ] Owner reviews the written scope and gives AGENTS22 harness consent;
-  an asynchronous concrete approval question is pending. Do not infer it.
-- [ ] After consent, create the implementation plan and a separate managed
+- [x] Owner reviewed the written scope and explicitly gave AGENTS22 consent:
+  「同意上述 harness 範圍並開始實作」. See latest DECISIONS.
+- [x] After consent, create the implementation plan and a separate managed
   worktree; contract/tests/implementation/verification follow in that order.
 - [ ] Implement and validate; do not edit harness before the scoped consent.
