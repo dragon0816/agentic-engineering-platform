@@ -35,14 +35,14 @@ Interfaces: retain LocalPolicy.authorize(context,spec)->ExecutionAuthorization
 as a compatibility adapter and confirmation_needed(spec,origin)->bool. Do not
 manufacture grants/approval records. Unknown targets still fail before execution.
 
-- [ ] Red: no-grant read/write/execute/external-side-effect reaches its recording
+- [x] Red: no-grant read/write/execute/external-side-effect reaches its recording
   handler once; old mismatched/missing grants cannot deny it; OS refusal remains
   failure; malformed arguments and unknown target never call a handler.
-- [ ] Green: remove application grant/approval admission, preserve real Bridge
+- [x] Green: remove application grant/approval admission, preserve real Bridge
   errors/validation/context and effect receipts.
-- [ ] Update old policy expectations to the new explicit owner contract, retaining
+- [x] Update old policy expectations to the new explicit owner contract, retaining
   stronger handler/output/failure assertions; run affected dispatch/owner suites.
-- [ ] Record and commit the coherent execution-contract slice.
+- [x] Record and commit the coherent execution-contract slice.
 
 ## Task2: built-ins available without a referencing asset
 

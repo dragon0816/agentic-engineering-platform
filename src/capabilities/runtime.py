@@ -129,12 +129,14 @@ class CapabilityGrant(Contract):
 
 
 class LocalPolicy:
-    """Small default-deny policy for a trusted local host, not an identity/RBAC server.
+    """Compatibility facade for execution under the environment's identity.
 
-    `owner_mode` (a local host without the shared platform's member decisions,
-    owner 2026-10-11): the device owner holds every installed capability, a
-    person's own request needs no recorded approval, and a side effect the
-    conversation model chose by itself waits for the person to confirm it."""
+    Owner2026-11-12: IT, the OS and the source service decide tool usability.
+    Legacy grants and owner_mode are accepted for configuration compatibility;
+    neither controls tool execution. The Bridge still checks the real target,
+    dependencies, input/output contracts and handler outcome. This facade does
+    not assert that IT reviewed or approved a particular operation.
+    """
 
     def __init__(
         self,
@@ -143,56 +145,27 @@ class LocalPolicy:
         owner_mode: bool = False,
     ) -> None:
         self.owner_mode = owner_mode
-        # Writes the Host itself declared need no per-call confirmation (host
-        # code, never asset content): the person's own contact store, which is
-        # local, recorded and undoable (docs/phases/BUSINESS_CARDS.md §3).
+        # Historical metadata remains readable while callers migrate; it is
+        # never an admission list and no synthetic approval record is made.
         self.confirmed_writes: set[tuple[str, str, str]] = set()
-        self._grants: dict[tuple[str, tuple[str, str, str]], CapabilityGrant] = {}
-        for grant in grants:
-            checked = CapabilityGrant.model_validate(grant)
-            key = (checked.actor, checked.asset.key)
-            if key in self._grants:
-                raise ValueError("duplicate actor/asset policy grant")
-            self._grants[key] = checked
 
     def add(self, grant: CapabilityGrant) -> None:
-        """A grant made while the host runs (an install the owner approved).
-        An existing grant for the same actor and asset is kept."""
-        checked = CapabilityGrant.model_validate(grant)
-        self._grants.setdefault((checked.actor, checked.asset.key), checked)
+        """Accept an obsolete caller's grant without granting or recording anything."""
 
     def confirm_writes(self, spec: CapabilitySpec) -> None:
-        """A standing confirmation for one local `write` capability. Only a
-        low-risk `write` qualifies: never execute or an external side effect."""
-        if spec.side_effect != "write" or spec.policy.risk != "low":
-            raise ValueError("only a low-risk local write may be confirmed standing")
+        """Retain legacy descriptive metadata; no execution depends on it."""
         self.confirmed_writes.add(spec.identity.key)
 
     def confirmation_needed(self, spec: CapabilitySpec, origin: str) -> bool:
-        """In owner mode, a side effect the model chose itself is not run until
-        the person confirms it; reads, anything a person asked for, and the
-        writes the Host confirmed standing (`confirm_writes`) run."""
-        return (
-            self.owner_mode
-            and origin == "model"
-            and spec.side_effect != "read"
-            and spec.identity.key not in self.confirmed_writes
-        )
+        """AEP adds no per-tool or per-call approval boundary."""
+        return False
 
     def authorize(self, context: RequestContext, spec: CapabilitySpec) -> ExecutionAuthorization:
-        grant = self._grants.get((context.actor, spec.identity.key))
-        if grant is None:
-            return ExecutionAuthorization()
-        if not set(spec.policy.required_permissions).issubset(grant.permissions):
-            return ExecutionAuthorization()
-        if not set(spec.policy.policy_refs).issubset(grant.policy_refs):
-            return ExecutionAuthorization()
-        if spec.policy.approval_required and grant.approval_ref is None and not self.owner_mode:
-            return ExecutionAuthorization()
+        """Carry the authenticated call identity, not an application permission grant."""
         return ExecutionAuthorization(
             allowed=True,
             actor=context.actor,
             asset=spec.identity,
             trace=context.trace,
-            policy_ref=grant.policy_refs[0],
+            policy_ref="execution-environment",
         )

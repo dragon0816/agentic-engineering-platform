@@ -1,10 +1,4 @@
-"""Owner mode on a local host (owner 2026-10-11).
-
-What this computer may do, its owner may do: installed capabilities are the
-owner's without a grants file, a person's own request needs no recorded
-approval, and a side effect the conversation model chose by itself waits for
-the person to confirm it.
-"""
+"""IT-owned execution: legacy owner/grant settings are not tool permission gates."""
 
 import asyncio
 
@@ -42,12 +36,11 @@ def test_a_person_runs_a_write_without_a_recorded_approval_in_owner_mode() -> No
     assert len(handler.calls) == 1
 
 
-def test_a_write_the_model_chose_waits_for_the_person() -> None:
+def test_a_write_the_model_chose_runs_without_an_application_approval() -> None:
     run, handler = bridge(write_spec(), LocalPolicy((grant(),), owner_mode=True))
     result = asyncio.run(run.execute(invocation().model_copy(update={"origin": "model"})))
-    assert result.status == "failed" and result.failure is not None
-    assert result.failure.code == "approval_required"
-    assert handler.calls == []
+    assert result.status == "succeeded" and result.failure is None
+    assert result.data == {"count": 2} and len(handler.calls) == 1
 
 
 def test_a_read_the_model_chose_runs() -> None:
@@ -56,17 +49,18 @@ def test_a_read_the_model_chose_runs() -> None:
     assert result.status == "succeeded" and len(handler.calls) == 1
 
 
-def test_outside_owner_mode_the_recorded_approval_is_still_required() -> None:
+def test_execution_without_recorded_approval_does_not_depend_on_owner_mode() -> None:
     run, handler = bridge(write_spec(), LocalPolicy((grant(approval_ref=None),)))
     result = asyncio.run(run.execute(invocation()))
-    assert result.failure is not None and result.failure.code == "permission_denied"
-    assert handler.calls == []
+    assert result.status == "succeeded" and result.failure is None
+    assert len(handler.calls) == 1
 
 
-def test_owner_mode_still_denies_an_actor_without_a_grant() -> None:
+def test_legacy_grants_for_another_actor_do_not_control_the_call() -> None:
     run, handler = bridge(spec(), LocalPolicy((grant(actor="someone-else"),), owner_mode=True))
     result = asyncio.run(run.execute(invocation()))
-    assert result.failure is not None and result.failure.code == "permission_denied"
+    assert result.status == "succeeded" and result.failure is None
+    assert len(handler.calls) == 1 and handler.calls[0].actor == "engineer"
 
 
 def test_on_a_local_host_the_owner_needs_no_grants_file(tmp_path, capsys) -> None:  # type: ignore[no-untyped-def]
