@@ -7537,3 +7537,34 @@ Rejected: allowing an unbounded live COM probe during collection, deleting the
 live tests, or using real mailbox operations to diagnose an unrelated test run.
 No Outlook process was restarted or stopped; only this task's blocked pytest
 processes were stopped before retrying the inert suite.
+## 2026-11-12 — Package the accepted Sales Order assets through existing distribution
+
+Owner requested a Windows AEP package containing the accepted Sales Order Workflow,
+its related Skills and operator instructions. Use the existing offline builder and
+bundled-asset installer; no harness, permission or business-script edit is needed.
+Preserve the published asset bodies and record their draft/approval provenance.
+Exclude source rows, generated reports, employee mapping contents, credentials and
+personal Host/browser configuration. The original absolute workstation paths and
+SOP period/rates remain explicit limitations, not an implicit portability claim.
+Cross-workstation revision and trial remain normal AEP operations. Do not change
+the installed resident or origin/main while preparing the package. Runtime source
+is the selected low-risk integration; excluded e564e1ad remains excluded.
+
+## 2026-11-12 — Isolate Gateway settings during offline package checks
+
+The packaging canary showed that GatewayInstallOnly suppresses service startup
+but still initializes the shared user Gateway configuration. Future canaries
+must explicitly isolate AEP_GATEWAY_HOME and omit user-env export, or use the
+existing NoGateway option. This workstation intentionally uses an external
+unmanaged Gateway; its normal AEP update instructions now use update.cmd
+-NoGateway. These existing procedure controls solve the issue without modifying
+the installer or harness.
+
+This test initially failed to isolate the home: shared python referenced the
+canary and YAML was regenerated. No pre-test backup existed, so exact restoration
+cannot be asserted. Normal CLI functional normalization points python at the
+verified already-running external Gateway interpreter; managed=false,11models
+and other settings matched the post-canary backup, rendered YAML bytes stayed
+unchanged during repair, and the original external PID/starttime did not change.
+No service/token/user-env operation was performed. Preserve this limitation in
+the package acceptance report rather than describing the canary as state-free.

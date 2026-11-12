@@ -57,3 +57,23 @@ content conflicts and must preserve cumulative decisions while presenting one
 current handoff. The currently accepted C4C run is not an acceptance run for this
 future merged code. Require explicit owner scoped consent before editing or
 merging this harness feature, then verify before push/deployment.
+
+## Blocking finding from a read-only synthetic evaluation
+
+Do not merge e564e1ad unchanged. Its _legacy_runs projection infers a succeeded
+Workflow from an exact legacy user-text prefix plus an answered assistant
+message, without consulting an actual execution record. A synthetic actor-owned
+form plus the exact prefix and an explanation-only answer produced
+workflow_form.run.status=succeeded with zero execution-handler calls. Evidence:
+.scratch/low-risk-verification/remote-projection-probe.json (source pinned to
+remote e564e1ad, no runtime change).
+
+This is a narrow exact-prefix collision and a form-status fidelity risk, not
+proof that ordinary Knowledge retrieval answers regress or that anything runs
+without approval. It matters in conversations that also contain prior Workflow
+forms: explanatory text must not become execution proof. Before any approved
+integration, require durable execution provenance for success, or show a
+truthful unresolved/legacy state and require normal explicit action. Add a
+negative case for explanation-only/Knowledge history with an old form. This
+extra state/provenance change is also harness scope and needs explicit consent.
+The three first-slice changes do not include this code.

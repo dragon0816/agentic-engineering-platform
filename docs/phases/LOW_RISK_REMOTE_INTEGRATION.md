@@ -46,3 +46,39 @@ Isolated source import checks passed. Baseline affected tests:
 Knowledge baseline is running; source integration waits for its result.
 
 Knowledge baseline: 445 passed in 294.16s; all baseline gates passed.
+
+## Independent review and original CI results
+
+Read-only review found no Critical or Important issue. Minor limitations retained:
+Outlook attachment failures after inline images can retain the coarser previous
+stage label; the test collection probe expects repository-root cwd. No production
+or test change was made to hide these limitations.
+
+Standard CI43102812296 on exact sourcee69371e6 completed:6556passed/74skipped,
+2failed (BI create-domain hold-count and BI version-form spatial assertion).
+Ruff/format/mypy/build/pipcheck and both offline-preview install checks passed.
+Browser-diagnostic upload failed because GitHub artifact storage quota was hit;
+preview uploads were skipped. The original CI is NOT green.
+
+A separate diagnostic-only commit2ffbf543/run43114604977 tested the original two
+assertions unchanged, Windows/Python3.12, before097b2521 and aftere69371e6, twice
+per ref. Version-form spatial assertion failed on BOTH refs in both passes;
+this failure exists on the baseline. Create-domain passed on BOTH refs twice;
+the full-run failure was not reproduced, and its cause is not proven. No only-head
+failure was observed. Diagnostic artifact uploads also hit the storage quota;
+run logs retain results. The diagnostic workflow is not part of delivery code.
+No BI production logic/assertion/timeout was changed, no unrelated harness merge.
+
+Local full verification completed on its initial run: 6619 passed, 13 skipped,
+0 failures/errors in 8453.20 seconds. Both originally failing CI BI cases passed
+locally. All 445 baseline Knowledge case identities and passed outcomes match
+the completed full-suite JUnit record; the eight Knowledge/model source paths
+remain identical. Evidence: full.log/full.xml and knowledge-after-full.json in
+.scratch/low-risk-verification. This is deterministic regression evidence, not
+an exhaustive evaluation of stochastic live-model answers. No assertion was
+weakened and the original red CI/control outcomes above remain part of delivery.
+
+Fresh committed-source platform wheel built successfully with pip wheel
+--no-deps --no-build-isolation. Package source is e69371e6; approved assets and
+operator documents form a separately documented local package overlay. See
+C4C_WINDOWS_PACKAGE_20261112.md for the package and isolated-install proof.

@@ -4849,7 +4849,9 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   independent validation passed (165/165 cells, 0 consistency diffs). Blank Owner exception
   documented. Install request card ap-20261111-202432-5d212d created (pending, not
   self-approved). See docs/phases/C4C_ROUND7_ACCEPTANCE.md.
-- [ ] Owner: review and approve installation card ap-20261111-202432-5d212d in Agent Web.
+- [x] Owner approved installation card ap-20261111-202432-5d212d in Agent Web;
+  installed Workflow 1.0.9 and its validation reference were independently read
+  back before exporting the requested package. No coding-agent self-approval.
 
 ### Low-risk remote integration (2026-11-12)
 
@@ -4857,9 +4859,21 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   live-Outlook test opt-in, and queued-message status only.
 - [x] Native isolated worktree and source import confinement verified; baseline
   affected tests13passed33.50s and complete Knowledge-named set445passed294.16s.
-- [ ] Apply ae1becf3,3b3da4d5,c0553d76, preserving all cumulative decisions.
-- [ ] Verify affected tests, same445Knowledge cases within full suite, lint,
+- [x] Apply ae1becf3,3b3da4d5,c0553d76, preserving all cumulative decisions.
+- [x] Verify affected tests, same445Knowledge cases within full suite, lint,
   format, typecheck, build and pipcheck; no live Outlook/C4C or resident update.
 - [ ] Push verified result to c4c-verified-20261112; leave origin/main unchanged.
 - [x] Separate harness assessment only: CHAT_WORKFLOW_PERSISTENCE_MERGE_REVIEW.md.
   e564e1ad remains excluded; explicit scoped owner consent needed before merge.
+
+- [x] Full local initial run: 6619 passed, 13 skipped, zero failures/errors;
+  same 445 baseline Knowledge identities/outcomes matched; eight source paths
+  unchanged. CI original red/control results preserved in phase report.
+- [x] Fresh committed-source platform wheel built for the requested Windows
+  Sales Order package; three approved asset exports/schema/provenance checked.
+- [x] Finish ZIP payload verification and isolated installation; include
+  Traditional Chinese guides and document fixed-path portability limits.
+  Final archive SHA33963cf8...cd49,588 payloads; install/doctor/pip checks passed,
+ 562 installed source files and three assets match. Shared Gateway initialization
+  incident and non-exact functional normalization are explicitly recorded in
+  C4C_WINDOWS_PACKAGE_20261112.md; current-PC update guide uses -NoGateway.
