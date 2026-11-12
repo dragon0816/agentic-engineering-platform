@@ -32,7 +32,6 @@ from agent.skills import SkillManifest, SkillRegistry
 from agent.task_execution import GatewayTaskExecutor
 from capabilities.bi_cards import vault as bi_vault
 from capabilities.bi_cards.capability import bindings as bi_cards_bindings
-from capabilities.bi_cards.manifest import BI_SKILL
 from capabilities.browser_session.handlers import SPEC as BROWSER_SPEC
 from capabilities.browser_session.handlers import (
     BrowserRequest,
@@ -220,17 +219,13 @@ from capabilities.release_package.contracts import (
     ReleasePreview,
     ReleasePreviewStepInput,
 )
-from capabilities.release_package.manifest import COMMIT as RELEASE_COMMIT_WORKFLOW
 from capabilities.release_package.manifest import COMMIT_SPEC as RELEASE_COMMIT_SPEC
 from capabilities.release_package.manifest import ISOLATED_APPLY as ISOLATED_APPLY_WORKFLOW
 from capabilities.release_package.manifest import ISOLATED_APPLY_SPEC
-from capabilities.release_package.manifest import PREPARE as RELEASE_PREPARE_WORKFLOW
 from capabilities.release_package.manifest import PREPARE_SPEC as RELEASE_PREPARE_SPEC
 from capabilities.release_package.manifest import PREVIEW as RELEASE_PREVIEW_WORKFLOW
 from capabilities.release_package.manifest import PREVIEW_SPEC as RELEASE_PREVIEW_SPEC
-from capabilities.release_package.manifest import PUSH as RELEASE_PUSH_WORKFLOW
 from capabilities.release_package.manifest import PUSH_SPEC as RELEASE_PUSH_SPEC
-from capabilities.release_package.manifest import RELEASE as RELEASE_RUN_WORKFLOW
 from capabilities.release_package.preview import ReleasePreviewHandler
 from capabilities.release_package.release_run import (
     CommitHandler,
@@ -290,7 +285,7 @@ from capabilities.weekly_report.handlers import (
 from capabilities.workflow_author.contracts import DraftWorkflowRequest, WorkflowDraft
 from capabilities.workflow_author.handlers import DRAFT_SPEC, DraftWorkflowHandler
 from channels.telegram import TelegramIngress, TelegramIngressConfig
-from common.assets import AssetIdentity, ExecutionDependencies, WorkflowManifest, WorkflowStep
+from common.assets import AssetIdentity, ExecutionDependencies, WorkflowManifest
 from common.authorization import DeviceAuthorization
 from common.base import Contract
 from common.distribution import LocalStateError
@@ -591,14 +586,13 @@ def load_membership(config: CompanyHostConfiguration, layout: HostLayout) -> Bri
 def load_authorization(
     config: CompanyHostConfiguration, layout: HostLayout
 ) -> DeviceAuthorization | None:
-    """What the members of this device decided it may run, when the control
-    plane has told it. A host without one is configured by hand through
-    `grants.json`; having both is two answers to one question, so it is
-    refused rather than merged."""
+    """Read legacy member metadata, including unchanged Knowledge selections.
+
+    Tool grants no longer govern execution and may coexist with this file.
+    Device identity is still checked; Knowledge selection is not widened here.
+    """
     if not layout.authorization.is_file():
         return None
-    if layout.grants.is_file():
-        raise HostError("authorization_conflict", layout.authorization)
     decided = _load_one(layout.authorization, DeviceAuthorization, "authorization_invalid")
     if decided.bridge_id != config.device.bridge_id:
         raise HostError("authorization_mismatch", layout.authorization)
@@ -703,11 +697,10 @@ def _loan_bridge_factory(
 def _register_loan_reply(
     installed: InstalledCapabilities,
     layout: HostLayout,
-    uses: set[tuple[str, str, str]],
     loan_bridge: Callable[[], LoanBridgeApi] | None,
     drafter: Callable[[], DraftWriter] | None,
 ) -> None:
-    """The loan capabilities an installed Workflow uses. The send itself
+    """Register the shipped loan tools without an asset-reference prerequisite. The send itself
     (`loan_manifest.SEND_SPEC`) is never registered: only a person's press on
     a send card sends (`host_runtime.loan_reply_cards`)."""
     from host_runtime.loan_reply_cards import LoanReplyCards
@@ -747,23 +740,9 @@ def _register_loan_reply(
             LoanReplyResult,
         ),
     ):
-        if spec.identity.key in uses:
-            installed.register(
-                spec, handler, step_input, output, ExecutionDependencies(central_required=False)
-            )
-
-
-def _target_name(step: AssetIdentity | WorkflowStep) -> tuple[str, str, str]:
-    return (step.capability if isinstance(step, WorkflowStep) else step).key
-
-
-def _has_workflow_settings(layout: HostLayout, identities: tuple[AssetIdentity, ...]) -> bool:
-    """Whether this install saved settings for any of these Workflows."""
-    try:
-        store = WorkflowSettingsStore(layout.workspace_root / SETTINGS_FILE)
-        return any(store.values(identity) for identity in identities)
-    except (OSError, ValueError):
-        return False
+        installed.register(
+            spec, handler, step_input, output, ExecutionDependencies(central_required=False)
+        )
 
 
 def build_integrations(
@@ -784,52 +763,24 @@ def build_integrations(
     not at the first fetch. The weekly report's steps that need no board are
     installed whenever its settings are, so a preview against the workbook
     alone still runs."""
-    # Workflow 13's paths are per-install Workflow settings now; a run without
-    # them is stopped by the engine, and the Bridge grant still decides use.
-    # Its capabilities exist when this host installed a Workflow that uses
-    # them, or still configures them the old way in host.json.
-    uses = {
-        _target_name(step)
-        for workflow in _load_all(layout.workflows, WorkflowManifest)
-        for step in workflow.steps
-    }
-    legacy = config.integrations
-    if RELEASE_PREVIEW_SPEC.identity.key in uses or (
-        legacy is not None and legacy.release_package is not None
-    ):
-        installed.register(
-            RELEASE_PREVIEW_SPEC,
-            ReleasePreviewHandler(),
-            ReleasePreviewStepInput,
-            ReleasePreview,
-            ExecutionDependencies(central_required=False),
-        )
-    if ISOLATED_APPLY_SPEC.identity.key in uses or (
-        legacy is not None and legacy.isolated_release_apply is not None
-    ):
-        installed.register(
-            ISOLATED_APPLY_SPEC,
-            IsolatedApplyHandler(),
-            IsolatedApplyStepInput,
-            IsolatedApplyOutput,
-            ExecutionDependencies(central_required=False),
-        )
-    # Workflow 13's release run (owner 2026-10-08, push 2026-10-15): prepare,
-    # commit and push, three approved runs. Registered when an installed
-    # Workflow uses them, or when this install already holds settings for one
-    # of their Workflows: that is how a host that does releases says so before
-    # their Workflows are installed from drafts. Grants still come only from
-    # the owner's install, and the settings keep the real GitLab out until
-    # `remote_release` is on.
-    release_configured = _has_workflow_settings(
-        layout,
-        (
-            RELEASE_PREPARE_WORKFLOW,
-            RELEASE_COMMIT_WORKFLOW,
-            RELEASE_PUSH_WORKFLOW,
-            RELEASE_RUN_WORKFLOW,
-        ),
+    # Register portable blocks before any asset references them. Task settings
+    # remain real inputs, validated by the handler at invocation time.
+    installed.register(
+        RELEASE_PREVIEW_SPEC,
+        ReleasePreviewHandler(),
+        ReleasePreviewStepInput,
+        ReleasePreview,
+        ExecutionDependencies(central_required=False),
     )
+    installed.register(
+        ISOLATED_APPLY_SPEC,
+        IsolatedApplyHandler(),
+        IsolatedApplyStepInput,
+        IsolatedApplyOutput,
+        ExecutionDependencies(central_required=False),
+    )
+    # Release prepare/commit/push are discoverable before a Workflow is authored.
+    # Their real request inputs and preflight checks remain unchanged.
     # Uploaded release files are read only from this host's upload store.
     uploads = layout.workspace_root / UPLOADS_FOLDER
     for spec, handler, step_input, output in (
@@ -842,27 +793,24 @@ def build_integrations(
         (RELEASE_COMMIT_SPEC, CommitHandler(), CommitStepInput, CommitResult),
         (RELEASE_PUSH_SPEC, PushHandler(), PushStepInput, PushResult),
     ):
-        if release_configured or spec.identity.key in uses:
-            installed.register(
-                spec, handler, step_input, output, ExecutionDependencies(central_required=False)
-            )
+        installed.register(
+            spec, handler, step_input, output, ExecutionDependencies(central_required=False)
+        )
     # Workflow 14: its paths are per-install Workflow settings.
-    if NCC_PREPARE_SPEC.identity.key in uses:
-        installed.register(
-            NCC_PREPARE_SPEC,
-            NccPrepareHandler(),
-            NccPlanStepInput,
-            NccPlan,
-            ExecutionDependencies(central_required=False),
-        )
-    if NCC_RENDER_SPEC.identity.key in uses:
-        installed.register(
-            NCC_RENDER_SPEC,
-            NccRenderHandler(),
-            NccRenderStepInput,
-            NccRendered,
-            ExecutionDependencies(central_required=False),
-        )
+    installed.register(
+        NCC_PREPARE_SPEC,
+        NccPrepareHandler(),
+        NccPlanStepInput,
+        NccPlan,
+        ExecutionDependencies(central_required=False),
+    )
+    installed.register(
+        NCC_RENDER_SPEC,
+        NccRenderHandler(),
+        NccRenderStepInput,
+        NccRendered,
+        ExecutionDependencies(central_required=False),
+    )
     # Web and data building blocks for generated Workflows.
     if config.web is not None:
         profile = (
@@ -905,8 +853,7 @@ def build_integrations(
             DesktopResult,
             ExecutionDependencies(central_required=False),
         )
-    # Data and Excel blocks: installed when a Workflow uses them, or when this
-    # host turned on web steps for generated Workflows (`web` in host.json).
+    # Data/Excel discovery does not depend on another tool's configuration.
     installed.register(
         DATA_MERGE_SPEC,
         DataMergeHandler(),
@@ -914,64 +861,55 @@ def build_integrations(
         DataMergeResult,
         ExecutionDependencies(central_required=False),
     )
-    generated = config.web is not None
-    if generated or DATA_SELECT_SPEC.identity.key in uses:
-        installed.register(
-            DATA_SELECT_SPEC,
-            SelectHandler(),
-            SelectRequest,
-            SelectResult,
-            ExecutionDependencies(central_required=False),
-        )
-    if generated or EXCEL_READ_SHEET_SPEC.identity.key in uses:
-        installed.register(
-            EXCEL_READ_SHEET_SPEC,
-            ReadSheetHandler(),
-            ReadSheetRequest,
-            SheetRows,
-            ExecutionDependencies(central_required=False),
-        )
-    if generated or EXCEL_UPSERT_SPEC.identity.key in uses:
-        installed.register(
-            EXCEL_UPSERT_SPEC,
-            UpsertHandler(layout.workspace_root / "excel-backups"),
-            UpsertRequest,
-            UpsertResult,
-            ExecutionDependencies(central_required=False),
-        )
-    # Workflows 06 / 06b, the loan replies (owner 2026-10-20): installed when
-    # an installed Workflow uses them; they ship switched off.
-    _register_loan_reply(installed, layout, uses, loan_bridge, drafter)
-    # The Outlook draft building block: installed when a Workflow uses it.
-    if MAIL_DRAFT_SPEC.identity.key in uses:
-        installed.register(
-            MAIL_DRAFT_SPEC,
-            MailDraftHandler(drafter if drafter is not None else OutlookComDraft),
-            MailDraftRequest,
-            MailDraftResult,
-            ExecutionDependencies(central_required=False),
-        )
-    # Outlook search and read (owner 2026-10-15): read only, in the scope the
-    # person set in Agent Web Settings > Agent mode; installed when used.
-    if MAIL_SEARCH_SPEC.identity.key in uses or MAIL_READ_SPEC.identity.key in uses:
-        from host_runtime.agent_mode_settings import AgentModeStore
-        from integrations.outlook_mail import OutlookComMailbox
+    installed.register(
+        DATA_SELECT_SPEC,
+        SelectHandler(),
+        SelectRequest,
+        SelectResult,
+        ExecutionDependencies(central_required=False),
+    )
+    installed.register(
+        EXCEL_READ_SHEET_SPEC,
+        ReadSheetHandler(),
+        ReadSheetRequest,
+        SheetRows,
+        ExecutionDependencies(central_required=False),
+    )
+    installed.register(
+        EXCEL_UPSERT_SPEC,
+        UpsertHandler(layout.workspace_root / "excel-backups"),
+        UpsertRequest,
+        UpsertResult,
+        ExecutionDependencies(central_required=False),
+    )
+    _register_loan_reply(installed, layout, loan_bridge, drafter)
+    # Outlook handlers are factories: registration neither opens COM nor reads mail.
+    installed.register(
+        MAIL_DRAFT_SPEC,
+        MailDraftHandler(drafter if drafter is not None else OutlookComDraft),
+        MailDraftRequest,
+        MailDraftResult,
+        ExecutionDependencies(central_required=False),
+    )
+    # Legacy mail settings are loaded only when a read/search is invoked.
+    from host_runtime.agent_mode_settings import AgentModeStore
+    from integrations.outlook_mail import OutlookComMailbox
 
-        store = AgentModeStore(layout.workspace_root)
-        installed.register(
-            MAIL_SEARCH_SPEC,
-            MailSearchHandler(OutlookComMailbox, lambda: store.load().mail),
-            MailSearchRequest,
-            MailSearchResult,
-            ExecutionDependencies(central_required=False),
-        )
-        installed.register(
-            MAIL_READ_SPEC,
-            MailReadHandler(OutlookComMailbox, lambda: store.load().mail),
-            MailReadRequest,
-            MailReadResult,
-            ExecutionDependencies(central_required=False),
-        )
+    store = AgentModeStore(layout.workspace_root)
+    installed.register(
+        MAIL_SEARCH_SPEC,
+        MailSearchHandler(OutlookComMailbox, lambda: store.load().mail),
+        MailSearchRequest,
+        MailSearchResult,
+        ExecutionDependencies(central_required=False),
+    )
+    installed.register(
+        MAIL_READ_SPEC,
+        MailReadHandler(OutlookComMailbox, lambda: store.load().mail),
+        MailReadRequest,
+        MailReadResult,
+        ExecutionDependencies(central_required=False),
+    )
     integrations = config.integrations
     if integrations is None:
         return
@@ -1179,10 +1117,8 @@ def build_gateway(
     configuration is present; every other capability a manifest names is
     absent, and a step that reaches for one fails closed.
 
-    When the members' decisions are present, only the Workflows and Skills
-    they chose are installed: a manifest sitting in the assets directory that
-    nobody selected is not something this device may run."""
-    allowed = authorization.allows if authorization is not None else None
+    Local tools/assets are usable without member tool selections. Knowledge
+    source/model eligibility is assembled separately and remains unchanged."""
     try:
         profile = load_active_profile(
             config,
@@ -1195,8 +1131,6 @@ def build_gateway(
     profile_skills = None if profile is None else {item.key for item in profile.skills}
     skills = SkillRegistry()
     for manifest in _load_all(layout.skills, SkillManifest):
-        if allowed is not None and not allowed("skill", manifest.metadata.identity):
-            continue
         if profile_skills is not None and manifest.metadata.identity.key not in profile_skills:
             continue
         try:
@@ -1205,8 +1139,6 @@ def build_gateway(
             raise HostError("asset_invalid", layout.skills) from error
     workflows = InstalledWorkflows()
     for workflow in _load_all(layout.workflows, WorkflowManifest):
-        if allowed is not None and not allowed("workflow", workflow.metadata.identity):
-            continue
         try:
             workflows.register(workflow)
         except ValueError as error:
@@ -1231,8 +1163,6 @@ def build_gateway(
         script_tools = load_script_tools(layout.script_tools)
         for tool in script_tools:
             script_manifest = tool.manifest
-            if allowed is not None and not allowed("capability", script_manifest.metadata.identity):
-                continue
             installed.register(
                 script_manifest.capability,
                 ScriptToolHandler(tool),
@@ -1327,33 +1257,26 @@ def build_gateway(
         WorkflowDraft,
         ExecutionDependencies(central_required=False),
     )
-    # Business cards (owner 2026-10-20, docs/phases/BUSINESS_CARDS.md): the
-    # person's own contact store under the workspace, installed when this host
-    # has the Skill (switched on or off, so switching it on needs no restart);
-    # the conversation tools appear only while it is switched on.
-    if _has_business_cards_skill(layout):
-        _register_business_cards(
-            installed,
-            layout,
-            model=drafting_model,
-            alias=(
-                binding.routing_alias
-                if binding is not None and binding.routing_alias is not None
-                else "routing"
-            ),
-            local_only=binding.require_local_model if binding is not None else False,
+    # Procedure Skills do not decide whether these built-in tools exist.
+    _register_business_cards(
+        installed,
+        layout,
+        model=drafting_model,
+        alias=(
+            binding.routing_alias
+            if binding is not None and binding.routing_alias is not None
+            else "routing"
+        ),
+        local_only=binding.require_local_model if binding is not None else False,
+    )
+    approval = None if binding is None else binding.data_approval
+    for spec, handler, request, response in bi_cards_bindings(
+        layout.workspace_root,
+        approved=() if approval is None else approval.approved_classes,
+    ):
+        installed.register(
+            spec, handler, request, response, ExecutionDependencies(central_required=False)
         )
-    # BI knowledge cards (owner 2026-10-21, Case A): the read-only chat query,
-    # installed when this host has the Skill, as for business cards.
-    if _has_skill(layout, BI_SKILL):
-        approval = None if binding is None else binding.data_approval
-        for spec, handler, request, response in bi_cards_bindings(
-            layout.workspace_root,
-            approved=() if approval is None else approval.approved_classes,
-        ):
-            installed.register(
-                spec, handler, request, response, ExecutionDependencies(central_required=False)
-            )
     if config.coding is not None and config.coding.workspace_roots:
         installed.register(
             CODING_RUN_SPEC,
@@ -1419,23 +1342,9 @@ def build_gateway(
                 )
     if config.knowledge_pipeline is not None:
         _register_knowledge_pipeline(installed, config, layout, drafting_model)
-    # Derive policy only after every configured built-in capability is in the
-    # registry. A selected Knowledge query or workflow-author capability must
-    # not disappear merely because its handler is assembled from local model
-    # configuration later than the filesystem and integration handlers.
-    grants = (
-        _decided_grants(authorization, installed)
-        if authorization is not None
-        else _configured_grants(layout)
-        + (_owner_grants(membership, installed, layout) if config.local_owner_grants else ())
-    )
-    if profile is not None:
-        permitted = {item.key for item in profile.allowed_capabilities}
-        grants = tuple(item for item in grants if item.asset.key in permitted)
-    try:
-        policy = LocalPolicy(grants, owner_mode=authorization is None and config.local_owner_grants)
-    except ValueError as error:
-        raise HostError("grants_invalid", layout.grants) from error
+    # Legacy grant files and profile tool lists are not execution admission.
+    # Actor/device identity and model/data eligibility remain their own contracts.
+    policy = LocalPolicy(owner_mode=authorization is None and config.local_owner_grants)
     for spec in CARDS_WRITE_SPECS:
         if installed.get(spec.identity) is not None:
             policy.confirm_writes(spec)
@@ -2113,8 +2022,8 @@ def inspect_runtime(
             if decided is not None
             else DoctorCheck(
                 name="authorization",
-                status="pending",
-                detail="no decisions from the shared platform; grants.json configures this host",
+                status="passed",
+                detail="tools use the execution environment; no AEP tool grants are required",
             )
         )
     try:
@@ -2125,15 +2034,7 @@ def inspect_runtime(
             name="assets", status="failed", detail=f"an asset manifest is unreadable: {error.code}"
         )
     else:
-        # Count what this host would actually install, which is what the
-        # members chose when they have chosen.
-        if decided is not None:
-            skills = tuple(
-                item for item in skills if decided.allows("skill", item.metadata.identity)
-            )
-            workflows = tuple(
-                item for item in workflows if decided.allows("workflow", item.metadata.identity)
-            )
+        # Report physically installed assets, not obsolete member tool selections.
         detail = f"{len(skills)} skill(s) and {len(workflows)} workflow(s) installed"
         assets = DoctorCheck(
             name="assets", status="passed" if skills or workflows else "pending", detail=detail

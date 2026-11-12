@@ -52,11 +52,11 @@ Interfaces: existing InstalledCapabilities.discover/get/register; no COM access
 or source-service call during discovery. Missing configuration is truthful setup
 status, never an invented permission denial.
 
-- [ ] Red: clean profile/no reference discovers Outlook search/read/draft and
+- [x] Red: clean profile/no reference discovers Outlook search/read/draft and
   available data/Excel/system blocks; zero mailbox/COM calls during construction.
-- [ ] Green: remove asset-usage registration gates; defer external dependencies
+- [x] Green: remove asset-usage registration gates; defer external dependencies
   until invocation. Preserve real integration configuration errors.
-- [ ] Run host wiring and external authoring catalog/Skill-binding regressions;
+- [x] Run host wiring and external authoring catalog/Skill-binding regressions;
   record and commit the registration slice.
 
 ## Task3: common discover/describe/invoke and operating-system commands

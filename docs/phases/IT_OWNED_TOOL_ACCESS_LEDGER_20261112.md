@@ -40,3 +40,29 @@ Task1 commit, ready for the registration slice.
 Ruling: retain LocalPolicy's constructor/add/confirm_writes interfaces only as
 compatibility metadata while migrating callers; no method may gate execution.
 This avoids breaking integrations before their registration/install migration.
+
+## Task2 — portable registration and local assets
+
+Red: task2-red.log1failed proves missing Outlook; expanded discovery red2failed/
+1passed proves Skill-gated BI/contacts and member-selected local assets.
+Green: task2-affected.log/xml52passed22.22s, including zero-COM discovery,
+no-reference data/Outlook/BI/contacts and local assets independent of legacy tool
+selections. Ruff passed; host.py mypy passed. Registration Knowledge isolation
+and pipeline host checks46passed25.86s. Full445/full build remain final gates.
+
+Removed13 asset-usage guards/setup assignments from portable registration and
+unused policy imports/helpers. Removed grant/profile-capability admission and
+fake runtime grant synthesis; preserved authenticated device checks and existing
+Knowledge selections/model data approval. Old grants can coexist or be malformed
+without becoming startup permission input. Diagnostics report actual installed
+assets. Existing assertions were updated only for the explicit changed policy;
+foreign-device and invalid-asset/secret-redaction assertions remain.
+
+Ruling: profile procedure selection still controls which instructions fit a
+role, not common tool access. Internal Knowledge query helpers retain their
+query/check contracts. Configured-only integration descriptors/setup statuses
+belong to Task3's common catalog, not a second registry policy. The new system
+command block is also Task3; Task2 covers existing portable built-ins.
+
+Next: commit Task2 and implement Task3 common catalog/description/invocation.
+No test/build process remains; no resident or shared configuration was touched.
