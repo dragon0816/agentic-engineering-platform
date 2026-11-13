@@ -4959,3 +4959,6 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [ ] Push reviewed assessment/consent, freeze typed contract, implement generic
   fixture-only Slice1 through parallel exclusive-file workers, integrate generic
   startup/API/declarative UI and validate. BI/Wiki extraction is not this slice.
+  Reviewed docs pushed6d0132ed (remote hash checked). Active dev branch
+  phase-plugins/slice1-20261113. Contract-first plan and exclusive Claude worker
+  ownership: FEATURE_PLUGIN_SLICE1_PLAN_20261113.md.

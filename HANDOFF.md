@@ -11,6 +11,14 @@ replacement. Do not imply the running resident uses this branch.
 
 ## Latest task: feature plugin assessment
 
+Active development now branches from reviewed/pushed6d0132ed to
+phase-plugins/slice1-20261113 in the SAME worktree. The pushed tool branch and
+main are unchanged during development. Plan:
+docs/phases/FEATURE_PLUGIN_SLICE1_PLAN_20261113.md. No new dependency install.
+Contract-only serial worker4cfe1b4e is implementing common/plugins.py and
+tests/test_plugin_manifest.py; no other worker may edit those. Other workers
+wait for the frozen interface, then parallel manager/Web/fixture work starts.
+
 Owner requests LLM Wiki, BI Knowledge and future feature GUI/API/processing/data/
 Skills/tools/Workflows as separately installable plugins. Assessment completed:
 docs/phases/FEATURE_PLUGIN_ASSESSMENT_20261113.md. Source inspection only; changes
