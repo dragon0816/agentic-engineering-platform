@@ -4945,3 +4945,10 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   Focused first92passed1timing-failure2skipped; unchanged command module rerun7pass,
   combined93passed2skipped. Ruff/format/mypy/build/pipcheck pass; all571wheel
   Python sources match. Exact evidence: DIRECT_TOOL_USE_CLARIFICATION_20261113.json.
+
+- [x] Assess Feature Plugin architecture for LLM Wiki, BI Knowledge and future
+  features (owner clarification2026-11-13). Trace GUI/API/processing/storage/
+  asset/tool/Knowledge hooks and existing Extension/asset pack reuse. Findings:
+  FEATURE_PLUGIN_ASSESSMENT_20261113.md. Static assessment only; no new harness
+  implementation authorized. Existing Extension activation approval remains an
+  identified legacy gap for a future plugin installer, not a newly added policy.

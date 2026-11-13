@@ -1,12 +1,38 @@
-# IT-owned tool access — local implementation and verification complete
+# Feature-plugin assessment — proposal complete, no implementation
 
 Updated 2026-11-13. Worktree:
 C:/Users/Chi_L/.paseo/worktrees/2qnenase/it-owned-tools-20261112
 Branch: it-owned-tool-access-20261112. Implementation commit d1653a45;
 long-path fixture commit 6a1488ed; earlier feature slices through f490ebb1.
-This handoff and final acceptance evidence are committed after those changes.
-No feature push, main update, resident restart, shared Gateway edit or previous
-C4C package replacement. Do not imply the running resident uses this branch.
+Tool feature and verification were pushed with owner consent: remote branch
+it-owned-tool-access-20261112 was checked at a902df0f58650afc360ee4f6ed59b5ebda9e3f57.
+No main update, resident restart, shared Gateway edit or previous C4C package
+replacement. Do not imply the running resident uses this branch.
+
+## Latest task: feature plugin assessment
+
+Owner requests LLM Wiki, BI Knowledge and future feature GUI/API/processing/data/
+Skills/tools/Workflows as separately installable plugins. Assessment completed:
+docs/phases/FEATURE_PLUGIN_ASSESSMENT_20261113.md. Source inspection only; changes
+are docs. No runtime edits/new packages/company processing/full tests needed or
+performed. git diff --check and source reference existence checked separately.
+Proposed first common Plugin API upgrade, then compatible plugin-only updates;
+reuse assets/extension process/repo primitives, add generic Web/API/provider/
+data-lifecycle registration, stage BI then Wiki, preserve Knowledge asking.
+Existing ExtensionManager.activate still requires ExtensionActivationApproval;
+new installer must align with no-tool/IT-approval owner policy, not copy that gate.
+This is a proposal only; obtain scoped AGENTS22 consent before harness edits.
+
+Previous merge assessment: fetched main267c75e4 and dry merge found3doc conflicts
+(HANDOFF/DECISIONS/TASKS), no source text conflicts. Main adds e564e1ad's unchanged
+workflow_form_runs.py legacy success inference; its blob is identical in that
+commit, current main and dry merged tree. Existing synthetic false-success
+finding remains relevant. Do not merge unchanged; no actual merge was performed.
+Branch currently has no matching CI run (push branch filter excludes its name).
+Do not conflate old branch validation with the untested combined merge result.
+
+Assessment docs are a separate local commit after the pushed feature; they are
+not silently pushed or treated as owner implementation approval.
 
 ## Goal and scope
 

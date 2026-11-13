@@ -7704,3 +7704,17 @@ native-agent wording, audit copy and current requirements with that behavior;
 no routing, permission logic, model/data classification or Knowledge change.
 Rejected adding an IT approval service or interpreting an execution failure as
 policy approval. Existing provider guards are not bypassed by the coding agent.
+
+### 2026-11-13 — Record feature-plugin assessment without implementation consent
+
+Owner requested structural assessment of packaging GUI, processing, databases,
+Skills, tools and Workflows as installable plugins, and clarified that both LLM
+Wiki and BI Knowledge plus future features are in scope. Assessment is recorded
+in FEATURE_PLUGIN_ASSESSMENT_20261113.md. The proposed generic plugin contract,
+worker/Web mounting and staged BI/Wiki extraction are recommendations, not an
+approved architecture change or harness implementation consent. First install
+would require an AEP version supporting the plugin API; compatible feature
+updates can then be separate packages. Preserve current Knowledge evidence and
+asking behavior, shared repo/version primitives and user-owned state. Do not
+copy legacy ExtensionActivationApproval into the new no-approval installer;
+its existing activation path is an identified gap, untouched in this assessment.
