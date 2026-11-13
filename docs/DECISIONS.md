@@ -7718,3 +7718,28 @@ updates can then be separate packages. Preserve current Knowledge evidence and
 asking behavior, shared repo/version primitives and user-owned state. Do not
 copy legacy ExtensionActivationApproval into the new no-approval installer;
 its existing activation path is an identified gap, untouched in this assessment.
+
+### 2026-11-13 — Authorize reviewed generic Feature Plugin Slice 1
+
+Owner:「你先把這個計劃丟給 Claude code review，沒問題後，請 push 評估文件，
+並開始開發，有些可以平行處理的部分請開多個 subagent 來處理」；follow-up:
+「開 sub Agent，優先開 Claude code」. This is contextual consent to the presented
+plan after review, not blanket consent for future harness changes. Claude Code
+reviewer63582bfb-e29f-4ebb-88c2-2b0c062e2eaf re-reviewed the amended proposal and
+returned Critical0/Important0, READY (message b988e3e8-8a6a-4acd-8772-a906d4234bb6).
+
+Scope is the generic fixture-only Slice1 documented in FEATURE_PLUGIN_ASSESSMENT:
+typed manifest/inert package, per-plugin worker manager and ownership ledger,
+direct authenticated install/enable/disable/uninstall, generic authenticated
+namespace API proxy, core-rendered declarative pages, generic startup/route/UI
+hooks in host.py/web.py/web_page.py. Skills cannot add these statically wired
+routes/mounts/registrations; source causal evidence is in the assessment. Record
+this consent BEFORE code. Preserve existing per-turn receipts/identity and model
+data/Knowledge rules. No publisher JS/HTML/iframe, no durable effect ledger,
+no BI/Wiki extraction, no Knowledge routing/provider changes, no legacy Extension
+manager or Gateway modification, no main merge/resident/shared Gateway update.
+No per-install/IT/owner-only permission gate. Use current interpreter/available
+dependencies without installing into the AEP venv. Future scope requires new
+consent. Reviewer withdrew its initial owner-only install suggestion as contrary
+to the direct-install contract. Parallel workers prefer actual Claude Code;
+freeze common contract first and give exclusive files to each worker.

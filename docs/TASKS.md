@@ -4952,3 +4952,10 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   FEATURE_PLUGIN_ASSESSMENT_20261113.md. Static assessment only; no new harness
   implementation authorized. Existing Extension activation approval remains an
   identified legacy gap for a future plugin installer, not a newly added policy.
+
+- [x] Feature Plugin plan reviewed by Claude Code: initial Important5 addressed;
+  amended Slice1 Critical0/Important0 READY. Scoped conditional owner consent
+  recorded in DECISIONS before code. Prefer Claude Code parallel subagents.
+- [ ] Push reviewed assessment/consent, freeze typed contract, implement generic
+  fixture-only Slice1 through parallel exclusive-file workers, integrate generic
+  startup/API/declarative UI and validate. BI/Wiki extraction is not this slice.

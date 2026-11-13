@@ -1,4 +1,4 @@
-# Feature-plugin assessment — proposal complete, no implementation
+# Feature Plugin Slice1 — reviewed, authorized, beginning implementation
 
 Updated 2026-11-13. Worktree:
 C:/Users/Chi_L/.paseo/worktrees/2qnenase/it-owned-tools-20261112
@@ -21,7 +21,15 @@ reuse assets/extension process/repo primitives, add generic Web/API/provider/
 data-lifecycle registration, stage BI then Wiki, preserve Knowledge asking.
 Existing ExtensionManager.activate still requires ExtensionActivationApproval;
 new installer must align with no-tool/IT-approval owner policy, not copy that gate.
-This is a proposal only; obtain scoped AGENTS22 consent before harness edits.
+Owner subsequently directed Claude Code review, push after review passes and
+implementation with Claude Code subagents. Amended bounded generic Slice1 now
+Critical0/Important0 READY; scoped consent recorded in DECISIONS BEFORE code.
+First push reviewed docs, then contract-first fixture implementation. BI/Wiki/
+Knowledge routing, arbitrary plugin JS, durable receipts remain out of scope.
+Actual Claude agents:63582bfb-e29f-4ebb-88c2-2b0c062e2eaf independent reviewer;
+9ba0d06a-b7ab-4a8b-9d79-316ff0f32167 Web research/development;
+4cfe1b4e-4788-426d-a93b-a5f6134c3c3a contracts/lifecycle. Freeze contract first,
+then assign exclusive files; parent owns host.py/web.py/web_page.py.
 
 Previous merge assessment: fetched main267c75e4 and dry merge found3doc conflicts
 (HANDOFF/DECISIONS/TASKS), no source text conflicts. Main adds e564e1ad's unchanged
@@ -31,8 +39,8 @@ finding remains relevant. Do not merge unchanged; no actual merge was performed.
 Branch currently has no matching CI run (push branch filter excludes its name).
 Do not conflate old branch validation with the untested combined merge result.
 
-Assessment docs are a separate local commit after the pushed feature; they are
-not silently pushed or treated as owner implementation approval.
+Reviewed assessment/consent docs will be pushed explicitly under the latest
+owner instruction before implementation. Do not merge origin/main into this work.
 
 ## Goal and scope
 
