@@ -7190,3 +7190,69 @@ The scoped design and regression matrix are in
 `phases/IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md`; historical approval requirements
 for local tool installation/execution are superseded for this scope. Shared
 publication and model/data-routing decisions are unchanged.
+
+## Feature Plugin API v1 (generic Slice 1, 2026-11-14)
+
+`common.plugins` defines closed frozen models; extra fields are invalid.
+`PluginManifest` format aep-plugin/1 contains identity, title, description,
+core_api (minimum inclusive / below exclusive SemVer), exact requires, optional
+runtime, capabilities, routes, pages, assets and data schema version. Plugin id
+is namespace.name; Slice1 gives each plugin a dedicated namespace. Names and
+identities cannot collide with core or other plugins. No manifest admission
+grants, IT approval or mandatory signer list exists.
+
+`PluginCapability` contains CapabilitySpec plus scalar input/output declarations
+and optional bounded rows output. `capability_models` constructs closed models
+without importing publisher code. Pending policy metadata does not gate dispatch
+or imply a review. PluginAsset identifies a digest-matched Skill/Workflow file;
+installation uses the existing skill_packs ledger and honest pending metadata.
+
+`PluginPackage` format aep-plugin-package/1 is a JSON/base64 envelope, not ZIP.
+Per-file path/size/SHA256 and canonical aggregate digest must match. Limits:
+8MiB envelope, 6MiB total raw files, 2MiB per file, 256 files. Canonical paths
+are bounded relative worker/ or assets/ paths; traversal, ADS, case collisions,
+Windows reserved names and redirected owned paths are refused. Staged files are
+rechecked at activation, process restart and Host restore. A hash is consistency,
+not a provenance/verified/trusted claim. No signature support is fabricated.
+
+Runtime uses the current interpreter with -I/-u/-B, stdlib/AEP dependencies and
+staged worker package path. JSONL uses existing ExtensionRequest/Response with
+request correlation, bounded output and serialized per-worker requests. Normal
+environment plus AEP_PLUGIN_PACKAGE_FILE and AEP_PLUGIN_DATA_ROOT is passed;
+HTTP headers and Web bearer token are not injected. Process crash/timeout is a
+failure, never automatic replay of a write. This is not an OS sandbox.
+
+`PluginManagerProtocol`: snapshot, install(payload, PluginOrigin), enable,
+disable, uninstall, call_read(PluginReadRequest, timeout_seconds) and
+set_busy_probe. Actual PluginManager also restores and closes owned workers.
+Origin records authenticated actor/channel/source/turn reference, not approval.
+Status states are active/disabled/failed; action and read status is succeeded or
+failed with typed failure. Per-turn successful-effect replay is unchanged; no
+durable receipt guarantee is added. An unreadable/redirected ledger is reported
+unavailable, never as a normal empty installation. Core startup remains usable.
+
+Authenticated Agent Web routes (after existing loopback/bearer validation, with
+Origin checks):
+- GET /api/plugin-manager/plugins: typed inventory and max_package_bytes.
+- POST /api/plugin-manager/install or /update: bounded raw envelope.
+- POST /api/plugin-manager/enable|disable|uninstall: exactly {plugin_id}.
+- GET /api/plugins/<plugin_id>/<route_id>?version=<exact SemVer>: only that
+  active version's declared read capability. No arbitrary URL/port/SQL proxy,
+  inbound identity override or forwarded Authorization. Responses must echo
+  request_id, plugin_id, version and route_id. Read data is limited to256KiB;
+  requests64KiB. Missing credentials401, foreign Origin403, and actual lifecycle
+  failures preserve their typed codes/status mapping.
+
+Page contributions are TextBlock, MetricBlock and TableBlock data, rendered by
+core-owned DOM text nodes. No plugin script/markup/link/image/frame/action is
+executed or auto-fetched. New dynamic page navigation appears after install;
+disable/uninstall withdraw only its contributions. Registry refresh is scoped to
+that plugin namespace, leaving other Skills/Workflows and Knowledge selection
+unchanged. Old assets retire only after commit and recovery preserves previous
+on/off locations and user choices. Data schema migration is unsupported in v1;
+mismatches return setup/compatibility failures. Data remains on uninstall.
+
+Known nonblocking limit: if the final live registry refresh after old-asset
+retirement fails, primary installation remains committed, and obsolete live
+entries may persist until safe restart; a separate success warning is not yet
+exposed by the frozen v1 action contract. See Slice1 acceptance/usage evidence.

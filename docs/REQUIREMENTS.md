@@ -121,3 +121,17 @@ The scoped design and regression matrix are in
 `phases/IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md`; historical approval requirements
 for local tool installation/execution are superseded for this scope. Shared
 publication and model/data-routing decisions are unchanged.
+
+## Independently installable feature packages (Slice 1, 2026-11-14)
+
+A plugin-capable AEP exposes a Plugins entry where an authenticated user can
+install a compatible local package without a separate AEP/IT installation or
+execution approval. The generic first slice provides text/metric/table pages,
+namespaced read APIs, typed tools and live Skill/Workflow assets. At least two
+plugins coexist; a plugin can remove only owned contributions. No-plugin startup
+and existing Knowledge questions remain compatible. Malformed/tampered packages
+and unavailable environments return actual failures. Upgrades preserve exact
+active dependencies and running work, and failed/interrupted installs preserve
+the prior usable version. Disabling or uninstalling keeps user data by default.
+BI/Wiki extraction, executable plugin frontends, third-party dependency installs,
+data migrations and durable cross-process effect receipts are later slices.

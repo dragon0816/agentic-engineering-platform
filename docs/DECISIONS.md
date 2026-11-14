@@ -7743,3 +7743,46 @@ dependencies without installing into the AEP venv. Future scope requires new
 consent. Reviewer withdrew its initial owner-only install suggestion as contrary
 to the direct-install contract. Parallel workers prefer actual Claude Code;
 freeze common contract first and give exclusive files to each worker.
+
+### 2026-11-14 — Freeze generic plugin Slice 1 after independent source review
+
+Implementation remains inside the previously consented fixture-only scope.
+Independent Claude Code review initially reproduced a junction-cleanup data-loss
+bug against synthetic files, dependency-upgrade breakage and failed/interrupted
+upgrade asset loss. These were fixed with workspace-anchored ownership checks,
+active-dependent update refusal, pending/retiring recovery and ledger-first
+teardown. Preserve old asset locations and user edits rather than rebuilding or
+unconditionally deleting them. Lazy worker restart rechecks exact staged bytes;
+Python3.11 detects junctions via the reparse tag when Path.is_junction is absent.
+The latter has a simulated missing-API RED/GREEN test, not a real Python3.11 run.
+Final Claude reviewer 46cc8ffd reports no Critical/Important findings, including
+the final compatibility delta. Ordinary environment remains available to workers;
+separate process is not a security sandbox. No new permission gates or signer list.
+
+Rejected alternatives: trusting resolved containment alone (misses an internal
+junction), deleting previous assets before committing the replacement, silently
+upgrading an exact dependency, or executing modified staged code on worker restart.
+Known limits accepted as nonblocking: late post-commit live-refresh errors can
+leave stale live entries until safe restart; configured active status can persist
+while changed-package restart calls correctly fail. See usage/contracts.
+
+All-plugin aggregate: 231 passed, 1 skipped (symlink creation privilege); real
+junction tests and headless browser executed. Global Ruff/format/mypy pass and
+pipcheck reports no broken requirements. Same445 deterministic Knowledge cases
+pass with identical outcomes; 46 source files unchanged. Full suite is RUNNING,
+not yet a pass. Source freeze records1696 files under .scratch/plugin-slice1.
+No BI/Wiki extraction, resident update, main merge or shared venv/Gateway change.
+
+### 2026-11-14 — Repair final plugin UI regression and stale direct-use test wording
+
+Full suite original: 6954 passed,3 failed,16 skipped. Independent verifier preserved
+raw failures and proved all445 Knowledge cases and46 source files unchanged.
+Move the complete Plugin panel after Reviews so BI's existing main-path boundary
+stays intact; do not change its test. Two other failures are stale expectations
+from a902df0f's owner-approved removal of the IT prerequisite. Require exact
+OS/service wording and additionally assert old IT wording absent. This aligns
+policy and strengthens assertions, rather than restoring the unwanted IT text.
+No execution/harness control flow or Knowledge changes. Fresh Claude review:
+zero Critical/Important. All176 affected module cases pass, including browser.
+Keep the original full failure; no second full execution or false full-green claim.
+Build/wheel smoke and pipcheck pass. Source archive includes its builder helper.

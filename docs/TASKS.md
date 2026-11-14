@@ -4956,9 +4956,23 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 - [x] Feature Plugin plan reviewed by Claude Code: initial Important5 addressed;
   amended Slice1 Critical0/Important0 READY. Scoped conditional owner consent
   recorded in DECISIONS before code. Prefer Claude Code parallel subagents.
-- [ ] Push reviewed assessment/consent, freeze typed contract, implement generic
+- [x] Push reviewed assessment/consent, freeze typed contract, implement generic
   fixture-only Slice1 through parallel exclusive-file workers, integrate generic
   startup/API/declarative UI and validate. BI/Wiki extraction is not this slice.
   Reviewed docs pushed6d0132ed (remote hash checked). Active dev branch
   phase-plugins/slice1-20261113. Contract-first plan and exclusive Claude worker
   ownership: FEATURE_PLUGIN_SLICE1_PLAN_20261113.md.
+
+- [x] Feature Plugin generic Slice1 implementation and independent Claude final
+  review complete: zero Critical/Important after causal fixes. Aggregate plugin
+  tests231 passed/1 privileged-symlink skip; real junction/browser tests executed.
+  Global Ruff/format/mypy/pipcheck pass. Same445 Knowledge cases pass; source
+  unchanged. Example and usage guide supplied. No BI/Wiki extraction/deployment.
+- [x] Final full-suite run, build/wheel smoke, final Knowledge comparison,
+  acceptance report, verified commits and feature-branch push. Retained original full run:
+  .scratch/plugin-slice1/full.log/xml; short C:/TEMP/aep-plugin-full-20261114.
+
+Final Slice1 evidence: FEATURE_PLUGIN_SLICE1_ACCEPTANCE_20261114.md and matching
+VERIFICATION JSON. Full original6954pass3fail16skip; repairs176pass, not a green
+full rerun. Build/pipcheck/wheel580 normalized source match passed. BI/Wiki
+extraction remains a separate unimplemented slice. Feature branch delivery only.

@@ -1,132 +1,59 @@
-# Feature Plugin Slice1 — reviewed, authorized, beginning implementation
+# Feature Plugin Slice 1 — local verification complete, feature delivery
 
-Updated 2026-11-13. Worktree:
-C:/Users/Chi_L/.paseo/worktrees/2qnenase/it-owned-tools-20261112
-Branch: it-owned-tool-access-20261112. Implementation commit d1653a45;
-long-path fixture commit 6a1488ed; earlier feature slices through f490ebb1.
-Tool feature and verification were pushed with owner consent: remote branch
-it-owned-tool-access-20261112 was checked at a902df0f58650afc360ee4f6ed59b5ebda9e3f57.
-No main update, resident restart, shared Gateway edit or previous C4C package
-replacement. Do not imply the running resident uses this branch.
+Updated2026-11-14. Worktree C:/Users/Chi_L/.paseo/worktrees/2qnenase/it-owned-tools-20261112.
+Branch phase-plugins/slice1-20261113. Reviewed assessment/consent pushed6d0132ed;
+contracts committed8035f78c before parallel development. See current git log for
+implementation and evidence commits. No main merge or resident/Gateway update.
 
-## Latest task: feature plugin assessment
+## Scope and authoritative evidence
+Generic fixture-only packages, multi-plugin worker manager, namespaced API,
+core declarative GUI and immediate typed tools/bundled Skills/Workflows.
+Owner harness consent and Skill-cannot evidence recorded before code in DECISIONS.
+Assessment: docs/phases/FEATURE_PLUGIN_ASSESSMENT_20261113.md.
+Final acceptance: docs/phases/FEATURE_PLUGIN_SLICE1_ACCEPTANCE_20261114.md.
+Machine-readable evidence: FEATURE_PLUGIN_SLICE1_VERIFICATION_20261114.json.
+Traditional Chinese usage: FEATURE_PLUGIN_SLICE1_USAGE_20261113.md.
+Example: examples/plugins/hello.aep-plugin.json (demo-hello.fixture).
+No BI/Wiki extraction, publisher HTML/JS/iframe, dependency install, database
+migration, model-data/routing change or durable receipt guarantee. No new IT/tool
+approval gates. Workers inherit normal environment and are not sandboxes.
 
-Active development now branches from reviewed/pushed6d0132ed to
-phase-plugins/slice1-20261113 in the SAME worktree. The pushed tool branch and
-main are unchanged during development. Plan:
-docs/phases/FEATURE_PLUGIN_SLICE1_PLAN_20261113.md. No new dependency install.
-Contract-only serial worker4cfe1b4e is implementing common/plugins.py and
-tests/test_plugin_manifest.py; no other worker may edit those. Other workers
-wait for the frozen interface, then parallel manager/Web/fixture work starts.
+## Completed and actual verification
+Actual Claude workers4cfe1b4e manager/contracts,9ba0d06a Web/browser,63582bfb
+integration/independent verification,46cc8ffd fresh final source reviewer all
+finished. Final reviews (including UI repairs): Critical0/Important0.
+Review-reproduced junction cleanup/dependency upgrade/rollback asset loss fixed;
+causal worker-restart integrity and simulatedPython3.11 junction fallback tested.
 
-Owner requests LLM Wiki, BI Knowledge and future feature GUI/API/processing/data/
-Skills/tools/Workflows as separately installable plugins. Assessment completed:
-docs/phases/FEATURE_PLUGIN_ASSESSMENT_20261113.md. Source inspection only; changes
-are docs. No runtime edits/new packages/company processing/full tests needed or
-performed. git diff --check and source reference existence checked separately.
-Proposed first common Plugin API upgrade, then compatible plugin-only updates;
-reuse assets/extension process/repo primitives, add generic Web/API/provider/
-data-lifecycle registration, stage BI then Wiki, preserve Knowledge asking.
-Existing ExtensionManager.activate still requires ExtensionActivationApproval;
-new installer must align with no-tool/IT-approval owner policy, not copy that gate.
-Owner subsequently directed Claude Code review, push after review passes and
-implementation with Claude Code subagents. Amended bounded generic Slice1 now
-Critical0/Important0 READY; scoped consent recorded in DECISIONS BEFORE code.
-First push reviewed docs, then contract-first fixture implementation. BI/Wiki/
-Knowledge routing, arbitrary plugin JS, durable receipts remain out of scope.
-Actual Claude agents:63582bfb-e29f-4ebb-88c2-2b0c062e2eaf independent reviewer;
-9ba0d06a-b7ab-4a8b-9d79-316ff0f32167 Web research/development;
-4cfe1b4e-4788-426d-a93b-a5f6134c3c3a contracts/lifecycle. Freeze contract first,
-then assign exclusive files; parent owns host.py/web.py/web_page.py.
+Aggregate plugin run231 passed1 privileged-symlink skip. Full original6954 passed,
+3 failed,16 skipped in2:02:50. One plugin panel-placement regression and two stale
+pre-existing IT text expectations were repaired; all176 affected-module tests
+then passed, including real headless browser. No assertions weakened; added
+negative old-IT-text checks. No second full run; DO NOT claim original/full rerun
+all-green. Same445 Knowledge cases all present/passed in full,46 source files
+unchanged. All1696 frozen files matched before repairs/build. Only page placement,
+those test expectations, MANIFEST inputs and generated egg-info changed after.
 
-Previous merge assessment: fetched main267c75e4 and dry merge found3doc conflicts
-(HANDOFF/DECISIONS/TASKS), no source text conflicts. Main adds e564e1ad's unchanged
-workflow_form_runs.py legacy success inference; its blob is identical in that
-commit, current main and dry merged tree. Existing synthetic false-success
-finding remains relevant. Do not merge unchanged; no actual merge was performed.
-Branch currently has no matching CI run (push branch filter excludes its name).
-Do not conflate old branch validation with the untested combined merge result.
+Global Ruff/format/mypy pass (1139 files); pipcheck/build pass. Wheel580 Python
+files match source after newline normalization; isolated wheel imports verified.
+Sdist includes example/builder/helper/worker. Build artifacts C:/TEMP/aep-plugin-
+build-20261114; local raw .scratch/plugin-slice1/{full,plugins-final,ui-fixes}.xml
+and logs retained. No live-model Knowledge quality claim;16 environment skips.
+Use original repo .venv with worktree src;tests PYTHONPATH, UTF8 and live opt-outs
+AEP_OUTLOOK_TESTS=0,AEP_GUI_TESTS=0,AEP_NATIVE_CLI_TESTS=0; short C:/TEMP basetemp.
+Never rebind shared editable venv.
 
-Reviewed assessment/consent docs will be pushed explicitly under the latest
-owner instruction before implementation. Do not merge origin/main into this work.
+## Known limits and next scope
+Late post-commit live refresh may leave old registry entries until safe restart.
+A refused changed-code worker restart may still list configured active status,
+but calls fail truthfully and modified code is not run. Reviewed nonblocking.
+Next functional slice: scoped BI/Wiki extraction with backup/restore and Knowledge
+equivalence; obtain new concrete AGENTS22 consent before editing those harness
+paths. Agent package-install API/CLI not implemented here, not prohibited.
+Prior a902df0f tool feature preserved. Do not merge main's excluded e564e1ad
+synthetic legacy false-success finding. No company resources or resident touched.
 
-## Goal and scope
-
-Owner explicitly approved four harness changes: unified tool registration across
-Bridge/MCP/conversation backends; no AEP grants, install/execute approval cards or
-extra command/folder/mail admission; same-session install/connect/use; preserve
-real outcomes, successful-effect deduplication and Knowledge evidence/citations.
-No change to model/data classification. Skill-first causal evidence and explicit
-scope consent are in DECISIONS and IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md.
-AGENTS22 still applies to expansions. Do not ask again for already covered work.
-
-Latest owner clarification2026-11-13: no IT prerequisite; if tools can execute in
-the environment, they can be used. No IT approval branch existed. Follow-up edits
-are only UI/prompt/Skill/audit wording and current requirements, not control flow.
-Historic IT-owned phase filenames are identifiers, not an authorization system.
-Follow-up verification: focused first92pass1timing-failure2skip (2.062s vs<2s),
-unchanged command module rerun7pass9.39s; combined93pass2skip, not first-run green.
-Ruff/format1482/mypy1117/build/pipcheck pass;571wheel Python files match source.
-Python ASTs unchanged except string literals in11files, no new full run needed.
-See docs/phases/DIRECT_TOOL_USE_CLARIFICATION_20261113.json for exact provenance.
-
-## Completed
-
-Tasks1–8 complete. Typed ToolAccess discovery/invoke/install; current-session MCP
-refresh; builtins independent of grants/profile tool selections; direct local
-asset install without fake business review; schedule and BI-local admission
-removed; Outlook read/query pagination and separate draft/send; native adapters
-add no AEP tool-disable/sandbox/approval relay and bypass no external guard.
-Shared async execution lease and successful receipts cover gateway/native/direct
-workflow calls. MCP collision/ownership rollback, process-tree deadlines, exact
-Skill-version rollback/profile references, actual run display receipts and
-replay-digest verification are covered. Generic native unknown-eligibility tool
-results return status only with an explicit data-route diagnostic. Existing
-Knowledge/model/source rules remain. No third-party dependency was added.
-
-## Verification: actual results and limits
-
-Read docs/phases/IT_OWNED_TOOL_ACCESS_ACCEPTANCE_20261113.md and corresponding
-VERIFICATION JSON for source/report/wheel hashes and case-level provenance.
-- Initial full:6682passed37failed15skipped8390.40s; raw reports retained. Old
-  admission expectations migrated; real version/profile/receipt defects fixed
-  with causal reds/greens. Same445Knowledge baseline cases all passed then.
-- Final core full:6724passed2failed15skipped7933.08s. NOT one green full run.
-- Long-path fixture: input setup failed before import at deep temp root. Final
-  test-only source uses short TemporaryDirectory; destination still>260 and
-  Raw/publication/read/digest assertions unchanged. Short/deep reruns each1pass.
-- Conversation failure: RemoteDisconnected from pre-existing Win32 long session
-  atomic-write path, not timeout. Baseline and current writers both reproduce;
-  workspace.py and authoring_task.py unchanged. Whole module at short root6pass.
-- BI delta55pass after the full snapshot; it is separately validated, not claimed
-  covered by the old full. Exactly6BI files plus1fixture differ from frozen core;
-  web_page outside BI tools rendering unchanged.
-- Combined current-case evidence6726passed15skipped; zero missing collected cases.
-  This reconciles6740collected cases+1collection-level skip;3JWT time-generated
-  parameter IDs match by family/count, all others exact. Same445Knowledge cases
-  match baseline outcomes after the named fixture rerun, without normalization.
-- Ruff check/format1481 pass; configured mypy src+tests1117 pass; build sdist/wheel
-  and pipcheck pass. Isolated --target wheel install/import passes. All571Python
-  wheel sources match current source after newline normalization, no extras.
-- Required fresh source reviewer: no remaining Critical/Important findings,
-  including focused BI delta review. This is not live system proof.
-
-## Known remaining limitations
-
-Generic session persistence at Win32 workspace paths beyond260 remains a known
-baseline limitation. No unrelated state-storage harness expansion was made.
-No live Outlook/mail send/thread, C4C, real provider, arbitrary third-party tool
-or company instrument test. Deterministic Knowledge tests do not prove stochastic
-model answer quality. Native unknown eligibility may withhold raw tool content;
-execution permission is not model-data authorization. Existing legacy native
-content/provider paths are not certified end-to-end egress isolation by this work.
-
-## Continuing safely
-
-Do not repeat hours of full tests without a concrete change/failure. Local code
-is verified; deployment/replacement end-user package is a separate next step.
-Use original repo .venv/Scripts/python.exe with this worktree/src;tests first on
-PYTHONPATH. NEVER rebind the shared editable installation. For checks use
-AEP_OUTLOOK_TESTS=0,AEP_GUI_TESTS=0,AEP_NATIVE_CLI_TESTS=0 and a fresh SHORT owned
-C:/TEMP basetemp. Raw evidence and build live in .scratch/it-owned-verification/.
-No full-suite watcher remains. TASKS and DECISIONS contain the closeout/boundary.
+## Delivery status
+Parent is committing coherent verified slices and pushing only the feature
+branch; verify remote SHA. Push may start CI; local evidence above must not be
+rewritten as a green CI run. No background verifier remains.

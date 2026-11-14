@@ -1279,3 +1279,31 @@ The scoped design and regression matrix are in
 `phases/IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md`; historical approval requirements
 for local tool installation/execution are superseded for this scope. Shared
 publication and model/data-routing decisions are unchanged.
+
+## Generic Feature Plugin API v1 (Slice 1, 2026-11-14)
+
+Feature plugins aggregate declarative pages, read API routes, typed Bridge
+capabilities and bundled Skills/Workflows. `common.plugins.PluginManifest` and
+`PluginPackage` are closed serializable contracts. A first core upgrade enables
+this API; compatible feature packages can then be installed independently. This
+slice uses synthetic examples and does not extract BI or LLM Wiki or change
+Knowledge asking/model-data policy.
+
+`plugins.PluginManager` owns multiple exact active versions keyed by plugin id,
+with a package/ownership ledger under workspace/plugins and separate persistent
+workspace/plugin-data. It reuses the existing Extension JSONL request/response
+contract, with bounded worker I/O; it does not invoke legacy ExtensionManager,
+create ActivationApproval, import publisher code into the Host, or install into
+AEP's venv. Workers use the current interpreter and normal OS environment.
+Package consistency/path/compatibility checks are technical invariants, not IT
+or tool-use approval. A worker is a process boundary, not an OS sandbox.
+
+Host wires one generic manager startup/close hook and namespace-scoped live asset
+refresh. Agent Web adds authenticated plugin management/proxy routes and a core
+text-only declarative renderer. No publisher JS/HTML/iframe or management token
+is passed to a plugin. Lifecycle mutation observes existing Host activity and
+own in-flight calls; existing per-turn TurnEffects remain unchanged. Failed or
+interrupted installation restores previous contributions, and cleanup verifies
+resolved ownership before touching any path. Users' modified/off/removed asset
+choices and plugin data survive lifecycle changes. Details and first-slice
+exclusions: phases/FEATURE_PLUGIN_ASSESSMENT_20261113.md and its Slice1 plan.
