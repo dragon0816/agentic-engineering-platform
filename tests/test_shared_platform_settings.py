@@ -464,10 +464,11 @@ def test_the_settings_page_has_the_card_and_capabilities_no_longer_holds_the_cod
         "/api/settings/shared-platform",
         "loadSharedPlatform()",
         "marketplaceUrl(",
-        "IT/OS/service permissions decide execution",
+        "OS/service permissions decide execution",
     ):
         assert hook in PAGE
     assert 'id="publish-code"' not in PAGE and 'id="publish-connect"' not in PAGE
+    assert "IT/OS/service permissions" not in PAGE
     card = PAGE[PAGE.index('id="shared-platform-card"') : PAGE.index("Laya decision acceleration")]
     assert "<section" not in card and 'type="password"' in card
 
@@ -504,7 +505,8 @@ def test_the_card_renders_in_settings_in_a_real_browser(tmp_path: Path) -> None:
             while "bridge-company" not in str(status) and time.monotonic() < deadline:
                 time.sleep(0.2)  # the card fills in when its settings arrive
                 status = browser._evaluate('document.getElementById("shared-this-pc").textContent')
-            assert "bridge-company" in str(status) and "IT/OS/service permissions" in str(status)
+            assert "bridge-company" in str(status) and "OS/service permissions" in str(status)
+            assert "IT/OS/service permissions" not in str(status)
         finally:
             browser.close()
             browser.discard_profile()
