@@ -235,8 +235,7 @@ def build_manager(workspace: Path, installed: Any, **options: Any) -> Any:
     `PluginManager(layout, installed, *, reserved_names, assets_changed, busy,
     interpreter)` as stated by the manager worker. Until `plugins.manager`
     exists this import fails, which is the expected red state."""
-    from plugins.manager import PluginManager
-
     from host_runtime.contracts import HostLayout
+    from plugins.manager import PluginManager
 
     return PluginManager(HostLayout.under(workspace), installed, **options)
