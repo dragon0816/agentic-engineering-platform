@@ -18,9 +18,12 @@ from collections.abc import Callable, Mapping
 from functools import partial
 from pathlib import Path
 from types import TracebackType
-from typing import Any, Literal, Self, TypeVar
+from typing import TYPE_CHECKING, Any, Literal, Self, TypeVar
 
 from pydantic import JsonValue, ValidationError
+
+if TYPE_CHECKING:
+    from plugins import PluginManager
 
 from agent.backends.gateway import GatewayModelBackend
 from agent.contracts import AgentProfile
@@ -529,6 +532,8 @@ class HostRuntime:
         self.telegram = telegram
         self.platform = platform
         self.chat_authoring = chat_authoring
+        # Optional feature packages own their processes and contributions.
+        self.plugins: PluginManager | None = None
         # MCP servers the owner added in Agent Web (owner 2026-10-08); they
         # connect when a long-running command starts them.
         self.mcp: McpHub | None = None
@@ -562,6 +567,8 @@ class HostRuntime:
             self.mcp.close()
         if self.voice is not None:
             self.voice.close()
+        if self.plugins is not None:
+            self.plugins.close()
         self.state.close()
 
     def __enter__(self) -> Self:
@@ -2233,6 +2240,52 @@ def _use_skill_now(gateway: Gateway, manifest: SkillManifest) -> None:
     registry.register(manifest)
 
 
+def _refresh_plugin_assets(gateway: Gateway, layout: HostLayout, namespace: str) -> None:
+    """Reload one plugin's files without rebuilding other procedure selections.
+
+    Validate the replacement before removing live bindings. Files kept by the
+    bundle ledger (user-modified, removed or switched off) remain authoritative.
+    """
+    registry = gateway.router.commands.skills
+    selected = {
+        manifest.metadata.identity.name: manifest.metadata.identity.version
+        for manifest in registry.manifests()
+        if manifest.metadata.identity.namespace == namespace
+    }
+    families: dict[str, list[SkillManifest]] = {}
+    for path in sorted(layout.skills.glob(f"{namespace}__*.json")):
+        manifest = SkillManifest.model_validate_json(path.read_bytes())
+        if manifest.metadata.identity.namespace != namespace:
+            raise ValueError("plugin asset namespace changed")
+        families.setdefault(manifest.metadata.identity.name, []).append(manifest)
+    candidates = SkillRegistry()
+    for name, versions in families.items():
+        pinned = next(
+            (item for item in versions if item.metadata.identity.version == selected.get(name)),
+            None,
+        )
+        chosen = pinned or max(
+            versions, key=lambda item: version_key(item.metadata.identity.version)
+        )
+        candidates.register(chosen)
+    workflows = InstalledWorkflows()
+    for path in sorted(layout.workflows.glob(f"{namespace}__*.json")):
+        workflow = WorkflowManifest.model_validate_json(path.read_bytes())
+        if workflow.metadata.identity.namespace != namespace:
+            raise ValueError("plugin asset namespace changed")
+        workflows.register(workflow)
+    for manifest in registry.manifests():
+        if manifest.metadata.identity.namespace == namespace:
+            registry.remove(manifest.metadata.identity)
+    for manifest in candidates.manifests():
+        registry.register(manifest)
+    for workflow in gateway.engine.workflows.manifests():
+        if workflow.metadata.identity.namespace == namespace:
+            gateway.engine.workflows.remove(workflow.metadata.identity)
+    for workflow in workflows.manifests():
+        gateway.engine.workflows.register(workflow)
+
+
 def model_condenser(gateway: Any) -> Callable[[str], list[str]]:
     """One bounded structured call that condenses a run's text preview into
     at most five key results (task result summaries, owner 2026-10-25), on
@@ -2443,6 +2496,21 @@ def build_runtime(
         account=lambda: runtime.actor,
     )
     chat_authoring.teams = runtime.team_membership.membership
+    # Generic feature registration; Knowledge/BI/Wiki construction above stays
+    # unchanged. An empty manager restores nothing and writes no plugin files.
+    from plugins import PluginManager
+
+    def plugin_reserved_names() -> tuple[str, ...]:
+        listing = gateway.host_tools
+        return tuple(item.tool.name for item in listing()) if listing is not None else ()
+
+    runtime.plugins = PluginManager(
+        place,
+        gateway.bridge.installed,
+        reserved_names=plugin_reserved_names,
+        assets_changed=lambda namespace: _refresh_plugin_assets(gateway, place, namespace),
+    )
+    runtime.plugins.restore()
     return runtime
 
 

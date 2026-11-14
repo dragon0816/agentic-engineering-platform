@@ -7,6 +7,9 @@ recursive-include evaluation *.json
 recursive-include skills *.json
 recursive-include integrations *.json *.md
 recursive-include tests/fixtures *.txt *.json *.md
+recursive-include tests/fixtures/plugins *.py
+include scripts/build_feature_plugin_example.py
+include tests/plugin_fixture_helpers.py
 recursive-include deploy/windows-preview *.cmd *.md *.ps1 *.json *.pdf *.txt
 include scripts/build_windows_preview.py
 recursive-include deploy/shared-platform-preview *.cmd *.md *.ps1

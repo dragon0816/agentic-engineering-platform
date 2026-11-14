@@ -116,6 +116,7 @@ from host_runtime import (
     knowledge_binding,
     knowledge_repos_api,
     multi_agent_switch,
+    plugin_web,
     telemetry_api,
     wiki_bench,
     write_log,
@@ -904,6 +905,10 @@ class AgentWeb:
                 return saved.messages if saved is not None else ()
 
             self.runtime.chat_authoring.session_messages = authoring_messages
+
+        plugins = getattr(self.runtime, "plugins", None)
+        if plugins is not None:
+            plugins.set_busy_probe(lambda: bool(self.activity()["busy"]))
 
     @property
     def request_lock(self) -> threading.RLock:
@@ -7180,6 +7185,14 @@ class _Handler(BaseHTTPRequestHandler):
         if not self._authorized():
             self._json(401, {"error": "this request carried no usable token"})
             return
+        if plugin_web.owns(parsed.path) and plugin_web.handle(
+            self,
+            "GET",
+            parsed,
+            getattr(self.server.web.runtime, "plugins", None),
+            actor=str(self.server.web.runtime.actor),
+        ):
+            return
         if parsed.path.startswith("/api/schedules"):
             self._schedule_route("GET", parsed.path, parsed.query)
             return
@@ -7343,6 +7356,14 @@ class _Handler(BaseHTTPRequestHandler):
             self._refuse_unread(401, {"error": "this request carried no usable token"})
             return
         path = urlparse(self.path).path
+        if plugin_web.owns(path) and plugin_web.handle(
+            self,
+            "POST",
+            urlparse(self.path),
+            getattr(self.server.web.runtime, "plugins", None),
+            actor=str(self.server.web.runtime.actor),
+        ):
+            return
         if path.startswith("/api/schedules"):
             self._schedule_route("POST", path, "")
             return

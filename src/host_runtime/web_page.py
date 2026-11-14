@@ -18,6 +18,12 @@ it is installed.
 from __future__ import annotations
 
 from host_runtime.bi_chart_html import BI_CHART_CSS, BI_CHART_JS
+from host_runtime.plugin_renderer import (
+    PLUGIN_NAV_HTML,
+    PLUGIN_PANEL_HTML,
+    PLUGIN_RENDERER_CSS,
+    PLUGIN_RENDERER_JS,
+)
 
 # Keep JavaScript escape sequences intact.  A normal Python string turns such
 # sequences as ``\n`` into literal line breaks inside JavaScript quoted strings,
@@ -1467,6 +1473,7 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
   .bi-split-pane { min-height: 0; overflow-y: auto; }
   #bi-b-review-split { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); }
 }
+/* PLUGIN_RENDERER_CSS */
 </style>
 </head>
 <body>
@@ -1486,6 +1493,7 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
     <button id="nav-tasks" type="button">Tasks</button>
     <button id="nav-reviews" type="button">Reviews</button>
     <button id="nav-memory" type="button">記憶</button>
+    <!-- PLUGIN_NAV_HTML -->
   </div>
   <div class="session-heading"><span>Sessions</span><span id="session-count">0</span></div>
   <input id="session-search" class="session-search" type="search"
@@ -3403,6 +3411,7 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
         </div>
         <div id="xp-report" class="kp-markdown"></div></details>
   </section>
+  <!-- PLUGIN_PANEL_HTML -->
   <section id="panel-memory" lang="zh-Hant">
     <div class="workspace-head">
       <div><h2>記憶</h2>
@@ -19034,9 +19043,10 @@ el("bi-example").addEventListener("click", async () => {
   } finally { button.disabled = false; }
 });
 
+/* PLUGIN_RENDERER_JS */
 const panels = {ask: null, installed: loadCapabilities,
   settings: loadSettings, schedules: loadSchedules, knowledge: loadKnowledgeTab, tasks: loadTasks,
-  reviews: loadReviews, memory: loadMemory};
+  reviews: loadReviews, memory: loadMemory, plugin: loadPlugins};
 
 function showBootError(failure) {
   const banner = el("boot-error"); banner.hidden = false;
@@ -19054,6 +19064,7 @@ async function selectPrimaryTab(name) {
   el("nav-tasks").toggleAttribute("aria-current", name === "tasks");
   el("nav-reviews").toggleAttribute("aria-current", name === "reviews");
   el("nav-memory").toggleAttribute("aria-current", name === "memory");
+  el("nav-plugins").toggleAttribute("aria-current", name === "plugin");
   el("chat-backend-bar").hidden = name !== "ask";
   if (name === "ask") { field.focus(); return; }
   try { await panels[name](); }
@@ -19069,7 +19080,8 @@ el("nav-reviews").addEventListener("click", () => selectPrimaryTab("reviews"));
 el("nav-memory").addEventListener("click", () => selectPrimaryTab("memory"));
 
 assetsReady = loadAssets();
-Promise.all([loadAbout(), assetsReady, loadChat(), loadSlashCommands(), loadAvatars(), loadMcp()])
+Promise.all([loadAbout(), assetsReady, loadChat(), loadSlashCommands(), loadAvatars(), loadMcp(),
+  loadPluginNav()])
   .catch(showBootError);
 field.focus();
 </script>
@@ -19080,4 +19092,10 @@ field.focus();
 # The BI chart renderer is shared with the chat's chart files (one source, no drift).
 PAGE = PAGE.replace("/* BI_CHART_CSS */", BI_CHART_CSS, 1).replace(
     "/* BI_CHART_JS */", BI_CHART_JS.rstrip(), 1
+)
+PAGE = (
+    PAGE.replace("/* PLUGIN_RENDERER_CSS */", PLUGIN_RENDERER_CSS, 1)
+    .replace("<!-- PLUGIN_NAV_HTML -->", PLUGIN_NAV_HTML, 1)
+    .replace("<!-- PLUGIN_PANEL_HTML -->", PLUGIN_PANEL_HTML, 1)
+    .replace("/* PLUGIN_RENDERER_JS */", PLUGIN_RENDERER_JS.rstrip(), 1)
 )
