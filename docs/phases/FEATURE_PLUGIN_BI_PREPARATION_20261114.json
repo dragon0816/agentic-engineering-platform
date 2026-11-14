@@ -1,0 +1,64 @@
+{
+  "date": "2026-11-14",
+  "scope": "BI overview domain and compatibility preparation only",
+  "installable_plugin": false,
+  "harness_H1_H4_implemented": false,
+  "harness_consent": "pending explicit owner response",
+  "core_source_diff_from": "a0496ae0",
+  "core_changed_files": [],
+  "focused_tests": {
+    "tests": 28,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": "49.670",
+    "junit_sha256": "33fcc35631c6d4b5ccb238176baf61d3b0933bbf4c31df8d23f3cecd6cda14ba",
+    "evidence": ".scratch\\plugin-bi\\preparation-freeze.xml"
+  },
+  "static": {
+    "ruff": "uncached passed",
+    "format": "uncached1517 files already formatted",
+    "mypy": "1144 source files passed, including new external reader"
+  },
+  "knowledge": {
+    "source_files_checked": 46,
+    "changed": [],
+    "same445_rerun_this_preparation": false
+  },
+  "review": {
+    "plan": "READY for presenting H1/H4 scope consent; no consent inferred",
+    "reader": "no Critical/Important; latest small delta accepted",
+    "known_limit": "deadline bounds per-row lock waits between datasets; not all query/filesystem time; conservative leftover journal refusal"
+  },
+  "frozen_files": {
+    "feature_plugins/bi_overview/worker/aep_plugin_bi_overview/reader.py": "205515eb43071b43ba0b3b219068095c2d9904a273f443888ae7320be9086ffa",
+    "tests/test_bi_facade_characterization.py": "35010ca415fb27eccb9db41828062d2a1385c9a71692d820ec4957543700a74b",
+    "tests/test_bi_overview_reader.py": "dd891239c02dd8b15e9dc696e034600cac32d21f3709106095a48ffbec2c6a0e",
+    "tests/test_plugin_v1_compatibility.py": "19f8871eb5176c74fea10ef3992162e1528077780f3a387a04ff166cfcd16c60",
+    "tests/fixtures/plugins_v1/golden-workspace.v1.json": "f61827911ebab7ddd3854f14fc215c7d12a26feec0f7555360958a31f809fa67",
+    "tests/fixtures/plugins_v1/hello.aep-plugin.v1.json": "2fd27dd8799602e19ed29a7c79ad2f56469b01021a9618daab8d6f2642897413",
+    "tests/fixtures/plugins_v1/README.md": "7b63511d79e2106e54498c8148791025aa9b1379ab6750dd39ed1219299bf9c7"
+  },
+  "previous_ci": {
+    "run": 43537708699,
+    "status": "failure",
+    "passed": 6897,
+    "failed": 2,
+    "skipped": 74,
+    "additional_failure": "Ruff I001 and GitHub artifact quota",
+    "import_fix_commit": "95d003fd",
+    "other_failures_repaired": false
+  },
+  "full_suite_this_preparation": "not rerun; core source unchanged; standalone new reader and characterization verified",
+  "build_this_preparation": "not run; no envelope/worker install package yet; packaging belongs to consented H1/H4 stage",
+  "real_company_data_used": false,
+  "resident_changed": false,
+  "main_updated": false,
+  "preparation_revision": "8c839c8749223a6c952e91a67bd1e20f91051f2d",
+  "golden_fixture_git_checkout": {
+    "verified": true,
+    "autocrlf": true,
+    "exact_bytes_preserved": true,
+    "attributes": "explicit -text and native CR-at-EOL handling only for pinned fixture JSON"
+  }
+}

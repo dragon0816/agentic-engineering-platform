@@ -4976,3 +4976,32 @@ Final Slice1 evidence: FEATURE_PLUGIN_SLICE1_ACCEPTANCE_20261114.md and matching
 VERIFICATION JSON. Full original6954pass3fail16skip; repairs176pass, not a green
 full rerun. Build/pipcheck/wheel580 normalized source match passed. BI/Wiki
 extraction remains a separate unimplemented slice. Feature branch delivery only.
+
+## Feature Plugin next slice — 2026-11-14
+
+- [x] Owner requests next-stage implementation. Branch
+  phase-plugins/bi-facade-20261114 from a0496ae0; prefer actual Claude Code workers.
+  Re-read assessment and research BI coupling. Strategy ADAPT for metadata reader,
+  PRESERVE for existing BI/Knowledge services. No new harness consent inferred.
+- [x] Inspect original Slice1 CI43537708699: failure (2 failed,6897 passed,74
+  skipped), artifact quota and helper import ordering. Fix reproduced I001 only
+  in95d003fd; global uncached Ruff/format and helper mypy pass. Other CI failures
+  retained; not relabelled as baseline-only or fixed without evidence.
+- [ ] Domain preparation: existing BI API/UI/read-rebuild characterization and
+  stdlib read-only metadata reader with synthetic parity/failure tests. Exclusive
+  Claude owners9ba0d06a tests;4cfe1b4e reader/tests. No core files modified.
+- [ ] Independent Claude review of concrete H1/H4 scope in
+  FEATURE_PLUGIN_BI_OVERVIEW_PLAN_20261114.md. Obtain explicit AGENTS22 consent
+  before fields/context/registration implementation; not part of Slice1 consent.
+- [ ] After consent only: compatible declared BI context + page-only service
+  registration, packaged BI overview, existing BI/Wiki/Knowledge parity tests.
+  Not full BI extraction, new executable GUI, model tool, repository migration
+  or a second process calling BiStore/sync/rebuild concurrently.
+
+- [x] BI overview preparation verified:28 passed (5characterization,19reader,
+  4frozen-v1 compatibility), uncached Ruff/format/mypy1144 pass. No core src
+  changes;46Knowledge files unchanged. Source/package bytes and a real v1 ledger
+  frozen before schema changes. Reader and amended plan independent review READY.
+- [ ] Await explicit owner response to H1/H4 scope question. No core API/worker
+  context/registration changes implemented or authorized yet. New docs and tests
+  are preparation, not an installed overview or completed BI extraction.

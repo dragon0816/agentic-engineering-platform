@@ -7786,3 +7786,39 @@ No execution/harness control flow or Knowledge changes. Fresh Claude review:
 zero Critical/Important. All176 affected module cases pass, including browser.
 Keep the original full failure; no second full execution or false full-green claim.
 Build/wheel smoke and pipcheck pass. Source archive includes its builder helper.
+
+### 2026-11-14 — Begin BI overview preparation; no new harness consent inferred
+
+Owner:「請執行下個階段的實作」. Proceed with non-harness domain preparation on
+phase-plugins/bi-facade-20261114. Prior consent explicitly excluded BI/Wiki and
+AGENTS22 says general implementation authorization is not harness consent.
+Read-only Claude investigations identify a concrete risk: BiStore construction,
+published reads and searches may rebuild/sync/write caches; repository RLocks
+are per-process. Reject directly calling existing BI services from a concurrent
+worker. Use ADAPT for a strictly bounded metadata reader and characterization;
+preserve authoritative BI query/provenance, data paths and the existing UI.
+
+Propose the smallest installed overview slice with two optional compatible
+contracts: declared BI data context and a UI-only read service contribution
+without a new model tool. Skills can guide citation/queries but cannot add the
+statically absent worker context or change registration. Exact proposed files,
+risks, old-v1 digest equivalence and tests are in
+FEATURE_PLUGIN_BI_OVERVIEW_PLAN_20261114.md. This is a proposal awaiting owner
+scope consent, not an approved harness change. Full BI UI/service extraction,
+Wiki/provider moves, task/model-data/routing changes remain excluded.
+
+Original Slice1 CI43537708699 failed2tests (BI version viewport and weekly draft
+status), plus artifact quota and one helper import-order error. Local Ruff cache
+had obscured the latter after package discovery. Reproduced with --no-cache and
+fixed only imports in95d003fd; no tests weakened. Use uncached lint for future
+source-tree changes. Keep original CI/local results; no claim CI was green.
+
+Preparation closed locally:28 tests pass, uncached Ruff/format and mypy1144 pass;
+core source unchanged,46Knowledge hashes unchanged. Claude reviewer46cc8ffd
+approved plan for presenting consent and the reader delta with no Critical/
+Important findings. Actualv1 package and10-file install ledger/stage snapshot
+preserved before any schema edits. Exact scope question H1/H4 sent through async
+input tool; owner response still pending. No scope consent recorded, no core
+change made, no full BI/Wiki extraction or installation claimed. Reader budget
+is a cooperative lock-wait bound, not hard interruption of all query/filesystem
+work; conservative leftover-journal refusal remains documented.
