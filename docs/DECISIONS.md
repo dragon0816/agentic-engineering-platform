@@ -7843,3 +7843,31 @@ is committed through129021ca; core implementation may now begin within this scop
 
 Owner also asks「幫我打開Hermes agent」. Handle this as an ancillary app-open
 request; it does not cancel H1/H4 development or authorize additional changes.
+
+### 2026-11-15 — Freeze approved H1/H4 contract
+
+common/plugins.py now implements API1.1, optional data.reads and page-service
+contribution exposure. Only the two new fields are omitted at their defaults;
+all pre-existing defaults and golden v1 package/digests remain unchanged. Parent
+independently ran contract/manifest/golden tests:89 passed9.24s. No new manager,
+worker, UI or Knowledge acceptance is inferred from contract tests.
+
+Parallel next work, exclusive owners:4cfe1b4e manager/process+runtime tests,
+9ba0d06a stdlib overview worker/manifest/builder+package tests,
+63582bfb independent HTTP/ToolAccess/Knowledge coexistence tests. Parent owns
+MANIFEST.in, documentation and final verification; shared Host/Web/Knowledge
+sources remain outside consent. Existing BI reader stays frozen. Independent
+final source review and full regression/build follow component integration.
+
+### 2026-11-15 — Freeze H1/H4 implementation for final regression
+
+Source0daf0b4449da04434733466fc6fd2c55f61c72ab contains the approved3core-file
+change only. Fresh Claude review returned0Critical/Important. Components302pass/
+1symlink skip; HTTP3pass and browser1pass; clearer local-copy total label followed
+by20passing package/browser cases. Uncached Ruff/format1524 and mypy1151 pass.
+Full run ACTUALLY started as session24579 with unique full-20261115.log/xml/exit
+under .scratch/plugin-bi. No full pass/build/445comparison claimed yet. Frozen
+1714 source/input files; no further implementation until concrete failures.
+Verifier63582bfb waits on the exact exit marker, then reports originals and,
+only if green, builds/checks artifacts. Preserve first failures; no weakened tests,
+no duplicate full run, no company models, resident/main/Gateway/venv changes.

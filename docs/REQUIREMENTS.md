@@ -135,3 +135,15 @@ active dependencies and running work, and failed/interrupted installs preserve
 the prior usable version. Disabling or uninstalling keeps user data by default.
 BI/Wiki extraction, executable plugin frontends, third-party dependency installs,
 data migrations and durable cross-process effect receipts are later slices.
+
+## BI overview feature package (H1/H4 approved2026-11-15)
+
+A compatible Plugin API1.1 Host can install a separate metadata overview of its
+existing BI data without moving or rebuilding that data. The overview exposes
+no additional model tool or Skill. It distinguishes local working projections
+from published answer sources and marks missing/outdated/busy/partial data
+honestly, without presenting unknown counts as zero or partial sums as complete.
+The current BI UI, import/edit/query workflow and Knowledge asking/citations must
+remain compatible. This is not the full BI/Wiki plugin extraction. Old v1 plugin
+bytes/digests must still install/restore unchanged; source SDK additions do not
+auto-install the BI package, update the resident or change tool approval rules.

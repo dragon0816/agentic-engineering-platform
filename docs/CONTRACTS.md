@@ -7256,3 +7256,22 @@ Known nonblocking limit: if the final live registry refresh after old-asset
 retirement fails, primary installation remains committed, and obsolete live
 entries may persist until safe restart; a separate success warning is not yet
 exposed by the frozen v1 action contract. See Slice1 acceptance/usage evidence.
+
+## Feature Plugin API1.1 H1/H4 (2026-11-15)
+
+PluginData.reads: tuple[Literal["bi"], ...] defaults to empty. PluginCapability.
+expose_as_tool defaults to true; false requires a read capability referenced by
+a declared page route. New features require core_api.minimum>=1.1.0. Only these
+two new fields are omitted from serialized data at their defaults; all existing
+default fields remain in canonical manifests. Golden v1 fixtures pin raw package,
+content digest, staged files and actual install ledger through parse/install/
+restore. An old API1.0 closed parser refuses new-field packages as
+plugin_package_invalid before compatibility checks; no silent downgrade is implied.
+
+The Host binds AEP_PLUGIN_READ_BI only from its declared BI context on first start
+and restart, preserves ordinary environment, and creates no BI data during install.
+Page service bindings remain in worker health/call_read but not InstalledCapabilities
+or ToolAccess. Tool-to-page updates use the normal version/busy/rollback semantics;
+namespace ownership survives even when the plugin registers no Agent tools.
+No new policy, grant, per-call approval, model-data or TurnEffects contract is added.
+The existing worker protocol and PluginManagerProtocol remain unchanged.

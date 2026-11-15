@@ -1307,3 +1307,21 @@ interrupted installation restores previous contributions, and cleanup verifies
 resolved ownership before touching any path. Users' modified/off/removed asset
 choices and plugin data survive lifecycle changes. Details and first-slice
 exclusions: phases/FEATURE_PLUGIN_ASSESSMENT_20261113.md and its Slice1 plan.
+
+## Plugin API1.1: declared BI context and page services (2026-11-15)
+
+Owner approved only H1/H4 in FEATURE_PLUGIN_BI_OVERVIEW_PLAN_20261114.md.
+PluginData.reads may declare the existing bi area. The Host supplies its actual
+location as reserved worker context, without changing data paths or creating a
+BI database. It is compatibility metadata, not a permission grant or sandbox.
+Ordinary worker environment remains available; stale reserved BI context is
+cleared when not declared. Initial start and restart use the same binding.
+
+A read capability with expose_as_tool=false must have a page route. It remains
+available through its typed worker/page service but is absent from Bridge and
+ToolAccess inventories. Existing tool contributions retain their default behavior;
+CapabilitySpec.policy, grants, TurnEffects and Knowledge routing remain unchanged.
+The two new fields are omitted only at their defaults in the wire form, preserving
+old package bytes and canonical digests. New feature packages require API>=1.1.
+The full BI service, interactive GUI, query/citation path and Wiki stay in core;
+only an independent metadata overview is being prepared, not full extraction.

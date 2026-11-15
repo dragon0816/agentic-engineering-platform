@@ -5013,3 +5013,22 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   Ancillary user request: open existing Hermes Agent, without cancelling this task.
 - [x] Ancillary request: existing Hermes desktop opened with --skip-build;
   actual main window Hermes PID47096 confirmed. No update, rebuild or config edit.
+
+- [x] H1/H4 contract freeze:89 tests pass (parent independent9.24s), API1.1,
+  default wire compatibility and unchanged v1 golden bytes/digest. No new approval
+  gates/policy/ToolAccess semantics. Interface ready for parallel integration.
+- [ ] Manager/process H1 context + selective page/tool registration (Claude4cfe).
+- [ ] BI overview stdlib worker/manifest/builder/package tests (Claude9ba0d06a).
+- [ ] Independent real HTTP, ToolAccess inventory, source-preservation and
+  published Knowledge coexistence tests (Claude63582bfb).
+- [ ] Integration, fresh review, full Knowledge regression/full suite/build and
+  source-package delivery; no resident or main update.
+
+- [x] Runtime791e6a71 and BI package0daf0b44 implemented; fresh Claude source
+  review0Critical/Important. Aggregate302pass1skip; UI label repair20pass;
+  global uncached Ruff/format/mypy pass. Actual HTTP/tool inventory/Knowledge
+  source/citation coexistence and real-browser install/disable/enable confirmed.
+- [ ] Final full session24579 running; unique .scratch/plugin-bi/full-20261115.*.
+  Verifier63582bfb armed bqi1xd594; collect original results, same445/46source
+  comparison and build only after pass. Then acceptance/docs/push/remote SHA.
+  Component results are not a final full/build claim; no resident or main update.
