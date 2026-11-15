@@ -14,6 +14,19 @@ renders as text: there is no HTML, script, URL, link, image or action field
 anywhere in the contract. A read route is an exact declared `read` capability
 of the plugin's own worker, so the existing JSON-lines invoke request carries
 it and no new wire protocol exists.
+
+Plugin API 1.1 (owner consent 2026-11-15, H1/H4 only,
+`docs/phases/FEATURE_PLUGIN_BI_OVERVIEW_PLAN_20261114.md`) adds two optional
+fields: `PluginData.reads` declares that the worker reads an existing Host data
+area (only `bi`), as context, not an access grant; and
+`PluginCapability.expose_as_tool=False` marks a read capability a page route
+uses as a page service, not an Agent tool. A manifest using either must declare
+`core_api.minimum >= FEATURE_API_MINIMUM`. Both keys are left out of the wire
+form at their defaults (and only they: every pre-existing default stays), so a
+v1 package keeps its exact bytes and `content_sha256`. A Plugin API 1.0 Host has
+a closed schema and refuses a package carrying either key as
+`plugin_package_invalid`, before any API range check; it is not reported as
+`plugin_core_api_incompatible`.
 """
 
 from __future__ import annotations
@@ -29,6 +42,7 @@ from typing import Annotated, Any, Literal, Protocol, Self
 from pydantic import (
     Field,
     JsonValue,
+    SerializerFunctionWrapHandler,
     StrictBool,
     StrictFloat,
     StrictInt,
@@ -37,6 +51,7 @@ from pydantic import (
     ValidationError,
     create_model,
     field_validator,
+    model_serializer,
     model_validator,
 )
 
@@ -48,7 +63,10 @@ from common.ownership import version_key
 PLUGIN_MANIFEST_FORMAT: Literal["aep-plugin/1"] = "aep-plugin/1"
 PLUGIN_PACKAGE_FORMAT: Literal["aep-plugin-package/1"] = "aep-plugin-package/1"
 #: The Feature Plugin API this core implements; manifests declare a range.
-CORE_PLUGIN_API_VERSION = "1.0.0"
+CORE_PLUGIN_API_VERSION = "1.1.0"
+#: The lowest core Plugin API a manifest using `data.reads` or a page service
+#: (`expose_as_tool=False`) may declare as its `core_api.minimum`.
+FEATURE_API_MINIMUM = "1.1.0"
 #: The existing Bridge Extension JSON-lines protocol, reused unchanged.
 WORKER_PROTOCOL: Literal["aep-extension-jsonl/v1"] = "aep-extension-jsonl/v1"
 
@@ -293,6 +311,16 @@ class PluginCapability(RegistryContract):
     spec: CapabilitySpec
     inputs: tuple[PluginField, ...] = Field(default=(), max_length=MAX_FIELDS)
     outputs: tuple[PluginField, ...] = Field(default=(), max_length=MAX_FIELDS)
+    #: False: a page service only (a read capability a route uses), never
+    #: registered as a Bridge/Agent tool. Plugin API 1.1.
+    expose_as_tool: StrictBool = True
+
+    @model_serializer(mode="wrap")
+    def _wire(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        if self.expose_as_tool:
+            data.pop("expose_as_tool", None)  # the v1 form, byte for byte
+        return data
 
     @field_validator("inputs", "outputs")
     @classmethod
@@ -396,6 +424,16 @@ class PluginData(Contract):
     migrations: data written by another schema version is refused."""
 
     schema_version: int = Field(default=0, ge=0, le=1_000_000, strict=True)
+    #: Existing Host data areas the worker reads, as declared context (Plugin
+    #: API 1.1); not an access grant and never created by installation.
+    reads: tuple[Literal["bi"], ...] = Field(default=(), max_length=1)
+
+    @model_serializer(mode="wrap")
+    def _wire(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        if not self.reads:
+            data.pop("reads", None)  # the v1 form, byte for byte
+        return data
 
 
 class PluginManifest(RegistryContract):
@@ -426,6 +464,16 @@ class PluginManifest(RegistryContract):
             raise KeyError(name)
         return found
 
+    @property
+    def tool_capabilities(self) -> tuple[PluginCapability, ...]:
+        """Capabilities registered as Bridge/Agent tools."""
+        return tuple(item for item in self.capabilities if item.expose_as_tool)
+
+    @property
+    def page_services(self) -> tuple[PluginCapability, ...]:
+        """Read capabilities only the plugin's page routes call."""
+        return tuple(item for item in self.capabilities if not item.expose_as_tool)
+
     def route(self, route_id: str) -> PluginRoute:
         found = next((item for item in self.routes if item.route_id == route_id), None)
         if found is None:
@@ -443,7 +491,19 @@ class PluginManifest(RegistryContract):
         self._check_runtime_and_capabilities(namespace)
         self._check_routes_and_pages()
         self._check_assets(namespace)
+        self._check_api_features()
         return self
+
+    def _check_api_features(self) -> None:
+        routed = {route.capability for route in self.routes}
+        for item in self.page_services:
+            if item.spec.side_effect != "read" or item.spec.name not in routed:
+                raise ValueError("a page service is a read capability a route uses")
+        uses_features = bool(self.data.reads or self.page_services)
+        if uses_features and (
+            version_key(self.core_api.minimum) < version_key(FEATURE_API_MINIMUM)
+        ):
+            raise ValueError("data.reads and page services need plugin API 1.1 or later")
 
     def _check_requires(self, namespace: str) -> None:
         names = [(item.namespace, item.name) for item in self.requires]
