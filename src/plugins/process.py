@@ -36,6 +36,9 @@ from extensions.runtime import ExtensionRequest, ExtensionResponse
 
 PACKAGE_ENV = "AEP_PLUGIN_PACKAGE_FILE"
 DATA_ENV = "AEP_PLUGIN_DATA_ROOT"
+#: Platform-owned context key (Plugin API 1.1, H1): the Host's existing `bi/`
+#: folder, set only for a manifest declaring `data.reads = ("bi",)`.
+READ_BI_ENV = "AEP_PLUGIN_READ_BI"
 #: Room for the reply envelope around a response at the contract's limit.
 LINE_OVERHEAD = 16 * 1024
 
@@ -162,8 +165,15 @@ def start_worker(
     data_root: Path,
     *,
     interpreter: str,
+    bi_root: Path | None = None,
 ) -> WorkerSession:
-    """Start the declared module and require an exact health declaration."""
+    """Start the declared module and require an exact health declaration.
+
+    `READ_BI_ENV` is never inherited from this process: it is removed, then set
+    to `bi_root` only when the manifest declares `data.reads = ("bi",)`. A
+    declaring manifest without `bi_root` does not start
+    (`plugin_environment_failed`); `bi_root` given for one that declares nothing
+    is ignored. This is declared context, not an access grant."""
     runtime = manifest.runtime
     if runtime is None:
         raise ValueError("plugin declares no worker")
@@ -171,6 +181,11 @@ def start_worker(
     # a worker is a separate process, not a sandbox, and claims no secret
     # isolation. `-I` already keeps PYTHONPATH/PYTHON* out of module loading.
     environment = dict(os.environ)
+    environment.pop(READ_BI_ENV, None)
+    if "bi" in manifest.data.reads:
+        if bi_root is None:
+            raise WorkerFailure("plugin_environment_failed")
+        environment[READ_BI_ENV] = str(bi_root)
     environment[PACKAGE_ENV] = str(staged / "package.json")
     environment[DATA_ENV] = str(data_root)
     try:

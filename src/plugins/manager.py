@@ -346,7 +346,7 @@ class PluginManager:
                 state="active",
                 content_sha256=record.content_sha256,
                 installed_by=record.installed_by,
-                capabilities=tuple(item.spec.identity for item in manifest.capabilities),
+                capabilities=tuple(item.spec.identity for item in manifest.tool_capabilities),
                 routes=tuple(item.route_id for item in manifest.routes),
                 pages=manifest.pages,
             )
@@ -454,7 +454,8 @@ class PluginManager:
             names.add(spec.name)
         if self._reserved is not None:
             names.update(self._reserved())
-        for item in manifest.capabilities:
+        # Only Agent tools are registered; a page service (H4) takes no tool name.
+        for item in manifest.tool_capabilities:
             if item.spec.name in names:
                 return "plugin_contribution_collision"
             if item.spec.identity.key not in own and self._installed.get(item.spec.identity):
@@ -488,16 +489,30 @@ class PluginManager:
         if manifest.runtime is not None:
             try:
                 active.session = start_worker(
-                    manifest, root, data_root, interpreter=self._interpreter
+                    manifest,
+                    root,
+                    data_root,
+                    interpreter=self._interpreter,
+                    bi_root=self._bi_root(manifest),
                 )
             except WorkerFailure as error:
                 raise _CallError(error.code) from None
         return active
 
+    def _bi_root(self, manifest: PluginManifest) -> Path | None:
+        """The Host's own `bi/` folder for a manifest declaring it (H1), checked
+        as a plain folder of this workspace; it may be missing and is never made."""
+        if "bi" not in manifest.data.reads:
+            return None
+        try:
+            return owned_path(self._ws, self._ws / "bi")
+        except PluginStageError as error:
+            raise _CallError(error.code) from None
+
     def _register(self, active: _Active) -> None:
         done: list[_Binding] = []
         try:
-            for binding in active.bindings.values():
+            for binding in self._tools(active):
                 self._installed.register(
                     binding.capability.spec,
                     binding.handler,
@@ -512,8 +527,13 @@ class PluginManager:
                 self._installed.unregister(binding.capability.spec.identity)
             raise _CallError("plugin_contribution_collision") from None
 
+    @staticmethod
+    def _tools(active: _Active) -> list[_Binding]:
+        """Bindings registered with the Bridge; page services (H4) are not."""
+        return [b for b in active.bindings.values() if b.capability.expose_as_tool]
+
     def _unregister(self, active: _Active) -> None:
-        for binding in active.bindings.values():
+        for binding in self._tools(active):
             current = self._installed.get(binding.capability.spec.identity)
             if current is not None and current.handler is binding.handler:
                 self._installed.unregister(binding.capability.spec.identity)
@@ -550,7 +570,11 @@ class PluginManager:
                 verify_staged(active.root, active.content_sha256, anchor=self._ws)
                 owned_path(self._ws, active.data_root)
                 active.session = start_worker(
-                    active.manifest, active.root, active.data_root, interpreter=self._interpreter
+                    active.manifest,
+                    active.root,
+                    active.data_root,
+                    interpreter=self._interpreter,
+                    bi_root=self._bi_root(active.manifest),
                 )
             except PluginStageError as error:
                 raise _CallError(error.code) from None
