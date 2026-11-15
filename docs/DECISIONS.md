@@ -7822,3 +7822,24 @@ input tool; owner response still pending. No scope consent recorded, no core
 change made, no full BI/Wiki extraction or installation claimed. Reader budget
 is a cooperative lock-wait bound, not hard interruption of all query/filesystem
 work; conservative leftover-journal refusal remains documented.
+
+### 2026-11-15 — Owner explicitly authorizes H1/H4 only
+
+Owner response to the exact scope question:
+「同意僅 H1／H4 並繼續」.
+
+This explicitly authorizes the reviewed scope in
+FEATURE_PLUGIN_BI_OVERVIEW_PLAN_20261114.md: optional declared existing-BI data
+context; UI-only read service contribution without Bridge/model registration;
+old-v1 package/digest compatibility; only common/plugins.py and
+plugins/{manager,process}.py plus associated tests/plugin source/packaging.
+Evidence that Skill changes cannot implement closed manifest/process bindings or
+registration is in that plan; path derivation was considered and rejected as an
+undeclared coupling, not claimed impossible. Golden v1 fixtures are committed
+before schema changes. No new Host/Web/Telegram/BI/Wiki/Knowledge routing, data
+approval, tool-install gate, database migration or executable GUI changes.
+Record this owner consent BEFORE any harness implementation. Domain preparation
+is committed through129021ca; core implementation may now begin within this scope.
+
+Owner also asks「幫我打開Hermes agent」. Handle this as an ancillary app-open
+request; it does not cancel H1/H4 development or authorize additional changes.

@@ -1,8 +1,8 @@
 # Next slice: BI overview plugin, with existing BI preserved
 
-Status: domain characterization/reader preparation authorized by the owner's
-request to execute the next stage; **H1/H4 harness extensions below await explicit
-scoped consent**. No generic next-stage instruction is recorded as harness consent.
+Status2026-11-15: owner explicitly approved only H1/H4 with
+「同意僅 H1／H4 並繼續」 in response to the exact scope question. Consent is
+recorded in DECISIONS before harness edits. Exclusions and expansion gate remain.
 Branch: `phase-plugins/bi-facade-20261114`, from `a0496ae0`.
 
 ## Goal and honest boundary
@@ -88,7 +88,7 @@ unavailability; a read must not become a second BI writer.
 - No manifest/package claims until the required harness contract is approved and
   implemented; no new tools, routes or running Host behavior from this preparation.
 
-## Proposed harness scope requiring owner consent
+## H1/H4 harness scope approved2026-11-15
 
 ### H1: explicit existing-BI context declaration
 
@@ -224,3 +224,7 @@ pending; elapsed time or reviewer READY is not owner consent.
 Golden JSON snapshots are pinned with -text attributes (native CRLF preserved);
 a fresh checkout-index with core.autocrlf=true reproduced exact package and staged
 workspace hashes. No snapshot regeneration or changed golden expectations.
+
+Owner explicitly approved the presented H1/H4 scope on2026-11-15. Contract-first
+implementation has begun; earlier preparation/pending statements above record
+the previous checkpoint, not a continuing approval requirement. No scope expansion.

@@ -1,13 +1,16 @@
-# BI Overview next slice — verified preparation, awaiting H1/H4 consent
+# BI Overview — H1/H4 approved; contract implementation started
 
-Updated2026-11-14. Worktree:
+Updated2026-11-15. Worktree:
 C:/Users/Chi_L/.paseo/worktrees/2qnenase/it-owned-tools-20261112
 Branch phase-plugins/bi-facade-20261114 from pusheda0496ae0.
-Owner asked「請執行下個階段的實作」. This authorizes domain preparation but
-is NOT inferred as new harness consent under AGENTS22. Exact H1/H4 scope was
-presented using the async question tool; no owner answer yet. Do not edit core
-schema/manager/process until explicit approval arrives. Do not infer from time,
-Claude READY, agent notifications or the general request.
+Owner explicitly answered the exact H1/H4 question on2026-11-15:
+「同意僅 H1／H4 並繼續」. Scope consent is appended to DECISIONS and TASKS
+BEFORE any harness implementation. No need to ask again for these two changes.
+No scope expansion. Claude worker4cfe1b4e is now implementing ONLY common/plugins.py
+and contract tests, serially; manager/process and packaging await frozen interface.
+User also requested opening Hermes Agent: parent launched existing Hermes desktop
+with --skip-build, verified actual Hermes main window PID47096/handle47452556.
+This ancillary request does not cancel H1/H4 work; no Hermes update/config edits.
 
 ## Scope and files
 Plan: docs/phases/FEATURE_PLUGIN_BI_OVERVIEW_PLAN_20261114.md.
@@ -42,7 +45,7 @@ not finished Plugin packaging. No resident/main/Gateway/shared venv changes.
 Actual Claude workers4cfe1b4e reader,9ba0d06a characterization,63582bfb goldenv1,
 46cc8ffd independent review all finished; nothing polling or running.
 
-## Proposed core changes, NOT implemented
+## Approved H1/H4 scope; serial contract implementation in progress
 H1: optional manifest declaration of existing BI location, explicit reserved
 AEP_PLUGIN_READ_BI context on start/restart. This is declared context, not an
 IT/tool permission gate or sandbox. Deriving today's path from data_root is
@@ -66,9 +69,13 @@ as greenCI. Previous code/acceptance pushed througha0496ae0 on Slice1 branch.
 Main still must not absorb excluded e564e1ad legacy false-success finding.
 
 ## Next actions
-1. Keep preparation committed and reviewable; no installer/package success claim.
-2. Wait for explicit owner H1/H4 approval; record exact words in DECISIONS/TASKS.
+1. Collect/freeze Claude contract worker result and verify golden v1 compatibility.
+2. Implement manager/process only after interface freeze; prepare independent
+   integration tests and stdlib BI overview worker/package in exclusive files.
 3. Freeze compatible contract using existing goldenv1 BEFORE parallel worker/UI
    packaging, then implement within the stated files and perform acceptance.
 4. Full BI/interactive GUI or Wiki extraction requires later concrete scope and
    backup/restore evidence. No data movement in this overview slice.
+
+2026-11-15 verification must follow new runtime changes; prior28 tests are prep
+only, not acceptance of H1/H4. No resident/main/Gateway update authorized.

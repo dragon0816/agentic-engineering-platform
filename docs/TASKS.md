@@ -5005,3 +5005,11 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
 - [ ] Await explicit owner response to H1/H4 scope question. No core API/worker
   context/registration changes implemented or authorized yet. New docs and tests
   are preparation, not an installed overview or completed BI extraction.
+
+- [x] Owner explicit H1/H4 consent2026-11-15:「同意僅 H1／H4 並繼續」.
+  Exact reviewed scope and exclusions recorded in DECISIONS before core edits.
+- [ ] Implement H1/H4 contract first, freeze interface; then worker/package and
+  independent integration in parallel, retain frozen v1 digests and source data.
+  Ancillary user request: open existing Hermes Agent, without cancelling this task.
+- [x] Ancillary request: existing Hermes desktop opened with --skip-build;
+  actual main window Hermes PID47096 confirmed. No update, rebuild or config edit.
