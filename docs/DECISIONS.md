@@ -7871,3 +7871,22 @@ under .scratch/plugin-bi. No full pass/build/445comparison claimed yet. Frozen
 Verifier63582bfb waits on the exact exit marker, then reports originals and,
 only if green, builds/checks artifacts. Preserve first failures; no weakened tests,
 no duplicate full run, no company models, resident/main/Gateway/venv changes.
+
+### 2026-11-15 — Accept approved H1/H4 source after original full pass
+
+Source0daf0b4449da04434733466fc6fd2c55f61c72ab completed the first full run with
+7029passed16environment skips,0failures/errors (1:52:47), no reruns. Independent
+verifier63582bfb confirmed exact445 Knowledge case IDs/outcomes unchanged and
+46Knowledge source hashes unchanged;1714 frozen files unchanged after full.
+Build and pipcheck pass;580wheel Python files match source after newline-only
+normalization; fresh isolated target imports API1.1 without shared-venv rebinding.
+Sdist contains exact BI worker/manifest/builder/example and golden-v1 bytes.
+Only generated egg-info changed afterbuild. No code repairs after full.
+
+Acceptance and limitations: FEATURE_PLUGIN_BI_ACCEPTANCE_20261115.md/json.
+This completes only the explicitly approved H1/H4 metadata-overview slice, not
+BI/Wiki extraction or executable plugin UI. Preserve older CI failures as history;
+no real-model quality guarantee. No main merge/resident/Gateway update performed.
+Owner additionally requested opening AEP Agent Web; existing desktop shortcut
+opened successfully and HTTP200 confirmed at localhost53583, without changing
+its installed version, configuration or running service.

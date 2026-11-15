@@ -1,0 +1,201 @@
+{
+  "date": "2026-11-15",
+  "scope": "Owner-approved H1/H4, read-only BI overview only",
+  "implementation_revision": "0daf0b4449da04434733466fc6fd2c55f61c72ab",
+  "original_junit": {
+    "full-20261115": {
+      "tests": 7045,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 16,
+      "sha256": "7822a452a552c4353015260a88f90433141abed69f4af4b7d65c318642b78a4a"
+    },
+    "components": {
+      "tests": 303,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "sha256": "485b81542a9f437f56688d2a6bd6cd0c8778dd29ab142140bc7bb0d936119b4b"
+    },
+    "label-final": {
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "1259a3cb995f37ae6f5c7dc2ff55804e31506717ad6a964ac9ad2f1e3344742d"
+    }
+  },
+  "review": {
+    "critical": 0,
+    "important": 0,
+    "minor_label": "clarified local-copy total;20 targeted tests passed"
+  },
+  "static": {
+    "ruff": "uncached passed",
+    "format_files": 1524,
+    "mypy_sources": 1151
+  },
+  "independent_verification": {
+    "source_revision_expected": "0daf0b4449da04434733466fc6fd2c55f61c72ab",
+    "head": "8fdf51e737804becf7ff582fb285c235878e1b08",
+    "freeze_revision": "0daf0b4449da04434733466fc6fd2c55f61c72ab",
+    "full": {
+      "exit_code": "0",
+      "tests": "7045",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "16",
+      "time": "6766.836",
+      "failed": [],
+      "skipped_cases": [
+        "::tests.test_voice_codecs",
+        "tests.test_agent_mode::test_real_claude_accepts_the_agent_mode_flags",
+        "tests.test_agent_mode::test_real_copilot_accepts_the_agent_mode_flags_over_acp",
+        "tests.test_bi_atlas_embed::test_the_vendored_embed_goldens_match_the_atlas_checkout",
+        "tests.test_bi_atlas_import::test_the_vendored_goldens_equal_the_atlas_checkout",
+        "tests.test_desktop_session::test_live_the_lab_expense_app_is_queried_and_exported",
+        "tests.test_lint::test_a_link_leaving_the_vault_is_a_finding_not_a_page",
+        "tests.test_llm_gateway::test_the_patch_applies_to_the_installed_litellm",
+        "tests.test_migrate::test_adoption_reports_every_edge_and_writes_all_or_nothing",
+        "tests.test_outlook_mail_folders::test_live_outlook_list_and_get_agree_on_the_inbox_folder",
+        "tests.test_outlook_mail_folders::test_live_outlook_is_read_from_two_different_worker_threads",
+        "tests.test_platform_transport::test_the_server_names_its_address_as_a_url",
+        "tests.test_plugin_package::test_a_symlinked_root_is_refused",
+        "tests.test_release_package::test_dry_run_refuses_destination_parent_symlink_into_git_metadata",
+        "tests.test_vault::test_a_link_inside_wiki_cannot_reach_an_immutable_area",
+        "tests.test_voice_whisper::test_real_engine_on_the_synthetic_speech"
+      ]
+    },
+    "knowledge": {
+      "baseline_cases": 445,
+      "baseline_outcomes": {
+        "passed": 445
+      },
+      "missing_in_full": [],
+      "outcome_differences": []
+    },
+    "knowledge_source_files": {
+      "checked": 46,
+      "changed": []
+    },
+    "source_freeze_after_full": {
+      "checked": 1714,
+      "changed": []
+    },
+    "build_artifacts": {
+      "wheel": {
+        "py_files": 580,
+        "src_py": 580,
+        "wheel_not_in_src": [],
+        "src_not_in_wheel": [],
+        "normalized_mismatches": [],
+        "required_present": {
+          "common/plugins.py": true,
+          "host_runtime/plugin_web.py": true,
+          "host_runtime/plugin_renderer.py": true,
+          "plugins/assets.py": true,
+          "plugins/ledger.py": true,
+          "plugins/manager.py": true,
+          "plugins/package.py": true,
+          "plugins/process.py": true,
+          "plugins/__init__.py": true
+        },
+        "feature_plugins_in_wheel": []
+      },
+      "sdist": {
+        "feature_plugins/bi_overview/manifest.json": {
+          "present": true,
+          "exact_bytes": true,
+          "normalized_equal": true
+        },
+        "feature_plugins/bi_overview/worker/aep_plugin_bi_overview/__init__.py": {
+          "present": true,
+          "exact_bytes": true,
+          "normalized_equal": true
+        },
+        "feature_plugins/bi_overview/worker/aep_plugin_bi_overview/reader.py": {
+          "present": true,
+          "exact_bytes": true,
+          "normalized_equal": true
+        },
+        "feature_plugins/bi_overview/worker/aep_plugin_bi_overview/worker.py": {
+          "present": true,
+          "exact_bytes": true,
+          "normalized_equal": true
+        },
+        "scripts/build_bi_overview_plugin.py": {
+          "present": true,
+          "exact_bytes": true,
+          "normalized_equal": true
+        },
+        "examples/plugins/bi-overview.aep-plugin.json": {
+          "present": true,
+          "exact_bytes": true,
+          "normalized_equal": true
+        },
+        "examples/plugins/hello.aep-plugin.json": {
+          "present": true,
+          "exact_bytes": true,
+          "normalized_equal": true
+        },
+        "tests/fixtures/plugins_v1/hello.aep-plugin.v1.json": {
+          "present": true,
+          "exact_bytes": true,
+          "normalized_equal": true
+        },
+        "tests/fixtures/plugins_v1/golden-workspace.v1.json": {
+          "present": true,
+          "exact_bytes": true,
+          "normalized_equal": true
+        }
+      },
+      "sdist_bi_overview_extra": [
+        "agentic_engineering_platform-0.1.0/feature_plugins/bi_overview",
+        "agentic_engineering_platform-0.1.0/feature_plugins/bi_overview/README.zh-TW.md",
+        "agentic_engineering_platform-0.1.0/feature_plugins/bi_overview/worker",
+        "agentic_engineering_platform-0.1.0/feature_plugins/bi_overview/worker/aep_plugin_bi_overview",
+        "agentic_engineering_platform-0.1.0/tests/test_bi_overview_browser.py",
+        "agentic_engineering_platform-0.1.0/tests/test_bi_overview_integration.py",
+        "agentic_engineering_platform-0.1.0/tests/test_bi_overview_package.py",
+        "agentic_engineering_platform-0.1.0/tests/test_bi_overview_reader.py"
+      ],
+      "golden_sha": {
+        "tests/fixtures/plugins_v1/hello.aep-plugin.v1.json": "2fd27dd8799602e19ed29a7c79ad2f56469b01021a9618daab8d6f2642897413",
+        "tests/fixtures/plugins_v1/golden-workspace.v1.json": "f61827911ebab7ddd3854f14fc215c7d12a26feec0f7555360958a31f809fa67"
+      }
+    },
+    "source_freeze_after_build": {
+      "checked": 1714,
+      "changed_egg_info_generated": [
+        "src/agentic_engineering_platform.egg-info/SOURCES.txt"
+      ],
+      "changed_other": []
+    },
+    "build": {
+      "command": "python -m build --no-isolation --outdir C:/TEMP/aep-bi-build-20261115",
+      "exit": 0,
+      "pip_check": "No broken requirements found.",
+      "isolated_wheel_imports": "common.plugins/plugins.manager/host_runtime.plugin_web from C:/TEMP/aep-bi-wheel-target-20261115; CORE_PLUGIN_API_VERSION 1.1.0",
+      "builder_check": "examples/plugins/bi-overview.aep-plugin.json up to date sha256 e471429db4c29f9e0fdadda749148eff1bfcb04544cda80d0479002f3252f423",
+      "example_files": [
+        "worker/aep_plugin_bi_overview/__init__.py",
+        "worker/aep_plugin_bi_overview/reader.py",
+        "worker/aep_plugin_bi_overview/worker.py"
+      ]
+    },
+    "commits_after_freeze": "8fdf51e7 docs only (HANDOFF.md, docs/*); no source change",
+    "git_status_after_build": [],
+    "limits": [
+      "deterministic tests only; no real-model Knowledge quality claim",
+      "16 environment skips (listed)",
+      "existing CI baseline failures are not claimed fixed",
+      "no shared venv install -e, no resident/Gateway/main change"
+    ]
+  },
+  "limits": [
+    "No live-model quality guarantee",
+    "Historical CI43537708699 failures not claimed fixed",
+    "Local verification build predates final closeout docs",
+    "No main/resident/Gateway/shared-venv update"
+  ]
+}

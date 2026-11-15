@@ -228,3 +228,13 @@ workspace hashes. No snapshot regeneration or changed golden expectations.
 Owner explicitly approved the presented H1/H4 scope on2026-11-15. Contract-first
 implementation has begun; earlier preparation/pending statements above record
 the previous checkpoint, not a continuing approval requirement. No scope expansion.
+
+## Final H1/H4 acceptance (2026-11-15)
+
+Approved implementation completed. Original full7029 passed16 skipped, zero
+failures, no reruns. Same445 Knowledge cases/46source hashes unchanged; build/
+pipcheck/wheel580source match/isolated imports and sdist package checks passed.
+Fresh independent review0Critical/Important; local-copy label clarified. See
+FEATURE_PLUGIN_BI_ACCEPTANCE_20261115.md and JSON for evidence and limits.
+Preparation/pending statements above are historical checkpoints, not current
+approval requirements. No full BI/Wiki extraction or resident/main update.

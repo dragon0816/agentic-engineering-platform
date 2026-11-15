@@ -4987,13 +4987,13 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   skipped), artifact quota and helper import ordering. Fix reproduced I001 only
   in95d003fd; global uncached Ruff/format and helper mypy pass. Other CI failures
   retained; not relabelled as baseline-only or fixed without evidence.
-- [ ] Domain preparation: existing BI API/UI/read-rebuild characterization and
+- [x] Domain preparation: existing BI API/UI/read-rebuild characterization and
   stdlib read-only metadata reader with synthetic parity/failure tests. Exclusive
   Claude owners9ba0d06a tests;4cfe1b4e reader/tests. No core files modified.
-- [ ] Independent Claude review of concrete H1/H4 scope in
+- [x] Independent Claude review of concrete H1/H4 scope in
   FEATURE_PLUGIN_BI_OVERVIEW_PLAN_20261114.md. Obtain explicit AGENTS22 consent
   before fields/context/registration implementation; not part of Slice1 consent.
-- [ ] After consent only: compatible declared BI context + page-only service
+- [x] After consent only: compatible declared BI context + page-only service
   registration, packaged BI overview, existing BI/Wiki/Knowledge parity tests.
   Not full BI extraction, new executable GUI, model tool, repository migration
   or a second process calling BiStore/sync/rebuild concurrently.
@@ -5002,13 +5002,13 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   4frozen-v1 compatibility), uncached Ruff/format/mypy1144 pass. No core src
   changes;46Knowledge files unchanged. Source/package bytes and a real v1 ledger
   frozen before schema changes. Reader and amended plan independent review READY.
-- [ ] Await explicit owner response to H1/H4 scope question. No core API/worker
+- [x] Await explicit owner response to H1/H4 scope question. No core API/worker
   context/registration changes implemented or authorized yet. New docs and tests
   are preparation, not an installed overview or completed BI extraction.
 
 - [x] Owner explicit H1/H4 consent2026-11-15:「同意僅 H1／H4 並繼續」.
   Exact reviewed scope and exclusions recorded in DECISIONS before core edits.
-- [ ] Implement H1/H4 contract first, freeze interface; then worker/package and
+- [x] Implement H1/H4 contract first, freeze interface; then worker/package and
   independent integration in parallel, retain frozen v1 digests and source data.
   Ancillary user request: open existing Hermes Agent, without cancelling this task.
 - [x] Ancillary request: existing Hermes desktop opened with --skip-build;
@@ -5017,18 +5017,27 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
 - [x] H1/H4 contract freeze:89 tests pass (parent independent9.24s), API1.1,
   default wire compatibility and unchanged v1 golden bytes/digest. No new approval
   gates/policy/ToolAccess semantics. Interface ready for parallel integration.
-- [ ] Manager/process H1 context + selective page/tool registration (Claude4cfe).
-- [ ] BI overview stdlib worker/manifest/builder/package tests (Claude9ba0d06a).
-- [ ] Independent real HTTP, ToolAccess inventory, source-preservation and
+- [x] Manager/process H1 context + selective page/tool registration (Claude4cfe).
+- [x] BI overview stdlib worker/manifest/builder/package tests (Claude9ba0d06a).
+- [x] Independent real HTTP, ToolAccess inventory, source-preservation and
   published Knowledge coexistence tests (Claude63582bfb).
-- [ ] Integration, fresh review, full Knowledge regression/full suite/build and
+- [x] Integration, fresh review, full Knowledge regression/full suite/build and
   source-package delivery; no resident or main update.
 
 - [x] Runtime791e6a71 and BI package0daf0b44 implemented; fresh Claude source
   review0Critical/Important. Aggregate302pass1skip; UI label repair20pass;
   global uncached Ruff/format/mypy pass. Actual HTTP/tool inventory/Knowledge
   source/citation coexistence and real-browser install/disable/enable confirmed.
-- [ ] Final full session24579 running; unique .scratch/plugin-bi/full-20261115.*.
+- [x] Final full session24579 running; unique .scratch/plugin-bi/full-20261115.*.
   Verifier63582bfb armed bqi1xd594; collect original results, same445/46source
   comparison and build only after pass. Then acceptance/docs/push/remote SHA.
   Component results are not a final full/build claim; no resident or main update.
+
+- [x] Final H1/H4 original full7029passed16skipped0fail, no reruns. Same445
+  Knowledge outcomes and46sources unchanged; sourcefreeze1714 unchanged before
+  build; only generatedegg-info afterbuild. Wheel580 normalizedsource matches,
+  isolatedimportsAPI1.1, sdistgolden/sourcepackage and builder--check allpass.
+  Acceptance: FEATURE_PLUGIN_BI_ACCEPTANCE_20261115.md/json. Feature branch
+  delivery only; no main merge, resident/Gateway/venv update.
+- [x] User ancillary request: opened existing AEP Agent desktop shortcut; service
+  HTTP200 at127.0.0.1:53583. Existing resident version retained, no deployment.
