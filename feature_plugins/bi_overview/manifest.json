@@ -1,0 +1,88 @@
+{
+  "format": "aep-plugin/1",
+  "identity": {"namespace": "bi-overview", "name": "overview", "version": "0.1.0"},
+  "title": "BI 資料集概覽",
+  "description": "Read-only overview of this computer's existing BI datasets: counts, schema, update time and honest availability. Local metadata only; it is not an answer source and changes no BI data.",
+  "core_api": {"minimum": "1.1.0", "below": "2.0.0"},
+  "runtime": {"module": "aep_plugin_bi_overview.worker"},
+  "capabilities": [
+    {
+      "spec": {
+        "identity": {"namespace": "bi-overview", "name": "read-overview", "version": "0.1.0"},
+        "name": "bi-overview.read_overview",
+        "description": "Read-only metadata of the local BI datasets for the overview page.",
+        "input_contract": "bi-overview.read_overview.input",
+        "output_contract": "bi-overview.read_overview.output",
+        "side_effect": "read",
+        "policy": {"risk": "low", "approval_required": true}
+      },
+      "expose_as_tool": false,
+      "outputs": [
+        {"name": "bi_status", "type": "string", "max_length": 40},
+        {"name": "coverage", "type": "string", "max_length": 200},
+        {"name": "datasets_found", "type": "integer"},
+        {"name": "datasets_unavailable", "type": "integer"},
+        {"name": "cards_known", "type": "integer"},
+        {"name": "cards_total", "type": "string", "max_length": 40},
+        {"name": "truncated", "type": "boolean"},
+        {"name": "invalid_registrations", "type": "integer"},
+        {
+          "name": "datasets",
+          "type": "rows",
+          "columns": [
+            "name",
+            "kind",
+            "status",
+            "reason",
+            "origin",
+            "cards",
+            "updated",
+            "schema_ref",
+            "dashboard",
+            "read_only",
+            "version"
+          ]
+        }
+      ]
+    }
+  ],
+  "routes": [{"route_id": "summary", "capability": "bi-overview.read_overview"}],
+  "pages": [
+    {
+      "page_id": "overview",
+      "title": "BI 資料集概覽",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "唯讀概覽：只讀這台電腦現有的 BI 資料集 metadata，不建立、重建、同步或修改任何資料。一般資料集為本機資料庫；vault 為本機工作投影，不是問答使用的已發佈版本；訂閱資料只讀本機記錄選定的版本。無法讀取的資料集標示狀態，不當成零筆。完整 BI 功能仍在 Knowledge → BI 卡片。"
+        },
+        {"kind": "metric", "label": "找到的資料集", "route_id": "summary", "field": "datasets_found"},
+        {"kind": "metric", "label": "可讀本機副本卡片數（部分；非已發佈）", "route_id": "summary", "field": "cards_known"},
+        {"kind": "metric", "label": "無法讀取的資料集", "route_id": "summary", "field": "datasets_unavailable"},
+        {"kind": "metric", "label": "完整本機副本卡片總數（不完整時為 —）", "route_id": "summary", "field": "cards_total"},
+        {"kind": "metric", "label": "涵蓋範圍", "route_id": "summary", "field": "coverage"},
+        {"kind": "metric", "label": "BI 資料夾", "route_id": "summary", "field": "bi_status"},
+        {
+          "kind": "table",
+          "title": "資料集",
+          "route_id": "summary",
+          "field": "datasets",
+          "columns": [
+            {"key": "name", "label": "資料集"},
+            {"key": "kind", "label": "類型"},
+            {"key": "status", "label": "狀態"},
+            {"key": "reason", "label": "原因"},
+            {"key": "origin", "label": "數字來源"},
+            {"key": "cards", "label": "卡片數"},
+            {"key": "updated", "label": "更新時間"},
+            {"key": "schema_ref", "label": "Schema"},
+            {"key": "dashboard", "label": "Dashboard"},
+            {"key": "read_only", "label": "唯讀"},
+            {"key": "version", "label": "訂閱版本"}
+          ]
+        }
+      ]
+    }
+  ],
+  "data": {"reads": ["bi"]}
+}
