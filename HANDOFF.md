@@ -1,4 +1,4 @@
-# BI Overview H1/H4 — verified locally, feature-branch delivery
+# BI Overview H1/H4 — verified and pushed
 
 Updated2026-11-15. Worktree:
 C:/Users/Chi_L/.paseo/worktrees/2qnenase/it-owned-tools-20261112
@@ -57,6 +57,9 @@ shared venv rebinding, actualcompanydata, BI/Wiki migration or executable GUI.
 Hermes desktop was opened without rebuild/update, actual main window confirmed.
 Latest request: opened existing AEP Agent desktop shortcut; HTTP200 verified at
 http://127.0.0.1:53583. Existing installed version retained; no restart/deployment.
-Parent finalizes closeout commit and pushes this feature branch, checks remote
-SHA/CI status; do not automatically merge main or deploy. Any subsequent BI/Wiki
-extraction or live update needs its own concrete scope/active-work checks.
+Acceptance and code pushed to origin/phase-plugins/bi-facade-20261114 at
+911bd1568568306011a6959f356d5ae68b84269d; remote SHA matched. This following
+delivery-record revision is docs-only. CI43703179517 was observed in_progress
+for911bd156; no green CI claim. Local full/build are complete; no local watcher
+remains. Do not automatically merge main or deploy. Further BI/Wiki extraction
+or live update needs its own concrete scope/active-work checks.

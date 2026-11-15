@@ -5041,3 +5041,7 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   delivery only; no main merge, resident/Gateway/venv update.
 - [x] User ancillary request: opened existing AEP Agent desktop shortcut; service
   HTTP200 at127.0.0.1:53583. Existing resident version retained, no deployment.
+
+- [x] Feature branch pushed and remoteSHA matched911bd156. CI43703179517
+  observed in_progress on that source-equivalent acceptance revision; no greenCI
+  claim. Local full/build complete; no main/resident deployment or local watcher.
