@@ -17,6 +17,7 @@ from typing import Any
 
 from common.assets import AssetIdentity, WorkflowManifest
 from common.execution import TraceIdentifiers
+from host_runtime import features
 from host_runtime.tool_access import ToolAccess, mcp_definitions, tool_context
 from knowledge.query import RetrievalSnapshot
 from knowledge.vault import normalize
@@ -209,15 +210,24 @@ class AssistantTools:
         return bool(getattr(getattr(self.web.runtime, "config", None), "assistant_bi_query", False))
 
     def listed(self) -> tuple[str, ...]:
-        """The tools this Agent Web offers now; `aep_bi_query` only while on."""
-        return tuple(n for n in TOOLS if n != "aep_bi_query" or self.bi_query_on())
+        """The tools this Agent Web offers now; `aep_bi_query` only while on and
+        while a feature (BI Knowledge) answers it."""
+        return tuple(
+            n
+            for n in TOOLS
+            if n != "aep_bi_query"
+            or (self.bi_query_on() and features.active().assistant_tool(n) is not None)
+        )
 
     def bi_query(self, args: dict[str, Any]) -> dict[str, Any]:
-        from host_runtime import bi_assistant_query
-
-        return bi_assistant_query.answer(
-            self.web.runtime, args, enabled=self.bi_query_on(), trace=_trace()
-        )
+        answer = features.active().assistant_tool("aep_bi_query")
+        if answer is None:
+            return {
+                "ok": False,
+                "code": "bi_not_installed",
+                "message": "BI Knowledge is not installed on this AEP.",
+            }
+        return answer(self.web.runtime, args, enabled=self.bi_query_on(), trace=_trace())
 
     # -- workflows ---------------------------------------------------------
 

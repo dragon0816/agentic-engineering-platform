@@ -110,8 +110,7 @@ from extensions.runtime import ExtensionLifecycleStore
 from host_runtime import (
     agent_code,
     asset_shelf,
-    bi_cards_api,
-    bi_feed_api,
+    features,
     gateway_link,
     knowledge_binding,
     knowledge_repos_api,
@@ -140,14 +139,6 @@ from host_runtime.attachments import (
 from host_runtime.attachments import summary as attachment_summary
 from host_runtime.authoring import AuthoringError, AuthoringSession, AuthoringStudio
 from host_runtime.avatars import UserPreferences, UserPreferencesStore, catalog
-from host_runtime.bi_cards_tools import (
-    ATLAS_PORT,
-    atlas_embeds,
-    bi_chart_files,
-    bi_question,
-    bi_skill_on,
-    with_bi_sources,
-)
 from host_runtime.business_cards_tools import chart_files, with_legend
 from host_runtime.change_proposals import ChangeProposals
 from host_runtime.chat_authoring import (
@@ -3576,19 +3567,17 @@ class AgentWeb:
                 else None
             )
         listening = TURN_PROGRESS.set(progress)
-        atlas_port = ATLAS_PORT.set(item.atlas_port)
         # The conversation's own model (owner 2026-10-21) for everything the
         # turn does (owner 2026-10-22): the conversation, a Knowledge answer,
         # a Workflow draft. A CLI-backend session's model is the backend's
         # own; what AEP itself asks for it uses the Settings model.
         try:
-            with session_model(turn_model):
+            with session_model(turn_model), features.active().turn_context(item):
                 result = self._conversation_turn(item)
             self._voice_used(item, progress.turn_id)
             return result
         finally:
             BACKEND_TURN_MODEL.reset(native_selection)
-            ATLAS_PORT.reset(atlas_port)
             TURN_PROGRESS.reset(listening)
             self.turn_progress.end(progress)
 
@@ -4016,8 +4005,8 @@ class AgentWeb:
                     # An org chart drawn in this turn (docs/phases/BUSINESS_CARDS.md):
                     # its PNG shows under the answer, its legend is in the text.
                     charts = chart_files(result)
-                    # A BI query's chart page (BI C2) shows in a sandboxed frame.
-                    charts = [*charts, *bi_chart_files(result)]
+                    # A feature's chart pages (a BI query's, BI C2) show in a sandboxed frame.
+                    charts = [*charts, *features.active().answer_files(result)]
                     # What the turn produced joins the session's ledger; a
                     # run's pictures and attached files show like the chart
                     # (owner 2026-10-25).
@@ -4046,7 +4035,11 @@ class AgentWeb:
                         **({CARD_KEY: carded} if carded is not None else {}),
                         **({"files": charts} if charts else {}),
                         **({"delegations": delegations} if delegations else {}),
-                        **({"atlas_embeds": embeds} if (embeds := atlas_embeds(result)) else {}),
+                        **(
+                            {"atlas_embeds": embeds}
+                            if (embeds := features.active().answer_embeds(result))
+                            else {}
+                        ),
                         # The person's preferences this turn was given (M3).
                         **(
                             {"preferences_used": list(result.preferences_used)}
@@ -4069,7 +4062,7 @@ class AgentWeb:
                         "ok": result is not None and result.status == "answered",
                         "answer": (
                             _with_blocks(
-                                with_bi_sources(
+                                features.active().finish_answer(
                                     with_legend(self._gateway_conversation_text(result), charts),
                                     result,
                                 ),
@@ -4304,8 +4297,8 @@ class AgentWeb:
         2026-10-06). Questions without such references route as before."""
         if names_local_work(message):
             return None
-        if bi_question(message) and bi_skill_on(self.runtime.agent.gateway):
-            # A BI cards question goes to the model and bi__query, not the vault.
+        if features.active().bypasses_knowledge(message, self.runtime.agent.gateway):
+            # A feature's question (BI cards) goes to the model and its tools, not the vault.
             return None
         eligible = [
             item for item in self.assets()["skills"] if item["knowledge_harness_selectable"]
@@ -4836,10 +4829,10 @@ class AgentWeb:
 
         discovered = asyncio.run(self.runtime.platform.catalog())
         self.last_catalog = {"at": utc_now().isoformat(), "status": discovered.status}
-        # Subscribed BI datasets: the update badge, stopped (no access) or offline.
-        from host_runtime.bi_subscriptions import observe_catalog
-
-        observe_catalog(self.runtime.layout.workspace_root, self.runtime.platform, discovered)
+        # What the catalog says about each feature (subscribed BI datasets' badge).
+        features.active().observe_catalog(
+            self.runtime.layout.workspace_root, self.runtime.platform, discovered
+        )
 
         try:
             installed_assets = self.runtime.state.installed()
@@ -7164,10 +7157,10 @@ class _Handler(BaseHTTPRequestHandler):
         # (owner 2026-10-08); see host_runtime/telemetry_api.py.
         if telemetry_api.handle(self, parsed.path, parsed.query):
             return
-        # The BI analysis feed, read by Atlas without the page token (owner
-        # 2026-11-01); see host_runtime/bi_feed_api.py.
-        if bi_feed_api.handle(
-            self, "GET", parsed.path, parsed.query, self.server.web.runtime.layout.workspace_root
+        # A feature's public reads (the BI analysis feed, read by Atlas without
+        # the page token, owner 2026-11-01; see host_runtime/bi_feed_api.py).
+        if features.active().public_get(
+            self, parsed.path, parsed.query, self.server.web.runtime.layout.workspace_root
         ):
             return
         if parsed.path == "/view/file":
@@ -7196,7 +7189,7 @@ class _Handler(BaseHTTPRequestHandler):
         if parsed.path.startswith("/api/schedules"):
             self._schedule_route("GET", parsed.path, parsed.query)
             return
-        if bi_cards_api.handle(self, "GET", parsed):  # BI cards (Case A)
+        if features.active().handle(self, "GET", parsed):  # BI cards (Case A)
             return
         if knowledge_repos_api.handle(self, "GET", parsed):  # wiki repositories (R4a)
             return
@@ -7348,9 +7341,9 @@ class _Handler(BaseHTTPRequestHandler):
         if urlparse(self.path).path in ("/mcp", "/mcp/authoring", "/mcp/agent"):
             self._assistant_mcp()
             return
-        if bi_feed_api.is_feed(urlparse(self.path).path):
+        if (closed := features.active().refuses_post(urlparse(self.path).path)) is not None:
             self._refuse_unread(405, {"ok": False, "code": "method_not_allowed",
-                                      "message": "the feed answers GET only"})  # fmt: skip
+                                      "message": closed})  # fmt: skip
             return
         if not self._authorized():
             self._refuse_unread(401, {"error": "this request carried no usable token"})
@@ -7367,7 +7360,7 @@ class _Handler(BaseHTTPRequestHandler):
         if path.startswith("/api/schedules"):
             self._schedule_route("POST", path, "")
             return
-        if bi_cards_api.handle(self, "POST", urlparse(self.path)):  # BI cards (Case A)
+        if features.active().handle(self, "POST", urlparse(self.path)):  # BI cards (Case A)
             return
         if knowledge_repos_api.handle(self, "POST", urlparse(self.path)):  # R4a
             return
@@ -8092,9 +8085,9 @@ class AgentWebServer(ThreadingHTTPServer):
     def page(self) -> bytes:
         if self._page is not None:
             return self._page()
-        from host_runtime.web_page import PAGE
+        from host_runtime.web_page import page
 
-        return PAGE.encode("utf-8")
+        return page().encode("utf-8")
 
     @property
     def address(self) -> str:

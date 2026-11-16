@@ -33,8 +33,6 @@ from agent.gateway import Gateway, KnowledgeVaultTool
 from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillManifest, SkillRegistry
 from agent.task_execution import GatewayTaskExecutor
-from capabilities.bi_cards import vault as bi_vault
-from capabilities.bi_cards.capability import bindings as bi_cards_bindings
 from capabilities.browser_session.handlers import SPEC as BROWSER_SPEC
 from capabilities.browser_session.handlers import (
     BrowserRequest,
@@ -308,10 +306,9 @@ from harness.restricted_runner import (
     RunnerError,
     RunnerLimits,
 )
-from host_runtime import bi_bench, wiki_bench
+from host_runtime import features, wiki_bench
 from host_runtime.agent import LocalAgent
 from host_runtime.attachments import AttachmentStore
-from host_runtime.bi_cards_tools import bi_cards_tools
 from host_runtime.bridge_tools import bridge_tools
 from host_runtime.business_cards_tools import business_cards_tools
 from host_runtime.chat_authoring import ChatAuthoring
@@ -1332,9 +1329,9 @@ def build_gateway(
         local_only=binding.require_local_model if binding is not None else False,
     )
     approval = None if binding is None else binding.data_approval
-    for spec, handler, request, response in bi_cards_bindings(
+    for spec, handler, request, response in features.active().capability_bindings(
         layout.workspace_root,
-        approved=() if approval is None else approval.approved_classes,
+        () if approval is None else approval.approved_classes,
     ):
         installed.register(
             spec, handler, request, response, ExecutionDependencies(central_required=False)
@@ -2356,8 +2353,8 @@ def build_runtime(
     place = layout if layout is not None else HostLayout.under(checked.workspace_root)
     # A wiki repository's push is checked against its recorded test runs (R4a).
     wiki.set_benchmark(partial(wiki_bench.gate, place.workspace_root))
-    # So is a BI vault's push (BI T1).
-    bi_vault.set_benchmark(partial(bi_bench.gate, place.workspace_root))
+    # Each feature's own setup (a BI vault's push gate, BI T1).
+    features.active().startup(place.workspace_root)
     membership = load_membership(checked, place)
     gateway = build_gateway(
         checked,
@@ -2425,7 +2422,7 @@ def build_runtime(
         *chat_authoring.tools(),
         *bridge_tools(gateway.bridge),
         *business_cards_tools(gateway),
-        *bi_cards_tools(gateway),
+        *features.active().host_tools(gateway),
         *mcp.tools(gateway.bridge),
         *workflow_form_tools(gateway.engine),
         *session_artifacts.tools(),

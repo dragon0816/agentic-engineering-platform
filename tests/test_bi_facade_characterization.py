@@ -169,9 +169,17 @@ def test_bi_routes_are_served_by_bi_after_the_token_and_not_by_plugins() -> None
         source = inspect.getsource(getattr(web._Handler, method))
         order = [
             source.index(marker)
-            for marker in ("self._authorized()", "plugin_web.handle(", "bi_cards_api.handle(")
+            for marker in ("self._authorized()", "plugin_web.handle(", "features.active().handle(")
         ]
         assert order == sorted(order), (method, order)
     # The Atlas analysis feed is read without the page token, before that guard.
     get = inspect.getsource(web._Handler.do_GET)
-    assert get.index("bi_feed_api.handle(") < get.index("self._authorized()")
+    assert get.index("features.active().public_get(") < get.index("self._authorized()")
+    # Those mount points are BI's own handlers (feature mount points, proposal r3).
+    from host_runtime import bi_cards_api, bi_feed_api, features_bi
+
+    bi = inspect.getsource(features_bi.BiFeature)
+    assert "bi_cards_api.handle(handler, method, parsed)" in bi
+    assert 'bi_feed_api.handle(handler, "GET", path, query, workspace_root)' in bi
+    held = vars(features_bi)
+    assert held["bi_cards_api"] is bi_cards_api and held["bi_feed_api"] is bi_feed_api

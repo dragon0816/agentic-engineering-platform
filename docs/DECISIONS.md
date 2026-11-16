@@ -7917,3 +7917,11 @@ plugin loading), for stage A then stage B without a further question between
 them. Not covered: permissions/approvals, iframe/token isolation, worker-ized BI,
 hot reload, plugin third-party dependencies, platform-side BI, data migration,
 LLM Wiki, resident update, main merge or push to main.
+
+### 2026-11-16 — Owner adds Shared Platform sync of subscribed BI datasets to r3 scope
+
+Owner chose「同意加入」: host-side `host_runtime/sync.py` installs subscribed BI
+dataset packages through the feature mount points instead of importing
+`bi_subscriptions`. Behavior and rollback on failure stay identical; with no BI
+feature installed such packages are refused with a stated reason. Platform-side
+`control_plane` BI remains out of scope.

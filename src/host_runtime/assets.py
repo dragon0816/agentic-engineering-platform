@@ -25,7 +25,6 @@ from collections.abc import Mapping
 from pathlib import Path
 
 from agent.skills import SkillManifest
-from capabilities.bi_cards.manifest import bi_knowledge_skill
 from capabilities.business_cards.manifest import business_cards_skill
 from capabilities.chipset_report.manifest import preview_skill as chipset_preview_skill
 from capabilities.chipset_report.manifest import preview_workflow as chipset_preview_workflow
@@ -58,6 +57,7 @@ from capabilities.team_tickets.manifest import preview_skill as team_tickets_pre
 from capabilities.team_tickets.manifest import preview_workflow as team_tickets_preview_workflow
 from capabilities.weekly_report.manifest import weekly_report_workflow, weekly_skill
 from common.assets import WorkflowManifest
+from host_runtime import features
 from host_runtime.workspace import write_atomically
 
 
@@ -90,8 +90,8 @@ def shipped() -> tuple[SkillManifest | WorkflowManifest, ...]:
         run_python_workflow(),
         # Business cards (owner 2026-10-20): switched on in every install.
         business_cards_skill(),
-        # BI knowledge cards (owner 2026-10-21, Case A): switched on in every install.
-        bi_knowledge_skill(),
+        # Each feature's Skills (BI knowledge cards, owner 2026-10-21): on in every install.
+        *features.active().shipped_skills(),
     )
 
 
