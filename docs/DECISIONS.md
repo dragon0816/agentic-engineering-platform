@@ -7890,3 +7890,19 @@ no real-model quality guarantee. No main merge/resident/Gateway update performed
 Owner additionally requested opening AEP Agent Web; existing desktop shortcut
 opened successfully and HTTP200 confirmed at localhost53583, without changing
 its installed version, configuration or running service.
+
+### 2026-11-16 — BI Plugin loads in-process at restart; no iframe or token isolation
+
+Owner rejected the sandboxed-iframe/broker design (proposal r2): "為什麼一定要用
+iframe…我不想要改變目前現有的頁面，希望這些頁面和運作程式可以透過安裝後，重啟aep,
+即可被引用" and "拿到token 到底有什麼關係，電腦是公司電腦，也只有使用者本人會用".
+Decision: feature plugins such as BI Knowledge may ship their existing page
+fragments and Python code, loaded into the AEP process and page at Host start;
+install/update takes effect after an AEP restart. Rejected: sandboxed iframe +
+postMessage broker, plugin-scoped tokens, separate worker process for BI, and
+declarative-only pages (would require rewriting ~305 BI functions). Trade-off
+accepted by owner: in-process plugin code has full AEP rights; this is a
+single-user company-PC trust model, not isolation. Slice1 worker plugins remain
+supported. Scope proposal r3:
+docs/phases/FEATURE_PLUGIN_BI_STAGE2_PROPOSAL_DRAFT_20261115.md. Implementation
+still requires the owner's scoped AGENTS22 consent.
