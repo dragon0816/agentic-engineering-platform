@@ -7906,3 +7906,14 @@ single-user company-PC trust model, not isolation. Slice1 worker plugins remain
 supported. Scope proposal r3:
 docs/phases/FEATURE_PLUGIN_BI_STAGE2_PROPOSAL_DRAFT_20261115.md. Implementation
 still requires the owner's scoped AGENTS22 consent.
+
+### 2026-11-16 — Owner consent for proposal r3 (stages A and B)
+
+Owner replied「同意照 r3 開工」to the scope in
+docs/phases/FEATURE_PLUGIN_BI_STAGE2_PROPOSAL_DRAFT_20261115.md (r3). This is the
+AGENTS22 scoped consent for the harness surfaces listed in its §5 (Web routing,
+tool registration/dispatch, Knowledge BI bypass, answer post-processing, startup
+plugin loading), for stage A then stage B without a further question between
+them. Not covered: permissions/approvals, iframe/token isolation, worker-ized BI,
+hot reload, plugin third-party dependencies, platform-side BI, data migration,
+LLM Wiki, resident update, main merge or push to main.
