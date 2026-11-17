@@ -697,7 +697,7 @@ def trial_candidates(
 def trial_extract(workspace: Path, vault_id: str, actor: str, ai: AiRuntime) -> Extract:
     """An extraction case read by a trial run with the working skills."""
     dataset = f"{VAULT_PREFIX}{vault_id}"
-    now = AiRuntime(model=ai.model, background=lambda _title, work: work(), approved=ai.approved)
+    now = AiRuntime(model=ai.model, background=lambda _title, work: work())
 
     def extract(case: Mapping[str, Any]) -> list[dict[str, Any]]:
         return trial_candidates(

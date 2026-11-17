@@ -118,8 +118,6 @@ def preview(
         return {"started": False, "count": len(sources), "sources": listed}
     _refuse_old_skill(staging, sources, given.get("skill_revision"))
     # Nothing starts unless all of it can: a refusal here costs no model call.
-    for source in sources:
-        ai_runs.check_classification(ai, source["classification"])
     if ai is None or ai.model() is None:
         raise BiStoreError("model_unavailable", "沒有可用的模型：到 Settings 設定模型後再試")
     rerun_id = uuid.uuid4().hex[:12]

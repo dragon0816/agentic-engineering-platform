@@ -9,7 +9,7 @@ is not synthetic (DQ-1); every shipped demo card is synthetic.
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Collection, Iterable, Sequence
+from collections.abc import Iterable, Sequence
 from importlib import resources
 from pathlib import Path
 from typing import Any
@@ -416,7 +416,6 @@ def query_cards(
     follow_links: bool,
     limit: int,
     hops: int = 0,
-    approved: Collection[str] | None = None,
 ) -> dict[str, Any]:
     """The chat capability's answer: cards with per-field source evidence, and
     with `hops` the cards their relations reach, each with its path."""
@@ -438,18 +437,9 @@ def query_cards(
         found = [(card, fields) for _, card, fields in near]
         closest = bool(found)
     cards = []
-    classes: dict[str, set[str]] = {}
-    if words and approved:
-        from aep_bi.cards.staging import Staging
-
-        for source_id, name, classification in Staging(
-            store.workspace, store.dataset
-        ).source_classes():
-            classes[source_id] = {classification}
-            classes.setdefault("name:" + name, set()).add(classification)
     for card, fields in found[:limit]:
         entry = _card_entry(store, card, fields)
-        snippet = _body_snippet(store, card, fields, words, approved, classes)
+        snippet = _body_snippet(fields, words)
         if snippet is not None:
             entry["body_snippet"] = snippet
         if follow_links:
@@ -543,33 +533,15 @@ def _filter_note(
 BODY_SNIPPET_CHARS = 300
 
 
-def _body_snippet(
-    store: BiStore,
-    card: Any,
-    fields: dict[str, dict[str, Any]],
-    words: list[str],
-    approved: Collection[str] | None,
-    classes: dict[str, set[str]],
-) -> dict[str, str] | None:
-    """A matched stored body excerpt, never an entire unrestricted body or raw source."""
+def _body_snippet(fields: dict[str, dict[str, Any]], words: list[str]) -> dict[str, str] | None:
+    """A matched stored body excerpt, never an entire body or raw source. Shown
+    whatever the sources' data class (owner 2026-11-17)."""
     body = fields.get("body")
-    if body is None or not words or not approved:
+    if body is None or not words:
         return None
     text = str(body["value"] or "")
     positions = [text.lower().find(word) for word in words if word in text.lower()]
     if not positions:
-        return None
-    sources = {
-        e["source_id"]
-        for e in store.evidence(card["id"])
-        if e["field"] == "body" and e["source_id"]
-    }
-    # Curated/imported card text without source classification defaults to INTERNAL.
-    levels = {level for source in sources for level in classes.get(source, {"UNKNOWN"})}
-    if not sources:
-        filename = str(body["ref"]).split("#row", 1)[0]
-        levels = classes.get("name:" + filename, {"INTERNAL"})
-    if not levels.issubset(approved):
         return None
     start = max(0, min(positions) - 80)
     end = min(len(text), start + BODY_SNIPPET_CHARS - 2)

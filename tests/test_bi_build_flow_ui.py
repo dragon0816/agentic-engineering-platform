@@ -97,7 +97,6 @@ def test_the_whole_build_flow(
         lambda _web: AiRuntime(
             model=lambda: (extractor, "test-model"),
             background=lambda _t, work: work(),
-            approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
         ),
     )
     shots = os.environ.get("AEP_UI_SHOTS")

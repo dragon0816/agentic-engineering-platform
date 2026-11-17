@@ -56,7 +56,6 @@ def test_a_run_checks_the_fit_only_when_ticked(
         lambda _web: AiRuntime(
             model=lambda: (extractor, "test-model"),
             background=lambda _t, work: work(),
-            approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
         ),
     )
     with _served(config, layout, _Model("none", {})) as server:

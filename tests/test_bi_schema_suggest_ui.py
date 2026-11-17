@@ -79,7 +79,6 @@ def test_a_press_suggests_with_quotes_and_a_field_is_added_on_the_version(
         lambda _web: AiRuntime(
             model=lambda: (model, "test-model"),
             background=lambda _t, work: work(),
-            approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
         ),
     )
     shots = os.environ.get("AEP_UI_SHOTS")

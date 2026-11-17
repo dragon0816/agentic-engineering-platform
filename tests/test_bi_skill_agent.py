@@ -61,7 +61,6 @@ def test_the_agent_tries_its_draft_and_its_suggestion_is_checked(tmp_path: Path)
     ai = AiRuntime(
         model=lambda: (extractor, "test-model"),
         background=lambda _t, work: work(),
-        approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
     )
     opened = {"dataset": dataset, "kind": "skill", "target": "classify"}
     session = _ok(_call(ws, "POST", "/api/bi/sessions", opened))["session"]
@@ -163,7 +162,6 @@ def test_the_agent_proposes_a_tool_and_tries_it_only_once_approved(tmp_path: Pat
     ai = AiRuntime(
         model=lambda: (Scripted(MEETING_ANSWER), "test-model"),
         background=lambda _t, work: work(),
-        approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
     )
     opened = {"dataset": dataset, "kind": "skill", "target": "classify"}
     session = _ok(_call(ws, "POST", "/api/bi/sessions", opened))["session"]
@@ -210,11 +208,12 @@ def test_the_agent_proposes_a_tool_and_tries_it_only_once_approved(tmp_path: Pat
         listed = _ok(_call(ws, "GET", f"/api/bi/vaults/{vault_id}/tools"))
         assert listed["drafts"][0]["code"] == code and listed["drafts"][0]["approved"] is False
         assert not any("approve" in t.name for t in agent.requests[0].tools)
-        second = turn("再試一次，保持來源分類限制")
-        assert [t["ok"] for t in second["sent"]["tools"]] == [True, False]
+        second = turn("再試一次，也試機密來源")
+        assert [t["ok"] for t in second["sent"]["tools"]] == [True, True]
     shown = "\n".join(m.text for m in agent.requests[-1].messages if m.role == "tool")
     assert "客戶會議紀錄" in shown
-    assert "classification_not_approved" in shown and "虛構機密" not in shown
+    # A RESTRICTED source is tried too: BI refuses no data class (owner 2026-11-17).
+    assert "classification_not_approved" not in shown and "虛構機密" in shown
     # Only shown: no source kept, nothing staged, no card.
     assert len(Staging(ws, dataset).sources()) == 2
     assert vault.Vault(ws, vault_id).repo.working_units() == before

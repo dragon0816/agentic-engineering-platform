@@ -351,8 +351,6 @@ def session_turn(
     view = schema_versions.draft(workspace, _draft_id(session))
     document, number = view["document"], view["revision"]
     samples, sent_sources = sessions.excerpts(staging, source_ids)
-    for sent in sent_sources:
-        ai_runs.check_classification(ai, sent["classification"])
     cards = len(staging.store.card_rows()) if staging.store.exists else 0
     context = (
         f"The person's goal: {session['goal'] or '(not given)'}\n"

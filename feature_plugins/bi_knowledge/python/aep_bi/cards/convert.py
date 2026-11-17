@@ -29,6 +29,7 @@ is `source_no_text`: scanned pages are not read (no OCR).
 
 from __future__ import annotations
 
+import codecs
 import io
 import re
 from collections.abc import Iterable
@@ -80,12 +81,32 @@ def convert(name: str, data: bytes) -> str:
     if suffix == ".pptx":
         return pptx_markdown(data)
     if suffix in TEXTS:
-        # As is: the AI path read text sources this way before V2.
-        return data.decode("utf-8-sig", errors="replace").replace("\r\n", "\n")
+        return decode_text(data).replace("\r\n", "\n")
     raise BiStoreError(
         "file_type_unsupported",
         f"「{PurePath(name).name}」無法轉成 Markdown；可用 CSV、TSV、Excel、PDF、Word、"
         "PowerPoint、Markdown 或文字檔",
+    )
+
+
+#: Tried in order for a text source without a UTF-16 byte order mark: UTF-8 (with or
+#: without its mark), then Big5 as Traditional Chinese Windows saves it.
+TEXT_ENCODINGS = ("utf-8-sig", "cp950")
+
+
+def decode_text(data: bytes) -> str:
+    """A Markdown or text source's characters, decoded strictly: UTF-16 by its byte
+    order mark, else `TEXT_ENCODINGS`. Bytes none of them reads are
+    `source_decode_failed` (as `readers.decode`), never text with U+FFFD in it."""
+    utf16 = data.startswith((codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE))
+    for encoding in ("utf-16",) if utf16 else TEXT_ENCODINGS:
+        try:
+            return data.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+    raise BiStoreError(
+        "source_decode_failed",
+        "來源不是 UTF-8、UTF-16 或 Big5 文字，無法轉成 Markdown；請另存為 UTF-8 後再加入",
     )
 
 

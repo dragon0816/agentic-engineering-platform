@@ -658,7 +658,9 @@ BI_PANE_HTML = r"""
                 accept=".csv,.tsv,.xlsx,.xlsm,.pdf,.docx,.pptx,.md,.markdown,.txt,text/csv,text/markdown,text/plain">
               <label class="bi-file" for="bi-b-file"><span class="bi-file-pick">選檔</span>
                 <span id="bi-b-file-name" class="bi-file-name">還沒有選檔</span></label></div>
-            <div><button class="go" id="bi-b-upload" type="button" disabled>轉檔</button></div>
+            <div><button class="go" id="bi-b-upload" type="button" disabled>轉檔</button>
+              <div class="mem-status bi-upload-status" id="bi-b-upload-status" role="status"
+                aria-live="polite" hidden></div></div>
           </div>
           <p class="bi-warn" id="bi-b-scope-need" hidden>
             先在上面選工作領域，才能加入檔案或 Ingest。</p>
@@ -5806,40 +5808,118 @@ el("bi-b-pages-dir").addEventListener("change", async (event) => {
 // base64 inside JSON cannot carry it (BI_SOURCES_IN_REPOSITORY S6).
 const BI_STREAM_FROM = 4 * 1024 * 1024;
 
-async function biUploadFile(file) {
+// A POST whose request body reports how much of it was sent (AGENTS.md rule 23):
+// fetch cannot say that, XMLHttpRequest can.
+function biSend(url, body, contentType, onSent) {
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("POST", url);
+    request.setRequestHeader("Authorization", "Bearer " + TOKEN);
+    if (contentType) request.setRequestHeader("Content-Type", contentType);
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable) onSent(event.loaded, event.total);
+    };
+    request.upload.onload = () => onSent(null, null);
+    request.onerror = () => reject(new Error("連線失敗"));
+    request.onload = () => {
+      let answer = {};
+      try { answer = JSON.parse(request.responseText || "{}"); } catch (_) { answer = {}; }
+      if (request.status === 401) {
+        reject(new Error("這個頁面是 Agent Web 較早的啟動；請開最新的 Agent Web 分頁再試"));
+      } else if (request.status >= 400 || answer.ok === false) {
+        const problem = new Error(answer.message || answer.error || answer.code
+          || ("主機回應 " + request.status));
+        problem.code = answer.code; reject(problem);
+      } else resolve(answer);
+    };
+    request.send(body);
+  });
+}
+
+async function biUploadFile(file, onSent) {
   const query = new URLSearchParams({dataset: biDataset(), name: file.name,
     classification: el("bi-b-class").value});
   if (biVaultOf(biDataset())) query.set("folder", el("bi-b-src-folder").value);
-  const reply = await fetch("/api/bi/sources/upload?" + query.toString(),
-    {method: "POST", headers: {"Authorization": "Bearer " + TOKEN}, body: file});
-  const answer = await reply.json().catch(() => ({}));
-  if (!reply.ok || answer.ok === false) {
-    throw new Error(answer.message || answer.code || ("主機回應 " + reply.status));
+  return biSend("/api/bi/sources/upload?" + query.toString(), file, "", onSent);
+}
+
+function biMegabytes(bytes) {
+  return bytes < 100 * 1024 ? (bytes / 1024).toFixed(1) + " KB"
+    : (bytes / 1048576).toFixed(1) + " MB";
+}
+
+// Beside 轉檔: that it started, which file of how many, bytes sent, seconds passed,
+// and in the end what came of every file (AGENTS.md rule 23).
+function biUploadProgress(state, message) {
+  const box = el("bi-b-upload-status"), button = el("bi-b-upload");
+  box.replaceChildren(); box.hidden = !state;
+  box.className = "mem-status bi-upload-status" + (state ? " " + state : "");
+  if (state === "loading") {
+    button.setAttribute("aria-busy", "true");
+    box.append(bh("span", "mem-spinner"), bh("span", "", message));
+  } else {
+    button.removeAttribute("aria-busy");
+    if (state) box.append(bh("span", "", message));
   }
-  return answer;
 }
 
 el("bi-b-upload").addEventListener("click", async () => {
   const button = el("bi-b-upload"); button.disabled = true;
-  biStatus("bi-status-build", "loading", "正在加入來源…");
-  const added = [];
+  const files = Array.from(el("bi-b-file").files);
+  const started = Date.now();
+  const now = {index: 0, name: "", step: "開始"};
+  const show = () => {
+    const seconds = Math.floor((Date.now() - started) / 1000);
+    biUploadProgress("loading", "正在轉檔 " + now.index + "/" + files.length + "："
+      + now.name + "・" + now.step + "・" + seconds + " 秒");
+  };
+  const ticker = setInterval(show, 1000);
+  const sent = (loaded, total) => {
+    now.step = loaded === null ? "已上傳，主機轉檔中"
+      : "已上傳 " + biMegabytes(loaded) + "/" + biMegabytes(total)
+        + (total ? "（" + Math.floor(loaded * 100 / total) + "%）" : "");
+    show();
+  };
+  const added = [], failed = [];
   try {
-    for (const file of el("bi-b-file").files) {
-      if (file.size > BI_STREAM_FROM) {
-        bi.build.sourceId = (await biUploadFile(file)).source.id;
-        added.push(bi.build.sourceId);
+    for (const [index, file] of files.entries()) {
+      Object.assign(now, {index: index + 1, name: file.name, step: "讀取檔案"}); show();
+      let reply;
+      try {
+        if (file.size > BI_STREAM_FROM) {
+          reply = await biUploadFile(file, sent);
+        } else {
+          // Markdown and text go as their bytes too: the host decides their encoding
+          // (UTF-8, UTF-16 or Big5) and says so when it cannot read one.
+          const binary = /\.(xlsx|xlsm|pdf|docx|pptx|md|markdown|txt)$/i.test(file.name);
+          const content = await biReadFile(file, binary);
+          const body = {dataset: biDataset(), name: file.name,
+            classification: el("bi-b-class").value};
+          if (biVaultOf(biDataset())) body.folder = el("bi-b-src-folder").value;
+          if (binary) body.content_base64 = content; else body.text = content;
+          now.step = "上傳中"; show();
+          reply = await biSend("/api/bi/sources", JSON.stringify(body), "application/json",
+            sent);
+        }
+      } catch (failure) {
+        failed.push(file.name + "：" + failure.message
+          + (failure.code ? "（" + failure.code + "）" : ""));
         continue;
       }
-      const binary = /\.(xlsx|xlsm|pdf|docx|pptx)$/i.test(file.name);
-      const content = await biReadFile(file, binary);
-      const body = {dataset: biDataset(), name: file.name,
-        classification: el("bi-b-class").value};
-      if (biVaultOf(biDataset())) body.folder = el("bi-b-src-folder").value;
-      if (binary) body.content_base64 = content; else body.text = content;
-      const reply = await biCall("/api/bi/sources", body);
       bi.build.sourceId = reply.source.id; added.push(reply.source.id);
+      const problem = reply.source.convert_error;
+      if (problem) {
+        failed.push(file.name + "：" + (problem.message || problem.code)
+          + (problem.code ? "（" + problem.code + "）" : ""));
+      }
     }
+    clearInterval(ticker);
     el("bi-b-file").value = ""; biFileChosen();
+    const done = files.length - failed.length;
+    const result = "已轉檔 " + done + " 份" + (failed.length
+      ? "；" + failed.length + " 份沒有轉檔：" + failed.join("；")
+        + "。可另存為 UTF-8、含文字層的檔案後再加入，或在右邊直接編輯 Markdown。" : "");
+    biUploadProgress(failed.length ? "error" : "good", result);
     // What was just added is what is ticked: the next Ingest reads those files.
     bi.build.chosen = added;
     await biBuildSources(); biBuildSave();
@@ -5847,8 +5927,8 @@ el("bi-b-upload").addEventListener("click", async () => {
     const last = bi.build.sources.find((source) => source.id === bi.build.sourceId);
     if (last && last.format) biPickSource(last);
   } catch (failure) {
-    biStatus("bi-status-build", "error", "來源沒有加入：" + failure.message + "。");
-  } finally { biFileChosen(); }
+    biUploadProgress("error", "來源沒有加入：" + failure.message + "。");
+  } finally { clearInterval(ticker); biFileChosen(); }
 });
 
 // -- step 2: schema ----------------------------------------------------------

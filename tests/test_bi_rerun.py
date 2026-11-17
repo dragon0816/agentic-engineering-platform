@@ -12,7 +12,6 @@ from test_bi_extract import Scripted
 from test_bi_vault import _commit, _ok, _push, _refused, _row, _sync, _two_pcs
 
 from aep_bi.cards import rerun, vault
-from aep_bi.cards.ai_runs import AiRuntime
 from aep_bi.cards.staging import Staging
 from aep_bi.cards.store import BiStore, PlannedRow
 from aep_bi.host.bi_cards_api import route
@@ -211,18 +210,19 @@ def test_a_rerun_run_stays_out_of_the_run_lists_and_cannot_be_committed(tmp_path
     assert (status, answer["code"]) == (409, "run_trial")
 
 
-def test_nothing_starts_unless_all_of_it_can(tmp_path: Path) -> None:
-    _, source = _seed(tmp_path)
+def test_nothing_starts_without_a_model_and_no_class_is_refused(tmp_path: Path) -> None:
+    _, source = _seed(tmp_path)  # INTERNAL by default
     jobs = Jobs()
-    model = Scripted(_answer(standard_body="IEEE 802.1"))
-    pair = (model, "test-model")
-    narrow = AiRuntime(model=lambda: pair, background=jobs, approved=lambda: ("RESTRICTED",))
     body = {"dataset": "demo", "sources": [source], "start": True}
-    status, answer = _call(tmp_path, "POST", "/api/bi/reruns/preview", body, narrow)
-    assert status != 200 and answer["code"] == "classification_not_approved"
-    assert jobs.pending == []
     status, answer = _call(tmp_path, "POST", "/api/bi/reruns/preview", body, _runtime(None, jobs))
     assert status != 200 and answer["code"] == "model_unavailable"
+    assert jobs.pending == []
+    # With a model it starts: a source's data class is never a refusal (owner 2026-11-17).
+    model = Scripted(_answer(standard_body="IEEE 802.1"))
+    started = _ok(_call(tmp_path, "POST", "/api/bi/reruns/preview", body, _runtime(model, jobs)))
+    assert started["rerun"]["id"] and jobs.pending
+    jobs.run_all()
+    assert model.requests
     assert _call(tmp_path, "GET", "/api/bi/reruns/../x", dataset="demo")[0] == 404
 
 

@@ -51,7 +51,6 @@ def test_a_tool_is_approved_run_and_its_output_previewed(
         lambda _web: AiRuntime(
             model=lambda: (extractor, "test-model"),
             background=lambda _t, work: work(),
-            approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
         ),
     )
     with _served(config, layout, _Model("none", {})) as server:

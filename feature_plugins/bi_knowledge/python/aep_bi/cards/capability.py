@@ -19,7 +19,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import sqlite3
-from collections.abc import Callable, Collection
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -164,7 +164,8 @@ class QueryResult(Contract):
     related: tuple[dict[str, Any], ...] = ()
     #: With `text`: where the words stand in the sources of the version read.
     passages: tuple[dict[str, Any], ...] = ()
-    #: Matching chunks of sources whose data class is not approved for the model.
+    #: Always 0: BI withholds no source for its data class (owner 2026-11-17).
+    #: Kept so readers of this result keep their shape.
     passages_withheld: int = 0
 
 
@@ -180,14 +181,12 @@ def source_note(source: dict[str, Any] | None) -> str:
     return note
 
 
-def _source_passages(
-    store: BiStore, text: str, approved: Collection[str] | None, chosen_version: bool
-) -> dict[str, Any]:
+def _source_passages(store: BiStore, text: str, chosen_version: bool) -> dict[str, Any]:
     """Never fails the cards' answer: the index is a rebuildable cache."""
-    if approved is None or chosen_version or not text.strip():
+    if chosen_version or not text.strip():
         return {"passages": [], "withheld": 0}
     try:
-        return search_index.passages(store, text, approved=approved)
+        return search_index.passages(store, text)
     except (sqlite3.Error, OSError, BiStoreError) as error:
         _LOG.warning("BI passages not read: %s", type(error).__name__)
         return {"passages": [], "withheld": 0}
@@ -198,13 +197,9 @@ class QueryHandler:
         self,
         workspace_root: Path,
         store_for: Callable[[str], tuple[BiStore, str] | None] | None = None,
-        *,
-        approved: Collection[str] | None = None,
     ) -> None:
         self.workspace_root = workspace_root
-        #: The data classes the host approved for its model; None reads no passage
-        #: (a source's text goes to a model only in an approved class).
-        self.approved = approved
+        # Every data class is read: BI withholds no source for its class (owner 2026-11-17).
         #: For a benchmark (BI T1): the store a dataset is read from and the
         #: note saying which version that is, in place of the published one;
         #: None for a dataset it does not cover. Nothing is synced then.
@@ -307,22 +302,18 @@ class QueryHandler:
                 follow_links=request.follow_links,
                 limit=request.limit,
                 hops=request.hops,
-                approved=self.approved,
             )
-            found = _source_passages(store, request.text, self.approved, chosen is not None)
-            withheld = found["withheld"]
-            held = f"另有 {withheld} 段來源的機密等級未核准送給模型，沒有列出。" if withheld else ""
+            found = _source_passages(store, request.text, chosen is not None)
             return QueryResult(
                 dataset=answer["dataset"],
                 total=answer["total"],
                 cards=tuple(answer["cards"]),
-                scope_note=answer["scope_note"] + held + (cited and f"{cited}。"),
+                scope_note=answer["scope_note"] + (cited and f"{cited}。"),
                 source=source,
                 sample_note=sample_note(store, [*answer["cards"], *answer["related"]]),
                 vault=read_version,
                 related=tuple(answer["related"]),
                 passages=tuple(found["passages"]),
-                passages_withheld=withheld,
             )
 
         try:
@@ -332,7 +323,7 @@ class QueryHandler:
 
 
 def bindings(
-    workspace_root: Path, *, approved: Collection[str] | None = None
+    workspace_root: Path,
 ) -> tuple[tuple[CapabilitySpec, Any, type[Contract], type[Contract]], ...]:
-    handler = QueryHandler(workspace_root, approved=approved)
+    handler = QueryHandler(workspace_root)
     return ((QUERY_SPEC, handler, QueryRequest, QueryResult),)

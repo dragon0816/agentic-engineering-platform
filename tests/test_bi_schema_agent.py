@@ -79,7 +79,6 @@ def _turn(tmp_path: Path, *script: dict[str, Any]) -> dict[str, Any]:
     ai = AiRuntime(
         model=lambda: (extractor, "test-model"),
         background=lambda _t, work: work(),
-        approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
     )
     opened = {"dataset": dataset, "kind": "schema", "target": draft_id}
     session = _ok(_call(ws, "POST", "/api/bi/sessions", opened))["session"]

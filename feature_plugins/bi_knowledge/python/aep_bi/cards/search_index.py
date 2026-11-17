@@ -30,7 +30,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from collections.abc import Collection, Iterator, Sequence
+from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
@@ -437,29 +437,21 @@ def _passages(
     return found
 
 
-def passages(
-    store: BiStore, query: Any, *, approved: Collection[str], limit: int = PASSAGE_LIMIT
-) -> dict[str, Any]:
-    """Passages for the model: only from sources of a data class approved for it.
-    `withheld` counts the matching chunks left out for that (at most `limit`), so
-    the answer can say so. No marks: they point into the snippet for a page."""
+def passages(store: BiStore, query: Any, *, limit: int = PASSAGE_LIMIT) -> dict[str, Any]:
+    """Passages for the model, from sources of every data class: BI withholds
+    none for its class (owner 2026-11-17), so `withheld` is always 0. No marks:
+    they point into the snippet for a page."""
     empty: dict[str, Any] = {"passages": [], "withheld": 0}
     words = terms(str(query or ""))
     if not words or not _has_data(store) or (store.read_only and store.view is None):
         return empty
     sync_quietly(store)
-    classes = {
-        str(s["id"]): str(s["classification"])
-        for s in Staging(store.workspace, store.dataset).sources()
-    }
-    allowed = [k for k, v in classes.items() if v in approved]
-    refused = [k for k, v in classes.items() if v not in approved]
+    held = [str(s["id"]) for s in Staging(store.workspace, store.dataset).sources()]
     with _db(store) as db:
-        found = _passages(db, words, limit, allowed) if allowed else []
-        withheld = len(_rows(db, "chunk_text", "source_id", words, limit, refused)[0])
+        found = _passages(db, words, limit, held) if held else []
     return {
         "passages": [{k: v for k, v in item.items() if k != "marks"} for item in found],
-        "withheld": withheld if refused else 0,
+        "withheld": 0,
     }
 
 

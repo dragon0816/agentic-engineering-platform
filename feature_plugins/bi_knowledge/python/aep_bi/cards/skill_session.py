@@ -212,8 +212,6 @@ def session_turn(
     skill, listed = _session_skill(workspace, vault_id, session)
     reg = vault.Vault(workspace, vault_id)._registry()
     samples, sent_sources = sessions.excerpts(staging, source_ids)
-    for sent in sent_sources:
-        ai_runs.check_classification(ai, sent["classification"])
     chosen_runs = run_ids if isinstance(run_ids, list) and run_ids else _recent_trials(staging)
     trials, used_runs = methods._run_context(staging, "", chosen_runs) if chosen_runs else ("", [])
     types = list(skill.get("card_types") or []) or list(reg.types)
