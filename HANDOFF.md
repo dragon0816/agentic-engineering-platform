@@ -1,65 +1,97 @@
-# BI Overview H1/H4 — verified and pushed
+# BI Knowledge as an in-process plugin (proposal r3) — handoff
 
-Updated2026-11-15. Worktree:
-C:/Users/Chi_L/.paseo/worktrees/2qnenase/it-owned-tools-20261112
-Branch phase-plugins/bi-facade-20261114. Verified code revision
-0daf0b4449da04434733466fc6fd2c55f61c72ab. Later commits are documentation only.
-Owner explicit H1/H4 approval「同意僅 H1／H4 並繼續」 recorded before code in
-DECISIONS/d4229ec5. No need to ask again within scope; no expansion authorized.
+Updated 2026-11-17 before an owner PC restart. Worktree
+`C:/Users/Chi_L/.paseo/worktrees/2qnenase/it-owned-tools-20261112`, branch
+`phase-plugins/bi-facade-20261114` (local commits only, NOT pushed).
 
-## Delivered code and scope
-7e4afc96: compatible Plugin API1.1 data.reads + page-service contribution types.
-791e6a71: declared BI context at start/restart and selective tool registration.
-0daf0b44: bi-overview.overview@0.1.0 worker/manifest/builder/example +HTTP/browser.
-Only common/plugins.py and plugins/{manager,process}.py changed in core.
-No Host/Web/Knowledge/BI/Telegram implementation change. Page services stay out
-of Bridge/ToolAccess/model inventories; policies/grants/TurnEffects unchanged.
-Source root/bi context isn't a permission gate/sandbox. Ordinary environment kept.
-No new Skills/assets/model tools. Metadata only, not full BI/Wiki extraction.
+## Goal and scope
+The owner's goal: stop needing to update/reinstall AEP whenever BI Knowledge (later
+LLM Wiki) changes. Approved design: proposal r3,
+`docs/phases/FEATURE_PLUGIN_BI_STAGE2_PROPOSAL_DRAFT_20261115.md`. A feature plugin's
+page fragments and Python code load into the AEP process at Host start, so install or
+update takes effect after an AEP restart. The pages stay exactly as they are. There is
+no iframe, no token isolation and no BI worker process. The owner rejected those in r2
+(see `docs/DECISIONS.md`, 2026-11-16 entries).
+AGENTS rule 22 consent is recorded in `docs/DECISIONS.md` for stages A and B. That
+consent covers Web routing, tool registration, the Knowledge BI bypass, answer
+post-processing, startup plugin loading, and Shared Platform `sync.py` installs of
+subscribed BI datasets. Permissions and approvals are unchanged. LLM Wiki, main merge
+and push are not covered.
+Run tests with `C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/.venv/Scripts/python.exe`
+and env `PYTHONPATH=src` (the venv's editable install points at another checkout).
+Always pass your own `--basetemp` and `-p no:cacheprovider`.
 
-## Acceptance and actual checks
-Authoritative docs/phases/FEATURE_PLUGIN_BI_ACCEPTANCE_20261115.md and JSON.
-Original full7029passed16environment skips0failures/errors,1:52:47, no reruns.
-Exact445Knowledge IDs/outcomes identical;46sources unchanged. Aggregate302pass/
-1symlink skip; clearer local-copy label20package/browser passes. Real HTTP and
-headless browser verify install,104synthetic cards, disable/enable, source byte
-preservation, tool-list equality on every model request, identical published Wiki
-answer/citation. Independent final source review Critical0/Important0.
-Uncached Ruff/format1524files and mypy1151sources pass. Build/pipcheck pass.
-580wheel Python files match normalized source, isolated target imports API1.1.
-Sdist contains exact source/package/example and golden v1 bytes.1714frozen files
-unchanged afterfull; only generatedegg-info SOURCES.txt changed afterbuild.
-Evidence .scratch/plugin-bi/final-verification-20261115.json and associatedlogs.
-Full outputs full-20261115.* are COMPLETE, exit0; do not rerun/wait on them.
-Claude verifier63582bfb completed all work; no background verifier remains.
+## Done (committed)
+- `8f6029cd` stage A. Core reaches BI only through `src/host_runtime/features.py`. The
+  BI contributions are in `features_bi.py` and the BI page parts in `bi_page.py`. With BI
+  installed, the page sha256 is unchanged at `86646dc3…`. The empty feature set gives a
+  working AEP without BI, with stand-ins for the 7 BI names the shell calls.
+  New test file: `tests/test_feature_set_without_bi.py`.
+  Verified: ruff, format, mypy (all files), 277 BI-focused tests and 9 new tests.
+- `8f05be83` B1, Plugin API 1.2 (`CORE_PLUGIN_API_VERSION` 1.2.0):
+  - Manifest field `in_process` {package `aep_*`, entry}.
+  - Package area `python/`.
+  - `src/plugins/in_process.py`: bundled roots (source `feature_plugins/`, env
+    `AEP_BUNDLED_PLUGINS`, or `<venv>/aep-feature-plugins`) plus the workspace ledger.
+    The newest enabled copy wins. `bundled-off.json` holds bundled plugins the owner
+    switched off.
+  - `features.for_host()` loads the plugins at `build_runtime`. A failure is skipped
+    and recorded as `plugin_load_failed`.
+  - The manager shows bundled plugins and `restart_required`. Bundled plugins can be
+    disabled but not uninstalled.
+  - `__pycache__` under `python/` is tolerated by verification and cleared before
+    import.
+  Tests: `tests/test_plugin_in_process.py` (11) and all plugin tests (87) pass, plus
+  mypy. The test pinning the API version moved from 1.1.0 to 1.2.0; this is a
+  legitimate contract change.
+- `43bca516`:
+  - The Windows bundle copies `feature_plugins/*/{plugin.json,python}` to
+    `feature-plugins/`, and `install.ps1` copies that to `.venv/aep-feature-plugins`.
+  - `scripts/build_bi_knowledge_plugin.py` builds `dist/bi-knowledge.aep-plugin.json`.
+  - `in_process.ensure_bundled_importable()` is for the Shared Platform.
+  Windows bundle/python tests (33) and installer tests (45) pass.
 
-## Artifacts and use
-examples/plugins/bi-overview.aep-plugin.json (37612bytes), sha256
- e471429db4c29f9e0fdadda749148eff1bfcb04544cda80d0479002f3252f423.
-README feature_plugins/bi_overview/README.zh-TW.md. Requires API>=1.1,<2.
-Install through Plugins on a compatible Host; no auto-install/IT approval.
-Build verification artifacts C:/TEMP/aep-bi-build-20261115 wheel+sdist. These
-predate final closeout docs and are not a deployed Windows release bundle.
-Builder scripts/build_bi_overview_plugin.py --check is deterministic.
+## In progress / interrupted by the restart
+1. B2: physically moving BI out of `src/`. A subagent was working in a separate
+   worktree `C:/TEMP/claude-bi/move`, branch `phase-plugins/bi-move-20261117`, based on
+   `8f6029cd`. At the restart it had about 280 uncommitted changes and no commit. They
+   are unverified, so inspect them (`git -C C:/TEMP/claude-bi/move status`) or redo
+   the move. Target layout:
+   - `feature_plugins/bi_knowledge/python/aep_bi/cards/` ← `src/capabilities/bi_cards/`
+   - `aep_bi/host/` ← `src/host_runtime/bi_*.py` and `bi_page.py`
+   - `aep_bi/feature.py` ← `features_bi.py`
+   - Rewrite all imports and string module paths in src, tests and scripts.
+   - `control_plane/bi_datasets.py` → `aep_bi.cards.snapshot`.
+   - pyproject: pytest `pythonpath`, and mypy `files`/excludes for the new path; drop
+     the bi_cards package-data.
+   - Page sha256 must stay `86646dc3…`, and no test assertion may be weakened.
+2. The stage A full-suite run (frozen copy `C:/TEMP/claude-bi/stageA` at `8f6029cd`)
+   was at about 13% with 2 failures so far. The restart kills it. The log is
+   `C:/TEMP/claude-bi/full-stageA.log`. Rerun it when the PC is quiet; the baseline is
+   7029 passed / 16 skipped. Classify any failure against known CI flakes
+   (`test_bi_many_sources_ui`, `test_bi_version_link_ui`, `test_weekly_report_workflow`)
+   before trusting it.
 
-## Limits and deployment state
-No real-model quality guarantee; all fixtures synthetic. Read budget bounds lock
-waits between datasets, not all query/filesystem time. Vault numbers are local
-working projections, not published answer sources; unknown freshness. Unknown/
-busy/outdated/truncated counts aren't zero or complete totals. Redirected bi
-paths and conservative leftover-journal behavior documented. Old Slice1 late
-registry-refresh/status limits unchanged. OldCI43537708699 failures not claimed
-fixed. Do not equate local green with a later CI result.
-No main merge, excluded e564e1ad legacy success inference, resident/Gateway update,
-shared venv rebinding, actualcompanydata, BI/Wiki migration or executable GUI.
+## Next steps, in order
+1. Finish B2 and merge it into this branch. In `features.py` set `BUILTIN = ()`.
+2. Add `feature_plugins/bi_knowledge/plugin.json`: identity e.g. `bi-knowledge.bi`
+   1.0.0, core_api 1.2.0–2.0.0, `in_process {package: aep_bi, entry: aep_bi.feature}`.
+   BI then loads as a bundled plugin. Check that the package fits the limits (256 files,
+   6 MB total, 2 MB per file) with `scripts/build_bi_knowledge_plugin.py`.
+3. Call `ensure_bundled_importable()` before the `aep_bi` import in
+   `control_plane/bi_datasets.py`.
+4. Run the full suite, the 445 Knowledge comparison, ruff, format, mypy, and the
+   wheel/sdist build. Check that the core wheel holds no BI modules. Then do a real
+   update test: install BI 1.0.1 (one visible text change) from the Plugins page →
+   restart → see the change; disable → restart → the BI tab is gone.
+5. Get an independent Claude Code review. Then write `zh-TW` usage docs for owners
+   (update BI = install the plugin + restart), add a TASKS row and finish this handoff.
+6. Later, with its own scope consent: LLM Wiki the same way.
 
-## User app requests and final actions
-Hermes desktop was opened without rebuild/update, actual main window confirmed.
-Latest request: opened existing AEP Agent desktop shortcut; HTTP200 verified at
-http://127.0.0.1:53583. Existing installed version retained; no restart/deployment.
-Acceptance and code pushed to origin/phase-plugins/bi-facade-20261114 at
-911bd1568568306011a6959f356d5ae68b84269d; remote SHA matched. This following
-delivery-record revision is docs-only. CI43703179517 was observed in_progress
-for911bd156; no green CI claim. Local full/build are complete; no local watcher
-remains. Do not automatically merge main or deploy. Further BI/Wiki extraction
-or live update needs its own concrete scope/active-work checks.
+## Known risks
+- BI code depends on about 15 core internal modules. A core change to those can
+  require a new BI plugin version; `core_api` and compatibility tests manage this.
+- A bundled plugin cannot be uninstalled, only switched off. A newer installed copy
+  overrides the bundled one; uninstalling it falls back to the bundled copy.
+- An earlier CI run failed on 3 BI UI timing tests that predate this work. They are not
+  fixed here.
