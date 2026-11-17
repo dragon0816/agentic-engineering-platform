@@ -8,10 +8,10 @@ from typing import Any
 import pytest
 from test_bi_vault import _call, _commit, _ok, _push, _refused, _two_pcs
 
-from capabilities.bi_cards import tool_runs, vault
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, BiStoreError
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import tool_runs, vault
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore, BiStoreError
+from aep_bi.host.bi_cards_api import route
 
 FOLDER = "applications/aidc/sources"
 TOOL = """

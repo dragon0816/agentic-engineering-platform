@@ -24,8 +24,8 @@ import pytest
 from test_bi_query_analyses import _joined
 from test_bi_vault import _call, _ok, _refused
 
-from capabilities.bi_cards import analyses, atlas_import, vault
-from capabilities.bi_cards.store import BiStoreError
+from aep_bi.cards import analyses, atlas_import, vault
+from aep_bi.cards.store import BiStoreError
 from scripts import bi_feed_fixtures as fixtures
 from scripts import check_atlas_dashboard_golden as drift
 

@@ -22,13 +22,14 @@ from test_chat_workflow_forms_telegram import _Scripted
 from test_host_models import binding, endpoint
 from test_host_wiring import grant_record, host_json, membership_record, workspace
 
+from aep_bi.cards import analyses, vault
+from aep_bi.cards.capability import QUERY_SPEC
+from aep_bi.host import bi_chart_html
+from aep_bi.host.bi_cards_tools import TOOL_NAME, bi_cards_tools, bi_chart_files, chart_page
 from agent.gateway import ConversationToolExecution, GatewayConversationResult, HostToolOutcome
-from capabilities.bi_cards import analyses, vault
-from capabilities.bi_cards.capability import QUERY_SPEC
 from common.execution import RequestContext, TraceIdentifiers
-from host_runtime import bi_chart_html, skill_packs
+from host_runtime import skill_packs
 from host_runtime.assets import shipped
-from host_runtime.bi_cards_tools import TOOL_NAME, bi_cards_tools, bi_chart_files, chart_page
 from host_runtime.conversations import ConversationTurnRequest
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer

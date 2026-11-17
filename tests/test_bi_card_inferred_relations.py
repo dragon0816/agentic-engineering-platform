@@ -12,9 +12,9 @@ from test_bi_card_links import _put, _row
 from test_bi_extract import Scripted
 from test_bi_vault import _call, _ok, _two_pcs
 
-from capabilities.bi_cards import card_model, catalog, extract, vault
-from capabilities.bi_cards.store import BiStore, card_id_for
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import card_model, catalog, extract, vault
+from aep_bi.cards.store import BiStore, card_id_for
+from aep_bi.host.bi_cards_api import route
 
 NOTE = "# 虛構會議\n\nFAKE-PRODUCT 需要 FAKE-TEST 才能量產。\n"
 QUOTE = "FAKE-PRODUCT 需要 FAKE-TEST"

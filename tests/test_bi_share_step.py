@@ -14,8 +14,8 @@ import pytest
 from test_bi_domain_gate import _bench, _question, _ready
 from test_bi_vault import _call, _commit, _ok, _push, _two_pcs
 
-from capabilities.bi_cards import domain_reach, vault
-from host_runtime import bi_bench
+from aep_bi.cards import domain_reach, vault
+from aep_bi.host import bi_bench
 
 
 @pytest.fixture(autouse=True)

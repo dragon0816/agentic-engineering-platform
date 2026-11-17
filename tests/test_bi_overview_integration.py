@@ -23,8 +23,8 @@ import test_vault_asking_e2e as asking
 from test_agent_web import base
 from test_host_models import GatewayReply
 
+from aep_bi.host.bi_cards_api import route as bi_route
 from common.plugins import PluginCapability, PluginField, PluginManifest, parse_plugin_package
-from host_runtime.bi_cards_api import route as bi_route
 from host_runtime.host import build_runtime
 from host_runtime.tool_access import ToolAccess
 from host_runtime.web import AgentWeb, AgentWebServer

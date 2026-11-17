@@ -30,9 +30,9 @@ from test_bi_vault import (
 )
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from capabilities.bi_cards import search_index, vault, vault_sources
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, BiStoreError
+from aep_bi.cards import search_index, vault, vault_sources
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore, BiStoreError
 from knowledge.repo.repository import _file_sha
 
 REPORT = "# AIDC 報告\n\n電源模組 FACT-1。\n"

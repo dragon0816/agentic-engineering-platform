@@ -11,9 +11,9 @@ from test_bi_ai_runs import Jobs, _runtime
 from test_bi_extract import Scripted
 from test_bi_vault import _call, _ok, _two_pcs
 
-from capabilities.bi_cards import catalog, schema_suggest, vault
-from capabilities.bi_cards.store import BiStore
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import catalog, schema_suggest, vault
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_api import route
 
 NOTE = (
     "# 虛構筆記\n\nFAKE-ROVER 的冷卻方式是液冷。\n"

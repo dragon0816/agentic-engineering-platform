@@ -15,10 +15,10 @@ import pytest
 from test_bi_card_page_import import _apply, _preview
 from test_bi_vault import _call, _ok, _push, _sync, _two_pcs
 
-from capabilities.bi_cards import importer, manifest, recipes, service, vault
-from capabilities.bi_cards.catalog import for_store
-from capabilities.bi_cards.schema import missing_state
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from aep_bi.cards import importer, manifest, recipes, service, vault
+from aep_bi.cards.catalog import for_store
+from aep_bi.cards.schema import missing_state
+from aep_bi.cards.store import BiStore, PlannedRow
 
 CSV = "技術,成熟度,標準組織\nFAKE-A,n/a,TBD\nFAKE-B,nan,-\nFAKE-C,待定,\n"
 

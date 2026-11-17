@@ -20,9 +20,9 @@ from bi_page_driver import BiPage, browser_missing
 from test_bi_atlas_import import atlas  # noqa: F401 - the stand-in Atlas fixture
 from test_draft_install_cards import served  # noqa: F401 - the real Agent Web fixture
 
-from capabilities.bi_cards import analyses, sessions, vault
-from capabilities.bi_cards.store import BiStore
-from host_runtime import bi_bench, bi_cards_api
+from aep_bi.cards import analyses, sessions, vault
+from aep_bi.cards.store import BiStore
+from aep_bi.host import bi_bench, bi_cards_api
 from scripts import bi_feed_fixtures as fixtures
 
 VAULT = fixtures.VAULT_ID

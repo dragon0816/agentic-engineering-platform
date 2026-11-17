@@ -16,9 +16,9 @@ from typing import Any
 
 import pytest
 
-from capabilities.bi_cards import card_model, service
-from capabilities.bi_cards.schema import BI_PREFIX
-from capabilities.bi_cards.store import LEGACY_SCHEMA, BiStore
+from aep_bi.cards import card_model, service
+from aep_bi.cards.schema import BI_PREFIX
+from aep_bi.cards.store import LEGACY_SCHEMA, BiStore
 
 READER_FILE = (
     Path(__file__).resolve().parents[1]

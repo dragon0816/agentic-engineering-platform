@@ -20,8 +20,8 @@ from typing import Any
 import pytest
 from test_draft_install_cards import served  # noqa: F401 - the real Agent Web fixture
 
-from capabilities.bi_cards import catalog
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import catalog
+from aep_bi.cards.store import BiStore
 
 SHOTS = Path(__file__).resolve().parents[1] / ".scratch" / "bi-schemas"
 EXAMPLE = "example/product-spec@1.0.0"

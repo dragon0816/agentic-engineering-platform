@@ -18,7 +18,7 @@ from typing import Any
 import pytest
 from test_bi_vault import _call, _ok
 
-from capabilities.bi_cards import ai_runs, catalog, extract, sessions, skill_session
+from aep_bi.cards import ai_runs, catalog, extract, sessions, skill_session
 
 AIDC = "applications/aidc/sources"
 PROFILE: dict[str, Any] = {"types": {"Technology": {"fields": {}}, "Account": {"fields": {}}}}

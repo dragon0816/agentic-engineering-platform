@@ -19,9 +19,9 @@ from typing import Any
 
 import pytest
 
-from capabilities.bi_cards import search_index, service
-from capabilities.bi_cards.store import BiStore
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import search_index, service
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_api import route
 
 ACTOR = "tester"
 TECH_CSV = (

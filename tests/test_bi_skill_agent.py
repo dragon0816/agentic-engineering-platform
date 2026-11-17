@@ -19,13 +19,14 @@ from test_bi_vault import _call, _ok
 from test_business_cards_conversation import Conversation
 from test_host_wiring import ready
 
-from capabilities.bi_cards import vault
-from capabilities.bi_cards.ai_runs import AiRuntime
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore
-from host_runtime import bi_bench, bi_skill_agent, skill_packs
+from aep_bi.cards import vault
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore
+from aep_bi.host import bi_bench, bi_skill_agent
+from aep_bi.host.bi_cards_api import route
+from host_runtime import skill_packs
 from host_runtime.assets import shipped
-from host_runtime.bi_cards_api import route
 from host_runtime.host import build_runtime
 
 NEW_BODY = "類型與資料夾照 schema。\n會議紀錄裡客戶親口說的評估，一律建一張 Signal。"

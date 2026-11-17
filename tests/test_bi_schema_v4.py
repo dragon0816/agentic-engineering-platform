@@ -16,9 +16,9 @@ from typing import Any
 from test_bi_schema_v2 import _call, _ok
 from test_bi_vault_published import CONTEXT
 
-from capabilities.bi_cards import analyses, catalog, packs, schema_versions
-from capabilities.bi_cards.capability import QueryHandler, QueryRequest
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from aep_bi.cards import analyses, catalog, packs, schema_versions
+from aep_bi.cards.capability import QueryHandler, QueryRequest
+from aep_bi.cards.store import BiStore, PlannedRow
 from scripts.build_bi_schema_v4 import OUT, WIDENED, build
 
 V3, V4 = "bi.schema/v1.1@3.0.0", "bi.schema/v1.1@4.0.0"

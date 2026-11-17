@@ -19,18 +19,18 @@ import pytest
 from test_draft_install_cards import served  # noqa: F401 - the real Agent Web fixture
 from test_host_wiring import ready
 
-from capabilities.bi_cards import board as bi_board
-from capabilities.bi_cards import importer, service
-from capabilities.bi_cards.capability import QUERY_SPEC, QueryHandler, QueryRequest
-from capabilities.bi_cards.manifest import BI_SKILL, GAP_RULE, PROCEDURE, bi_knowledge_skill
-from capabilities.bi_cards.schema import SCHEMA_FILE, parse_date, registry, split_list
-from capabilities.bi_cards.store import BiStore, BiStoreError
+from aep_bi.cards import board as bi_board
+from aep_bi.cards import importer, service
+from aep_bi.cards.capability import QUERY_SPEC, QueryHandler, QueryRequest
+from aep_bi.cards.manifest import BI_SKILL, GAP_RULE, PROCEDURE, bi_knowledge_skill
+from aep_bi.cards.schema import SCHEMA_FILE, parse_date, registry, split_list
+from aep_bi.cards.store import BiStore, BiStoreError
+from aep_bi.host.bi_cards_api import route
+from aep_bi.host.bi_cards_tools import ATLAS_TOOL, TOOL_NAME, bi_cards_tools
 from capabilities.runtime import CapabilityRefused
 from common.execution import RequestContext, TraceIdentifiers
 from host_runtime import skill_packs
 from host_runtime.assets import shipped
-from host_runtime.bi_cards_api import route
-from host_runtime.bi_cards_tools import ATLAS_TOOL, TOOL_NAME, bi_cards_tools
 from host_runtime.contracts import HostLayout
 from host_runtime.host import build_runtime
 from scripts.build_bi_schema_v1_1 import V4, build
@@ -127,45 +127,24 @@ def test_the_demo_csvs_in_the_package_equal_the_sample() -> None:
 
 
 def test_harness_and_storage_code_outside_the_package_do_not_import_bi_types() -> None:
-    """ADR-K10: only the BI package and the Host's BI wiring name it."""
+    """ADR-K10: only the BI package and the Host's BI wiring name it.
+
+    The BI package and its Host parts live in the BI Knowledge feature plugin
+    (`feature_plugins/bi_knowledge/python/aep_bi`, proposal r3 stage B), so in
+    core only these may still name it.
+    """
     allowed = {
         "host_runtime/host.py",
         "host_runtime/assets.py",
-        "host_runtime/bi_cards_api.py",
-        "host_runtime/bi_cards_tools.py",
-        # BI dataset sharing: the subscription routes and the sync's installer.
-        "host_runtime/bi_subscriptions.py",
-        # BI vaults V4: the vault routes.
-        "host_runtime/bi_vaults_api.py",
-        # BI T1: a vault's benchmark runs and its push check.
-        "host_runtime/bi_bench.py",
-        # BI T2: the skill AI on the Agent harness.
-        "host_runtime/bi_skill_agent.py",
-        # BI T3: the analysis AI on the Agent harness.
-        "host_runtime/bi_analysis_agent.py",
-        # BI feed F2: the read-only analysis feed for Atlas.
-        "host_runtime/bi_feed_api.py",
-        # BI C3: a chat chart saved as a vault analysis (propose_change).
-        "host_runtime/bi_chat_save.py",
-        # Asking a vault: `aep_bi_query`, the BI side of the assistant tools.
-        "host_runtime/bi_assistant_query.py",
-        # BI K2: the Dashboard order imported from an Atlas dashboard.
-        "host_runtime/bi_atlas_import.py",
-        # BI E2: Atlas panels and dashboards framed in the chat.
-        "host_runtime/bi_atlas_embed.py",
-        # The BI build flow: the harness turn, Session A and the question AI.
-        "host_runtime/bi_harness.py",
-        "host_runtime/bi_schema_agent.py",
-        "host_runtime/bi_questions_agent.py",
         # BI dataset sharing: the platform re-reads every published snapshot.
         "control_plane/bi_datasets.py",
     }
     offenders = []
     for path in (REPO / "src").rglob("*.py"):
         relative = path.relative_to(REPO / "src").as_posix()
-        if relative.startswith("capabilities/bi_cards/") or relative in allowed:
+        if relative in allowed:
             continue
-        if "capabilities.bi_cards" in path.read_text(encoding="utf-8"):
+        if "aep_bi.cards" in path.read_text(encoding="utf-8"):
             offenders.append(relative)
     assert offenders == []
 
@@ -449,8 +428,8 @@ def test_a_note_with_the_value_it_has_is_no_change(tmp_path: Path) -> None:
     field's source kept and the published snapshot byte for byte the same.
     Values are compared normalised (enum case and aliases, a domain list's
     spelling, list whitespace), as an import compares them."""
-    from capabilities.bi_cards import catalog
-    from capabilities.bi_cards.snapshot import build_snapshot
+    from aep_bi.cards import catalog
+    from aep_bi.cards.snapshot import build_snapshot
 
     store = _loaded(tmp_path)
     reg = catalog.for_store(store)
@@ -810,7 +789,7 @@ def test_the_skill_is_installed_switched_on_and_offers_the_tool(tmp_path: Path) 
 def test_the_tool_names_the_vaults_by_purpose_and_queries_one(tmp_path: Path) -> None:
     """BI vaults V6: the model picks a vault by its stated purpose and queries
     it like any dataset; the query reads what the shared folder holds."""
-    from capabilities.bi_cards import vault
+    from aep_bi.cards import vault
 
     config, layout = ready(tmp_path)
     skill_packs.install_bundle(layout, None, shipped=shipped())
@@ -867,7 +846,7 @@ def test_set_field_on_an_unknown_card_is_refused(tmp_path: Path) -> None:
 def test_a_bi_question_is_not_sent_to_the_knowledge_vault() -> None:
     """Live: 「哪些客戶產品有需求但還沒有商機？」 matched the vault Skill's intent
     words and went to the vault; BI words now keep it with bi__query."""
-    from capabilities.bi_cards.manifest import bi_question
+    from aep_bi.cards.manifest import bi_question
 
     assert bi_question("哪些客戶產品有需求但還沒有商機？")
     assert bi_question("哪些應用是對手有方案、我方沒有的缺口？")

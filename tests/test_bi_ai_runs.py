@@ -17,10 +17,10 @@ from typing import Any
 
 from test_bi_extract import MEETING_ANSWER, NOTE, Scripted
 
-from capabilities.bi_cards.ai_runs import AiRuntime
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_api import route
 from common.execution import Failure
-from host_runtime.bi_cards_api import route
 
 ACTOR = "tester"
 

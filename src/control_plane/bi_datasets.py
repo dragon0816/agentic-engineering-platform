@@ -36,7 +36,7 @@ from pydantic import AwareDatetime, Field, StrictBool, model_validator
 # The one place outside the BI package and the Host's BI wiring that names it
 # (ADR-K10): the platform reads every snapshot itself rather than trusting the
 # publishing Agent, so it uses the same reader the Agent does.
-from capabilities.bi_cards.snapshot import (
+from aep_bi.cards.snapshot import (
     MAX_SNAPSHOT_BYTES,
     Publication,
     Snapshot,

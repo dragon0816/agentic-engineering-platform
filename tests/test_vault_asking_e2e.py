@@ -25,7 +25,7 @@ from test_host_wiring import grant_record, membership_record, workspace
 from test_knowledge_repo_agent import ASSET as WIKI_ASSET
 from test_knowledge_repo_agent import _template
 
-from capabilities.bi_cards.capability import QUERY_SPEC
+from aep_bi.cards.capability import QUERY_SPEC
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from host_runtime import skill_packs
 from host_runtime.assets import shipped

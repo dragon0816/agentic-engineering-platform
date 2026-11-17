@@ -24,11 +24,11 @@ from typing import Any
 import pytest
 from test_bi_extract import Scripted
 
-from capabilities.bi_cards import convert, readers
-from capabilities.bi_cards.ai_runs import AiRuntime
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStoreError
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import convert, readers
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStoreError
+from aep_bi.host.bi_cards_api import route
 
 ACTOR = "tester"
 TECH_CSV = (

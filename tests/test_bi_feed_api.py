@@ -22,7 +22,7 @@ from typing import Any
 
 import pytest
 
-from capabilities.bi_cards import feed
+from aep_bi.cards import feed
 from host_runtime.web import AgentWebServer
 from scripts import bi_feed_fixtures as fixtures
 
@@ -109,7 +109,7 @@ def test_only_local_pages_read_it_without_a_token(served: tuple[str, Path]) -> N
 def test_a_publish_queues_the_default_results(
     served: tuple[str, Path], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from host_runtime import bi_feed_api
+    from aep_bi.host import bi_feed_api
 
     url, workspace = served
     monkeypatch.setattr(feed, "on_queued", None)  # this test drains the queue itself

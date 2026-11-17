@@ -28,8 +28,8 @@ from bi_pack_fixtures import (
 )
 from test_bi_vault import _call, _ok, _refused
 
-from capabilities.bi_cards import analyses, catalog, packs, service, vault
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import analyses, catalog, packs, service, vault
+from aep_bi.cards.store import BiStore
 
 #: Sections whose answers come from the `chains` fixture (`test_bi_pack_chains`).
 LATER = {*CHAINS, "coverage"}

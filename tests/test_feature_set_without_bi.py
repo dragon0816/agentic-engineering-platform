@@ -8,6 +8,7 @@ is a working AEP with no BI, and the built-in set is the AEP that was.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import threading
@@ -22,7 +23,8 @@ import pytest
 from bi_page_driver import _WATCH, browser_missing
 from test_host_wiring import host_json, ready
 
-from host_runtime import features, features_bi, web_page
+from aep_bi import feature as features_bi
+from host_runtime import features, web_page
 from host_runtime.assets import shipped
 from host_runtime.assistant_tools import AssistantTools
 from host_runtime.change_proposals import ProposalRefused
@@ -31,6 +33,7 @@ from host_runtime.web import AgentWeb, AgentWebServer
 from integrations.browser import Browser
 
 ROOT = Path(__file__).resolve().parents[1]
+PLUGIN = ROOT / "feature_plugins" / "bi_knowledge" / "python"
 NONE = features.FeatureSet(())
 
 
@@ -65,13 +68,14 @@ def test_core_modules_import_no_bi_code_when_no_feature_is_built_in() -> None:
         "import host_runtime.knowledge_binding, host_runtime.assets, host_runtime.web_page\n"
         "host_runtime.web_page.page()\n"
         "assert not host_runtime.assets.shipped() is None\n"
-        "print('\\n'.join(sorted(n for n in sys.modules if n.startswith(("
-        "'capabilities.bi_cards', 'host_runtime.bi_', 'host_runtime.features_bi')))))\n"
+        "print('\\n'.join(sorted(n for n in sys.modules"
+        " if n == 'aep_bi' or n.startswith('aep_bi.'))))\n"
     )
     found = subprocess.run(
         [sys.executable, "-c", script],
         cwd=ROOT,
-        env={**_environment(), "PYTHONPATH": str(ROOT / "src")},
+        # BI stays importable, so a core module that reached it would be listed.
+        env={**_environment(), "PYTHONPATH": os.pathsep.join([str(ROOT / "src"), str(PLUGIN)])},
         capture_output=True,
         text=True,
         timeout=300,

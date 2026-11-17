@@ -16,10 +16,10 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import card_model, vault
-from capabilities.bi_cards.store import VAULT_PREFIX, BiStore
+from aep_bi.cards import card_model, vault
+from aep_bi.cards.store import VAULT_PREFIX, BiStore
+from aep_bi.host.bi_cards_api import route
 from host_runtime import plugin_web
-from host_runtime.bi_cards_api import route
 from host_runtime.web_page import PAGE
 
 DATASET_KEYS = {"name", "cards", "updated", "schema", "dashboard", "subscribed", "read_only"}
@@ -176,7 +176,8 @@ def test_bi_routes_are_served_by_bi_after_the_token_and_not_by_plugins() -> None
     get = inspect.getsource(web._Handler.do_GET)
     assert get.index("features.active().public_get(") < get.index("self._authorized()")
     # Those mount points are BI's own handlers (feature mount points, proposal r3).
-    from host_runtime import bi_cards_api, bi_feed_api, features_bi
+    from aep_bi import feature as features_bi
+    from aep_bi.host import bi_cards_api, bi_feed_api
 
     bi = inspect.getsource(features_bi.BiFeature)
     assert "bi_cards_api.handle(handler, method, parsed)" in bi

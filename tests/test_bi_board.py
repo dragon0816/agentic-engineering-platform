@@ -14,7 +14,7 @@ from typing import Any
 
 from test_bi_vault import _call, _ok
 
-from capabilities.bi_cards import analyses, vault
+from aep_bi.cards import analyses, vault
 from scripts import bi_feed_fixtures as fixtures
 
 DATASET = vault.dataset_name(fixtures.VAULT_ID)
@@ -96,8 +96,8 @@ def test_results_are_cached_and_a_failure_is_a_note(tmp_path: Path, monkeypatch:
 
 
 def test_a_dataset_only_on_this_pc_draws_the_built_in_pack(tmp_path: Path) -> None:
-    from capabilities.bi_cards import service
-    from capabilities.bi_cards.store import BiStore
+    from aep_bi.cards import service
+    from aep_bi.cards.store import BiStore
 
     service.load_demo(BiStore(tmp_path))
     found = _ok(_call(tmp_path, "GET", "/api/bi/dashboard", dataset="demo", domain="robotics"))

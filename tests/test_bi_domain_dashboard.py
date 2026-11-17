@@ -14,8 +14,8 @@ from typing import Any
 import pytest
 from test_bi_vault import _call, _commit, _ok, _push, _refused, _sync, _two_pcs
 
-from capabilities.bi_cards import analyses, board, feed, packs, vault
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import analyses, board, feed, packs, vault
+from aep_bi.cards.store import BiStore
 
 BY_DOMAIN = {
     "title": "這個領域的卡片數",

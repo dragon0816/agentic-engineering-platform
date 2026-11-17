@@ -14,8 +14,8 @@ from typing import Any
 import pytest
 from test_bi_vault import _call, _commit, _ok, _push, _refused, _sync, _two_pcs
 
-from capabilities.bi_cards import homes, vault, vault_skills
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import homes, vault, vault_skills
+from aep_bi.cards.store import BiStore
 
 
 def _create(ws: Path, vault_id: str, **body: Any) -> Any:
@@ -161,7 +161,7 @@ def test_a_folder_name_that_exists_is_refused_whatever_the_label(tmp_path: Path)
 
 
 def test_an_alias_is_the_domain_it_stands_for(tmp_path: Path, monkeypatch: Any) -> None:
-    from capabilities.bi_cards.schema import Registry
+    from aep_bi.cards.schema import Registry
 
     _drive, vault_id, _dataset, a, _b = _two_pcs(tmp_path)
     units = vault.Vault(a, vault_id).repo.working_units()
@@ -262,7 +262,7 @@ def test_cards_of_a_new_domain_can_carry_it_with_no_new_schema_version(tmp_path:
     units = target.repo.working_units()
     assert units["schema"] == schema_before
 
-    from capabilities.bi_cards import catalog
+    from aep_bi.cards import catalog
 
     reg = catalog.for_store(BiStore(a, dataset))
     assert "automotive" in reg.domains

@@ -18,11 +18,11 @@ from test_bi_chat_charts import DATASET, _call, _data, _host
 from test_bi_query_analyses import _joined
 from test_bi_vault_published import CONTEXT
 
-from capabilities.bi_cards import analyses
-from capabilities.bi_cards.capability import CHAT_SQL_ROWS, QueryHandler, QueryRequest
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import analyses
+from aep_bi.cards.capability import CHAT_SQL_ROWS, QueryHandler, QueryRequest
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_tools import bi_cards_tools
 from capabilities.runtime import CapabilityRefused
-from host_runtime.bi_cards_tools import bi_cards_tools
 from host_runtime.host import build_runtime
 from scripts import bi_feed_fixtures as fixtures
 

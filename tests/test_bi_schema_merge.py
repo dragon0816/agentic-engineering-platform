@@ -15,9 +15,9 @@ from typing import Any
 import pytest
 from test_bi_vault import _call, _commit, _ok, _push, _two_pcs
 
-from capabilities.bi_cards import catalog, schema_merge, schema_versions, vault
-from capabilities.bi_cards.schema import shipped
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import catalog, schema_merge, schema_versions, vault
+from aep_bi.cards.schema import shipped
+from aep_bi.cards.store import BiStore
 
 Mutate = Callable[[dict[str, Any]], None]
 BASE = "bi.schema/v1.1@5.0.0"
@@ -555,7 +555,7 @@ def test_old_units_and_version_text_stay_valid() -> None:
 
 
 def test_the_snapshot_of_a_merged_schema_reads_back(tmp_path: Path) -> None:
-    from capabilities.bi_cards import snapshot
+    from aep_bi.cards import snapshot
 
     done = _both_land(tmp_path, _new_field("cooling"), _new_field("power"), order="ab")
     a, dataset = done["a"], done["dataset"]
@@ -620,7 +620,7 @@ def test_a_created_domain_flags_no_skill_even_one_that_names_it(tmp_path: Path) 
 
 
 def test_a_snapshot_carries_a_created_domain(tmp_path: Path) -> None:
-    from capabilities.bi_cards import snapshot
+    from aep_bi.cards import snapshot
 
     _, vault_id, dataset, a, _ = _two_pcs(tmp_path)
     _create(a, vault_id, "marine")

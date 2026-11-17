@@ -17,8 +17,8 @@ from test_bi_card_page_import import _apply, _preview
 from test_bi_vault import _call, _ok
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore, PlannedRow
 
 AIDC = "applications/aidc/sources"
 PAGE = "---\ntype: technology\nname: FAKE-1\n---\n\n## 說明\n虛構的內容。\n"

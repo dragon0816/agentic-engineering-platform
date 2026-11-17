@@ -15,8 +15,8 @@ from bi_page_driver import BiPage, browser_missing
 from test_bi_vault import _call, _import, _ok, _row
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from capabilities.bi_cards.store import BiStore
-from host_runtime import bi_bench
+from aep_bi.cards.store import BiStore
+from aep_bi.host import bi_bench
 
 QUIET = "window.__aepWatch.open.length === 0"
 

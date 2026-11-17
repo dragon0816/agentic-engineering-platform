@@ -11,9 +11,9 @@ from typing import Any
 
 from test_bi_vault import _call, _ok, _refused, _two_pcs
 
-from capabilities.bi_cards import questions_session, sessions
-from capabilities.bi_cards.staging import Staging
-from host_runtime import bi_cards_api
+from aep_bi.cards import questions_session, sessions
+from aep_bi.cards.staging import Staging
+from aep_bi.host import bi_cards_api
 
 
 class _Bench:

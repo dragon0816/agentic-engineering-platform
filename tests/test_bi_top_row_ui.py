@@ -15,8 +15,8 @@ from bi_page_driver import BiPage, browser_missing
 from test_bi_vault import _call, _ok
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from capabilities.bi_cards import vault
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import vault
+from aep_bi.cards.store import BiStore
 
 AIDC = "applications/aidc/sources"
 QUIET = "window.__aepWatch.open.length === 0"

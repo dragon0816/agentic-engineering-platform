@@ -20,10 +20,10 @@ from typing import Any
 from test_bi_ai_runs import Jobs
 from test_bi_extract import NOTE
 
-from capabilities.bi_cards import extract, service
-from capabilities.bi_cards.ai_runs import AiRuntime
-from capabilities.bi_cards.store import BiStore
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import extract, service
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_api import route
 from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
 
 ACTOR = "tester"

@@ -15,8 +15,8 @@ from typing import Any
 
 import pytest
 
-from capabilities.bi_cards import analyses, feed, vault
-from capabilities.bi_cards.store import BiStoreError
+from aep_bi.cards import analyses, feed, vault
+from aep_bi.cards.store import BiStoreError
 from scripts import bi_feed_fixtures as fixtures
 
 

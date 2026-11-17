@@ -14,10 +14,11 @@ from test_bi_vault_published import CONTEXT
 from test_business_cards_conversation import Conversation
 from test_host_wiring import ready
 
-from capabilities.bi_cards.capability import QUERY_SPEC, QueryHandler, QueryRequest
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, PlannedRow
-from host_runtime import bi_bench, skill_packs
+from aep_bi.cards.capability import QUERY_SPEC, QueryHandler, QueryRequest
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore, PlannedRow
+from aep_bi.host import bi_bench
+from host_runtime import skill_packs
 from host_runtime.assets import shipped
 from host_runtime.host import build_runtime
 

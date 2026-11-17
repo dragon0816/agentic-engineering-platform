@@ -22,10 +22,10 @@ from typing import Any
 import openpyxl
 import pytest
 
-from capabilities.bi_cards import readers, recipes
-from capabilities.bi_cards.schema import registry
-from capabilities.bi_cards.store import BiStore, BiStoreError
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import readers, recipes
+from aep_bi.cards.schema import registry
+from aep_bi.cards.store import BiStore, BiStoreError
+from aep_bi.host.bi_cards_api import route
 
 ACTOR = "tester"
 REAL = Path(__file__).parent / "fixtures" / "bi_vault_example" / "tools" / "samples" / "real"

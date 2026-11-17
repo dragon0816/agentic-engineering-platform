@@ -17,13 +17,13 @@ from test_bi_vault_sources import FOLDER, _add
 from test_host_models import configured
 from test_host_wiring import ready
 
-from capabilities.bi_cards import search_index, service
-from capabilities.bi_cards.capability import QUERY_SPEC, QueryHandler, QueryRequest
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from aep_bi.cards import search_index, service
+from aep_bi.cards.capability import QUERY_SPEC, QueryHandler, QueryRequest
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore, PlannedRow
+from aep_bi.host.bi_assistant_query import BI_QUERY_FIELDS
 from host_runtime import skill_packs
 from host_runtime.assets import shipped
-from host_runtime.bi_assistant_query import BI_QUERY_FIELDS
 from host_runtime.host import build_runtime
 
 APPROVED = ("UNCLASSIFIED", "INTERNAL")

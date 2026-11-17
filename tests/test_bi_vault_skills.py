@@ -18,10 +18,10 @@ from test_bi_ai_runs import Jobs, _runtime
 from test_bi_extract import Scripted
 from test_bi_vault import _call, _commit, _ok, _push, _refused, _sync, _two_pcs
 
-from capabilities.bi_cards import vault, vault_skills
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import vault, vault_skills
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_api import route
 
 V1 = "bi.schema/v1.1@1.1.0"
 V2 = "bi.schema/v1.1@2.0.0"

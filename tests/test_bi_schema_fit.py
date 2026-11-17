@@ -12,9 +12,9 @@ from test_bi_card_links import _put, _row
 from test_bi_extract import Scripted
 from test_bi_vault import _call, _ok, _two_pcs
 
-from capabilities.bi_cards import catalog, profile, vault
-from capabilities.bi_cards.store import BiStore
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import catalog, profile, vault
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_api import route
 
 NOTE = (
     "# 虛構筆記\n\nFAKE-ROVER 的負載是 30 公斤。\n太空任務 FAKE-MISSION 要追蹤參與公司與里程碑。\n"

@@ -21,9 +21,10 @@ from test_bi_extract import MEETING_ANSWER, NOTE
 from test_host_models import GatewayReply, binding, endpoint
 from test_host_wiring import ready
 
+from aep_bi.host import bi_cards_api
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from capabilities.workflow_author.handlers import DRAFT_SPEC
-from host_runtime import bi_cards_api, skill_packs
+from host_runtime import skill_packs
 from host_runtime.assets import shipped
 from host_runtime.host import HostRuntime, build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer

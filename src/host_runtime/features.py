@@ -25,7 +25,7 @@ from typing import Any, Protocol
 PAGE_SLOTS = ("feature_css", "knowledge_pane", "feature_js")
 
 #: Built-in features, as `module:attribute` of a `Feature` instance.
-BUILTIN: tuple[str, ...] = ("host_runtime.features_bi:FEATURE",)
+BUILTIN: tuple[str, ...] = ("aep_bi.feature:FEATURE",)
 
 
 class PackageRefused(Exception):

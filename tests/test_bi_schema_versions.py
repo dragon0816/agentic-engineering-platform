@@ -16,9 +16,9 @@ import json
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog, schema_versions, service
-from capabilities.bi_cards.store import BiStore
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import catalog, schema_versions, service
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_api import route
 
 ACTOR = "tester"
 EXAMPLE = "example/product-spec@1.0.0"
@@ -416,7 +416,7 @@ def test_a_run_from_before_an_upgrade_must_be_run_again(tmp_path: Path) -> None:
 
 
 def test_a_shared_snapshot_leaves_out_hidden_values(tmp_path: Path) -> None:
-    from capabilities.bi_cards import snapshot
+    from aep_bi.cards import snapshot
 
     _example_dataset(tmp_path)
     target = _publish_example_v2(tmp_path, _reshape)

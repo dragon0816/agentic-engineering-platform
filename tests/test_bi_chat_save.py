@@ -18,7 +18,7 @@ from test_bi_chat_charts import DATASET, _host
 from test_bi_chat_sql import BY_REGION
 from test_host_wiring import host_json
 
-from capabilities.bi_cards import analyses, vault
+from aep_bi.cards import analyses, vault
 from common.change_proposal import KINDS, PROPOSE_GUIDANCE, TELEGRAM_KINDS
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb

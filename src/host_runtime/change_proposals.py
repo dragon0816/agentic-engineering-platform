@@ -1265,7 +1265,7 @@ class ChangeProposals:
             return False, str(reply.get("message") or reply.get("code"))
         return True, "Submitted; it is waiting for review."
 
-    # bi_analysis (BI C3; the BI side is host_runtime.bi_chat_save) ------------
+    # bi_analysis (BI C3; the BI side is aep_bi.host.bi_chat_save) ------------
 
     def _bi_workspace(self) -> Path:
         return Path(self.web.runtime.layout.workspace_root)

@@ -17,8 +17,8 @@ from pathlib import Path
 
 import pytest
 
-from capabilities.bi_cards import analyses, tool_runs
-from capabilities.bi_cards.store import BiStoreError
+from aep_bi.cards import analyses, tool_runs
+from aep_bi.cards.store import BiStoreError
 
 NUMPY = importlib.util.find_spec("numpy") is not None
 MARK = "outside-marker.txt"

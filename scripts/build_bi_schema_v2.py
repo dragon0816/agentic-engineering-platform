@@ -20,17 +20,18 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-for path in (REPO, REPO / "src"):  # run as a script: neither is importable then
+BI = REPO / "feature_plugins" / "bi_knowledge" / "python"  # the BI Knowledge plugin
+for path in (REPO, REPO / "src", BI):  # run as a script: neither is importable then
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
 from typing import Any  # noqa: E402
 
-from capabilities.bi_cards.vault import MARKET_SEGMENTS  # noqa: E402
+from aep_bi.cards.vault import MARKET_SEGMENTS  # noqa: E402
 from scripts import build_bi_schema_v1_1 as base  # noqa: E402
 
 V8 = REPO / "tests" / "fixtures" / "bi_schema_v8" / "bi_schema.py"
-OUT = REPO / "src" / "capabilities" / "bi_cards" / "bi_schema_v2.json"
+OUT = BI / "aep_bi" / "cards" / "bi_schema_v2.json"
 
 TYPE_LABELS = {
     **base.TYPE_LABELS,
