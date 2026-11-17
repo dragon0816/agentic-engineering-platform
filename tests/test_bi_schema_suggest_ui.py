@@ -16,10 +16,10 @@ from test_bi_extract import Scripted
 from test_bi_vault import _call, _ok, _use_homes
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from capabilities.bi_cards import vault
-from capabilities.bi_cards.ai_runs import AiRuntime
-from capabilities.bi_cards.store import BiStore
-from host_runtime import bi_cards_api
+from aep_bi.cards import vault
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.cards.store import BiStore
+from aep_bi.host import bi_cards_api
 
 FOLDER = "applications/aidc/sources"
 NOTE = "# 虛構筆記\n\nFAKE-RACK 的冷卻方式是浸沒式液冷。\n太空任務 FAKE-MISSION 要追蹤里程碑。\n"
@@ -79,7 +79,6 @@ def test_a_press_suggests_with_quotes_and_a_field_is_added_on_the_version(
         lambda _web: AiRuntime(
             model=lambda: (model, "test-model"),
             background=lambda _t, work: work(),
-            approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
         ),
     )
     shots = os.environ.get("AEP_UI_SHOTS")

@@ -43,6 +43,11 @@ BUNDLE_HERMES = "hermes"
 #: names in `wheels-gateway/`, installed by `install.ps1` into its own venv.
 GATEWAY_LOCK = Path("gateway") / "requirements.txt"
 BUNDLE_GATEWAY_WHEELS = "wheels-gateway"
+#: Feature plugins shipped with AEP (Plugin API 1.2; BI Knowledge first): each
+#: folder's `plugin.json` and `python/`, copied to `feature-plugins/`, which
+#: `install.ps1` puts in the venv as `aep-feature-plugins` for the Host to load.
+FEATURE_PLUGINS = Path("feature_plugins")
+BUNDLE_FEATURE_PLUGINS = "feature-plugins"
 #: Documented placeholders in the Hermes pack that look like an assignment
 #: to the credential scan, accepted one by one (file, exact text). Anything
 #: else that looks like a credential still stops the build.
@@ -136,6 +141,24 @@ def copy_hermes_pack(pack: Path, target: Path) -> None:
     )
 
 
+def copy_feature_plugins(source: Path, target: Path) -> None:
+    """Each shipped feature plugin's manifest and code, without Python caches."""
+    if not source.is_dir():
+        return
+    for folder in sorted(path for path in source.iterdir() if (path / "plugin.json").is_file()):
+        shutil.copy2(folder / "plugin.json", _made(target / folder.name) / "plugin.json")
+        shutil.copytree(
+            folder / "python",
+            target / folder.name / "python",
+            ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+        )
+
+
+def _made(folder: Path) -> Path:
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder
+
+
 def locked_requirements(lock: Path) -> list[tuple[str, str]]:
     """(name, version) for every `name==version` line of the gateway lock."""
     pinned = []
@@ -214,6 +237,7 @@ def build(
         root = Path(temporary) / BUNDLE_NAME
         shutil.copytree(template, root)
         copy_hermes_pack(repo / HERMES_PACK, root / BUNDLE_HERMES)
+        copy_feature_plugins(repo / FEATURE_PLUGINS, root / BUNDLE_FEATURE_PLUGINS)
         wheels = root / "wheels"
         wheels.mkdir()
         shutil.copy2(platform_wheel, wheels / platform_wheel.name)

@@ -21,7 +21,7 @@ import pytest
 from pydantic import ValidationError
 from test_host_models import binding, configured, endpoint
 
-from capabilities.bi_cards import sessions
+from aep_bi.cards import sessions
 from common.execution import TraceIdentifiers
 from host_runtime.contracts import ModelBinding
 from host_runtime.gateway_link import timeout_reply
@@ -105,8 +105,8 @@ def test_the_host_gives_chat_and_drafting_their_own_timeouts(
         drafting: Any = runtime.agent.gateway.bridge.installed.get(DRAFT_SPEC.identity)
         assert drafting.handler.model.client.base.timeout_s == 900
         # Trial runs inside a BI AI turn use the conversation's client and its timeout.
-        from capabilities.bi_cards.ai_runs import AiRuntime
-        from host_runtime import bi_harness
+        from aep_bi.cards.ai_runs import AiRuntime
+        from aep_bi.host import bi_harness
 
         extraction = AiRuntime(model=lambda: None, background=lambda _t, work: work())
         tried: Any = bi_harness.turn_ai(runtime.agent.gateway, extraction).model()

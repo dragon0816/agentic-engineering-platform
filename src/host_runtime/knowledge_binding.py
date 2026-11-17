@@ -26,6 +26,7 @@ from urllib.parse import ParseResult
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from common.assets import AssetIdentity
 from common.execution import RequestContext, TraceIdentifiers
+from host_runtime import features
 from host_runtime.contracts import CompanyHostConfiguration
 from host_runtime.profiles import ProfileError, load_active_profile
 from host_runtime.workspace import write_atomically
@@ -372,14 +373,12 @@ def _wiki_entry(web: Any, item: Mapping[str, Any], bindings: list[Any]) -> dict[
 
 def askable(web: Any) -> dict[str, Any]:
     """Each vault on this PC and whether the general chat can ask it."""
-    from host_runtime import bi_vaults_api
-
     workspace = Path(web.runtime.layout.workspace_root)
     bindings = _bindings(web)
     notes = [_reason("several_vaults")] if len(bindings) > 1 else []
     return {
         "repos": [_wiki_entry(web, item, bindings) for item in wiki_repos.listing(workspace)],
-        "vaults": bi_vaults_api.askable_vaults(web, _granted, _entry),
+        "vaults": features.active().askable_vaults(web, _granted, _entry),
         "notes": notes,
     }
 

@@ -15,6 +15,7 @@ read only and compares folder strings, never a subject or a body.
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 import threading
 from datetime import UTC, datetime, timedelta
@@ -22,13 +23,13 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from test_agent_mail import _call, _mail, _press
+from test_agent_mail import _call, _mail
 from test_business_cards_capabilities import BODY, SignatureModel, _bridge, _run
 
 from capabilities.mail_read.handlers import MailReadHandler, MailReadRequest
 from common.execution import RequestContext, TraceIdentifiers
 from integrations import outlook_mail
-from integrations.outlook_mail import MailError, MailScope, OutlookComMailbox
+from integrations.outlook_mail import MailScope, OutlookComMailbox
 
 NOW = datetime.now(UTC)
 OL_NAMESPACE, OL_FOLDER, OL_MAIL = 1, 2, 43
@@ -162,7 +163,7 @@ def test_a_localised_inbox_is_still_the_inbox() -> None:
     assert box.get("in-2").folder == "Inbox/Projects"
 
 
-def test_read_accepts_an_inbox_message_and_keeps_other_stores_out() -> None:
+def test_read_keeps_store_paths_distinct_without_an_application_access_acl() -> None:
     _, box = _outlook()
     scope = MailScope(folders=("Inbox",), max_days=30)
     assert outlook_mail.read(box, scope, "in-1").message_id == "in-1"
@@ -170,9 +171,9 @@ def test_read_accepts_an_inbox_message_and_keeps_other_stores_out() -> None:
     # Another store's Inbox is not the person's Inbox: the path names the store.
     assert box.get("pst-1").folder == "Shared PST/Inbox"
     for outside in ("pst-1", "ar-1"):
-        with pytest.raises(MailError) as refused:
-            outlook_mail.read(box, scope, outside)
-        assert refused.value.code == "message_unknown"
+        found = outlook_mail.read(box, scope, outside)
+        assert found.message_id == outside
+        assert found.folder == box.get(outside).folder
 
 
 def _context() -> RequestContext:
@@ -199,9 +200,7 @@ def test_agent_mode_reads_an_inbox_message(tmp_path: Path) -> None:
     _, box = _outlook()
     mail._reader = lambda: box
     run = mode.begin("s1", "claude_code")
-    presser = _press(mode.open_cards, "allow_session")
     found = _call(mode, run, "outlook_search", {})
-    presser.join()
     # Outlook lists a folder's own items; a subfolder is read by its id.
     assert [item["message_id"] for item in found["messages"]] == ["in-1"]
     read = _call(mode, run, "outlook_read", {"message_id": "in-1"})
@@ -209,7 +208,9 @@ def test_agent_mode_reads_an_inbox_message(tmp_path: Path) -> None:
     assert read["message"]["folder"] == "Inbox"
     nested = _call(mode, run, "outlook_read", {"message_id": "in-2"})
     assert nested["ok"] and nested["message"]["folder"] == "Inbox/Projects"
-    assert _call(mode, run, "outlook_read", {"message_id": "pst-1"})["code"] == "message_unknown"
+    shared = _call(mode, run, "outlook_read", {"message_id": "pst-1"})
+    assert shared["ok"] and shared["message"]["folder"] == "Shared PST/Inbox"
+    assert not run.cards
 
 
 def test_signature_harvest_reads_inbox_mail_through_outlook(tmp_path: Path) -> None:
@@ -228,7 +229,7 @@ def test_signature_harvest_reads_inbox_mail_through_outlook(tmp_path: Path) -> N
 
 
 def _outlook_running() -> Any:
-    if sys.platform != "win32":
+    if sys.platform != "win32" or os.environ.get("AEP_OUTLOOK_TESTS") != "1":
         return None
     try:
         import win32com.client
@@ -238,12 +239,18 @@ def _outlook_running() -> Any:
         return None
 
 
-@pytest.mark.skipif(_outlook_running() is None, reason="Outlook is not running on this computer")
+@pytest.mark.skipif(
+    sys.platform != "win32" or os.environ.get("AEP_OUTLOOK_TESTS") != "1",
+    reason="reads live Outlook; opt in with AEP_OUTLOOK_TESTS=1",
+)
 def test_live_outlook_list_and_get_agree_on_the_inbox_folder() -> None:
     """Read only, against the real Outlook: one Inbox message's folder from
     `list` and from `get`. Only the folder strings are compared; the
     subject and body are never printed."""
-    box = OutlookComMailbox(dispatch=_outlook_running())
+    application = _outlook_running()
+    if application is None:
+        pytest.skip("Outlook is not running on this computer")
+    box = OutlookComMailbox(dispatch=application)
     listed = box.list("Inbox", NOW - timedelta(days=365), 1)
     if not listed:
         pytest.skip("the Inbox has no message in the last year")
@@ -251,7 +258,10 @@ def test_live_outlook_list_and_get_agree_on_the_inbox_folder() -> None:
     assert (listed[0].folder, got.folder) == ("Inbox", "Inbox")
 
 
-@pytest.mark.skipif(_outlook_running() is None, reason="Outlook is not running on this computer")
+@pytest.mark.skipif(
+    sys.platform != "win32" or os.environ.get("AEP_OUTLOOK_TESTS") != "1",
+    reason="reads live Outlook; opt in with AEP_OUTLOOK_TESTS=1",
+)
 def test_live_outlook_is_read_from_two_different_worker_threads() -> None:
     """Read only, against the real Outlook (live test 2026-10-20: the second
     mail call after a restart failed with CO_E_NOTINITIALIZED). `list` runs on
@@ -259,6 +269,8 @@ def test_live_outlook_is_read_from_two_different_worker_threads() -> None:
     the folder strings are compared; no subject or body is printed."""
     from concurrent.futures import ThreadPoolExecutor
 
+    if _outlook_running() is None:
+        pytest.skip("Outlook is not running on this computer")
     box = OutlookComMailbox()
 
     def one() -> tuple[int, list[str]]:

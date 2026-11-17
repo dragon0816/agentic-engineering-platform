@@ -17,7 +17,7 @@ from bi_page_driver import BiPage, browser_missing
 from test_bi_vault import _call, _commit, _ok, _push
 from test_vault_asking_e2e import _bi_host, _bi_join, _Model, _served
 
-from capabilities.bi_cards import vault_sources
+from aep_bi.cards import vault_sources
 
 FOLDER = "library/products/sources"
 REPORT = "# 虛構報告\n\n電源模組 FACT-TWOPC。\n"

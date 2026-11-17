@@ -16,9 +16,9 @@ from typing import Any
 from test_bi_card_page_import import _apply, _preview
 from test_bi_vault import _push, _sync, _two_pcs
 
-from capabilities.bi_cards import card_model, extract, vault
-from capabilities.bi_cards.schema import registry
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from aep_bi.cards import card_model, extract, vault
+from aep_bi.cards.schema import registry
+from aep_bi.cards.store import BiStore, PlannedRow
 
 LOCATOR = {"line": 3, "key": "maturity"}
 

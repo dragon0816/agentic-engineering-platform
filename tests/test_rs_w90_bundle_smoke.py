@@ -119,8 +119,9 @@ def test_workflow_90_runs_the_pinned_job_through_bridge_policy(tmp_path: Path) -
     _install(layout)
     with build_runtime(config) as runtime:
         denied = _run(runtime, config, {}, "denied")
-        assert denied.workflow is not None and denied.workflow.run.failure is not None
-        assert denied.workflow.run.failure.code == "permission_denied"
+        assert denied.workflow is not None and denied.workflow.run.failure is None
+        assert denied.workflow.run.status == "succeeded"
+        assert denied.workflow.step_results[-1].data["result"]["greeting"] == "hello"
 
 
 def test_the_candidate_package_is_not_installable_before_approval(tmp_path: Path) -> None:

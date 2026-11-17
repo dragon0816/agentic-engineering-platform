@@ -15,7 +15,7 @@ import pytest
 from bi_page_driver import BiPage, browser_missing
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards.store import BiStore
 
 # 虛構範例: fictional.
 SOURCE = """---

@@ -28,10 +28,11 @@ from test_bi_skill_benchmark import _Grounded
 from test_draft_install_cards import _AuthoringClaude, _lab
 from test_host_wiring import host_json
 
-from capabilities.bi_cards import analyses, schema_versions, vault, vault_checks
-from capabilities.bi_cards.ai_runs import AiRuntime
-from capabilities.bi_cards.store import BiStore
-from host_runtime import bi_bench, bi_cards_api, skill_packs
+from aep_bi.cards import analyses, schema_versions, vault, vault_checks
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.cards.store import BiStore
+from aep_bi.host import bi_bench, bi_cards_api
+from host_runtime import skill_packs
 from host_runtime.assets import shipped
 from host_runtime.conversation_backends import LocalConversationBackends
 from host_runtime.host import build_runtime
@@ -96,7 +97,6 @@ def test_the_whole_build_flow(
         lambda _web: AiRuntime(
             model=lambda: (extractor, "test-model"),
             background=lambda _t, work: work(),
-            approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
         ),
     )
     shots = os.environ.get("AEP_UI_SHOTS")

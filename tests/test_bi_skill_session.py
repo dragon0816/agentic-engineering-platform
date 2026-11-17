@@ -16,8 +16,8 @@ from test_bi_ai_runs import Jobs, _runtime
 from test_bi_extract import Scripted
 from test_bi_vault import _call, _commit, _ok, _push, _refused, _sync, _two_pcs
 
-from capabilities.bi_cards.extract import DATA_FENCE
-from host_runtime.bi_cards_api import route
+from aep_bi.cards.extract import DATA_FENCE
+from aep_bi.host.bi_cards_api import route
 
 NEW_BODY = "類型與資料夾照 schema。\n電源相關的規格表：額定功率一律放在 specs。"
 

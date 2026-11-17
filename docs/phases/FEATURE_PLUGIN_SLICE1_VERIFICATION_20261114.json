@@ -1,0 +1,106 @@
+{
+  "scope": "Generic fixture-only Feature Plugin Slice1; BI/Wiki extraction excluded",
+  "date": "2026-11-14",
+  "review": {
+    "critical": 0,
+    "important": 0,
+    "reviewer": "Claude Code independent reviewer 46cc8ffd",
+    "final_ui_delta": "accepted"
+  },
+  "tests": {
+    "full": {
+      "tests": 6973,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 16,
+      "sha256": "13c91fa13d6a561b51053f6cca6b1bfe39b5c98017ec6b1771294895e3169916",
+      "evidence": ".scratch\\plugin-slice1\\full.xml"
+    },
+    "plugins-final": {
+      "tests": 232,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "sha256": "ee427de6feba02d55679d2d78f340edc6edb8979ab227260b80940e1f1669231",
+      "evidence": ".scratch\\plugin-slice1\\plugins-final.xml"
+    },
+    "ui-fixes": {
+      "tests": 176,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "f26ba42e536d0541001a84080b6a8cbbfb672e593012dc7e8f47553aaa6e88bf",
+      "evidence": ".scratch\\plugin-slice1\\ui-fixes.xml"
+    }
+  },
+  "original_full_claim": "6954 passed,3 failed,16 skipped; not a green original full run",
+  "repair": "Only panel placement and stale IT text expectations changed; all176 targeted cases passed; no second full-suite execution",
+  "knowledge": {
+    "baseline_cases": 445,
+    "baseline_outcomes": {
+      "passed": 445
+    },
+    "present_in_full": 445,
+    "missing_in_full": [],
+    "outcome_differences": []
+  },
+  "knowledge_source_files_checked_after_repair": 46,
+  "changed_knowledge_sources": [],
+  "freeze_after_full": {
+    "checked": 1696,
+    "changed": []
+  },
+  "post_full_changed_files": [
+    "MANIFEST.in",
+    "src/agentic_engineering_platform.egg-info/SOURCES.txt",
+    "src/agentic_engineering_platform.egg-info/top_level.txt",
+    "src/host_runtime/web_page.py",
+    "tests/test_shared_platform_settings.py"
+  ],
+  "unexpected_source_changes": [],
+  "wheel": {
+    "wheel": "C:\\TEMP\\aep-plugin-build-20261114\\agentic_engineering_platform-0.1.0-py3-none-any.whl",
+    "sha256": "18a7e669ca2b963c76a48fef5d09ff5f7429cc36d6c0c6bbce4a6159e46b1991",
+    "python_files": 580,
+    "normalized_source_mismatches": [],
+    "required_modules": [
+      "common/plugins.py",
+      "plugins/manager.py",
+      "plugins/package.py",
+      "plugins/process.py",
+      "plugins/assets.py",
+      "plugins/ledger.py",
+      "host_runtime/plugin_web.py",
+      "host_runtime/plugin_renderer.py"
+    ],
+    "isolated_wheel_imports": "isolated wheel imports verified",
+    "venv_rebound": false
+  },
+  "sdist": {
+    "path": "C:\\TEMP\\aep-plugin-build-20261114\\agentic_engineering_platform-0.1.0.tar.gz",
+    "sha256": "7030928415771d0a523d391aaf33f767e95d27c6d02236e925e556a9694f2ea3",
+    "required_example_builder_inputs_present": true
+  },
+  "static": {
+    "ruff": "passed",
+    "format": "1508 files already formatted",
+    "mypy": "1139 source files; passed",
+    "pip_check": "No broken requirements found."
+  },
+  "limits": [
+    "No live-model Knowledge quality claim",
+    "16 environment skips in original full",
+    "Late post-commit registry refresh may leave old live entries until safe restart",
+    "Configured active state may remain after changed-package worker restart refusal",
+    "Python3.11 missing-API simulation only; no real3.11 interpreter run"
+  ],
+  "deployment": {
+    "main_updated": false,
+    "resident_updated": false,
+    "gateway_updated": false,
+    "shared_venv_rebound": false
+  },
+  "execution_runtime_logic_unchanged_after_full": true,
+  "implementation_revision": "4a199482ee62d6a27b66b12165f2a4eadfd8b5fd",
+  "artifact_scope": "Local code-verification wheel/sdist built before final acceptance-document commit; no Windows release/resident deployment"
+}

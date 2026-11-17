@@ -22,11 +22,11 @@ from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
 
 
-def test_schema_offers_only_agent_fields_and_never_privileged_ones() -> None:
+def test_schema_offers_declared_agent_fields_including_execution_choices() -> None:
     schema = agent_tool_schema(_manifest(RICH))
     properties = schema["properties"]
     assert schema["additionalProperties"] is False
-    assert "send" not in properties  # privileged: a person's choice
+    assert properties["send"]["type"] == "boolean"
     assert "output" not in properties  # web-only field
     assert "trace_level" not in properties  # internal field
     assert properties["mode"]["enum"] == ["brief", "full"]
@@ -106,6 +106,14 @@ def _declared_gateway(handler: Handler, model: FakeModel) -> Gateway:
         },
         {"name": "send", "label": "Send", "kind": "boolean", "confirm": True},
     ]
+    # Only the handler's declared argument is forwarded. `send` is a Workflow
+    # execution choice, not an extra field in this fixture's Probe contract.
+    data["steps"] = [
+        {
+            "capability": capability_spec().identity.model_dump(mode="json"),
+            "inputs": {"args": {"source": "run", "path": ["args"]}},
+        }
+    ]
     workflows = InstalledWorkflows()
     workflows.register(WorkflowManifest.model_validate(data))
     return Gateway(
@@ -152,15 +160,22 @@ def test_the_model_sees_the_declared_fields_and_a_valid_call_runs() -> None:
     schema = offered["release__package"].input_schema
     assert schema is not None
     properties = schema["properties"]
-    assert isinstance(properties, dict) and set(properties) == {"args"}
+    assert isinstance(properties, dict) and set(properties) == {"args", "send"}
     assert result.tools[0].workflow is not None
     assert handler.calls == 1
 
 
-def test_privileged_or_invalid_arguments_are_refused_before_execution() -> None:
-    for arguments in ({"args": "quick", "send": True}, {"args": "NOT-VALID"}):
+def test_undeclared_or_invalid_arguments_are_refused_before_execution() -> None:
+    for arguments in ({"args": "quick", "internal": True}, {"args": "NOT-VALID"}):
         result, handler, _model = _converse(arguments)
         failure = result.tools[0].failure
         assert failure is not None and failure.code == "workflow_parameters_invalid"
         assert result.tools[0].workflow is None
         assert handler.calls == 0
+
+
+def test_model_can_supply_the_declared_send_choice_without_an_extra_card() -> None:
+    result, handler, _model = _converse({"args": "quick", "send": True})
+    assert result.tools[0].workflow is not None
+    assert result.tools[0].workflow.run.status == "succeeded"
+    assert handler.calls == 1

@@ -1,15 +1,9 @@
-"""Send, or discard, one Outlook draft a person just reviewed (owner 2026-10-15).
+"""Send or discard one saved Outlook draft under the execution environment.
 
-The only module in this repository that delivers a mail. It is reached from
-one place: the decision of a mail card (`host_runtime.agent_mail`), after a
-person pressed **Send** on that one message in Agent Web. There is no
-conversation-wide allow and no tool, route or Workflow step that calls it;
-a test checks the source tree for that.
-
-What is sent is the draft the card showed: the item is found by its Outlook
-id and its recipients, subject and attachment names are compared with what
-the card showed before anything is sent. If the person edited the draft in
-Outlook meanwhile, nothing is sent and the card says to send it from Outlook.
+Normal explicit send calls and historical owner-card decisions use the same
+sender. A draft-only request never calls Send. Recipients, subject and attachment
+names must match the supplied fingerprint; changed drafts fail honestly. Outlook
+may rewrite saved HTML, so the fingerprint does not compare the body.
 """
 
 from __future__ import annotations

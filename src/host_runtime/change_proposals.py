@@ -41,6 +41,7 @@ from common.change_proposal import (
     secret_problem,
 )
 from common.execution import Failure, RequestContext
+from host_runtime import features
 from host_runtime.card_store import CardStore, PendingRecord, new_card_id
 from models.contracts import ModelTool
 
@@ -1264,19 +1265,24 @@ class ChangeProposals:
             return False, str(reply.get("message") or reply.get("code"))
         return True, "Submitted; it is waiting for review."
 
-    # bi_analysis (BI C3; the BI side is host_runtime.bi_chat_save) ------------
+    # bi_analysis (BI C3; the BI side is aep_bi.host.bi_chat_save) ------------
 
     def _bi_workspace(self) -> Path:
         return Path(self.web.runtime.layout.workspace_root)
 
-    def _now_bi_analysis(self, values: Mapping[str, Any]) -> dict[str, Any]:
-        from host_runtime import bi_chat_save
+    @staticmethod
+    def _bi_chat_save() -> Any:
+        found = features.active().service("bi_chat_save")
+        if found is None:
+            raise ProposalRefused("BI Knowledge is not installed on this AEP.")
+        return found
 
-        return bi_chat_save.now(self._bi_workspace(), values)
+    def _now_bi_analysis(self, values: Mapping[str, Any]) -> dict[str, Any]:
+        now: dict[str, Any] = self._bi_chat_save().now(self._bi_workspace(), values)
+        return now
 
     def _plan_bi_analysis(self, values: Mapping[str, Any], snapshot: dict[str, Any]) -> Plan:
-        from host_runtime import bi_chat_save
-
+        bi_chat_save = self._bi_chat_save()
         given = _only("bi_analysis", values, bi_chat_save.FIELDS)
         try:
             planned = bi_chat_save.plan(self._bi_workspace(), given, snapshot)
@@ -1285,16 +1291,14 @@ class ChangeProposals:
         return self._bi_plan(planned)
 
     def _apply_bi_analysis(self, proposal: ChangeProposal) -> tuple[bool, str]:
-        from host_runtime import bi_chat_save
-
-        return bi_chat_save.apply(self._bi_workspace(), proposal.values)
+        done: tuple[bool, str] = self._bi_chat_save().apply(self._bi_workspace(), proposal.values)
+        return done
 
     def _now_bi_analysis_edit(self, values: Mapping[str, Any]) -> dict[str, Any]:
         return self._now_bi_analysis(values)
 
     def _plan_bi_analysis_edit(self, values: Mapping[str, Any], snapshot: dict[str, Any]) -> Plan:
-        from host_runtime import bi_chat_save
-
+        bi_chat_save = self._bi_chat_save()
         given = _only("bi_analysis_edit", values, bi_chat_save.EDIT_FIELDS)
         try:
             planned = bi_chat_save.plan_edit(self._bi_workspace(), given, snapshot)

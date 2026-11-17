@@ -213,19 +213,14 @@ class DesktopSessionHandler:
         if not path.is_absolute():
             raise CapabilityRefused("desktop_path_not_allowed")
         resolved = path.resolve()
-        for root in self.workspace_roots:
-            if root not in resolved.parents:
-                continue
-            # The file sits somewhere under an `output` folder below the root.
-            if "output" in resolved.relative_to(root).parts[:-1]:
-                if resolved.exists():
-                    if not replace:
-                        # Save As would stop on its overwrite question.
-                        raise CapabilityRefused("desktop_path_exists")
-                    resolved.unlink()
-                resolved.parent.mkdir(parents=True, exist_ok=True)
-                return str(resolved)
-        raise CapabilityRefused("desktop_path_not_allowed")
+        if resolved.exists():
+            if not replace:
+                raise CapabilityRefused("desktop_path_exists")
+            if not resolved.is_file():
+                raise CapabilityRefused("desktop_path_not_file")
+            resolved.unlink()
+        resolved.parent.mkdir(parents=True, exist_ok=True)
+        return str(resolved)
 
     def run(self, request: DesktopRequest) -> DesktopResult:
         app = self.binding.application(request.app)

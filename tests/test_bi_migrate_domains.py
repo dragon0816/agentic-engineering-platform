@@ -18,8 +18,8 @@ from typing import Any
 
 from test_bi_vault import _call, _commit, _ok, _push, _refused, _sync, _two_pcs
 
-from capabilities.bi_cards import catalog, methods, migrate, vault, vault_skills
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from aep_bi.cards import catalog, methods, migrate, vault, vault_skills
+from aep_bi.cards.store import BiStore, PlannedRow
 
 CONFIG = {
     "format": "aep.bi.domains/v1",

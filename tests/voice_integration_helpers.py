@@ -180,12 +180,15 @@ CODING_ARGUMENTS: dict[str, Any] = {
 }
 
 
+CODING_EFFECTIVE_ARGUMENTS = CodingChangeStepInput.model_validate(CODING_ARGUMENTS).model_dump()
+
+
 class CodingModel(TextModel):
     def generate(self, request: ModelRequest) -> ModelResponse:
         self.requests.append(request)
         if request.messages[-1].role == "tool":
             return ModelResponse(
-                trace=request.trace, model_alias=request.model_alias, text="程式修改等待你的核准。"
+                trace=request.trace, model_alias=request.model_alias, text="測試程式修改已執行。"
             )
         return ModelResponse(
             trace=request.trace,
@@ -204,7 +207,17 @@ def coding_approvals(agent: Any, root: Path) -> tuple[ChatAuthoring, list[dict[s
 
     async def write(context: RequestContext, inputs: Contract) -> Contract:
         writes.append(inputs.model_dump())
-        raise AssertionError("Coding must wait for approval")
+        return CodingChangeResult(
+            repository="fixture",
+            worktree=str(root / "fake-worktree"),
+            base_revision="fixture-base",
+            summary="Recorded fixture change",
+            attempts=1,
+            commands=(),
+            diff="fixture-only",
+            evidence="inert execution spy",
+            committed=False,
+        )
 
     installed = InstalledCapabilities()
     installed.register(

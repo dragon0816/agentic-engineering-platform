@@ -13,8 +13,8 @@ from test_bi_extract import Scripted
 from test_bi_run_merge import _detail, _post
 from test_bi_vault import _call, _ok, _two_pcs
 
-from capabilities.bi_cards import catalog, extract
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from aep_bi.cards import catalog, extract
+from aep_bi.cards.store import BiStore, PlannedRow
 
 NOTE = "# 虛構\n\nFAKE-CO 宣布新的生態系，FAKE-OTHER 也加入。\n"
 

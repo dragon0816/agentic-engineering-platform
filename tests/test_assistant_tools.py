@@ -81,6 +81,10 @@ def test_the_protocol_lists_the_tools_and_answers_calls(tmp_path: Path) -> None:
         "aep_knowledge_ask",
         "aep_workflows",
         "aep_run_workflow",
+        "aep_tools_catalog",
+        "aep_tools_describe",
+        "aep_tools_invoke",
+        "aep_tools_install_mcp",
     }
     called = handle(
         tools,
@@ -131,7 +135,7 @@ def test_agent_web_serves_the_tools_with_their_own_token(served: AgentWebServer)
     assert _rpc(served, "wrong-token", listing).status == 401
     token = served.web.assistant_token
     reply = json.loads(_rpc(served, token, listing).body)
-    assert len(reply["result"]["tools"]) == 5
+    assert len(reply["result"]["tools"]) == 9
     assert _rpc(served, served.token, listing).status == 200  # the session token works too
     note = _rpc(served, token, {"jsonrpc": "2.0", "method": "notifications/initialized"})
     assert note.status == 202

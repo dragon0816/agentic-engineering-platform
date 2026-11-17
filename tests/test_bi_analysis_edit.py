@@ -16,9 +16,9 @@ from test_bi_dashboard_proposal import COUNT, TYPES, _units, _vault
 from test_bi_vault import _call, _ok
 from test_business_cards_conversation import Conversation
 
-from capabilities.bi_cards import analyses
-from host_runtime import bi_analysis_agent, bi_bench
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import analyses
+from aep_bi.host import bi_analysis_agent, bi_bench
+from aep_bi.host.bi_cards_api import route
 from host_runtime.host import build_runtime
 
 BODIES_CHART = {"type": "bar", "x": "body", "y": "n"}

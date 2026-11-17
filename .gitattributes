@@ -20,3 +20,5 @@ tests/fixtures/atlas_dashboard_golden/** -text
 tests/fixtures/atlas_embed_golden/** -text
 # Voice test audio is hash-verified by its manifest; never line-ending converted.
 tests/fixtures/voice/** binary
+# Plugin v1 package and installed-workspace snapshots pin exact byte hashes.
+tests/fixtures/plugins_v1/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

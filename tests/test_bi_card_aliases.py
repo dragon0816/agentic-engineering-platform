@@ -14,8 +14,8 @@ from typing import Any
 
 from test_bi_schema_v2 import _call, _ok
 
-from capabilities.bi_cards import ai_runs, catalog, importer, names
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from aep_bi.cards import ai_runs, catalog, importer, names
+from aep_bi.cards.store import BiStore, PlannedRow
 
 V3 = "bi.schema/v1.1@3.0.0"
 

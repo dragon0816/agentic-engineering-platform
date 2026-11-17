@@ -51,10 +51,8 @@ def workspace_note(roots: Sequence[str]) -> str:
         return ""
     listed = "; ".join(roots)
     return (
-        "Task folders for coding/run-python, browser downloads and Workflow steps must be "
-        f"folders under one of these roots: {listed}. When the person has not named one, "
-        f"suggest a new folder under {roots[0]} named after the task (for example "
-        f"{Path(roots[0]) / 'stock-price'}); never suggest a folder outside these roots. "
-        "coding/run-python creates a task folder under these roots that does not exist yet "
-        "(with input/ and output/), so never ask the person to create it."
+        f"Suggested task folders: {listed}. These are defaults, not permission boundaries. "
+        f"When no folder is supplied, choose a task-named folder under {roots[0]} "
+        f"(for example {Path(roots[0]) / 'stock-price'}). Any absolute IT-accessible path "
+        "is valid. Create missing input/output folders without asking the person to do it."
     )

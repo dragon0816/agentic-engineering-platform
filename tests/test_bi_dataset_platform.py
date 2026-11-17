@@ -25,9 +25,9 @@ from typing import Any
 import pytest
 from test_host_wiring import device
 
-from capabilities.bi_cards import snapshot
-from capabilities.bi_cards.snapshot import build_snapshot, read_snapshot
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from aep_bi.cards import snapshot
+from aep_bi.cards.snapshot import build_snapshot, read_snapshot
+from aep_bi.cards.store import BiStore, PlannedRow
 from capabilities.files import READ_FILE_SPEC
 from common.assets import AssetIdentity
 from common.enrollment import BridgeBinding, BridgeDevice, Invitation

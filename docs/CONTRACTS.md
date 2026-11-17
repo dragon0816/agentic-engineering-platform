@@ -4244,7 +4244,7 @@ schema is chosen at creation and never changed" (owner 2026-10-27): a dataset ma
   - `POST /api/bi/schema-suggest {"dataset", "source_ids": [...], "only_new": bool}` → `{"ok": true,
     "suggestion": <suggestion>}` with `status: "running"`; the model is asked in the background. `only_new`
     leaves out sources an ingest run read. At most 10 sources (`left_out` counts the rest). Refusals: 400
-    `suggest_no_sources`, `model_unavailable`, `classification_not_approved`; 409 `suggest_running`,
+    `suggest_no_sources`, `model_unavailable`; 409 `suggest_running`,
     `dataset_read_only`.
   - `GET /api/bi/schema-suggest?dataset=` → `{"suggestion": <suggestion> | null}`.
   - `<suggestion>` = `{"id", "status": "running" | "done" | "failed", "at", "by", "schema", "model",
@@ -4393,9 +4393,10 @@ checks, quote location), `ai_runs.py` (runs, background job, retry), `runs.py` (
   proposal §4 card rules), `types` (card type names; default Signal, Technology, Application). Refusals: 400
   `model_unavailable` (no model in Settings; nothing is started; the rule path still works), 400
   `types_invalid`, `instructions_too_long`, `source_not_text`.
-- **Data class.** A source reaches the model (AI run, Session A or B excerpt) only when its `classification`
-  is in the host's `models.data_approval.approved_classes`; otherwise 400 `classification_not_approved` and
-  nothing is sent (added 2026-10-28).
+- **Data class.** A source's `classification` is recorded and shown; it is never a reason to refuse or
+  withhold the source. Every class reaches the model through the configured internal gateway (AI run,
+  Session A or B excerpt, `bi__query` passages and body snippets; `passages_withheld` is always 0). The
+  2026-10-28 `classification_not_approved` refusal was removed (owner 2026-11-17).
 - **The model.** The Knowledge query model and alias when a wiki Knowledge asset is bound; otherwise the host's routing
   client and alias, the same `ApprovedModelClient`, never an unwrapped client (owner 2026-11-03; `web_ai_runtime`). No
   routed model: `model_unavailable`. One call per chunk,
@@ -7180,3 +7181,98 @@ field is introduced. Raw Network headers/body/fullURL/query are never retained
 or diagnosed; only bounded necessary protocol metadata is used internally.
 This is transport evidence, not a business or DOM correctness proof. Existing
 Workflow checks, independent output validation and installation approval remain.
+
+
+## IT-owned local tool contracts (owner2026-11-12)
+
+ToolAccess catalog returns actual installed versus needs_setup status. describe returns current input/output contracts; invoke returns real execution_status, handler_invoked, result and replayed evidence. Successful side effects share canonical actor/target/normalized-input receipts across aliases and native endpoints for the current turn. Failed/read operations are not memoized. system/run-command executes argv without implicit shell; coding/run-python uses EnvironmentRunner and preserves real failures, output limits and fresh artifact checks. outlook/send-draft takes the draft receipt and is distinct from drafting. Mail body chunks expose body_truncated/next_body_offset; bounded search never asserts full-thread coverage. Installation preserves pending business review and actual verification independently of availability.
+
+The scoped design and regression matrix are in
+`phases/IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md`; historical approval requirements
+for local tool installation/execution are superseded for this scope. Shared
+publication and model/data-routing decisions are unchanged.
+
+## Feature Plugin API v1 (generic Slice 1, 2026-11-14)
+
+`common.plugins` defines closed frozen models; extra fields are invalid.
+`PluginManifest` format aep-plugin/1 contains identity, title, description,
+core_api (minimum inclusive / below exclusive SemVer), exact requires, optional
+runtime, capabilities, routes, pages, assets and data schema version. Plugin id
+is namespace.name; Slice1 gives each plugin a dedicated namespace. Names and
+identities cannot collide with core or other plugins. No manifest admission
+grants, IT approval or mandatory signer list exists.
+
+`PluginCapability` contains CapabilitySpec plus scalar input/output declarations
+and optional bounded rows output. `capability_models` constructs closed models
+without importing publisher code. Pending policy metadata does not gate dispatch
+or imply a review. PluginAsset identifies a digest-matched Skill/Workflow file;
+installation uses the existing skill_packs ledger and honest pending metadata.
+
+`PluginPackage` format aep-plugin-package/1 is a JSON/base64 envelope, not ZIP.
+Per-file path/size/SHA256 and canonical aggregate digest must match. Limits:
+8MiB envelope, 6MiB total raw files, 2MiB per file, 256 files. Canonical paths
+are bounded relative worker/ or assets/ paths; traversal, ADS, case collisions,
+Windows reserved names and redirected owned paths are refused. Staged files are
+rechecked at activation, process restart and Host restore. A hash is consistency,
+not a provenance/verified/trusted claim. No signature support is fabricated.
+
+Runtime uses the current interpreter with -I/-u/-B, stdlib/AEP dependencies and
+staged worker package path. JSONL uses existing ExtensionRequest/Response with
+request correlation, bounded output and serialized per-worker requests. Normal
+environment plus AEP_PLUGIN_PACKAGE_FILE and AEP_PLUGIN_DATA_ROOT is passed;
+HTTP headers and Web bearer token are not injected. Process crash/timeout is a
+failure, never automatic replay of a write. This is not an OS sandbox.
+
+`PluginManagerProtocol`: snapshot, install(payload, PluginOrigin), enable,
+disable, uninstall, call_read(PluginReadRequest, timeout_seconds) and
+set_busy_probe. Actual PluginManager also restores and closes owned workers.
+Origin records authenticated actor/channel/source/turn reference, not approval.
+Status states are active/disabled/failed; action and read status is succeeded or
+failed with typed failure. Per-turn successful-effect replay is unchanged; no
+durable receipt guarantee is added. An unreadable/redirected ledger is reported
+unavailable, never as a normal empty installation. Core startup remains usable.
+
+Authenticated Agent Web routes (after existing loopback/bearer validation, with
+Origin checks):
+- GET /api/plugin-manager/plugins: typed inventory and max_package_bytes.
+- POST /api/plugin-manager/install or /update: bounded raw envelope.
+- POST /api/plugin-manager/enable|disable|uninstall: exactly {plugin_id}.
+- GET /api/plugins/<plugin_id>/<route_id>?version=<exact SemVer>: only that
+  active version's declared read capability. No arbitrary URL/port/SQL proxy,
+  inbound identity override or forwarded Authorization. Responses must echo
+  request_id, plugin_id, version and route_id. Read data is limited to256KiB;
+  requests64KiB. Missing credentials401, foreign Origin403, and actual lifecycle
+  failures preserve their typed codes/status mapping.
+
+Page contributions are TextBlock, MetricBlock and TableBlock data, rendered by
+core-owned DOM text nodes. No plugin script/markup/link/image/frame/action is
+executed or auto-fetched. New dynamic page navigation appears after install;
+disable/uninstall withdraw only its contributions. Registry refresh is scoped to
+that plugin namespace, leaving other Skills/Workflows and Knowledge selection
+unchanged. Old assets retire only after commit and recovery preserves previous
+on/off locations and user choices. Data schema migration is unsupported in v1;
+mismatches return setup/compatibility failures. Data remains on uninstall.
+
+Known nonblocking limit: if the final live registry refresh after old-asset
+retirement fails, primary installation remains committed, and obsolete live
+entries may persist until safe restart; a separate success warning is not yet
+exposed by the frozen v1 action contract. See Slice1 acceptance/usage evidence.
+
+## Feature Plugin API1.1 H1/H4 (2026-11-15)
+
+PluginData.reads: tuple[Literal["bi"], ...] defaults to empty. PluginCapability.
+expose_as_tool defaults to true; false requires a read capability referenced by
+a declared page route. New features require core_api.minimum>=1.1.0. Only these
+two new fields are omitted from serialized data at their defaults; all existing
+default fields remain in canonical manifests. Golden v1 fixtures pin raw package,
+content digest, staged files and actual install ledger through parse/install/
+restore. An old API1.0 closed parser refuses new-field packages as
+plugin_package_invalid before compatibility checks; no silent downgrade is implied.
+
+The Host binds AEP_PLUGIN_READ_BI only from its declared BI context on first start
+and restart, preserves ordinary environment, and creates no BI data during install.
+Page service bindings remain in worker health/call_read but not InstalledCapabilities
+or ToolAccess. Tool-to-page updates use the normal version/busy/rollback semantics;
+namespace ownership survives even when the plugin registers no Agent tools.
+No new policy, grant, per-call approval, model-data or TurnEffects contract is added.
+The existing worker protocol and PluginManagerProtocol remain unchanged.

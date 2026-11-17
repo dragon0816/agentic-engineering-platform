@@ -13,8 +13,8 @@ from typing import Any
 
 from test_bi_vault import _call, _commit, _Drive, _ok, _push, _sync, _two_pcs
 
-from capabilities.bi_cards import card_model, catalog, quality, vault
-from capabilities.bi_cards.store import BiStore, PlannedRow, card_id_for
+from aep_bi.cards import card_model, catalog, quality, vault
+from aep_bi.cards.store import BiStore, PlannedRow, card_id_for
 
 ACME = card_id_for("Account", "FAKE-ACME")
 OPP = card_id_for("Opportunity", "FAKE-OPP")

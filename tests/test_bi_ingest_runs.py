@@ -15,10 +15,10 @@ from typing import Any
 
 import pytest
 
-from capabilities.bi_cards import runs
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import runs
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_api import route
 
 ACTOR = "tester"
 TECH_CSV = (

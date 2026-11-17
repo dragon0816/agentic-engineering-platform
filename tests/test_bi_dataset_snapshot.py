@@ -19,8 +19,8 @@ from typing import Any
 
 import pytest
 
-from capabilities.bi_cards import catalog, service, snapshot
-from capabilities.bi_cards.snapshot import (
+from aep_bi.cards import catalog, service, snapshot
+from aep_bi.cards.snapshot import (
     Publication,
     SnapshotError,
     build_snapshot,
@@ -30,7 +30,7 @@ from capabilities.bi_cards.snapshot import (
     schema_state,
     stamp_publication,
 )
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from aep_bi.cards.store import BiStore, PlannedRow
 
 FOLDER_FILE = "C:\\Users\\leo.chi\\Documents\\secret-project\\customers.csv"
 

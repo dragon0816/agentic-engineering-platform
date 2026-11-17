@@ -12,8 +12,7 @@ from typing import Any
 
 import pytest
 
-from capabilities.bi_cards.ai_runs import AiRuntime, check_classification
-from capabilities.bi_cards.store import BiStoreError
+from aep_bi.cards.ai_runs import AiRuntime
 
 TEMPLATE = Path(__file__).resolve().parents[1] / "deploy" / "windows-preview"
 
@@ -28,13 +27,8 @@ def _approved() -> tuple[str, ...]:
 
 def test_a_new_install_approves_internal_and_nothing_higher() -> None:
     assert set(_approved()) == {"UNCLASSIFIED", "INTERNAL"}
-    ai = AiRuntime(model=lambda: None, background=lambda _t, _w: None, approved=_approved)
-    check_classification(ai, "INTERNAL")
-    check_classification(ai, "UNCLASSIFIED")
-    for level in ("CONFIDENTIAL", "RESTRICTED"):
-        with pytest.raises(BiStoreError) as refused:
-            check_classification(ai, level)
-        assert refused.value.code == "classification_not_approved"
+    # BI does not consult this list (owner 2026-11-17): its runtime carries no approval.
+    assert set(AiRuntime.__dataclass_fields__) == {"model", "background"}
 
 
 def test_the_installer_takes_the_approval_from_that_file_and_update_runs_the_installer() -> None:

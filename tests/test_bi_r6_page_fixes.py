@@ -17,9 +17,9 @@ from test_bi_vault import _call, _commit, _ok, _push, _sync, _two_pcs
 from test_bi_vault_ui import _browser_missing
 from test_draft_install_cards import served  # noqa: F401 - the real Agent Web fixture
 
-from capabilities.bi_cards import vault
-from capabilities.bi_cards.store import BiStore, PlannedRow, card_id_for
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import vault
+from aep_bi.cards.store import BiStore, PlannedRow, card_id_for
+from aep_bi.host.bi_cards_api import route
 
 AIDC, ROBOTICS = "applications/aidc/sources", "applications/robotics/sources"
 PROFILE = {

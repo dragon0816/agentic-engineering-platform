@@ -17,16 +17,15 @@ from test_bi_vault_sources import FOLDER, _add
 from test_host_models import configured
 from test_host_wiring import ready
 
-from capabilities.bi_cards import search_index, service
-from capabilities.bi_cards.capability import QUERY_SPEC, QueryHandler, QueryRequest
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from aep_bi.cards import search_index, service
+from aep_bi.cards.capability import QUERY_SPEC, QueryHandler, QueryRequest
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore, PlannedRow
+from aep_bi.host.bi_assistant_query import BI_QUERY_FIELDS
 from host_runtime import skill_packs
 from host_runtime.assets import shipped
-from host_runtime.bi_assistant_query import BI_QUERY_FIELDS
 from host_runtime.host import build_runtime
 
-APPROVED = ("UNCLASSIFIED", "INTERNAL")
 REPORT = "# 虛構報告\n\n電源模組 FACT-POWER-1 的效率。\n"
 
 
@@ -72,9 +71,9 @@ def _relate(
     db.close()
 
 
-def _ask(ws: Path, approved: Any = APPROVED, **given: Any) -> dict[str, Any]:
+def _ask(ws: Path, **given: Any) -> dict[str, Any]:
     request = QueryRequest(**given)
-    return dict(asyncio.run(QueryHandler(ws, approved=approved)(CONTEXT, request)).model_dump())
+    return dict(asyncio.run(QueryHandler(ws)(CONTEXT, request)).model_dump())
 
 
 def _names(answer: dict[str, Any]) -> list[str]:
@@ -288,7 +287,8 @@ def test_chinese_shorter_than_a_trigram_is_found_too(tmp_path: Path) -> None:
     assert _ask(tmp_path, dataset="demo", text="效率")["passages"]
 
 
-def test_a_source_of_an_unapproved_class_is_withheld_and_counted(tmp_path: Path) -> None:
+def test_a_source_of_every_class_gives_passages_and_none_is_withheld(tmp_path: Path) -> None:
+    """BI withholds no source for its data class (owner 2026-11-17)."""
     _store(tmp_path, "A")
     staging = Staging(tmp_path, "demo")
     staging.add_source("open.md", text=REPORT, actor="alice", classification="INTERNAL")
@@ -296,19 +296,19 @@ def test_a_source_of_an_unapproved_class_is_withheld_and_counted(tmp_path: Path)
         "secret.md", text=REPORT + "\n機密。\n", actor="alice", classification="RESTRICTED"
     )
     answer = _ask(tmp_path, dataset="demo", text="FACT-POWER-1")
-    assert [p["source_name"] for p in answer["passages"]] == ["open.md"]
-    assert answer["passages_withheld"] == 1
-    assert "機密" not in str(answer["passages"])
-    assert "1" in answer["scope_note"]
-    none = _ask(tmp_path, approved=("UNCLASSIFIED",), dataset="demo", text="FACT-POWER-1")
-    assert none["passages"] == () and none["passages_withheld"] == 2
+    assert sorted(p["source_name"] for p in answer["passages"]) == ["open.md", "secret.md"]
+    assert answer["passages_withheld"] == 0
+    assert "未核准" not in answer["scope_note"]
 
 
-def test_with_no_approval_known_no_passage_is_read(tmp_path: Path) -> None:
+def test_a_restricted_source_alone_gives_its_passage(tmp_path: Path) -> None:
     _store(tmp_path, "A")
-    Staging(tmp_path, "demo").add_source("report.md", text=REPORT, actor="alice")
-    answer = _ask(tmp_path, approved=None, dataset="demo", text="FACT-POWER-1")
-    assert answer["passages"] == () and answer["passages_withheld"] == 0
+    Staging(tmp_path, "demo").add_source(
+        "report.md", text=REPORT, actor="alice", classification="RESTRICTED"
+    )
+    answer = _ask(tmp_path, dataset="demo", text="FACT-POWER-1")
+    (passage,) = answer["passages"]
+    assert passage["source_name"] == "report.md" and answer["passages_withheld"] == 0
 
 
 def test_a_vault_gives_passages_of_the_published_version_only(tmp_path: Path) -> None:
@@ -355,7 +355,7 @@ def test_a_withdrawn_source_gives_no_passage(tmp_path: Path) -> None:
 
 def test_a_subscribed_copy_has_no_sources_and_creates_nothing(tmp_path: Path) -> None:
     store = BiStore(tmp_path, "engineering/robotics-bi")
-    found = search_index.passages(store, "FACT", approved=APPROVED)
+    found = search_index.passages(store, "FACT")
     assert found == {"passages": [], "withheld": 0}
     assert not store.dir.exists()
 
@@ -381,19 +381,26 @@ def test_an_unreadable_source_does_not_stop_the_others(
     assert _ask(tmp_path, dataset="demo", text="FACT-TWO")["passages"]  # picked up next time
 
 
-def test_the_host_tells_the_query_what_its_model_is_approved_for(tmp_path: Path) -> None:
-    config, layout = configured(tmp_path / "with-model")
-    skill_packs.install_bundle(layout, None, shipped=shipped())
-    with build_runtime(config, layout=layout) as runtime:
-        installed = runtime.agent.gateway.bridge.installed.get(QUERY_SPEC.identity)
-        assert installed is not None
-        assert getattr(installed.handler, "approved", None) == ("UNCLASSIFIED",)
-    config, layout = ready(tmp_path / "no-model")
-    skill_packs.install_bundle(layout, None, shipped=shipped())
-    with build_runtime(config, layout=layout) as runtime:
-        installed = runtime.agent.gateway.bridge.installed.get(QUERY_SPEC.identity)
-        assert installed is not None
-        assert getattr(installed.handler, "approved", None) == ()
+def test_the_host_query_reads_every_class_whatever_its_model_approval(tmp_path: Path) -> None:
+    """The installed `bi__query` reads a RESTRICTED source's passage both on a host
+    approving UNCLASSIFIED only and on one with no model: no class filter."""
+    for config, layout in (
+        configured(tmp_path / "with-model"),
+        ready(tmp_path / "no-model"),
+    ):
+        skill_packs.install_bundle(layout, None, shipped=shipped())
+        ws = Path(layout.workspace_root)
+        _store(ws, "A")
+        Staging(ws, "demo").add_source(
+            "report.md", text=REPORT, actor="alice", classification="RESTRICTED"
+        )
+        with build_runtime(config, layout=layout) as runtime:
+            installed = runtime.agent.gateway.bridge.installed.get(QUERY_SPEC.identity)
+            assert installed is not None
+            request = QueryRequest(dataset="demo", text="FACT-POWER-1")
+            answer = asyncio.run(installed.handler(CONTEXT, request)).model_dump()
+        (passage,) = answer["passages"]
+        assert passage["source_name"] == "report.md" and answer["passages_withheld"] == 0
 
 
 def test_the_assistant_tool_passes_hops_on() -> None:

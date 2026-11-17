@@ -2,7 +2,7 @@
 
 One-off converter (owner 2026-10-21, docs/DECISIONS.md): it *reads* the
 robotics sample's `tools/bi_schema.py` (schema v4) with `ast`, never imports
-or runs it, and writes `src/capabilities/bi_cards/bi_schema_v1_1.json`. The
+or runs it, and writes `feature_plugins/bi_knowledge/python/aep_bi/cards/bi_schema_v1_1.json`. The
 id rules and field classes come from `bi.schema/v1` (the proposal file).
 
     python scripts/build_bi_schema_v1_1.py
@@ -20,9 +20,10 @@ from pathlib import Path
 from typing import Any
 
 REPO = Path(__file__).resolve().parents[1]
+BI = REPO / "feature_plugins" / "bi_knowledge" / "python"  # the BI Knowledge plugin
 V4 = REPO / "tests" / "fixtures" / "robotics_kb_sample" / "tools" / "bi_schema.py"
 V1 = REPO / "docs" / "proposals" / "bi_schema_v1" / "bi_schema_v1.json"
-OUT = REPO / "src" / "capabilities" / "bi_cards" / "bi_schema_v1_1.json"
+OUT = BI / "aep_bi" / "cards" / "bi_schema_v1_1.json"
 
 TYPE_LABELS = {
     "Opportunity": "商機",

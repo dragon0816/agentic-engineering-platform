@@ -17,9 +17,9 @@ from typing import Any
 import pytest
 from test_bi_vault_published import CONTEXT
 
-from capabilities.bi_cards import service, vault
-from capabilities.bi_cards.capability import QueryHandler, QueryRequest
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import service, vault
+from aep_bi.cards.capability import QueryHandler, QueryRequest
+from aep_bi.cards.store import BiStore
 from capabilities.runtime import CapabilityRefused
 from scripts import bi_feed_fixtures as fixtures
 

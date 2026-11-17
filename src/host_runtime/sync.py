@@ -71,7 +71,7 @@ from common.sync import (
     SyncRequest,
     WireFailure,
 )
-from host_runtime import bi_subscriptions
+from host_runtime import features
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
 from host_runtime.contracts import HostLayout, PlatformBinding
 from host_runtime.memory_spaces import conflicts as memory_conflicts
@@ -218,7 +218,7 @@ class _VerifiedInstall:
     files: tuple[tuple[Path, bytes], ...]
     knowledge: tuple[_KnowledgeInstall, ...]
     # Subscribed BI datasets (BI dataset sharing slice 1), checked, not written.
-    bi_datasets: tuple[bi_subscriptions.PreparedInstall, ...] = ()
+    bi_datasets: tuple[features.PreparedPackage, ...] = ()
 
 
 def _identities_on_disk(directory: Path) -> dict[tuple[str, str, str], tuple[Path, bytes]]:
@@ -453,7 +453,7 @@ class PlatformClient:
                     if created and item.target.exists():
                         shutil.rmtree(item.target)
                     raise SyncRefused("workspace_unwritable") from None
-            committed: list[bi_subscriptions.PreparedInstall] = []
+            committed: list[features.PreparedPackage] = []
             try:
                 for prepared in verified.bi_datasets:
                     prepared.commit()
@@ -463,7 +463,7 @@ class PlatformClient:
                 for prepared in reversed(committed):
                     prepared.rollback()
                 raise SyncRefused(error.code) from None
-            except (OSError, ValueError, bi_subscriptions.SubscriptionError):
+            except (OSError, ValueError, features.PackageRefused):
                 for prepared in reversed(committed):
                     prepared.rollback()
                 raise SyncRefused("workspace_unwritable") from None
@@ -499,16 +499,17 @@ class PlatformClient:
         }
         files: list[tuple[Path, bytes]] = []
         knowledge: list[_KnowledgeInstall] = []
-        bi_datasets: list[bi_subscriptions.PreparedInstall] = []
+        bi_datasets: list[features.PreparedPackage] = []
         for package in plan.packages:
             artifact = package.metadata.package
-            if package.kind == bi_subscriptions.KIND and artifact is not None:
+            installer = features.active().package_installer(package.kind)
+            if installer is not None and artifact is not None:
                 # A read-only BI dataset copy: checked whole here, written
                 # after every other check passed (`PreparedInstall.commit`).
                 identity = package.metadata.identity
                 try:
                     bi_datasets.append(
-                        bi_subscriptions.prepare(
+                        installer.prepare(
                             layout.workspace_root,
                             identity.namespace,
                             identity.name,
@@ -517,7 +518,7 @@ class PlatformClient:
                             artifact.sha256,
                         )
                     )
-                except bi_subscriptions.SubscriptionError as error:
+                except features.PackageRefused as error:
                     raise SyncRefused(_bi_refusal(error.code)) from None
                 continue
             if artifact is None or package.kind not in on_disk:

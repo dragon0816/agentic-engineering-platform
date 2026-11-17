@@ -8,10 +8,10 @@ from typing import Any, cast
 import pytest
 from test_bi_vault import _push, _row, _sync, _two_pcs
 
-from capabilities.bi_cards import correction, service, vault, vault_skills
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, BiStoreError, PlannedRow
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import correction, service, vault, vault_skills
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore, BiStoreError, PlannedRow
+from aep_bi.host.bi_cards_api import route
 
 
 def _call(ws: Path, path: str, body: Any, actor: str = "tester") -> Any:

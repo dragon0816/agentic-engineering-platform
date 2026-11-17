@@ -20,10 +20,10 @@ from test_bi_extract import Scripted
 from test_bi_vault import _call, _commit, _Drive, _ok, _push, _sync, _two_pcs
 from test_bi_vault_sources import FOLDER
 
-from capabilities.bi_cards import card_markdown, catalog, vault
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import card_markdown, catalog, vault
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_api import route
 
 PAGE = "---\ntype: technology\nname: FAKE-1\n---\n\n## 說明\n虛構的內容。\n"
 CSV_OLD = "技術,領域,成熟度\nFAKE-1,robotics,mature\n"

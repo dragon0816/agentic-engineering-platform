@@ -16,8 +16,8 @@ from pathlib import Path
 from bi_pack_fixtures import build, chain_cards, golden, new_vault, pack_results
 from test_bi_vault import _call, _ok
 
-from capabilities.bi_cards import board, migrate, vault
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import board, migrate, vault
+from aep_bi.cards.store import BiStore
 
 
 def test_chains_and_coverage_after_the_migration_give_the_golden_answers(

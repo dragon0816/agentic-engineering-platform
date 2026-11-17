@@ -19,10 +19,10 @@ from test_bi_extract import Scripted
 from test_bi_vault import _call, _commit, _Drive, _ok, _push, _sync, _two_pcs
 from test_bi_vault_sources import FOLDER
 
-from capabilities.bi_cards import card_markdown, catalog, vault
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import card_markdown, catalog, vault
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_api import route
 
 OLD = "這段長文是虛構卡片目前的內容，有它自己的出處。" * 8
 NEW = "一句話。"

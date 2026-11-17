@@ -88,11 +88,12 @@ def test_read_dispatch_through_bridge_policy(tmp_path: Path) -> None:
     assert output.truncated is False
 
 
-def test_default_deny_never_touches_the_filesystem(tmp_path: Path) -> None:
+def test_no_application_grant_is_needed_and_actual_missing_file_is_reported(tmp_path: Path) -> None:
     handler = CountingHandler(tmp_path)
     result = dispatch(bridge(handler, granted=False), path=str(tmp_path / "notes.txt"))
-    assert result.failure is not None and result.failure.code == "permission_denied"
-    assert handler.calls == 0
+    assert result.status == "succeeded" and result.failure is None
+    assert isinstance(result.data, dict) and result.data["outcome"] == "not_found"
+    assert handler.calls == 1
 
 
 def test_reads_are_confined_to_the_allowed_root(tmp_path: Path) -> None:

@@ -278,6 +278,16 @@ $PlatformWheel = $PlatformWheels[0]
 # package index.
 & $VenvPython -m pip install --disable-pip-version-check --no-index --find-links (Join-Path $BundleRoot "wheels") --force-reinstall "agentic-engineering-platform[excel,windows,weekly-mail]" "pypdf[image]>=6,<7" "python-docx>=1,<2"
 if ($LASTEXITCODE -ne 0) { throw "Offline wheel installation failed." }
+# Feature plugins shipped with AEP (Plugin API 1.2, BI Knowledge first): the
+# Host loads them at start from the venv's aep-feature-plugins folder, which
+# this install or update replaces. Plugins installed later on the Plugins page
+# live in the workspace and are not touched here.
+$ShippedPlugins = Join-Path $BundleRoot "feature-plugins"
+$VenvPlugins = Join-Path $Venv "aep-feature-plugins"
+if (Test-Path -LiteralPath $VenvPlugins) { Remove-Item -LiteralPath $VenvPlugins -Recurse -Force }
+if (Test-Path -LiteralPath $ShippedPlugins -PathType Container) {
+    Copy-Item -LiteralPath $ShippedPlugins -Destination $VenvPlugins -Recurse -Force
+}
 # This is the Agent + Bridge role. The wheel contains the shared contracts and
 # all project entry points, but this installation exposes only its own runtime.
 Get-ChildItem -LiteralPath (Join-Path $Venv "Scripts") -Filter "aep-platform*" -ErrorAction SilentlyContinue | Remove-Item -Force

@@ -24,11 +24,11 @@ from typing import Any
 import pytest
 from test_bi_extract import Scripted
 
-from capabilities.bi_cards import convert, readers
-from capabilities.bi_cards.ai_runs import AiRuntime
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStoreError
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import convert, readers
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStoreError
+from aep_bi.host.bi_cards_api import route
 
 ACTOR = "tester"
 TECH_CSV = (
@@ -332,6 +332,57 @@ def test_a_source_that_cannot_be_converted_is_kept_with_the_reason(tmp_path: Pat
     saved = _ok(_save(tmp_path, broken["id"], "# 手動整理（虛構）\n\n重點一\n", 0, "手動整理"))
     assert saved["revision"]["rev"] == 1 and saved["revision"]["origin"] == "edit"
     assert saved["source"]["convert_error"] is None
+
+
+# -- text sources in other encodings (a Big5 .md was read as garbage) --------
+
+NOTE_ZH = "# 虛構會議紀錄\r\n\r\n電源模組 FACT-POWER-1 的效率。\r\n"
+NOTE_MD = NOTE_ZH.replace("\r\n", "\n")
+
+
+@pytest.mark.parametrize(
+    ("name", "data"),
+    [
+        ("big5.md", NOTE_ZH.encode("cp950")),
+        ("utf16-le.md", NOTE_ZH.encode("utf-16")),  # with its byte order mark
+        ("utf16-be.markdown", b"\xfe\xff" + NOTE_ZH.encode("utf-16-be")),
+        ("big5.txt", NOTE_ZH.encode("cp950")),
+    ],
+)
+def test_a_text_source_in_big5_or_utf16_converts_to_its_characters(
+    tmp_path: Path, name: str, data: bytes
+) -> None:
+    assert convert.convert(name, data) == NOTE_MD
+    source = _source(tmp_path, name, data=data)
+    assert source["markdown_rev"] == 1 and source["convert_error"] is None
+    markdown = _markdown(tmp_path, source["id"])["markdown"]
+    assert markdown == NOTE_MD and "�" not in markdown
+
+
+def test_utf8_text_sources_convert_as_before(tmp_path: Path) -> None:
+    for data in (NOTE_ZH.encode("utf-8"), b"\xef\xbb\xbf" + NOTE_ZH.encode("utf-8")):
+        assert convert.convert("note.md", data) == NOTE_MD
+    typed = _source(tmp_path, "typed.md", text=NOTE_ZH)
+    assert _markdown(tmp_path, typed["id"])["markdown"] == NOTE_MD
+
+
+def test_a_text_source_no_encoding_reads_is_kept_with_the_reason(tmp_path: Path) -> None:
+    data = b"# \xff\xff\x81 \x80\n"
+    with pytest.raises(BiStoreError) as refused:
+        convert.convert("broken.md", data)
+    assert refused.value.code == "source_decode_failed"
+    with pytest.raises(BiStoreError) as rule_path:
+        readers.decode(data)
+    assert rule_path.value.code == refused.value.code  # the rule path's reason
+    source = _source(tmp_path, "broken.md", data=data)
+    assert source["markdown_rev"] == 0
+    assert source["convert_error"]["code"] == "source_decode_failed"
+    assert "�" not in str(source["convert_error"])
+    _refused(
+        _call(tmp_path, "GET", f"/api/bi/sources/{source['id']}/markdown", dataset="demo"),
+        400,
+        "source_decode_failed",
+    )
 
 
 def test_edits_are_new_revisions_and_the_original_never_changes(tmp_path: Path) -> None:

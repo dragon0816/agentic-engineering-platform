@@ -182,7 +182,7 @@ def test_a_read_only_workflow_runs_directly(tmp_path: Path) -> None:
     assert recorder.calls == ["2026-09"]
 
 
-def test_a_writing_workflow_waits_for_the_owner_and_runs_once_approved(tmp_path: Path) -> None:
+def test_a_writing_workflow_runs_directly_without_approval(tmp_path: Path) -> None:
     chat, recorder = studio(tmp_path)
     drafted = draft(chat, "write-it")
     candidate_id = drafted.data["candidate_id"]
@@ -191,14 +191,8 @@ def test_a_writing_workflow_waits_for_the_owner_and_runs_once_approved(tmp_path:
         "authoring__run_workflow",
         {"candidate_id": candidate_id, "arguments": {"month": "2026-08"}},
     )
-    assert asked.status == "awaiting_approval" and recorder.calls == []
-    (pending,) = chat.approvals("owner", session_id="session-1")
-    assert pending.approval_id == asked.data["approval_id"]
-    decided = chat.decide(pending.approval_id, "owner", approve=True)
-    assert decided.status == "approved" and recorder.calls == ["2026-08"]
-    assert isinstance(decided.result, dict) and decided.result["status"] == "succeeded"
-    with pytest.raises(ChatAuthoringError):
-        chat.decide(pending.approval_id, "owner", approve=True)
+    assert asked.status == "succeeded" and recorder.calls == ["2026-08"]
+    assert asked.data["status"] == "succeeded"
     assert chat.approvals("owner") == []
 
 
@@ -206,44 +200,40 @@ def test_a_rejected_or_stale_request_never_runs_and_others_cannot_decide(tmp_pat
     chat, recorder = studio(tmp_path)
     drafted = draft(chat, "write-it")
     candidate_id = drafted.data["candidate_id"]
-    first = call(chat, "authoring__run_workflow", {"candidate_id": candidate_id, "arguments": {}})
+    first = chat.request("owner", "session-1", "run", candidate_id, {"month": "fixture"})
     with pytest.raises(ChatAuthoringError):
-        chat.decide(first.data["approval_id"], "someone-else", approve=True)
-    assert chat.decide(first.data["approval_id"], "owner", approve=False).status == "rejected"
-    second = call(chat, "authoring__run_workflow", {"candidate_id": candidate_id, "arguments": {}})
+        chat.decide(first.approval_id, "someone-else", approve=True)
+    assert chat.decide(first.approval_id, "owner", approve=False).status == "rejected"
+    second = chat.request("owner", "session-1", "run", candidate_id, {"month": "fixture"})
     changed = workflow("write-it") | {"description": "Changed after the request."}
     call(
         chat,
         "authoring__draft_workflow",
         {"title": "W", "workflow": changed, "candidate_id": candidate_id},
     )
-    stale = chat.decide(second.data["approval_id"], "owner", approve=True)
+    stale = chat.decide(second.approval_id, "owner", approve=True)
     assert stale.status == "failed" and recorder.calls == []
 
 
-def test_install_needs_approval_and_a_rerun_keeps_the_same_digest(tmp_path: Path) -> None:
+def test_direct_install_preserves_digest_and_does_not_fabricate_review(tmp_path: Path) -> None:
     chat, recorder = studio(tmp_path)
     drafted = draft(chat, "write-it")
     candidate_id = drafted.data["candidate_id"]
     asked = call(chat, "authoring__install_workflow", {"candidate_id": candidate_id})
-    assert asked.status == "awaiting_approval"
-    assert not (tmp_path / "workflows").exists()
-    installed = chat.decide(asked.data["approval_id"], "owner", approve=True)
-    assert installed.status == "approved"
+    assert asked.status == "succeeded"
+    assert chat.approvals("owner") == []
     files = list((tmp_path / "workflows").glob("*.json"))
     assert len(files) == 1
     published = json.loads(files[0].read_text(encoding="utf-8"))
-    assert published["metadata"]["lifecycle"] == "published"
-    assert published["metadata"]["business_approval"]["reviewer"] == "owner"
-    grants = json.loads((tmp_path / "grants.json").read_text(encoding="utf-8"))
-    assert [g["asset"]["name"] for g in grants] == ["write-it"]
+    assert published["metadata"]["lifecycle"] == "draft"
+    assert published["metadata"]["business_approval"]["reviewer"] is None
+    assert not (tmp_path / "grants.json").exists()
     listed = call(chat, "authoring__list_workflows", {})
     assert listed.data[0]["status"] == "installed"
     item = chat.candidate(candidate_id, "owner")
-    assert isinstance(installed.result, dict)
-    assert listed.data[0]["digest"] == digest(item.draft) == installed.result["digest"]
+    assert listed.data[0]["digest"] == digest(item.draft) == asked.data["digest"]
     again = call(chat, "authoring__install_workflow", {"candidate_id": candidate_id})
-    assert again.status == "failed" and again.failure.code == "candidate_already_installed"
+    assert again.status == "failed" and again.failure.code == "workflow_version_exists"
     # Installing was the approval (owner 2026-10-08): reruns of the installed
     # version run at once.
     for month in ("2026-09", "2026-10"):
@@ -269,8 +259,7 @@ def test_the_agent_can_read_back_its_own_draft(tmp_path: Path) -> None:
 
 
 def install(chat: ChatAuthoring, candidate_id: str) -> Any:
-    asked = call(chat, "authoring__install_workflow", {"candidate_id": candidate_id})
-    return chat.decide(asked.data["approval_id"], "owner", approve=True)
+    return call(chat, "authoring__install_workflow", {"candidate_id": candidate_id})
 
 
 def test_a_new_draft_of_an_installed_name_continues_its_versions(tmp_path: Path) -> None:
@@ -278,7 +267,7 @@ def test_a_new_draft_of_an_installed_name_continues_its_versions(tmp_path: Path)
     chat, _ = studio(tmp_path)
     first = draft(chat, "write-it")
     assert first.data["workflow"] == "engineering/echo-month@1.0.0"
-    assert install(chat, first.data["candidate_id"]).status == "approved"
+    assert install(chat, first.data["candidate_id"]).status == "succeeded"
     revised = call(
         chat,
         "authoring__draft_workflow",
@@ -291,7 +280,7 @@ def test_a_new_draft_of_an_installed_name_continues_its_versions(tmp_path: Path)
     assert revised.data["workflow"] == "engineering/echo-month@1.0.1"
     later = draft(chat, "write-it")  # another conversation, same name
     assert later.data["workflow"] == "engineering/echo-month@1.0.1"
-    assert install(chat, later.data["candidate_id"]).status == "approved"
+    assert install(chat, later.data["candidate_id"]).status == "succeeded"
     again = draft(chat, "write-it")
     assert again.data["workflow"] == "engineering/echo-month@1.0.2"
 
@@ -321,7 +310,7 @@ def test_an_installed_workflow_runs_without_asking_again_and_is_usable_at_once(
     )
     candidate_id = draft(chat, "write-it").data["candidate_id"]
     decided = chat.install_now("owner", candidate_id)
-    assert decided.status == "approved" and used == [("echo-month", 1)]
+    assert decided.status == "approved" and used == [("echo-month", 0)]
     assert isinstance(decided.result, dict)
     note = decided.result["note"]
     assert isinstance(note, str) and "runs now" in note
@@ -344,10 +333,10 @@ def test_an_installed_workflow_runs_without_asking_again_and_is_usable_at_once(
         "authoring__run_workflow",
         {"candidate_id": candidate_id, "arguments": {"month": "2026-11"}},
     )
-    assert again.status == "awaiting_approval" and recorder.calls == ["2026-10"]
+    assert again.status == "succeeded" and recorder.calls == ["2026-10", "2026-11"]
 
 
-def test_the_host_registers_an_install_and_its_grants_while_running() -> None:
+def test_legacy_grant_updates_are_not_tool_authority() -> None:
     from capabilities.runtime import CapabilityGrant, LocalPolicy
     from common.assets import AssetIdentity
 
@@ -360,8 +349,18 @@ def test_the_host_registers_an_install_and_its_grants_while_running() -> None:
         approval_ref="x",
     )
     policy.add(grant)
-    policy.add(grant.model_copy(update={"approval_ref": "y"}))  # the first one stays
-    assert policy._grants[("owner", grant.asset.key)].approval_ref == "x"
+    policy.add(grant.model_copy(update={"approval_ref": "y"}))
+    context = RequestContext(
+        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+        actor="another-user",
+        namespace="lab",
+        message="fixture",
+        channel="test",
+    )
+    decision = policy.authorize(context, spec("write-it", "write"))
+    assert decision.allowed and decision.actor == "another-user"
+    assert decision.policy_ref == "execution-environment"
+    assert not policy.confirmation_needed(spec("write-it", "write"), "model")
 
 
 def test_a_revision_that_drops_a_step_must_say_so(tmp_path: Path) -> None:

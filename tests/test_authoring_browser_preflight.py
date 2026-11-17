@@ -1,4 +1,8 @@
-"""Browser repair preflight never grants a general automation tool or trial proof."""
+"""Historical preflight decisions remain readable and never manufacture trial proof.
+
+The legacy request builder below is intentionally explicit; normal tools execute
+directly and are exercised separately in test_it_tool_boundaries.
+"""
 
 from __future__ import annotations
 
@@ -25,8 +29,10 @@ from host_runtime.authoring_browser_preflight import (
     PREFLIGHT_SOURCE,
     PREFLIGHT_TOOL,
     claim_continuation,
-    preflight_tool,
     repair_scope_for,
+)
+from host_runtime.authoring_browser_preflight import (
+    _legacy_preflight_tool as preflight_tool,
 )
 from host_runtime.authoring_browser_preflight_budget import (
     _path,
@@ -56,7 +62,9 @@ class RepairBrowser(FakeBrowser):
 
 
 @contextmanager
-def failed_browser_trial(tmp_path: Path) -> Iterator[tuple[Any, Any, str, RepairBrowser]]:
+def failed_browser_trial(
+    tmp_path: Path, *, direct: bool = False
+) -> Iterator[tuple[Any, Any, str, RepairBrowser]]:
     from capabilities.web.handlers import WebHostBinding
 
     config, layout = _chat_config(tmp_path)
@@ -98,9 +106,13 @@ def failed_browser_trial(tmp_path: Path) -> Iterator[tuple[Any, Any, str, Repair
             },
         )
         assert item is not None and not problems
-        request = chat.request(runtime.actor, session, "run", item.candidate_id)
-        decided = chat.decide(request.approval_id, runtime.actor, True)
-        assert isinstance(decided.result, dict) and decided.result["status"] == "failed"
+        if direct:
+            done = chat.execute(runtime.actor, item, {}, "direct-fixture")
+            assert done["status"] == "failed"
+        else:
+            request = chat.request(runtime.actor, session, "run", item.candidate_id)
+            decided = chat.decide(request.approval_id, runtime.actor, True)
+            assert isinstance(decided.result, dict) and decided.result["status"] == "failed"
         scope = repair_scope_for(chat, current(chat, runtime.actor, session))
         assert scope is not None
         ensure_budget(chat, scope, runtime.agent.gateway.limits())
@@ -211,7 +223,9 @@ def test_stale_candidate_is_not_executed_after_owner_approval(tmp_path: Path) ->
         assert browser.visited == before
 
 
-def test_only_eligible_repair_offers_tool_and_approval_resumes_same_pass(tmp_path: Path) -> None:
+def test_eligible_repair_executes_probe_without_cards_or_false_trial_verification(
+    tmp_path: Path,
+) -> None:
     with failed_browser_trial(tmp_path) as (runtime, web, session, browser):
         chat = runtime.chat_authoring
         item = current(chat, runtime.actor, session)
@@ -235,18 +249,11 @@ def test_only_eligible_repair_offers_tool_and_approval_resumes_same_pass(tmp_pat
         assert result is not None
         assert all(PREFLIGHT_TOOL in {t.name for t in r.tools} for r in model.requests)
         assert all("browser__operate" not in {t.name for t in r.tools} for r in model.requests)
-        pending = next(a for a in chat.approvals(runtime.actor) if a.source == PREFLIGHT_SOURCE)
-        before = chat.tasks.load(runtime.actor, session)
-        resumed = Capturing({"text": "Browser validation succeeded; full trial still required."})
-        runtime.agent.gateway.router.model = resumed
-        decided = web.decide_approval(pending.approval_id, "approve")
-        assert decided["ok"] and decided.get("repair") is not None
-        assert resumed.requests and "preflight_only" in resumed.requests[0].messages[-1].text
+        assert not any(a.source == PREFLIGHT_SOURCE for a in chat.approvals(runtime.actor))
         after = chat.tasks.load(runtime.actor, session)
-        assert after.repair_attempts == before.repair_attempts == 1
-        assert after.last_run_id == before.last_run_id and after.verified_digest is None
+        assert after.repair_attempts == 1
+        assert after.verified_digest is None
         assert browser.visited.count(SITE + "/good") == 1
-        assert web._resume_failed_authoring(session, preflight_approval=pending.approval_id) is None
         runtime.agent.gateway.router.model = Capturing({"text": "A workflow is a procedure."})
         web.conversation_turn({"session_id": session, "message": "What is a workflow?"})
         assert all(
@@ -344,7 +351,7 @@ def test_approval_is_model_origin_with_one_trial_grant_and_no_global_grant_chang
         assert "preflight_only" not in chat.external_view(result)
 
 
-def test_technical_authorization_denial_is_not_bypassed_by_owner_confirmation(
+def test_legacy_preflight_does_not_need_synthetic_tool_grants(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -354,9 +361,9 @@ def test_technical_authorization_denial_is_not_bypassed_by_owner_confirmation(
         before = list(browser.visited)
         monkeypatch.setattr(chat, "grants", lambda *_args: ())
         result = chat.decide(asked.data["approval_id"], runtime.actor, True)
-        assert result.result["failure"] == "permission_denied"
-        assert result.result["handler_invoked"] is False and browser.visited == before
-        assert claim_continuation(chat, runtime.actor, session, result.approval_id) is None
+        assert result.result["failure"] is None
+        assert result.result["handler_invoked"] is True and browser.visited != before
+        assert claim_continuation(chat, runtime.actor, session, result.approval_id) is not None
 
 
 def test_redirect_scope_stops_before_other_actions_and_does_not_leak_to_normal_calls(
@@ -527,7 +534,13 @@ def test_reject_cannot_overwrite_an_already_claimed_execution(
         assert browser.visited.count(SITE + "/good") == 1
 
 
-def test_approval_continuation_reuses_consumed_model_and_tool_budget(tmp_path: Path) -> None:
+def test_historical_approval_continuation_reuses_consumed_model_and_tool_budget(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from host_runtime import authoring_browser_preflight
+
+    # Reconstruct an old-version pending record, then exercise its continuation.
+    monkeypatch.setattr(authoring_browser_preflight, "preflight_tool", preflight_tool)
     with failed_browser_trial(tmp_path) as (runtime, web, session, browser):
         chat = runtime.chat_authoring
         item = current(chat, runtime.actor, session)

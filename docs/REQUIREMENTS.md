@@ -111,3 +111,39 @@ identities. Review Hermes Skills and validated Workflows for provenance,
 license, dependencies and policy before publishing Marketplace defaults.
 Finally, demonstrate SOP-to-Workflow, Knowledge and ordinary Skill use from
 user-level entry points with independent validation.
+
+
+## Environment-available application tools (owner2026-11-13 clarification)
+
+All supported AEP conversation backends expose a common typed tool catalog. Tools do not require selected Skills, member grants or per-call/per-install AEP approval. Agents can install/connect tooling and use it in the same session whenever the execution environment can actually run it. No separate IT approval, IT identity or IT-managed allowlist is required. Actual OS/service errors are reported, never relabeled as success. Mail search filters are query values, not access ACLs. Drafting and sending remain distinct. Model data eligibility, Knowledge evidence/citations, artifact ownership and successful-effect receipts remain mandatory.
+
+The scoped design and regression matrix are in
+`phases/IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md`; historical approval requirements
+for local tool installation/execution are superseded for this scope. Shared
+publication and model/data-routing decisions are unchanged.
+
+## Independently installable feature packages (Slice 1, 2026-11-14)
+
+A plugin-capable AEP exposes a Plugins entry where an authenticated user can
+install a compatible local package without a separate AEP/IT installation or
+execution approval. The generic first slice provides text/metric/table pages,
+namespaced read APIs, typed tools and live Skill/Workflow assets. At least two
+plugins coexist; a plugin can remove only owned contributions. No-plugin startup
+and existing Knowledge questions remain compatible. Malformed/tampered packages
+and unavailable environments return actual failures. Upgrades preserve exact
+active dependencies and running work, and failed/interrupted installs preserve
+the prior usable version. Disabling or uninstalling keeps user data by default.
+BI/Wiki extraction, executable plugin frontends, third-party dependency installs,
+data migrations and durable cross-process effect receipts are later slices.
+
+## BI overview feature package (H1/H4 approved2026-11-15)
+
+A compatible Plugin API1.1 Host can install a separate metadata overview of its
+existing BI data without moving or rebuilding that data. The overview exposes
+no additional model tool or Skill. It distinguishes local working projections
+from published answer sources and marks missing/outdated/busy/partial data
+honestly, without presenting unknown counts as zero or partial sums as complete.
+The current BI UI, import/edit/query workflow and Knowledge asking/citations must
+remain compatible. This is not the full BI/Wiki plugin extraction. Old v1 plugin
+bytes/digests must still install/restore unchanged; source SDK additions do not
+auto-install the BI package, update the resident or change tool approval rules.

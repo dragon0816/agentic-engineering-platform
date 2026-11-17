@@ -4,7 +4,7 @@ over Streamable HTTP (owner 2026-10-08).
 Each normalizes the protocol into `capabilities.mcp.MCPClient`: initialize
 once, list tools, call a tool. Requests on one server go one at a time.
 Nothing here decides what a tool may do; the host binds each tool as a Bridge
-capability under the owner's grants.
+capability; the execution environment supplies permissions.
 """
 
 from __future__ import annotations
@@ -24,6 +24,7 @@ from typing import Any
 from pydantic import JsonValue
 
 from capabilities.mcp import MCPCallResult, MCPTool
+from common.assets import REDACTED, SECRET_PATTERN
 
 PROTOCOL_VERSION = "2025-06-18"
 CLIENT_INFO = {"name": "aep-bridge", "version": "1"}
@@ -154,6 +155,7 @@ class StdioMcpClient(_Session):
         self.cwd = cwd
         self.log = log
         self._process: subprocess.Popen[bytes] | None = None
+        self._readers: list[threading.Thread] = []
         self._replies: dict[int, dict[str, Any]] = {}
         self._arrived = threading.Condition()
 
@@ -162,10 +164,7 @@ class StdioMcpClient(_Session):
             return self._process
         self._ready = False
         executable = shutil.which(self.command) or self.command
-        stderr: Any = subprocess.DEVNULL
-        if self.log is not None:
-            self.log.parent.mkdir(parents=True, exist_ok=True)
-            stderr = self.log.open("ab")
+        stderr = subprocess.PIPE if self.log is not None else subprocess.DEVNULL
         flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
         try:
             process = subprocess.Popen(
@@ -182,8 +181,38 @@ class StdioMcpClient(_Session):
                 "mcp_start_failed", f"could not start {self.command}: {type(error).__name__}"
             ) from None
         self._process = process
-        threading.Thread(target=self._read, args=(process,), daemon=True).start()
+        reader = threading.Thread(target=self._read, args=(process,), daemon=True)
+        self._readers.append(reader)
+        reader.start()
+        if self.log is not None:
+            reader = threading.Thread(target=self._log_stderr, args=(process,), daemon=True)
+            self._readers.append(reader)
+            reader.start()
         return process
+
+    def _log_stderr(self, process: subprocess.Popen[bytes]) -> None:
+        assert process.stderr is not None and self.log is not None
+        try:
+            self.log.parent.mkdir(parents=True, exist_ok=True)
+            with self.log.open("a", encoding="utf-8") as log:
+                while raw := process.stderr.readline(65_537):
+                    if len(raw) > 65_536:
+                        while raw and not raw.endswith(b"\n"):
+                            raw = process.stderr.readline(65_537)
+                        log.write("[omitted oversized diagnostic]\n")
+                    else:
+                        line = SECRET_PATTERN.sub(REDACTED, raw.decode("utf-8", errors="replace"))
+                        for value in self.env.values():
+                            if len(value) >= 4:
+                                line = line.replace(value, REDACTED)
+                        log.write(line)
+                    log.flush()
+        except OSError:
+            # A diagnostic log is optional; consume the stream without exposing it.
+            while process.stderr.read(8192):
+                pass
+        finally:
+            process.stderr.close()
 
     def _read(self, process: subprocess.Popen[bytes]) -> None:
         assert process.stdout is not None
@@ -247,12 +276,47 @@ class StdioMcpClient(_Session):
     def close(self) -> None:
         super().close()
         process, self._process = self._process, None
-        if process is not None and process.poll() is None:
-            process.terminate()
+        if process is None:
+            return
+        if process.stdin is not None:
             try:
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
+                process.stdin.close()  # EOF reaches a venv launcher's child too.
+            except OSError:
+                pass
+        try:
+            process.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            if os.name == "nt":
+                try:
+                    subprocess.run(
+                        [
+                            os.path.join(
+                                os.environ.get("SystemRoot", r"C:\Windows"),
+                                "System32",
+                                "taskkill.exe",
+                            ),
+                            "/PID",
+                            str(process.pid),
+                            "/T",
+                            "/F",
+                        ],
+                        stdin=subprocess.DEVNULL,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        creationflags=subprocess.CREATE_NO_WINDOW,
+                        timeout=5,
+                        check=False,
+                    )
+                except (OSError, subprocess.TimeoutExpired):
+                    pass
+            if process.poll() is None:
                 process.kill()
+            process.wait(timeout=5)
+        for reader in self._readers:
+            reader.join(timeout=2)
+        self._readers.clear()
+        if process.stdout is not None:
+            process.stdout.close()
 
 
 class HttpMcpClient(_Session):

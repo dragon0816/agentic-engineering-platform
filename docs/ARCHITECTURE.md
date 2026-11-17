@@ -1269,3 +1269,59 @@ Phase 5: provider adapters/model gateway and external integrations.
 Phase 6: guardrails, approvals, tracing and full evaluation harness, including cross-model and multi-agent evaluation.
 
 Phase 7: end-to-end validation and controlled deprecation of source repositories.
+
+
+## Actual execution environment (owner2026-11-13 clarification)
+
+The Bridge remains the execution plane and Registry remains distribution/control plane. LocalPolicy is a compatibility identity adapter, not an application permission engine. ToolAccess provides shared catalog/describe/invoke/install-MCP surfaces to Gateway and native MCP adapters. Native HTTP turn tokens bind assistant/authoring calls to one TurnEffects record. Dynamic connection refreshes typed Bridge bindings; local asset installation refreshes the running registry without forging grants/review. Actual OS/service errors determine execution failures; no separate IT authorization system exists in AEP. Purpose-specific retrieval and validation helper contracts remain bounded; they are not general Agent tool profiles.
+
+The scoped design and regression matrix are in
+`phases/IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md`; historical approval requirements
+for local tool installation/execution are superseded for this scope. Shared
+publication and model/data-routing decisions are unchanged.
+
+## Generic Feature Plugin API v1 (Slice 1, 2026-11-14)
+
+Feature plugins aggregate declarative pages, read API routes, typed Bridge
+capabilities and bundled Skills/Workflows. `common.plugins.PluginManifest` and
+`PluginPackage` are closed serializable contracts. A first core upgrade enables
+this API; compatible feature packages can then be installed independently. This
+slice uses synthetic examples and does not extract BI or LLM Wiki or change
+Knowledge asking/model-data policy.
+
+`plugins.PluginManager` owns multiple exact active versions keyed by plugin id,
+with a package/ownership ledger under workspace/plugins and separate persistent
+workspace/plugin-data. It reuses the existing Extension JSONL request/response
+contract, with bounded worker I/O; it does not invoke legacy ExtensionManager,
+create ActivationApproval, import publisher code into the Host, or install into
+AEP's venv. Workers use the current interpreter and normal OS environment.
+Package consistency/path/compatibility checks are technical invariants, not IT
+or tool-use approval. A worker is a process boundary, not an OS sandbox.
+
+Host wires one generic manager startup/close hook and namespace-scoped live asset
+refresh. Agent Web adds authenticated plugin management/proxy routes and a core
+text-only declarative renderer. No publisher JS/HTML/iframe or management token
+is passed to a plugin. Lifecycle mutation observes existing Host activity and
+own in-flight calls; existing per-turn TurnEffects remain unchanged. Failed or
+interrupted installation restores previous contributions, and cleanup verifies
+resolved ownership before touching any path. Users' modified/off/removed asset
+choices and plugin data survive lifecycle changes. Details and first-slice
+exclusions: phases/FEATURE_PLUGIN_ASSESSMENT_20261113.md and its Slice1 plan.
+
+## Plugin API1.1: declared BI context and page services (2026-11-15)
+
+Owner approved only H1/H4 in FEATURE_PLUGIN_BI_OVERVIEW_PLAN_20261114.md.
+PluginData.reads may declare the existing bi area. The Host supplies its actual
+location as reserved worker context, without changing data paths or creating a
+BI database. It is compatibility metadata, not a permission grant or sandbox.
+Ordinary worker environment remains available; stale reserved BI context is
+cleared when not declared. Initial start and restart use the same binding.
+
+A read capability with expose_as_tool=false must have a page route. It remains
+available through its typed worker/page service but is absent from Bridge and
+ToolAccess inventories. Existing tool contributions retain their default behavior;
+CapabilitySpec.policy, grants, TurnEffects and Knowledge routing remain unchanged.
+The two new fields are omitted only at their defaults in the wire form, preserving
+old package bytes and canonical digests. New feature packages require API>=1.1.
+The full BI service, interactive GUI, query/citation path and Wiki stay in core;
+only an independent metadata overview is being prepared, not full extraction.

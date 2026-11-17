@@ -21,9 +21,10 @@ from test_bi_extract import MEETING_ANSWER, NOTE
 from test_host_models import GatewayReply, binding, endpoint
 from test_host_wiring import ready
 
+from aep_bi.host import bi_cards_api
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from capabilities.workflow_author.handlers import DRAFT_SPEC
-from host_runtime import bi_cards_api, skill_packs
+from host_runtime import skill_packs
 from host_runtime.assets import shipped
 from host_runtime.host import HostRuntime, build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
@@ -279,26 +280,35 @@ def test_a_bench_extraction_case_is_read(make_host: Any, tmp_path: Path) -> None
     assert found, "the trial found candidates"
 
 
-@pytest.mark.parametrize("approved", [("UNCLASSIFIED",), None])
-def test_a_source_of_an_unapproved_class_is_still_refused(
-    make_host: Any, approved: tuple[str, ...] | None
-) -> None:
-    host = make_host(approved=approved)
+def test_an_internal_source_is_sent_with_only_unclassified_approved(make_host: Any) -> None:
+    """BI no longer refuses a source for its data class (owner 2026-11-17): the
+    gateway approval names UNCLASSIFIED only, and an INTERNAL source is sent."""
+    host = make_host(approved=("UNCLASSIFIED",))
     source = demo(host)  # INTERNAL by default
     body = {"dataset": "demo", "kind": "ingest", "source_id": source}
-    status, answer = host.call("/api/bi/runs", body)
-    assert (status, answer["code"]) == (400, "classification_not_approved")
+    run = host.ok("/api/bi/runs", body)["run"]
+    assert host.wait(run["id"])["status"] == "review"
+    assert host.gateway.bodies
+
+
+def test_without_a_gateway_approval_nothing_reaches_the_gateway(make_host: Any) -> None:
+    """Kept limit: a model call still needs the host's internal-gateway approval."""
+    host = make_host(approved=None)
+    source = demo(host)
+    body = {"dataset": "demo", "kind": "ingest", "source_id": source}
+    run = host.ok("/api/bi/runs", body)["run"]
+    assert host.wait(run["id"])["status"] == "failed"
     assert host.gateway.bodies == []
 
 
 @pytest.mark.parametrize("level", ["CONFIDENTIAL", "RESTRICTED"])
-def test_higher_classes_are_refused_with_internal_approved(make_host: Any, level: str) -> None:
+def test_higher_classes_are_sent_through_the_approved_gateway(make_host: Any, level: str) -> None:
     host = make_host()
     source = demo(host, classification=level)
     body = {"dataset": "demo", "kind": "ingest", "source_id": source}
-    status, answer = host.call("/api/bi/runs", body)
-    assert (status, answer["code"]) == (400, "classification_not_approved")
-    assert host.gateway.bodies == []
+    run = host.ok("/api/bi/runs", body)["run"]
+    assert host.wait(run["id"])["status"] == "review"
+    assert host.gateway.bodies
 
 
 def _vault(host: Host, tmp_path: Path) -> dict[str, Any]:
@@ -326,11 +336,14 @@ def test_a_vault_source_goes_through_the_fallback_and_a_withdrawn_one_is_not_sen
     dataset = vault["dataset"]
     secret = {"dataset": dataset, "name": "secret.md", "text": NOTE + "\n機密。\n"}
     source = host.ok("/api/bi/sources", {**secret, "classification": "RESTRICTED"})["source"]
-    status, answer = host.call(
+    host.gateway.failing = 0
+    secret_run = host.ok(
         "/api/bi/runs", {"dataset": dataset, "kind": "trial", "source_id": source["id"]}
-    )
-    assert (status, answer["code"]) == (400, "classification_not_approved")
-    assert host.gateway.bodies == []
+    )["run"]
+    # A RESTRICTED source is sent too: BI refuses no data class (owner 2026-11-17).
+    assert host.wait(secret_run["id"], dataset)["status"] == "review"
+    assert host.gateway.bodies
+    host.gateway.failing = 10
 
     plain = {"dataset": dataset, "name": "meeting.md", "text": NOTE}
     source = host.ok("/api/bi/sources", plain)["source"]

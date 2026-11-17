@@ -13,9 +13,9 @@ from typing import Any
 from test_bi_card_links import ACME, OPP, _put, _rename, _row, _start
 from test_bi_vault import _call, _commit, _ok, _push, _sync, _two_pcs
 
-from capabilities.bi_cards import card_model, vault
-from capabilities.bi_cards.schema import Registry
-from capabilities.bi_cards.store import BiStore, card_id_for
+from aep_bi.cards import card_model, vault
+from aep_bi.cards.schema import Registry
+from aep_bi.cards.store import BiStore, card_id_for
 from scripts.build_bi_schema_v5 import build
 
 HAS_ACCOUNT = card_model.relation_id(OPP, "has_account", ACME)

@@ -162,7 +162,7 @@ def test_approved_failure_continuation_cannot_replace_qa_inputs_with_defaults(
         )
         model = Capturing(
             *responses,
-            {"text": "The QA trial awaits approval."},
+            {"text": "The QA trial failed."},
             {"text": "The QA trial remains unverified."},
         )
         runtime.agent.gateway.router.model = model
@@ -179,7 +179,7 @@ def test_approved_failure_continuation_cannot_replace_qa_inputs_with_defaults(
 
         assert calls == (
             ["QA-report", "patched-step" if supplied == "patched" else "QA-report"]
-            if entry == "card" and supplied != "conflicting"
+            if supplied != "conflicting"
             else ["QA-report"]
         )
         pending = [
@@ -188,7 +188,7 @@ def test_approved_failure_continuation_cannot_replace_qa_inputs_with_defaults(
             if a.kind == "run" and a.candidate_id == item.candidate_id
         ]
         if supplied != "conflicting" and entry == "approval":
-            assert len(pending) == 1 and pending[0].arguments == approved
+            assert pending == []  # continuation uses the original actual trial inputs
         elif supplied == "conflicting":
             assert all(a.arguments == approved for a in pending)
             assert any(
@@ -302,7 +302,7 @@ def test_read_only_repair_inherits_actual_inputs_only_with_matching_host_evidenc
 
 
 @pytest.mark.parametrize("evidence", ["missing", "foreign_session", "stale_run"])
-def test_write_continuation_requires_matching_actual_approved_run(
+def test_write_continuation_uses_trial_inputs_independently_of_legacy_approval(
     tmp_path: Path, evidence: str
 ) -> None:
     from test_authoring_trial_diagnostics import _plan
@@ -346,9 +346,7 @@ def test_write_continuation_requires_matching_actual_approved_run(
         return await tool.handler(repair, {"candidate_id": item.candidate_id, "arguments": {}})
 
     outcome = asyncio.run(invoke())
-    assert (
-        outcome.failure is not None
-        and outcome.failure.code == "authoring_trial_arguments_unavailable"
-    )
-    assert calls == ["QA-month"]
+    assert outcome.failure is not None and outcome.failure.code == "fixture_failure"
+    # Mutating/removing legacy cards cannot change the actual saved QA inputs.
+    assert calls == ["QA-month", "QA-month"]
     assert chat.approvals("owner", session_id="session-1") == []

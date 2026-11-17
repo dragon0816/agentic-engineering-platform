@@ -108,17 +108,17 @@ def test_concurrent_submission_and_timeout_do_not_duplicate_work() -> None:
     asyncio.run(scenario())
 
 
-def test_replay_rechecks_authorization() -> None:
+def test_replay_does_not_need_a_legacy_application_grant() -> None:
     async def scenario() -> None:
         handler = Handler()
         runner, flow = engine(handler, steps=1)
         await runner.execute(context(), flow.metadata.identity, {"count": 1}, idempotency_key="key")
         runner.bridge.policy = LocalPolicy()
-        denied = await runner.execute(
+        replay = await runner.execute(
             context(), flow.metadata.identity, {"count": 1}, idempotency_key="key"
         )
-        assert denied.run.failure is not None and denied.run.failure.code == "permission_denied"
-        assert denied.step_results == () and len(handler.calls) == 1
+        assert replay.run.status == "succeeded" and replay.run.failure is None
+        assert len(handler.calls) == 1
 
     asyncio.run(scenario())
 

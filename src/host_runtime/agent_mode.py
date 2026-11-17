@@ -1,35 +1,14 @@
-"""Agent mode for the Claude Code and Copilot conversation backends (owner 2026-10-15).
+"""Native backend tools and conversation work folders.
 
-`docs/phases/AGENT_MODE_BACKENDS.md` ("Revised rules"). A conversation's
-coding agent runs in its own working folder with AEP's skills and MCP
-servers; whatever it may not do on its own reaches the person as an
-approval card in that conversation:
-
-- files inside the working folder (and the read-only folders a person
-  added): free;
-- files outside: Allow / Allow this folder for this conversation / Deny;
-- shell commands: always a card with the full command and its folder;
-  Allow for this conversation remembers the program;
-- network tools and anything else unknown: a card;
-- credentials and protected settings (`common.agent_guard`): refused, even
-  when allowed;
-- an unanswered card is Deny after ten minutes.
-
-The backend learns the answer through the relay it supports: Claude Code
-calls the `permission` tool of the `aep-agent` MCP server below
-(`--permission-prompt-tool`), Copilot asks over the Agent Client Protocol
-(`host_runtime.acp_client`). Both block until the person answers.
-
-Every request is written to `agent-mode/audit.jsonl` (secrets redacted); every
-card and every refusal is a Task row, and each agent turn is one more. The
-cards are `pm-` records in a `CardStore` and `AgentWeb.decide_card` sends
-their buttons here. Telegram never decides one: these backends are text-only
-there.
-"""
+Tools execute without AEP grants or approval relays. Provider/OS permissions
+remain real. Historical permission-card records are compatibility APIs, never
+auto-approved; production callbacks do not create them."""
 
 from __future__ import annotations
 
+import asyncio
 import hmac
+import html
 import json
 import secrets
 import threading
@@ -40,14 +19,12 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Protocol
 
+from agent.turn_effects import TurnEffects, effect_key, use_effects
 from common.action_cards import ActionCard, CardButton
 from common.agent_guard import (
     AgentRequest,
     Grants,
     GuardPlaces,
-    folder_refusal,
-    inside,
-    judge,
     resolved,
 )
 from common.assets import REDACTED, SECRET_PATTERN
@@ -60,6 +37,7 @@ from host_runtime.agent_mode_settings import (
     AgentModeStore,
 )
 from host_runtime.card_store import CardStore, PendingRecord, new_card_id
+from host_runtime.tool_access import ToolAccess, mcp_definitions, tool_context
 
 CARD_PREFIX = "pm"
 CARD_MINUTES = 10
@@ -139,6 +117,7 @@ class AgentRun:
     refused: list[str] = field(default_factory=list)
     # An ACP tool call id -> the card that asked for it, for its outcome.
     tool_cards: dict[str, str] = field(default_factory=dict)
+    effects: TurnEffects = field(default_factory=TurnEffects)
 
 
 class TaskSink(Protocol):
@@ -201,6 +180,9 @@ class AgentMode:
         self._audit_lock = threading.Lock()
         # Set by AgentWeb: the mail tools (host_runtime.agent_mail.AgentMail).
         self.mail: Any = None
+        self.tool_access: ToolAccess | None = None
+        self.actor = "local-agent"
+        self.namespace = "engineering"
         # Skill folders the agent reads from (AEP's read-only skills).
         self.skill_roots: tuple[Path, ...] = ()
         # Set by AgentWeb: hears (session, tool name, waiting|allowed|refused)
@@ -239,12 +221,6 @@ class AgentMode:
                 "code": "agent_mode_settings_invalid",
                 "message": "Those Agent mode settings are not valid.",
             }
-        if settings.codex:
-            return {
-                "ok": False,
-                "code": "agent_mode_unsupported",
-                "message": TEXT_ONLY_REASON["codex"],
-            }
         if settings.default_root:
             problem = self._root_problem(Path(settings.default_root))
             if problem is not None:
@@ -265,11 +241,9 @@ class AgentMode:
         if not folder.is_absolute():
             return "Give a full folder path."
         target = resolved(folder)
-        roots = [self.store.sessions_root, *map(Path, self.coding_roots())]
-        if not any(inside(target, root) for root in roots):
-            listed = "; ".join(str(root) for root in roots)
-            return f"A working folder must be under one of: {listed}."
-        return folder_refusal(target, self.places)
+        return (
+            "The working path is not a folder." if target.exists() and not target.is_dir() else None
+        )
 
     # -- each conversation's folders ----------------------------------------
 
@@ -314,9 +288,6 @@ class AgentMode:
                     "code": "read_folder_missing",
                     "message": f"{text} is not a folder on this computer.",
                 }
-            problem = folder_refusal(path, self.places)
-            if problem is not None:
-                return {"ok": False, "code": "agent_folder_refused", "message": problem}
             cleaned.append(str(resolved(path)))
         if len(cleaned) > 20:
             return {
@@ -406,14 +377,7 @@ class AgentMode:
     def request(
         self, run: AgentRun, request: AgentRequest, *, kind: str = "permission"
     ) -> tuple[bool, str]:
-        """Decide one request: free, refused, or the person's answer to a card."""
-        verdict = judge(
-            request,
-            folder=run.folder,
-            read_roots=run.read_roots,
-            grants=self.grants(run.session_id),
-            places=self.places,
-        )
+        """AEP adds no tool permission gate; actual execution is still pending."""
         target = request.command or ", ".join(request.paths) or request.tool
         self.audit(
             {
@@ -423,28 +387,13 @@ class AgentMode:
                 "tool": request.tool,
                 "kind": request.kind,
                 "target": target,
-                "decision": verdict.decision,
-                "note": verdict.message,
+                "decision": "environment",
+                "note": "Execute directly; report actual OS/service errors.",
             }
         )
-        if verdict.decision == "free":
-            run.free.append(redact(f"{request.tool} {target}")[:120])
-            self._observe(run, request.tool, "allowed")
-            return True, ""
-        if verdict.decision == "refuse":
-            self._observe(run, request.tool, "refused")
-            run.refused.append(target)
-            task = self.tasks().start(
-                "agent_permission",
-                redact(f"Refused {request.tool}: {target}")[:160],
-                run.session_id,
-            )
-            self.tasks().finish(task, "failed", redact(verdict.message))
-            return False, verdict.message
-        self._observe(run, request.tool, "waiting")
-        allowed, message = self.ask(run, request, scope=verdict.scope, kind=kind)
-        self._observe(run, request.tool, "allowed" if allowed else "refused")
-        return allowed, message
+        run.free.append(redact(f"{request.tool} {target}")[:120])
+        self._observe(run, request.tool, "allowed")
+        return True, ""
 
     def _observe(self, run: AgentRun, tool: str, status: str) -> None:
         if self.observer is None:
@@ -698,8 +647,8 @@ class AgentMode:
 
     def tools(self, run: AgentRun) -> dict[str, tuple[str, dict[str, Any]]]:
         listed = dict(MCP_TOOLS)
-        if run.backend != "claude_code":
-            listed.pop(PERMISSION_TOOL)
+        listed.update(mcp_definitions())
+        listed.pop(PERMISSION_TOOL, None)  # Retired approval relay, not an execution tool.
         return listed
 
     def mcp(self, run: AgentRun, message: dict[str, Any]) -> dict[str, Any] | None:
@@ -765,9 +714,91 @@ class AgentMode:
             "error": {"code": -32601, "message": f"method not found: {method}"},
         }
 
+    def effects_for_session(self, session_id: str) -> TurnEffects | None:
+        return next(
+            (run.effects for run in list(self._runs.values()) if run.session_id == session_id), None
+        )
+
     def call(self, run: AgentRun, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+        with run.effects.native_calls_lock, use_effects(run.effects):
+            is_read = name in {
+                "outlook_search",
+                "outlook_read",
+                "knowledge_sandboxes",
+                "knowledge_questions_status",
+                "aep_tools_catalog",
+                "aep_tools_describe",
+                PERMISSION_TOOL,
+            }
+            if name == "outlook_read" and arguments.get("save_attachments"):
+                is_read = False
+            if name == "knowledge_step":
+                step = arguments.get("step")
+                values = arguments.get("arguments")
+                values = values if isinstance(values, dict) else {}
+                is_read = step in KNOWLEDGE_READS or (
+                    step == "convert" and values.get("mode", "dry_run") != "apply"
+                )
+            if name == "aep_tools_invoke" and self.tool_access is not None:
+                described = self.tool_access.describe(str(arguments.get("target") or ""))
+                is_read = described.get("tool", {}).get("side_effect") == "read"
+            key = effect_key(f"native-host:{name}", arguments)
+            previous = run.effects.replay_call(key) if not is_read else None
+            if previous is not None:
+                return {**previous, "replayed": True}
+            result = self._call(run, name, arguments)
+            if not is_read and result.get("ok") is True:
+                run.effects.record_call(
+                    key,
+                    result,
+                    counted=(
+                        result.get("replayed") is not True and name != "aep_tools_install_mcp"
+                    ),
+                )
+            return result
+
+    def _call(self, run: AgentRun, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+        if name in mcp_definitions():
+            if self.tool_access is None:
+                return {"ok": False, "code": "tool_manager_unavailable"}
+            return self.tool_access.native_call(
+                name,
+                arguments,
+                tool_context(self.actor, self.namespace, run.session_id),
+                run.backend,
+            )
         if name == PERMISSION_TOOL:
             return self.claude_permission(run, arguments)
+        if name in {"outlook_draft", "outlook_send"} and self.tool_access is not None:
+            values = dict(arguments)
+            target = "outlook/send-draft@1.0.0"
+            if name == "outlook_draft":
+                values = {
+                    "to": arguments.get("to", []),
+                    "cc": arguments.get("cc", []),
+                    "subject": arguments.get("subject", ""),
+                    "html_body": "<p>"
+                    + html.escape(str(arguments.get("body") or "")).replace("\n", "<br>")
+                    + "</p>",
+                    "attachments": [
+                        str(resolved(str(path), run.folder))
+                        for path in arguments.get("attachments", [])
+                    ],
+                }
+                target = "outlook/draft@1.0.0"
+            outcome = asyncio.run(
+                self.tool_access.invoke(
+                    tool_context(self.actor, self.namespace, run.session_id), target, values
+                )
+            )
+            data = outcome.data if isinstance(outcome.data, dict) else {}
+            body = data.get("result")
+            return {
+                **(body if isinstance(body, dict) else {}),
+                "ok": outcome.status == "succeeded",
+                "replayed": data.get("replayed") is True,
+                "code": outcome.failure.code if outcome.failure else None,
+            }
         if name.startswith("outlook_"):
             if self.mail is None:
                 return {"ok": False, "code": "mail_unavailable"}
@@ -817,55 +848,15 @@ class AgentMode:
         self, run: AgentRun, step: str, arguments: dict[str, Any]
     ) -> tuple[bool, str]:
         tool = f"knowledge:{step}"
-        if tool in self.grants(run.session_id).tools:
-            run.free.append(tool)
-            self.audit(
-                {
-                    "session": run.session_id,
-                    "run": run.run_id,
-                    "tool": tool,
-                    "decision": "free",
-                    "note": "allowed for this conversation",
-                }
-            )
-            return True, ""
-        request = AgentRequest(
-            kind="other",
-            tool=tool,
-            folder=str(run.folder),
-            preview=json.dumps(arguments, ensure_ascii=False, indent=1),
+        run.free.append(tool)
+        self.audit(
+            {"session": run.session_id, "run": run.run_id, "tool": tool, "decision": "environment"}
         )
-        self.audit({"session": run.session_id, "run": run.run_id, "tool": tool, "decision": "card"})
-        return self.ask(
-            run,
-            request,
-            scope=tool,
-            kind="knowledge",
-            title=f"Knowledge: {step.replace('-', ' ')} in a sandbox",
-        )
+        return True, ""
 
     def mail_read_card(self, run: AgentRun, scope_text: str) -> tuple[bool, str]:
-        """The first mail read of a conversation asks once."""
-        if self.store.session(run.session_id).mail_read:
-            return True, ""
-        request = AgentRequest(
-            kind="other", tool="outlook.read", folder=str(run.folder), preview=scope_text
-        )
-        self.audit(
-            {
-                "session": run.session_id,
-                "run": run.run_id,
-                "tool": "outlook.read",
-                "decision": "card",
-            }
-        )
-        return self.ask(
-            run,
-            request,
-            scope="outlook.read",
-            kind="mail_read",
-            title="Read your email in this conversation",
-        )
+        """Legacy interface; reads use the actual signed-in mailbox identity."""
+        return True, ""
 
 
 def _result(ident: Any, result: dict[str, Any]) -> dict[str, Any]:
@@ -1055,14 +1046,15 @@ def acp_request(call: dict[str, Any], folder: Path) -> AgentRequest:
 
 
 INSTRUCTIONS = (
-    "AEP agent-mode tools. Mail: outlook_search and outlook_read read the person's Outlook "
-    "mail within the scope they set (the first read in a conversation asks them once); "
-    "outlook_draft saves a draft and shows the person a card with Send / Keep as draft / "
-    "Cancel: only their press sends it, every message on its own. Knowledge pipeline: "
+    "AEP tools use the actual OS/service identity, without AEP permission cards. "
+    "Use aep_tools_catalog/describe/invoke to discover and use all Bridge/MCP tools. "
+    "Use aep_tools_install_mcp to connect a missing server in this session. "
+    "Draft means save, never send; outlook_send is the distinct requested send action. "
+    "Do not repeat succeeded effects. Bounded mail search is not complete thread proof; "
+    "follow next_body_offset when the body is truncated. Knowledge pipeline: "
     "knowledge_sandboxes, knowledge_step (sandbox create, pull, convert, ingest plan/apply "
-    "in a sandbox; writes ask the person), knowledge_run_questions. Push to the vault, "
-    "merge and publish stay on the Knowledge page. Credentials and protected settings are "
-    "never touched, even when asked."
+    "in a sandbox), knowledge_run_questions. Shared publication remains a separate "
+    "procedure. Preserve raw evidence and source citations."
 )
 _S = {"type": "string"}
 MCP_TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
@@ -1076,7 +1068,7 @@ MCP_TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
         },
     ),
     "outlook_search": (
-        "Search the person's Outlook mail (read only) within their scope: words in subject, "
+        "Search IT-accessible Outlook mail (read only): words in subject, "
         "sender or text; optional sender, folder, days back, limit (max 50). Returns ids.",
         {
             "type": "object",
@@ -1094,14 +1086,18 @@ MCP_TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
         "attachments into this conversation's folder and returns their paths.",
         {
             "type": "object",
-            "properties": {"message_id": _S, "save_attachments": {"type": "boolean"}},
+            "properties": {
+                "message_id": _S,
+                "save_attachments": {"type": "boolean"},
+                "body_offset": {"type": "integer", "minimum": 0},
+                "body_limit": {"type": "integer", "minimum": 1, "maximum": 20000},
+            },
             "required": ["message_id"],
         },
     ),
     "outlook_draft": (
-        "Save an Outlook draft and ask the person: the card shows to, cc, subject, body and "
-        "attachments with Send / Keep as draft / Cancel. Waits for their press and returns "
-        "what happened. Attachments are files in this conversation's folder.",
+        "Save an Outlook draft; never send. Returns entry_id/fingerprint for a separate "
+        "requested outlook_send call. Attachments must be existing IT-accessible files.",
         {
             "type": "object",
             "properties": {
@@ -1114,6 +1110,15 @@ MCP_TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
             "required": ["to", "subject", "body"],
         },
     ),
+    "outlook_send": (
+        "Send a saved draft when sending was requested. Use entry_id/fingerprint from "
+        "outlook_draft, without asking the user for those technical values. No AEP card.",
+        {
+            "type": "object",
+            "properties": {"entry_id": _S, "fingerprint": _S},
+            "required": ["entry_id", "fingerprint"],
+        },
+    ),
     "knowledge_sandboxes": (
         "List personal Knowledge sandboxes and the base vaults one can be made from.",
         {"type": "object", "properties": {}},
@@ -1122,7 +1127,7 @@ MCP_TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
         "Run one Knowledge pipeline step in a personal sandbox. Reads: sandbox-list, "
         "sandbox-contents {sandbox_id}, drop-folders {base}, question-sets {sandbox_id}, "
         "lint {sandbox_id}, ingest-plan {sandbox_id, raw_ref}, file-read {sandbox_id, path}, "
-        "plan-page {sandbox_id, plan_id, path}, skill-guide. Writes (the person is asked): "
+        "plan-page {sandbox_id, plan_id, path}, skill-guide. Writes: "
         "sandbox-create {base, label, scope?}, pull {sandbox_id, folders[]}, drop-add "
         "{sandbox_id, name, ...}, convert {sandbox_id, paths[], mode: dry_run|apply}, "
         "ingest-apply {sandbox_id, plan_id}.",
@@ -1136,7 +1141,7 @@ MCP_TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
         },
     ),
     "knowledge_run_questions": (
-        "Run test question sets against a sandbox in the background (the person is asked); "
+        "Run test question sets against a sandbox in the background without an AEP card; "
         "then poll knowledge_questions_status.",
         {
             "type": "object",

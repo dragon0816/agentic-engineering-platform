@@ -6,7 +6,6 @@ from test_chat_authoring import call, context, studio, workflow
 
 from agent.gateway import GatewayConversationResult, HostToolOutcome
 from host_runtime.authoring_task import Requirement
-from host_runtime.chat_authoring import ChatAuthoringError
 
 
 def test_resident_draft_cannot_skip_the_requirement_plan(tmp_path: Path) -> None:
@@ -23,7 +22,7 @@ def test_resident_draft_cannot_skip_the_requirement_plan(tmp_path: Path) -> None
     assert outcome.failure.code == "authoring_plan_required"
 
 
-def test_install_requires_successful_current_digest_trial(tmp_path: Path) -> None:
+def test_verified_status_requires_successful_current_digest_trial(tmp_path: Path) -> None:
     chat, _ = studio(tmp_path)
     chat.tasks.plan(
         "owner",
@@ -48,16 +47,16 @@ def test_install_requires_successful_current_digest_trial(tmp_path: Path) -> Non
     raw["checks"] = [{"check_id": "echoed", "step_index": 0, "kind": "data_nonempty"}]
     item, problems = chat.draft("owner", "session-1", "Echo", raw)
     assert not problems and item is not None
-    with pytest.raises(ChatAuthoringError, match="authoring_trial_required"):
-        chat.install(item, "owner", "approved-install")
+    assert chat.readiness(item)["verified"] is False
     assert (
         chat.execute("owner", item, {"month": "2026-11"}, "approved-run")["status"] == "succeeded"
     )
     current = chat.candidate(item.candidate_id, "owner")
-    assert chat.install(current, "owner", "approved-install")["installed_as"]
+    installed = chat.install(current, "owner")
+    assert installed["installed_as"] and installed["verified"] is True
 
 
-def test_incomplete_prototype_can_be_saved_and_tried_but_cannot_be_installed(
+def test_incomplete_prototype_installs_with_explicit_unverified_quality(
     tmp_path: Path,
 ) -> None:
     chat, _ = studio(tmp_path)
@@ -91,8 +90,11 @@ def test_incomplete_prototype_can_be_saved_and_tried_but_cannot_be_installed(
     assert current.authoring_task is not None
     assert current.authoring_task.verified_digest is None
     assert current.authoring_task.repair_attempts == 1
-    with pytest.raises(ChatAuthoringError, match="authoring_coverage_incomplete"):
-        chat.install(current, "owner", "approved-install")
+    installed = chat.install(current, "owner")
+    assert installed["installed_as"] and installed["verified"] is False
+    assert isinstance(installed["quality"], dict)
+    assert installed["quality"]["coverage_complete"] is False
+    assert installed["quality"]["coverage_problems"]
 
 
 def test_observed_sop_creates_unfinished_task_before_model_answers(tmp_path: Path) -> None:
@@ -165,3 +167,55 @@ def test_supplied_workbook_cannot_be_reasked_before_first_draft(
         },
     )
     assert result.status == "failed"
+
+
+def test_historical_pending_card_is_not_current_completion_evidence(tmp_path: Path) -> None:
+    chat, _ = studio(tmp_path)
+    chat.tasks.plan("owner", "session-1", "Please make a workflow from this SOP", [])
+    chat.request_capability("owner", "session-1", chat.installed.discover()[0].identity, {})
+    ctx = context().model_copy(update={"message": "Please finish the SOP workflow"})
+    result = GatewayConversationResult(
+        trace=ctx.trace, status="answered", text="Ready", model_turns=1
+    )
+    assert chat.completion_problem(ctx, result) is not None
+
+
+def test_replayed_old_revision_does_not_inherit_new_revision_verification(tmp_path: Path) -> None:
+    from agent.turn_effects import turn_scope
+
+    chat, recorder = studio(tmp_path)
+    chat.tasks.plan(
+        "owner",
+        "session-1",
+        "Echo the month",
+        [
+            Requirement(
+                requirement_id="echo",
+                description="Echo the month",
+                check_ids=("echoed",),
+                assertions=(
+                    {
+                        "path": ["steps", 0, "capability", "name"],
+                        "operator": "equals",
+                        "expected": "write-it",
+                    },
+                ),
+            )
+        ],
+    )
+    old, problems = chat.draft("owner", "session-1", "Echo", workflow("write-it"))
+    assert old is not None and not problems
+    with turn_scope():
+        first = chat.execute("owner", old, {"month": "fixture"}, "old")
+        assert first["status"] == "succeeded" and first["verified"] is False
+        revised = workflow("write-it")
+        revised["checks"] = [{"check_id": "echoed", "step_index": 0, "kind": "data_nonempty"}]
+        new, problems = chat.draft("owner", "session-1", "Echo", revised, old.candidate_id)
+        assert new is not None and not problems
+        verified = chat.execute("owner", new, {"month": "fixture"}, "new")
+        assert verified["status"] == "succeeded" and verified["verified"] is True
+        replayed = chat.execute("owner", old, {"month": "fixture"}, "old-again")
+    assert replayed["status"] == "succeeded" and replayed["replayed"] is True
+    assert replayed["run_id"] == first["run_id"]
+    assert replayed["verified"] is False and replayed["coverage_complete"] is False
+    assert recorder.calls == ["fixture"]

@@ -21,10 +21,10 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog, schema_versions, vault
-from capabilities.bi_cards.schema import SHIPPED_FILES, shipped, widens
-from capabilities.bi_cards.store import BiStore, PlannedRow
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import catalog, schema_versions, vault
+from aep_bi.cards.schema import SHIPPED_FILES, shipped, widens
+from aep_bi.cards.store import BiStore, PlannedRow
+from aep_bi.host.bi_cards_api import route
 from scripts.build_bi_schema_v2 import V8, build
 
 V1 = "bi.schema/v1.1@1.1.0"

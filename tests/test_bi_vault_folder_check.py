@@ -11,7 +11,7 @@ from typing import Any
 import pytest
 from test_bi_vault import _call, _ok, _two_pcs
 
-from host_runtime.bi_cards_api import route
+from aep_bi.host.bi_cards_api import route
 
 
 def _check(ws: Path, path: str, mode: str = "new") -> dict[str, Any]:

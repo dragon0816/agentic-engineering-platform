@@ -13,10 +13,10 @@ from test_bi_extract import Scripted
 from test_bi_vault import _call, _ok, _two_pcs
 from test_bi_vault_sources import FOLDER
 
-from capabilities.bi_cards import reading_runs
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import reading_runs
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_api import route
 from common.execution import Failure
-from host_runtime.bi_cards_api import route
 
 DESCRIBED = """---
 type: technology

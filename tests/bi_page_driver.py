@@ -124,6 +124,23 @@ class BiPage:
             f".find(b => b.textContent.includes({json.dumps(label)})).click()"
         )
 
+    def plugin_row_shows(self, plugin_id: str, text: str) -> None:
+        """Wait until the Plugins list row of `plugin_id` contains `text`."""
+        self.wait(
+            "[...document.querySelectorAll('#plugin-list .plugin-row')].some(r =>"
+            f" r.dataset.pluginId === {json.dumps(plugin_id)}"
+            f" && r.textContent.includes({json.dumps(text)}))"
+        )
+
+    def click_plugin_button(self, plugin_id: str, label: str) -> None:
+        """Press a button in the Plugins list row of `plugin_id` only."""
+        self.run(
+            "[...document.querySelectorAll('#plugin-list .plugin-row')]"
+            f".find(r => r.dataset.pluginId === {json.dumps(plugin_id)})"
+            f".querySelectorAll('button').forEach(b => {{ if (b.textContent.includes("
+            f"{json.dumps(label)})) b.click(); }})"
+        )
+
     def text_of(self, element_id: str) -> str:
         return str(self.run(f"document.getElementById({json.dumps(element_id)}).textContent"))
 

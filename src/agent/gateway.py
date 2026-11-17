@@ -41,7 +41,13 @@ from agent.harness_handoff import capped, harness_reply, with_unverified_note
 from agent.routing import RequestRouter, RoutingOutcome
 from agent.skills import CommandBinding, SkillManifest
 from agent.tool_recovery import RECOVERY_GUIDANCE, ToolRecovery, recovery_for
-from agent.turn_effects import REPLAY_INSTRUCTION, REPLAY_NOTE, effect_key, turn_scope
+from agent.turn_effects import (
+    REPLAY_INSTRUCTION,
+    REPLAY_NOTE,
+    effect_key,
+    turn_scope,
+    workflow_effect_key,
+)
 from agent.turn_effects import current as current_effects
 from capabilities.runtime import CapabilityInvocation
 from common.action_cards import CARD_KEY
@@ -327,6 +333,38 @@ class HostToolOutcome(Contract):
 
 
 @dataclass(frozen=True)
+class ToolEffect:
+    """Execution identity shared by aliases of one installed capability."""
+
+    key: str
+    side_effect: SideEffect
+
+
+def capability_effect(
+    bridge: BridgeExecutor,
+    context: RequestContext,
+    target: AssetIdentity,
+    arguments: dict[str, JsonValue],
+) -> ToolEffect | None:
+    binding = bridge.installed.get(target)
+    if binding is None:
+        return None
+    return ToolEffect(
+        effect_key(
+            "capability",
+            {
+                "bridge": id(bridge),
+                "actor": context.actor,
+                "namespace": context.namespace,
+                "target": target.model_dump(mode="json"),
+                "arguments": arguments,
+            },
+        ),
+        binding.spec.side_effect,
+    )
+
+
+@dataclass(frozen=True)
 class HostTool:
     """A conversation tool the host implements itself, such as drafting a
     Workflow. It never approves, installs or runs a change on its own: any
@@ -342,6 +380,11 @@ class HostTool:
     # of the same model reply that say so too (read-only delegations). None:
     # never; the call runs in order, alone.
     parallel: Callable[[RequestContext, dict[str, JsonValue]], bool] | None = None
+    # Dispatch wrappers resolve the actual target, rather than pretending every
+    # invocation has the same side effect or identifying it by a public alias.
+    effect: Callable[[RequestContext, dict[str, JsonValue]], ToolEffect | None] | None = None
+    # Workflow wrappers record their run themselves, including cross-entry retries.
+    records_effect: bool = False
 
 
 #: Host tools added for one turn only (BI benchmarks and the skill AI,
@@ -1324,14 +1367,39 @@ class Gateway:
                     seen_calls.add(key)
                     since_new.clear()
                 since_new[key] = since_new.get(key, 0) + 1
-                effects = (
-                    current_effects() if self._side_effecting(call.name, host, bindings) else None
+                resolved = None
+                resolver = host[call.name].effect if call.name in host else None
+                if resolver is not None:
+                    resolved = resolver(context, call.arguments)
+                elif (
+                    binding := bindings.get(call.name)
+                ) is not None and binding.kind == "capability":
+                    fixed = bound.get(call.name)
+                    actual = (
+                        call.arguments
+                        if fixed is None
+                        else {k: v for k, v in call.arguments.items() if k == "question"} | fixed
+                    )
+                    resolved = capability_effect(self.bridge, context, binding.target, actual)
+                effect_id = key if resolved is None else resolved.key
+                changes = (
+                    self._side_effecting(call.name, host, bindings)
+                    if resolved is None
+                    else resolved.side_effect != "read"
                 )
-                earlier = effects.replay_call(key) if effects is not None else None
+                effects = current_effects() if changes else None
+                earlier = effects.replay_call(effect_id) if effects is not None else None
                 if earlier is not None:
                     # P0-2: already done in this turn with the same arguments
                     # (a Host-check retry, or a delegated sub-run): not again.
-                    item = earlier.model_copy(update={"call_id": call.call_id, "replayed": True})
+                    item = earlier.model_copy(
+                        update={
+                            "call_id": call.call_id,
+                            "name": call.name,
+                            "arguments": _recorded_arguments(call.arguments),
+                            "replayed": True,
+                        }
+                    )
                     telemetry.emit(
                         "tool.replayed",
                         status="skipped",
@@ -1354,10 +1422,15 @@ class Gateway:
                     if effects is not None and _effect_done(item):
                         # A Workflow tool's run is counted once, as the run.
                         effects.record_call(
-                            key,
+                            effect_id,
                             item,
-                            counted=bindings.get(call.name) is None
-                            or bindings[call.name].kind != "workflow",
+                            counted=not item.replayed
+                            and (
+                                not host[call.name].records_effect
+                                if call.name in host
+                                else bindings.get(call.name) is None
+                                or bindings[call.name].kind != "workflow"
+                            ),
                         )
                 evidence.append(item)
                 if _tool_succeeded(item):
@@ -1636,7 +1709,12 @@ class Gateway:
                 name=call.name,
                 failure=Failure(code="host_tool_failed", message=type(error).__name__),
             )
-        return ConversationToolExecution(call_id=call.call_id, name=call.name, host=outcome)
+        return ConversationToolExecution(
+            call_id=call.call_id,
+            name=call.name,
+            host=outcome,
+            replayed=isinstance(outcome.data, dict) and outcome.data.get("replayed") is True,
+        )
 
     async def _execute_conversation_tool(
         self,
@@ -1759,24 +1837,12 @@ class Gateway:
                     arguments=invocation_arguments,
                 )
             )
-            if (
-                result.failure is not None
-                and result.failure.code == "approval_required"
-                and self.capability_approval is not None
-            ):
-                pending = await asyncio.to_thread(
-                    self.capability_approval, context, binding.target, invocation_arguments
-                )
-                return ConversationToolExecution(
-                    call_id=call.call_id,
-                    name=call.name,
-                    host=HostToolOutcome(status="awaiting_approval", data=pending),
-                )
             return ConversationToolExecution(
                 call_id=call.call_id,
                 name=call.name,
                 decision=decision,
                 capability=result,
+                replayed="capability_replayed" in result.warnings,
             )
         arguments: dict[str, JsonValue] = dict(call.arguments)
         manifest = self.engine.workflows.get(binding.target)
@@ -1904,37 +1970,29 @@ class Gateway:
         # starting a run), the same Workflow with the same arguments succeeds
         # at most once; outside a turn (a form, a schedule, a remote job) the
         # engine's own idempotency key is the guard.
-        effects = current_effects() if workflow_idempotency_key is None else None
+        # A caller-generated persistent key must not bypass an active turn's
+        # receipt (native HTTP adapters can issue several requests in that turn).
+        effects = current_effects()
         manifest = self.engine.workflows.get(workflow) if effects is not None else None
         key = (
-            effect_key(
-                "workflow-run",
-                {
-                    "workflow": workflow.model_dump(mode="json"),
-                    # A revised draft with the same identity is another run.
-                    "manifest": manifest.model_dump(mode="json") if manifest else None,
-                    "arguments": arguments or {},
-                    "actor": request.actor,
-                },
-            )
-            if effects is not None
+            workflow_effect_key(request.actor, manifest.model_dump(mode="json"), arguments)
+            if effects is not None and manifest is not None
             else ""
         )
-        earlier = effects.replay_run(key) if effects is not None else None
-        if earlier is not None:
-            telemetry.emit(
-                "tool.replayed",
-                status="skipped",
-                state="tool",
-                attributes={
-                    "tool_id": f"{workflow.namespace}/{workflow.name}",
-                    "replayed": effects.replayed if effects is not None else 0,
-                },
-            )
-            return cast(WorkflowRunSnapshot, earlier)
-        # The engine's run table belongs to one event loop at a time, and a
-        # workflow may change shared resources: serialize runs across threads.
-        with self.bridge.exclusive:
+        # Serialize engine access across loops without blocking their threads.
+        async with self.bridge.exclusive.hold():
+            earlier = effects.replay_run(key) if effects is not None else None
+            if earlier is not None:
+                telemetry.emit(
+                    "tool.replayed",
+                    status="skipped",
+                    state="tool",
+                    attributes={
+                        "tool_id": f"{workflow.namespace}/{workflow.name}",
+                        "replayed": effects.replayed if effects is not None else 0,
+                    },
+                )
+                return cast(WorkflowRunSnapshot, earlier)
             # Through the shared Harness: steps, then the Workflow's output checks.
             snapshot = await run_workflow_checked(
                 self.engine,
@@ -1944,9 +2002,9 @@ class Gateway:
                 timeout_seconds=workflow_timeout_seconds,
                 idempotency_key=workflow_idempotency_key,
             )
-        if effects is not None and snapshot.run.status == "succeeded":
-            effects.record_run(key, snapshot)
-        return snapshot
+            if effects is not None and snapshot.run.status == "succeeded":
+                effects.record_run(key, snapshot)
+            return snapshot
 
     def inspect(self, request: RequestContext, run_id: RunId) -> RunControlResult:
         """Classify a run's steps for its owner; never executes anything.

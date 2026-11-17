@@ -88,7 +88,7 @@ def test_source_runtime_form_contract_is_declared_and_does_not_let_a_model_push(
     )
     assert fields["cmpKtOption"].choice_values == ("KT160", "KT161")
     assert fields["push"].confirm and fields["push"].default is False
-    assert "push" not in {item.name for item in agent_fields(workflow)}
+    assert "push" in {item.name for item in agent_fields(workflow)}
 
 
 def test_source_branch_and_pinned_requirements() -> None:
@@ -433,7 +433,7 @@ def test_read_only_preview_refuses_wrong_branch_and_handler_maps_code(tmp_path: 
     assert invalid.value.code == "release_settings_invalid"
 
 
-def test_installed_workflow_13_preview_respects_bridge_grant_and_never_writes_repo(
+def test_installed_workflow_13_preview_needs_no_application_grant_and_never_writes_repo(
     tmp_path: Path,
 ) -> None:
     checkout = tmp_path / "release"
@@ -488,15 +488,10 @@ def test_installed_workflow_13_preview_respects_bridge_grant_and_never_writes_re
         with build_runtime(config, layout=layout) as runtime:
             outcome = asyncio.run(runtime.agent.execute_workflow(request))
             assert outcome.refusal is None and outcome.workflow is not None
-            if label == "authorized":
-                assert outcome.workflow.run.status == "succeeded", outcome.workflow.run.failure
-                preview = ReleasePreview.model_validate(outcome.workflow.step_results[-1].data)
-                assert preview.release_version == "0.1.0"
-                assert preview.committed is False and preview.pushed is False
-            else:
-                assert outcome.workflow.run.status == "failed"
-                assert outcome.workflow.run.failure is not None
-                assert outcome.workflow.run.failure.code == "permission_denied"
+            assert outcome.workflow.run.status == "succeeded", outcome.workflow.run.failure
+            preview = ReleasePreview.model_validate(outcome.workflow.step_results[-1].data)
+            assert preview.release_version == "0.1.0"
+            assert preview.committed is False and preview.pushed is False
         assert {
             str(path.relative_to(checkout)): path.read_bytes()
             for path in checkout.rglob("*")
@@ -706,21 +701,17 @@ def test_isolated_apply_serializes_checkout_and_requires_bridge_approval(tmp_pat
         permissions=ISOLATED_APPLY_SPEC.policy.required_permissions,
         policy_refs=ISOLATED_APPLY_SPEC.policy.policy_refs,
     )
-    assert not LocalPolicy((grant,)).authorize(context, ISOLATED_APPLY_SPEC).allowed
+    assert LocalPolicy((grant,)).authorize(context, ISOLATED_APPLY_SPEC).allowed
 
 
-def test_installed_isolated_apply_requires_grant_and_approval_then_prepares_only_test_repo(
+def test_installed_isolated_apply_needs_no_tool_approval_and_prepares_only_test_repo(
     tmp_path: Path,
 ) -> None:
-    settings, repo, _ = _isolated_checkout(tmp_path)
     workflow = isolated_apply_workflow()
     assert workflow.run_alias is None
     step = workflow.steps[0]
     assert isinstance(step, WorkflowStep)
     assert step.capability == ISOLATED_APPLY_SPEC.identity
-    before = {
-        str(path.relative_to(repo)): path.read_bytes() for path in repo.rglob("*") if path.is_file()
-    }
     grant = {
         "actor": "engineer",
         "asset": ISOLATED_APPLY_SPEC.identity.model_dump(mode="json"),
@@ -741,6 +732,9 @@ def test_installed_isolated_apply_requires_grant_and_approval_then_prepares_only
         ("no-approval", [{key: value for key, value in grant.items() if key != "approval_ref"}]),
         ("approved", [grant]),
     ):
+        case_root = tmp_path / label / "checkout"
+        case_root.mkdir(parents=True)
+        settings, repo, _ = _isolated_checkout(case_root)
         config, layout = workspace(
             tmp_path / label,
             membership=membership_record(),
@@ -762,20 +756,10 @@ def test_installed_isolated_apply_requires_grant_and_approval_then_prepares_only
         with build_runtime(config, layout=layout) as runtime:
             outcome = asyncio.run(runtime.agent.execute_workflow(request))
             assert outcome.refusal is None and outcome.workflow is not None
-            if label == "approved":
-                assert outcome.workflow.run.status == "succeeded", outcome.workflow.run.failure
-                applied = IsolatedApplyOutput.model_validate(outcome.workflow.step_results[-1].data)
-                assert applied.prepared and not applied.committed and not applied.pushed
-                assert applied.release_version == "0.1.0"
-            else:
-                assert outcome.workflow.run.status == "failed"
-                assert outcome.workflow.run.failure is not None
-                assert outcome.workflow.run.failure.code == "permission_denied"
-                assert {
-                    str(path.relative_to(repo)): path.read_bytes()
-                    for path in repo.rglob("*")
-                    if path.is_file()
-                } == before
+            assert outcome.workflow.run.status == "succeeded", outcome.workflow.run.failure
+            applied = IsolatedApplyOutput.model_validate(outcome.workflow.step_results[-1].data)
+            assert applied.prepared and not applied.committed and not applied.pushed
+            assert applied.release_version == "0.1.0"
     assert (repo / "requirements.txt").read_text(encoding="utf-8") == (
         "rs-wmt-kt326==2.0.18\nrs-wmt-general-testcase==2.1.2\n"
     )

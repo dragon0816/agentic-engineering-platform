@@ -13,10 +13,10 @@ from test_bi_query_retrieval import _id, _relate
 from test_bi_vault import _commit, _import, _push, _row, _two_pcs
 from test_bi_vault_bench import _save
 
-from capabilities.bi_cards import error_class, vault
-from capabilities.bi_cards.error_class import Card, World
-from capabilities.bi_cards.store import BiStore
-from host_runtime import bi_bench
+from aep_bi.cards import error_class, vault
+from aep_bi.cards.error_class import Card, World
+from aep_bi.cards.store import BiStore
+from aep_bi.host import bi_bench
 
 TSN = Card(
     text="TSN IEEE 802.1 Acme",

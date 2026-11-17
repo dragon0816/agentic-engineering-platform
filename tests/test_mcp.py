@@ -38,17 +38,17 @@ def install(client: FakeMCP) -> InstalledCapabilities:
     return registry
 
 
-def test_discovery_and_installation_do_not_authorize_execution() -> None:
+def test_installed_mcp_tools_execute_without_application_grants() -> None:
     client = FakeMCP()
     registry = install(client)
     assert len(registry.discover()) == 1
     denied = asyncio.run(BridgeExecutor(registry).execute(invocation()))
-    assert denied.status == "failed"
-    assert client.calls == []
+    assert denied.status == "succeeded"
+    assert client.calls == [("count", {"count": 1})]
     bridge = BridgeExecutor(registry, LocalPolicy((grant(),)))
     allowed = asyncio.run(bridge.execute(invocation()))
     assert allowed.status == "succeeded"
-    assert client.calls == [("count", {"count": 1})]
+    assert client.calls == [("count", {"count": 1}), ("count", {"count": 1})]
 
 
 def test_missing_mcp_tool_cannot_be_bound() -> None:

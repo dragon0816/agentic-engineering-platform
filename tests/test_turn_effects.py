@@ -17,7 +17,7 @@ from agent.gateway import Gateway, HostTool, HostToolOutcome
 from agent.skills import SkillManifest
 from agent.turn_effects import REPLAY_NOTE, current, turn_scope
 from capabilities.contracts import CapabilitySpec
-from capabilities.runtime import CapabilityGrant, LocalPolicy
+from capabilities.runtime import CapabilityGrant, CapabilityRefused, LocalPolicy
 from common.assets import ExecutionDependencies
 from common.base import Contract
 from common.execution import Failure, RequestContext, TraceIdentifiers
@@ -282,7 +282,7 @@ def test_a_failed_write_is_not_cached() -> None:
     assert result.tools[0].host.status == "failed"
 
 
-def test_a_call_awaiting_approval_is_not_recorded_as_succeeded() -> None:
+def test_legacy_approval_callback_does_not_block_or_duplicate_execution() -> None:
     built, _, write, _ = _built(
         [
             _reply(("notes__publish", {"note": "a"})),
@@ -299,16 +299,13 @@ def test_a_call_awaiting_approval_is_not_recorded_as_succeeded() -> None:
 
     built.capability_approval = approval
     result = _converse(built)
-    assert write.calls == 0
-    assert len(asked) == 2  # asked again: nothing was done, nothing to replay
-    assert [item.host.status for item in result.tools if item.host] == [
-        "awaiting_approval",
-        "awaiting_approval",
-    ]
-    assert not any(item.replayed for item in result.tools)
+    assert write.calls == 1
+    assert asked == []
+    assert [item.replayed for item in result.tools] == [False, True]
+    assert all(item.capability.status == "succeeded" for item in result.tools)
 
 
-def test_a_refused_write_is_not_recorded() -> None:
+def test_an_environment_refused_write_is_not_recorded() -> None:
     built, _, write, _ = _built(
         [
             _reply(("notes__publish", {"note": "a"})),
@@ -316,14 +313,25 @@ def test_a_refused_write_is_not_recorded() -> None:
             _reply(text="沒有權限。"),
         ]
     )
-    policy = built.bridge.policy
-    assert isinstance(policy, LocalPolicy)
-    policy._grants.clear()
+    calls = []
+
+    async def refused(context: RequestContext, inputs: Contract) -> Contract:
+        calls.append(context)
+        raise CapabilityRefused("environment_denied")
+
+    binding = built.bridge.installed.get(write_spec().identity)
+    assert binding is not None
+    # Same technical contract, actual environment refusal instead of an AEP grant.
+    built.bridge.installed.unregister(write_spec().identity)
+    built.bridge.installed.register(
+        write_spec(), refused, NoteInput, NoteOutput, ExecutionDependencies(central_required=False)
+    )
     result = _converse(built)
     assert write.calls == 0
+    assert len(calls) == 2
     assert not any(item.replayed for item in result.tools)
     assert all(
-        item.capability is not None and item.capability.status != "succeeded"
+        item.capability is not None and item.capability.failure.code == "environment_denied"
         for item in result.tools
     )
 

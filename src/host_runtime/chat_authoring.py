@@ -1,26 +1,9 @@
-"""Workflows drafted, previewed, run and installed from a conversation (G4).
+"""Local Workflow/Skill authoring with real execution and quality evidence.
 
-Conversational authoring slices A4-A6 (`docs/phases/CONVERSATIONAL_AUTHORING.md`):
-the Agent drafts a Workflow from the conversation, previews it, and asks to
-run it once or to install it. The owner's decisions of 2026-10-06 bound it:
-
-- the model has no tool that approves, installs or runs a change; a run whose
-  steps only read runs directly, anything else becomes an approval request
-  the owner decides with a button (Agent Web) outside the model's reach;
-- a candidate is private to its author, local and unpublished until the
-  owner installs it; install writes it published with the owner as business
-  approver and adds the grants its steps need;
-- every run goes through the Bridge with exactly the grants the candidate's
-  steps need for this actor, as a preview does.
-
-Records live under `<workspace>/authoring/chat/`: one JSON file per
-candidate and per approval request.
-
-External authoring (owner 2026-10-08, `docs/phases/EXTERNAL_AUTHORING.md`)
-uses the same candidates and approvals: Claude Code, Codex or Copilot submit
-through `aep-host assets` or `aep-host mcp`, marked `source: external:<agent>`,
-and may also submit Skills, which install into the skills folder once the
-owner approves. An external agent sees only statuses and codes, never data.
+Normal run/install tools do not require AEP approval or tool grants. Strict
+schemas, identity/version checks, trial tokens, coverage and actual provenance
+remain. Historical explicit approval APIs remain readable and are not replayed.
+External authoring retains its existing status-only data boundary.
 """
 
 from __future__ import annotations
@@ -39,9 +22,11 @@ from typing import Any, Literal, cast
 
 from pydantic import Field, JsonValue, ValidationError
 
-from agent.gateway import GatewayConversationResult, HostTool, HostToolOutcome
+from agent.gateway import GatewayConversationResult, HostTool, HostToolOutcome, ToolEffect
 from agent.skills import SkillManifest
-from capabilities.coding_change.workspaces import containing_root, workspace_note
+from agent.turn_effects import current as current_effects
+from agent.turn_effects import workflow_effect_key
+from capabilities.coding_change.workspaces import workspace_note
 from capabilities.runtime import (
     CapabilityGrant,
     CapabilityInvocation,
@@ -50,7 +35,7 @@ from capabilities.runtime import (
 )
 from capabilities.workflow_author.conversation import assemble
 from common.assets import AssetIdentity, FixedInput, WorkflowManifest, WorkflowStep
-from common.base import Contract, Symbol, Text
+from common.base import Contract, Sha256, Symbol, Text
 from common.execution import Failure, RequestContext, TraceIdentifiers
 from common.trace import redact
 from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
@@ -69,6 +54,7 @@ from host_runtime.authoring_task import (
     task_guidance,
 )
 from host_runtime.conversations import ConversationMessage
+from host_runtime.mcp_servers import McpHub
 from host_runtime.skill_authoring import (
     SkillCandidate,
     assemble_skill,
@@ -421,6 +407,15 @@ class ChatAuthoringError(Exception):
         super().__init__(code)
 
 
+class AuthoringRunReceipt(Contract):
+    """Display metadata from a real execution; never verification evidence."""
+
+    run_id: Text
+    digest: Sha256
+    status: Text
+    at: Text
+
+
 class ChatCandidate(Contract):
     candidate_id: Symbol
     actor: Symbol
@@ -447,6 +442,7 @@ class ChatCandidate(Contract):
     member_team: Symbol | None = None
     membership_source: Text | None = None
     authoring_task: AuthoringTask | None = None
+    last_run: AuthoringRunReceipt | None = None
 
 
 REVISION_PREFIX = "revision:"
@@ -617,6 +613,7 @@ class ChatAuthoring:
         skills_dir: Path | None = None,
         coding_workspace_roots: tuple[str, ...] = (),
         on_installed: Callable[[WorkflowManifest, tuple[CapabilityGrant, ...]], None] | None = None,
+        on_skill_installed: Callable[[SkillManifest], None] | None = None,
         teams: Callable[[str], TeamMembership] | None = None,
         autonomy_required: bool = False,
         attachments: AttachmentStore | None = None,
@@ -631,6 +628,7 @@ class ChatAuthoring:
         # (owner 2026-10-08: a Workflow installed from the draft list said
         # workflow_not_installed when run from the Capabilities page).
         self.on_installed = on_installed
+        self.on_skill_installed = on_skill_installed
         # (installed Workflow, the model's run values) -> its run form offer,
         # set by the host; None keeps the plain run (owner 2026-10-15).
         self.form_offer: (
@@ -641,6 +639,7 @@ class ChatAuthoring:
         # at draft time so a Workflow never fails only at its approved run.
         self.coding_workspace_roots = coding_workspace_roots
         self._bridge = bridge
+        self.mcp: McpHub | None = None
         self.namespace = namespace
         self.workflows_dir = workflows_dir
         self.grants_file = grants_file
@@ -702,18 +701,7 @@ class ChatAuthoring:
             for item in candidates.values()
         ):
             return None
-        if any(
-            approval.kind in ("run", "capability")
-            and (
-                approval.kind == "capability"
-                or (
-                    approval.candidate_id in candidates
-                    and approval.digest == digest(candidates[approval.candidate_id].draft)
-                )
-            )
-            for approval in self.approvals(context.actor, session_id=context.session_id)
-        ):
-            return None
+        # Historical approval cards are not evidence that the current task ran.
         return (
             "The saved SOP Workflow task is unfinished. Preserve every requirement, "
             "use authoring__get_plan and browser__inspect to repair the candidate, then "
@@ -754,6 +742,11 @@ class ChatAuthoring:
     @property
     def installed(self) -> InstalledCapabilities:
         return self._bridge().installed
+
+    @property
+    def bridge(self) -> BridgeExecutor:
+        """The same execution plane used by authoring, Gateway and MCP tools."""
+        return self._bridge()
 
     # -- records -----------------------------------------------------------
 
@@ -1249,13 +1242,11 @@ class ChatAuthoring:
         source = self._fixed_workspace(step)
         if source is None:
             return []
-        roots = self.coding_workspace_roots
-        if containing_root(source, roots) is None:
-            allowed = "; ".join(roots) if roots else "none are configured on this host"
-            return [
-                f"step {index}: workspace {source} is outside the allowed task folders "
-                f"({allowed}); use a folder under one of them"
-            ]
+        path = Path(source)
+        if not path.is_absolute():
+            return [f"step {index}: workspace must be an absolute path"]
+        if path.exists() and not path.is_dir():
+            return [f"step {index}: workspace is not a folder"]
         return []
 
     def prepare_workspaces(self, manifest: WorkflowManifest) -> None:
@@ -1265,9 +1256,7 @@ class ChatAuthoring:
             if not isinstance(step, WorkflowStep):
                 continue
             source = self._fixed_workspace(step)
-            resolved = (
-                None if source is None else containing_root(source, self.coding_workspace_roots)
-            )
+            resolved = None if source is None else Path(source).resolve()
             if resolved is not None and not resolved.is_dir():
                 for part in ("input", "output"):
                     (resolved / part).mkdir(parents=True, exist_ok=True)
@@ -1293,7 +1282,7 @@ class ChatAuthoring:
         bridge = self._bridge()
         trial = BridgeExecutor(
             bridge.installed,
-            LocalPolicy(self.grants(manifest, actor, ref)),
+            LocalPolicy(),
             timeout_seconds=bridge.timeout_seconds,
         )
         return WorkflowEngine(workflows, trial, settings_provider=lambda _manifest: {})
@@ -1415,29 +1404,8 @@ class ChatAuthoring:
         if effective != arguments:
             # Older records without effective values cannot safely adopt current defaults.
             raise ChatAuthoringError("authoring_trial_arguments_unavailable")
-        if not self.read_only(candidate.draft):
-            approved = [
-                a
-                for a in self.approvals(
-                    context.actor, session_id=context.session_id, pending_only=False
-                )
-                if a.kind == "run"
-                and a.status == "approved"
-                and a.candidate_id == candidate.candidate_id
-                and a.digest == task.last_trial_digest
-                and isinstance(a.result, dict)
-                and a.result.get("run_id") == task.last_run_id
-                and a.result.get("digest") == task.last_trial_digest
-                and a.result.get("status") == task.last_status
-            ]
-            if len(approved) != 1:
-                raise ChatAuthoringError("authoring_trial_arguments_unavailable")
-            try:
-                original = validate_run_parameters(candidate.draft, approved[0].arguments)
-            except WorkflowParameterError as error:
-                raise ChatAuthoringError("authoring_trial_arguments_unavailable") from error
-            if original != arguments:
-                raise ChatAuthoringError("authoring_trial_arguments_unavailable")
+        # The persisted trial token/history and saved effective inputs above are
+        # execution evidence. A withdrawn approval record is not required.
         if any(
             key not in arguments
             or json.dumps(value, sort_keys=True) != json.dumps(arguments[key], sort_keys=True)
@@ -1453,30 +1421,99 @@ class ChatAuthoring:
     def execute(
         self, actor: str, candidate: ChatCandidate, arguments: dict[str, JsonValue], ref: str
     ) -> dict[str, JsonValue]:
+        if candidate.actor != actor:
+            raise ChatAuthoringError("candidate_unknown")
         try:
             arguments = validate_run_parameters(candidate.draft, arguments)
         except WorkflowParameterError as error:
             raise ChatAuthoringError("workflow_input_invalid", str(error)) from None
-        candidate = self.begin_trial(actor, candidate, arguments)
-        self.prepare_workspaces(candidate.draft)
-        engine = self._engine(candidate.draft, actor, ref)
-        snapshot = asyncio.run(
-            run_workflow_checked(
+        return asyncio.run(self._execute_once(actor, candidate, arguments, ref))
+
+    async def _execute_once(
+        self, actor: str, candidate: ChatCandidate, arguments: dict[str, JsonValue], ref: str
+    ) -> dict[str, JsonValue]:
+        # Share the same async lease as normal Gateway runs; keep the receipt
+        # check, actual execution and success record atomic across HTTP threads.
+        async with self.installed.exclusive.hold():
+            effects = current_effects()
+            effect_id = workflow_effect_key(
+                actor, candidate.draft.model_dump(mode="json"), arguments
+            )
+            earlier = effects.replay_run(effect_id) if effects is not None else None
+            if earlier is not None:
+                replay_quality: dict[str, JsonValue] = {
+                    "verified": False,
+                    "coverage_complete": False,
+                }
+                try:
+                    current = self.candidate(candidate.candidate_id, actor)
+                    if digest(current.draft) == digest(candidate.draft):
+                        replay_quality = self.readiness(current)
+                except (ChatAuthoringError, OSError, ValidationError):
+                    # An existing real result remains replayable even if display
+                    # metadata is gone. Never borrow another revision's proof.
+                    pass
+                return {
+                    "candidate_id": candidate.candidate_id,
+                    "digest": digest(candidate.draft),
+                    "workflow": _key(candidate.draft.metadata.identity),
+                    **summarize(cast(WorkflowRunSnapshot, earlier)),
+                    **replay_quality,
+                    "replayed": True,
+                }
+            candidate = self.begin_trial(actor, candidate, arguments)
+            self.prepare_workspaces(candidate.draft)
+            engine = self._engine(candidate.draft, actor, ref)
+            snapshot = await run_workflow_checked(
                 engine,
                 self._context(actor, self.namespace, candidate.session_id, "run"),
                 candidate.draft.metadata.identity,
                 arguments,
                 timeout_seconds=self.run_timeout_seconds,
             )
-        )
-        self.record_trial(actor, candidate, snapshot)
-        return {
-            "candidate_id": candidate.candidate_id,
-            "digest": digest(candidate.draft),
-            "workflow": _key(candidate.draft.metadata.identity),
-            **summarize(snapshot),
-            **self.readiness(self.candidate(candidate.candidate_id, actor)),
-        }
+            if effects is not None and snapshot.run.status == "succeeded":
+                effects.record_run(effect_id, snapshot)
+            metadata_warning: str | None = None
+            quality: dict[str, JsonValue] = {"verified": False}
+            try:
+                self.record_trial(actor, candidate, snapshot)
+                # Display-only metadata cannot turn a completed operation into failure.
+                with self._candidate_lock(candidate.candidate_id):
+                    current = self.candidate(candidate.candidate_id, actor)
+                    if digest(current.draft) == digest(candidate.draft):
+                        current = self._save_candidate(
+                            current.model_copy(
+                                update={
+                                    "last_run": AuthoringRunReceipt(
+                                        run_id=snapshot.run.run_id,
+                                        digest=digest(candidate.draft),
+                                        status=snapshot.run.status,
+                                        at=_now(),
+                                    )
+                                }
+                            )
+                        )
+                        quality = self.readiness(current)
+                    else:
+                        metadata_warning = "candidate_changed_after_execution"
+            except ChatAuthoringError as error:
+                if error.code not in {
+                    "authoring_candidate_busy",
+                    "authoring_digest_stale",
+                    "candidate_unknown",
+                }:
+                    raise
+                metadata_warning = error.code
+            except OSError:
+                metadata_warning = "execution_metadata_write_failed"
+            return {
+                "candidate_id": candidate.candidate_id,
+                "digest": digest(candidate.draft),
+                "workflow": _key(candidate.draft.metadata.identity),
+                **summarize(snapshot),
+                **quality,
+                **({"warnings": [metadata_warning], "verified": False} if metadata_warning else {}),
+            }
 
     def begin_trial(
         self, actor: str, candidate: ChatCandidate, arguments: dict[str, JsonValue]
@@ -1726,7 +1763,7 @@ class ChatAuthoring:
         )
 
     def install(
-        self, candidate: ChatCandidate, actor: str, approval_id: str
+        self, candidate: ChatCandidate, actor: str, approval_id: str | None = None
     ) -> dict[str, JsonValue]:
         with self._candidate_lock(candidate.candidate_id):
             current = self.candidate(candidate.candidate_id, actor)
@@ -1735,19 +1772,14 @@ class ChatAuthoring:
             return self._install(current, actor, approval_id)
 
     def _install(
-        self, candidate: ChatCandidate, actor: str, approval_id: str
+        self, candidate: ChatCandidate, actor: str, approval_id: str | None
     ) -> dict[str, JsonValue]:
-        active = self.tasks.load(actor, candidate.session_id) if candidate.session_id else None
-        task = active or candidate.authoring_task
-        if task is not None:
-            problems = coverage_problems(task, candidate.draft)
-            if problems:
-                raise ChatAuthoringError("authoring_coverage_incomplete", "; ".join(problems))
-            if task.verified_digest != digest(candidate.draft):
-                raise ChatAuthoringError(
-                    "authoring_trial_required",
-                    "Run this exact candidate successfully before installing it",
-                )
+        # Quality evidence is reported, never fabricated or used as tool admission.
+        readiness = self.readiness(candidate)
+        verified = readiness.get("verified") is True
+        manifest, problems = self._validate_manifest({}, candidate.draft.model_dump(mode="json"))
+        if manifest is None or problems:
+            raise ChatAuthoringError("workflow_no_longer_valid", "; ".join(problems))
         identity = candidate.draft.metadata.identity
         name = f"{identity.namespace}__{identity.name}__{identity.version}.json"
         target = self.workflows_dir / name
@@ -1756,12 +1788,10 @@ class ChatAuthoring:
         metadata = candidate.draft.metadata.model_dump(mode="json")
         metadata.update(
             {
-                "lifecycle": "published",
-                "business_approval": {
-                    "status": "approved",
-                    "reviewer": actor,
-                    "evidence": f"chat-approval:{approval_id}",
-                },
+                "lifecycle": "validated" if verified else "draft",
+                # Installing is availability, including the legacy Install button;
+                # neither a reference string nor that button proves business review.
+                "business_approval": {"status": "pending"},
                 "validation_refs": [
                     f"chat-candidate:{candidate.candidate_id}:{digest(candidate.draft)}"
                 ],
@@ -1778,8 +1808,6 @@ class ChatAuthoring:
                 json.dumps(published.model_dump(mode="json"), ensure_ascii=False, indent=2) + "\n"
             ).encode("utf-8"),
         )
-        ref = f"chat-approval:{approval_id}"
-        self._add_grants(published, actor, ref)
         self._save_candidate(
             candidate.model_copy(
                 update={
@@ -1791,11 +1819,13 @@ class ChatAuthoring:
         )
         live = self.on_installed is not None
         if self.on_installed is not None:
-            self.on_installed(published, self.grants(published, actor, ref))
+            self.on_installed(published, ())
         return {
             "installed_as": _key(identity),
             "file": target.name,
             "digest": digest(candidate.draft),
+            "verified": verified,
+            "quality": readiness or {"verified": False, "reason": "no_trial_evidence"},
             "note": "It runs now, in conversations and from the Capabilities page."
             if live
             else "Reuse it from a conversation now; other channels see it after a restart.",
@@ -2113,7 +2143,16 @@ class ChatAuthoring:
         )
 
     def install_skill(
-        self, candidate: SkillCandidate, actor: str, approval_id: str
+        self, candidate: SkillCandidate, actor: str, approval_id: str | None = None
+    ) -> dict[str, JsonValue]:
+        with self._candidate_lock(candidate.candidate_id):
+            current = self.skill_candidate(candidate.candidate_id, actor)
+            if skill_digest(current.draft) != skill_digest(candidate.draft):
+                raise ChatAuthoringError("authoring_digest_stale")
+            return self._install_skill(current, actor, approval_id)
+
+    def _install_skill(
+        self, candidate: SkillCandidate, actor: str, approval_id: str | None
     ) -> dict[str, JsonValue]:
         """Write the Skill published, and set the actor's earlier versions of
         the name aside: one installed version per name."""
@@ -2143,12 +2182,8 @@ class ChatAuthoring:
         metadata = candidate.draft.metadata.model_dump(mode="json")
         metadata.update(
             {
-                "lifecycle": "published",
-                "business_approval": {
-                    "status": "approved",
-                    "reviewer": actor,
-                    "evidence": f"chat-approval:{approval_id}",
-                },
+                "lifecycle": "draft",
+                "business_approval": {"status": "pending"},
                 "validation_refs": [
                     f"skill-candidate:{candidate.candidate_id}:{skill_digest(candidate.draft)}"
                 ],
@@ -2178,12 +2213,17 @@ class ChatAuthoring:
                 }
             )
         )
+        if self.on_skill_installed is not None:
+            self.on_skill_installed(published)
         return {
             "installed_as": _key(identity),
             "file": target.name,
             "digest": skill_digest(candidate.draft),
             "set_aside": list(set_aside),
-            "note": "The host uses it after a restart.",
+            "verified": False,
+            "note": "Available in this session."
+            if self.on_skill_installed
+            else "Installed locally; this adapter has no live Skill registry.",
         }
 
     # -- the owner's draft list in Agent Web (owner 2026-10-08) -------------
@@ -2442,8 +2482,8 @@ class ChatAuthoring:
                         "digest": digest(item.draft),
                         "read_only": self.read_only(item.draft),
                         **self.readiness(item),
-                        "next": "preview it, then run it; a run that writes waits for the owner's "
-                        "approval",
+                        "next": "preview and trial it; report actual results, then install locally "
+                        "without an AEP approval card",
                     },
                 )
 
@@ -2519,52 +2559,23 @@ class ChatAuthoring:
                     offer = self._form_instead(context, item.draft, arguments)
                     if offer is not None:
                         return HostToolOutcome(status="succeeded", data={OFFER_KEY: offer})
-                    # The installed version, unchanged: installing was the approval.
+                    # The installed version uses the same direct execution contract.
                     return _trial_outcome(
                         self.execute(
                             context.actor, item, arguments, f"chat-installed:{item.candidate_id}"
                         )
                     )
-                if self.read_only(item.draft):
-                    return _trial_outcome(
-                        self.execute(
-                            context.actor, item, arguments, f"chat-read-only:{item.candidate_id}"
-                        )
-                    )
-                request = self.request(
-                    context.actor, context.session_id, "run", item.candidate_id, arguments
-                )
-                return HostToolOutcome(
-                    status="awaiting_approval",
-                    data={
-                        "approval_id": request.approval_id,
-                        "candidate_id": item.candidate_id,
-                        "digest": digest(item.draft),
-                        "summary": request.summary,
-                        "next": "Nothing ran yet. Tell the person it waits for their approval "
-                        "button; after they approve, the result appears in this conversation.",
-                    },
+                return _trial_outcome(
+                    self.execute(context.actor, item, arguments, f"chat-run:{item.candidate_id}")
                 )
 
             return await run_sync(work)
 
         async def install_tool(context: RequestContext, args: Args) -> HostToolOutcome:
             def work() -> HostToolOutcome:
-                request = self.request(
-                    context.actor,
-                    context.session_id,
-                    "install",
-                    str(args.get("candidate_id") or ""),
-                )
+                candidate = self.candidate(str(args.get("candidate_id") or ""), context.actor)
                 return HostToolOutcome(
-                    status="awaiting_approval",
-                    data={
-                        "approval_id": request.approval_id,
-                        "summary": request.summary,
-                        "next": (
-                            "Nothing is installed yet; it waits for the person's approval button."
-                        ),
-                    },
+                    status="succeeded", data=self.install(candidate, context.actor)
                 )
 
             return await run_sync(work)
@@ -2712,7 +2723,92 @@ class ChatAuthoring:
 
         candidate = {"candidate_id": {"type": "string"}}
         values = {"arguments": {"type": "object", "description": "run values by parameter name"}}
+
+        def run_effect(context: RequestContext, args: Args) -> ToolEffect | None:
+            try:
+                item = self.candidate(str(args.get("candidate_id") or ""), context.actor)
+                arguments = validate_run_parameters(item.draft, _arguments(args))
+            except (ChatAuthoringError, WorkflowParameterError):
+                return None
+            return ToolEffect(
+                workflow_effect_key(context.actor, item.draft.model_dump(mode="json"), arguments),
+                "execute",
+            )
+
+        async def draft_skill_tool(context: RequestContext, args: Args) -> HostToolOutcome:
+            def work() -> HostToolOutcome:
+                raw = args.get("skill")
+                if not isinstance(raw, dict):
+                    return _refused("skill_missing", "Give the Skill as an object")
+                item, problems = self.draft_skill(
+                    context.actor,
+                    str(args.get("title") or ""),
+                    raw,
+                    str(args["candidate_id"]) if args.get("candidate_id") else None,
+                    session_id=context.session_id,
+                )
+                if item is None:
+                    return _refused("skill_invalid", "; ".join(problems))
+                return HostToolOutcome(
+                    status="succeeded",
+                    data={
+                        "candidate_id": item.candidate_id,
+                        "digest": skill_digest(item.draft),
+                        "skill": _key(item.draft.metadata.identity),
+                    },
+                )
+
+            return await run_sync(work)
+
+        async def install_skill_tool(context: RequestContext, args: Args) -> HostToolOutcome:
+            def work() -> HostToolOutcome:
+                item = self.skill_candidate(str(args.get("candidate_id") or ""), context.actor)
+                return HostToolOutcome(
+                    status="succeeded", data=self.install_skill(item, context.actor)
+                )
+
+            return await run_sync(work)
+
         return (
+            HostTool(
+                ModelTool(
+                    name="authoring__draft_skill",
+                    description=(
+                        "Create or revise a local Skill. skill has name, alias, instructions, "
+                        "commands [{name,kind:capability|workflow,target:namespace/name@version}]. "
+                        "Instructions guide the task; commands name installed targets."
+                    ),
+                    input_contract="host.authoring.skill-draft.v1",
+                    input_schema={
+                        "type": "object",
+                        "properties": {
+                            "title": {"type": "string"},
+                            "skill": {"type": "object"},
+                            **candidate,
+                        },
+                        "required": ["skill", "title"],
+                    },
+                ),
+                guarded(draft_skill_tool),
+                side_effect="write",
+            ),
+            HostTool(
+                ModelTool(
+                    name="authoring__install_skill",
+                    description=(
+                        "Install a Skill locally and refresh this session's procedures. "
+                        "No AEP approval card; preserve actual quality/provenance."
+                    ),
+                    input_contract="host.authoring.skill-install.v1",
+                    input_schema={
+                        "type": "object",
+                        "properties": candidate,
+                        "required": ["candidate_id"],
+                    },
+                ),
+                guarded(install_skill_tool),
+                side_effect="write",
+            ),
             HostTool(
                 ModelTool(
                     name="authoring__needs_input",
@@ -2836,8 +2932,7 @@ class ChatAuthoring:
                     name="authoring__run_workflow",
                     description=(
                         "Run a drafted or installed Workflow once with run values. A Workflow "
-                        "whose steps only read runs now and returns its result; otherwise it "
-                        "waits for the person's approval button and nothing runs yet. If a "
+                        "executes now under the actual environment and returns its result. If a "
                         "platform run failed, fix the cause (revise the candidate when its "
                         "steps were wrong) and run it again here; do not redo the work "
                         "outside the Workflow."
@@ -2850,13 +2945,16 @@ class ChatAuthoring:
                     },
                 ),
                 guarded(run_tool),
+                side_effect="execute",
+                effect=run_effect,
+                records_effect=True,
             ),
             HostTool(
                 ModelTool(
                     name="authoring__install_workflow",
                     description=(
-                        "Ask the person to install a drafted Workflow for reuse; it waits for "
-                        "their approval button."
+                        "Install a drafted Workflow locally for reuse. Report actual quality; "
+                        "untested does not mean verified or business-reviewed."
                     ),
                     input_contract="host.authoring.install.v1",
                     input_schema={
@@ -2866,6 +2964,7 @@ class ChatAuthoring:
                     },
                 ),
                 guarded(install_tool),
+                side_effect="write",
             ),
             HostTool(
                 ModelTool(

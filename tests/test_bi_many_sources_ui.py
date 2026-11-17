@@ -20,8 +20,8 @@ from bi_page_driver import BiPage, browser_missing
 from test_bi_vault import _call, _ok
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore, PlannedRow
 
 MANY = 900
 AIDC = "applications/aidc/sources"
@@ -208,6 +208,50 @@ def test_in_a_vault_the_table_follows_the_domain_and_converting_opens_the_result
                 "document.querySelector('#bi-b-sources tbody tr[aria-selected=true]')"
                 ".textContent.includes('new.md')"
             )
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_converting_shows_its_progress_beside_the_button_and_ends_with_each_result(
+    tmp_path: Path,
+) -> None:
+    """AGENTS.md rule 23 (owner 2026-11-17: 「轉檔沒有進度」): file n of N with its name, what
+    it is doing and the seconds passed, beside 轉檔 while it runs; then how many converted
+    and why one did not."""
+    config, layout = _bi_host(tmp_path / "pc")
+    BiStore(layout.workspace_root, "demo").create("bi.schema/v1.1")
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(tmp_path / "browser", server.address) as page:
+            page.wait("document.getElementById('bi-status-build').hidden")
+            # The first file's request waits until the test lets it go.
+            page.run(
+                "(() => { const send = XMLHttpRequest.prototype.send; let first = true;"
+                " window.__gate = new Promise((go) => { window.__go = go; });"
+                " XMLHttpRequest.prototype.send = function (body) {"
+                " if (first) { first = false; window.__gate.then(() => send.call(this, body)); }"
+                " else send.call(this, body); }; })()"
+            )
+            page.run(
+                "(() => { const dt = new DataTransfer();"
+                " dt.items.add(new File(['# 第一份\\n\\n內容。\\n'], 'one.md'));"
+                " dt.items.add(new File([new Uint8Array([35, 32, 255, 255, 129, 32, 128, 10])],"
+                " 'bad.md'));"
+                " dt.items.add(new File(['# 第三份\\n'], 'three.md'));"
+                " const f = document.getElementById('bi-b-file'); f.files = dt.files;"
+                " f.dispatchEvent(new Event('change')); })()"
+            )
+            page.click("#bi-b-upload")
+            page.see("bi-b-upload-status", "正在轉檔 1/3：one.md")
+            assert "秒" in page.text_of("bi-b-upload-status")
+            assert page.run("document.getElementById('bi-b-upload').getAttribute('aria-busy')")
+            assert page.run("document.getElementById('bi-b-upload').disabled")
+            page.wait(page.shows("bi-b-upload-status", "1 秒"), 30)  # the seconds keep counting
+
+            page.run("window.__go(); 0")
+            page.see("bi-b-upload-status", "已轉檔 2 份；1 份沒有轉檔：bad.md：")
+            ended = page.text_of("bi-b-upload-status")
+            assert "source_decode_failed" in ended and "正在轉檔" not in ended
+            assert not page.run("document.getElementById('bi-b-upload').hasAttribute('aria-busy')")
+            page.wait("document.querySelectorAll('#bi-b-sources tbody tr').length === 3")
 
 
 def _row(kind: str, name: str, **values: Any) -> PlannedRow:

@@ -22,10 +22,10 @@ from test_bi_vault import _call, _ok
 from test_bi_working_domain_ui import AIDC, WIRELESS, _question, _skill
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from capabilities.bi_cards import vault
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore
-from host_runtime import bi_bench
+from aep_bi.cards import vault
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore
+from aep_bi.host import bi_bench
 
 # Counts the browser's own dialogs: the page must not use them.
 _NO_DIALOGS = (

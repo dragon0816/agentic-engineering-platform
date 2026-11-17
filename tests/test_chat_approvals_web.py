@@ -48,17 +48,18 @@ def test_the_owner_decides_over_http_and_the_result_joins_the_conversation(
         )
 
     asked = asyncio.run(ask())
-    assert asked.status == "awaiting_approval" and recorder.calls == []
-    assert isinstance(asked.data, dict)
+    assert asked.status == "succeeded" and recorder.calls == ["2026-09"]
+    assert chat.approvals(context.actor, session_id=session_id) == []
+    historical = chat.request(context.actor, session_id, "run", candidate, {"month": "2026-10"})
 
     listed = fetch(url + "/api/approvals?session_id=" + session_id, token=token).json()
     (pending,) = listed["approvals"]
-    assert pending["approval_id"] == asked.data["approval_id"]
+    assert pending["approval_id"] == historical.approval_id
     unauthenticated = fetch(
         url + "/api/approvals/decide",
         body={"approval_id": pending["approval_id"], "decision": "approve"},
     )
-    assert unauthenticated.status == 401 and recorder.calls == []
+    assert unauthenticated.status == 401 and recorder.calls == ["2026-09"]
 
     decided = fetch(
         url + "/api/approvals/decide",
@@ -66,7 +67,7 @@ def test_the_owner_decides_over_http_and_the_result_joins_the_conversation(
         body={"approval_id": pending["approval_id"], "decision": "approve"},
     ).json()
     assert decided["ok"] and decided["approval"]["status"] == "approved"
-    assert recorder.calls == ["2026-09"] and "已核准並執行" in decided["text"]
+    assert recorder.calls == ["2026-09", "2026-10"] and "已核准並執行" in decided["text"]
     shown = fetch(url + "/api/conversations?session_id=" + session_id, token=token).json()
     messages = shown["selected"]["messages"]
     assert [m["role"] for m in messages[-2:]] == ["user", "assistant"]
@@ -97,7 +98,10 @@ def test_external_submissions_wait_in_their_own_list_with_the_whole_draft(
     served.web.runtime.chat_authoring = authoring.chat
     external = ExternalAuthoring(authoring.chat, actor, "claude-code")
     submitted = external.submit_skill(skill(), "Echo helper")
-    asked = external.install_skill(str(submitted["candidate_id"]))
+    historical = authoring.chat.request_skill_install(
+        actor, str(submitted["candidate_id"]), source="external:claude-code"
+    )
+    asked = {"approval_id": historical.approval_id}
     url, token = base(served), served.token
     (item,) = fetch(url + "/api/approvals/external", token=token).json()["approvals"]
     assert item["source"] == "external:claude-code" and item["kind"] == "install_skill"
@@ -132,7 +136,8 @@ def test_the_owner_sees_drafts_not_yet_installed_and_installs_or_deletes_them(
     wf = mine.submit_workflow(workflow("write-it"), "Echo")
     sk = mine.submit_skill(skill(), "Echo helper")
     ran = mine.run_workflow(str(wf["candidate_id"]), {"month": "09"})
-    authoring.chat.decide(str(ran["approval_id"]), actor, True)
+    assert ran["ran"] is True and isinstance(ran["run"], dict)
+    assert ran["run"]["status"] == "succeeded" and recorder.calls == ["09"]
     url, token = base(served), served.token
     listed = fetch(url + "/api/drafts", token=token).json()["drafts"]
     assert {d["kind"] for d in listed} == {"workflow", "skill"}
@@ -145,13 +150,13 @@ def test_the_owner_sees_drafts_not_yet_installed_and_installs_or_deletes_them(
     ).json()
     assert installed["ok"] and installed["installed_as"] == "engineering/echo-month@1.0.0"
     assert (tmp_path / "workflows" / "engineering__echo-month__1.0.0.json").is_file()
-    asked = mine.install_skill(str(sk["candidate_id"]))
     deleted = fetch(
         url + "/api/drafts/delete", token=token, body={"candidate_id": sk["candidate_id"]}
     ).json()
     assert deleted["ok"]
     assert fetch(url + "/api/drafts", token=token).json()["drafts"] == []
-    assert authoring.chat.approval(str(asked["approval_id"]), actor).status == "rejected"
+    assert authoring.chat.approvals(actor) == []
+    assert not (tmp_path / "skills" / "engineering__echo-helper__1.0.0.json").exists()
     unknown = fetch(url + "/api/drafts/install", token=token, body={"candidate_id": "wf-x"})
     assert unknown.status == 409 and unknown.json()["code"] == "candidate_unknown"
     assert recorder.calls == ["09"]

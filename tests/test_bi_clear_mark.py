@@ -9,8 +9,8 @@ from typing import Any
 import pytest
 from test_bi_vault import _call, _ok, _two_pcs
 
-from capabilities.bi_cards import catalog, importer, quality, vault
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import catalog, importer, quality, vault
+from aep_bi.cards.store import BiStore
 
 
 def _csv(ws: Path, dataset: str, text: str) -> None:

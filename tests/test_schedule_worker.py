@@ -56,21 +56,21 @@ def allow(record: ScheduleRecord, trace: TraceIdentifiers) -> ExecutionAuthoriza
     )
 
 
-def test_without_exact_execution_approval_nothing_runs(tmp_path: Path) -> None:
+def test_without_legacy_approval_the_owned_installed_workflow_runs(tmp_path: Path) -> None:
     resident, runner = agent(company(), tmp_path)
     with SqliteScheduleStore(tmp_path / "schedules.sqlite", bridge_id="bridge-company") as store:
         store.create(definition(), now=DUE)
         worker = ScheduleWorker(store, resident)
         result = asyncio.run(worker.poll_once(now=DUE))
         assert len(result) == 1
-        assert result[0].status == "needs_input"
-        assert result[0].result_code == "schedule_approval_required"
-        assert runner.bridge.events == ()
-        assert resident.runs() == ()
+        assert result[0].status == "succeeded"
+        assert result[0].result_code == "workflow_succeeded"
+        assert runner.bridge.events
+        assert len(resident.runs()) == 1
     resident.state.close()
 
 
-def test_mismatched_approval_cannot_authorize_a_different_target(tmp_path: Path) -> None:
+def test_legacy_authorizer_cannot_replace_the_saved_owned_target(tmp_path: Path) -> None:
     resident, runner = agent(company(), tmp_path)
     wrong = AssetIdentity(namespace="engineering", name="other", version="1.0.0")
 
@@ -87,9 +87,10 @@ def test_mismatched_approval_cannot_authorize_a_different_target(tmp_path: Path)
         store.create(definition(), now=DUE)
         worker = ScheduleWorker(store, resident, authorizer=mismatched)
         result = asyncio.run(worker.poll_once(now=DUE))
-        assert result[0].status == "needs_input"
-        assert result[0].result_code == "schedule_approval_required"
-        assert runner.bridge.events == ()
+        assert result[0].status == "succeeded"
+        assert result[0].result_code == "workflow_succeeded"
+        assert all(event.asset != wrong for event in runner.bridge.events)
+        assert runner.bridge.events
     resident.state.close()
 
 
@@ -108,16 +109,16 @@ def test_approved_exact_workflow_runs_through_agent_and_bridge(tmp_path: Path) -
     resident.state.close()
 
 
-def test_schedule_approval_does_not_bypass_bridge_grants(tmp_path: Path) -> None:
+def test_schedule_does_not_need_application_bridge_grants(tmp_path: Path) -> None:
     resident, runner = agent(company(), tmp_path)
     runner.bridge.policy = LocalPolicy(())
     with SqliteScheduleStore(tmp_path / "schedules.sqlite", bridge_id="bridge-company") as store:
         store.create(definition(), now=DUE)
         result = asyncio.run(ScheduleWorker(store, resident, authorizer=allow).poll_once(now=DUE))
-        assert result[0].status == "failed"
-        assert result[0].result_code == "permission_denied"
+        assert result[0].status == "succeeded"
+        assert result[0].result_code == "workflow_succeeded"
         assert runner.bridge.events
-        assert all(event.code == "permission_denied" for event in runner.bridge.events)
+        assert all(event.code is None for event in runner.bridge.events)
     resident.state.close()
 
 

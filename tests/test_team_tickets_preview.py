@@ -182,7 +182,23 @@ def test_workflow_7_uses_jira_bearer_and_policy_without_a_workbook(tmp_path: Pat
     assert not any(tmp_path.rglob("*.xlsx"))
 
     layout.grants.write_text("[]", encoding="utf-8")
-    denied_transport = ScriptedTransport([])
+    denied_transport = ScriptedTransport(
+        [
+            Reply(200, {"issues": [issue(1)], "total": 1}),
+            Reply(
+                200,
+                {
+                    "comments": [
+                        {
+                            "created": "2026-10-03T08:00:00.000+0800",
+                            "author": {"displayName": "Leo"},
+                            "body": "progress",
+                        }
+                    ]
+                },
+            ),
+        ]
+    )
     with build_runtime(
         config,
         layout=layout,
@@ -194,8 +210,11 @@ def test_workflow_7_uses_jira_bearer_and_policy_without_a_workbook(tmp_path: Pat
                 request.model_copy(update={"idempotency_key": "workflow-7-jira-denied-1"})
             )
         )
-        assert denied.workflow is not None and denied.workflow.run.status != "succeeded"
-    assert denied_transport.calls == []
+        assert denied.workflow is not None and denied.workflow.run.status == "succeeded"
+        repeated = TeamTicketsPreview.model_validate(denied.workflow.step_results[-1].data)
+        assert repeated.records[0].values["Reporter"] == "Leo"
+    assert len(denied_transport.calls) == 2
+    assert denied_transport.calls[0]["headers"]["Authorization"] == "Bearer fixture-token"
 
 
 def test_comment_failure_is_visible_without_losing_other_issue_rows() -> None:

@@ -1,17 +1,8 @@
-"""Workflow authoring sessions (owner design B, 2026-10-06; SOP_TO_WORKFLOW W5).
+"""Legacy SOP authoring records with direct local installation.
 
-One durable record per effort to turn an SOP into a Workflow, under
-`<workspace>/authoring/<id>/`: the SOP (an uploaded PDF is kept beside the
-record), the discussion, the current draft, the open questions, the settings
-the owner entered for this computer and the last preview.
-
-    drafting -> needs_input -> ready -> previewed -> installed
-
-The model drafts and asks; it never approves or installs. `install` is a
-host action reached only from the owner's Agent Web page: it requires a
-preview of exactly the current draft that changed nothing and failed
-nowhere, writes the Workflow as published with the owner's approval, its
-settings, and the grants its steps need, and asks for a restart.
+Preview is optional evidence of a plan, never proof that writes ran successfully.
+Installation uses valid local manifests and retains pending business review;
+normal OS/service controls apply, without AEP grants or approval cards.
 """
 
 from __future__ import annotations
@@ -26,14 +17,14 @@ from typing import Literal
 
 from pydantic import Field, JsonValue
 
-from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
+from capabilities.runtime import InstalledCapabilities
 from capabilities.workflow_author.conversation import AuthoringTurn, author_turn
 from capabilities.workflow_author.handlers import sop_pdf_text
 from common.assets import WorkflowManifest, WorkflowStep
 from common.base import Contract, Symbol, Text
 from common.execution import TraceIdentifiers
 from host_runtime.workflow_settings import WorkflowSettingsStore
-from host_runtime.workspace import documents, write_atomically
+from host_runtime.workspace import write_atomically
 from models.contracts import ModelClient
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine, WorkflowPreview
@@ -241,14 +232,7 @@ class AuthoringStudio:
         draft = session.draft
         workflows = InstalledWorkflows()
         workflows.register(draft)
-        # The grants install would add, and nothing else: the preview shows
-        # what the installed Workflow would do, for this actor only.
-        trial = BridgeExecutor(
-            bridge.installed,
-            LocalPolicy(self._grants(draft, actor, f"authoring-preview:{session_id}")),
-            timeout_seconds=bridge.timeout_seconds,
-        )
-        engine = WorkflowEngine(workflows, trial, settings_provider=lambda _manifest: settings)
+        engine = WorkflowEngine(workflows, bridge, settings_provider=lambda _manifest: settings)
         import asyncio
 
         from common.execution import RequestContext
@@ -276,17 +260,14 @@ class AuthoringStudio:
         )
 
     def install(self, session_id: str, actor: str) -> tuple[AuthoringSession, Path]:
-        """The owner's approval. Never reachable by the model."""
+        """Install a valid local draft without fabricating review or trial success."""
         session = self.load(session_id, actor)
         draft = session.draft
-        if (
-            draft is None
-            or session.preview is None
-            or session.status != "previewed"
-            or session.preview.status != "previewed"
-            or session.preview_of != _digest(draft)
-        ):
-            raise AuthoringError("authoring_preview_required")
+        if draft is None:
+            raise AuthoringError("authoring_no_draft")
+        for step in draft.steps:
+            if isinstance(step, WorkflowStep) and self.installed.get(step.capability) is None:
+                raise AuthoringError("capability_not_installed")
         identity = draft.metadata.identity
         name = f"{identity.namespace}__{identity.name}__{identity.version}.json"
         target = self.workflows_dir / name
@@ -295,13 +276,14 @@ class AuthoringStudio:
         metadata = draft.metadata.model_dump(mode="json")
         metadata.update(
             {
-                "lifecycle": "published",
-                "business_approval": {
-                    "status": "approved",
-                    "reviewer": actor,
-                    "evidence": f"authoring-session:{session_id}",
-                },
-                "validation_refs": [f"authoring-preview:{session_id}:{session.preview_of}"],
+                "lifecycle": "draft",
+                "business_approval": {"status": "pending"},
+                "validation_refs": [f"authoring-draft:{session_id}:{_digest(draft)}"]
+                + (
+                    [f"authoring-preview:{session_id}:{session.preview_of}"]
+                    if session.preview is not None and session.preview_of == _digest(draft)
+                    else []
+                ),
             }
         )
         published = WorkflowManifest.model_validate(
@@ -316,7 +298,6 @@ class AuthoringStudio:
         )
         if session.settings:
             self.settings_store.save(identity, session.settings)
-        self._add_grants(published, actor, f"authoring-session:{session_id}")
         installed = self._save(
             session.model_copy(
                 update={
@@ -326,44 +307,3 @@ class AuthoringStudio:
             )
         )
         return installed, target
-
-    # -- grants ------------------------------------------------------------
-
-    def _grants(
-        self, manifest: WorkflowManifest, actor: str, ref: str
-    ) -> tuple[CapabilityGrant, ...]:
-        grants: dict[tuple[str, str, str], CapabilityGrant] = {}
-        for step in manifest.steps:
-            if not isinstance(step, WorkflowStep):
-                raise AuthoringError("authoring_nested_workflow")
-            binding = self.installed.get(step.capability)
-            if binding is None:
-                raise AuthoringError("authoring_capability_missing")
-            grants[step.capability.key] = CapabilityGrant(
-                actor=actor,
-                asset=binding.spec.identity,
-                permissions=binding.spec.policy.required_permissions,
-                policy_refs=binding.spec.policy.policy_refs,
-                approval_ref=ref,
-            )
-        return tuple(grants.values())
-
-    def _add_grants(self, manifest: WorkflowManifest, actor: str, ref: str) -> None:
-        existing = (
-            [CapabilityGrant.model_validate(item) for item in documents(self.grants_file)]
-            if self.grants_file.is_file()
-            else []
-        )
-        have = {(grant.actor, grant.asset.key) for grant in existing}
-        added = [
-            grant
-            for grant in self._grants(manifest, actor, ref)
-            if (grant.actor, grant.asset.key) not in have
-        ]
-        if not added:
-            return
-        payload = [grant.model_dump(mode="json") for grant in (*existing, *added)]
-        write_atomically(
-            self.grants_file,
-            (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
-        )

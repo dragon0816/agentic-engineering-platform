@@ -7484,3 +7484,462 @@ no sleep/timeout padding, no session churn to renew chances. Harness scope follo
 AGENTS22 and is NOT granted: stop with evidence, minimal scope and regression checks.
 Platform note: the normal reopen on new user input resets repair_attempts from 3 to 0;
 trials remain owner-approval gated and each run is recorded.
+
+## 2026-11-12 — Stage remote integration with a Knowledge non-regression gate
+
+Owner accepted the recommendation with「先按你的建議執行」and added that
+usable Workflow generation must not lower Knowledge asking quality. Authorized
+first slice: ae1becf3 safe numeric Outlook diagnostics,3b3da4d5 explicit opt-in
+for live Outlook tests,c0553d76 queued-message feedback. Keep e564e1ad chat
+Workflow persistence out of implementation; assess it separately under AGENTS22.
+Its deterministic form/state path cannot be made durable by Skill wording, but
+that causal finding is not permission to merge the harness feature.
+
+Integrate in a native managed worktree from verified097b2521, preserve its C4C
+history, compare the same Knowledge cases before/after, and require full checks
+before pushing the verified branch. Do not modify the resident or run live
+mailbox/C4C tests. Normal Knowledge retrieval/routing/prompts/evidence/scope and
+authoring isolation stay unchanged. Any observed regression blocks delivery;
+record limitations rather than promise every stochastic model answer is identical.
+Rejected: merge all remote commits because source text auto-merges, force-push
+main, weaken tests, or use the earlier package's verification for new code.
+## 2026-11-07 — Diagnose Outlook draft failures without logging mail content
+
+The SDE run on the owner's host reached `weekly-report/apply` successfully, then
+`weekly-report/mail` failed with `draft_failed` after 392164.4 ms. The saved run and
+telemetry prove execution continued after navigation. They do not identify the
+failing COM operation or HRESULT: the draft adapter discarded every underlying
+exception. Existing stderr contains no usable numeric diagnosis for that failure.
+Do not label this historical failure an Outlook environment fault or an adapter
+logic fault without evidence, and do not retry a real draft to investigate it.
+
+The draft adapter now logs a fixed stage plus numeric HRESULT/scode, including
+COM-apartment failure. It retains the public `draft_failed` contract. No exception
+message, traceback, subject, recipient, file path or environment value is logged.
+A synthetic COM failure regression first failed with empty diagnostics, then passed
+with the numeric codes and explicit assertions excluding private exception text.
+Rejected: printing COM exceptions, automatically retrying mailbox writes, or
+changing business success semantics to hide the failed draft.
+
+## 2026-11-07 — Collect ordinary tests without probing live Outlook
+
+The full suite hung during collection in `_outlook_running` at
+`win32com.client.GetActiveObject`, even with AEP_GUI_TESTS=0. Its two skip
+conditions called real COM before pytest could skip anything. A controlled
+subprocess replacing GetActiveObject recorded two calls on the old source and
+zero after the fix.
+
+Live Outlook tests require explicit `AEP_OUTLOOK_TESTS=1` and Windows. Collection
+checks only those conditions; the opted-in test body may then check that Outlook
+is already running. The same original mailbox/thread assertions remain. Default
+unit and CI collection never reads the person's mailbox or waits on Outlook.
+Rejected: allowing an unbounded live COM probe during collection, deleting the
+live tests, or using real mailbox operations to diagnose an unrelated test run.
+No Outlook process was restarted or stopped; only this task's blocked pytest
+processes were stopped before retrying the inert suite.
+## 2026-11-12 — Package the accepted Sales Order assets through existing distribution
+
+Owner requested a Windows AEP package containing the accepted Sales Order Workflow,
+its related Skills and operator instructions. Use the existing offline builder and
+bundled-asset installer; no harness, permission or business-script edit is needed.
+Preserve the published asset bodies and record their draft/approval provenance.
+Exclude source rows, generated reports, employee mapping contents, credentials and
+personal Host/browser configuration. The original absolute workstation paths and
+SOP period/rates remain explicit limitations, not an implicit portability claim.
+Cross-workstation revision and trial remain normal AEP operations. Do not change
+the installed resident or origin/main while preparing the package. Runtime source
+is the selected low-risk integration; excluded e564e1ad remains excluded.
+
+## 2026-11-12 — Isolate Gateway settings during offline package checks
+
+The packaging canary showed that GatewayInstallOnly suppresses service startup
+but still initializes the shared user Gateway configuration. Future canaries
+must explicitly isolate AEP_GATEWAY_HOME and omit user-env export, or use the
+existing NoGateway option. This workstation intentionally uses an external
+unmanaged Gateway; its normal AEP update instructions now use update.cmd
+-NoGateway. These existing procedure controls solve the issue without modifying
+the installer or harness.
+
+This test initially failed to isolate the home: shared python referenced the
+canary and YAML was regenerated. No pre-test backup existed, so exact restoration
+cannot be asserted. Normal CLI functional normalization points python at the
+verified already-running external Gateway interpreter; managed=false,11models
+and other settings matched the post-canary backup, rendered YAML bytes stayed
+unchanged during repair, and the original external PID/starttime did not change.
+No service/token/user-env operation was performed. Preserve this limitation in
+the package acceptance report rather than describing the canary as state-free.
+## 2026-11-12 — IT owns tool availability; remove AEP tool approvals
+
+Owner direction:「我們在開發階段，不要有這麼多限制，我想要讓Agent可以AEP裡面的所有工具，並且可以安裝任何的工具，除非這個工具是這台電腦不能使用了，這是由公司的IT人員來決定，寫這一個application不做這種工具管控的設計。」
+Explicit clarification:「取消工具安裝與執行核准，由公司 IT 控制」.
+
+This changes the product policy for local tool/Skill/Workflow installation and
+tool execution, including send/delete/external writes: no AEP per-tool grants,
+installation approval or per-call approval/risk gate. IT-managed OS/service
+identities and the actual execution environment decide what can run. Do not
+implement a development auto-approve flag while retaining the unwanted control
+layer as the target architecture. This direction supersedes the earlier local
+tool approval decisions to this extent; publishing shared assets and model/data
+routing are separate and are not silently changed by it.
+
+Policy consent is explicit. Implementation consent under AGENTS22 is a separate
+checkpoint: the concrete Skill-first causal evidence, minimal harness surfaces,
+alternatives, boundaries and regression matrix are recorded in
+IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md and presented for review. Live read-only
+Skill probes already prove instructions cannot bind the unregistered Outlook
+search/read capabilities; source registration/grant/install checks run outside
+Skill reasoning. No harness/config/runtime change has been made before the
+owner reviews that concrete scope. Keep user intent, truthful evidence,
+at-most-once effects and the Knowledge regression baseline intact.
+## 2026-11-12 — Approve the concrete IT-owned tool harness scope
+
+Owner answered「同意上述 harness 範圍並開始實作」to the question covering:
+unified Bridge/MCP/backend registration and visibility; removing AEP tool grants,
+installation/execution approvals and extra command/folder/mail restrictions;
+agent installation/connection and same-session use; preserving truthful results,
+at-most-once effects and Knowledge evidence/citations, without changing model
+data classification. Skill-first evidence, minimum surfaces and regressions were
+presented in IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md before this consent.
+
+This is AGENTS22 implementation consent for that concrete scope. It is not a
+claim that IT approved an individual tool or a delegation to change model/data
+policy, shared publishing, unrelated chat-form persistence or the running
+resident. Work proceeds on it-owned-tool-access-20261112, managed worktree
+wks_9e3f85169bdceb9b, with contract/red-green/verification stages in the plan.
+
+
+## 2026-11-12 — Direct tool execution preserves evidence rather than approval artifacts
+
+Within the owner's already approved four-part IT-owned harness scope, normal
+browser repair probes and actual trial-input continuation use persisted trial
+identity/history and effective inputs, not historical approval records. A red
+fixture proved a direct failed trial could not continue despite valid evidence;
+removing that admission check preserves the same QA inputs and existing actor/
+session/digest/history conflict tests. Old explicit card APIs remain history and
+are never automatically approved/replayed. A probe never verifies a Workflow.
+
+The legacy SOP Studio also installs local valid drafts without a preview gate,
+grant or fictional business reviewer. Preview is plan evidence, not a passed full
+trial. Local availability, actual verification and shared business publication are
+separate, as in the approved design. Reject the alternative of automatically
+approving cards or marking every install published/verified: it fabricates evidence.
+
+Native CLI tests that might inherit actual IT credentials are explicit opt-in
+(AEP_NATIVE_CLI_TESTS=1), with ordinary regression coverage using fake CLI/ACP/MCP
+and existing model/data-policy assertions. The application no longer rewrites
+provider safeguards/settings; this is not permission to bypass external guards.
+No live mail/send is used for implementation acceptance. Details and raw evidence:
+IT_OWNED_TOOL_ACCESS_LEDGER_20261112.md and its .scratch verification paths.
+
+
+### 2026-11-12 — Preserve result eligibility while removing tool admission
+
+Within the owner's explicitly approved IT-owned tool-access harness scope,
+new generic native MCP calls execute without AEP grants/cards, but return status
+only with an explicit `result_eligibility_not_established` diagnostic when no
+result classification and eligible receiving-model route is established. Native
+initial-history checks do not classify later arbitrary tool results. Rejected:
+implicitly treating unknown results as PUBLIC, broadening an older Copilot data
+approval to Codex/Claude, or reintroducing tool approval. Gateway and existing
+Knowledge data routes remain separate; no model classification rule is changed.
+Evidence and regression boundaries are in the IT_OWNED_TOOL_ACCESS ledger.
+Historical pending approval records remain history, never current task proof.
+
+
+### 2026-11-13 — Preserve version and execution truth under IT-owned tools
+
+Within the owner's November12 scoped harness consent, retained Skill versions
+remain rollback evidence: use exact profile versions when a profile is active,
+otherwise the explicit procedure-version preference or highest installed SemVer.
+This chooses guidance, not tool permission. Removed the surviving capability-
+selection prerequisite from profile activation; Skill/Knowledge references and
+model endpoint eligibility remain. Actual Bridge errors decide unavailable tools.
+
+Direct authoring records real metadata without approval cards or quality claims.
+Its shared async execution lease prevents duplicate workflow IDs across native
+threads; successful outcomes survive display-metadata lock contention. Replayed
+old revisions cannot borrow current verification. Rejected fake approval records,
+using display receipts as verification, and reintroducing tool grants. Causal
+red/green evidence and first full results are in the IT-owned tools ledger.
+
+
+### 2026-11-13 — Remove the remaining BI-local code execution approval
+
+The same November12 scope includes BI data-processing tools, not only Bridge
+capability grants/MCP. Three causal tests proved the per-PC hash approval branch
+still blocked local runs. Removed that gate and the corresponding prompt/UI
+permission step; historical reviews remain history, never auto-approved. This
+does not change the purpose-specific read-only source/output contract, source
+classification/lineage/withdrawal, model eligibility or Knowledge card review.
+A Skill cannot change the runtime approval branch. See the BI addendum and55
+actual runtime/UI/agent/guard regressions; the ongoing core full predates this
+local delta and is not claimed as its acceptance evidence.
+
+### 2026-11-13 — Record combined verification without expanding session I/O scope
+
+The final core full had two long-root failures, not an all-green result. Keep the
+raw reports and reconcile exact cases with separately named BI and long-path
+reruns. Isolate the long-destination-path test's input fixture from pytest root
+depth, preserving all destination-length/Raw/publication/digest assertions.
+Generic session atomic writes also fail beyond Win32's path limit; baseline and
+current writer controls both reproduce it, and both writer/authoring-task modules
+are unchanged. Normal short-root Knowledge conversation module6passed. Record
+this existing limitation instead of silently expanding the approved harness
+scope into unrelated state persistence, raising timeouts or weakening assertions.
+Combined current-case evidence6726passed15skipped is not a single full-run claim.
+All445baseline Knowledge cases/outcomes match after the named fixture rerun;
+this deterministic evidence is not proof of stochastic model answer quality.
+
+### 2026-11-13 — Tool usability does not require an IT approval layer
+
+Owner clarification:「不用保留IT，在電腦上可以執行，就可以用」.
+AEP requires neither IT approval nor IT identity/management enrollment nor an
+IT-managed tool allowlist. Tools usable at their execution environment can be
+installed/connected and called directly; actual OS/service errors remain real.
+This supersedes the earlier phrase「由公司 IT 控制」as an application prerequisite;
+historical quotes and phase filenames are retained for traceability. Code review
+found no IT authorization branch: LocalPolicy already allows the authenticated
+call independently of old grants. This follow-up aligns UI, bundled Skill and
+native-agent wording, audit copy and current requirements with that behavior;
+no routing, permission logic, model/data classification or Knowledge change.
+Rejected adding an IT approval service or interpreting an execution failure as
+policy approval. Existing provider guards are not bypassed by the coding agent.
+
+### 2026-11-13 — Record feature-plugin assessment without implementation consent
+
+Owner requested structural assessment of packaging GUI, processing, databases,
+Skills, tools and Workflows as installable plugins, and clarified that both LLM
+Wiki and BI Knowledge plus future features are in scope. Assessment is recorded
+in FEATURE_PLUGIN_ASSESSMENT_20261113.md. The proposed generic plugin contract,
+worker/Web mounting and staged BI/Wiki extraction are recommendations, not an
+approved architecture change or harness implementation consent. First install
+would require an AEP version supporting the plugin API; compatible feature
+updates can then be separate packages. Preserve current Knowledge evidence and
+asking behavior, shared repo/version primitives and user-owned state. Do not
+copy legacy ExtensionActivationApproval into the new no-approval installer;
+its existing activation path is an identified gap, untouched in this assessment.
+
+### 2026-11-13 — Authorize reviewed generic Feature Plugin Slice 1
+
+Owner:「你先把這個計劃丟給 Claude code review，沒問題後，請 push 評估文件，
+並開始開發，有些可以平行處理的部分請開多個 subagent 來處理」；follow-up:
+「開 sub Agent，優先開 Claude code」. This is contextual consent to the presented
+plan after review, not blanket consent for future harness changes. Claude Code
+reviewer63582bfb-e29f-4ebb-88c2-2b0c062e2eaf re-reviewed the amended proposal and
+returned Critical0/Important0, READY (message b988e3e8-8a6a-4acd-8772-a906d4234bb6).
+
+Scope is the generic fixture-only Slice1 documented in FEATURE_PLUGIN_ASSESSMENT:
+typed manifest/inert package, per-plugin worker manager and ownership ledger,
+direct authenticated install/enable/disable/uninstall, generic authenticated
+namespace API proxy, core-rendered declarative pages, generic startup/route/UI
+hooks in host.py/web.py/web_page.py. Skills cannot add these statically wired
+routes/mounts/registrations; source causal evidence is in the assessment. Record
+this consent BEFORE code. Preserve existing per-turn receipts/identity and model
+data/Knowledge rules. No publisher JS/HTML/iframe, no durable effect ledger,
+no BI/Wiki extraction, no Knowledge routing/provider changes, no legacy Extension
+manager or Gateway modification, no main merge/resident/shared Gateway update.
+No per-install/IT/owner-only permission gate. Use current interpreter/available
+dependencies without installing into the AEP venv. Future scope requires new
+consent. Reviewer withdrew its initial owner-only install suggestion as contrary
+to the direct-install contract. Parallel workers prefer actual Claude Code;
+freeze common contract first and give exclusive files to each worker.
+
+### 2026-11-14 — Freeze generic plugin Slice 1 after independent source review
+
+Implementation remains inside the previously consented fixture-only scope.
+Independent Claude Code review initially reproduced a junction-cleanup data-loss
+bug against synthetic files, dependency-upgrade breakage and failed/interrupted
+upgrade asset loss. These were fixed with workspace-anchored ownership checks,
+active-dependent update refusal, pending/retiring recovery and ledger-first
+teardown. Preserve old asset locations and user edits rather than rebuilding or
+unconditionally deleting them. Lazy worker restart rechecks exact staged bytes;
+Python3.11 detects junctions via the reparse tag when Path.is_junction is absent.
+The latter has a simulated missing-API RED/GREEN test, not a real Python3.11 run.
+Final Claude reviewer 46cc8ffd reports no Critical/Important findings, including
+the final compatibility delta. Ordinary environment remains available to workers;
+separate process is not a security sandbox. No new permission gates or signer list.
+
+Rejected alternatives: trusting resolved containment alone (misses an internal
+junction), deleting previous assets before committing the replacement, silently
+upgrading an exact dependency, or executing modified staged code on worker restart.
+Known limits accepted as nonblocking: late post-commit live-refresh errors can
+leave stale live entries until safe restart; configured active status can persist
+while changed-package restart calls correctly fail. See usage/contracts.
+
+All-plugin aggregate: 231 passed, 1 skipped (symlink creation privilege); real
+junction tests and headless browser executed. Global Ruff/format/mypy pass and
+pipcheck reports no broken requirements. Same445 deterministic Knowledge cases
+pass with identical outcomes; 46 source files unchanged. Full suite is RUNNING,
+not yet a pass. Source freeze records1696 files under .scratch/plugin-slice1.
+No BI/Wiki extraction, resident update, main merge or shared venv/Gateway change.
+
+### 2026-11-14 — Repair final plugin UI regression and stale direct-use test wording
+
+Full suite original: 6954 passed,3 failed,16 skipped. Independent verifier preserved
+raw failures and proved all445 Knowledge cases and46 source files unchanged.
+Move the complete Plugin panel after Reviews so BI's existing main-path boundary
+stays intact; do not change its test. Two other failures are stale expectations
+from a902df0f's owner-approved removal of the IT prerequisite. Require exact
+OS/service wording and additionally assert old IT wording absent. This aligns
+policy and strengthens assertions, rather than restoring the unwanted IT text.
+No execution/harness control flow or Knowledge changes. Fresh Claude review:
+zero Critical/Important. All176 affected module cases pass, including browser.
+Keep the original full failure; no second full execution or false full-green claim.
+Build/wheel smoke and pipcheck pass. Source archive includes its builder helper.
+
+### 2026-11-14 — Begin BI overview preparation; no new harness consent inferred
+
+Owner:「請執行下個階段的實作」. Proceed with non-harness domain preparation on
+phase-plugins/bi-facade-20261114. Prior consent explicitly excluded BI/Wiki and
+AGENTS22 says general implementation authorization is not harness consent.
+Read-only Claude investigations identify a concrete risk: BiStore construction,
+published reads and searches may rebuild/sync/write caches; repository RLocks
+are per-process. Reject directly calling existing BI services from a concurrent
+worker. Use ADAPT for a strictly bounded metadata reader and characterization;
+preserve authoritative BI query/provenance, data paths and the existing UI.
+
+Propose the smallest installed overview slice with two optional compatible
+contracts: declared BI data context and a UI-only read service contribution
+without a new model tool. Skills can guide citation/queries but cannot add the
+statically absent worker context or change registration. Exact proposed files,
+risks, old-v1 digest equivalence and tests are in
+FEATURE_PLUGIN_BI_OVERVIEW_PLAN_20261114.md. This is a proposal awaiting owner
+scope consent, not an approved harness change. Full BI UI/service extraction,
+Wiki/provider moves, task/model-data/routing changes remain excluded.
+
+Original Slice1 CI43537708699 failed2tests (BI version viewport and weekly draft
+status), plus artifact quota and one helper import-order error. Local Ruff cache
+had obscured the latter after package discovery. Reproduced with --no-cache and
+fixed only imports in95d003fd; no tests weakened. Use uncached lint for future
+source-tree changes. Keep original CI/local results; no claim CI was green.
+
+Preparation closed locally:28 tests pass, uncached Ruff/format and mypy1144 pass;
+core source unchanged,46Knowledge hashes unchanged. Claude reviewer46cc8ffd
+approved plan for presenting consent and the reader delta with no Critical/
+Important findings. Actualv1 package and10-file install ledger/stage snapshot
+preserved before any schema edits. Exact scope question H1/H4 sent through async
+input tool; owner response still pending. No scope consent recorded, no core
+change made, no full BI/Wiki extraction or installation claimed. Reader budget
+is a cooperative lock-wait bound, not hard interruption of all query/filesystem
+work; conservative leftover-journal refusal remains documented.
+
+### 2026-11-15 — Owner explicitly authorizes H1/H4 only
+
+Owner response to the exact scope question:
+「同意僅 H1／H4 並繼續」.
+
+This explicitly authorizes the reviewed scope in
+FEATURE_PLUGIN_BI_OVERVIEW_PLAN_20261114.md: optional declared existing-BI data
+context; UI-only read service contribution without Bridge/model registration;
+old-v1 package/digest compatibility; only common/plugins.py and
+plugins/{manager,process}.py plus associated tests/plugin source/packaging.
+Evidence that Skill changes cannot implement closed manifest/process bindings or
+registration is in that plan; path derivation was considered and rejected as an
+undeclared coupling, not claimed impossible. Golden v1 fixtures are committed
+before schema changes. No new Host/Web/Telegram/BI/Wiki/Knowledge routing, data
+approval, tool-install gate, database migration or executable GUI changes.
+Record this owner consent BEFORE any harness implementation. Domain preparation
+is committed through129021ca; core implementation may now begin within this scope.
+
+Owner also asks「幫我打開Hermes agent」. Handle this as an ancillary app-open
+request; it does not cancel H1/H4 development or authorize additional changes.
+
+### 2026-11-15 — Freeze approved H1/H4 contract
+
+common/plugins.py now implements API1.1, optional data.reads and page-service
+contribution exposure. Only the two new fields are omitted at their defaults;
+all pre-existing defaults and golden v1 package/digests remain unchanged. Parent
+independently ran contract/manifest/golden tests:89 passed9.24s. No new manager,
+worker, UI or Knowledge acceptance is inferred from contract tests.
+
+Parallel next work, exclusive owners:4cfe1b4e manager/process+runtime tests,
+9ba0d06a stdlib overview worker/manifest/builder+package tests,
+63582bfb independent HTTP/ToolAccess/Knowledge coexistence tests. Parent owns
+MANIFEST.in, documentation and final verification; shared Host/Web/Knowledge
+sources remain outside consent. Existing BI reader stays frozen. Independent
+final source review and full regression/build follow component integration.
+
+### 2026-11-15 — Freeze H1/H4 implementation for final regression
+
+Source0daf0b4449da04434733466fc6fd2c55f61c72ab contains the approved3core-file
+change only. Fresh Claude review returned0Critical/Important. Components302pass/
+1symlink skip; HTTP3pass and browser1pass; clearer local-copy total label followed
+by20passing package/browser cases. Uncached Ruff/format1524 and mypy1151 pass.
+Full run ACTUALLY started as session24579 with unique full-20261115.log/xml/exit
+under .scratch/plugin-bi. No full pass/build/445comparison claimed yet. Frozen
+1714 source/input files; no further implementation until concrete failures.
+Verifier63582bfb waits on the exact exit marker, then reports originals and,
+only if green, builds/checks artifacts. Preserve first failures; no weakened tests,
+no duplicate full run, no company models, resident/main/Gateway/venv changes.
+
+### 2026-11-15 — Accept approved H1/H4 source after original full pass
+
+Source0daf0b4449da04434733466fc6fd2c55f61c72ab completed the first full run with
+7029passed16environment skips,0failures/errors (1:52:47), no reruns. Independent
+verifier63582bfb confirmed exact445 Knowledge case IDs/outcomes unchanged and
+46Knowledge source hashes unchanged;1714 frozen files unchanged after full.
+Build and pipcheck pass;580wheel Python files match source after newline-only
+normalization; fresh isolated target imports API1.1 without shared-venv rebinding.
+Sdist contains exact BI worker/manifest/builder/example and golden-v1 bytes.
+Only generated egg-info changed afterbuild. No code repairs after full.
+
+Acceptance and limitations: FEATURE_PLUGIN_BI_ACCEPTANCE_20261115.md/json.
+This completes only the explicitly approved H1/H4 metadata-overview slice, not
+BI/Wiki extraction or executable plugin UI. Preserve older CI failures as history;
+no real-model quality guarantee. No main merge/resident/Gateway update performed.
+Owner additionally requested opening AEP Agent Web; existing desktop shortcut
+opened successfully and HTTP200 confirmed at localhost53583, without changing
+its installed version, configuration or running service.
+
+### 2026-11-16 — BI Plugin loads in-process at restart; no iframe or token isolation
+
+Owner rejected the sandboxed-iframe/broker design (proposal r2): "為什麼一定要用
+iframe…我不想要改變目前現有的頁面，希望這些頁面和運作程式可以透過安裝後，重啟aep,
+即可被引用" and "拿到token 到底有什麼關係，電腦是公司電腦，也只有使用者本人會用".
+Decision: feature plugins such as BI Knowledge may ship their existing page
+fragments and Python code, loaded into the AEP process and page at Host start;
+install/update takes effect after an AEP restart. Rejected: sandboxed iframe +
+postMessage broker, plugin-scoped tokens, separate worker process for BI, and
+declarative-only pages (would require rewriting ~305 BI functions). Trade-off
+accepted by owner: in-process plugin code has full AEP rights; this is a
+single-user company-PC trust model, not isolation. Slice1 worker plugins remain
+supported. Scope proposal r3:
+docs/phases/FEATURE_PLUGIN_BI_STAGE2_PROPOSAL_DRAFT_20261115.md. Implementation
+still requires the owner's scoped AGENTS22 consent.
+
+### 2026-11-16 — Owner consent for proposal r3 (stages A and B)
+
+Owner replied「同意照 r3 開工」to the scope in
+docs/phases/FEATURE_PLUGIN_BI_STAGE2_PROPOSAL_DRAFT_20261115.md (r3). This is the
+AGENTS22 scoped consent for the harness surfaces listed in its §5 (Web routing,
+tool registration/dispatch, Knowledge BI bypass, answer post-processing, startup
+plugin loading), for stage A then stage B without a further question between
+them. Not covered: permissions/approvals, iframe/token isolation, worker-ized BI,
+hot reload, plugin third-party dependencies, platform-side BI, data migration,
+LLM Wiki, resident update, main merge or push to main.
+
+### 2026-11-16 — Owner adds Shared Platform sync of subscribed BI datasets to r3 scope
+
+Owner chose「同意加入」: host-side `host_runtime/sync.py` installs subscribed BI
+dataset packages through the feature mount points instead of importing
+`bi_subscriptions`. Behavior and rollback on failure stay identical; with no BI
+feature installed such packages are refused with a stated reason. Platform-side
+`control_plane` BI remains out of scope.
+
+### 2026-11-17 — Owner removes BI classification and vault grant gates
+
+A user reported that a BI item classed INTERNAL could neither be changed nor
+used. Owner: 「我覺得aep不應該設計任何權限，只要有人share vault給某個人，它就可以用aep
+來存取這個vault」 and 「目前BI knowledge 和wiki llm沒有敏感資訊」. Asked to choose, the
+owner approved (AGENTS22 scoped consent) items 2 and 3:
+(2) BI no longer refuses or withholds sources by data class: `check_classification`
+call sites (ai_runs, methods, reading_runs, rerun, schema_session, schema_suggest,
+skill_session) and the query passage/excerpt filtering by `approved` classes.
+(3) Askable vaults no longer check `_granted`/`_permitted`: sharing the vault is
+access. Kept: external agents (Claude Code/Codex) receive PUBLIC only, and model
+calls go through the configured internal gateway; RESTRICTED stays unapprovable
+in the data-policy contract. Reverses the 2026-10-28 rejected alternative
+"record the class only, do not gate" for BI. Diagnosis: the gates were AEP policy
+beyond ADR-K8 (class decides which model may receive data; who reads is decided
+by vault sharing). Not chosen: item 1 (editing a source's class) — owner did not
+select it.

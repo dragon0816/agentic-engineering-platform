@@ -18,11 +18,12 @@ from test_bi_vault import _call, _commit, _import, _ok, _push, _refused, _row, _
 from test_business_cards_conversation import Conversation
 from test_host_wiring import ready
 
-from capabilities.bi_cards import analyses, vault
-from capabilities.bi_cards.store import BiStoreError
-from host_runtime import bi_analysis_agent, bi_bench, skill_packs
+from aep_bi.cards import analyses, vault
+from aep_bi.cards.store import BiStoreError
+from aep_bi.host import bi_analysis_agent, bi_bench
+from aep_bi.host.bi_cards_api import route
+from host_runtime import skill_packs
 from host_runtime.assets import shipped
-from host_runtime.bi_cards_api import route
 from host_runtime.host import build_runtime
 
 BY_BODY = (

@@ -89,6 +89,9 @@ def test_rapid_domain_panel_adds_survive_an_unfinished_first_save(
                 )
                 if index == 0:
                     page.wait("window.__saveHold.length===1", 60)
+                    # Background reads may finish after the controlled save headers.
+                    # Keep the save body held while awaiting the same quiet invariant.
+                    page.wait(QUIET, 60)
                     assert page.run(QUIET)
             page.run("window.__saveHold.splice(0).forEach(go=>go())")
             page.wait(page.shows("bi-b-an-state", "2 個分析"), 15)

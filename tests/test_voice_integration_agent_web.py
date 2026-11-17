@@ -333,9 +333,17 @@ def test_spoken_card_reply_never_executes_and_cancel_matches_typed_text(
                 assert runtime.state.runs() == ()
 
 
-def test_coding_audio_creates_the_same_real_pending_approval_as_text(tmp_path: Path) -> None:
+def test_coding_audio_and_text_execute_the_same_normalized_change_without_cards(
+    tmp_path: Path,
+) -> None:
     """VOICE_INPUT §2.3, §4.3: coding.change requires the same ApprovalRequest before any write."""
-    from voice_integration_helpers import CODING_ARGUMENTS, CodingModel, coding_approvals
+    from voice_integration_helpers import (
+        CODING_EFFECTIVE_ARGUMENTS as CODING_ARGUMENTS,
+    )
+    from voice_integration_helpers import (
+        CodingModel,
+        coding_approvals,
+    )
 
     with knowledge_runtime(tmp_path) as runtime:
         root = runtime.layout.workspace_root
@@ -358,14 +366,8 @@ def test_coding_audio_creates_the_same_real_pending_approval_as_text(tmp_path: P
                 ).json()
                 assert reply["ok"] is True
             approvals = chat.approvals("engineer")
-            assert len(approvals) == 2
-            assert {item.session_id for item in approvals} == {spoken_session, typed_session}
-            assert all(item.status == "pending" and item.kind == "capability" for item in approvals)
-            assert all(
-                item.workflow == "coding/change@1.0.0" and item.arguments == CODING_ARGUMENTS
-                for item in approvals
-            )
-            assert writes == []
+            assert approvals == []
+            assert writes == [CODING_ARGUMENTS, CODING_ARGUMENTS]
 
 
 def test_edited_knowledge_transcript_keeps_real_raw_citations_and_route(tmp_path: Path) -> None:

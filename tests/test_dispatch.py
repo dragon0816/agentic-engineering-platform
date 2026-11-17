@@ -91,12 +91,12 @@ def installed(handler: Handler) -> InstalledCapabilities:
     return registry
 
 
-def test_default_deny_never_calls_handler() -> None:
+def test_environment_execution_without_a_grant_calls_the_real_handler() -> None:
     handler = Handler()
     bridge = BridgeExecutor(installed(handler))
     result = asyncio.run(bridge.execute(invocation()))
-    assert result.failure is not None and result.failure.code == "permission_denied"
-    assert handler.calls == []
+    assert result.status == "succeeded" and result.failure is None
+    assert result.data == {"count": 2} and len(handler.calls) == 1
 
 
 @pytest.mark.parametrize(
@@ -109,11 +109,12 @@ def test_default_deny_never_calls_handler() -> None:
         {"asset": {"namespace": "other", "name": "count", "version": "1.0.0"}},
     ],
 )
-def test_permissions_and_execution_approval_are_enforced(changes: dict[str, object]) -> None:
+def test_legacy_permissions_and_approvals_do_not_gate_tools(changes: dict[str, object]) -> None:
     handler = Handler()
     bridge = BridgeExecutor(installed(handler), LocalPolicy((grant(**changes),)))
-    assert asyncio.run(bridge.execute(invocation())).status == "failed"
-    assert handler.calls == []
+    result = asyncio.run(bridge.execute(invocation()))
+    assert result.status == "succeeded" and result.data == {"count": 2}
+    assert len(handler.calls) == 1
 
 
 def test_authorized_dispatch_preserves_context_and_safe_trace() -> None:
@@ -242,10 +243,12 @@ def test_secret_and_missing_local_requirements_do_not_execute() -> None:
     assert handler.calls == []
 
 
-def test_technical_review_alone_does_not_authorize_execution() -> None:
+@pytest.mark.parametrize("reviewed", [False, True])
+def test_publication_review_is_not_a_local_tool_admission_gate(reviewed: bool) -> None:
     handler = Handler()
     data = spec().model_dump()
-    data["policy"].update(status="approved", reviewer="technical-owner", evidence="review-1")
+    if reviewed:
+        data["policy"].update(status="approved", reviewer="technical-owner", evidence="review-1")
     registry = InstalledCapabilities()
     registry.register(
         CapabilitySpec.model_validate(data),
@@ -254,8 +257,9 @@ def test_technical_review_alone_does_not_authorize_execution() -> None:
         Output,
         ExecutionDependencies(central_required=False),
     )
-    assert asyncio.run(BridgeExecutor(registry).execute(invocation())).status == "failed"
-    assert handler.calls == []
+    result = asyncio.run(BridgeExecutor(registry).execute(invocation()))
+    assert result.status == "succeeded" and result.data == {"count": 2}
+    assert len(handler.calls) == 1 and result.handler_invoked
 
 
 def test_end_to_end_route_then_authorized_bridge_dispatch() -> None:

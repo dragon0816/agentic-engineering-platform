@@ -4849,4 +4849,213 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   independent validation passed (165/165 cells, 0 consistency diffs). Blank Owner exception
   documented. Install request card ap-20261111-202432-5d212d created (pending, not
   self-approved). See docs/phases/C4C_ROUND7_ACCEPTANCE.md.
-- [ ] Owner: review and approve installation card ap-20261111-202432-5d212d in Agent Web.
+- [x] Owner approved installation card ap-20261111-202432-5d212d in Agent Web;
+  installed Workflow 1.0.9 and its validation reference were independently read
+  back before exporting the requested package. No coding-agent self-approval.
+
+### Low-risk remote integration (2026-11-12)
+
+- [x] Owner approved staged integration: numeric Outlook diagnostics, explicit
+  live-Outlook test opt-in, and queued-message status only.
+- [x] Native isolated worktree and source import confinement verified; baseline
+  affected tests13passed33.50s and complete Knowledge-named set445passed294.16s.
+- [x] Apply ae1becf3,3b3da4d5,c0553d76, preserving all cumulative decisions.
+- [x] Verify affected tests, same445Knowledge cases within full suite, lint,
+  format, typecheck, build and pipcheck; no live Outlook/C4C or resident update.
+- [x] Push verified result to c4c-verified-20261112; leave origin/main unchanged.
+  First delivery dfd73c1a9fe2efcede8266dfaa2dd40aafefd67e was normally
+  fast-forward pushed and independently matched with git ls-remote;
+  origin/main remained267c75e4c917e523ad72a52d93890d8d7837bbb5.
+- [x] Separate harness assessment only: CHAT_WORKFLOW_PERSISTENCE_MERGE_REVIEW.md.
+  e564e1ad remains excluded; explicit scoped owner consent needed before merge.
+
+- [x] Full local initial run: 6619 passed, 13 skipped, zero failures/errors;
+  same 445 baseline Knowledge identities/outcomes matched; eight source paths
+  unchanged. CI original red/control results preserved in phase report.
+- [x] Fresh committed-source platform wheel built for the requested Windows
+  Sales Order package; three approved asset exports/schema/provenance checked.
+- [x] Finish ZIP payload verification and isolated installation; include
+  Traditional Chinese guides and document fixed-path portability limits.
+  Final archive SHA33963cf8...cd49,588 payloads; install/doctor/pip checks passed,
+  562 installed source files and three assets match. Shared Gateway initialization
+  incident and non-exact functional normalization are explicitly recorded in
+  C4C_WINDOWS_PACKAGE_20261112.md; current-PC update guide uses -NoGateway.
+### Data Skills, Dashboards and Outlook assessment (2026-11-12)
+
+- [x] Confirm dedicated BI AI rule/program drafting and Dashboard proposal paths;
+  distinguish general Ask from BI sessions. Fixture regressions47passed.
+- [x] Confirm Outlook draft versus mailbox read/search exposure; live catalog and
+  read-only Skill binding checks show read/search absent from this Host's catalog.
+  Current Agent mode flags all off; current180day/one-folder scope excludes Sent.
+- [x] Verify mail contracts with fake mailboxes:28passed/2live-tests skipped.
+  Document whole-thread retrieval/completeness gap; do not claim live acceptance.
+- [x] Record findings and stale BI guide text in
+  DATA_DASHBOARD_MAIL_CAPABILITY_ASSESSMENT_20261112.md. No harness/config edits.
+### IT-owned tool availability and installation (2026-11-12)
+
+- [x] Explore current registry/Bridge/MCP/native/install approval paths and
+  applicable Skills; capture direct missing-capability/Skill binding evidence.
+- [x] Clarify the policy: owner cancels AEP installation and execution approvals,
+  including send/delete/external writes; company IT decides tool availability.
+- [x] Compare three approaches; propose one inventory/no app tool-policy layer,
+  rather than a development-mode auto-approve switch.
+- [x] Write and self-review IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md with stages,
+  concrete harness surfaces and Knowledge/side-effect/install regressions.
+  No visual design question arose; no visual companion was needed.
+- [x] Owner reviewed the written scope and explicitly gave AGENTS22 consent:
+  「同意上述 harness 範圍並開始實作」. See latest DECISIONS.
+- [x] After consent, create the implementation plan and a separate managed
+  worktree; contract/tests/implementation/verification follow in that order.
+- [x] Implement and validate; do not edit harness before the scoped consent.
+
+- [x] IT-owned tools implementation slices1–7: unified typed discovery/invocation,
+  direct local/MCP installation and same-session refresh, no AEP mail/folder/CLI
+  approval admission; real outcomes and turn receipts retained. Latest focused
+  checks118passed and61passed/2live-Outlook-skipped. Exact445baseline Knowledge
+  cases/outcomes match (445passed162.21s). See IT_OWNED_TOOL_ACCESS_LEDGER_20261112.md.
+- [x] IT-owned tools final acceptance: one independent whole-branch review,
+  final frozen lint/format/type/full pytest/build/pipcheck and full-run445baseline
+  comparison. No deployment/push/resident/shared Gateway changes yet.
+
+- [x] IT-owned tools final review repairs: required same fresh reviewer reports
+  Critical0/Important0 remaining. Concurrent effects, MCP collision/ownership,
+  schedule gates, owned process deadlines and generic native result eligibility
+  repaired. Targeted89passed; migrated business/recovery/schedule119passed1skip.
+  Final Ruff/format pass1481files; mypy1117files pass. Final full pytest running
+  in isolated worktree; source frozen, no build/deployment yet.
+
+- [x] IT-owned tools first full run completed6682passed37failed15skipped; all445
+  baseline Knowledge IDs/outcomes match. Old-policy expectations migrated; real
+  Skill-version/profile and direct-run receipt/concurrency/digest issues repaired.
+  Final focused161passed and required same-reviewer Critical0/Important0.
+- [x] Final frozen full rerun completed:6724passed2failed15skipped; raw failures
+  retained. Both diagnosed long-path cases pass named supplemental checks; BI
+  delta55passed. Current combined evidence6726passed15skipped (not one green
+  full). Same445Knowledge outcomes match baseline. Lint/format/mypy/build/pipcheck
+  and isolated571-source wheel smoke pass. Acceptance report and machine evidence
+  in docs/phases/IT_OWNED_TOOL_ACCESS_{ACCEPTANCE,VERIFICATION}_20261113.*.
+- [ ] Separate known limitation: pre-existing generic session persistence fails
+  at Win32 paths beyond260 characters. Baseline/current control both reproduce;
+  normal short-root Knowledge conversations6passed. No extra state-I/O harness
+  change authorized or made in this task.
+- [x] Owner clarification2026-11-13: no IT approval/identity/management prerequisite;
+  align UI, native-agent/bundled Skill wording and requirements. LocalPolicy
+  already permits actual execution without such a gate. Verify focused tests,
+  static checks and build; no new harness control flow or model-data rule change.
+  Focused first92passed1timing-failure2skipped; unchanged command module rerun7pass,
+  combined93passed2skipped. Ruff/format/mypy/build/pipcheck pass; all571wheel
+  Python sources match. Exact evidence: DIRECT_TOOL_USE_CLARIFICATION_20261113.json.
+
+- [x] Assess Feature Plugin architecture for LLM Wiki, BI Knowledge and future
+  features (owner clarification2026-11-13). Trace GUI/API/processing/storage/
+  asset/tool/Knowledge hooks and existing Extension/asset pack reuse. Findings:
+  FEATURE_PLUGIN_ASSESSMENT_20261113.md. Static assessment only; no new harness
+  implementation authorized. Existing Extension activation approval remains an
+  identified legacy gap for a future plugin installer, not a newly added policy.
+
+- [x] Feature Plugin plan reviewed by Claude Code: initial Important5 addressed;
+  amended Slice1 Critical0/Important0 READY. Scoped conditional owner consent
+  recorded in DECISIONS before code. Prefer Claude Code parallel subagents.
+- [x] Push reviewed assessment/consent, freeze typed contract, implement generic
+  fixture-only Slice1 through parallel exclusive-file workers, integrate generic
+  startup/API/declarative UI and validate. BI/Wiki extraction is not this slice.
+  Reviewed docs pushed6d0132ed (remote hash checked). Active dev branch
+  phase-plugins/slice1-20261113. Contract-first plan and exclusive Claude worker
+  ownership: FEATURE_PLUGIN_SLICE1_PLAN_20261113.md.
+
+- [x] Feature Plugin generic Slice1 implementation and independent Claude final
+  review complete: zero Critical/Important after causal fixes. Aggregate plugin
+  tests231 passed/1 privileged-symlink skip; real junction/browser tests executed.
+  Global Ruff/format/mypy/pipcheck pass. Same445 Knowledge cases pass; source
+  unchanged. Example and usage guide supplied. No BI/Wiki extraction/deployment.
+- [x] Final full-suite run, build/wheel smoke, final Knowledge comparison,
+  acceptance report, verified commits and feature-branch push. Retained original full run:
+  .scratch/plugin-slice1/full.log/xml; short C:/TEMP/aep-plugin-full-20261114.
+
+Final Slice1 evidence: FEATURE_PLUGIN_SLICE1_ACCEPTANCE_20261114.md and matching
+VERIFICATION JSON. Full original6954pass3fail16skip; repairs176pass, not a green
+full rerun. Build/pipcheck/wheel580 normalized source match passed. BI/Wiki
+extraction remains a separate unimplemented slice. Feature branch delivery only.
+
+## Feature Plugin next slice — 2026-11-14
+
+- [x] Owner requests next-stage implementation. Branch
+  phase-plugins/bi-facade-20261114 from a0496ae0; prefer actual Claude Code workers.
+  Re-read assessment and research BI coupling. Strategy ADAPT for metadata reader,
+  PRESERVE for existing BI/Knowledge services. No new harness consent inferred.
+- [x] Inspect original Slice1 CI43537708699: failure (2 failed,6897 passed,74
+  skipped), artifact quota and helper import ordering. Fix reproduced I001 only
+  in95d003fd; global uncached Ruff/format and helper mypy pass. Other CI failures
+  retained; not relabelled as baseline-only or fixed without evidence.
+- [x] Domain preparation: existing BI API/UI/read-rebuild characterization and
+  stdlib read-only metadata reader with synthetic parity/failure tests. Exclusive
+  Claude owners9ba0d06a tests;4cfe1b4e reader/tests. No core files modified.
+- [x] Independent Claude review of concrete H1/H4 scope in
+  FEATURE_PLUGIN_BI_OVERVIEW_PLAN_20261114.md. Obtain explicit AGENTS22 consent
+  before fields/context/registration implementation; not part of Slice1 consent.
+- [x] After consent only: compatible declared BI context + page-only service
+  registration, packaged BI overview, existing BI/Wiki/Knowledge parity tests.
+  Not full BI extraction, new executable GUI, model tool, repository migration
+  or a second process calling BiStore/sync/rebuild concurrently.
+
+- [x] BI overview preparation verified:28 passed (5characterization,19reader,
+  4frozen-v1 compatibility), uncached Ruff/format/mypy1144 pass. No core src
+  changes;46Knowledge files unchanged. Source/package bytes and a real v1 ledger
+  frozen before schema changes. Reader and amended plan independent review READY.
+- [x] Await explicit owner response to H1/H4 scope question. No core API/worker
+  context/registration changes implemented or authorized yet. New docs and tests
+  are preparation, not an installed overview or completed BI extraction.
+
+- [x] Owner explicit H1/H4 consent2026-11-15:「同意僅 H1／H4 並繼續」.
+  Exact reviewed scope and exclusions recorded in DECISIONS before core edits.
+- [x] Implement H1/H4 contract first, freeze interface; then worker/package and
+  independent integration in parallel, retain frozen v1 digests and source data.
+  Ancillary user request: open existing Hermes Agent, without cancelling this task.
+- [x] Ancillary request: existing Hermes desktop opened with --skip-build;
+  actual main window Hermes PID47096 confirmed. No update, rebuild or config edit.
+
+- [x] H1/H4 contract freeze:89 tests pass (parent independent9.24s), API1.1,
+  default wire compatibility and unchanged v1 golden bytes/digest. No new approval
+  gates/policy/ToolAccess semantics. Interface ready for parallel integration.
+- [x] Manager/process H1 context + selective page/tool registration (Claude4cfe).
+- [x] BI overview stdlib worker/manifest/builder/package tests (Claude9ba0d06a).
+- [x] Independent real HTTP, ToolAccess inventory, source-preservation and
+  published Knowledge coexistence tests (Claude63582bfb).
+- [x] Integration, fresh review, full Knowledge regression/full suite/build and
+  source-package delivery; no resident or main update.
+
+- [x] Runtime791e6a71 and BI package0daf0b44 implemented; fresh Claude source
+  review0Critical/Important. Aggregate302pass1skip; UI label repair20pass;
+  global uncached Ruff/format/mypy pass. Actual HTTP/tool inventory/Knowledge
+  source/citation coexistence and real-browser install/disable/enable confirmed.
+- [x] Final full session24579 running; unique .scratch/plugin-bi/full-20261115.*.
+  Verifier63582bfb armed bqi1xd594; collect original results, same445/46source
+  comparison and build only after pass. Then acceptance/docs/push/remote SHA.
+  Component results are not a final full/build claim; no resident or main update.
+
+- [x] Final H1/H4 original full7029passed16skipped0fail, no reruns. Same445
+  Knowledge outcomes and46sources unchanged; sourcefreeze1714 unchanged before
+  build; only generatedegg-info afterbuild. Wheel580 normalizedsource matches,
+  isolatedimportsAPI1.1, sdistgolden/sourcepackage and builder--check allpass.
+  Acceptance: FEATURE_PLUGIN_BI_ACCEPTANCE_20261115.md/json. Feature branch
+  delivery only; no main merge, resident/Gateway/venv update.
+- [x] User ancillary request: opened existing AEP Agent desktop shortcut; service
+  HTTP200 at127.0.0.1:53583. Existing resident version retained, no deployment.
+
+- [x] Feature branch pushed and remoteSHA matched911bd156. CI43703179517
+  observed in_progress on that source-equivalent acceptance revision; no greenCI
+  claim. Local full/build complete; no main/resident deployment or local watcher.
+
+## BI Knowledge in-process plugin (proposal r3) — 2026-11-16/17
+
+- [x] Proposal r3 and owner consent (DECISIONS 2026-11-16): in-process plugins
+  loaded at restart, pages unchanged, no iframe/token isolation; sync.py added.
+- [x] Stage A 8f6029cd: core reaches BI only via host_runtime.features; page
+  byte-identical; core without BI starts. Focused tests/mypy pass; full suite
+  interrupted by a PC restart (rerun needed).
+- [x] B1 8f05be83: Plugin API 1.2 in-process loader, bundled/installed resolution,
+  restart-required status, broken plugin skipped. Plugin tests pass.
+- [x] 43bca516: Windows bundle ships feature plugins; BI plugin builder.
+- [ ] B2: move BI code to feature_plugins/bi_knowledge (subagent worktree
+  C:/TEMP/claude-bi/move, uncommitted at restart); then plugin.json, full
+  verification, real update test, review, docs. See HANDOFF.md.

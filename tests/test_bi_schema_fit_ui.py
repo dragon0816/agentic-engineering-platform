@@ -14,8 +14,8 @@ from test_bi_extract import MEETING_ANSWER, NOTE, Scripted
 from test_bi_vault import _call, _ok, _use_homes
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from capabilities.bi_cards.ai_runs import AiRuntime
-from host_runtime import bi_cards_api
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.host import bi_cards_api
 
 FOLDER = "applications/aidc/sources"
 QUESTION = "虛構的待釐清內容"
@@ -56,7 +56,6 @@ def test_a_run_checks_the_fit_only_when_ticked(
         lambda _web: AiRuntime(
             model=lambda: (extractor, "test-model"),
             background=lambda _t, work: work(),
-            approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
         ),
     )
     with _served(config, layout, _Model("none", {})) as server:

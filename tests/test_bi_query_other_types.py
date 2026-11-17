@@ -14,10 +14,11 @@ from test_bi_vault_published import CONTEXT
 from test_business_cards_conversation import Conversation
 from test_host_wiring import ready
 
-from capabilities.bi_cards.capability import QUERY_SPEC, QueryHandler, QueryRequest
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, PlannedRow
-from host_runtime import bi_bench, skill_packs
+from aep_bi.cards.capability import QUERY_SPEC, QueryHandler, QueryRequest
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore, PlannedRow
+from aep_bi.host import bi_bench
+from host_runtime import skill_packs
 from host_runtime.assets import shipped
 from host_runtime.host import build_runtime
 
@@ -49,10 +50,8 @@ def _cards(ws: Path, dataset: str = "demo") -> BiStore:
     return store
 
 
-def _query(ws: Path, *, approved: Any = ("INTERNAL",), **args: Any) -> dict[str, Any]:
-    return asyncio.run(
-        QueryHandler(ws, approved=approved)(CONTEXT, QueryRequest(**args))
-    ).model_dump()
+def _query(ws: Path, **args: Any) -> dict[str, Any]:
+    return asyncio.run(QueryHandler(ws)(CONTEXT, QueryRequest(**args))).model_dump()
 
 
 @pytest.mark.parametrize(
@@ -100,13 +99,10 @@ def test_only_matching_body_is_returned_as_a_bounded_citable_snippet(tmp_path: P
     assert all("body_snippet" not in c for c in _query(tmp_path, text="不相關")["cards"])
 
 
-def test_body_requires_approval_and_respects_its_source_class(tmp_path: Path) -> None:
+def test_body_snippet_is_shown_whatever_its_source_class(tmp_path: Path) -> None:
+    """BI withholds no excerpt for its source's data class (owner 2026-11-17)."""
     store = _cards(tmp_path)
-    for approved in (None, (), ("UNCLASSIFIED",)):
-        assert all(
-            "body_snippet" not in c
-            for c in _query(tmp_path, text="BW-200", approved=approved)["cards"]
-        )
+    assert any("body_snippet" in c for c in _query(tmp_path, text="BW-200")["cards"])
     source = Staging(tmp_path, "demo").add_source(
         "private.md", text="BW-300 機密", actor="a", classification="RESTRICTED"
     )
@@ -121,8 +117,8 @@ def test_body_requires_approval_and_respects_its_source_class(tmp_path: Path) ->
         }
     ]
     store.apply([row], filename="private.md", entity_type=row.entity_type, actor="a")
-    assert "body_snippet" not in _query(tmp_path, text="BW-300")["cards"][0]
-    assert "body_snippet" in _query(tmp_path, text="BW-300", approved=("RESTRICTED",))["cards"][0]
+    snippet = _query(tmp_path, text="BW-300")["cards"][0]["body_snippet"]
+    assert "BW-300 機密" in snippet["text"]
     # A real reviewed run stores source IDs even when its ref does not name the file.
     row = _row("CustomerProduct", "BW-400", product_name="BW-400", body="BW-400 機密")
     row.evidence["body"] = [
@@ -137,7 +133,7 @@ def test_body_requires_approval_and_respects_its_source_class(tmp_path: Path) ->
     store.commit_run(
         "restricted-run", [(row, "candidate", None)], filename="different-name.md", actor="a"
     )
-    assert "body_snippet" not in _query(tmp_path, text="BW-400")["cards"][0]
+    assert "BW-400 機密" in _query(tmp_path, text="BW-400")["cards"][0]["body_snippet"]["text"]
 
 
 def test_counts_and_snippets_read_the_published_version_and_keep_sample_flags(
@@ -228,11 +224,10 @@ def test_a_benchmark_model_widens_on_the_hint_and_reads_the_other_types_body(
     with build_runtime(config, layout=layout) as runtime:
         gateway = runtime.agent.gateway
         gateway.router.model = model
-        # The same approved classes the installed read tool supplies, not model arguments.
+        # The installed read tool reads every data class: nothing is set for the turn.
         installed = gateway.bridge.installed.get(QUERY_SPEC.identity)
         assert installed is not None
         assert isinstance(installed.handler, QueryHandler)
-        installed.handler.approved = ("INTERNAL",)
         reply = bi_bench.ask_on(
             gateway,
             layout.workspace_root,

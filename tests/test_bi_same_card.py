@@ -7,8 +7,8 @@ from typing import Any
 import pytest
 from test_bi_vault import _row, _two_pcs
 
-from capabilities.bi_cards import extract, importer
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import extract, importer
+from aep_bi.cards.store import BiStore
 
 
 @pytest.mark.parametrize("reverse", [False, True])
@@ -19,7 +19,7 @@ def test_two_pcs_replay_same_card(
 ) -> None:
     from test_bi_vault import _commit, _import, _push, _sync, _tables
 
-    from capabilities.bi_cards import vault
+    from aep_bi.cards import vault
 
     drive, vid, dataset, a, b = _two_pcs(tmp_path)
     _import(a, dataset, _row("Fictional", body="Shared"))
@@ -106,7 +106,7 @@ def test_two_pcs_replay_same_card(
 def test_evidence_context_does_not_resurrect_replaced_value() -> None:
     import copy
 
-    from capabilities.bi_cards import same_card, vault
+    from aep_bi.cards import same_card, vault
     from knowledge.repo.repository import apply_ops, value_hash
 
     key, field = "evidence:fiction:summary", "field:fiction:summary"
@@ -123,7 +123,7 @@ def test_evidence_context_does_not_resurrect_replaced_value() -> None:
 
 
 def test_old_ambiguous_evidence_still_conflicts() -> None:
-    from capabilities.bi_cards import vault
+    from aep_bi.cards import vault
     from knowledge.repo.repository import apply_ops, value_hash
 
     key = "evidence:fiction:body"
@@ -136,7 +136,7 @@ def test_old_ambiguous_evidence_still_conflicts() -> None:
 def test_old_sequential_replacement_replays_without_new_semantics() -> None:
     import copy
 
-    from capabilities.bi_cards import vault
+    from aep_bi.cards import vault
     from knowledge.repo.repository import apply_ops, value_hash
 
     key = "field:fiction:summary"
@@ -163,7 +163,7 @@ def test_old_sequential_replacement_replays_without_new_semantics() -> None:
 def test_replay_policy_upgrade_rebuilds_once(tmp_path: Path) -> None:
     import json
 
-    from capabilities.bi_cards import vault
+    from aep_bi.cards import vault
 
     _, vid, _, a, _ = _two_pcs(tmp_path)
     repo = vault.Vault(a, vid).repo
@@ -183,7 +183,7 @@ def test_opening_an_old_materialization_replays_the_old_repository_cache(tmp_pat
     import json
     from contextlib import closing
 
-    from capabilities.bi_cards import card_model, vault
+    from aep_bi.cards import card_model, vault
 
     _, vid, dataset, a, _ = _two_pcs(tmp_path)
     store = BiStore(a, dataset)
@@ -202,7 +202,7 @@ def test_opening_an_old_materialization_replays_the_old_repository_cache(tmp_pat
 def test_evidence_operation_context_is_validated_and_bi_only() -> None:
     import copy
 
-    from capabilities.bi_cards import vault
+    from aep_bi.cards import vault
     from knowledge.repo.repository import COMMIT_FORMAT, commit_id, commit_problem
 
     record: dict[str, Any] = {
@@ -288,7 +288,7 @@ def test_chunk_reading_keeps_alternative_evidence() -> None:
 def test_same_reference_is_one_row_with_the_later_fallback_time(
     reverse: bool, dates: tuple[str, str]
 ) -> None:
-    from capabilities.bi_cards import same_card, vault
+    from aep_bi.cards import same_card, vault
     from knowledge.repo.repository import apply_ops
 
     field, key = "field:fiction:summary", "evidence:fiction:summary"
@@ -312,7 +312,7 @@ def test_same_reference_is_one_row_with_the_later_fallback_time(
 
 
 def test_an_append_does_not_reapply_a_stale_review_of_an_existing_reference() -> None:
-    from capabilities.bi_cards import same_card, vault
+    from aep_bi.cards import same_card, vault
     from knowledge.repo.repository import apply_ops, value_hash
 
     field, key = "field:fiction:summary", "evidence:fiction:summary"
@@ -330,7 +330,7 @@ def test_an_append_does_not_reapply_a_stale_review_of_an_existing_reference() ->
 
 @pytest.mark.parametrize("reverse", [False, True])
 def test_updated_uses_chronological_time_across_offsets(reverse: bool) -> None:
-    from capabilities.bi_cards import vault
+    from aep_bi.cards import vault
     from knowledge.repo.repository import apply_ops
 
     key = "field:fiction:updated"
@@ -345,7 +345,7 @@ def test_updated_uses_chronological_time_across_offsets(reverse: bool) -> None:
 
 @pytest.mark.parametrize("at", ["2026-11-06T02:00:00+00:00", "2026-11-06T03:00:00+00:00"])
 def test_card_updated_uses_chronological_time_and_history_format(at: str) -> None:
-    from capabilities.bi_cards.vault import _field_history
+    from aep_bi.cards.vault import _field_history
 
     entry = {
         "at": "2026-11-06T10:00:00+08:00",

@@ -1,27 +1,10 @@
-"""`coding/run-python@1.0.0`: run one Python script for a conversation task.
+"""`coding/run-python@1.0.0`: execute Python in the actual IT-managed environment.
 
-The Agent writes a program for a task the person asked for in words, the host
-runs it under the restricted runner, and the result (exit code, output, the
-files in `output/`) goes back to the model so it can repair and run again.
-Owner approval 2026-10-06 (coding_v1 G1), on the condition that Knowledge
-asking and task/Workflow execution are not affected.
-
-Bounds: the workspace must lie under a folder listed in the host's
-`coding.workspace_roots`; the script can write only to the workspace's
-`output/` and its own run folder (low integrity labels only those two);
-`input/` and everything else stay read-only to it; no credential reaches it;
-direct outbound network is blocked by the runner's firewall rule; memory cap
-and timeout as for every coding run. Unlike `coding/change`, the script may
-start a few child processes (`coding.run_python_max_processes`, default 4) so
-it can run a command-line tool; they inherit the low-integrity token and die
-with the run (owner decision 2026-10-06, lab gap L3). Each script is kept under
-`.aep-run/` in the workspace as evidence.
-
-A workspace under a root that does not exist yet is created, with input/ and
-output/, and the result says so (`workspace_created`, owner 2026-10-20);
-outside the roots, or by a path that climbs with `..`, it is refused and
-nothing is created.
-"""
+An absolute workspace organizes input/, output/ and retained .aep-run/ scripts.
+No AEP folder ACL, restricted token or firewall-rule admission is added. OS and
+service permissions, real timeouts/exit codes and redacted bounded output apply.
+Only new or content-changed output artifacts count as this invocation's result;
+JSON must be a complete bounded object before it can feed another Workflow step."""
 
 from __future__ import annotations
 
@@ -29,6 +12,7 @@ import asyncio
 import hashlib
 import json
 import os
+import sys
 from collections.abc import Callable, Mapping
 from pathlib import Path
 from time import monotonic
@@ -36,25 +20,22 @@ from time import monotonic
 from pydantic import Field, JsonValue, TypeAdapter
 
 from capabilities.coding_change.contracts import CodingHostBinding
-from capabilities.coding_change.workspaces import (
-    containing_root,
-    create_workspace,
-    has_traversal,
-)
+from capabilities.coding_change.workspaces import create_workspace
 from capabilities.contracts import CapabilitySpec
 from capabilities.runtime import CapabilityExecutionFailed, CapabilityRefused
 from common.base import Contract, Text
 from common.execution import RequestContext
+from harness.environment_runner import EnvironmentRunner
 from harness.network_block import outbound_rule_present
-from harness.restricted_runner import RestrictedRunner, RunnerError, RunnerLimits, label_low
+from harness.restricted_runner import RunnerError, RunnerLimits
 
 RUN_SPEC = CapabilitySpec.model_validate(
     {
         "identity": {"namespace": "coding", "name": "run-python", "version": "1.0.0"},
         "name": "coding.run_python",
         "description": (
-            "Run one Python script in an allowed task workspace under restricted execution; "
-            "it may write only to the workspace's output folder"
+            "Run Python under the actual OS account in an absolute task folder. "
+            "No AEP folder/firewall admission; retain script/parameters and output artifacts."
         ),
         "input_contract": "coding.run-python.input.v1",
         "output_contract": "coding.run-python.output.v1",
@@ -110,7 +91,7 @@ class RunPythonResult(Contract):
 class RunPythonHandler:
     def __init__(
         self,
-        binding: CodingHostBinding,
+        binding: CodingHostBinding | None,
         *,
         rule_present: Callable[[Path], bool] = outbound_rule_present,
         extra_env: Mapping[str, str] | None = None,
@@ -119,9 +100,17 @@ class RunPythonHandler:
         self.rule_present = rule_present
         self.extra_env = dict(extra_env or {})
 
+    @property
+    def python(self) -> Path:
+        return Path(self.binding.runner_python if self.binding else sys.executable)
+
+    @property
+    def timeout_seconds(self) -> int:
+        return self.binding.timeout_seconds if self.binding else 120
+
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         step_input = RunPythonStepInput.model_validate(inputs)
-        result = await asyncio.to_thread(self.run, step_input.request, step_input.arguments)
+        result = await self._run_async(step_input.request, step_input.arguments)
         if result.timed_out:
             raise CapabilityExecutionFailed("coding_program_timeout", result)
         if result.exit_code != 0:
@@ -134,11 +123,7 @@ class RunPythonHandler:
         path = Path(raw.strip())
         if not path.is_absolute():
             raise CapabilityRefused("coding_workspace_not_absolute")
-        if has_traversal(raw):
-            raise CapabilityRefused("coding_workspace_not_allowed")
-        resolved = containing_root(raw, self.binding.workspace_roots)
-        if resolved is None:
-            raise CapabilityRefused("coding_workspace_not_allowed")
+        resolved = path.resolve()
         if resolved.exists() and not resolved.is_dir():
             raise CapabilityRefused("coding_workspace_not_a_folder")
         return resolved
@@ -146,21 +131,22 @@ class RunPythonHandler:
     def run(
         self, request: RunPythonRequest, arguments: dict[str, JsonValue] | None = None
     ) -> RunPythonResult:
+        return asyncio.run(self._run_async(request, arguments))
+
+    async def _run_async(
+        self, request: RunPythonRequest, arguments: dict[str, JsonValue] | None = None
+    ) -> RunPythonResult:
         workspace = self._workspace(request.workspace)
-        python = Path(self.binding.runner_python)
+        python = self.python
         try:
-            runner = RestrictedRunner(
+            runner = EnvironmentRunner(
                 python,
                 RunnerLimits(
-                    timeout_seconds=self.binding.timeout_seconds,
-                    memory_mb=self.binding.memory_mb,
-                    max_processes=self.binding.run_python_max_processes,
+                    timeout_seconds=self.timeout_seconds,
                 ),
             )
         except RunnerError as error:
             raise CapabilityRefused(error.code) from None
-        if self.binding.require_network_block and not self.rule_present(python):
-            raise CapabilityRefused("coding_network_block_missing")
         # Created only once every check passed, so a refused run leaves nothing.
         created = not workspace.is_dir()
         if created:
@@ -179,8 +165,12 @@ class RunPythonHandler:
             params = step / "params.json"
             params.write_text(json.dumps(arguments, ensure_ascii=False, indent=1), encoding="utf-8")
             env["AEP_WORKFLOW_PARAMS"] = str(params)
-        label_low(output)
-        result = runner.run([str(script)], cwd=workspace, run_dir=step, extra_env=env)
+        try:
+            result = await runner.run_async(
+                [str(script)], cwd=workspace, run_dir=step, extra_env=env
+            )
+        except RunnerError as error:
+            raise CapabilityRefused(error.code) from None
         diagnostics = RunPythonResult(
             exit_code=result.exit_code,
             timed_out=result.timed_out,

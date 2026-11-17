@@ -21,9 +21,9 @@ from test_bi_chat_charts import DATASET, _browser_missing, _host
 from test_chat_workflow_forms_telegram import _Scripted
 from test_host_wiring import host_json
 
-from capabilities.bi_cards import analyses, board, feed, vault
+from aep_bi.cards import analyses, board, feed, vault
+from aep_bi.host import bi_chat_save
 from common.change_proposal import KINDS, PROPOSE_GUIDANCE, PROPOSE_TOOL, TELEGRAM_KINDS
-from host_runtime import bi_chat_save
 from host_runtime.conversations import ConversationTurnRequest
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer

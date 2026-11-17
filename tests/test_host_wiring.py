@@ -248,25 +248,23 @@ def test_what_the_operator_sees_when_a_request_runs(
     assert f"bridge {BRIDGE}" in status and "read-local-file: succeeded (engineer)" in status
 
 
-def test_without_a_grant_the_policy_refuses_the_step(
+def test_without_a_grant_the_host_runs_the_real_step(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """Installing an asset is not permission to run it. The route resolves,
-    the run is recorded, and the dispatch is refused."""
+    """IT-owned execution needs no application grant or recorded approval."""
     config, layout = workspace(tmp_path, membership=membership_record())
     target = layout.workspace_root / "notes.txt"
-    assert main(["ask", "--config", str(host_json(tmp_path, config)), f"files.read {target}"]) == 1
-    assert "failure: permission_denied" in capsys.readouterr().out
+    assert main(["ask", "--config", str(host_json(tmp_path, config)), f"files.read {target}"]) == 0
+    assert "succeeded, 1 step(s) completed" in capsys.readouterr().out
     with build_runtime(config) as runtime:
         run = runtime.agent.runs()[0]
-    assert run.status == "failed"
-    # A grant that omits the approval this capability's policy requires is
-    # no better than no grant at all.
+    assert run.status == "succeeded"
+    # An obsolete grant missing its approval also cannot control the operation.
     without_approval = grant_record()
     without_approval[0].pop("approval_ref")
     layout.grants.write_text(json.dumps(without_approval), encoding="utf-8")
-    assert main(["ask", "--config", str(host_json(tmp_path, config)), f"files.read {target}"]) == 1
-    assert "failure: permission_denied" in capsys.readouterr().out
+    assert main(["ask", "--config", str(host_json(tmp_path, config)), f"files.read {target}"]) == 0
+    assert "succeeded, 1 step(s) completed" in capsys.readouterr().out
 
 
 def test_an_unbound_actor_is_refused_before_anything_runs(
@@ -322,12 +320,12 @@ def test_an_unreadable_asset_is_named_without_its_contents(
     assert main(["ask", "--config", str(host_json(tmp_path, config)), "files.read x"]) == 2
     printed = capsys.readouterr()
     assert "asset_invalid" in printed.err and "hunter2" not in printed.err
-    # A grants file that is not a grant is refused the same way.
+    # Obsolete grant records are not an execution input and are left untouched.
     broken.unlink()
     layout.grants.write_text('[{"actor": "engineer"}]', encoding="utf-8")
-    with pytest.raises(HostError) as grants:
-        build_runtime(config)
-    assert grants.value.code == "grants_invalid"
+    with build_runtime(config) as runtime:
+        assert runtime.agent.gateway.bridge.installed.get(READ_FILE_SPEC.identity) is not None
+    assert layout.grants.read_text(encoding="utf-8") == '[{"actor": "engineer"}]'
 
 
 def test_doctor_reports_what_the_host_has_been_given_without_writing_anything(
@@ -487,7 +485,7 @@ def authorization(*kinds: str, actor: str = "engineer") -> dict[str, Any]:
     }
 
 
-def test_the_host_runs_what_its_members_chose_and_nothing_else(
+def test_legacy_member_selections_do_not_create_execution_grants(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     config, layout = workspace(tmp_path, membership=membership_record())
@@ -500,39 +498,33 @@ def test_the_host_runs_what_its_members_chose_and_nothing_else(
     printed = capsys.readouterr().out
     assert "route: workflow engineering/read-local-file@1.0.0" in printed
     assert "succeeded, 1 step(s) completed" in printed
-    # The grant came from the capability's own specification, not from the
-    # decision, which named no permission at all.
     with build_runtime(config) as runtime:
-        grant = runtime.agent.gateway.bridge.policy._grants[  # noqa: SLF001 - the policy is the subject
-            ("engineer", ("filesystem", "read-file", "1.0.0"))
-        ]
-    assert grant.permissions == READ_FILE_SPEC.policy.required_permissions
-    assert grant.policy_refs == READ_FILE_SPEC.policy.policy_refs
-    assert grant.approval_ref == "workspace-read-approval"
+        assert runtime.agent.gateway.bridge.installed.get(READ_FILE_SPEC.identity) is not None
+        assert runtime.agent.runs()[0].status == "succeeded"
+    assert not layout.grants.exists()  # no synthetic local permission record
 
 
-def test_an_asset_nobody_chose_is_not_installed(
+def test_installed_assets_do_not_need_member_tool_selections(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """The manifests are all sitting in the assets directory. What the device
-    installs is what its members chose, so an unchosen Workflow is not there
-    to run and an unchosen Skill is not there to route to."""
+    """A local installed asset remains usable regardless of legacy selections."""
     config, layout = workspace(tmp_path, membership=membership_record())
     target = layout.workspace_root / "notes.txt"
     path = host_json(tmp_path, config)
     layout.authorization.write_text(
         json.dumps(authorization("skill", "capability")), encoding="utf-8"
     )
-    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 1
-    assert "workflow_not_installed" in capsys.readouterr().out
+    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
+    assert "succeeded, 1 step(s) completed" in capsys.readouterr().out
     layout.authorization.write_text(json.dumps(authorization("capability")), encoding="utf-8")
-    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 1
-    assert "needs_input (unknown_skill)" in capsys.readouterr().out
+    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
+    assert "succeeded, 1 step(s) completed" in capsys.readouterr().out
     with build_runtime(config) as runtime:
-        assert runtime.agent.runs() == ()
+        assert len(runtime.agent.runs()) == 2
+        assert all(run.status == "succeeded" for run in runtime.agent.runs())
 
 
-def test_a_revoked_tool_stops_authorizing_the_same_run(
+def test_legacy_tool_decisions_do_not_revoke_environment_access(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     config, layout = workspace(tmp_path, membership=membership_record())
@@ -543,19 +535,19 @@ def test_a_revoked_tool_stops_authorizing_the_same_run(
     )
     assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
     assert "succeeded" in capsys.readouterr().out
-    # The member changed their mind; the control plane reissues without it.
+    # The old control-plane tool selection is no longer an admission policy.
     layout.authorization.write_text(
         json.dumps(authorization("skill", "workflow")), encoding="utf-8"
     )
-    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 1
-    assert "failure: permission_denied" in capsys.readouterr().out
-    # Another member's decision authorizes nothing for this one.
+    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
+    assert "succeeded, 1 step(s) completed" in capsys.readouterr().out
+    # Another member's old selection changes neither caller identity nor access.
     layout.authorization.write_text(
         json.dumps(authorization("skill", "workflow", "capability", actor="tester")),
         encoding="utf-8",
     )
-    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 1
-    assert "failure: permission_denied" in capsys.readouterr().out
+    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
+    assert "succeeded, 1 step(s) completed" in capsys.readouterr().out
 
 
 def test_doctor_reports_the_members_decisions_and_what_they_leave_installed(
@@ -569,26 +561,24 @@ def test_doctor_reports_the_members_decisions_and_what_they_leave_installed(
         "workspace_writable": True,
     }
     named = {item.name: item for item in host_report(config, layout, **probe).checks}  # type: ignore[arg-type]
-    assert named["authorization"].status == "pending"
-    assert "grants.json" in named["authorization"].detail
+    assert named["authorization"].status == "passed"
+    assert "no AEP tool grants" in named["authorization"].detail
     assert named["assets"].detail == "1 skill(s) and 1 workflow(s) installed"
-    # With decisions, the count is what this host would actually install.
+    # Obsolete selections do not hide assets in diagnostics.
     layout.authorization.write_text(json.dumps(authorization("skill")), encoding="utf-8")
     report = host_report(config, layout, **probe)  # type: ignore[arg-type]
     named = {item.name: item for item in report.checks}
     assert named["authorization"].status == "passed" and "1 decision(s)" in (
         named["authorization"].detail
     )
-    assert named["assets"].detail == "1 skill(s) and 0 workflow(s) installed"
+    assert named["assets"].detail == "1 skill(s) and 1 workflow(s) installed"
     assert report.runtime == "ready"
-    # Two answers to one question is a failure the operator can see before
-    # a command fails on it.
+    # Obsolete grants can coexist without becoming an execution requirement.
     layout.grants.write_text(json.dumps(grant_record()), encoding="utf-8")
     report = host_report(config, layout, **probe)  # type: ignore[arg-type]
     named = {item.name: item for item in report.checks}
-    assert named["authorization"].status == "failed"
-    assert "authorization_conflict" in named["authorization"].detail
-    assert report.status == "ready" and report.runtime == "pending"
+    assert named["authorization"].status == "passed"
+    assert report.status == "ready" and report.runtime == "ready"
 
 
 def test_a_tool_this_host_cannot_grant_is_named_rather_than_silently_ignored(
@@ -624,12 +614,12 @@ def test_a_tool_this_host_cannot_grant_is_named_rather_than_silently_ignored(
     assert READ_FILE_SPEC.policy.policy_refs
 
 
-def test_two_answers_to_one_question_are_refused(tmp_path: Path) -> None:
+def test_legacy_grants_coexist_but_foreign_device_metadata_is_refused(tmp_path: Path) -> None:
     config, layout = ready(tmp_path)
     layout.authorization.write_text(json.dumps(authorization("capability")), encoding="utf-8")
-    with pytest.raises(HostError) as conflict:
-        build_runtime(config)
-    assert conflict.value.code == "authorization_conflict"
+    with build_runtime(config) as runtime:
+        assert runtime.agent.gateway.bridge.installed.get(READ_FILE_SPEC.identity) is not None
+    assert layout.grants.is_file() and layout.authorization.is_file()
     layout.grants.unlink()
     # A bundle that is valid in itself but was issued for another device.
     foreign = authorization("capability")

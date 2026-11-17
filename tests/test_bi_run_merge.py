@@ -11,9 +11,9 @@ from test_bi_ai_runs import Jobs, _runtime
 from test_bi_extract import Scripted
 from test_bi_vault import _call, _ok, _push, _sync, _two_pcs
 
-from capabilities.bi_cards import extract, vault
-from capabilities.bi_cards.store import BiStore, PlannedRow, card_id_for
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import extract, vault
+from aep_bi.cards.store import BiStore, PlannedRow, card_id_for
+from aep_bi.host.bi_cards_api import route
 
 KIND = "SupplyLink"
 KEY = "FAKE-LINK"

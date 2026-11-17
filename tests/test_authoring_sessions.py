@@ -92,10 +92,6 @@ def test_discussion_preview_and_install_end_to_end(tmp_path: Path) -> None:
 
     session = room.discuss(session.session_id, ACTOR, "客戶代碼每次執行時輸入")
     assert session.status == "ready" and session.draft is not None
-    with pytest.raises(AuthoringError) as early:
-        room.install(session.session_id, ACTOR)
-    assert early.value.code == "authoring_preview_required"
-
     shown = room.preview(
         session.session_id,
         ACTOR,
@@ -109,11 +105,10 @@ def test_discussion_preview_and_install_end_to_end(tmp_path: Path) -> None:
     done, path = room.install(session.session_id, ACTOR)
     assert done.status == "installed" and done.installed_as == "engineering/daily-sop@1.0.0"
     published = WorkflowManifest.model_validate_json(path.read_text(encoding="utf-8"))
-    assert published.metadata.lifecycle == "published"
-    assert published.metadata.business_approval.reviewer == ACTOR
-    grants = json.loads((tmp_path / "grants.json").read_text(encoding="utf-8"))
-    assert {grant["asset"]["name"] for grant in grants} == {"read", "write"}
-    assert all(grant["approval_ref"].startswith("authoring-session:") for grant in grants)
+    assert published.metadata.lifecycle == "draft"  # plan preview is not a full trial
+    assert published.metadata.business_approval.reviewer is None
+    assert published.metadata.business_approval.status == "pending"
+    assert not (tmp_path / "grants.json").exists()
     settings = json.loads((tmp_path / "workflow-settings.json").read_text(encoding="utf-8"))
     assert settings["workflows"]["engineering/daily-sop"] == {"folder": "C:/out"}
     with pytest.raises(AuthoringError) as twice:
@@ -121,7 +116,7 @@ def test_discussion_preview_and_install_end_to_end(tmp_path: Path) -> None:
     assert twice.value.code == "authoring_session_installed"
 
 
-def test_a_draft_changed_after_its_preview_needs_a_new_preview(tmp_path: Path) -> None:
+def test_a_changed_draft_never_inherits_the_old_preview_as_validation(tmp_path: Path) -> None:
     calls = Calls()
     model = Scripted(
         {"reply": "草稿", "questions": [], "workflow": draft()},
@@ -134,9 +129,10 @@ def test_a_draft_changed_after_its_preview_needs_a_new_preview(tmp_path: Path) -
     )
     changed = room.discuss(session.session_id, ACTOR, "版本改成 1.0.1")
     assert changed.preview is None and changed.status == "ready"
-    with pytest.raises(AuthoringError) as refused:
-        room.install(session.session_id, ACTOR)
-    assert refused.value.code == "authoring_preview_required"
+    _installed, path = room.install(session.session_id, ACTOR)
+    manifest = WorkflowManifest.model_validate_json(path.read_text(encoding="utf-8"))
+    assert manifest.metadata.lifecycle == "draft"
+    assert not any("authoring-preview" in ref for ref in manifest.metadata.validation_refs)
 
 
 def test_sessions_belong_to_their_actor_and_a_pdf_must_be_a_pdf(tmp_path: Path) -> None:

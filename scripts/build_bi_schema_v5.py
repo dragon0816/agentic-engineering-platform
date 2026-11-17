@@ -28,7 +28,8 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-for entry in (REPO, REPO / "src"):
+BI = REPO / "feature_plugins" / "bi_knowledge" / "python"  # the BI Knowledge plugin
+for entry in (REPO, REPO / "src", BI):
     if str(entry) not in sys.path:
         sys.path.insert(0, str(entry))
 
@@ -36,7 +37,7 @@ from typing import Any  # noqa: E402
 
 from scripts import build_bi_schema_v4 as v4  # noqa: E402
 
-OUT = REPO / "src" / "capabilities" / "bi_cards" / "bi_schema_v5.json"
+OUT = BI / "aep_bi" / "cards" / "bi_schema_v5.json"
 #: name, label, kind, class, aliases. In this order, after a type's own fields.
 ADDED = (
     ("summary", "摘要", "str", "judgement", ["摘要", "summary"]),

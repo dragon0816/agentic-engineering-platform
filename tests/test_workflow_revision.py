@@ -378,7 +378,8 @@ def test_editing_the_script_then_the_cards_install_adds_1_0_1_and_keeps_1_0_0(
     installed = WorkflowManifest.model_validate_json(new.read_text(encoding="utf-8"))
     step: Any = installed.steps[0]
     assert step.inputs["request"].value["script"] == EDITED
-    assert installed.metadata.lifecycle == "published" and installed.occupies_machine
+    assert installed.metadata.lifecycle == "draft" and installed.occupies_machine
+    assert installed.metadata.business_approval.status == "pending"
     # 1.0.0 stays installed, byte for byte, and remains readable by its exact version.
     assert original.read_bytes() == before
     old = call(chat, "authoring__get_workflow", {"workflow": "fixture-weekly-report@1.0.0"})
@@ -531,7 +532,9 @@ def test_the_shipped_package_is_found_by_name_or_by_an_installed_capability(
     assert refused.status == "failed" and refused.failure.code == "capability_file_refused"
 
 
-def test_the_model_has_no_tool_that_installs_or_edits_installed_files(tmp_path: Path) -> None:
+def test_direct_model_install_creates_new_version_and_preserves_original_bytes(
+    tmp_path: Path,
+) -> None:
     chat = studio(tmp_path)
     names = {tool.tool.name for tool in chat.tools()}
     assert {
@@ -556,8 +559,9 @@ def test_the_model_has_no_tool_that_installs_or_edits_installed_files(tmp_path: 
         },
     )
     asked = call(chat, "authoring__install_workflow", {"candidate_id": candidate_id})
-    assert asked.status == "awaiting_approval"
-    assert sorted(p.name for p in chat.workflows_dir.glob("*.json")) == [path.name]
+    assert asked.status == "succeeded"
+    assert len(list(chat.workflows_dir.glob("*.json"))) == 2
+    assert chat.approvals("owner") == []
     assert path.read_bytes() == before
 
 

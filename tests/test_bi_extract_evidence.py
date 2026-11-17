@@ -14,8 +14,8 @@ from typing import Any
 
 from test_bi_extract import Scripted
 
-from capabilities.bi_cards import extract
-from capabilities.bi_cards.schema import shipped
+from aep_bi.cards import extract
+from aep_bi.cards.schema import shipped
 
 V2 = shipped()[1]
 REPORT = """# 虛構產業報告

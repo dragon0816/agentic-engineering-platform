@@ -65,7 +65,9 @@ def test_a_script_reads_input_writes_output_and_its_result_comes_back(tmp_path: 
 
 
 @requires_win32
-def test_input_and_other_folders_are_not_writable_and_a_failure_is_returned(tmp_path: Path) -> None:
+def test_os_accessible_input_and_other_folders_are_writable_and_exit_is_real(
+    tmp_path: Path,
+) -> None:
     workspace = task(tmp_path)
     outside = tmp_path / "outside.txt"
     run = handler(tmp_path / "tasks").run(
@@ -83,28 +85,30 @@ def test_input_and_other_folders_are_not_writable_and_a_failure_is_returned(tmp_
             ),
         )
     )
-    assert run.exit_code == 3 and run.output.count("refused") == 2
-    assert (workspace / "input" / "data.csv").read_text(encoding="utf-8") == "a,b\n1,2\n"
-    assert not outside.exists()
+    assert run.exit_code == 3 and run.output.count("wrote") == 2
+    assert (workspace / "input" / "data.csv").read_text(encoding="utf-8") == "x"
+    assert outside.read_text(encoding="utf-8") == "x"
 
 
-def test_only_workspaces_under_an_allowed_root(tmp_path: Path) -> None:
+def test_absolute_workspaces_are_available_and_real_path_kind_errors_remain(tmp_path: Path) -> None:
     (tmp_path / "elsewhere").mkdir()
     (tmp_path / "tasks").mkdir()
     (tmp_path / "tasks" / "a-file").write_text("x", encoding="utf-8")
     for raw, code in (
-        (str(tmp_path / "elsewhere"), "coding_workspace_not_allowed"),
-        (str(tmp_path / "elsewhere" / "new-task"), "coding_workspace_not_allowed"),
         ("relative/path", "coding_workspace_not_absolute"),
         (str(tmp_path / "tasks" / "a-file"), "coding_workspace_not_a_folder"),
     ):
         with pytest.raises(CapabilityRefused) as refused:
             handler(tmp_path / "tasks").run(RunPythonRequest(workspace=raw, script="print(1)"))
         assert refused.value.code == code
-    assert not (tmp_path / "elsewhere" / "new-task").exists()
+    for name in (tmp_path / "elsewhere", tmp_path / "elsewhere" / "new-task"):
+        run = handler(tmp_path / "tasks").run(
+            RunPythonRequest(workspace=str(name), script="print(1)")
+        )
+        assert run.exit_code == 0 and name.is_dir()
 
 
-def test_a_path_that_climbs_out_of_the_root_is_refused_and_creates_nothing(
+def test_absolute_paths_are_resolved_without_an_aep_root_boundary(
     tmp_path: Path,
 ) -> None:
     """Owner 2026-10-20: never create a folder outside the roots; `..` is
@@ -115,12 +119,10 @@ def test_a_path_that_climbs_out_of_the_root_is_refused_and_creates_nothing(
         str(tmp_path / "tasks") + "/../escaped",
         str(tmp_path / "tasks") + r"\sub\..\inside",
     ):
-        with pytest.raises(CapabilityRefused) as refused:
-            handler(tmp_path / "tasks").run(RunPythonRequest(workspace=raw, script="print(1)"))
-        assert refused.value.code == "coding_workspace_not_allowed"
-    assert not (tmp_path / "escaped").exists()
-    assert not (tmp_path / "tasks" / "inside").exists()
-    assert not (tmp_path / "tasks" / "sub").exists()
+        run = handler(tmp_path / "tasks").run(RunPythonRequest(workspace=raw, script="print(1)"))
+        assert run.exit_code == 0
+    assert (tmp_path / "escaped").is_dir()
+    assert (tmp_path / "tasks" / "inside").is_dir()
 
 
 def test_a_missing_folder_under_a_root_is_checked_but_made_only_when_the_run_starts(
@@ -135,10 +137,8 @@ def test_a_missing_folder_under_a_root_is_checked_but_made_only_when_the_run_sta
     assert runner._workspace(str(target)) == target.resolve()
     assert not target.exists()
     runner.rule_present = lambda _python: False
-    with pytest.raises(CapabilityRefused) as refused:
-        runner.run(RunPythonRequest(workspace=str(target), script="print(1)"))
-    assert refused.value.code == "coding_network_block_missing"
-    assert not target.exists()
+    run = runner.run(RunPythonRequest(workspace=str(target), script="print(1)"))
+    assert run.exit_code == 0 and target.is_dir()
 
 
 @requires_win32
@@ -237,6 +237,7 @@ def test_failed_program_cannot_pass_with_an_old_workbook(
     (workspace / "output").mkdir()
     (workspace / "output" / "old.xlsx").write_bytes(b"previous report")
     runner = handler(tmp_path / "tasks")
+    assert runner.binding is not None
     runner.binding = runner.binding.model_copy(update={"timeout_seconds": 5})
     installed = InstalledCapabilities()
     installed.register(

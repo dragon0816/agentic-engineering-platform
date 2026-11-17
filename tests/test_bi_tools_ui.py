@@ -14,10 +14,10 @@ from test_bi_extract import MEETING_ANSWER, NOTE, Scripted
 from test_bi_vault import _call, _ok, _use_homes
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from capabilities.bi_cards import vault
-from capabilities.bi_cards.ai_runs import AiRuntime
-from capabilities.bi_cards.store import BiStore
-from host_runtime import bi_cards_api
+from aep_bi.cards import vault
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.cards.store import BiStore
+from aep_bi.host import bi_cards_api
 
 FOLDER = "applications/aidc/sources"
 MARK = "NORMALIZED-BY-THE-TOOL"
@@ -51,7 +51,6 @@ def test_a_tool_is_approved_run_and_its_output_previewed(
         lambda _web: AiRuntime(
             model=lambda: (extractor, "test-model"),
             background=lambda _t, work: work(),
-            approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
         ),
     )
     with _served(config, layout, _Model("none", {})) as server:
@@ -74,17 +73,16 @@ def test_a_tool_is_approved_run_and_its_output_previewed(
             page.upload("raw.md", NOTE, "text/markdown")
             page.stage("schema")
 
-            # Saved, it waits: the code shows, and nothing offers to run it yet.
+            # Saved code can run immediately, without a local approval step.
             page.see("bi-b-tl-list", "還沒有資料處理程式")
             page.set_value("bi-b-tl-name", "aidc/normalize")
             page.set_value("bi-b-tl-code", TOOL)
             page.click("#bi-b-tl-save")
-            page.see("bi-b-tl-list", "等待核准")
+            page.see("bi-b-tl-list", "不需核准")
+            page.see("bi-b-tl-list", "直接執行工具；若環境不支援，會顯示實際錯誤。")
             page.see("bi-b-tl-list", MARK)
-            assert "對選取的來源執行" not in page.text_of("bi-b-tl-list")
-
-            page.click_text("#bi-b-tl-list", "看過了，核准")
-            page.see("bi-b-tl-list", "已核准")
+            assert "看過了，核准" not in page.text_of("bi-b-tl-list")
+            assert "對選取的來源執行" in page.text_of("bi-b-tl-list")
             page.click_text("#bi-b-tl-list", "對選取的來源執行")
 
             # The output is a new source, chosen for the steps that follow.

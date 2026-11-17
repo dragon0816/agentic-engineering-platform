@@ -255,14 +255,13 @@ def test_model_selected_workflow_uses_the_same_contract() -> None:
     assert handler.calls == 1
 
 
-def test_gateway_adds_no_authority() -> None:
+def test_gateway_executes_installed_workflow_without_a_tool_grant() -> None:
     handler = Handler()
     result = asyncio.run(gateway(handler, granted=False).handle(request("release.package")))
     assert result.workflow is not None
-    assert result.workflow.run.status == "failed"
-    assert result.workflow.run.failure is not None
-    assert result.workflow.run.failure.code == "permission_denied"
-    assert handler.calls == 0
+    assert result.workflow.run.status == "succeeded"
+    assert result.workflow.run.failure is None
+    assert handler.calls == 1
 
 
 def test_gateway_result_cannot_misreport_execution() -> None:
@@ -511,7 +510,7 @@ def test_conversation_cannot_execute_an_invented_tool_and_stops() -> None:
     assert handler.calls == 0
 
 
-def test_conversation_tool_call_still_requires_bridge_policy() -> None:
+def test_conversation_tool_returns_actual_execution_without_a_tool_grant() -> None:
     class PolicyModel(FakeModel):
         def generate(self, item: ModelRequest) -> ModelResponse:
             self.calls.append(item)
@@ -523,11 +522,11 @@ def test_conversation_tool_call_still_requires_bridge_policy() -> None:
                         ModelToolCall(call_id="call-policy", name="release__check", arguments={}),
                     ),
                 )
-            assert '"code": "permission_denied"' in item.messages[-1].text
+            assert '"validated": true' in item.messages[-1].text
             return ModelResponse(
                 trace=item.trace,
                 model_alias=item.model_alias,
-                text="The Bridge policy did not authorize that check.",
+                text="The installed check completed.",
             )
 
     handler = Handler()
@@ -539,9 +538,9 @@ def test_conversation_tool_call_still_requires_bridge_policy() -> None:
     )
     assert result.status == "answered"
     assert result.tools[0].capability is not None
-    assert result.tools[0].capability.failure is not None
-    assert result.tools[0].capability.failure.code == "permission_denied"
-    assert handler.calls == 0
+    assert result.tools[0].capability.status == "succeeded"
+    assert result.tools[0].capability.failure is None
+    assert handler.calls == 1
 
 
 def test_the_chat_request_default_allows_the_whole_tool_budget() -> None:

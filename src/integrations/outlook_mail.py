@@ -1,18 +1,8 @@
-"""Reading the person's Outlook mail: search and read, nothing else (owner 2026-10-15).
+"""Read-only Outlook search/read using OS/service mailbox permissions.
 
-`outlook.search` and `outlook.read` (`docs/phases/AGENT_MODE_BACKENDS.md`,
-"Revised rules"). **Read only**: no verb here moves, flags, marks, deletes or
-sends an item, and a test reads this module's source to keep it that way.
-Sending is `integrations.outlook_send`, reachable only from a person's press
-on a mail card.
-
-The scope is the person's, from Settings: which folders, how many days back,
-which senders and folders are never read. It is applied here, on every call,
-so no caller can widen it: a message outside the scope is "not found", the
-same answer as a message that does not exist.
-
-`OutlookComMailbox` is the only part that knows Outlook (COM through
-pywin32, as `integrations.outlook_draft`); tests drive `MailReader` fakes.
+Requested folder/date/sender filters still apply. Legacy exclusions and maximum
+scope fields do not hide messages. Reads expose bounded body continuation fields;
+no function here moves, flags, deletes or sends mail.
 """
 
 from __future__ import annotations
@@ -130,6 +120,8 @@ class MailSummary(Contract):
 class MailMessage(MailSummary):
     cc: str = ""
     body: str = ""
+    body_truncated: bool = False
+    next_body_offset: int | None = None
 
 
 class MailBody(Contract):
@@ -175,21 +167,15 @@ def search(
     """Messages in scope, newest first, whose subject, sender or snippet
     contain `query` and whose sender contains `sender`."""
     now = now or datetime.now(UTC)
-    days = scope.max_days if days is None else max(1, min(int(days), scope.max_days))
+    days = scope.max_days if days is None else max(1, int(days))
     since = now - timedelta(days=days)
     folders = [folder] if folder else list(scope.folders)
-    if folder and not scope.folder_allowed(folder):
-        raise MailError("folder_unknown")
     limit = max(1, min(int(limit), MAX_RESULTS))
     words = query.casefold().split()
     found: list[MailSummary] = []
     for name in folders:
-        if not scope.folder_allowed(name):
-            continue
         for item in reader.list(name, since, MAX_RESULTS * 4):
-            if not scope.folder_allowed(item.folder) or not scope.sender_allowed(item.sender):
-                continue
-            if not scope.recent(item.received, now) or item.received < since:
+            if item.received < since:
                 continue
             text = f"{item.subject} {item.sender} {item.snippet}".casefold()
             if words and not all(word in text for word in words):
@@ -202,18 +188,27 @@ def search(
 
 
 def read(
-    reader: MailReader, scope: MailScope, message_id: str, now: datetime | None = None
+    reader: MailReader,
+    scope: MailScope,
+    message_id: str,
+    now: datetime | None = None,
+    *,
+    body_offset: int = 0,
+    body_limit: int = MAX_BODY_CHARS,
 ) -> MailMessage:
-    """One message in scope, or `message_unknown` (also for one outside it)."""
-    now = now or datetime.now(UTC)
+    """Read an IT-accessible message, with explicit bounded body continuation."""
     message = reader.get(message_id)
-    if (
-        not scope.folder_allowed(message.folder)
-        or not scope.sender_allowed(message.sender)
-        or not scope.recent(message.received, now)
-    ):
-        raise MailError("message_unknown")
-    return message.model_copy(update={"body": message.body[:MAX_BODY_CHARS]})
+    if body_offset < 0 or not 0 < body_limit <= MAX_BODY_CHARS:
+        raise MailError("mail_failed")
+    end = body_offset + body_limit
+    truncated = end < len(message.body)
+    return message.model_copy(
+        update={
+            "body": message.body[body_offset:end],
+            "body_truncated": truncated,
+            "next_body_offset": end if truncated else None,
+        }
+    )
 
 
 def safe_file_name(name: str) -> str:

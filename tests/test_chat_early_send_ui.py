@@ -9,6 +9,7 @@ sends it once ready, exactly once. Stub model only.
 from __future__ import annotations
 
 import json
+import threading
 import time
 from pathlib import Path
 from typing import Any
@@ -32,9 +33,12 @@ def test_enter_before_the_page_is_ready_sends_once_it_is(
 
     web = served.web
     checked = web.conversation_backends
+    checking = threading.Event()
+    release = threading.Event()
 
     def slow_backends() -> Any:
-        time.sleep(4)
+        checking.set()
+        assert release.wait(30)
         return checked()
 
     monkeypatch.setattr(web, "conversation_backends", slow_backends)
@@ -62,10 +66,13 @@ def test_enter_before_the_page_is_ready_sends_once_it_is(
     try:
         browser.navigate(served.address)
         wait("!!document.getElementById('message')")
+        assert checking.wait(10)
         assert browser._evaluate("document.getElementById('send').disabled")
         browser._evaluate(
             f"const f = document.getElementById('message'); f.value = {json.dumps(ASKED)};"
             "f.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));"
+            # The delayed loading notice arrives after Enter queued the message.
+            "sendWait(true);"
         )
         # Not silent: the text stays and the page says it will be sent.
         note = str(wait("document.getElementById('send-wait').textContent"))
@@ -73,10 +80,12 @@ def test_enter_before_the_page_is_ready_sends_once_it_is(
         assert browser._evaluate("document.getElementById('message').value") == ASKED
         assert asked == []
         # Once ready it goes, once.
+        release.set()
         wait(f"document.getElementById('log').innerText.includes({json.dumps(ANSWER_TEXT)})")
         assert asked == [ASKED]
         assert browser._evaluate("document.getElementById('message').value") == ""
         assert browser._evaluate("document.getElementById('send-wait').hidden")
     finally:
+        release.set()
         browser.close()
         browser.discard_profile()

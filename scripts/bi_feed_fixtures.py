@@ -32,13 +32,14 @@ from typing import Any
 from urllib.parse import urlencode
 
 REPO = Path(__file__).resolve().parents[1]
-for path in (REPO, REPO / "src"):  # run as a script: neither is importable then
+BI = REPO / "feature_plugins" / "bi_knowledge" / "python"  # the BI Knowledge plugin
+for path in (REPO, REPO / "src", BI):  # run as a script: neither is importable then
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
-from capabilities.bi_cards import analyses, feed, vault, vault_skills  # noqa: E402
-from capabilities.bi_cards import store as bi_store  # noqa: E402
-from capabilities.bi_cards.store import BiStore, PlannedRow  # noqa: E402
+from aep_bi.cards import analyses, feed, vault, vault_skills  # noqa: E402
+from aep_bi.cards import store as bi_store  # noqa: E402
+from aep_bi.cards.store import BiStore, PlannedRow  # noqa: E402
 from knowledge.repo import repository as repo_engine  # noqa: E402
 
 FIXTURE = REPO / "tests" / "fixtures" / "bi_feed"

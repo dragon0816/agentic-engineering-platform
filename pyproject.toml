@@ -62,9 +62,6 @@ where = ["src"]
 # The loan replies' message texts, carried from rs_workflow_system's
 # config/loan-templates (Workflow 06b); overridable per install.
 "capabilities.loan_reply" = ["loan-templates/*.txt"]
-# The BI cards demo set: the robotics sample's 12 CSVs, and the example
-# non-BI schema with its CSVs, offered but not installed (owner 2026-10-21).
-"capabilities.bi_cards" = ["demo/*.csv", "samples/*.json", "samples/*.csv"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -72,10 +69,14 @@ addopts = "-ra"
 # `gui`: drives windows on the desktop (keyboard, mouse focus). Skipped unless
 # AEP_GUI_TESTS=1, so a plain run never takes over the owner's screen (2026-10-07).
 markers = ["gui: drives desktop windows; runs only with AEP_GUI_TESTS=1"]
+# BI Knowledge is a feature plugin outside src (proposal r3, stage B).
+pythonpath = ["feature_plugins/bi_knowledge/python"]
 
 [tool.ruff]
 target-version = "py311"
 line-length = 100
+# First-party roots: the defaults plus the BI Knowledge feature plugin.
+src = [".", "src", "feature_plugins/bi_knowledge/python"]
 # Migrated source jobs are vendored byte-identical and hash-verified; never reformat them.
 # Benchmark runs are recorded agent output kept as evidence (prompts, traces and
 # the scripts an agent wrote, some deliberately broken); never lint or reformat them.
@@ -115,12 +116,13 @@ select = ["E", "F", "I", "UP", "B"]
 "benchmarks/coding_v1/fixtures/build_fixtures.py" = ["E501"]
 # The default BI analysis pack's scripts: each runs after `_prelude.py` (BI P2), whose
 # names they use.
-"src/capabilities/bi_cards/pack_default/*.py" = ["F821"]
+"feature_plugins/bi_knowledge/python/aep_bi/cards/pack_default/*.py" = ["F821"]
 
 [tool.mypy]
 python_version = "3.11"
 strict = true
-files = ["src", "tests"]
+files = ["src", "tests", "feature_plugins/bi_knowledge/python"]
+mypy_path = "src,feature_plugins/bi_knowledge/python"
 plugins = ["pydantic.mypy"]
 # The owner's BI example tools are verbatim reference fixtures, not our code.
 exclude = [
@@ -128,7 +130,7 @@ exclude = [
     "tests/fixtures/robotics_kb_sample/",
     "tests/fixtures/bi_schema_v8/",
     # Analysis scripts run in a guarded process after `_prelude.py`, not modules (BI P2).
-    "src/capabilities/bi_cards/pack_default/",
+    "feature_plugins/bi_knowledge/python/aep_bi/cards/pack_default/",
 ]
 
 # The source loan tests, vendored unchanged apart from their imports as the

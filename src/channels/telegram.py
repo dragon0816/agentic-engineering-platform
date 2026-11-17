@@ -59,6 +59,7 @@ from common.distribution import LocalStateError
 from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalWorkflowRequest
 from common.workflow_run_form import form_offer, offer_in, person_prefill, run_intent
+from host_runtime import features
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
 from host_runtime.answers import run_cards, run_follow_up
 from host_runtime.attachments import (
@@ -71,7 +72,6 @@ from host_runtime.attachments import (
     for_model,
     safe_name,
 )
-from host_runtime.bi_cards_tools import with_bi_sources
 from host_runtime.business_cards_tools import chart_files, with_legend
 from host_runtime.chat_authoring import ChatAuthoring, ChatAuthoringError, approval_text
 from host_runtime.delegation_record import records_from as delegation_records
@@ -1960,7 +1960,7 @@ class TelegramIngress:
             return TelegramDelivery(**base, disposition="answered", reply=reply, buttons=buttons)
         # A subscribed BI dataset's source line, when the model left it out.
         answer = (
-            with_bi_sources(conversation.text, conversation)
+            features.active().finish_answer(conversation.text, conversation)
             if conversation.text.strip()
             else _no_answer_reply(record)
         )

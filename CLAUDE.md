@@ -52,6 +52,19 @@ For shared contracts, apply `.agents/skills/contract-development/SKILL.md`.
 Before completion or transfer, apply `.agents/skills/code-change-verification/SKILL.md` and `.agents/skills/handoff/SKILL.md`.
 When migrating existing behavior, apply `.agents/skills/migration/SKILL.md`.
 
+## Tools available in the execution environment can run directly
+
+Owner decision2026-11-12 cancels AEP tool grants and local tool/Skill/Workflow
+installation and execution approvals. Agents discover/connect/install/use tools
+in the same session whenever the execution environment can actually run them.
+Owner clarification2026-11-13 requires no IT approval, IT identity or IT-managed
+allowlist. Report actual OS/service errors. Preserve identities,
+truthful results, at-most-once effects, Knowledge sources/citations and unchanged
+model/data-routing rules. Shared publication is separate. Do not fabricate review
+or auto-approve historical cards. External coding-provider guards remain intact.
+Future harness changes still require AGENTS22 scoped consent. Current approved
+scope and tests: docs/phases/IT_OWNED_TOOL_ACCESS_DESIGN_20261112.md.
+
 ## Handoff
 
 Codex, Claude Code and humans may alternate on the same branch. Never depend on another coding agent's chat history.

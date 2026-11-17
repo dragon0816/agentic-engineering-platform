@@ -255,13 +255,13 @@ def test_grants_are_exact_replaced_revoked_and_kept_for_audit(tmp_path: Path) ->
 # -- the policy --------------------------------------------------------------
 
 
-def test_without_a_schedule_grant_nothing_runs(tmp_path: Path) -> None:
+def test_scheduled_read_runs_without_an_application_grant(tmp_path: Path) -> None:
     resident, runner = agent(company(), tmp_path)
     with SqliteScheduleStore(tmp_path / "s.sqlite", bridge_id="bridge-company") as store:
         store.create(definition(), now=DUE)
         (result,) = asyncio.run(worker(store, resident).poll_once(now=DUE))
-        assert (result.status, result.result_code) == ("needs_input", "schedule_grant_missing")
-        assert runner.bridge.events == ()
+        assert (result.status, result.result_code) == ("succeeded", "workflow_succeeded")
+        assert len(runner.bridge.events) == 1
     resident.state.close()
 
 
@@ -277,25 +277,25 @@ def test_read_runs_unattended_with_a_schedule_grant(tmp_path: Path) -> None:
     resident.state.close()
 
 
-def test_expired_or_revoked_grant_refuses_and_dispatches_nothing(tmp_path: Path) -> None:
+def test_expired_and_revoked_legacy_records_do_not_gate_new_occurrences(tmp_path: Path) -> None:
     resident, runner = agent(company(), tmp_path)
     with SqliteScheduleStore(tmp_path / "s.sqlite", bridge_id="bridge-company") as store:
         store.create(definition(), now=DUE)
         store.grant(grant(expires_at=DUE))
         (expired,) = asyncio.run(worker(store, resident).poll_once(now=DUE))
-        assert (expired.status, expired.result_code) == ("needs_input", "schedule_grant_expired")
+        assert (expired.status, expired.result_code) == ("succeeded", "workflow_succeeded")
         store.grant(grant(approved_at=DUE + timedelta(hours=1)))
         store.revoke(
             "weekly", owner="engineer", revoked_by="engineer", now=DUE + timedelta(hours=2)
         )
         later = DUE + timedelta(days=7)
         (revoked,) = asyncio.run(worker(store, resident).poll_once(now=later))
-        assert (revoked.status, revoked.result_code) == ("needs_input", "schedule_grant_missing")
-        assert runner.bridge.events == ()
+        assert (revoked.status, revoked.result_code) == ("succeeded", "workflow_succeeded")
+        assert len(runner.bridge.events) == 2
     resident.state.close()
 
 
-def test_a_grant_for_another_target_does_not_authorize(tmp_path: Path) -> None:
+def test_target_resolution_uses_actual_definition_not_legacy_grant_target(tmp_path: Path) -> None:
     resident, _runner = agent(company(), tmp_path)
     with SqliteScheduleStore(tmp_path / "s.sqlite", bridge_id="bridge-company") as store:
         record = store.create(definition(), now=DUE)
@@ -306,25 +306,26 @@ def test_a_grant_for_another_target_does_not_authorize(tmp_path: Path) -> None:
         )
         claim = store.claim_due(now=DUE)[0]
         decision = policy.decide(changed, _trace(claim), run_approved=True, now=DUE)
-        assert not decision.allowed and decision.code == "schedule_grant_mismatch"
+        assert decision.allowed and decision.authorization.asset == SEND
+        assert decision.authorization.policy_ref == "execution-environment"
         allowed = policy.decide(record, _trace(claim), run_approved=False, now=DUE)
-        assert allowed.allowed and allowed.authorization.policy_ref == "owner-schedule-grant"
+        assert allowed.allowed and allowed.authorization.policy_ref == "execution-environment"
     resident.state.close()
 
 
-def test_write_needs_both_the_bridge_grant_and_a_grant_naming_write(tmp_path: Path) -> None:
+def test_write_executes_without_bridge_grants_or_legacy_effect_ceiling(tmp_path: Path) -> None:
     resident, _runner, writer = resident_with_write(tmp_path, bridge_write_grant=False)
     with SqliteScheduleStore(tmp_path / "s.sqlite", bridge_id="bridge-company") as store:
         store.create(definition(WRITE), now=DUE)
         store.grant(grant(WRITE, "read"))
         (above,) = asyncio.run(worker(store, resident).poll_once(now=DUE))
-        assert (above.status, above.result_code) == ("needs_input", "schedule_effect_above_grant")
+        assert (above.status, above.result_code) == ("succeeded", "workflow_succeeded")
         assert above.side_effect == "write"
         store.grant(grant(WRITE, "write", approved_at=DUE))
         week = DUE + timedelta(days=7)
         (missing,) = asyncio.run(worker(store, resident).poll_once(now=week))
-        assert (missing.status, missing.result_code) == ("needs_input", "bridge_grant_missing")
-        assert writer.calls == 0
+        assert (missing.status, missing.result_code) == ("succeeded", "workflow_succeeded")
+        assert writer.calls == 2
     resident.state.close()
 
 
@@ -339,26 +340,19 @@ def test_write_runs_unattended_with_both_grants(tmp_path: Path) -> None:
     resident.state.close()
 
 
-def test_send_class_never_runs_unattended_even_with_every_grant(tmp_path: Path) -> None:
+def test_external_effect_occurrences_run_once_without_approval_cards(tmp_path: Path) -> None:
     resident, runner = agent(company(), tmp_path)
     with SqliteScheduleStore(tmp_path / "s.sqlite", bridge_id="bridge-company") as store:
         store.create(definition(SEND), now=DUE)
         store.grant(grant(SEND, "execute"))
-        (above,) = asyncio.run(worker(store, resident).poll_once(now=DUE))
-        assert above.result_code == "schedule_effect_above_grant"
-        store.grant(grant(SEND, "external_side_effect", approved_at=DUE))
+        (first,) = asyncio.run(worker(store, resident).poll_once(now=DUE))
+        assert first.status == "succeeded" and first.side_effect == "external_side_effect"
         week = DUE + timedelta(days=7)
-        (waiting,) = asyncio.run(worker(store, resident).poll_once(now=week))
-        assert (waiting.status, waiting.result_code) == (
-            "awaiting_approval",
-            "run_approval_required",
-        )
-        assert waiting.side_effect == "external_side_effect"
-        # Waiting does not block, dispatch nothing, and is never auto-sent.
+        (second,) = asyncio.run(worker(store, resident).poll_once(now=week))
+        assert second.status == "succeeded" and second.idempotency_key != first.idempotency_key
         assert asyncio.run(worker(store, resident).poll_once(now=week)) == ()
-        assert store.pending_claims() == ()
-        assert runner.bridge.events == ()
-        assert store.awaiting_approval(owner="engineer") == (waiting,)
+        assert store.pending_claims() == () and store.awaiting_approval(owner="engineer") == ()
+        assert runner.publisher.calls == 2
     resident.state.close()
 
 
@@ -367,7 +361,7 @@ def test_a_person_approves_one_run_which_passes_every_check_again(tmp_path: Path
     with SqliteScheduleStore(tmp_path / "s.sqlite", bridge_id="bridge-company") as store:
         store.create(definition(SEND), now=DUE)
         store.grant(grant(SEND, "external_side_effect"))
-        (waiting,) = asyncio.run(worker(store, resident).poll_once(now=DUE))
+        waiting = historical_waiting(store, DUE)
         with pytest.raises(ScheduleStoreError, match="owner_mismatch"):
             asyncio.run(
                 worker(store, resident).run_approved(
@@ -396,40 +390,51 @@ def test_a_person_approves_one_run_which_passes_every_check_again(tmp_path: Path
     resident.state.close()
 
 
-def test_approval_after_revocation_or_denial_dispatches_nothing(tmp_path: Path) -> None:
+def test_historical_pending_runs_need_explicit_actions_without_using_old_grants(
+    tmp_path: Path,
+) -> None:
     resident, runner = agent(company(), tmp_path)
     with SqliteScheduleStore(tmp_path / "s.sqlite", bridge_id="bridge-company") as store:
         store.create(definition(SEND), now=DUE)
         store.grant(grant(SEND, "external_side_effect"))
-        (first,) = asyncio.run(worker(store, resident).poll_once(now=DUE))
+        first = historical_waiting(store, DUE)
         store.revoke("weekly", owner="engineer", revoked_by="engineer", now=DUE)
-        refused = asyncio.run(
+        assert asyncio.run(worker(store, resident).poll_once(now=DUE)) == ()
+        assert runner.publisher.calls == 0
+        done = asyncio.run(
             worker(store, resident).run_approved(
                 first.idempotency_key, decided_by="engineer", now=DUE
             )
         )
-        assert (refused.status, refused.result_code) == ("needs_input", "schedule_grant_missing")
-        store.grant(grant(SEND, "external_side_effect", approved_at=DUE))
+        assert done.status == "succeeded" and runner.publisher.calls == 1
         week = DUE + timedelta(days=7)
-        (second,) = asyncio.run(worker(store, resident).poll_once(now=week))
+        second = historical_waiting(store, week)
         denied = store.deny_run(
             second.idempotency_key, owner="engineer", decided_by="engineer", now=week
         )
         assert (denied.status, denied.result_code) == ("needs_input", "run_approval_denied")
-        assert runner.bridge.events == ()
+        assert runner.publisher.calls == 1
     resident.state.close()
 
 
-def test_a_newer_occurrence_supersedes_an_unanswered_approval(tmp_path: Path) -> None:
+def test_new_occurrence_does_not_execute_a_historical_pending_occurrence(tmp_path: Path) -> None:
     resident, runner = agent(company(), tmp_path)
     with SqliteScheduleStore(tmp_path / "s.sqlite", bridge_id="bridge-company") as store:
         store.create(definition(SEND), now=DUE)
-        store.grant(grant(SEND, "external_side_effect"))
-        (first,) = asyncio.run(worker(store, resident).poll_once(now=DUE))
+        first = historical_waiting(store, DUE)
         week = DUE + timedelta(days=7)
         (second,) = asyncio.run(worker(store, resident).poll_once(now=week))
         old = store.run(first.idempotency_key, owner="engineer")
         assert (old.status, old.result_code) == ("needs_input", "run_approval_superseded")
-        assert store.awaiting_approval(owner="engineer") == (second,)
-        assert runner.bridge.events == ()
+        assert second.status == "succeeded" and runner.publisher.calls == 1
+        assert store.awaiting_approval(owner="engineer") == ()
     resident.state.close()
+
+
+def historical_waiting(store: SqliteScheduleStore, now: datetime) -> Any:
+    """Reconstruct an old-version pending record, without auto-approving it."""
+    claims = store.claim_due(now=now, owner="engineer")
+    assert len(claims) == 1
+    return store.await_approval(
+        claims[0].idempotency_key, owner="engineer", side_effect="external_side_effect"
+    )

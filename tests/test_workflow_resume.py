@@ -5,6 +5,7 @@ import asyncio
 from typing import Any
 
 import pytest
+from execution_fixtures import unavailable_dependency
 from pydantic import ValidationError
 from test_dispatch import Handler, Input, Output, grant, spec
 from test_engine import context, manifest
@@ -129,7 +130,7 @@ def test_inspect_classifies_completed_uncertain_and_never_started() -> None:
     assert runner.inspect(context(), "run-missing") is None
 
 
-def test_denied_step_had_no_effect_and_resumes_after_a_grant() -> None:
+def test_missing_execution_dependency_has_no_effect_and_latest_attempt_can_resume() -> None:
     handler = Handler()
     installed = InstalledCapabilities()
     installed.register(
@@ -140,20 +141,22 @@ def test_denied_step_had_no_effect_and_resumes_after_a_grant() -> None:
     flow = manifest([spec().identity] * 2)
     workflows.register(flow)
     runner = WorkflowEngine(workflows, bridge)
+    restore = unavailable_dependency(installed, spec().identity)
     denied = run(runner, flow)
-    assert denied.run.failure.code == "permission_denied"
+    assert denied.run.failure.code == "missing_local_capability"
     plan = runner.inspect(context(), denied.run.run_id)
     assert plan is not None
     assert [s.state for s in plan.steps] == ["never_started", "never_started"]
-    assert plan.steps[0].code == "permission_denied"
+    assert plan.steps[0].code == "missing_local_capability"
     # Still denied: the plan grants nothing, and no run record is created.
     still = resume(runner, denied.run.run_id)
-    assert still is not None and still.run.failure.code == "permission_denied"
-    assert runner.get(still.run.run_id) is None
-    bridge.policy = LocalPolicy((grant(),))
-    resumed = resume(runner, denied.run.run_id)
+    assert still is not None and still.run.failure.code == "missing_local_capability"
+    assert runner.get(still.run.run_id) is not None  # an actual Bridge attempt, no handler
+    assert handler.calls == []
+    restore()
+    resumed = resume(runner, still.run.run_id)
     assert resumed is not None and resumed.run.status == "succeeded"
-    assert resumed.run.completed_steps == 2 and resumed.run.resumed_from == denied.run.run_id
+    assert resumed.run.completed_steps == 2 and resumed.run.resumed_from == still.run.run_id
     assert len(handler.calls) == 2
 
 
@@ -305,10 +308,10 @@ class TransientOnce(Handler):
 def test_a_run_can_be_continued_only_once() -> None:
     writer = FailOn()
     runner, flow = mixed_engine(FailOn(), writer)
-    runner.bridge.policy = LocalPolicy(())
+    restore = unavailable_dependency(runner.bridge.installed, spec().identity)
     denied = run(runner, flow)
-    assert denied.run.failure.code == "permission_denied"
-    runner.bridge.policy = LocalPolicy((grant(), write_grant()))
+    assert denied.run.failure.code == "missing_local_capability"
+    restore()
     first = resume(runner, denied.run.run_id)
     assert first is not None and first.run.status == "succeeded"
     assert writer.count == 1
@@ -368,16 +371,18 @@ def test_handler_evidence_survives_a_later_pre_handler_rejection() -> None:
             runner.execute(context(), flow.metadata.identity, {"count": 1}, timeout_seconds=10)
         )
         await asyncio.sleep(0.02)
-        # Revoked during the retry delay: attempt 2 is denied before any handler,
+        # A dependency disappears during retry delay: attempt 2 reaches no handler,
         # but attempt 1 already ran, so the step's effect is uncertain.
-        runner.bridge.policy = LocalPolicy(())
+        unavailable_dependency(runner.bridge.installed, spec().identity)
         result = await task
         assert result.run.failure is not None
-        assert result.run.failure.code == "permission_denied"
+        assert result.run.failure.code == "missing_local_capability"
         assert handler.count == 1
         plan = runner.inspect(context(), result.run.run_id)
         assert plan is not None
-        assert plan.steps[0].state == "uncertain" and plan.steps[0].code == "permission_denied"
+        assert (
+            plan.steps[0].state == "uncertain" and plan.steps[0].code == "missing_local_capability"
+        )
         assert [a.handler_invoked for a in result.attempts] == [True, False]
 
     asyncio.run(scenario())

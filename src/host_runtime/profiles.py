@@ -68,8 +68,10 @@ def _check_references(
     allows: Callable[[RunnableKind, AssetIdentity], bool],
     profile: AgentProfile,
 ) -> None:
-    """Every Skill, Knowledge and capability the profile names is allowed
-    (and installed), and the routing endpoint meets its requirements."""
+    """Check exact procedure/source references and model requirements.
+
+    Tool declarations are not application execution permissions.
+    """
     for skill in profile.skills:
         if not allows("skill", skill) or not _installed(layout.skills, skill, SkillManifest):
             raise ProfileError("profile_dependency_unavailable")
@@ -78,8 +80,7 @@ def _check_references(
             layout.knowledge, knowledge, KnowledgeManifest
         ):
             raise ProfileError("profile_dependency_unavailable")
-    if any(not allows("capability", capability) for capability in profile.allowed_capabilities):
-        raise ProfileError("profile_dependency_unavailable")
+    # Tool declarations are role guidance; OS/service access is checked at execution.
     binding = config.models
     endpoint = (
         None

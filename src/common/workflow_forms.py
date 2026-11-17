@@ -133,12 +133,12 @@ def form_fields(manifest: WorkflowManifest, channel: ParameterChannel) -> list[d
 
 
 def agent_fields(manifest: WorkflowManifest) -> tuple[WorkflowParameter, ...]:
-    """Fields a model may fill: agent-channel runtime fields, never privileged.
+    """All declared agent-channel runtime inputs, including execution choices.
 
-    A privileged field (`confirm`) such as "send mail" stays a person's
-    choice; static settings and secrets are never run fields at all.
+    Legacy `confirm` is presentation metadata, not execution authorization.
+    Static settings and secret references remain outside run arguments.
     """
-    return tuple(field for field in ordered_fields(manifest, "agent") if not field.confirm)
+    return ordered_fields(manifest, "agent")
 
 
 def _property_schema(field: WorkflowParameter) -> dict[str, Any]:

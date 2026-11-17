@@ -1,13 +1,9 @@
-"""`coding/change@1.0.0`: the bounded harness on a real repository.
+"""`coding/change@1.0.0`: validate a declared change in an isolated repository.
 
-Every check a person can act on comes before anything runs, as a typed
-refusal: unknown repository, a file outside `writable` or a test file, a test
-that does not exist, no model, a runner interpreter that cannot be
-restricted, or a missing network block. Then one detached git worktree, the
-model author, and restricted pytest as the only judge. A run that does not
-validate is a refusal with the harness's own code; its evidence is written
-next to the worktree first, so nothing the run learned is lost.
-"""
+The declared target/test contract prevents the author from weakening its own
+validation. Commands run under actual OS permissions, with real exit/timeout
+results; no AEP low-token or firewall-rule admission gate. Failed validation is
+retained as evidence and is never reported as a successful change."""
 
 from __future__ import annotations
 
@@ -33,6 +29,7 @@ from common.execution import RequestContext, TraceIdentifiers
 from harness import git_worktree
 from harness.check_commands import ModuleCheck, check_case
 from harness.contracts import CodingHarnessRequest, HarnessBudget, WorkspaceSnapshot
+from harness.environment_runner import EnvironmentRunner
 from harness.model_author import AuthorUnavailable, ModelChangeAuthor
 from harness.network_block import outbound_rule_present
 from harness.pytest_commands import (
@@ -43,7 +40,7 @@ from harness.pytest_commands import (
     suite_case,
 )
 from harness.repo_reader import RepoReader
-from harness.restricted_runner import RestrictedRunner, RunnerError, RunnerLimits
+from harness.restricted_runner import RunnerError, RunnerLimits
 from harness.runtime import CodingHarness, DeclaredCommands
 from harness.workspace import BoundedWorkspace, WorkspaceRefused
 from models.contracts import ModelClient
@@ -115,7 +112,7 @@ class CodingChangeHandler:
             raise CapabilityRefused("coding_model_unavailable")
         python = Path(self.binding.runner_python)
         try:
-            runner = RestrictedRunner(
+            runner = EnvironmentRunner(
                 python,
                 RunnerLimits(
                     timeout_seconds=self.binding.timeout_seconds,
@@ -125,8 +122,6 @@ class CodingChangeHandler:
             )
         except RunnerError as error:
             raise CapabilityRefused(error.code) from None
-        if self.binding.require_network_block and not self.rule_present(python):
-            raise CapabilityRefused("coding_network_block_missing")
         run_id = f"{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}"
         try:
             run = git_worktree.create(root, self.runs_root, run_id)

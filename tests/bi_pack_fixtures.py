@@ -30,9 +30,9 @@ from typing import Any
 
 from test_bi_vault import _call, _commit, _ok
 
-from capabilities.bi_cards import analyses, catalog, packs, service, vault, vault_skills
-from capabilities.bi_cards.store import BiStore, PlannedRow
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import analyses, catalog, packs, service, vault, vault_skills
+from aep_bi.cards.store import BiStore, PlannedRow
+from aep_bi.host.bi_cards_api import route
 from scripts import bi_feed_fixtures as feed_fixtures
 
 TODAY = date(2026, 10, 29)

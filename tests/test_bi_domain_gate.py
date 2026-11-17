@@ -13,9 +13,9 @@ from typing import Any
 import pytest
 from test_bi_vault import _call, _commit, _import, _ok, _push, _refused, _row, _sync, _two_pcs
 
-from capabilities.bi_cards import domain_reach, vault
-from capabilities.bi_cards.store import BiStore
-from host_runtime import bi_bench
+from aep_bi.cards import domain_reach, vault
+from aep_bi.cards.store import BiStore
+from aep_bi.host import bi_bench
 
 ALL = domain_reach.ALL
 

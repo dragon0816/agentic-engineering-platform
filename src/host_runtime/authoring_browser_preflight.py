@@ -132,23 +132,6 @@ def _state(chat: ChatAuthoring, scope: BrowserRepairScope) -> ChatCandidate:
     step = candidate.draft.steps[scope.step_index]
     if not isinstance(step, WorkflowStep) or step.capability != scope.capability:
         raise ChatAuthoringError("preflight_stale")
-    approvals = chat.approvals(scope.actor, session_id=scope.session_id, pending_only=False)
-    if not any(
-        a.kind == "run"
-        and a.status == "approved"
-        and a.candidate_id == scope.candidate_id
-        and a.digest == scope.trial_digest
-        and isinstance(a.result, dict)
-        and a.result.get("run_id") == scope.trial_run_id
-        and a.result.get("status") == "failed"
-        for a in approvals
-    ):
-        raise ChatAuthoringError("preflight_trial_approval_required")
-    if any(
-        a.kind == "run" and a.status == "pending" and a.candidate_id == scope.candidate_id
-        for a in approvals
-    ):
-        raise ChatAuthoringError("preflight_trial_pending")
     return candidate
 
 
@@ -264,6 +247,77 @@ def _check_call(chat: ChatAuthoring, call: BrowserPreflightCall) -> ChatCandidat
 
 
 def preflight_tool(
+    chat: ChatAuthoring, context: RequestContext, scope: BrowserRepairScope
+) -> HostTool:
+    """Run the repair probe directly; execution does not claim Workflow verification."""
+
+    async def execute(ctx: RequestContext, arguments: dict[str, JsonValue]) -> HostToolOutcome:
+        if (ctx.actor, ctx.session_id, ctx.trace) != (
+            context.actor,
+            context.session_id,
+            context.trace,
+        ):
+            return _refused("preflight_scope_required")
+        try:
+            parsed = BrowserPreflightRequest.model_validate(arguments)
+            if parsed.candidate_id != scope.candidate_id:
+                return _refused("preflight_scope_required")
+            with chat._candidate_lock(scope.candidate_id):
+                candidate = _state(chat, scope)
+                task = chat.tasks.load(scope.actor, scope.session_id)
+                assert task is not None
+                step = candidate.draft.steps[scope.step_index]
+                assert isinstance(step, WorkflowStep)
+                original = _inputs(step, task.last_trial_arguments)
+                call = BrowserPreflightCall(
+                    scope=scope,
+                    candidate_digest=parsed.base_digest,
+                    browser=original.model_copy(update={"actions": parsed.actions, "look": True}),
+                )
+                _check_call(chat, call)
+            with browser_origin_scope(scope.origins):
+                result = await chat._bridge().execute(
+                    CapabilityInvocation(
+                        context=ctx,
+                        target=scope.capability,
+                        arguments=call.browser.model_dump(mode="json"),
+                        origin="model",
+                    )
+                )
+            return HostToolOutcome(
+                status=result.status,
+                data={
+                    "status": result.status,
+                    "preflight_only": True,
+                    "verified": False,
+                    "handler_invoked": result.handler_invoked,
+                    "data": result.data,
+                    "replayed": "capability_replayed" in result.warnings,
+                },
+                failure=result.failure,
+            )
+        except (ValidationError, ValueError, KeyError, TypeError, WebScriptError):
+            return _refused("preflight_invalid")
+        except (ChatAuthoringError, RepairBudgetError) as error:
+            return _refused(error.code if isinstance(error, ChatAuthoringError) else str(error))
+
+    return HostTool(
+        ModelTool(
+            name=PREFLIGHT_TOOL,
+            description="Run a bounded browser correction probe for this failed step. "
+            "Supply candidate_id, current base_digest and one to eight actions. "
+            "Returns actual execution without an AEP approval card. The probe preserves "
+            "the repair's original sites and never verifies or installs a Workflow.",
+            input_contract="host.authoring-browser-preflight.v1",
+            input_schema=BrowserPreflightRequest.model_json_schema(),
+        ),
+        execute,
+        side_effect="external_side_effect",
+        records_effect=True,
+    )
+
+
+def _legacy_preflight_tool(
     chat: ChatAuthoring, context: RequestContext, scope: BrowserRepairScope
 ) -> HostTool:
     async def request(ctx: RequestContext, arguments: dict[str, JsonValue]) -> HostToolOutcome:

@@ -27,11 +27,11 @@ from test_bi_chat_charts import DATASET, _browser_missing, _host
 from test_chat_workflow_forms_telegram import _Scripted
 from test_host_wiring import host_json
 
-from capabilities.bi_cards.store import BiStoreError
+from aep_bi.cards.store import BiStoreError
+from aep_bi.host import bi_atlas_embed, bi_atlas_import
+from aep_bi.host.bi_cards_api import route
+from aep_bi.host.bi_cards_tools import ATLAS_PORT, ATLAS_TOOL, STALE_BOARD, TOOL_NAME
 from common.execution import RequestContext, TraceIdentifiers
-from host_runtime import bi_atlas_embed, bi_atlas_import
-from host_runtime.bi_cards_api import route
-from host_runtime.bi_cards_tools import ATLAS_PORT, ATLAS_TOOL, STALE_BOARD, TOOL_NAME
 from host_runtime.conversations import ConversationTurnRequest
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer

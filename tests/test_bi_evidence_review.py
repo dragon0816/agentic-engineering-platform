@@ -15,8 +15,8 @@ from test_bi_evidence_references import LOCATOR, _commit_run
 from test_bi_vault import _call, _import, _ok, _push, _row, _sync, _two_pcs
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from capabilities.bi_cards import card_model, vault
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from aep_bi.cards import card_model, vault
+from aep_bi.cards.store import BiStore, PlannedRow
 
 REFERENCE = card_model.reference_id("src-1", LOCATOR)
 JUDGED = {

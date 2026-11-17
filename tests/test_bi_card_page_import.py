@@ -15,10 +15,10 @@ from bi_page_driver import BiPage, browser_missing
 from test_bi_vault import _call, _ok, _push, _status, _two_pcs
 from test_vault_asking_e2e import _ask, _bi_host, _bi_join, _Model, _served
 
-from capabilities.bi_cards import page_import, vault, vault_sources
-from capabilities.bi_cards.capability import QueryHandler, QueryRequest
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import page_import, vault, vault_sources
+from aep_bi.cards.capability import QueryHandler, QueryRequest
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore
 
 TECH = """---
 type: technology

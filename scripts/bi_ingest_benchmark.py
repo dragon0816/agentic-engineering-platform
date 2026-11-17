@@ -23,7 +23,8 @@ Two commands, both writing a Markdown report under
            python scripts/bi_ingest_benchmark.py score --workspace <dir>
                --dataset <name> --run 01_robot_tsn_meeting.md=<run id> ...
 
-Run with `PYTHONPATH=src` from the repository root (or an installed AEP).
+Run with `PYTHONPATH=src` and `feature_plugins/bi_knowledge/python` from the
+repository root (or an installed AEP).
 """
 
 from __future__ import annotations
@@ -36,9 +37,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import ai_runs, benchmark, runs
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, BiStoreError
+from aep_bi.cards import ai_runs, benchmark, runs
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore, BiStoreError
 
 FIXTURE = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "bi_ingest_benchmark"
 ACTOR = "bi-benchmark"

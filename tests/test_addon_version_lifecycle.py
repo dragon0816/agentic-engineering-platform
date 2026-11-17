@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+import pytest
 from test_host_wiring import BRIDGE, skill_manifest
 from test_member_portal import post, signed_in
 from test_platform_transport import NOW, SECRET, SKILL, Platform, host, package, trace
@@ -169,3 +170,66 @@ def test_failed_replacement_is_atomic_and_member_cannot_change_family(tmp_path: 
     active = platform.authorization.authorization(BRIDGE, issued_at=NOW).selections
     assert any(item.asset == SKILL and item.status == "active" for item in active)
     assert not any(item.asset == SKILL_V2 and item.status == "active" for item in active)
+
+
+@pytest.mark.parametrize(
+    "declared_tools, explicit_versions",
+    [(False, (SKILL,)), (True, (SKILL,)), (False, (SKILL, SKILL_V2))],
+)
+def test_explicit_profile_skill_version_overrides_another_family_preference(
+    tmp_path: Path, declared_tools: bool, explicit_versions: tuple[AssetIdentity, ...]
+) -> None:
+    from test_agent_profile_marketplace import PROFILE, configured, profile
+    from test_host_wiring import membership_record, workspace
+    from test_platform_transport import READ
+
+    from common.authorization import DeviceAssetSelection, DeviceAuthorization
+    from host_runtime.profiles import activate_profile
+
+    config, layout = workspace(tmp_path, membership=membership_record(), assets=False)
+    config = configured(config)
+    layout.skills.mkdir(parents=True, exist_ok=True)
+    for identity in (SKILL, SKILL_V2):
+        manifest = skill_manifest()
+        manifest["metadata"]["identity"] = identity.model_dump(mode="json")
+        (
+            layout.skills / f"{identity.namespace}__{identity.name}__{identity.version}.json"
+        ).write_text(json.dumps(manifest), encoding="utf-8")
+    layout.agents.mkdir(parents=True, exist_ok=True)
+    (layout.agents / "engineering__personal-engineer__1.0.0.json").write_text(
+        profile(
+            allowed_capabilities=[READ] if declared_tools else [], skills=list(explicit_versions)
+        ).model_dump_json(),
+        encoding="utf-8",
+    )
+    selections = tuple(
+        DeviceAssetSelection.model_validate(
+            {
+                "bridge_id": config.device.bridge_id,
+                "actor": actor,
+                "kind": kind,
+                "asset": identity,
+                "decided_at": NOW,
+            }
+        )
+        for actor, kind, identity in (
+            ("engineer", "skill", SKILL_V2),
+            ("colleague", "skill", SKILL),
+            ("engineer", "agent", PROFILE),
+        )
+    )
+    authorization = DeviceAuthorization(
+        bridge_id=config.device.bridge_id, issued_at=NOW, selections=selections
+    )
+    layout.authorization.write_text(authorization.model_dump_json(), encoding="utf-8")
+    activate_profile(config, layout, authorization, PROFILE, actor="engineer", now=NOW)
+    if len(explicit_versions) > 1:
+        from host_runtime.host import HostError
+
+        with pytest.raises(HostError, match="asset_invalid"):
+            build_runtime(config, layout=layout)
+        return
+    with build_runtime(config, layout=layout) as runtime:
+        selected = runtime.agent.gateway.router.commands.skills.get("engineering", "files")
+        assert selected is not None and selected.metadata.identity == SKILL
+        assert runtime.agent.gateway.bridge.installed.discover()

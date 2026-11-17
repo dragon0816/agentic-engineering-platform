@@ -1,6 +1,6 @@
 ---
 name: aep-skill-creator
-description: Build a Skill for the AEP (Agentic Engineering Platform) Agent and submit it for the owner's approval. Use when asked to create or improve an AEP Skill, to teach the AEP Agent a procedure, or to give it a command that runs an installed AEP Workflow or capability.
+description: Build a Skill for the AEP (Agentic Engineering Platform) Agent and install it locally with actual validation evidence. Use when asked to create or improve an AEP Skill, to teach the AEP Agent a procedure, or to give it a command that runs an installed AEP Workflow or capability.
 ---
 
 # AEP Skill creator
@@ -12,7 +12,8 @@ An AEP Skill tells the resident AEP Agent:
 - **which commands** it may run (`commands`, each bound to an installed
   capability or Workflow).
 
-A Skill grants nothing. Commands run with the Host's own approvals and grants.
+A Skill is procedure guidance. Tools run under OS/service permissions; AEP does
+not require tool grants or local installation/execution approval.
 
 ## Tools
 
@@ -75,9 +76,10 @@ Use the `aep` MCP server tools when available, or the CLI
    - `rules` (regular expressions) and `script_tools` are refused. The
      installer configures those.
 4. **Check.** Run `aep_check_skill` until it says `ok`.
-5. **Submit, then ask to install.** Call `aep_submit_skill`, then
-   `aep_install_skill`. Tell the person to approve it in Agent Web. Approval
-   shows them the whole Skill. The Host uses a new Skill after it restarts.
+5. **Submit and install locally.** Call `aep_submit_skill`, then
+   `aep_install_skill`. Inspect its actual result. The installed Skill becomes
+   available in the same session without an AEP approval card or restart.
+   Installation does not imply business review or successful evaluation.
 6. **Revise.** To revise, submit with the same `candidate_id`. An installed
    name gets the next version automatically. Only one version per name stays
    installed.
@@ -86,5 +88,8 @@ Use the `aep` MCP server tools when available, or the CLI
 
 - Never put passwords, tokens, keys or company data in instructions.
 - Never write into the Host's workspace folders directly.
-- Write instructions only for the AEP Agent. Never instruct it to approve,
-  install or run changes by itself, or to skip the owner's approval.
+- Write instructions for the AEP Agent, including how to discover and use tools
+  for the person's task. It may install/connect tools and use them in the same
+  session. Preserve actual errors, at-most-once effects and model/data rules.
+- Shared publication is separate from local installation; never forge review or
+  validation evidence or decide historical approval records automatically.

@@ -20,11 +20,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+from _thread import RLock
 from collections.abc import Iterator
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass, field
 from typing import Any
+
+from common.async_lock import ExecutionLock
 
 #: What the model is told about a call that was not executed again.
 REPLAY_NOTE = "這個動作在本回合已執行過，未重複執行"
@@ -41,12 +44,33 @@ def effect_key(name: str, arguments: Any) -> str:
     return hashlib.sha256(f"{name}\0{canonical}".encode()).hexdigest()
 
 
+def workflow_effect_key(actor: str, manifest: dict[str, Any], arguments: Any) -> str:
+    """Install/review provenance changes do not repeat an identical procedure."""
+    body = dict(manifest)
+    identity = body.pop("metadata")["identity"]
+    return effect_key(
+        "workflow-run",
+        {
+            "workflow": identity,
+            "manifest": body,
+            "arguments": arguments or {},
+            "actor": actor,
+        },
+    )
+
+
 @dataclass
 class TurnEffects:
     """One turn's succeeded side effects and its counts (telemetry: counts only)."""
 
     calls: dict[str, Any] = field(default_factory=dict)
     workflow_runs: dict[str, Any] = field(default_factory=dict)
+    capability_calls: dict[str, Any] = field(default_factory=dict)
+    operations: dict[str, Any] = field(default_factory=dict)
+    capability_locks: dict[str, ExecutionLock] = field(default_factory=dict, repr=False)
+    capability_locks_guard: RLock = field(default_factory=RLock, repr=False)
+    operations_lock: RLock = field(default_factory=RLock, repr=False)
+    native_calls_lock: RLock = field(default_factory=RLock, repr=False)
     recorded: int = 0
     replayed: int = 0
 
@@ -74,6 +98,32 @@ class TurnEffects:
             self.workflow_runs[key] = snapshot
             self.recorded += 1
 
+    def capability_lock(self, key: str) -> ExecutionLock:
+        with self.capability_locks_guard:
+            return self.capability_locks.setdefault(key, ExecutionLock(reentrant=False))
+
+    def replay_capability(self, key: str) -> Any | None:
+        found = self.capability_calls.get(key)
+        if found is not None:
+            self.replayed += 1
+        return found
+
+    def record_capability(self, key: str, result: Any) -> None:
+        # Logical tool/run wrappers count the effect. This receipt also protects
+        # nested Workflow steps and calls made through a different Bridge wrapper.
+        self.capability_calls.setdefault(key, result)
+
+    def replay_operation(self, key: str) -> Any | None:
+        result = self.operations.get(key)
+        if result is not None:
+            self.replayed += 1
+        return result
+
+    def record_operation(self, key: str, result: Any) -> None:
+        if key not in self.operations:
+            self.operations[key] = result
+            self.recorded += 1
+
     def counts(self) -> dict[str, int]:
         return {"side_effects_recorded": self.recorded, "side_effects_replayed": self.replayed}
 
@@ -84,6 +134,16 @@ _CURRENT: ContextVar[TurnEffects | None] = ContextVar("aep_turn_effects", defaul
 def current() -> TurnEffects | None:
     """The record of the turn being run, if any (none outside a turn)."""
     return _CURRENT.get()
+
+
+@contextmanager
+def use_effects(effects: TurnEffects) -> Iterator[None]:
+    """Authenticated native-turn adapters carry receipts across HTTP requests."""
+    token = _CURRENT.set(effects)
+    try:
+        yield
+    finally:
+        _CURRENT.reset(token)
 
 
 @contextmanager

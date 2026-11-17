@@ -107,7 +107,7 @@ for (const root of [list, approvals, history]) {
   assert.ok(!tags.includes("img") && !tags.includes("script"), tags.join(","));
   assert.ok(content(root).includes(HOSTILE));
 }
-assert.match(content(list), /never automatic/);
+assert.match(content(list), /Access is managed by IT/);
 assert.match(content(list), /Blocked by an unresolved run/);
 assert.match(content(list), /weekly on Mon, Fri at 09:00/);
 assert.match(content(approvals), /Nothing has been sent/);

@@ -19,13 +19,14 @@ from test_bi_vault import _call, _ok
 from test_business_cards_conversation import Conversation
 from test_host_wiring import ready
 
-from capabilities.bi_cards import vault
-from capabilities.bi_cards.ai_runs import AiRuntime
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore
-from host_runtime import bi_bench, bi_skill_agent, skill_packs
+from aep_bi.cards import vault
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore
+from aep_bi.host import bi_bench, bi_skill_agent
+from aep_bi.host.bi_cards_api import route
+from host_runtime import skill_packs
 from host_runtime.assets import shipped
-from host_runtime.bi_cards_api import route
 from host_runtime.host import build_runtime
 
 NEW_BODY = "類型與資料夾照 schema。\n會議紀錄裡客戶親口說的評估，一律建一張 Signal。"
@@ -60,7 +61,6 @@ def test_the_agent_tries_its_draft_and_its_suggestion_is_checked(tmp_path: Path)
     ai = AiRuntime(
         model=lambda: (extractor, "test-model"),
         background=lambda _t, work: work(),
-        approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
     )
     opened = {"dataset": dataset, "kind": "skill", "target": "classify"}
     session = _ok(_call(ws, "POST", "/api/bi/sessions", opened))["session"]
@@ -162,7 +162,6 @@ def test_the_agent_proposes_a_tool_and_tries_it_only_once_approved(tmp_path: Pat
     ai = AiRuntime(
         model=lambda: (Scripted(MEETING_ANSWER), "test-model"),
         background=lambda _t, work: work(),
-        approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
     )
     opened = {"dataset": dataset, "kind": "skill", "target": "classify"}
     session = _ok(_call(ws, "POST", "/api/bi/sessions", opened))["session"]
@@ -175,7 +174,7 @@ def test_the_agent_proposes_a_tool_and_tries_it_only_once_approved(tmp_path: Pat
         agent.then(
             {"tools": [("bi_skill__draft_tool", drafted)]},
             {"tools": [("bi_skill__try_tool", tried)]},
-            {"text": "請先看過程式碼並核准。"},
+            {"text": "草稿已試跑，尚未寫入知識庫。"},
             {"tools": [("bi_skill__try_tool", tried)]},
             {"tools": [("bi_skill__try_tool", {"sha256": sha, "source_id": secret})]},
             {"text": "試跑成功。"},
@@ -201,21 +200,20 @@ def test_the_agent_proposes_a_tool_and_tries_it_only_once_approved(tmp_path: Pat
         first = turn("這份來源規則讀不了，寫個程式")
         assert [(t["name"], t["ok"]) for t in first["sent"]["tools"]] == [
             ("bi_skill__draft_tool", True),
-            ("bi_skill__try_tool", False),
+            ("bi_skill__try_tool", True),
         ]
         told = "\n".join(m.text for m in agent.requests[2].messages if m.role == "tool")
-        assert "tool_needs_approval" in told
-        # The code waits for the person; nothing was staged, and the model cannot approve it.
+        assert "客戶會議紀錄" in told and "tool_needs_approval" not in told
+        # Execution needs no approval; no review or staged data is fabricated.
         listed = _ok(_call(ws, "GET", f"/api/bi/vaults/{vault_id}/tools"))
         assert listed["drafts"][0]["code"] == code and listed["drafts"][0]["approved"] is False
         assert not any("approve" in t.name for t in agent.requests[0].tools)
-        _ok(_call(ws, "POST", f"/api/bi/vaults/{vault_id}/tool-approve",
-                  {"sha256": sha, "confirm": True}))  # fmt: skip
-        second = turn("核准了，試試看")
-        assert [t["ok"] for t in second["sent"]["tools"]] == [True, False]
+        second = turn("再試一次，也試機密來源")
+        assert [t["ok"] for t in second["sent"]["tools"]] == [True, True]
     shown = "\n".join(m.text for m in agent.requests[-1].messages if m.role == "tool")
     assert "客戶會議紀錄" in shown
-    assert "classification_not_approved" in shown and "虛構機密" not in shown
+    # A RESTRICTED source is tried too: BI refuses no data class (owner 2026-11-17).
+    assert "classification_not_approved" not in shown and "虛構機密" in shown
     # Only shown: no source kept, nothing staged, no card.
     assert len(Staging(ws, dataset).sources()) == 2
     assert vault.Vault(ws, vault_id).repo.working_units() == before

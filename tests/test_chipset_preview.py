@@ -209,7 +209,9 @@ def test_apply_refuses_when_temp_changed_after_preview(tmp_path: Path) -> None:
     assert target.read_bytes() == before
 
 
-def test_installed_workflow_10_apply_respects_exact_write_grant(tmp_path: Path) -> None:
+def test_installed_workflow_10_apply_runs_with_or_without_legacy_write_metadata(
+    tmp_path: Path,
+) -> None:
     source, target = tmp_path / "FY2526.xlsx", tmp_path / "target.xlsx"
     _book(source, "Project List", ("Chipset models",), [("QFW7114",)])
     _book(target, "Chipset_requirement", ("chipset", "Technology"), [])
@@ -254,22 +256,26 @@ def test_installed_workflow_10_apply_respects_exact_write_grant(tmp_path: Path) 
             trace=TraceIdentifiers(trace_id="chipset", request_id=key, span_id="apply"),
         )
 
-    before = target.read_bytes()
     writer = RecordingChipsetWriter()
     with build_runtime(config, layout=layout, chipset_writer=lambda: writer) as runtime:
         denied = asyncio.run(runtime.agent.execute_workflow(request("chipset-denied")))
         assert denied.workflow is not None
-        assert denied.workflow.run.status == "failed"
-        assert denied.workflow.run.failure is not None
-        assert denied.workflow.run.failure.code == "permission_denied"
-    assert target.read_bytes() == before and writer.replaced == []
+        assert denied.workflow.run.status == "succeeded"
+        assert denied.workflow.run.failure is None
+    assert writer.replaced == ["temp"]
+    written = openpyxl.load_workbook(target, read_only=True)
+    try:
+        assert any("QFW7114" in row for row in written["temp"].values)
+    finally:
+        written.close()
+    _book(target, "Chipset_requirement", ("chipset", "Technology"), [])
 
     layout.grants.write_text(json.dumps([read_grant, write_grant]), encoding="utf-8")
     with build_runtime(config, layout=layout, chipset_writer=lambda: writer) as runtime:
         allowed = asyncio.run(runtime.agent.execute_workflow(request("chipset-allowed")))
         assert allowed.workflow is not None
         assert allowed.workflow.run.status == "succeeded", allowed.workflow.run.failure
-    assert writer.replaced == ["temp"]
+    assert writer.replaced == ["temp", "temp"]
 
 
 def test_disabled_source_is_skipped_and_protected_sheet_is_refused(tmp_path: Path) -> None:

@@ -19,6 +19,7 @@ by writing another adapter and nothing else.
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any, Literal, Protocol
@@ -188,6 +189,19 @@ def _dispatch_outlook() -> Any:
     return win32com.client.Dispatch(OUTLOOK_PROGID)
 
 
+def _log_draft_failure(stage: str, error: BaseException) -> None:
+    """Fixed operation and numeric HRESULTs only; never COM exception text."""
+    parts = ["stage=" + stage]
+    hresult = getattr(error, "hresult", None)
+    if type(hresult) is int:
+        parts.append(f"hresult=0x{hresult & 0xFFFFFFFF:08X}")
+    args = getattr(error, "args", ())
+    info = args[2] if isinstance(args, tuple) and len(args) > 2 else None
+    if isinstance(info, tuple) and len(info) > 5 and type(info[5]) is int:
+        parts.append(f"scode=0x{info[5] & 0xFFFFFFFF:08X}")
+    logging.getLogger(__name__).warning("Outlook draft failed: %s", " ".join(parts))
+
+
 class OutlookComDraft:
     """The draft through Outlook itself, on the Windows machine that has it.
 
@@ -221,30 +235,39 @@ class OutlookComDraft:
                     return self._save(checked)
                 except DraftError as error:
                     code = error.code
-                except Exception:
+                except Exception as error:
+                    _log_draft_failure("adapter", error)
                     code = "draft_failed"
-        except Exception:  # CoInitialize itself failed
+        except Exception as error:  # CoInitialize itself failed
+            _log_draft_failure("apartment", error)
             code = "draft_failed"
         raise DraftError(code)
 
     def _save(self, checked: MailDraft) -> DraftReceipt:
+        stage = "connect"
         try:
             application = self._dispatch if self._dispatch is not None else self._connect()
+            stage = "create_item"
             item = application.CreateItem(_MAIL_ITEM)
+            stage = "content"
             item.Subject = checked.subject
             item.HTMLBody = checked.html_body
             if checked.to:
                 item.To = "; ".join(checked.to)
             if checked.cc:
                 item.CC = "; ".join(checked.cc)
+            stage = "attachments"
             for image in checked.images:
                 attached = item.Attachments.Add(str(Path(image.path).resolve()))
                 accessor = attached.PropertyAccessor
+                stage = "inline_properties"
                 accessor.SetProperty(_CONTENT_ID, image.cid)
                 accessor.SetProperty(_HIDDEN, True)
             for path in checked.attachments:
                 item.Attachments.Add(str(Path(path).resolve()))
+            stage = "save"
             item.Save()
+            stage = "receipt"
             return DraftReceipt(
                 saved=True,
                 entry_id=str(item.EntryID or ""),
@@ -252,7 +275,8 @@ class OutlookComDraft:
             )
         except DraftError:
             raise
-        except Exception:
+        except Exception as error:
+            _log_draft_failure(stage, error)
             # Whatever COM raised is not re-raised: its message can carry the
             # subject line and the recipients.
             raise DraftError("draft_failed") from None

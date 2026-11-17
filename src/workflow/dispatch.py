@@ -3,14 +3,15 @@
 import asyncio
 import json
 import math
-import threading
 from contextlib import nullcontext
-from typing import Literal
+from typing import Literal, cast
 
 from pydantic import ValidationError
 from pydantic_core import ErrorDetails
 
 import telemetry.recorder as telemetry
+from agent.turn_effects import current as current_effects
+from agent.turn_effects import effect_key
 from capabilities.runtime import (
     CapabilityExecutionFailed,
     CapabilityInvocation,
@@ -52,9 +53,9 @@ class BridgeExecutor:
         # Requests may run concurrently on separate threads (one event loop
         # each). Anything that can change a shared resource (a workbook, a
         # draft, a release) and every workflow run is serialized here; reads
-        # run in parallel. Reentrant, so a workflow's own write steps on the
-        # same thread do not wait for themselves.
-        self.exclusive = threading.RLock()
+        # run in parallel. Async leases preserve nested workflow execution
+        # without a thread-owned mutex blocking an event loop.
+        self.exclusive = installed.exclusive
 
     @property
     def events(self) -> tuple[ExecutionEvent, ...]:
@@ -145,12 +146,51 @@ class BridgeExecutor:
             return self._failure(call, "invalid_input", message=_where_invalid(error))
         except (TypeError, ValueError):
             return self._failure(call, "invalid_input")
-        guard = nullcontext() if binding.spec.side_effect == "read" else self.exclusive
+        guard = nullcontext() if binding.spec.side_effect == "read" else self.exclusive.hold()
+        effects = current_effects() if binding.spec.side_effect != "read" else None
+        receipt = effect_key(
+            "bridge-capability",
+            {
+                "registry": id(self.installed),
+                "target": call.target.model_dump(mode="json"),
+                "actor": call.context.actor,
+                "namespace": call.context.namespace,
+                "arguments": inputs.model_dump(mode="json"),
+            },
+        )
+        receipt_guard = (
+            effects.capability_lock(receipt).hold() if effects is not None else nullcontext()
+        )
         try:
-            with guard:
+            async with guard, receipt_guard:
+                earlier = effects.replay_capability(receipt) if effects is not None else None
+                if earlier is not None:
+                    return self._finish(
+                        call,
+                        cast(CapabilityResult, earlier).model_copy(
+                            update={
+                                "trace": call.context.trace,
+                                "handler_invoked": False,
+                                "warnings": (*earlier.warnings, "capability_replayed"),
+                            }
+                        ),
+                    )
                 output = await asyncio.wait_for(
-                    binding.handler(call.context, inputs), self.timeout_seconds
+                    binding.handler(call.context, inputs),
+                    binding.timeout_seconds or self.timeout_seconds,
                 )
+                try:
+                    checked = binding.output_model.model_validate(output, strict=True)
+                    result = CapabilityResult(
+                        trace=call.context.trace,
+                        status="succeeded",
+                        data=checked.model_dump(mode="json"),
+                        handler_invoked=True,
+                    )
+                except (ValidationError, TypeError, ValueError):
+                    return self._failure(call, "invalid_output", invoked=True)
+                if effects is not None:
+                    effects.record_capability(receipt, result)
         except TimeoutError:
             return self._failure(call, "timeout", invoked=True)
         except CapabilityExecutionFailed as failure:
@@ -195,16 +235,6 @@ class BridgeExecutor:
         except Exception:
             # Exception text may contain credentials or input data; never trace it.
             return self._failure(call, "handler_error", invoked=True)
-        try:
-            checked = binding.output_model.model_validate(output, strict=True)
-            result = CapabilityResult(
-                trace=call.context.trace,
-                status="succeeded",
-                data=checked.model_dump(mode="json"),
-                handler_invoked=True,
-            )
-        except (ValidationError, TypeError, ValueError):
-            return self._failure(call, "invalid_output", invoked=True)
         return self._finish(call, result)
 
 

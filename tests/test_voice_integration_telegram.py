@@ -326,9 +326,15 @@ def test_plain_text_keeps_its_confirmation_semantics(tmp_path: Path, voice_enabl
     assert fake.calls == [] and transport.downloads == []
 
 
-def test_coding_voice_preserves_the_real_pending_approval_and_never_writes(tmp_path: Path) -> None:
+def test_coding_voice_and_text_execute_once_per_turn_without_cards(tmp_path: Path) -> None:
     """VOICE_INPUT §2.3, §4.3: a spoken coding request creates the typed coding ApprovalRequest."""
-    from voice_integration_helpers import CODING_ARGUMENTS, CodingModel, coding_approvals
+    from voice_integration_helpers import (
+        CODING_EFFECTIVE_ARGUMENTS as CODING_ARGUMENTS,
+    )
+    from voice_integration_helpers import (
+        CodingModel,
+        coding_approvals,
+    )
 
     data, _, text = fixture("zh_coding")
     transport = FileTransport([[voice_update()], [update(2, OWNER, text)]], {"speech": data})
@@ -338,15 +344,14 @@ def test_coding_voice_preserves_the_real_pending_approval_and_never_writes(tmp_p
     agent.gateway.router.model = CodingModel()
     voice_result = poll(item).deliveries[0]
     first = chat.approvals("engineer")
-    assert len(first) == 1 and first[0].status == "pending"
-    assert first[0].workflow == "coding/change@1.0.0" and first[0].arguments == CODING_ARGUMENTS
-    assert any(data.startswith("approve:") for row in voice_result.buttons for _, data in row)
-    assert writes == []
+    assert first == []
+    assert not any(value.startswith("approve:") for row in voice_result.buttons for _, value in row)
+    assert writes == [CODING_ARGUMENTS]
     typed_result = poll(item).deliveries[0]
     approvals = chat.approvals("engineer")
-    assert len(approvals) == 2 and all(record.status == "pending" for record in approvals)
-    assert all(record.arguments == CODING_ARGUMENTS for record in approvals)
-    assert voice_result.reply == typed_result.reply and writes == []
+    assert approvals == []
+    assert voice_result.reply == typed_result.reply
+    assert writes == [CODING_ARGUMENTS, CODING_ARGUMENTS]
     assert_no_audio(tmp_path / "workspace", data)
 
 

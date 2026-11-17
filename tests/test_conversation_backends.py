@@ -110,7 +110,9 @@ def test_selected_native_model_is_validated_and_forwarded(tmp_path: Path) -> Non
         assert len(runner.calls) == before
 
 
-def test_selected_claude_agent_model_keeps_permission_relay(tmp_path: Path) -> None:
+def test_selected_claude_agent_model_preserves_native_it_permission_settings(
+    tmp_path: Path,
+) -> None:
     runner = Runner('{"result":"answer"}')
     backends = LocalConversationBackends(tmp_path, which=installed, runner=runner)
     backends.available_models = lambda backend: {"ok": True, "models": ["fixture-native"]}  # type: ignore[method-assign]
@@ -125,9 +127,9 @@ def test_selected_claude_agent_model_keeps_permission_relay(tmp_path: Path) -> N
     assert result.status == "answered"
     argv = runner.calls[-1][0]
     assert argv[argv.index("--model") + 1] == "fixture-native"
-    assert argv[argv.index("--permission-mode") + 1] == "manual"
-    assert argv[argv.index("--permission-prompts") + 1] == "host"
-    assert "--permission-prompt-tool" in argv
+    assert "--permission-mode" not in argv
+    assert "--permission-prompts" not in argv
+    assert "--permission-prompt-tool" not in argv
     assert "--dangerously-skip-permissions" not in argv
 
 
@@ -208,7 +210,7 @@ def test_gateway_configuration_and_credential_readiness_are_separate(tmp_path: P
     assert statuses["gateway"].action == "configure"
 
 
-def test_claude_uses_stdin_fixed_restrictions_and_blank_working_root(tmp_path: Path) -> None:
+def test_claude_uses_stdin_without_aep_tool_restrictions(tmp_path: Path) -> None:
     runner = Runner(json.dumps({"result": "A bounded answer."}))
     backends = LocalConversationBackends(tmp_path, which=installed, runner=runner)
     result = backends.complete(
@@ -220,12 +222,12 @@ def test_claude_uses_stdin_fixed_restrictions_and_blank_working_root(tmp_path: P
     argv, call = runner.calls[0]
     assert result.status == "answered" and result.text == "A bounded answer."
     assert argv[0] == "C:/fixed/claude.exe"
-    assert "--restricted" in argv and "--tools" in argv
+    assert "--restricted" not in argv and "--tools" not in argv
     assert "What can you help with?" not in argv
-    assert "Do not use tools" in call["input"]
+    assert "Return real results" in call["input"]
     assert call["cwd"] == tmp_path / ".conversation-backends"
     assert call["timeout"] == BACKEND_TIMEOUT_SECONDS
-    assert "GITHUB_TOKEN" not in call["env"]
+    assert "Persona controls speaking style only" in call["input"]
 
 
 def test_codex_jsonl_is_reduced_to_final_text_and_output_is_bounded(tmp_path: Path) -> None:
@@ -250,8 +252,8 @@ def test_codex_jsonl_is_reduced_to_final_text_and_output_is_bounded(tmp_path: Pa
     argv, _call = runner.calls[0]
     assert result.status == "answered" and len(result.text) == MAX_BACKEND_OUTPUT_CHARS
     assert argv[1:3] == ["exec", "--json"]
-    assert "--sandbox" in argv and "read-only" in argv
-    assert "--ephemeral" in argv and "--ignore-user-config" in argv
+    assert "--sandbox" not in argv and "read-only" not in argv
+    assert "--ephemeral" in argv and "--ignore-user-config" not in argv
 
 
 def test_timeout_and_missing_cli_are_typed_without_stderr_leaks(tmp_path: Path) -> None:
@@ -350,7 +352,7 @@ def test_a_chinese_cli_answer_is_read_as_utf8_not_the_console_code_page(tmp_path
     assert _answer(None) == ""
 
 
-def test_copilot_agent_gets_only_aeps_tools_through_the_running_agent_web(
+def test_copilot_agent_gets_aep_tools_without_excluding_it_tools(
     tmp_path: Path,
 ) -> None:
     from host_runtime.conversation_backends import AGENT_MCP_FILE, AGENT_TIMEOUT_SECONDS
@@ -372,8 +374,8 @@ def test_copilot_agent_gets_only_aeps_tools_through_the_running_agent_web(
     )
     argv, call = runner.calls[0]
     assert result.status == "answered" and "KM606" in result.text
-    assert "--allow-tool=aep" in argv and "--deny-tool=shell" in argv
-    assert "--deny-tool=write" in argv and "--disable-builtin-mcps" in argv
+    assert not any(arg.startswith(("--allow-tool", "--deny-tool")) for arg in argv)
+    assert "--disable-builtin-mcps" not in argv
     config_arg = argv[argv.index("--additional-mcp-config") + 1]
     config = json.loads(
         (tmp_path / ".conversation-backends" / AGENT_MCP_FILE).read_text(encoding="utf-8")
@@ -384,7 +386,7 @@ def test_copilot_agent_gets_only_aeps_tools_through_the_running_agent_web(
     # The authoring tools come from the same Agent Web, with the same token.
     assert servers["aep"]["url"] == "http://127.0.0.1:5000/mcp/authoring"
     assert servers["aep"]["headers"] == servers["aep-assistant"]["headers"]
-    assert "--allow-tool=aep-assistant" in argv
+    assert "aep-assistant" in servers
     # AEP's skills are in the agent's trusted working folder.
     root = tmp_path / ".conversation-backends"
     assert argv[argv.index("--add-dir") + 1] == str(root)
@@ -399,7 +401,7 @@ def test_copilot_agent_gets_only_aeps_tools_through_the_running_agent_web(
     assert statuses["copilot_agent"].action == "authenticate"
 
 
-def test_the_text_only_backends_never_load_the_persons_agent_setup() -> None:
+def test_backends_keep_it_configuration_and_builtin_tool_discovery() -> None:
     """The user-level AEP setup (agent_setup.py) is for the person's own sessions.
     The text-only chat backends stay tool-less (2026-10-02 backend rule): they
     ignore user MCP servers and settings; only the Copilot agent mode gets
@@ -407,8 +409,9 @@ def test_the_text_only_backends_never_load_the_persons_agent_setup() -> None:
     from host_runtime.conversation_backends import SPECS
 
     arguments = {spec.name: spec.arguments for spec in SPECS}
-    assert {"--strict-mcp-config", "--restricted", "--safe-mode"} <= set(arguments["claude_code"])
-    assert arguments["claude_code"][arguments["claude_code"].index("--tools") + 1] == ""
-    assert "--ignore-user-config" in arguments["codex"]
-    assert "--sandbox" in arguments["codex"]
-    assert "--available-tools=" in arguments["copilot"]
+    assert {"--strict-mcp-config", "--restricted", "--safe-mode", "--tools"}.isdisjoint(
+        arguments["claude_code"]
+    )
+    assert "--ignore-user-config" not in arguments["codex"]
+    assert "--sandbox" not in arguments["codex"]
+    assert "--available-tools=" not in arguments["copilot"]

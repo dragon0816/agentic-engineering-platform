@@ -1,15 +1,10 @@
-"""AEP's assistant tools for an external agent such as GitHub Copilot (CP1).
+"""Authenticated assistant MCP tools served by the loaded Agent Web host.
 
-`docs/phases/COPILOT_INTEGRATION.md`. Served by the running Agent Web at
-`POST /mcp` (MCP over HTTP, JSON-RPC 2.0), so Copilot in Agent Web or in
-VS Code uses the Host's loaded Knowledge and models. The tools are read only:
-Knowledge search, page reading and the Knowledge Harness's validated answer,
-the installed Workflows, and running an installed Workflow that only reads.
-A Workflow that changes something is left to the person in Agent Web, because
-an agent chose it (owner mode: model-chosen side effects wait for a person).
-
-Unlike the authoring tools (statuses and codes only), these return content:
-the owner approved sending all data to Copilot (2026-10-12).
+Installed Bridge/MCP tools execute without application grant or approval cards.
+New generic native result contents are withheld when receiving-model eligibility
+is not established; execution status remains truthful. Existing Knowledge/BI
+content endpoints retain their own data-route contracts. An older Copilot content
+approval does not classify arbitrary new tool output or extend to other backends.
 """
 
 from __future__ import annotations
@@ -22,6 +17,8 @@ from typing import Any
 
 from common.assets import AssetIdentity, WorkflowManifest
 from common.execution import TraceIdentifiers
+from host_runtime import features
+from host_runtime.tool_access import ToolAccess, mcp_definitions, tool_context
 from knowledge.query import RetrievalSnapshot
 from knowledge.vault import normalize
 
@@ -34,8 +31,8 @@ INSTRUCTIONS = (
     "aep_knowledge_read and cite the page paths you used; aep_knowledge_ask returns "
     "AEP's validated, cited answer. aep_bi_query reads BI cards and saved analyses of a "
     "knowledge base when the owner turned it on. aep_workflows lists installed Workflows; "
-    "aep_run_workflow runs one that only reads. Never claim to have run a Workflow "
-    "that the tool said must be run by the person."
+    "aep_run_workflow runs an installed Workflow. Return actual results and never "
+    "repeat a succeeded side effect. Draft does not mean send."
 )
 
 _Q = {"type": "string"}
@@ -87,7 +84,7 @@ TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
     ),
     "aep_run_workflow": (
         "Run an installed Workflow by id (namespace/name@version) with its parameters. "
-        "Only Workflows that only read run here; others must be run by the person.",
+        "Runs under the actual execution environment, without an AEP approval card.",
         {
             "type": "object",
             "properties": {"workflow": _Q, "arguments": {"type": "object"}},
@@ -95,6 +92,7 @@ TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
         },
     ),
 }
+TOOLS.update(mcp_definitions())
 
 
 def assistant_token(workspace: Path) -> str:
@@ -125,8 +123,12 @@ def _identity(text: str) -> AssetIdentity:
 
 
 class AssistantTools:
-    def __init__(self, web: Any) -> None:
+    def __init__(
+        self, web: Any, *, session_id: str | None = None, backend: str | None = None
+    ) -> None:
         self.web = web
+        self.session_id = session_id
+        self.backend = backend
 
     # -- knowledge ---------------------------------------------------------
 
@@ -208,15 +210,24 @@ class AssistantTools:
         return bool(getattr(getattr(self.web.runtime, "config", None), "assistant_bi_query", False))
 
     def listed(self) -> tuple[str, ...]:
-        """The tools this Agent Web offers now; `aep_bi_query` only while on."""
-        return tuple(n for n in TOOLS if n != "aep_bi_query" or self.bi_query_on())
+        """The tools this Agent Web offers now; `aep_bi_query` only while on and
+        while a feature (BI Knowledge) answers it."""
+        return tuple(
+            n
+            for n in TOOLS
+            if n != "aep_bi_query"
+            or (self.bi_query_on() and features.active().assistant_tool(n) is not None)
+        )
 
     def bi_query(self, args: dict[str, Any]) -> dict[str, Any]:
-        from host_runtime import bi_assistant_query
-
-        return bi_assistant_query.answer(
-            self.web.runtime, args, enabled=self.bi_query_on(), trace=_trace()
-        )
+        answer = features.active().assistant_tool("aep_bi_query")
+        if answer is None:
+            return {
+                "ok": False,
+                "code": "bi_not_installed",
+                "message": "BI Knowledge is not installed on this AEP.",
+            }
+        return answer(self.web.runtime, args, enabled=self.bi_query_on(), trace=_trace())
 
     # -- workflows ---------------------------------------------------------
 
@@ -258,19 +269,12 @@ class AssistantTools:
         manifest = next((m for m in self._installed() if m.metadata.identity == identity), None)
         if manifest is None:
             return {"ok": False, "code": "workflow_not_installed"}
-        chat = self.web.runtime.chat_authoring
-        if chat is None or not chat.read_only(manifest):
-            return {
-                "ok": False,
-                "code": "needs_person",
-                "message": "This Workflow changes something; the person must run it from "
-                "Agent Web. Do not say it ran.",
-            }
         result = self.web.launch_workflow(
             WorkflowLaunchRequest(
                 workflow=identity,
                 arguments=arguments or {},
                 idempotency_key=f"assistant-{uuid.uuid4().hex}",
+                session_id=self.session_id,
             )
         )
         return {"ok": bool(result.get("ok")), "answer": result.get("answer")}
@@ -279,6 +283,18 @@ class AssistantTools:
 
     def call(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
         try:
+            if name in mcp_definitions():
+                runtime = self.web.runtime
+                return ToolAccess(runtime.agent.gateway.bridge, mcp=runtime.mcp).native_call(
+                    name,
+                    args,
+                    tool_context(
+                        runtime.actor,
+                        runtime.config.namespace or "engineering",
+                        self.session_id,
+                    ),
+                    self.backend,
+                )
             if name == "aep_knowledge_search":
                 return self.knowledge_search(
                     str(args.get("query") or ""), int(args.get("limit") or 8)
