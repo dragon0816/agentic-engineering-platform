@@ -83,7 +83,7 @@ def test_the_installed_bi_overview_page_shows_the_real_local_dataset(tmp_path: P
             _choose_package(page, raw)
             page.click("#plugin-install")
             page.see("plugin-status", f"Installed {PLUGIN}.")
-            page.see("plugin-list", "active")
+            page.plugin_row_shows(PLUGIN, "active")
             _open_page(page)
 
             assert page.wait(f"{_metric('找到的資料集')} === '1'")
@@ -96,12 +96,12 @@ def test_the_installed_bi_overview_page_shows_the_real_local_dataset(tmp_path: P
             assert row[:6] == ["demo", "local", "ready", "—", "本機資料庫", str(DEMO_CARDS)]
 
             # Disabling removes the page; enabling reads the same, untouched BI data.
-            page.click_text("#plugin-list", "Disable")
-            page.see("plugin-list", "disabled")
+            page.click_plugin_button(PLUGIN, "Disable")
+            page.plugin_row_shows(PLUGIN, "disabled")
             page.wait("document.querySelectorAll('#plugin-nav button').length === 0")
             assert page.run("document.getElementById('plugin-page').hidden") is True
-            page.click_text("#plugin-list", "Enable")
-            page.see("plugin-list", "active")
+            page.click_plugin_button(PLUGIN, "Enable")
+            page.plugin_row_shows(PLUGIN, "active")
             _open_page(page)
             assert page.wait(
                 f"{_metric('完整本機副本卡片總數（不完整時為 —）')} === '{DEMO_CARDS}'"

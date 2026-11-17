@@ -57,18 +57,23 @@ def test_a_plugin_installs_shows_its_page_and_keeps_hostile_text_as_text(
     config, layout = _bi_host(tmp_path / "pc")
     with _served(config, layout, _Model("none", {})) as server:
         with BiPage(tmp_path / "browser", server.address) as page:
-            # No plugin yet: the entry is there, with no plugin pages under it.
+            # No plugin installed yet: only BI Knowledge, shipped with AEP (Plugin
+            # API 1.2), is listed, with no plugin pages under the entry.
             assert page.run("document.getElementById('nav-plugins').offsetParent !== null")
             page.click("#nav-plugins")
             page.wait("document.getElementById('panel-plugin').hasAttribute('data-open')")
-            page.see("plugin-list", "No plugins are installed.")
+            page.plugin_row_shows("bi-knowledge.bi", "shipped with AEP")
+            rows = "[...document.querySelectorAll('#plugin-list .plugin-row')]"
+            assert page.run(f"{rows}.map(r => r.dataset.pluginId)") == ["bi-knowledge.bi"]
+            shipped_buttons = f"{rows}[0].querySelectorAll('button')"
+            assert page.run(f"[...{shipped_buttons}].map(b => b.textContent)") == ["Disable"]
             assert page.run("document.querySelectorAll('#plugin-nav button').length") == 0
 
             # Install from a chosen file; no approval step, the plugin is active.
             _choose_package(page, package_bytes(NAMESPACE))
             page.click("#plugin-install")
             page.see("plugin-status", f"Installed {PLUGIN}.")
-            page.see("plugin-list", "active")
+            page.plugin_row_shows(PLUGIN, "active")
             _open_page(page)
             assert page.run(_METRIC) == "0"
             assert page.run(_ROWS) == 1  # the header row only
@@ -94,12 +99,12 @@ def test_a_plugin_installs_shows_its_page_and_keeps_hostile_text_as_text(
             assert page.run("window.__pluginXss === undefined") is True
 
             # Disabling removes only its nav entry and page; enabling finds the data kept.
-            page.click_text("#plugin-list", "Disable")
-            page.see("plugin-list", "disabled")
+            page.click_plugin_button(PLUGIN, "Disable")
+            page.plugin_row_shows(PLUGIN, "disabled")
             page.wait("document.querySelectorAll('#plugin-nav button').length === 0")
             assert page.run("document.getElementById('plugin-page').hidden") is True
-            page.click_text("#plugin-list", "Enable")
-            page.see("plugin-list", "active")
+            page.click_plugin_button(PLUGIN, "Enable")
+            page.plugin_row_shows(PLUGIN, "active")
             _open_page(page)
             page.wait(f"{_METRIC} === '1'")
             page.see("plugin-page", HOSTILE)

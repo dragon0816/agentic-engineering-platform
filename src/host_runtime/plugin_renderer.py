@@ -136,6 +136,7 @@ function renderPluginList(box, snapshot, act) {
       pluginElement("strong", "", String(plugin.title)),
       " ", pluginElement("code", "", String(plugin.plugin_id) + "@" + String(identity.version)),
       " ", pluginElement("span", "plugin-state", String(plugin.state)));
+    row.dataset.pluginId = String(plugin.plugin_id);
     if (plugin.shipped) row.append(" ", pluginElement("span", "plugin-note", "shipped with AEP"));
     if (plugin.failure) {
       row.append(pluginElement("p", "plugin-failure", pluginFailureText(plugin.failure)));
