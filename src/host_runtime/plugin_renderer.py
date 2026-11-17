@@ -123,18 +123,26 @@ function renderPluginNav(box, snapshot, open) {
 
 function renderPluginList(box, snapshot, act) {
   const plugins = (snapshot && snapshot.plugins) || [];
-  if (!plugins.length) {
+  // Shipped with AEP (Plugin API 1.2): switched off or on, never uninstalled.
+  const shipped = ((snapshot && snapshot.bundled) || []).map((p) => ({...p, shipped: true}));
+  const all = [...plugins, ...shipped];
+  if (!all.length) {
     box.replaceChildren(pluginElement("p", "empty", "No plugins are installed."));
     return;
   }
-  box.replaceChildren(...plugins.map((plugin) => {
+  box.replaceChildren(...all.map((plugin) => {
     const identity = plugin.identity || {};
     const row = pluginElement("div", "plugin-row",
       pluginElement("strong", "", String(plugin.title)),
       " ", pluginElement("code", "", String(plugin.plugin_id) + "@" + String(identity.version)),
       " ", pluginElement("span", "plugin-state", String(plugin.state)));
+    if (plugin.shipped) row.append(" ", pluginElement("span", "plugin-note", "shipped with AEP"));
     if (plugin.failure) {
       row.append(pluginElement("p", "plugin-failure", pluginFailureText(plugin.failure)));
+    }
+    if (plugin.restart_required) {
+      row.append(pluginElement("p", "plugin-restart",
+        "Restart AEP to apply this change (it loads into AEP when AEP starts)."));
     }
     const controls = pluginElement("div", "plugin-controls");
     if (plugin.state === "active") {
@@ -142,7 +150,7 @@ function renderPluginList(box, snapshot, act) {
     } else {
       controls.append(pluginButton("Enable", () => act("enable", plugin)));
     }
-    controls.append(pluginButton("Uninstall", () => act("uninstall", plugin)));
+    if (!plugin.shipped) controls.append(pluginButton("Uninstall", () => act("uninstall", plugin)));
     row.append(controls);
     return row;
   }));
@@ -244,7 +252,7 @@ async function pluginRefresh() {
     pluginSay("Could not read plugins: " + pluginFailureText(reply), true);
     return false;
   }
-  pluginSnapshot = {plugins: reply.plugins || []};
+  pluginSnapshot = {plugins: reply.plugins || [], bundled: reply.bundled || []};
   const nav = el("plugin-nav");
   if (nav) renderPluginNav(nav, pluginSnapshot, openPluginPage);
   const list = el("plugin-list");

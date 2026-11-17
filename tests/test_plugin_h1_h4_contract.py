@@ -37,7 +37,7 @@ def service_data(**changes: Any) -> dict[str, Any]:
 
 
 def test_the_core_offers_plugin_api_1_1_and_old_ranges_still_include_it() -> None:
-    assert CORE_PLUGIN_API_VERSION == "1.1.0"
+    assert CORE_PLUGIN_API_VERSION == "1.2.0"
     assert core_api_supported(manifest())  # an old {1.0.0, 2.0.0} manifest
     assert core_api_supported(PluginManifest.model_validate(manifest_data(core_api=NEW_API)))
 

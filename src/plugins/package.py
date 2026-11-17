@@ -144,10 +144,15 @@ def _check(folder: Path, package: PluginPackage) -> None:
         for path in expected
         for depth in range(1, len(PurePosixPath(path).parts))
     }
+    compiled = package.manifest.in_process is not None
     for path in folder.rglob("*"):
         relative = path.relative_to(folder).as_posix()
         if linked(path):
             raise PluginStageError("plugin_path_invalid")
+        if compiled and _bytecode(relative, path):
+            # Python's own caches of an in-process feature's verified sources;
+            # the loader removes them before each import (`clear_bytecode`).
+            continue
         if path.is_dir():
             if relative not in folders:
                 raise PluginStageError("plugin_staged_changed")
@@ -160,6 +165,23 @@ def _check(folder: Path, package: PluginPackage) -> None:
         found.add(relative)
     if found != expected:
         raise PluginStageError("plugin_staged_changed")
+
+
+def _bytecode(relative: str, path: Path) -> bool:
+    parts = relative.split("/")
+    if parts[0] != "python" or "__pycache__" not in parts:
+        return False
+    if parts[-1] == "__pycache__":
+        return path.is_dir()
+    return parts[-2] == "__pycache__" and parts[-1].endswith(".pyc") and path.is_file()
+
+
+def clear_bytecode(python_root: Path) -> None:
+    """Remove `__pycache__` folders below an in-process feature's `python/`, so
+    what runs is compiled from the verified sources, not from a planted cache."""
+    for cache in sorted(Path(python_root).rglob("__pycache__"), reverse=True):
+        if cache.is_dir() and not linked(cache):
+            _delete(cache)
 
 
 def verify_staged(

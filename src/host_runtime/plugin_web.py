@@ -95,6 +95,7 @@ STATUS_BY_CODE: dict[str, int] = {
     "plugin_not_active": 409,
     "plugin_version_stale": 409,
     "plugin_route_unknown": 404,
+    "plugin_load_failed": 503,
 }
 
 Reply = tuple[int, dict[str, Any]]
@@ -160,13 +161,20 @@ def route(
 
 def _list(manager: PluginManagerProtocol | None) -> Reply:
     plugins: list[dict[str, Any]] = []
+    shipped: list[dict[str, Any]] = []
     if manager is not None:
         try:
             snapshot = manager.snapshot()
         except Exception:  # noqa: BLE001 - reported as unavailable, never as an empty list
             return _refusal(503, "plugin_unavailable", "the plugin manager did not answer")
         plugins = [item.model_dump(mode="json") for item in snapshot.plugins]
-    return 200, {"ok": True, "plugins": plugins, "max_package_bytes": MAX_PACKAGE_BYTES}
+        shipped = [item.model_dump(mode="json") for item in snapshot.bundled]
+    return 200, {
+        "ok": True,
+        "plugins": plugins,
+        **({"bundled": shipped} if shipped else {}),
+        "max_package_bytes": MAX_PACKAGE_BYTES,
+    }
 
 
 def _act(manager: PluginManagerProtocol | None, actor: str, action: str, body: bytes) -> Reply:

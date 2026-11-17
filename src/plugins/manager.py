@@ -23,9 +23,10 @@ failure, and no effect is promised to survive a restart.
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import sys
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from threading import Lock, RLock
@@ -66,6 +67,7 @@ from common.plugins import (
 )
 from host_runtime.contracts import HostLayout
 from plugins import assets as bundled
+from plugins import in_process
 from plugins.ledger import (
     LedgerUnreadable,
     PendingInstall,
@@ -218,6 +220,21 @@ class _Handler:
         return checked
 
 
+#: Who "installed" a feature plugin shipped with AEP itself.
+BUNDLED_ORIGIN = PluginOrigin(actor="aep", channel="bundled")
+
+
+@dataclass(frozen=True)
+class FeatureState:
+    """What the Host process loaded of the in-process feature plugins (Plugin
+    API 1.2): plugin id to version, and plugin id to (code, message) for those
+    found but not loaded. Supplied by the Host; this package imports no feature."""
+
+    loaded: Callable[[], Mapping[str, str]]
+    failures: Callable[[], Mapping[str, tuple[PluginErrorCode, str]]]
+    bundled_roots: Callable[[], tuple[Path, ...]] = in_process.bundled_roots
+
+
 class PluginManager:
     """Implements `common.plugins.PluginManagerProtocol` for one workspace."""
 
@@ -230,6 +247,7 @@ class PluginManager:
         assets_changed: Callable[[str], None] | None = None,
         busy: Callable[[], bool] | None = None,
         interpreter: str | None = None,
+        features: FeatureState | None = None,
     ) -> None:
         self._layout = layout
         self._installed = installed
@@ -242,6 +260,7 @@ class PluginManager:
         self._failures: dict[str, PluginFailure] = {}
         self._inflight = 0
         self._inflight_lock = Lock()
+        self._features = features
 
     # -- paths ------------------------------------------------------------------------
 
@@ -336,6 +355,99 @@ class PluginManager:
         )
 
     def _status(self, record: PluginRecord) -> PluginStatus:
+        status = self._worker_status(record)
+        manifest = self._manifest_of(record)
+        if manifest is None or manifest.in_process is None:
+            return status
+        return self._feature_status(status, record.enabled)
+
+    def _manifest_of(self, record: PluginRecord) -> PluginManifest | None:
+        active = self._active.get(record.plugin_id)
+        if active is not None:
+            return active.manifest
+        identity = record.identity
+        envelope = self._version_dir(identity.namespace, identity.name, identity.version)
+        try:
+            owned_path(self._ws, envelope / "package.json")
+            return parse_plugin_package((envelope / "package.json").read_bytes()).manifest
+        except (OSError, PluginContractError, PluginStageError):
+            return None
+
+    def _feature_status(self, status: PluginStatus, enabled: bool) -> PluginStatus:
+        """An in-process feature's state: what this process loaded, what the next
+        start loads, and a load failure as `failed`."""
+        if self._features is None:
+            return status.model_copy(update={"in_process": True})
+        loaded = self._features.loaded().get(status.plugin_id)
+        expected = self._next_start().get(status.plugin_id)
+        restart = loaded != expected
+        failure = self._features.failures().get(status.plugin_id)
+        if enabled and failure is not None and not restart:
+            return PluginStatus(
+                plugin_id=status.plugin_id,
+                identity=status.identity,
+                title=status.title,
+                state="failed",
+                content_sha256=status.content_sha256,
+                installed_by=status.installed_by,
+                failure=PluginFailure(code=failure[0], message=failure[1] or failure[0]),
+                in_process=True,
+            )
+        return status.model_copy(update={"in_process": True, "restart_required": restart})
+
+    def _next_start(self) -> dict[str, str]:
+        roots = self._features.bundled_roots() if self._features is not None else ()
+        sources, _ = in_process.resolve(self._ws, roots)
+        return {source.plugin_id: source.version for source in sources}
+
+    def _bundled_statuses(self, ledger: PluginLedger) -> tuple[PluginStatus, ...]:
+        if self._features is None:
+            return ()
+        sources, _ = in_process.bundled(self._features.bundled_roots())
+        off = in_process.bundled_off(self._ws)
+        shown: list[PluginStatus] = []
+        for source in sources:
+            if ledger.get(source.plugin_id) is not None:
+                continue
+            manifest = source.manifest
+            base = PluginStatus(
+                plugin_id=source.plugin_id,
+                identity=manifest.identity,
+                title=manifest.title,
+                state="disabled" if source.plugin_id in off else "active",
+                content_sha256=hashlib.sha256(
+                    manifest.model_dump_json().encode("utf-8")
+                ).hexdigest(),
+                installed_by=BUNDLED_ORIGIN,
+            )
+            shown.append(self._feature_status(base, source.plugin_id not in off))
+        return tuple(shown)
+
+    def _bundled_toggle(self, action: PluginAction, plugin_id: str) -> PluginActionResult | None:
+        """Enable/disable a bundled feature plugin with no ledger record; None
+        when `plugin_id` is not one."""
+        if self._features is None:
+            return None
+        sources, _ = in_process.bundled(self._features.bundled_roots())
+        if plugin_id not in {source.plugin_id for source in sources}:
+            return None
+        try:
+            in_process.set_bundled_off(self._ws, plugin_id, action == "disable")
+        except OSError:
+            return self._fail(action, plugin_id, "plugin_environment_failed")
+        status = next(
+            (
+                item
+                for item in self._bundled_statuses(PluginLedger())
+                if item.plugin_id == plugin_id
+            ),
+            None,
+        )
+        return PluginActionResult(
+            action=action, status="succeeded", plugin_id=plugin_id, plugin=status
+        )
+
+    def _worker_status(self, record: PluginRecord) -> PluginStatus:
         active = self._active.get(record.plugin_id)
         if active is not None and active.manifest.identity == record.identity:
             manifest = active.manifest
@@ -390,7 +502,10 @@ class PluginManager:
                 ledger = self._ledger()
             except LedgerUnreadable as error:
                 raise PluginContractError(error.code) from None
-            return PluginSnapshot(plugins=tuple(self._status(r) for r in ledger.plugins))
+            return PluginSnapshot(
+                plugins=tuple(self._status(r) for r in ledger.plugins),
+                bundled=self._bundled_statuses(ledger),
+            )
 
     # -- checks -------------------------------------------------------------------------
 
@@ -928,6 +1043,9 @@ class PluginManager:
                 return self._fail("enable", None, error.code)
             record = ledger.get(plugin_id)
             if record is None:
+                toggled = self._bundled_toggle("enable", plugin_id)
+                if toggled is not None:
+                    return toggled
                 return self._fail("enable", None, "plugin_not_installed")
             if plugin_id in self._active:
                 return PluginActionResult(
@@ -991,6 +1109,14 @@ class PluginManager:
 
     def disable(self, plugin_id: str, origin: PluginOrigin) -> PluginActionResult:
         with self._lock:
+            try:
+                listed = self._ledger().get(plugin_id) is not None
+            except LedgerUnreadable:
+                listed = True  # `_deactivate` reports the unreadable ledger
+            if not listed:
+                toggled = self._bundled_toggle("disable", plugin_id)
+                if toggled is not None:
+                    return toggled
             outcome = self._deactivate("disable", plugin_id)
             if isinstance(outcome, PluginActionResult):
                 return outcome

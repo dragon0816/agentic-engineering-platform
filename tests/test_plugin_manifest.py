@@ -305,9 +305,9 @@ def test_dependencies_are_exact_unique_and_not_self() -> None:
 
 
 def test_core_api_range_is_ordered_and_checked_against_the_core() -> None:
-    assert CORE_PLUGIN_API_VERSION == "1.1.0"  # Plugin API 1.1: H1/H4 (2026-11-15)
+    assert CORE_PLUGIN_API_VERSION == "1.2.0"  # Plugin API 1.2: in-process features (2026-11-17)
     assert core_api_supported(manifest())
-    assert not core_api_supported(manifest(core_api={"minimum": "1.2.0", "below": "2.0.0"}))
+    assert not core_api_supported(manifest(core_api={"minimum": "1.3.0", "below": "2.0.0"}))
     assert not core_api_supported(manifest(), core="2.0.0")
     with pytest.raises(ValidationError):
         manifest(core_api={"minimum": "2.0.0", "below": "2.0.0"})

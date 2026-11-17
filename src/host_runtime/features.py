@@ -6,20 +6,28 @@ Host start (docs/phases/FEATURE_PLUGIN_BI_STAGE2_PROPOSAL_DRAFT_20261115.md r3).
 Every hook is optional: the `Feature` base answers "nothing to add", and an
 empty `FeatureSet` is a core without that feature.
 
-The active set is process-wide, like the Host itself: `active()` returns it and
-`use()` replaces it (Host start, tests). The default set holds the features
-named in `BUILTIN`, imported by name.
+The active set is process-wide, like the Host itself: `active()` returns it,
+`for_host()` loads it for a workspace at Host start and `use()` pins one (tests).
+Features come from in-process feature plugins (`plugins.in_process`, Plugin API
+1.2): bundled with AEP or installed on the Plugins page, loaded at start; a
+plugin that fails to import is skipped and reported, and AEP starts without it.
+`BUILTIN` names features that are part of core itself, imported by name.
 """
 
 from __future__ import annotations
 
 import contextlib
 import importlib
+import sys
 import threading
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from contextlib import AbstractContextManager
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
+
+if TYPE_CHECKING:
+    from plugins.in_process import FeatureSource
 
 #: Page slots a feature may fill (`web_page.PAGE` placeholders).
 PAGE_SLOTS = ("feature_css", "knowledge_pane", "feature_js")
@@ -254,28 +262,140 @@ def load(references: Iterable[str]) -> FeatureSet:
     return FeatureSet(found)
 
 
+@dataclass(frozen=True)
+class Loaded:
+    """An in-process feature plugin this process imported."""
+
+    plugin_id: str
+    version: str
+    origin: str
+    python_root: Path
+
+
+@dataclass(frozen=True)
+class LoadFailure:
+    plugin_id: str
+    code: str
+    message: str
+
+
 _lock = threading.Lock()
 _active: FeatureSet | None = None
+_pinned = False
+_loaded: dict[str, Loaded] = {}
+_failures: dict[str, LoadFailure] = {}
+
+
+def loaded() -> dict[str, Loaded]:
+    """The feature plugins imported by this process, by plugin id."""
+    with _lock:
+        return dict(_loaded)
+
+
+def failures() -> dict[str, LoadFailure]:
+    """Feature plugins found but not loaded at the last start, and why."""
+    with _lock:
+        return dict(_failures)
+
+
+def _import(source: FeatureSource) -> Feature:
+    spec = source.manifest.in_process
+    if spec is None:
+        raise TypeError(f"{source.plugin_id} is not an in-process feature")
+    held = _loaded.get(source.plugin_id)
+    if held is not None and held.python_root != source.python_root:
+        raise RuntimeError(
+            f"version {held.version} is already loaded; restart AEP to use {source.version}"
+        )
+    if source.origin == "installed" and spec.package not in sys.modules:
+        from plugins.package import clear_bytecode
+
+        clear_bytecode(source.python_root)
+    root = str(source.python_root)
+    if root not in sys.path:
+        sys.path.append(root)
+    module = importlib.import_module(spec.entry)
+    package_file = getattr(sys.modules.get(spec.package), "__file__", None)
+    if package_file is None or not Path(package_file).resolve().is_relative_to(
+        source.python_root.resolve()
+    ):
+        raise RuntimeError(f"{spec.package} is already provided by another folder")
+    feature = getattr(module, spec.attribute)
+    if not isinstance(feature, Feature):
+        raise TypeError(f"{spec.entry}.{spec.attribute} is not a Feature")
+    return feature
+
+
+def load_sources(sources: Iterable[FeatureSource]) -> FeatureSet:
+    """Import each feature plugin; one that fails is recorded and left out."""
+    found: list[Feature] = []
+    for source in sources:
+        try:
+            feature = _import(source)
+        except Exception as error:  # noqa: BLE001 - a broken plugin must not stop AEP
+            with _lock:
+                _failures[source.plugin_id] = LoadFailure(
+                    source.plugin_id, "plugin_load_failed", f"{type(error).__name__}: {error}"[:300]
+                )
+            continue
+        with _lock:
+            _loaded[source.plugin_id] = Loaded(
+                source.plugin_id, source.version, source.origin, source.python_root
+            )
+            _failures.pop(source.plugin_id, None)
+        found.append(feature)
+    return FeatureSet(found)
+
+
+def _discover(workspace_root: Path | None) -> FeatureSet:
+    from plugins import in_process
+
+    sources, skipped = in_process.resolve(workspace_root)
+    with _lock:
+        _failures.clear()
+        for item in skipped:
+            _failures[item.plugin_id] = LoadFailure(item.plugin_id, item.code, item.message)
+    builtin = load(BUILTIN)
+    plugins = load_sources(sources)
+    return FeatureSet((*builtin, *plugins))
 
 
 def active() -> FeatureSet:
-    """The features this process runs; the built-in ones until `use` says otherwise."""
+    """The features this process runs; without a Host start, the bundled ones."""
     global _active
     with _lock:
-        if _active is None:
-            _active = load(BUILTIN)
-        return _active
+        current = _active
+    if current is None:
+        current = _discover(None)
+        with _lock:
+            if _active is None:
+                _active = current
+            current = _active
+    return current
+
+
+def for_host(workspace_root: Path) -> FeatureSet:
+    """Load this workspace's features at Host start (a pinned set stays)."""
+    global _active
+    with _lock:
+        if _pinned and _active is not None:
+            return _active
+    chosen = _discover(workspace_root)
+    with _lock:
+        if not _pinned:
+            _active = chosen
+        return _active if _active is not None else chosen
 
 
 @contextlib.contextmanager
 def use(features: FeatureSet) -> Iterator[FeatureSet]:
     """Run with exactly these features, then restore the previous set."""
-    global _active
+    global _active, _pinned
     with _lock:
-        previous = _active
-        _active = features
+        previous, was_pinned = _active, _pinned
+        _active, _pinned = features, True
     try:
         yield features
     finally:
         with _lock:
-            _active = previous
+            _active, _pinned = previous, was_pinned

@@ -18,7 +18,7 @@ from collections.abc import Callable, Mapping
 from functools import partial
 from pathlib import Path
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Literal, Self, TypeVar
+from typing import TYPE_CHECKING, Any, Literal, Self, TypeVar, cast
 
 from pydantic import JsonValue, ValidationError
 
@@ -2353,8 +2353,10 @@ def build_runtime(
     place = layout if layout is not None else HostLayout.under(checked.workspace_root)
     # A wiki repository's push is checked against its recorded test runs (R4a).
     wiki.set_benchmark(partial(wiki_bench.gate, place.workspace_root))
-    # Each feature's own setup (a BI vault's push gate, BI T1).
-    features.active().startup(place.workspace_root)
+    # The features this workspace runs: bundled and installed in-process
+    # plugins (Plugin API 1.2), loaded now; an update takes effect at a start.
+    # Each feature's own setup follows (a BI vault's push gate, BI T1).
+    features.for_host(place.workspace_root).startup(place.workspace_root)
     membership = load_membership(checked, place)
     gateway = build_gateway(
         checked,
@@ -2495,7 +2497,9 @@ def build_runtime(
     chat_authoring.teams = runtime.team_membership.membership
     # Generic feature registration; Knowledge/BI/Wiki construction above stays
     # unchanged. An empty manager restores nothing and writes no plugin files.
+    from common.plugins import PluginErrorCode
     from plugins import PluginManager
+    from plugins.manager import FeatureState
 
     def plugin_reserved_names() -> tuple[str, ...]:
         listing = gateway.host_tools
@@ -2506,6 +2510,13 @@ def build_runtime(
         gateway.bridge.installed,
         reserved_names=plugin_reserved_names,
         assets_changed=lambda namespace: _refresh_plugin_assets(gateway, place, namespace),
+        features=FeatureState(
+            loaded=lambda: {k: v.version for k, v in features.loaded().items()},
+            failures=lambda: {
+                k: (cast(PluginErrorCode, v.code), v.message)
+                for k, v in features.failures().items()
+            },
+        ),
     )
     runtime.plugins.restore()
     return runtime

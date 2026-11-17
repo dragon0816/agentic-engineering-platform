@@ -63,10 +63,12 @@ from common.ownership import version_key
 PLUGIN_MANIFEST_FORMAT: Literal["aep-plugin/1"] = "aep-plugin/1"
 PLUGIN_PACKAGE_FORMAT: Literal["aep-plugin-package/1"] = "aep-plugin-package/1"
 #: The Feature Plugin API this core implements; manifests declare a range.
-CORE_PLUGIN_API_VERSION = "1.1.0"
+CORE_PLUGIN_API_VERSION = "1.2.0"
 #: The lowest core Plugin API a manifest using `data.reads` or a page service
 #: (`expose_as_tool=False`) may declare as its `core_api.minimum`.
 FEATURE_API_MINIMUM = "1.1.0"
+#: The lowest core Plugin API an in-process feature plugin (`in_process`) may declare.
+IN_PROCESS_API_MINIMUM = "1.2.0"
 #: The existing Bridge Extension JSON-lines protocol, reused unchanged.
 WORKER_PROTOCOL: Literal["aep-extension-jsonl/v1"] = "aep-extension-jsonl/v1"
 
@@ -116,6 +118,8 @@ _LOCAL_NAME = re.compile(r"^[a-z][a-z0-9_]{0,39}$")
 _PATH_PART = re.compile(r"^[a-z0-9_][a-z0-9_.-]*$")
 _DEVICE = re.compile(r"^(?:con|prn|aux|nul|com[0-9]|lpt[0-9])$")
 _WORKER_SUFFIXES = (".py", ".json")
+#: Files an in-process feature plugin ships under `python/`: code and its data.
+_PYTHON_SUFFIXES = (".py", ".json", ".csv", ".md", ".typed")
 
 ShortText = Annotated[str, StringConstraints(min_length=1, max_length=MAX_TITLE, pattern=r"\S")]
 LongText = Annotated[str, StringConstraints(min_length=1, max_length=MAX_TEXT, pattern=r"\S")]
@@ -164,6 +168,8 @@ PluginErrorCode = Literal[
     "plugin_not_active",
     "plugin_version_stale",
     "plugin_route_unknown",
+    #: An in-process feature failed to import or start (Plugin API 1.2).
+    "plugin_load_failed",
 ]
 
 
@@ -213,13 +219,17 @@ def plugin_path_problem(path: str) -> str | None:
         if len(parts) < 3 or len(parts) > 6 or not path.endswith(_WORKER_SUFFIXES):
             return "worker files are .py or .json inside the worker package"
         return None
+    if parts[0] == "python":
+        if len(parts) < 3 or len(parts) > 7 or not path.endswith(_PYTHON_SUFFIXES):
+            return "python files are .py/.json/.csv/.md inside the python package"
+        return None
     if parts[0] == "assets":
         if len(parts) != 3 or parts[1] not in {"skills", "workflows"}:
             return "assets are assets/skills/<file> or assets/workflows/<file>"
         if not parts[2].endswith(".json"):
             return "asset files are JSON manifests"
         return None
-    return "path is outside the worker and assets areas"
+    return "path is outside the worker, python and assets areas"
 
 
 def _package_path(value: str) -> str:
@@ -273,6 +283,37 @@ class PluginRuntime(Contract):
     def module_path(self) -> str:
         """The package file holding `module`."""
         return "worker/" + self.module.replace(".", "/") + ".py"
+
+
+InProcessPackage = Annotated[
+    str, StringConstraints(max_length=40, pattern=r"^aep_[a-z][a-z0-9_]*$")
+]
+
+
+class PluginInProcess(Contract):
+    """A feature loaded into the AEP process at Host start (Plugin API 1.2,
+    owner 2026-11-16): `python/<package>/...` goes on the import path and
+    `<entry>.<attribute>` is its `host_runtime.features.Feature`. It runs with
+    AEP's own rights; installing or updating it takes effect at the next start."""
+
+    package: InProcessPackage
+    entry: ModuleName
+    attribute: Annotated[str, StringConstraints(pattern=r"^[A-Za-z_][A-Za-z0-9_]{0,39}$")] = (
+        "FEATURE"
+    )
+
+    @model_validator(mode="after")
+    def entry_in_package(self) -> Self:
+        if self.package.startswith("aep_plugin_"):
+            raise ValueError("aep_plugin_* names belong to worker plugins")
+        if not self.entry.startswith(self.package + "."):
+            raise ValueError("the entry module lives in the plugin's own python package")
+        return self
+
+    @property
+    def entry_path(self) -> str:
+        """The package file holding `entry`."""
+        return "python/" + self.entry.replace(".", "/") + ".py"
 
 
 class PluginField(Contract):
@@ -449,6 +490,14 @@ class PluginManifest(RegistryContract):
     pages: tuple[PluginPage, ...] = Field(default=(), max_length=MAX_PAGES)
     assets: tuple[PluginAsset, ...] = Field(default=(), max_length=MAX_ASSETS)
     data: PluginData = PluginData()
+    in_process: PluginInProcess | None = None
+
+    @model_serializer(mode="wrap")
+    def _wire(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        if self.in_process is None:
+            data.pop("in_process", None)  # the 1.0/1.1 form, byte for byte
+        return data
 
     @property
     def plugin_id(self) -> str:
@@ -492,7 +541,20 @@ class PluginManifest(RegistryContract):
         self._check_routes_and_pages()
         self._check_assets(namespace)
         self._check_api_features()
+        self._check_in_process()
         return self
+
+    def _check_in_process(self) -> None:
+        if self.in_process is None:
+            return
+        if self.runtime or self.capabilities or self.routes or self.pages or self.assets:
+            raise ValueError(
+                "an in-process feature declares no worker, capabilities, routes, pages or assets"
+            )
+        if self.data.reads:
+            raise ValueError("an in-process feature reads Host data directly, not via data.reads")
+        if version_key(self.core_api.minimum) < version_key(IN_PROCESS_API_MINIMUM):
+            raise ValueError("an in-process feature needs plugin API 1.2 or later")
 
     def _check_api_features(self) -> None:
         routed = {route.capability for route in self.routes}
@@ -672,6 +734,16 @@ class PluginPackage(Contract):
                 raise ValueError("worker files live in the plugin's worker package")
             if manifest.runtime.module_path not in paths:
                 raise ValueError("the runtime module file is in the package")
+        python = [path for path in paths if path.startswith("python/")]
+        if manifest.in_process is None:
+            if python:
+                raise ValueError("python files need a declared in-process feature")
+        else:
+            root = f"python/{manifest.in_process.package}/"
+            if any(not path.startswith(root) for path in python):
+                raise ValueError("python files live in the feature's own python package")
+            if manifest.in_process.entry_path not in paths:
+                raise ValueError("the in-process entry module file is in the package")
         declared = {item.path: item for item in manifest.assets}
         present = {path for path in paths if path.startswith("assets/")}
         if present != set(declared):
@@ -819,6 +891,18 @@ class PluginStatus(Contract):
     capabilities: tuple[AssetIdentity, ...] = ()
     routes: tuple[LocalId, ...] = ()
     pages: tuple[PluginPage, ...] = ()
+    #: Plugin API 1.2: an in-process feature, and whether what this process
+    #: loaded differs from what the next AEP start loads.
+    in_process: StrictBool = False
+    restart_required: StrictBool = False
+
+    @model_serializer(mode="wrap")
+    def _wire(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        for key in ("in_process", "restart_required"):
+            if not data.get(key):
+                data.pop(key, None)  # the 1.0/1.1 form
+        return data
 
     @model_validator(mode="after")
     def state_shape(self) -> Self:
@@ -835,6 +919,16 @@ class PluginStatus(Contract):
 
 class PluginSnapshot(Contract):
     plugins: tuple[PluginStatus, ...] = ()
+    #: Feature plugins shipped with AEP and not replaced by an installed copy
+    #: (Plugin API 1.2); they cannot be uninstalled, only switched off.
+    bundled: tuple[PluginStatus, ...] = ()
+
+    @model_serializer(mode="wrap")
+    def _wire(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        if not self.bundled:
+            data.pop("bundled", None)
+        return data
 
     @model_validator(mode="after")
     def one_owner(self) -> Self:
