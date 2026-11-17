@@ -784,8 +784,6 @@ class AgentWeb:
         self._session_guard = threading.Lock()
         self._turn_locks: dict[str, threading.Lock] = {}
         self._record_locks: dict[str, threading.Lock] = {}
-        self._workflow_form_owner = uuid.uuid4().hex
-        self._workflow_form_active: dict[str, str] = {}
         # Short-lived links for showing an HTML file in the sandboxed viewer:
         # nonce -> (session, path, expiry). The page token is never in a frame URL.
         self._file_views: dict[str, tuple[str, str, float]] = {}
@@ -3000,7 +2998,7 @@ class AgentWeb:
             "selected": (
                 None
                 if selected is None
-                else self._fresh_cards(self._workflow_form_record(selected))
+                else self._fresh_cards(json.loads(selected.model_dump_json()))
             ),
         }
 
@@ -6073,37 +6071,7 @@ class AgentWeb:
             offer["message"] = f"{label}：按「Run」開始；不會自動執行。"
         return offer
 
-    def _workflow_form_record(self, record: Any) -> dict[str, Any]:
-        from host_runtime.workflow_form_runs import project
-
-        return project(json.loads(record.model_dump_json()), self._workflow_form_owner)
-
     def launch_workflow(self, request: WorkflowLaunchRequest) -> dict[str, Any]:
-        from host_runtime.workflow_form_runs import launch
-
-        item = WorkflowLaunchRequest.model_validate(request)
-        manifest = next(
-            (
-                m
-                for m in manifests(self.runtime.layout.workflows, WorkflowManifest)
-                if m.metadata.identity == item.workflow
-            ),
-            None,
-        )
-        if manifest is not None:
-            item = item.model_copy(
-                update={"arguments": validate_run_parameters(manifest, item.arguments)}
-            )
-        active_id = uuid.uuid4().hex
-        with self._session_guard:
-            self._workflow_form_active[active_id] = datetime.now(UTC).isoformat()
-        try:
-            return launch(self, item)
-        finally:
-            with self._session_guard:
-                self._workflow_form_active.pop(active_id, None)
-
-    def _execute_workflow_launch(self, request: WorkflowLaunchRequest) -> dict[str, Any]:
         """Run one exact installed Workflow through the resident Agent."""
         item = WorkflowLaunchRequest.model_validate(request)
         manifest = next(
@@ -6626,12 +6594,6 @@ class AgentWeb:
             for task in self.task_list()["tasks"]
             if task.get("status") == "running"
         ]
-        # Includes a form waiting for the execution lock, before telemetry starts.
-        with self._session_guard:
-            items += [
-                {"kind": "workflow_form", "started_at": began}
-                for began in self._workflow_form_active.values()
-            ]
         # A delegated sub-agent is part of its turn (multi-agent V1): the turn
         # says how many run, only while some do.
         items += [
@@ -8037,8 +7999,6 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(200, self.server.web.launch_workflow(launch))
             except WorkflowParameterError as failure:
                 self._json(400, {"code": "workflow_parameters_invalid", "error": str(failure)})
-            except ValueError:
-                self._json(400, {"error": "Workflow form unavailable"})
             except Exception as failure:  # noqa: BLE001 - a page shows everything
                 self._json(
                     500,

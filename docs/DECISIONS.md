@@ -7990,3 +7990,13 @@ Enter. Every original input-retention/not-yet-sent/once/cleared/hidden assertion
 remains. It deterministically failed on the unchanged b9d96ac7 page; the guard
 and turn-group cases then passed9 tests. Rejected: waiting for any nonempty notice,
 removing the promise assertion, or lengthening sleeps to conceal the race.
+
+### 2026-11-18 — Merge origin/main into main without e564e1ad's runtime change
+
+Pushing the BI plugin work required integrating origin/main (5 commits). Four
+were already present as cherry-picks. e564e1ad (chat Workflow attempts across
+navigation) stays excluded per docs/phases/CHAT_WORKFLOW_PERSISTENCE_MERGE_REVIEW.md
+(its legacy projection infers succeeded runs); owner chose 「選擇一」: merge
+origin/main and revert e564e1ad's code, tests and CONTRACTS section, keeping its
+DECISIONS/TASKS/evaluation records as history. Re-add only after the review's
+fixes, with scoped consent. No force push.

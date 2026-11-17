@@ -3027,11 +3027,6 @@ document.addEventListener("keydown", (event) => {
 });
 
 function renderConversation(record) {
-  const focused = document.activeElement.closest(".chat-run-form") ? document.activeElement : null;
-  const selection = focused && typeof focused.selectionStart === "number"
-    ? [focused.selectionStart, focused.selectionEnd] : null;
-  const savedForms = new Map(Array.from(log.querySelectorAll(".chat-run-form"))
-    .map(holder => [holder.dataset.messageId, holder]));
   log.replaceChildren();
   closeTurnMenu();
   // Files wait in the conversation they were uploaded to.
@@ -3092,7 +3087,7 @@ function renderConversation(record) {
       if (replied.workflow_form && !installForm) {
         // Only the newest answer's form starts open; older ones fold away.
         chatRunForm(said.parentNode, replied, record.session_id,
-          index + 2 >= record.messages.length, savedForms);
+          index + 2 >= record.messages.length);
       }
       for (const shown of replied.action_cards || []) {
         said.parentNode.append(shown.card_id.startsWith("dr-")
@@ -3103,8 +3098,7 @@ function renderConversation(record) {
       if (installForm) {
         // A Workflow installed from its draft card: its run form under the card.
         chatRunForm(said.parentNode, replied, record.session_id,
-          index + 2 >= record.messages.length || openInstallForm === replied.message_id,
-          savedForms);
+          index + 2 >= record.messages.length || openInstallForm === replied.message_id);
       }
       if (replied.action_card) {
         said.parentNode.append(renderActionCard(replied.action_card, async () => {
@@ -3114,10 +3108,6 @@ function renderConversation(record) {
         }));
       }
     }
-  }
-  if (focused && focused.isConnected) {
-    focused.focus({preventScroll: true});
-    if (selection) focused.setSelectionRange(...selection);
   }
   renderPendingTurns(record.session_id);
   renderApprovals(record.session_id).catch(() => {});
@@ -3144,31 +3134,13 @@ function openWorkflowSettings(workflow) {
   selectPrimaryTab("installed");
 }
 
-function chatRunForm(block, message, session, open, savedForms) {
+function chatRunForm(block, message, session, open) {
   const offer = message.workflow_form;
-  const offerKey = JSON.stringify(offer);
-  const saved = savedForms && savedForms.get(message.message_id);
-  if (saved && saved.dataset.offer === offerKey) {
-    if (saved.dataset.needsStatusCheck === "true") {
-      const button = saved.querySelector(".chat-run-actions button");
-      if (button && (!offer.run || ["failed", "interrupted"].includes(offer.run.status))) {
-        button.disabled = (offer.missing_settings || []).length > 0;
-        saved.querySelector(".chat-run-result").textContent = "已確認主機尚無新的執行紀錄。";
-      }
-      delete saved.dataset.needsStatusCheck;
-    }
-    block.append(saved);
-    return;
-  }
   const holder = document.createElement("details");
-  holder.className = "chat-run-form";
-  holder.open = !!open || (offer.run && offer.run.status === "running");
+  holder.className = "chat-run-form"; holder.open = !!open;
   holder.dataset.workflow = offer.workflow.namespace + "/" + offer.workflow.name;
-  holder.dataset.messageId = message.message_id; holder.dataset.offer = offerKey;
   const summary = document.createElement("summary");
-  summary.append(text((offer.run ? ({running: "執行中：", succeeded: "已完成：",
-    failed: "執行失敗：", interrupted: "已中斷："}[offer.run.status] || "")
-    : "Run ") + offer.title));
+  summary.append(text("Run " + offer.title));
   const body = document.createElement("div");
   holder.append(summary, body);
   block.append(holder);
@@ -3196,49 +3168,13 @@ async function drawChatRunForm(body, offer, message, session) {
   }
   const identity = {namespace: workflow.namespace, name: workflow.name,
     version: workflow.version};
-  const attempt = offer.run;
-  if (attempt && (attempt.status === "running" || attempt.status === "succeeded")) {
-    const status = document.createElement("p");
-    status.className = "chat-run-result"; status.setAttribute("role", "status");
-    status.textContent = attempt.status === "running" ? "Workflow 執行中…" : "Workflow 已完成";
-    body.append(status);
-    if (attempt.status === "running") {
-      const check = async () => {
-        if (!body.isConnected || session !== activeConversation) return;
-        try {
-          const listed = await call("/api/conversations?session_id=" + encodeURIComponent(session));
-          if (body.isConnected && session === activeConversation) {
-            renderConversation(listed.selected);
-          }
-        } catch (_) {}
-        if (body.isConnected && session === activeConversation) setTimeout(check, 1500);
-      };
-      setTimeout(check, 1500);
-    }
-    return;
-  }
-  if (attempt) {
-    if (attempt.arguments_unavailable || (attempt.unavailable_uploads || []).length) {
-      const legacy = document.createElement("p");
-      legacy.textContent = attempt.arguments_unavailable
-        ? "舊紀錄未保留完整參數，重試前請核對下方所有值。"
-        : "舊紀錄未保留上傳檔案的參照，請重新選取檔案；其他已知參數已帶入。";
-      body.append(legacy);
-    }
-    const stopped = document.createElement("p"); stopped.className = "chat-run-result";
-    stopped.textContent = (attempt.status === "interrupted"
-      ? "Workflow 已中斷。" : "Workflow 執行失敗。")
-      + "重試前請先檢查已完成的寫入或草稿。 " + (attempt.answer || "");
-    body.append(stopped);
-  }
-
   if (workflow.description) {
     const about = document.createElement("p"); about.className = "chat-run-note";
     about.append(text(workflow.description)); body.append(about);
   }
   const missing = offer.missing_settings || [];
   const run = document.createElement("button"); run.type = "button";
-  run.className = "go"; run.append(text(attempt ? "重試 Workflow" : "Run"));
+  run.className = "go"; run.append(text("Run"));
   if (missing.length) {
     const notice = document.createElement("div"); notice.className = "chat-run-missing";
     notice.setAttribute("role", "status");
@@ -3260,34 +3196,18 @@ async function drawChatRunForm(body, offer, message, session) {
     none.append(text("This Workflow asks for nothing; press Run to start it."));
     body.append(none);
   }
-  const given = (attempt && attempt.arguments) || offer.prefill || {};
+  const given = offer.prefill || {};
   const named = fields.filter(field => Object.prototype.hasOwnProperty.call(given, field.name));
   if (named.length) {
     // Values read from the chat message (owner 2026-10-25), shown so they can be checked.
     const note = document.createElement("p"); note.className = "chat-run-note chat-run-given";
-    note.append(text((attempt && attempt.arguments ? "上次執行使用：" : "已從你的訊息帶入：")
-      + named.map(field => field.label + " = " + (field.kind === "upload"
-        ? "沿用已上傳檔案" : formatGiven(given[field.name], field))).join("；")));
+    note.append(text("已從你的訊息帶入：" + named.map(
+      field => field.label + " = " + formatGiven(given[field.name], field)).join("；")));
     body.append(note);
   }
   body.append(container);
   renderParameterForm(container, fields, prefix, {workflow: identity, uploads: true,
     presets: true, values: given, collapseOptional: true});
-  // Reuse accepted upload references, never set a browser file input's value.
-  // The engine revalidates their confinement and existence on every run.
-  if (attempt && attempt.arguments) {
-    for (const field of fields.filter(field => field.kind === "upload")) {
-      const value = given[field.name];
-      const paths = (Array.isArray(value) ? value : [value]).filter(v => typeof v === "string");
-      const input = container.querySelector("#" + CSS.escape(prefix + field.name));
-      if (!input || !paths.length) continue;
-      input.dataset.paths = JSON.stringify(paths);
-      input.extras[0].replaceChildren(...paths.map(path => {
-        const item = document.createElement("li"); item.append(text(path.split(/[\\/]/).pop()));
-        return item;
-      }));
-    }
-  }
   const actions = document.createElement("div"); actions.className = "chat-run-actions";
   const result = document.createElement("p"); result.className = "chat-run-result";
   result.setAttribute("aria-live", "polite");
@@ -3305,11 +3225,9 @@ async function drawChatRunForm(body, offer, message, session) {
     };
     tick();
     const timer = setInterval(tick, 1000);
-    let restoreRun = false;
     try {
       const launched = await call("/api/workflows/run", {
         workflow: identity, arguments: values, session_id: session,
-        form_message_id: message.message_id, retry_of: attempt ? attempt.key : null,
         idempotency_key: "chat-" + Date.now() + "-" + Math.random().toString(16).slice(2),
       });
       result.textContent = launched.answer;
@@ -3318,25 +3236,10 @@ async function drawChatRunForm(body, offer, message, session) {
         log.scrollTop = log.scrollHeight;
       }
     } catch (failure) {
-      result.textContent = "無法取得執行回覆，正在確認主機狀態…";
-      try {
-        const listed = await call("/api/conversations?session_id=" + encodeURIComponent(session));
-        const current = listed.selected && listed.selected.messages.find(
-          item => item.message_id === message.message_id);
-        const currentRun = current && current.workflow_form && current.workflow_form.run;
-        restoreRun = !!current && (!currentRun || (attempt && currentRun.key === attempt.key
-          && ["failed", "interrupted"].includes(currentRun.status)));
-        if (session === activeConversation) renderConversation(listed.selected);
-        if (restoreRun && body.isConnected) {
-          result.textContent = "尚無新的執行紀錄：" + failure.message;
-        }
-      } catch (_) {
-        if (body.parentElement) body.parentElement.dataset.needsStatusCheck = "true";
-        result.textContent = "連線中斷；請回到對話查看執行狀態，避免重複啟動。";
-      }
+      result.textContent = "The Workflow did not run: " + failure.message;
     } finally {
       clearInterval(timer); run.removeAttribute("aria-busy");
-      run.disabled = missing.length > 0 || !restoreRun;
+      run.disabled = missing.length > 0;
     }
   });
 }
