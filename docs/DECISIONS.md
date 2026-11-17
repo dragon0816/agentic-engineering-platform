@@ -7925,3 +7925,21 @@ dataset packages through the feature mount points instead of importing
 `bi_subscriptions`. Behavior and rollback on failure stay identical; with no BI
 feature installed such packages are refused with a stated reason. Platform-side
 `control_plane` BI remains out of scope.
+
+### 2026-11-17 — Owner removes BI classification and vault grant gates
+
+A user reported that a BI item classed INTERNAL could neither be changed nor
+used. Owner: 「我覺得aep不應該設計任何權限，只要有人share vault給某個人，它就可以用aep
+來存取這個vault」 and 「目前BI knowledge 和wiki llm沒有敏感資訊」. Asked to choose, the
+owner approved (AGENTS22 scoped consent) items 2 and 3:
+(2) BI no longer refuses or withholds sources by data class: `check_classification`
+call sites (ai_runs, methods, reading_runs, rerun, schema_session, schema_suggest,
+skill_session) and the query passage/excerpt filtering by `approved` classes.
+(3) Askable vaults no longer check `_granted`/`_permitted`: sharing the vault is
+access. Kept: external agents (Claude Code/Codex) receive PUBLIC only, and model
+calls go through the configured internal gateway; RESTRICTED stays unapprovable
+in the data-policy contract. Reverses the 2026-10-28 rejected alternative
+"record the class only, do not gate" for BI. Diagnosis: the gates were AEP policy
+beyond ADR-K8 (class decides which model may receive data; who reads is decided
+by vault sharing). Not chosen: item 1 (editing a source's class) — owner did not
+select it.
