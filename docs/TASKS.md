@@ -5045,3 +5045,17 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
 - [x] Feature branch pushed and remoteSHA matched911bd156. CI43703179517
   observed in_progress on that source-equivalent acceptance revision; no greenCI
   claim. Local full/build complete; no main/resident deployment or local watcher.
+
+## BI Knowledge in-process plugin (proposal r3) — 2026-11-16/17
+
+- [x] Proposal r3 and owner consent (DECISIONS 2026-11-16): in-process plugins
+  loaded at restart, pages unchanged, no iframe/token isolation; sync.py added.
+- [x] Stage A 8f6029cd: core reaches BI only via host_runtime.features; page
+  byte-identical; core without BI starts. Focused tests/mypy pass; full suite
+  interrupted by a PC restart (rerun needed).
+- [x] B1 8f05be83: Plugin API 1.2 in-process loader, bundled/installed resolution,
+  restart-required status, broken plugin skipped. Plugin tests pass.
+- [x] 43bca516: Windows bundle ships feature plugins; BI plugin builder.
+- [ ] B2: move BI code to feature_plugins/bi_knowledge (subagent worktree
+  C:/TEMP/claude-bi/move, uncommitted at restart); then plugin.json, full
+  verification, real update test, review, docs. See HANDOFF.md.
