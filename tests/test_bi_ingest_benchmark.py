@@ -23,11 +23,11 @@ import pytest
 from test_bi_ai_runs import Jobs
 from test_bi_extract import Scripted
 
-from capabilities.bi_cards import benchmark, extract
-from capabilities.bi_cards.ai_runs import AiRuntime
-from capabilities.bi_cards.schema import registry
-from capabilities.bi_cards.store import BiStore
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import benchmark, extract
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.cards.schema import registry
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_api import route
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests" / "fixtures" / "bi_ingest_benchmark"

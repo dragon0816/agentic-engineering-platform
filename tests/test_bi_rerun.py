@@ -11,11 +11,11 @@ from test_bi_ai_runs import Jobs, _runtime
 from test_bi_extract import Scripted
 from test_bi_vault import _commit, _ok, _push, _refused, _row, _sync, _two_pcs
 
-from capabilities.bi_cards import rerun, vault
-from capabilities.bi_cards.ai_runs import AiRuntime
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, PlannedRow
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import rerun, vault
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore, PlannedRow
+from aep_bi.host.bi_cards_api import route
 
 ACTOR = "tester"
 TEXT = "# 規格（虛構）\n\nTSN 由 IEEE 802.1 制定。\n成熟度屬於成長期。\n相關機構 IETF。\n"

@@ -25,9 +25,9 @@ from test_bi_vault import _call, _ok
 from test_bi_vault_sources import FOLDER
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore
-from host_runtime.bi_cards_api import route
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_api import route
 
 MANY = 180
 ACCOUNTS = 30  # of MANY; the rest are Technology

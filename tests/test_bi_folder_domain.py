@@ -12,8 +12,8 @@ from test_bi_ai_runs import Jobs, _runtime
 from test_bi_extract import Scripted
 from test_bi_vault import _call, _ok, _two_pcs
 
-from capabilities.bi_cards.store import BiStore
-from host_runtime.bi_cards_api import route
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_api import route
 
 KIND = "Signal"
 QUOTE = "虛構船廠採用新的衛星模組"

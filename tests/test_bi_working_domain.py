@@ -13,9 +13,9 @@ from typing import Any
 import pytest
 from test_bi_vault import _call, _commit, _ok, _push, _refused, _two_pcs
 
-from capabilities.bi_cards import homes, sessions, vault
-from capabilities.bi_cards.store import BiStoreError
-from host_runtime import bi_bench
+from aep_bi.cards import homes, sessions, vault
+from aep_bi.cards.store import BiStoreError
+from aep_bi.host import bi_bench
 
 AIDC_Q: dict[str, Any] = {
     "question": "虛構 AIDC 題？",

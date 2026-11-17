@@ -40,7 +40,7 @@ from test_vault_asking_e2e import (
     _wiki_published,
 )
 
-from capabilities.bi_cards.store import VAULT_REGISTRY, VAULTS_DIR
+from aep_bi.cards.store import VAULT_REGISTRY, VAULTS_DIR
 from common.change_proposal import KINDS, PROPOSE_GUIDANCE, TELEGRAM_KINDS
 from host_runtime import knowledge_binding
 from host_runtime.contracts import CompanyHostConfiguration

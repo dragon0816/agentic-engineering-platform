@@ -16,9 +16,9 @@ from typing import Any
 import pytest
 from test_bi_vault import _commit, _push, _row, _sync, _two_pcs
 
-from capabilities.bi_cards import card_model, catalog, schema_versions, vault
-from capabilities.bi_cards.schema import Registry
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import card_model, catalog, schema_versions, vault
+from aep_bi.cards.schema import Registry
+from aep_bi.cards.store import BiStore
 from knowledge.repo.repository import RepoError
 from scripts.build_bi_schema_v5 import ADDED, OUT, build
 

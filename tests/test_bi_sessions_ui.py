@@ -27,8 +27,8 @@ import pytest
 from test_bi_methods import Model
 from test_draft_install_cards import served  # noqa: F401 - the real Agent Web fixture
 
-from capabilities.bi_cards.ai_runs import AiRuntime
-from host_runtime import bi_cards_api
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.host import bi_cards_api
 from models.contracts import ModelRequest
 
 SHOTS = Path(__file__).resolve().parents[1] / ".scratch" / "bi-sessions"

@@ -17,8 +17,8 @@ from typing import Any
 import pytest
 from test_bi_vault import _call, _ok, _refused
 
-from capabilities.bi_cards import analyses, feed, vault
-from capabilities.bi_cards.store import BiStoreError
+from aep_bi.cards import analyses, feed, vault
+from aep_bi.cards.store import BiStoreError
 from scripts import bi_feed_fixtures as fixtures
 
 URL = f"/api/bi/vaults/{fixtures.VAULT_ID}/analyses"
@@ -82,7 +82,7 @@ def test_the_dashboard_order_is_a_unit_that_is_committed_and_pushed(tmp_path: Pa
 
 
 def test_an_ai_proposal_may_declare_parameters(tmp_path: Path) -> None:
-    from capabilities.bi_cards import analysis_session
+    from aep_bi.cards import analysis_session
 
     ws = _joined(tmp_path)
     found = analyses_run_default(ws)
@@ -94,7 +94,7 @@ def test_an_ai_proposal_may_declare_parameters(tmp_path: Path) -> None:
 
 
 def analyses_run_default(ws: Path) -> dict[str, Any]:
-    from capabilities.bi_cards import analyses
+    from aep_bi.cards import analyses
 
     return dict(analyses.run_saved(ws, fixtures.VAULT_ID, "accounts-by-region")["table"])
 

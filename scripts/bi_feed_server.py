@@ -27,12 +27,13 @@ from typing import Any
 from urllib.parse import urlparse
 
 REPO = Path(__file__).resolve().parents[1]
-for path in (REPO, REPO / "src"):  # run as a script: neither is importable then
+BI = REPO / "feature_plugins" / "bi_knowledge" / "python"  # the BI Knowledge plugin
+for path in (REPO, REPO / "src", BI):  # run as a script: neither is importable then
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
-from capabilities.bi_cards import feed  # noqa: E402
-from host_runtime import bi_feed_api  # noqa: E402
+from aep_bi.cards import feed  # noqa: E402
+from aep_bi.host import bi_feed_api  # noqa: E402
 from scripts import bi_feed_fixtures as fixtures  # noqa: E402
 
 

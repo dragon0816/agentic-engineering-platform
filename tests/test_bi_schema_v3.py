@@ -15,8 +15,8 @@ from pathlib import Path
 
 from test_bi_schema_v2 import _call, _ok
 
-from capabilities.bi_cards import catalog, schema_versions
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from aep_bi.cards import catalog, schema_versions
+from aep_bi.cards.store import BiStore, PlannedRow
 from scripts.build_bi_schema_v3 import OUT, build
 
 V2, V3 = "bi.schema/v1.1@2.0.0", "bi.schema/v1.1@3.0.0"

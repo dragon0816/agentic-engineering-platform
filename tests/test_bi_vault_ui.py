@@ -23,10 +23,10 @@ import pytest
 from test_bi_extract import Scripted
 from test_draft_install_cards import served  # noqa: F401 - the real Agent Web fixture
 
-from capabilities.bi_cards import analyses, sessions, vault
-from capabilities.bi_cards.ai_runs import AiRuntime
-from capabilities.bi_cards.store import BiStore
-from host_runtime import bi_bench, bi_cards_api
+from aep_bi.cards import analyses, sessions, vault
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.cards.store import BiStore
+from aep_bi.host import bi_bench, bi_cards_api
 
 SHOTS = Path(__file__).resolve().parents[1] / ".scratch" / "bi-vault"
 

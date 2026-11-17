@@ -25,8 +25,9 @@ from typing import Any
 
 import pytest
 
-from capabilities.bi_cards import card_model, vault
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import card_model, vault
+from aep_bi.cards.store import BiStore
+from aep_bi.host.bi_cards_api import route
 from common.plugins import (
     MAX_REQUEST_BYTES,
     MAX_RESPONSE_BYTES,
@@ -37,7 +38,6 @@ from common.plugins import (
     parse_plugin_package,
 )
 from extensions.runtime import ExtensionRequest
-from host_runtime.bi_cards_api import route
 from plugins.process import BOOTSTRAP, WorkerRefusal, WorkerSession, invoke
 
 ROOT = Path(__file__).resolve().parents[1]

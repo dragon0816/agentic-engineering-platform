@@ -27,8 +27,8 @@ from test_bi_vault import (
     _two_pcs,
 )
 
-from capabilities.bi_cards import vault
-from capabilities.bi_cards.capability import QueryHandler, QueryRequest
+from aep_bi.cards import vault
+from aep_bi.cards.capability import QueryHandler, QueryRequest
 from common.execution import RequestContext, TraceIdentifiers
 
 CONTEXT = RequestContext(

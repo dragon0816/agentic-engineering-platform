@@ -11,13 +11,21 @@ from pathlib import Path
 
 import pytest
 
-from capabilities.bi_cards import homes, vault, vault_skills
+from aep_bi.cards import homes, vault, vault_skills
 from knowledge.repo import skills
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "docs" / "examples" / "bi-skills"
 SCHEMA = json.loads(
-    (ROOT / "src" / "capabilities" / "bi_cards" / "bi_schema_v5.json").read_text(encoding="utf-8")
+    (
+        ROOT
+        / "feature_plugins"
+        / "bi_knowledge"
+        / "python"
+        / "aep_bi"
+        / "cards"
+        / "bi_schema_v5.json"
+    ).read_text(encoding="utf-8")
 )
 DOMAINS = ("aidc", "wireless", "robotics", "aerospace", "mobile")
 

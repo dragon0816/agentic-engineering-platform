@@ -19,13 +19,14 @@ from test_bi_vault import _call, _ok
 from test_business_cards_conversation import Conversation
 from test_host_wiring import ready
 
-from capabilities.bi_cards import schema_session, schema_versions
-from capabilities.bi_cards.ai_runs import AiRuntime
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, PlannedRow
-from host_runtime import bi_bench, bi_schema_agent, skill_packs
+from aep_bi.cards import schema_session, schema_versions
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore, PlannedRow
+from aep_bi.host import bi_bench, bi_schema_agent
+from aep_bi.host.bi_cards_api import route
+from host_runtime import skill_packs
 from host_runtime.assets import shipped
-from host_runtime.bi_cards_api import route
 from host_runtime.host import build_runtime
 
 BUDGET = {"name": "budget_band", "label": "預算級距", "kind": "str", "class": "sourced"}

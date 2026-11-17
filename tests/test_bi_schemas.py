@@ -17,14 +17,14 @@ from typing import Any
 
 import pytest
 
-from capabilities.bi_cards import catalog, service
-from capabilities.bi_cards.capability import QueryHandler, QueryRequest
-from capabilities.bi_cards.manifest import PROCEDURE
-from capabilities.bi_cards.store import LEGACY_SCHEMA, BiStore
+from aep_bi.cards import catalog, service
+from aep_bi.cards.capability import QueryHandler, QueryRequest
+from aep_bi.cards.manifest import PROCEDURE
+from aep_bi.cards.store import LEGACY_SCHEMA, BiStore
+from aep_bi.host.bi_cards_api import route
+from aep_bi.host.bi_cards_tools import FAILURE_TEXT
 from capabilities.runtime import CapabilityRefused
 from common.execution import RequestContext, TraceIdentifiers
-from host_runtime.bi_cards_api import route
-from host_runtime.bi_cards_tools import FAILURE_TEXT
 
 ACTOR = "tester"
 EXAMPLE = "example/product-spec@1.0.0"

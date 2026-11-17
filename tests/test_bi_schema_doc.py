@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from capabilities.bi_cards.schema import Registry, shipped
-from capabilities.bi_cards.schema_doc import schema_markdown
+from aep_bi.cards.schema import Registry, shipped
+from aep_bi.cards.schema_doc import schema_markdown
 
 
 def _v2() -> Registry:

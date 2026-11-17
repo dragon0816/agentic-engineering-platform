@@ -12,7 +12,7 @@ from typing import Any
 
 from test_bi_vault import _call, _commit, _ok, _push, _sync, _two_pcs
 
-from capabilities.bi_cards import vault
+from aep_bi.cards import vault
 from knowledge.repo import repository
 
 

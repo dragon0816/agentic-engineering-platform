@@ -13,7 +13,7 @@ from typing import Any
 from test_bi_schema_merge import _change, _new_field
 from test_bi_vault import _call, _commit, _import, _ok, _row, _two_pcs
 
-from capabilities.bi_cards import vault
+from aep_bi.cards import vault
 
 
 def _last_commit_units(ws: Path, vault_id: str) -> tuple[str, set[str]]:

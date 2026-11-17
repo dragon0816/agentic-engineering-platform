@@ -8,9 +8,9 @@ from typing import Any
 
 import pytest
 
-from capabilities.bi_cards import homes, vault_skills, vault_sources
-from capabilities.bi_cards.store import BiStoreError
-from capabilities.bi_cards.vault import BI_TYPE, Vault, create
+from aep_bi.cards import homes, vault_skills, vault_sources
+from aep_bi.cards.store import BiStoreError
+from aep_bi.cards.vault import BI_TYPE, Vault, create
 from knowledge.repo import readme_text, skills
 from knowledge.repo.repository import DEFAULT_LAYOUT, RepoError, layout_of, path_problem
 from knowledge.repo.wiki import WIKI
@@ -266,7 +266,7 @@ def test_the_extract_skill_of_a_source_is_its_homes(tmp_path: Path) -> None:
 
 
 def test_the_tools_of_a_home_are_stored_and_listed_never_run(tmp_path: Path) -> None:
-    from capabilities.bi_cards import vault_tools
+    from aep_bi.cards import vault_tools
 
     vault = _vault(tmp_path)
     script = tmp_path / "fetch.py"
@@ -302,7 +302,7 @@ def test_the_tools_of_a_home_are_stored_and_listed_never_run(tmp_path: Path) -> 
     ],
 )
 def test_a_bad_tool_is_refused(tmp_path: Path, given: dict[str, Any]) -> None:
-    from capabilities.bi_cards import vault_tools
+    from aep_bi.cards import vault_tools
 
     vault = _vault(tmp_path)
     with pytest.raises(BiStoreError) as failure:

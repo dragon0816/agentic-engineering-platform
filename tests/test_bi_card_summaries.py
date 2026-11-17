@@ -12,8 +12,8 @@ from typing import Any
 import pytest
 from test_bi_vault import _call, _import, _ok, _push, _row, _two_pcs
 
-from capabilities.bi_cards import catalog, extract
-from capabilities.bi_cards.schema import Registry
+from aep_bi.cards import catalog, extract
+from aep_bi.cards.schema import Registry
 
 V4, V5 = "bi.schema/v1.1@4.0.0", "bi.schema/v1.1@5.0.0"
 TEXT = "FAKE-A 是一種虛構的同步技術，用於機器人。"

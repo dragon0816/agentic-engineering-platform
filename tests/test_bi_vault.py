@@ -18,10 +18,10 @@ from typing import Any
 
 import pytest
 
-from capabilities.bi_cards import catalog, source_markdown, vault
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, PlannedRow, datasets
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import catalog, source_markdown, vault
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore, PlannedRow, datasets
+from aep_bi.host.bi_cards_api import route
 
 EXAMPLE = "example/product-spec@1.0.0"
 

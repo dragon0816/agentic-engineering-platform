@@ -14,10 +14,10 @@ from test_bi_ai_runs import Jobs, _runtime
 from test_bi_extract import Scripted
 from test_bi_vault import _call, _commit, _ok, _push, _refused, _two_pcs
 
-from capabilities.bi_cards import card_model, catalog, extract, profile, vault
-from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStore, BiStoreError
-from host_runtime.bi_cards_api import route
+from aep_bi.cards import card_model, catalog, extract, profile, vault
+from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore, BiStoreError
+from aep_bi.host.bi_cards_api import route
 
 SCHEMA = "bi.schema/v1.1@5.0.0"
 AIDC = "applications/aidc/sources"
@@ -515,8 +515,8 @@ def test_publish_reports_what_a_profile_requires_and_never_blocks(tmp_path: Path
 
 def test_under_a_profile_the_generated_classify_skill_stays_out(tmp_path: Path) -> None:
     """Found on a real model: it lists every type, and says to use only those."""
-    from capabilities.bi_cards import vault_skills
-    from capabilities.bi_cards.store import BiStore
+    from aep_bi.cards import vault_skills
+    from aep_bi.cards.store import BiStore
     from knowledge.repo import skills
 
     _, vault_id, dataset, a, _ = _two_pcs(tmp_path)

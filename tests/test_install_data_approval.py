@@ -12,8 +12,8 @@ from typing import Any
 
 import pytest
 
-from capabilities.bi_cards.ai_runs import AiRuntime, check_classification
-from capabilities.bi_cards.store import BiStoreError
+from aep_bi.cards.ai_runs import AiRuntime, check_classification
+from aep_bi.cards.store import BiStoreError
 
 TEMPLATE = Path(__file__).resolve().parents[1] / "deploy" / "windows-preview"
 

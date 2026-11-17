@@ -30,9 +30,10 @@ from test_bi_vault import (
 from test_business_cards_conversation import Conversation
 from test_host_wiring import ready
 
-from capabilities.bi_cards import vault
-from capabilities.bi_cards.store import BiStore
-from host_runtime import bi_bench, bi_cards_tools, skill_packs
+from aep_bi.cards import vault
+from aep_bi.cards.store import BiStore
+from aep_bi.host import bi_bench, bi_cards_tools
+from host_runtime import skill_packs
 from host_runtime.assets import shipped
 from host_runtime.host import build_runtime
 

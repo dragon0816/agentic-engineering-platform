@@ -13,8 +13,8 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import Any
 
-from capabilities.bi_cards import extract
-from capabilities.bi_cards.schema import registry
+from aep_bi.cards import extract
+from aep_bi.cards.schema import registry
 from common.execution import Failure
 from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
 

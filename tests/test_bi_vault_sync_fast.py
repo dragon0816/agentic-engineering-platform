@@ -22,9 +22,9 @@ from test_bi_vault import (
     _two_pcs,
 )
 
-from capabilities.bi_cards import analyses, card_model, feed, vault, vault_sources
-from capabilities.bi_cards.store import BiStore, BiStoreError
-from host_runtime import bi_feed_api
+from aep_bi.cards import analyses, card_model, feed, vault, vault_sources
+from aep_bi.cards.store import BiStore, BiStoreError
+from aep_bi.host import bi_feed_api
 from knowledge.repo.repository import Repository
 from scripts.bi_feed_fixtures import LATE_ANALYSIS
 

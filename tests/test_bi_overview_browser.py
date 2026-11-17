@@ -17,7 +17,7 @@ import pytest
 from bi_page_driver import BiPage, browser_missing
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from host_runtime.bi_cards_api import route as bi_route
+from aep_bi.host.bi_cards_api import route as bi_route
 
 PLUGIN = "bi-overview.overview"
 DEMO_CARDS = 104

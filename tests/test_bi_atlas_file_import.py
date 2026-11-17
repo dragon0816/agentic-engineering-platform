@@ -19,8 +19,8 @@ from test_bi_query_analyses import _joined
 from test_bi_vault import _call, _ok
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from capabilities.bi_cards import vault
-from host_runtime.bi_atlas_import import MAX_BYTES
+from aep_bi.cards import vault
+from aep_bi.host.bi_atlas_import import MAX_BYTES
 from scripts import bi_feed_fixtures as fixtures
 
 ROUTE = f"/api/bi/vaults/{VAULT}/atlas-import"

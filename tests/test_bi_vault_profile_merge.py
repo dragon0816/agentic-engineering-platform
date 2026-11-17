@@ -7,8 +7,8 @@ from typing import Any
 
 from test_bi_vault import _call, _commit, _ok, _push, _refused, _two_pcs
 
-from capabilities.bi_cards import catalog, vault
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import catalog, vault
+from aep_bi.cards.store import BiStore
 
 V5 = "bi.schema/v1.1@5.0.0"
 FIELD = {"kind": "str", "class": "sourced", "label": "冷卻方式"}

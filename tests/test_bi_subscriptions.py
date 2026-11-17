@@ -17,19 +17,19 @@ from typing import Any
 import pytest
 from test_agent_web import served  # noqa: F401 - the server fixture
 
-from capabilities.bi_cards import catalog, service, subscriptions
-from capabilities.bi_cards.capability import QueryHandler, QueryRequest
-from capabilities.bi_cards.manifest import PROCEDURE
-from capabilities.bi_cards.snapshot import (
+from aep_bi.cards import catalog, service, subscriptions
+from aep_bi.cards.capability import QueryHandler, QueryRequest
+from aep_bi.cards.manifest import PROCEDURE
+from aep_bi.cards.snapshot import (
     Publication,
     build_snapshot,
     read_snapshot,
     stamp_publication,
 )
-from capabilities.bi_cards.store import BiStore, BiStoreError, datasets
-from capabilities.bi_cards.subscriptions import Offer, SubscriptionError
+from aep_bi.cards.store import BiStore, BiStoreError, datasets
+from aep_bi.cards.subscriptions import Offer, SubscriptionError
+from aep_bi.host.bi_cards_api import route
 from common.execution import RequestContext, TraceIdentifiers
-from host_runtime.bi_cards_api import route
 
 DATASET = "engineering/robotics-bi"
 ACTOR = "tester"
@@ -212,7 +212,7 @@ def _spec_owner(tmp_path: Path) -> BiStore:
     catalog.install(root, example["schema"]["filename"], example["schema"]["json_text"])
     store = BiStore(root, "spec")
     store.create("example/product-spec@1.0.0")
-    from capabilities.bi_cards import importer
+    from aep_bi.cards import importer
 
     for entity_type, filename, text in (
         (c["entity_type"], c["filename"], c["text"]) for c in example["csv"]
@@ -555,10 +555,10 @@ def test_the_sync_installs_a_selected_dataset_and_never_updates_by_itself(
     from test_member_portal import signed_in
     from test_platform_transport import NOW, Platform, host
 
+    from aep_bi.host.bi_subscriptions import catalog_offers
     from common.assets import AssetIdentity
     from common.authorization import DeviceAssetSelection
     from control_plane.http import ControlPlaneServer
-    from host_runtime.bi_subscriptions import catalog_offers
 
     owner = _owner(tmp_path)
     platform = Platform()
@@ -634,7 +634,7 @@ def test_the_sync_installs_a_selected_dataset_and_never_updates_by_itself(
 def test_agent_web_adapter_selects_as_the_member_and_explains_refusals(tmp_path: Path) -> None:
     from types import SimpleNamespace
 
-    from host_runtime.bi_subscriptions import WebPlatform, observe_catalog
+    from aep_bi.host.bi_subscriptions import WebPlatform, observe_catalog
     from host_runtime.platform_publish import PublishError
 
     calls: list[tuple[str, str, dict[str, str]]] = []
@@ -726,7 +726,7 @@ def test_a_missing_source_line_is_appended_once(tmp_path: Path) -> None:
     """Live test: 2 of 9 answers on a subscribed dataset had no source line
     though `bi__query` carried it. The Host appends the tool result's line,
     once per dataset however many calls read it."""
-    from host_runtime.bi_cards_tools import with_bi_sources
+    from aep_bi.host.bi_cards_tools import with_bi_sources
 
     owner = _owner(tmp_path)
     reader = tmp_path / "reader"
@@ -741,7 +741,7 @@ def test_a_missing_source_line_is_appended_once(tmp_path: Path) -> None:
 
 
 def test_one_answer_carries_one_sample_note_for_a_dataset(tmp_path: Path) -> None:
-    from host_runtime.bi_cards_tools import with_bi_sources
+    from aep_bi.host.bi_cards_tools import with_bi_sources
 
     owner = _owner(tmp_path)
     reader = tmp_path / "reader"
@@ -761,7 +761,7 @@ def test_one_answer_carries_one_sample_note_for_a_dataset(tmp_path: Path) -> Non
 
 
 def test_a_source_line_the_model_wrote_is_not_repeated(tmp_path: Path) -> None:
-    from host_runtime.bi_cards_tools import with_bi_sources
+    from aep_bi.host.bi_cards_tools import with_bi_sources
 
     owner = _owner(tmp_path)
     reader = tmp_path / "reader"
@@ -780,7 +780,7 @@ def test_a_source_line_the_model_wrote_is_not_repeated(tmp_path: Path) -> None:
 
 
 def test_the_appended_line_carries_the_stopped_or_update_status(tmp_path: Path) -> None:
-    from host_runtime.bi_cards_tools import with_bi_sources
+    from aep_bi.host.bi_cards_tools import with_bi_sources
 
     owner = _owner(tmp_path)
     reader = tmp_path / "reader"
@@ -800,7 +800,7 @@ def test_the_appended_line_carries_the_stopped_or_update_status(tmp_path: Path) 
 
 
 def test_an_own_dataset_adds_no_source_line(tmp_path: Path) -> None:
-    from host_runtime.bi_cards_tools import with_bi_sources
+    from aep_bi.host.bi_cards_tools import with_bi_sources
 
     owner = _owner(tmp_path)
     local = _ask(owner.workspace, dataset="robotics", text="BMS")

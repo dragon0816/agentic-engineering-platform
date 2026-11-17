@@ -11,8 +11,8 @@ from typing import Any
 
 from test_bi_vault import _call, _commit, _Drive, _ok, _push, _row, _sync, _two_pcs
 
-from capabilities.bi_cards import card_markdown, vault, vault_sources
-from capabilities.bi_cards.store import BiStore
+from aep_bi.cards import card_markdown, vault, vault_sources
+from aep_bi.cards.store import BiStore
 
 
 def _publish(ws: Path, vault_id: str, tag: str) -> dict[str, Any]:

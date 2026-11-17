@@ -7158,7 +7158,7 @@ class _Handler(BaseHTTPRequestHandler):
         if telemetry_api.handle(self, parsed.path, parsed.query):
             return
         # A feature's public reads (the BI analysis feed, read by Atlas without
-        # the page token, owner 2026-11-01; see host_runtime/bi_feed_api.py).
+        # the page token, owner 2026-11-01; see aep_bi/host/bi_feed_api.py).
         if features.active().public_get(
             self, parsed.path, parsed.query, self.server.web.runtime.layout.workspace_root
         ):

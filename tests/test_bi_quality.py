@@ -12,11 +12,11 @@ import asyncio
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import board, catalog, quality
-from capabilities.bi_cards.capability import QueryHandler, QueryRequest
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from aep_bi.cards import board, catalog, quality
+from aep_bi.cards.capability import QueryHandler, QueryRequest
+from aep_bi.cards.store import BiStore, PlannedRow
+from aep_bi.host.bi_cards_api import route
 from common.execution import RequestContext, TraceIdentifiers
-from host_runtime.bi_cards_api import route
 
 V2 = "bi.schema/v1.1@2.0.0"
 

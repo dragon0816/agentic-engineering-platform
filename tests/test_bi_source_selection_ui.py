@@ -17,7 +17,7 @@ from bi_page_driver import BiPage, browser_missing
 from test_bi_vault import _call, _ok
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from capabilities.bi_cards.staging import Staging
+from aep_bi.cards.staging import Staging
 
 SCHEMA = "/api/bi/schema?"
 SOURCES = "/api/bi/sources?"

@@ -31,7 +31,8 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-for path in (REPO, REPO / "src"):  # run as a script: neither is importable then
+BI = REPO / "feature_plugins" / "bi_knowledge" / "python"  # the BI Knowledge plugin
+for path in (REPO, REPO / "src", BI):  # run as a script: neither is importable then
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
@@ -39,7 +40,7 @@ from typing import Any  # noqa: E402
 
 from scripts import build_bi_schema_v2 as v2  # noqa: E402
 
-OUT = REPO / "src" / "capabilities" / "bi_cards" / "bi_schema_v3.json"
+OUT = BI / "aep_bi" / "cards" / "bi_schema_v3.json"
 MATRIX = REPO / "scripts" / "bi_coverage_matrix.json"
 #: The manager's AIDC chains (his chain sections A–A3: 運算鏈, 電力鏈, 散熱鏈).
 CHAINS = (("CMP", "運算鏈"), ("PWR", "電力鏈"), ("THM", "散熱鏈"))

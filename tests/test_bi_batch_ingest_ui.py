@@ -19,9 +19,9 @@ from test_bi_extract import Scripted
 from test_bi_vault import _call, _ok
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from capabilities.bi_cards.ai_runs import AiRuntime
+from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.host import bi_cards_api
 from common.execution import Failure
-from host_runtime import bi_cards_api
 
 NOTES = [(f"會議{n}.md", f"# 會議 {n}\n\n客戶 FAKE-{n} 表示正在評估 TSN。\n") for n in (1, 2, 3)]
 BROKEN = ("壞掉.md", "# 壞掉\n\n這份會讓模型失敗。\n")
