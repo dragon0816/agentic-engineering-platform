@@ -209,3 +209,14 @@ def resolve(
             continue
         ready.append(source)
     return ready, skipped
+
+
+def ensure_bundled_importable(roots: tuple[Path, ...] | None = None) -> None:
+    """Put each bundled feature's `python/` on the import path without loading
+    it as a Host feature: for code outside the Host that reads a feature's
+    formats (the Shared Platform's BI dataset snapshots)."""
+    sources, _ = bundled(roots)
+    for source in sources:
+        root = str(source.python_root)
+        if root not in sys.path:
+            sys.path.append(root)
