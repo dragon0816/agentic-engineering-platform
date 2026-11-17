@@ -5059,3 +5059,14 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
 - [ ] B2: move BI code to feature_plugins/bi_knowledge (subagent worktree
   C:/TEMP/claude-bi/move, uncommitted at restart); then plugin.json, full
   verification, real update test, review, docs. See HANDOFF.md.
+- [x] B2 9ee7532d + 08ac8765: BI moved to feature_plugins/bi_knowledge (aep_bi),
+  loaded as bundled in-process plugin bi-knowledge.bi 1.0.0; package 3.4 MB.
+- [x] 662998b9: owner-approved removal of BI class and vault grant gates; Big5/
+  UTF-16 Markdown decoding; convert progress (AGENTS rule 23).
+- [x] Full suite on 662998b9: 7054 passed, 16 skipped, 4 failed (4:56). Causes:
+  plugin browser list expectation (fixed ede64472, 12 browser tests pass);
+  test_browser throwaway profile also fails on old main (pre-existing, this PC);
+  test_script_tools and test_bi_review_table_ui pass on rerun (load flakes).
+  ruff/format/mypy (1155 files) pass. Merged to main locally e7c5f66e (not pushed).
+- [ ] Open: push main (owner decision); real install/update acceptance on the
+  resident AEP; 445 Knowledge comparison not rerun; LLM Wiki plugin later.
