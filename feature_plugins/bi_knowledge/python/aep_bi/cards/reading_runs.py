@@ -219,10 +219,6 @@ def start(
     if not planned["cards"]:
         raise BiStoreError("reading_nothing", "沒有缺這些欄位又有自己文字的卡片")
     used = list(dict.fromkeys(s["source_id"] for c in planned["cards"] for s in c["sections"]))
-    for source_id in used:
-        source = staging.source(source_id)
-        if source is not None:
-            ai_runs.check_classification(ai, source["classification"])
     chosen = ai.model() if ai is not None else None
     if chosen is None:
         raise BiStoreError("model_unavailable", "沒有可用的模型：到 Settings 設定模型後再試")

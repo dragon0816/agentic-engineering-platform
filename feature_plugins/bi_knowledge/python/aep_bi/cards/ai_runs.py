@@ -23,7 +23,7 @@ person may send a table source here too (`path: "ai"`, owner 2026-10-28).
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -54,25 +54,8 @@ class AiRuntime:
 
     model: Callable[[], tuple[ModelClient, str] | None]
     background: Callable[[str, Callable[[], None]], None]
-    #: The data classes the host administrator approved for that model
-    #: (`models.data_approval.approved_classes`); None when not checked here
-    #: (tests that build a runtime by hand).
-    approved: Callable[[], tuple[str, ...]] | None = field(default=None)
-
-
-def check_classification(ai: AiRuntime | None, classification: str) -> None:
-    """A source goes to the model only when its data class is approved for
-    that model (owner proposal §3, §6: data classes and allowed models)."""
-    if ai is None or ai.approved is None:
-        return
-    allowed = ai.approved()
-    if classification not in allowed:
-        shown = "、".join(allowed) or "沒有"
-        raise BiStoreError(
-            "classification_not_approved",
-            f"來源的機密等級是 {classification}，但這個模型只核准 {shown} 的資料；"
-            "請改用核准等級的來源，或請管理員在 Settings 核准這個等級",
-        )
+    # A source's data class is recorded and shown, never a reason to refuse it:
+    # BI sends every class to the configured internal gateway (owner 2026-11-17).
 
 
 def _types(reg: Registry, given: Any) -> list[str]:
@@ -171,7 +154,6 @@ def start(
     text = str(instructions).strip() if edited else extract.DEFAULT_INSTRUCTIONS
     if len(text) > MAX_INSTRUCTIONS:
         raise BiStoreError("instructions_too_long", f"判讀規則最多 {MAX_INSTRUCTIONS} 個字")
-    check_classification(ai, source["classification"])
     chosen = ai.model() if ai is not None else None
     if chosen is None:
         raise BiStoreError(
@@ -298,11 +280,6 @@ def retry(workspace: Path, dataset: str, ai: AiRuntime | None, run_id: str) -> d
     failed = [int(f["chunk"]) for f in layout.get("failures") or []]
     if not failed:
         raise BiStoreError("run_closed", "這次執行沒有可以重試的段落")
-    # Checked on every send: the approval may have narrowed since the run began.
-    for source_id in run["source_ids"]:
-        source = staging.source(source_id)
-        if source is not None:
-            check_classification(ai, source["classification"])
     chosen = ai.model() if ai is not None else None
     if chosen is None:
         raise BiStoreError("model_unavailable", "沒有可用的模型：到 Settings 設定後再試")

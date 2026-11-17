@@ -49,7 +49,8 @@ class BiFeature(Feature):
     def capability_bindings(
         self, workspace_root: Path, approved: Sequence[str]
     ) -> Iterable[tuple[Any, Any, Any, Any]]:
-        return bi_cards_bindings(workspace_root, approved=approved)
+        # `approved` is not a BI gate: BI reads every data class (owner 2026-11-17).
+        return bi_cards_bindings(workspace_root)
 
     def host_tools(self, gateway: Any) -> Iterable[Any]:
         return bi_cards_tools(gateway)

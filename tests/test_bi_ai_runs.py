@@ -218,58 +218,41 @@ def test_a_cancelled_extraction_stays_cancelled(tmp_path: Path) -> None:
     assert _detail(tmp_path, run["id"])["run"]["status"] == "cancelled"
 
 
-def test_a_source_goes_to_the_model_only_in_an_approved_data_class(tmp_path: Path) -> None:
-    jobs = Jobs()
-    pair = (Scripted(MEETING_ANSWER), "test-model")
-    ai = AiRuntime(model=lambda: pair, background=jobs, approved=lambda: ("UNCLASSIFIED",))
-    internal = _note(tmp_path)  # INTERNAL by default
-    status, payload = _call(
-        tmp_path,
-        "POST",
-        "/api/bi/runs",
-        {"dataset": "demo", "kind": "trial", "source_id": internal},
-        ai,
-    )
-    assert (status, payload["code"]) == (400, "classification_not_approved")
-    assert jobs.pending == []
-    body = {
-        "dataset": "demo",
-        "name": "public.md",
-        "text": NOTE + "\n公開版。\n",
-        "classification": "UNCLASSIFIED",
-    }
-    public = _ok(_call(tmp_path, "POST", "/api/bi/sources", body))["source"]["id"]
-    run = _start(tmp_path, ai, public, kind="trial")
-    jobs.run_all()
-    assert _detail(tmp_path, run["id"])["run"]["status"] == "review"
+def test_a_source_of_every_data_class_goes_to_the_model(tmp_path: Path) -> None:
+    """BI never refuses a source for its data class (owner 2026-11-17): the class
+    stays recorded on the source, and the source is sent to the model."""
+    for level in ("INTERNAL", "CONFIDENTIAL", "RESTRICTED"):
+        jobs = Jobs()
+        model = Scripted(MEETING_ANSWER)
+        ai = _runtime(model, jobs)
+        body = {
+            "dataset": "demo",
+            "name": f"{level.lower()}.md",
+            "text": NOTE + f"\n標記 MARK-{level}。\n",
+            "classification": level,
+        }
+        added = _ok(_call(tmp_path, "POST", "/api/bi/sources", body))["source"]
+        assert added["classification"] == level
+        run = _start(tmp_path, ai, str(added["id"]), kind="trial")
+        jobs.run_all()
+        assert _detail(tmp_path, run["id"])["run"]["status"] == "review"
+        assert any(f"MARK-{level}" in str(request) for request in model.requests)
 
 
-def test_a_retry_is_refused_when_the_source_s_data_class_is_no_longer_approved(
-    tmp_path: Path,
-) -> None:
-    """The check is made on every send: an administrator may have narrowed the
-    approval since the run began."""
+def test_a_retry_is_sent_whatever_the_source_s_data_class(tmp_path: Path) -> None:
+    """A retry is never refused for the source's class: no approval is consulted."""
     jobs = Jobs()
-    allowed = ["UNCLASSIFIED", "INTERNAL"]
     model = Scripted(Failure(code="model_unavailable", message="down"), MEETING_ANSWER)
-    ai = AiRuntime(
-        model=lambda: (model, "test-model"), background=jobs, approved=lambda: tuple(allowed)
-    )
-    run = _start(tmp_path, ai, _note(tmp_path))
+    ai = AiRuntime(model=lambda: (model, "test-model"), background=jobs)
+    run = _start(tmp_path, ai, _note(tmp_path))  # INTERNAL by default
     jobs.run_all()
     assert _detail(tmp_path, run["id"])["run"]["status"] == "failed"
     asked = len(model.requests)
 
-    allowed.remove("INTERNAL")
     path = f"/api/bi/runs/{run['id']}/retry"
-    status, payload = _call(tmp_path, "POST", path, {"dataset": "demo"}, ai)
-    assert (status, payload["code"]) == (400, "classification_not_approved")
-    assert jobs.pending == [] and len(model.requests) == asked
-    assert _detail(tmp_path, run["id"])["run"]["status"] == "failed"
-
-    allowed.append("INTERNAL")
     _ok(_call(tmp_path, "POST", path, {"dataset": "demo"}, ai))
     jobs.run_all()
+    assert len(model.requests) > asked
     assert _detail(tmp_path, run["id"])["run"]["status"] == "review"
 
 

@@ -229,7 +229,6 @@ def harness_asker(
             source = Staging(workspace, dataset).source(source_id)
             if source is None:
                 raise BiStoreError("source_unknown", "沒有這個來源")
-            ai_runs.check_classification(ai, source["classification"])
             found = tool_runs.try_draft(workspace, vault_id, str(args.get("sha256")), source_id)
             return {
                 "printed": sessions.fenced("Tool printed:", found["printed"]),

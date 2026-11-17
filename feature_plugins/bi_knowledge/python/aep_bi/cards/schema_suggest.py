@@ -118,7 +118,6 @@ def start(
     actor: str,
 ) -> dict[str, Any]:
     """Read the sources in the background; the suggestion is `running` until it ends."""
-    from aep_bi.cards import ai_runs
 
     staging = Staging(workspace, dataset)
     store = staging.store
@@ -132,8 +131,6 @@ def start(
             "suggest_no_sources",
             "沒有可以看的來源：這個領域的來源都已經 ingest 過，或還沒轉檔；可以改選「選的來源」",
         )
-    for source in sources:
-        ai_runs.check_classification(ai, str(source["classification"]))
     chosen = ai.model() if ai is not None else None
     if chosen is None:
         raise BiStoreError("model_unavailable", "沒有可用的模型：到 Settings 設定模型後再試")

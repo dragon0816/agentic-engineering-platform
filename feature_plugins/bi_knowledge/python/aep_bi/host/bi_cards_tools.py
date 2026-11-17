@@ -621,13 +621,6 @@ def reading_tool(gateway: Any, handler: QueryHandler) -> HostTool | None:
     installed = gateway.bridge.installed.get(QUERY_SPEC.identity)
     if not found or installed is None:
         return None
-    if handler.approved is None:
-        # A chosen-version tool uses the same host approval as the installed read tool.
-        handler = QueryHandler(
-            handler.workspace_root,
-            handler.store_for,
-            approved=getattr(installed.handler, "approved", None),
-        )
 
     async def call(context: RequestContext, arguments: dict[str, Any]) -> HostToolOutcome:
         try:

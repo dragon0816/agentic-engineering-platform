@@ -15,7 +15,6 @@ from typing import Any
 
 from aep_bi.cards import ai_runs, sessions
 from aep_bi.cards.staging import Staging
-from aep_bi.cards.store import BiStoreError
 from agent.backend_contracts import ConversationLimits
 from agent.delegation_scope import running_sub_run
 from agent.gateway import GatewayConversationResult, HostTool, HostToolOutcome, turn_host_tools
@@ -73,9 +72,7 @@ def turn_ai(gateway: Any, ai: ai_runs.AiRuntime) -> ai_runs.AiRuntime:
             return chat, str(getattr(router, "model_alias", ""))
         return ai.model()
 
-    return ai_runs.AiRuntime(
-        model=model, background=lambda _title, work: work(), approved=ai.approved
-    )
+    return ai_runs.AiRuntime(model=model, background=lambda _title, work: work())
 
 
 def tools_used(result: GatewayConversationResult) -> list[dict[str, Any]]:
@@ -122,10 +119,6 @@ def source_tools(
         source = staging.source(str(args.get("source_id") or ""))
         if source is None:
             return failed("source_unknown", "沒有這個來源")
-        try:
-            ai_runs.check_classification(ai, source["classification"])
-        except BiStoreError as error:
-            return failed(error.code, error.message)
         text = sessions._source_text(staging, source)
         start = max(0, int(args.get("start") or 0))
         piece = text[start : start + MAX_SOURCE_PIECE]

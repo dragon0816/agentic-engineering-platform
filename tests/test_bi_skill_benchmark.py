@@ -78,7 +78,6 @@ def _run(
     ai = AiRuntime(
         model=lambda: (extractor, "test-model"),
         background=lambda _t, work: work(),
-        approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
     )
     store = BiStore(ws, dataset)
     before = store.path.read_bytes()

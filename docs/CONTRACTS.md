@@ -4244,7 +4244,7 @@ schema is chosen at creation and never changed" (owner 2026-10-27): a dataset ma
   - `POST /api/bi/schema-suggest {"dataset", "source_ids": [...], "only_new": bool}` → `{"ok": true,
     "suggestion": <suggestion>}` with `status: "running"`; the model is asked in the background. `only_new`
     leaves out sources an ingest run read. At most 10 sources (`left_out` counts the rest). Refusals: 400
-    `suggest_no_sources`, `model_unavailable`, `classification_not_approved`; 409 `suggest_running`,
+    `suggest_no_sources`, `model_unavailable`; 409 `suggest_running`,
     `dataset_read_only`.
   - `GET /api/bi/schema-suggest?dataset=` → `{"suggestion": <suggestion> | null}`.
   - `<suggestion>` = `{"id", "status": "running" | "done" | "failed", "at", "by", "schema", "model",
@@ -4393,9 +4393,10 @@ checks, quote location), `ai_runs.py` (runs, background job, retry), `runs.py` (
   proposal §4 card rules), `types` (card type names; default Signal, Technology, Application). Refusals: 400
   `model_unavailable` (no model in Settings; nothing is started; the rule path still works), 400
   `types_invalid`, `instructions_too_long`, `source_not_text`.
-- **Data class.** A source reaches the model (AI run, Session A or B excerpt) only when its `classification`
-  is in the host's `models.data_approval.approved_classes`; otherwise 400 `classification_not_approved` and
-  nothing is sent (added 2026-10-28).
+- **Data class.** A source's `classification` is recorded and shown; it is never a reason to refuse or
+  withhold the source. Every class reaches the model through the configured internal gateway (AI run,
+  Session A or B excerpt, `bi__query` passages and body snippets; `passages_withheld` is always 0). The
+  2026-10-28 `classification_not_approved` refusal was removed (owner 2026-11-17).
 - **The model.** The Knowledge query model and alias when a wiki Knowledge asset is bound; otherwise the host's routing
   client and alias, the same `ApprovedModelClient`, never an unwrapped client (owner 2026-11-03; `web_ai_runtime`). No
   routed model: `model_unavailable`. One call per chunk,

@@ -52,7 +52,6 @@ def scripted(monkeypatch: pytest.MonkeyPatch) -> Scripted:
         lambda _web: AiRuntime(
             model=lambda: (model, "test-model"),
             background=lambda _title, work: work(),
-            approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
         ),
     )
     return model

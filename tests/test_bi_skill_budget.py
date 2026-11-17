@@ -94,7 +94,6 @@ def _vault(tmp_path: Path) -> tuple[Any, Any, Path, dict[str, Any], str, AiRunti
     ai = AiRuntime(
         model=lambda: (Scripted(MEETING_ANSWER), "test-model"),
         background=lambda _t, work: work(),
-        approved=lambda: ("UNCLASSIFIED", "INTERNAL"),
     )
     return config, layout, ws, made["vault"], source, ai
 

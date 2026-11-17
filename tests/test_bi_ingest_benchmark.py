@@ -229,7 +229,6 @@ def test_the_api_pipeline_and_the_scorer_agree(
     ai = AiRuntime(
         model=lambda: (_by_note(answers), "test-model"),
         background=jobs,
-        approved=lambda: ("UNCLASSIFIED",),
     )
     started = []
     for case in CASES:
@@ -276,7 +275,6 @@ def test_the_script_runs_trials_scores_and_reports_without_writing_cards(
     ai = AiRuntime(
         model=lambda: (_by_note(_flawed()), "test-model"),
         background=lambda title, work: work(),
-        approved=lambda: ("UNCLASSIFIED",),
     )
     summary, rows = script.run_benchmark(tmp_path, "demo", ai)
     assert _flaws(summary) == EXPECTED_FLAWS
@@ -299,8 +297,8 @@ def test_the_script_runs_trials_scores_and_reports_without_writing_cards(
     chosen = {r["note"]: r["run"] for r in rows}
     again, _ = script.score_runs(tmp_path, "demo", chosen)
     assert again == summary
-    # Without an approved data class nothing reaches the model; the report says why.
-    closed = AiRuntime(model=ai.model, background=ai.background, approved=lambda: ("INTERNAL",))
-    summary, rows = script.run_benchmark(tmp_path, "other", closed)
-    assert {r["error"].split(":")[0] for r in rows} == {"classification_not_approved"}
-    assert summary["counts"]["found"] == 0
+    # No data class keeps a case from the model (owner 2026-11-17): another dataset
+    # is read the same way, whatever its sources' class.
+    summary, rows = script.run_benchmark(tmp_path, "other", ai)
+    assert [r["status"] for r in rows] == ["review"] * 5
+    assert _flaws(summary) == EXPECTED_FLAWS
