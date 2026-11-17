@@ -518,6 +518,49 @@ class SqliteLocalState:
                 )
         return checked
 
+    def set_workflow_form_run(
+        self, session_id: Symbol, actor: Symbol, message_id: Symbol, run: dict[str, Any]
+    ) -> None:
+        """Update only the execution state of an actor-owned assistant form.
+
+        Transcript text and every other message remain append-only.
+        """
+        with self._write() as conn:
+            row = conn.execute(
+                "SELECT record FROM conversations WHERE session_id = ? AND actor = ?",
+                (session_id, actor),
+            ).fetchone()
+            if row is None:
+                raise LocalStateError("conversation_unknown")
+            stored = ConversationRecord.model_validate_json(row[0])
+            target = next(
+                (
+                    m
+                    for m in stored.messages
+                    if m.message_id == message_id and m.role == "assistant" and m.workflow_form
+                ),
+                None,
+            )
+            if target is None:
+                raise LocalStateError("conversation_message_unknown")
+            updated = stored.model_copy(
+                update={
+                    "messages": tuple(
+                        m.model_copy(
+                            update={"workflow_form": {**(m.workflow_form or {}), "run": run}}
+                        )
+                        if m.message_id == message_id
+                        else m
+                        for m in stored.messages
+                    )
+                }
+            )
+            checked = ConversationRecord.model_validate(updated.model_dump())
+            conn.execute(
+                "UPDATE conversations SET record = ? WHERE session_id = ? AND actor = ?",
+                (checked.model_dump_json(), session_id, actor),
+            )
+
     def set_message_card(
         self,
         session_id: Symbol,

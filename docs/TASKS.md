@@ -5070,3 +5070,10 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   ruff/format/mypy (1155 files) pass. Merged to main locally e7c5f66e (not pushed).
 - [ ] Open: push main (owner decision); real install/update acceptance on the
   resident AEP; 445 Knowledge comparison not rerun; LLM Wiki plugin later.
+- [x] 2026-11-08, Codex (codex-lead, base b9d96ac7): persist chat Workflow activation and arguments before execution, reconcile running/completed state on navigation/reload, consume started forms and allow explicit failed/interrupted retries. Baseline proof failures and real-browser slow-stub tests on temporary hosts; final full 6018 passed/13 skipped, Ruff format/check and mypy passed. Both prior CI UI failures passed locally. Original owner run continued and failed in Outlook drafting; historical COM cause was discarded. See CHAT_WORKFLOW_NAVIGATION_2026-11-07 evaluation and HANDOFF.
+
+- [x] 2026-11-07, Codex (codex-lead): diagnose the owner's SDE result as five successful steps including weekly-report/apply, followed by Outlook draft_failed after 392164.4 ms. Original COM cause was discarded and cannot be reconstructed from saved records. Add fixed-stage/numeric-only Outlook draft diagnostics; synthetic regression failed before the change, then Outlook draft/COM group 20 passed and expanded affected group 39 passed. No real Workflow, draft or restart performed; no automatic mailbox retry. Navigation repair is still in verification.
+
+- [x] 2026-11-08, Codex (codex-lead): preserve queued-send notice during delayed backend checks (c0553d76), with coordinated browser regression failing on b9d96ac7 and all original assertions retained. Focused 9 passed; final full 6018 passed/13 skipped.
+
+- [x] 2026-11-08, Codex (codex-lead): build local Windows offline release 20261108-0234-e564e1ad from clean tested e564e1ad. Official builder exit0; archive SHA256, integrity, all manifest hashes/sizes/revision and inner-wheel repair content verified. Package189186782 bytes; SHA256/path in HANDOFF. No tag, publish, push, install or owner restart performed.

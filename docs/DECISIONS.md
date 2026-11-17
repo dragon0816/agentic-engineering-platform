@@ -7943,3 +7943,50 @@ in the data-policy contract. Reverses the 2026-10-28 rejected alternative
 beyond ADR-K8 (class decides which model may receive data; who reads is decided
 by vault sharing). Not chosen: item 1 (editing a source's class) — owner did not
 select it.
+
+## 2026-11-07 — Persist chat Workflow activation before execution
+
+The owner's SDE run continued after leaving Agent Web and eventually failed in
+Outlook drafting. The inline form persisted only its original offer, not the
+activation, until the endpoint appended the final run/result pair. A return
+redrew a fresh Run with a fresh idempotency key, permitting another activation.
+
+Bind the new client to its exact form message and persist a claimed attempt under
+the existing per-session record lock before waiting for execution. Store validated
+runtime arguments, including defaults, so a failed retry preserves what the
+person supplied. Repeated activation replays state; retry explicitly names the
+failed/interrupted attempt. Existing Agent/Gateway/engine/Bridge execution and
+approval remain authoritative. Do not add a second executor or make UI navigation
+own the lifetime of work. Do not automatically repeat partial mailbox/workbook
+writes. A new intentional successful rerun starts from a new offer.
+
+Use a narrowly scoped actor-owned form-state transaction; do not weaken ordinary
+append-only conversation persistence. An unfinished marker from another instance
+is interrupted, not resumed. Old exact generated run/result pairs may project
+consumed state when the name has one identity. Decode only complete generated
+JSON-valued arguments; do not guess truncated values or hidden upload paths.
+
+Status refresh reuses unchanged form controls and restores focus/selection, so
+one running Workflow cannot erase another form's unsent draft. Failed requests
+are reconciled against authoritative host state: if no new attempt was claimed,
+keep the original form usable and show the error; otherwise show the existing
+run. Rejected: memory-only button disabling, fresh-key duplicate execution,
+blanket transcript rewrites, rebuilding unrelated input controls every poll, or
+claiming a missing HTTP response proves a Workflow never started.
+
+## 2026-11-08 — Preserve queued-send feedback during backend readiness checks
+
+The first release-validation full suite completed with6017 passed13 skipped and
+one early-send UI failure. Its queued-send promise had become the generic backend
+checking notice. The delayed1500ms loadChat callback called sendWait(true) even
+when queueSend had already set sendQueued. This is a pre-existing visible-state
+bug, not a reason to relax the queued-message assertion.
+
+Keep the queued notice when a later loading notice arrives. The false/cleanup
+path and flushQueuedSend's ready check and exactly-once submit are unchanged.
+The browser test uses explicit backend-start/release Events instead of assuming
+inspection finishes within a4-second sleep, then invokes the late notice after
+Enter. Every original input-retention/not-yet-sent/once/cleared/hidden assertion
+remains. It deterministically failed on the unchanged b9d96ac7 page; the guard
+and turn-group cases then passed9 tests. Rejected: waiting for any nonempty notice,
+removing the promise assertion, or lengthening sleeps to conceal the race.
