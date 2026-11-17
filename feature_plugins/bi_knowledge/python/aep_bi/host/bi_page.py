@@ -5830,7 +5830,9 @@ el("bi-b-upload").addEventListener("click", async () => {
         added.push(bi.build.sourceId);
         continue;
       }
-      const binary = /\.(xlsx|xlsm|pdf|docx|pptx)$/i.test(file.name);
+      // Markdown and text go as their bytes too: the host decides their encoding
+      // (UTF-8, UTF-16 or Big5) and says so when it cannot read one.
+      const binary = /\.(xlsx|xlsm|pdf|docx|pptx|md|markdown|txt)$/i.test(file.name);
       const content = await biReadFile(file, binary);
       const body = {dataset: biDataset(), name: file.name,
         classification: el("bi-b-class").value};
