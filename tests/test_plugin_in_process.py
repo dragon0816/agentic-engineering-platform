@@ -291,3 +291,26 @@ def test_python_caches_are_tolerated_cleared_and_nothing_else_is(tmp_path: Path)
     (folder / "python" / package / "extra.py").write_text("x = 1\n")
     with pytest.raises(PluginStageError):
         verify_staged(folder, built.content_sha256, anchor=ws)
+
+
+def test_the_bi_knowledge_plugin_builds_as_an_installable_in_process_package() -> None:
+    import importlib.util
+
+    from common.plugins import parse_plugin_package
+
+    spec = importlib.util.spec_from_file_location(
+        "build_bi_knowledge_plugin", ROOT / "scripts" / "build_bi_knowledge_plugin.py"
+    )
+    assert spec is not None and spec.loader is not None
+    builder = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(builder)
+    payload = builder.package_bytes()
+    assert payload == builder.package_bytes()  # deterministic
+    package = parse_plugin_package(payload)
+    assert package.manifest.plugin_id == "bi-knowledge.bi"
+    assert package.manifest.in_process is not None
+    assert package.manifest.in_process.entry == "aep_bi.feature"
+    paths = {item.path for item in package.files}
+    assert "python/aep_bi/host/bi_page.py" in paths
+    assert "python/aep_bi/cards/samples/product-spec@1.0.0.json" in paths
+    assert not any("__pycache__" in path for path in paths)

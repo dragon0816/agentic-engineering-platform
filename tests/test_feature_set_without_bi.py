@@ -58,7 +58,7 @@ def test_without_bi_the_page_keeps_the_shell_and_offers_no_bi_tab() -> None:
     assert "const bh = " in page
 
 
-def test_core_modules_import_no_bi_code_when_no_feature_is_built_in() -> None:
+def test_core_modules_import_no_bi_code_when_no_feature_plugin_is_offered() -> None:
     script = (
         "import sys\n"
         "from host_runtime import features\n"
@@ -74,8 +74,13 @@ def test_core_modules_import_no_bi_code_when_no_feature_is_built_in() -> None:
     found = subprocess.run(
         [sys.executable, "-c", script],
         cwd=ROOT,
-        # BI stays importable, so a core module that reached it would be listed.
-        env={**_environment(), "PYTHONPATH": os.pathsep.join([str(ROOT / "src"), str(PLUGIN)])},
+        # BI stays importable, so a core module that reached it would be listed;
+        # no bundled feature plugin is offered (an empty AEP_BUNDLED_PLUGINS).
+        env={
+            **_environment(),
+            "PYTHONPATH": os.pathsep.join([str(ROOT / "src"), str(PLUGIN)]),
+            "AEP_BUNDLED_PLUGINS": "",
+        },
         capture_output=True,
         text=True,
         timeout=300,

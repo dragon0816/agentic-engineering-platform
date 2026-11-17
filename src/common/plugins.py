@@ -115,7 +115,7 @@ RESERVED_NAMESPACES = frozenset(
 
 _NAMESPACE = re.compile(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$")
 _LOCAL_NAME = re.compile(r"^[a-z][a-z0-9_]{0,39}$")
-_PATH_PART = re.compile(r"^[a-z0-9_][a-z0-9_.-]*$")
+_PATH_PART = re.compile(r"^[a-z0-9_][a-z0-9_.@-]*$")
 _DEVICE = re.compile(r"^(?:con|prn|aux|nul|com[0-9]|lpt[0-9])$")
 _WORKER_SUFFIXES = (".py", ".json")
 #: Files an in-process feature plugin ships under `python/`: code and its data.
@@ -204,7 +204,8 @@ def plugin_path_problem(path: str) -> str | None:
 
     Paths are lowercase relative POSIX paths in two areas only: `worker/...`
     (`.py`/`.json`) and `assets/skills|workflows/<file>.json`. Lowercase-only
-    removes case collisions on Windows; the part pattern excludes `..`, hidden
+    removes case collisions on Windows (`@` is allowed: BI ships `name@version.json`
+    samples); the part pattern excludes `..`, hidden
     files, drive letters, backslashes, `:` (alternate data streams), spaces
     and non-ASCII; device names and trailing dots are refused explicitly."""
     if not path or len(path) > MAX_PATH_LENGTH:
