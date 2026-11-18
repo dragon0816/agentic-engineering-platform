@@ -5100,3 +5100,13 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
 - [x] 2026-11-18 BI review accept-all + accept-and-import (81a5f660, f56c7004): new /accept route,
   old bulk button removed; 135 API/static + 17 UI tests pass. Parallel test runs: pytest-xdist in dev
   extras; full suite `python -m pytest -n auto --dist loadfile` (CI too).
+- [x] 2026-11-18 LLM Wiki in-process plugin (llm-wiki.wiki 1.0.0) + BI accept-all merged
+  to local main fd80565b. Parallel full suite (6 workers) on 01d429a6: 7058 passed,
+  16 skipped, 30 failed under heavy load; serial rerun of all 30: 29 passed, 1
+  (test_system_command timing) also fails on pre-Wiki main (environment). Earlier
+  fixes: guide test reads the served page; time-dependent JWT param ids (xdist
+  collection). 445 Knowledge cases passed in the plugin stages.
+- [x] 2026-11-18 live acceptance on the resident AEP after idle checks: both bundled
+  plugins active, BI accept-all buttons present (old bulk button gone), Knowledge APIs
+  200. Wiki 1.0.1 installed via Plugins → live after restart; disabled → maintenance
+  gone, asking and BI still 200; uninstalled → bundled 1.0.0 back.
