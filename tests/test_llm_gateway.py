@@ -323,6 +323,7 @@ def test_the_launcher_starts_on_loopback_offline_with_the_tokens_in_its_own_proc
 @pytest.mark.parametrize(
     ("token", "expected"),
     [(None, "missing CHATRS_TOKEN"), (fake_jwt(-2), "expired")],
+    ids=["missing", "expired"],  # the JWT carries the current time (pytest-xdist)
 )
 def test_the_launcher_will_not_start_without_a_valid_token(
     tmp_path: Path, token: str | None, expected: str
@@ -603,6 +604,8 @@ def test_refresh_writes_a_new_valid_token_with_a_backup(tmp_path: Path) -> None:
         (0, "AEP-TOKEN:garbage\n", "unreadable_token"),
         (0, f"AEP-TOKEN:{fake_jwt(-1)}\n", "expired_token"),
     ],
+    # The JWT carries the current time; parallel workers need the same names.
+    ids=["no_ticket", "rejected", "unreadable", "expired"],
 )
 def test_refresh_failures_are_named_and_never_write(
     tmp_path: Path, code: int, stdout: str, expected: str
