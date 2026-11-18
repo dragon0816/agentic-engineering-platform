@@ -57,14 +57,18 @@ def test_a_plugin_installs_shows_its_page_and_keeps_hostile_text_as_text(
     config, layout = _bi_host(tmp_path / "pc")
     with _served(config, layout, _Model("none", {})) as server:
         with BiPage(tmp_path / "browser", server.address) as page:
-            # No plugin installed yet: only BI Knowledge, shipped with AEP (Plugin
-            # API 1.2), is listed, with no plugin pages under the entry.
+            # No plugin installed yet: only BI Knowledge and the LLM Wiki, shipped with
+            # AEP (Plugin API 1.2), are listed, with no plugin pages under the entry.
             assert page.run("document.getElementById('nav-plugins').offsetParent !== null")
             page.click("#nav-plugins")
             page.wait("document.getElementById('panel-plugin').hasAttribute('data-open')")
             page.plugin_row_shows("bi-knowledge.bi", "shipped with AEP")
+            page.plugin_row_shows("llm-wiki.wiki", "shipped with AEP")
             rows = "[...document.querySelectorAll('#plugin-list .plugin-row')]"
-            assert page.run(f"{rows}.map(r => r.dataset.pluginId)") == ["bi-knowledge.bi"]
+            assert page.run(f"{rows}.map(r => r.dataset.pluginId)") == [
+                "bi-knowledge.bi",
+                "llm-wiki.wiki",
+            ]
             shipped_buttons = f"{rows}[0].querySelectorAll('button')"
             assert page.run(f"[...{shipped_buttons}].map(b => b.textContent)") == ["Disable"]
             assert page.run("document.querySelectorAll('#plugin-nav button').length") == 0

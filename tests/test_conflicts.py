@@ -9,7 +9,7 @@ import pytest
 from pydantic import ValidationError
 from test_raw import make_vault
 
-from knowledge.conflicts import (
+from aep_wiki.knowledge.conflicts import (
     DECISIONS_HEADER,
     Decision,
     append_decision,
@@ -20,6 +20,7 @@ from knowledge.conflicts import (
     open_conflicts,
     resolve,
 )
+from aep_wiki.knowledge.planning import NO_DECISIONS
 from knowledge.lint import (
     ManualEdits,
     OpenConflict,
@@ -29,7 +30,6 @@ from knowledge.lint import (
     record_state,
     scan,
 )
-from knowledge.planning import NO_DECISIONS
 from knowledge.vault import Vault
 
 TODAY = date(2026, 9, 21)

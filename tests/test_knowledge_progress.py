@@ -4,8 +4,8 @@ from pathlib import Path
 
 from test_knowledge_scope import _project
 
+from aep_wiki.knowledge import progress
 from host_runtime.web_page import PAGE
-from knowledge import progress
 
 
 def test_creating_a_sandbox_reports_every_file_copied(tmp_path: Path) -> None:

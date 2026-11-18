@@ -16,9 +16,10 @@ from typing import Any
 import pytest
 from test_knowledge_repos_api import PAGE, _call, _ok, _two_pcs
 
-from host_runtime import wiki_bench
+from aep_wiki.host import wiki_bench
+from aep_wiki.knowledge import wiki_work
 from host_runtime.contracts import KnowledgeAskRequest
-from knowledge import wiki_repos, wiki_work
+from knowledge import wiki_repos
 from knowledge.evolution import KnowledgeCatalog
 from knowledge.repo import set_benchmark
 

@@ -6,7 +6,7 @@ from test_knowledge_pipeline import _pipeline, _sandbox_with_note
 from test_knowledge_sandbox import _base
 from test_planning import PlanningModel, answers
 
-from knowledge.planning import PLAN_CONTRACT
+from aep_wiki.knowledge.planning import PLAN_CONTRACT
 from knowledge.schema import category_skill, ingest_conventions
 from knowledge.vault import Vault
 

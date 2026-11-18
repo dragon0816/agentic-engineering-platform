@@ -29,7 +29,8 @@ from test_product_e2e_05 import V1
 from test_review_proposals import _finding, _report
 
 from aep_bi import feature as features_bi
-from host_runtime import features, features_wiki, web_page
+from aep_wiki import feature as features_wiki
+from host_runtime import features, web_page
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
 from integrations.browser import Browser
@@ -42,37 +43,13 @@ ONLY_BI = features.FeatureSet((BI,))
 ONLY_WIKI = features.FeatureSet((WIKI,))
 NEITHER = features.FeatureSet(())
 COMBINATIONS = {"only BI": ONLY_BI, "only Wiki": ONLY_WIKI, "neither": NEITHER}
-#: Core modules of the Wiki maintenance; none is imported without the feature.
-MAINTENANCE = (
-    "knowledge.pipeline",
-    "knowledge.planning",
-    "knowledge.merge",
-    "knowledge.sandbox",
-    "knowledge.stage",
-    "knowledge.migrate",
-    "knowledge.conflicts",
-    "knowledge.wiki_work",
-    "knowledge.progress",
-    "knowledge.describe",
-    "knowledge.wiki_repos_write",
-    "capabilities.knowledge_pipeline.handlers",
-    "host_runtime.features_wiki",
-    "host_runtime.wiki_web",
-    "host_runtime.wiki_host",
-    "host_runtime.wiki_page",
-    "host_runtime.knowledge_repos_api",
-    "host_runtime.wiki_bench",
-    "host_runtime.knowledge_convert",
-    "host_runtime.knowledge_reingest",
-    "host_runtime.knowledge_push",
-    "host_runtime.knowledge_publish",
-    "host_runtime.knowledge_bench",
-    "host_runtime.skill_assist",
-)
+#: The Wiki maintenance's package (the plugin's `python/`); without the feature no
+#: core module imports any of it.
+WIKI_PLUGIN = ROOT / "feature_plugins" / "llm_wiki" / "python"
 
 
 def test_the_running_features_are_the_wiki_and_bi_and_the_wiki_page_comes_first() -> None:
-    assert [feature.name for feature in features.active()] == ["llm-wiki", "bi-knowledge"]
+    assert [feature.name for feature in features.active()] == ["bi-knowledge", "llm-wiki"]
     both = features.FeatureSet((WIKI, BI)).page_fragments()
     # Whatever order the features load in, the Wiki's parts are placed before BI's.
     assert features.FeatureSet((BI, WIKI)).page_fragments() == both
@@ -131,22 +108,21 @@ def test_an_in_process_plugin_places_its_page_parts_by_its_manifest() -> None:
 def test_core_modules_import_no_wiki_maintenance_code_without_the_feature() -> None:
     script = (
         "import sys\n"
-        "from host_runtime import features\n"
-        "features.BUILTIN = ()\n"
         "import host_runtime.host, host_runtime.web, host_runtime.sync, channels.telegram\n"
         "import host_runtime.change_proposals, host_runtime.assistant_tools\n"
         "import host_runtime.knowledge_binding, host_runtime.assets, host_runtime.web_page\n"
         "import host_runtime.agent_mode, knowledge.wiki_repos, knowledge.query\n"
         "host_runtime.web_page.page()\n"
-        f"wanted = {MAINTENANCE!r}\n"
-        "print('\\n'.join(sorted(n for n in sys.modules if n in wanted)))\n"
+        "print('\\n'.join(sorted(n for n in sys.modules"
+        " if n == 'aep_wiki' or n.startswith('aep_wiki.'))))\n"
     )
     found = subprocess.run(
         [sys.executable, "-c", script],
         cwd=ROOT,
         env={
             **os.environ,
-            "PYTHONPATH": os.pathsep.join([str(ROOT / "src"), str(BI_PLUGIN)]),
+            # The Wiki stays importable, so a core module that reached it would be listed.
+            "PYTHONPATH": os.pathsep.join([str(ROOT / "src"), str(BI_PLUGIN), str(WIKI_PLUGIN)]),
             "AEP_BUNDLED_PLUGINS": "",
         },
         capture_output=True,

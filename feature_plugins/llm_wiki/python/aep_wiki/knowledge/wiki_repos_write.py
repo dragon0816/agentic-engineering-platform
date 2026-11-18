@@ -25,7 +25,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from knowledge import wiki_work
+from aep_wiki.knowledge import wiki_work
 from knowledge.repo import readme, wiki
 from knowledge.repo import repository as engine
 from knowledge.repo.repository import RepoError, Repository

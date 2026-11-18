@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 PAGE_SLOTS = ("feature_css", "knowledge_pane", "feature_js")
 
 #: Built-in features, as `module:attribute` of a `Feature` instance.
-BUILTIN: tuple[str, ...] = ("host_runtime.features_wiki:FEATURE",)
+BUILTIN: tuple[str, ...] = ()
 
 
 class PackageRefused(Exception):

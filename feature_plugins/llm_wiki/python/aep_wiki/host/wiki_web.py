@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any, Literal
 from urllib.parse import parse_qs
 
-from capabilities.knowledge_pipeline.handlers import (
+from aep_wiki.capabilities.handlers import (
     ADOPT_SPEC,
     CONVERT_SPEC,
     DROP_ADD_SPEC,
@@ -45,36 +45,36 @@ from capabilities.knowledge_pipeline.handlers import (
     SANDBOX_LIST_SPEC,
     SKILL_GUIDE_SPEC,
 )
-from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
-from common.execution import TraceIdentifiers
-from common.local_agent import LocalCapabilityRequest
-from host_runtime import knowledge_repos_api, wiki_bench
-from host_runtime.contracts import KnowledgeAskRequest
-from host_runtime.knowledge_bench import latest as latest_benchmark
-from host_runtime.knowledge_bench import run_benchmark
-from host_runtime.knowledge_convert import ConvertRun, run_convert
-from host_runtime.knowledge_harness import KnowledgeHarness, harness_skill
-from host_runtime.knowledge_publish import (
+from aep_wiki.host import knowledge_repos_api, wiki_bench
+from aep_wiki.host.knowledge_bench import latest as latest_benchmark
+from aep_wiki.host.knowledge_bench import run_benchmark
+from aep_wiki.host.knowledge_convert import ConvertRun, run_convert
+from aep_wiki.host.knowledge_publish import (
     PublishError,
     publish_candidate,
     refresh_from_project,
 )
-from host_runtime.knowledge_push import latest_push, run_push
-from host_runtime.knowledge_reingest import MAX_DOCUMENTS as MAX_REINGEST
-from host_runtime.knowledge_reingest import RUNS as REINGEST_RUNS
-from host_runtime.knowledge_reingest import ReingestRun, run_reingest
-from host_runtime.knowledge_reingest import latest as latest_reingest
-from host_runtime.knowledge_reingest import report as reingest_report
+from aep_wiki.host.knowledge_push import latest_push, run_push
+from aep_wiki.host.knowledge_reingest import MAX_DOCUMENTS as MAX_REINGEST
+from aep_wiki.host.knowledge_reingest import RUNS as REINGEST_RUNS
+from aep_wiki.host.knowledge_reingest import ReingestRun, run_reingest
+from aep_wiki.host.knowledge_reingest import latest as latest_reingest
+from aep_wiki.host.knowledge_reingest import report as reingest_report
+from aep_wiki.host.skill_assist import Turn, assist
+from aep_wiki.knowledge.pipeline import KnowledgePipeline, PipelineError
+from aep_wiki.knowledge.progress import read as knowledge_progress
+from aep_wiki.knowledge.sandbox import REPO_PREFIX, SandboxError, Sandboxes
+from aep_wiki.knowledge.wiki_work import capture as capture_work
+from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
+from common.execution import TraceIdentifiers
+from common.local_agent import LocalCapabilityRequest
+from host_runtime.contracts import KnowledgeAskRequest
+from host_runtime.knowledge_harness import KnowledgeHarness, harness_skill
 from host_runtime.review_routes import read_proposal
-from host_runtime.skill_assist import Turn, assist
 from host_runtime.tasks import TaskLog, TaskStatus
 from knowledge.evolution import KnowledgeCatalog
-from knowledge.pipeline import KnowledgePipeline, PipelineError
-from knowledge.progress import read as knowledge_progress
-from knowledge.sandbox import REPO_PREFIX, SandboxError, Sandboxes
 from knowledge.vault import Vault
 from knowledge.wiki_repos import listing as wiki_repo_listing
-from knowledge.wiki_work import capture as capture_work
 
 # The Knowledge tab's pipeline steps (docs/phases/KNOWLEDGE_K1.md), by the short
 # name the page sends; nothing else can be called through its route.

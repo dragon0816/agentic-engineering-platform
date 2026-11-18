@@ -18,9 +18,10 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from aep_wiki.host.knowledge_bench import RESULTS, Ask, BenchmarkReport, run_benchmark
+from aep_wiki.knowledge import wiki_work
 from common.assets import AssetIdentity
-from host_runtime.knowledge_bench import RESULTS, Ask, BenchmarkReport, run_benchmark
-from knowledge import wiki_repos, wiki_work
+from knowledge import wiki_repos
 from knowledge.repo import wiki
 from knowledge.repo.repository import CheckReport, canonical, local_root
 from knowledge.vault import Vault

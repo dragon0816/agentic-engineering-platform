@@ -10,8 +10,7 @@ from pathlib import Path
 import pytest
 from test_raw import make_vault
 
-from knowledge.lint import scan
-from knowledge.migrate import (
+from aep_wiki.knowledge.migrate import (
     AdoptedRaw,
     AdoptionReport,
     DriftedRaw,
@@ -25,7 +24,8 @@ from knowledge.migrate import (
     snapshots,
     source_for_legacy,
 )
-from knowledge.planning import source_text
+from aep_wiki.knowledge.planning import source_text
+from knowledge.lint import scan
 from knowledge.query import retrieve
 from knowledge.raw import DropIntake, PlainTextExtractor, RawIndex, load_document
 from knowledge.vault import Vault, VaultError

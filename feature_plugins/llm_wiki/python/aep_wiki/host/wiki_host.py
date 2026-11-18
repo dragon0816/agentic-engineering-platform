@@ -12,31 +12,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from capabilities.knowledge_pipeline.contracts import (
-    AdoptRequest,
-    ConvertRequest,
-    DropAdded,
-    DropAddRequest,
-    DropFoldersRequest,
-    FileRequest,
-    IndexBuildRequest,
-    IndexEnrichRequest,
-    IngestApplyRequest,
-    IngestPlanRequest,
-    LintRequest,
-    MergeRequest,
-    PlanPageRequest,
-    PullRequest,
-    RuleWriteRequest,
-    SandboxCreateRequest,
-    SandboxDiscarded,
-    SandboxList,
-    SandboxListRequest,
-    SandboxRecord,
-    SandboxRef,
-    SkillGuideRequest,
-)
-from capabilities.knowledge_pipeline.handlers import (
+from aep_wiki.capabilities.handlers import (
     ADOPT_SPEC,
     CONVERT_SPEC,
     DROP_ADD_SPEC,
@@ -80,11 +56,8 @@ from capabilities.knowledge_pipeline.handlers import (
     SandboxListHandler,
     SkillGuideHandler,
 )
-from host_runtime.contracts import CompanyHostConfiguration, HostLayout
-from knowledge.describe import ImageDescriber
-from knowledge.layered_index import EnrichReport, IndexReport
-from knowledge.office import office_extractors
-from knowledge.pipeline import (
+from aep_wiki.knowledge.describe import ImageDescriber
+from aep_wiki.knowledge.pipeline import (
     AdoptSummary,
     ConvertResult,
     DropFolders,
@@ -101,7 +74,34 @@ from knowledge.pipeline import (
     SandboxFile,
     SkillGuide,
 )
-from knowledge.sandbox import Sandboxes
+from aep_wiki.knowledge.sandbox import Sandboxes
+from capabilities.knowledge_pipeline.contracts import (
+    AdoptRequest,
+    ConvertRequest,
+    DropAdded,
+    DropAddRequest,
+    DropFoldersRequest,
+    FileRequest,
+    IndexBuildRequest,
+    IndexEnrichRequest,
+    IngestApplyRequest,
+    IngestPlanRequest,
+    LintRequest,
+    MergeRequest,
+    PlanPageRequest,
+    PullRequest,
+    RuleWriteRequest,
+    SandboxCreateRequest,
+    SandboxDiscarded,
+    SandboxList,
+    SandboxListRequest,
+    SandboxRecord,
+    SandboxRef,
+    SkillGuideRequest,
+)
+from host_runtime.contracts import CompanyHostConfiguration, HostLayout
+from knowledge.layered_index import EnrichReport, IndexReport
+from knowledge.office import office_extractors
 from models.contracts import ModelClient
 
 

@@ -5,9 +5,9 @@ from pathlib import Path
 import pytest
 from test_knowledge_sandbox import _base, _snapshot
 
-from knowledge.pipeline import KnowledgePipeline, PipelineError
+from aep_wiki.knowledge.pipeline import KnowledgePipeline, PipelineError
+from aep_wiki.knowledge.sandbox import Sandboxes
 from knowledge.raw import source_for
-from knowledge.sandbox import Sandboxes
 
 
 def _project(tmp_path: Path) -> tuple[KnowledgePipeline, Path]:

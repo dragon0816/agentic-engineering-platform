@@ -20,8 +20,9 @@ import pytest
 from test_knowledge_repo_pipeline import QUESTION, served  # noqa: F401 - the fixture
 from test_knowledge_repos_api import _wiki_folder
 
+from aep_wiki.knowledge import wiki_repos_write
 from host_runtime.web import AgentWebServer
-from knowledge import wiki_repos, wiki_repos_write
+from knowledge import wiki_repos
 
 SHOTS = Path(__file__).resolve().parents[1] / ".scratch" / "knowledge-repo"
 

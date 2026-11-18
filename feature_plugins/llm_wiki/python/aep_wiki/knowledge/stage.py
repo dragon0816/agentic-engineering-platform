@@ -18,11 +18,11 @@ from uuid import uuid4
 
 from pydantic import Field
 
+from aep_wiki.knowledge.conflicts import DECISIONS_HEADER
+from aep_wiki.knowledge.migrate import adopt
 from common.base import Contract, Sha256, Text
 from common.filesystem import publish_directory
-from knowledge.conflicts import DECISIONS_HEADER
 from knowledge.evolution import decision_digest, knowledge_digest, raw_digest
-from knowledge.migrate import adopt
 from knowledge.vault import Vault
 
 

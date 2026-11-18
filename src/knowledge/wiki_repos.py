@@ -11,7 +11,7 @@ rebuilt with `wiki.materialize` from the published commit, or the pushed head
 when never published, whenever that target changes (`version.json`). This
 PC's local commits and uncommitted changes never reach it. Creating,
 importing, joining and the version operations are the Wiki maintenance's
-(`knowledge.wiki_repos_write`).
+(the LLM Wiki plugin's `aep_wiki.knowledge.wiki_repos_write`).
 
 Errors are `RepoError`.
 """

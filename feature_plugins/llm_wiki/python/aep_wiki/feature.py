@@ -15,11 +15,12 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-from host_runtime import wiki_bench, wiki_host, wiki_page, wiki_web
+from aep_wiki.host import wiki_bench, wiki_host, wiki_page, wiki_web
 from host_runtime.features import Feature
 from knowledge.repo import wiki
 
-#: Its page fragments go before BI's (`DEFAULT_PAGE_ORDER`), where they were.
+#: Its page fragments go before BI's (`DEFAULT_PAGE_ORDER`), where they were;
+#: plugin.json `in_process.page_order` says the same for the loaded plugin.
 PAGE_ORDER = 50
 
 

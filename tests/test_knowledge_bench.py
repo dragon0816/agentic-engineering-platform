@@ -7,10 +7,10 @@ from typing import Any
 
 from test_knowledge_sandbox import _base
 
+from aep_wiki.host.knowledge_bench import catalog_for, latest, run_benchmark
 from capabilities.knowledge_query.handlers import KnowledgeQueryHandler
 from common.assets import AssetIdentity
 from host_runtime.contracts import KnowledgeAskRequest
-from host_runtime.knowledge_bench import catalog_for, latest, run_benchmark
 from host_runtime.knowledge_harness import KnowledgeHarness
 from host_runtime.web_page import PAGE
 from knowledge.evolution import KnowledgeCatalog

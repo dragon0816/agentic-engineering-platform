@@ -7,8 +7,8 @@ from test_knowledge_pipeline import _pipeline, _sandbox_with_note
 from test_knowledge_sandbox import _snapshot
 from test_planning import PlanningModel, answers
 
+from aep_wiki.knowledge.pipeline import PipelineError
 from host_runtime.web_page import PAGE
-from knowledge.pipeline import PipelineError
 
 
 def test_rules_are_listed_read_and_saved_only_in_the_sandbox(tmp_path: Path) -> None:

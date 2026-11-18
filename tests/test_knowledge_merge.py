@@ -6,8 +6,8 @@ import pytest
 from test_knowledge_pipeline import _pipeline
 from test_knowledge_sandbox import _snapshot
 
-from knowledge.merge import merge_page, three_way
-from knowledge.pipeline import KnowledgePipeline, PipelineError
+from aep_wiki.knowledge.merge import merge_page, three_way
+from aep_wiki.knowledge.pipeline import KnowledgePipeline, PipelineError
 
 PAGE = """---
 title: CMX500

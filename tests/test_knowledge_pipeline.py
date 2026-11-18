@@ -6,9 +6,9 @@ import pytest
 from test_knowledge_sandbox import _base, _snapshot
 from test_planning import PlanningModel, answers
 
-from knowledge.pipeline import KnowledgePipeline, PipelineError
-from knowledge.planning import PLAN_CONTRACT
-from knowledge.sandbox import Sandboxes
+from aep_wiki.knowledge.pipeline import KnowledgePipeline, PipelineError
+from aep_wiki.knowledge.planning import PLAN_CONTRACT
+from aep_wiki.knowledge.sandbox import Sandboxes
 
 
 def _pipeline(tmp_path: Path, model: PlanningModel | None = None) -> tuple[KnowledgePipeline, Path]:

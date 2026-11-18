@@ -57,8 +57,6 @@ where = ["src"]
 # The creator Skills an external coding agent installs (EXTERNAL_AUTHORING X4).
 # The AEP Agent shortcut icon (owner 2026-10-13), made by scripts/make_icon.py.
 "host_runtime" = ["avatars/*.png", "avatars/*.json", "creators/*/SKILL.md", "icons/*.ico"]
-# The skill writing guide and templates the Knowledge page and its Skill assistant show.
-"knowledge" = ["skill_guide/*.md"]
 # The loan replies' message texts, carried from rs_workflow_system's
 # config/loan-templates (Workflow 06b); overridable per install.
 "capabilities.loan_reply" = ["loan-templates/*.txt"]
@@ -69,14 +67,15 @@ addopts = "-ra"
 # `gui`: drives windows on the desktop (keyboard, mouse focus). Skipped unless
 # AEP_GUI_TESTS=1, so a plain run never takes over the owner's screen (2026-10-07).
 markers = ["gui: drives desktop windows; runs only with AEP_GUI_TESTS=1"]
-# BI Knowledge is a feature plugin outside src (proposal r3, stage B).
-pythonpath = ["feature_plugins/bi_knowledge/python"]
+# BI Knowledge and the LLM Wiki are feature plugins outside src (BI proposal r3
+# stage B; LLM Wiki proposal 2026-11-18 stage B).
+pythonpath = ["feature_plugins/bi_knowledge/python", "feature_plugins/llm_wiki/python"]
 
 [tool.ruff]
 target-version = "py311"
 line-length = 100
 # First-party roots: the defaults plus the BI Knowledge feature plugin.
-src = [".", "src", "feature_plugins/bi_knowledge/python"]
+src = [".", "src", "feature_plugins/bi_knowledge/python", "feature_plugins/llm_wiki/python"]
 # Migrated source jobs are vendored byte-identical and hash-verified; never reformat them.
 # Benchmark runs are recorded agent output kept as evidence (prompts, traces and
 # the scripts an agent wrote, some deliberately broken); never lint or reformat them.
@@ -121,8 +120,8 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
-files = ["src", "tests", "feature_plugins/bi_knowledge/python"]
-mypy_path = "src,feature_plugins/bi_knowledge/python"
+files = ["src", "tests", "feature_plugins/bi_knowledge/python", "feature_plugins/llm_wiki/python"]
+mypy_path = "src,feature_plugins/bi_knowledge/python,feature_plugins/llm_wiki/python"
 plugins = ["pydantic.mypy"]
 # The owner's BI example tools are verbatim reference fixtures, not our code.
 exclude = [

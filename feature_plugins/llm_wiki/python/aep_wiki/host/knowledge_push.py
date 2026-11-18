@@ -23,12 +23,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
 
+from aep_wiki.host.knowledge_bench import Ask, BenchmarkReport, run_benchmark
+from aep_wiki.knowledge.merge import Resolution
+from aep_wiki.knowledge.pipeline import KnowledgePipeline, PipelineError
 from common.assets import AssetIdentity
 from common.base import Contract
-from host_runtime.knowledge_bench import Ask, BenchmarkReport, run_benchmark
 from knowledge.evolution import knowledge_digest
-from knowledge.merge import Resolution
-from knowledge.pipeline import KnowledgePipeline, PipelineError
 from knowledge.vault import Vault
 
 PUSH_STATE = ".push"

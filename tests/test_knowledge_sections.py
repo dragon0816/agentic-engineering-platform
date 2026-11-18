@@ -7,7 +7,7 @@ import pytest
 from test_planning import PlanningModel, document, good_plan_json
 from test_raw import make_vault
 
-from knowledge.planning import PLAN_CONTRACT, RELEVANCE_CONTRACT, IngestPlanner
+from aep_wiki.knowledge.planning import PLAN_CONTRACT, RELEVANCE_CONTRACT, IngestPlanner
 from knowledge.sections import SectionError, apply_op, lost_lines, parse
 from knowledge.vault import Vault
 

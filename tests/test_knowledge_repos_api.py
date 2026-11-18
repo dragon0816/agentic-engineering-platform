@@ -12,7 +12,7 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-from host_runtime.knowledge_repos_api import route
+from aep_wiki.host.knowledge_repos_api import route
 from knowledge import wiki_repos
 from knowledge.repo import wiki
 from knowledge.vault import Vault

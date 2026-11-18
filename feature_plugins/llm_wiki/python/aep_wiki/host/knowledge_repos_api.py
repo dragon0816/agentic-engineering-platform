@@ -18,7 +18,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import ParseResult, parse_qs
 
-from knowledge import wiki_repos, wiki_repos_write
+from aep_wiki.knowledge import wiki_repos_write
+from knowledge import wiki_repos
 from knowledge.repo.repository import RepoError
 
 Answer = tuple[int, dict[str, Any]]

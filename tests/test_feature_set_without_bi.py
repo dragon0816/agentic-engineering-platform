@@ -24,7 +24,8 @@ from bi_page_driver import _WATCH, browser_missing
 from test_host_wiring import host_json, ready
 
 from aep_bi import feature as features_bi
-from host_runtime import features, features_wiki, web_page
+from aep_wiki import feature as features_wiki
+from host_runtime import features, web_page
 from host_runtime.assets import shipped
 from host_runtime.assistant_tools import AssistantTools
 from host_runtime.change_proposals import ProposalRefused
@@ -38,7 +39,7 @@ NONE = features.FeatureSet(())
 
 
 def test_the_built_in_features_are_bi_and_its_page_is_the_default_page() -> None:
-    assert [feature.name for feature in features.active()] == ["llm-wiki", "bi-knowledge"]
+    assert [feature.name for feature in features.active()] == ["bi-knowledge", "llm-wiki"]
     both = features.FeatureSet((features_wiki.FEATURE, features_bi.FEATURE))
     assert web_page.page(both) == web_page.page()
     assert web_page.PAGE == web_page.page()

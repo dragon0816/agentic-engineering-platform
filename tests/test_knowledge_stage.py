@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pytest
 
+from aep_wiki.knowledge.stage import main, stage_legacy_query_vault
 from knowledge.query import retrieve
-from knowledge.stage import main, stage_legacy_query_vault
 from knowledge.vault import Vault
 
 

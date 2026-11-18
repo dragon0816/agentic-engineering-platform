@@ -5,9 +5,9 @@ from pathlib import Path
 import pytest
 from test_knowledge_sandbox import _base
 
+from aep_wiki.knowledge.pipeline import KnowledgePipeline, PipelineError
+from aep_wiki.knowledge.sandbox import Sandboxes
 from host_runtime.web_page import PAGE
-from knowledge.pipeline import KnowledgePipeline, PipelineError
-from knowledge.sandbox import Sandboxes
 from knowledge.schema import category_skills
 from knowledge.vault import Vault
 

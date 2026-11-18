@@ -10,8 +10,8 @@ import pytest
 from pydantic import ValidationError
 from test_raw import drop, make_vault
 
+from aep_wiki.knowledge.describe import DEFAULT_PROMPT, ImageDescriber, data_uri
 from common.execution import Failure, TraceIdentifiers
-from knowledge.describe import DEFAULT_PROMPT, ImageDescriber, data_uri
 from knowledge.raw import (
     AssetSink,
     DropIntake,

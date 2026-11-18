@@ -184,7 +184,7 @@ def test_query_keeps_the_flat_index_and_never_cites_sub_indexes(tmp_path: Path) 
 def test_ingest_relevance_reads_only_the_chosen_categories(tmp_path: Path) -> None:
     from test_planning import PlanningModel, document, good_plan_json
 
-    from knowledge.planning import (
+    from aep_wiki.knowledge.planning import (
         CATEGORY_CONTRACT,
         PLAN_CONTRACT,
         RELEVANCE_CONTRACT,
@@ -216,7 +216,7 @@ def test_ingest_relevance_reads_only_the_chosen_categories(tmp_path: Path) -> No
 def test_a_flat_index_keeps_the_single_relevance_pass(tmp_path: Path) -> None:
     from test_planning import PlanningModel, document, good_plan_json
 
-    from knowledge.planning import PLAN_CONTRACT, RELEVANCE_CONTRACT, IngestPlanner
+    from aep_wiki.knowledge.planning import PLAN_CONTRACT, RELEVANCE_CONTRACT, IngestPlanner
 
     vault = _vault(tmp_path)
     model = PlanningModel({RELEVANCE_CONTRACT: {"relevant": []}, PLAN_CONTRACT: good_plan_json()})

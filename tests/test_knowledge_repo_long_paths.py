@@ -10,7 +10,8 @@ from tempfile import TemporaryDirectory
 import pytest
 from test_knowledge_repos_api import _call, _ok
 
-from knowledge import wiki_repos, wiki_repos_write
+from aep_wiki.knowledge import wiki_repos_write
+from knowledge import wiki_repos
 from knowledge.evolution import knowledge_digest, raw_digest
 from knowledge.vault import Vault
 

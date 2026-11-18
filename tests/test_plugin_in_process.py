@@ -337,3 +337,43 @@ def test_the_bi_knowledge_plugin_builds_as_an_installable_in_process_package() -
     assert "python/aep_bi/host/bi_page.py" in paths
     assert "python/aep_bi/cards/samples/product-spec@1.0.0.json" in paths
     assert not any("__pycache__" in path for path in paths)
+
+
+def test_the_llm_wiki_plugin_builds_deterministically_within_the_plugin_limits() -> None:
+    import importlib.util
+
+    from common import plugins
+
+    spec = importlib.util.spec_from_file_location(
+        "build_llm_wiki_plugin", ROOT / "scripts" / "build_llm_wiki_plugin.py"
+    )
+    assert spec is not None and spec.loader is not None
+    builder = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(builder)
+    payload = builder.package_bytes()
+    assert payload == builder.package_bytes()  # deterministic
+    package = plugins.parse_plugin_package(payload)
+    manifest = package.manifest
+    assert manifest.plugin_id == "llm-wiki.wiki" and manifest.identity.version == "1.0.0"
+    assert (manifest.core_api.minimum, manifest.core_api.below) == ("1.2.0", "2.0.0")
+    assert manifest.in_process is not None and manifest.in_process.entry == "aep_wiki.feature"
+    assert manifest.in_process.page_order == 50
+    sizes = {item.path: item.size for item in package.files}
+    assert len(sizes) <= plugins.MAX_FILES == 256
+    assert sum(sizes.values()) <= plugins.MAX_TOTAL_FILE_BYTES == 6 * 1024 * 1024
+    assert max(sizes.values()) <= plugins.MAX_FILE_BYTES == 2 * 1024 * 1024
+    for path in (
+        "python/aep_wiki/feature.py",
+        "python/aep_wiki/host/wiki_page.py",
+        "python/aep_wiki/knowledge/pipeline.py",
+        "python/aep_wiki/knowledge/skill_guide/guide.zh-tw.md",
+    ):
+        assert path in sizes, path
+    assert not any("__pycache__" in path for path in sizes)
+
+
+def test_the_llm_wiki_plugin_is_bundled_and_loads_by_default() -> None:
+    chosen, skipped = in_process.resolve(None)
+    assert "llm-wiki.wiki" in {source.plugin_id for source in chosen}
+    assert not [item for item in skipped if item.plugin_id == "llm-wiki.wiki"]
+    assert "llm-wiki" in {feature.name for feature in features.active()}
