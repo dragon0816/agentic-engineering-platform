@@ -8000,3 +8000,18 @@ navigation) stays excluded per docs/phases/CHAT_WORKFLOW_PERSISTENCE_MERGE_REVIE
 origin/main and revert e564e1ad's code, tests and CONTRACTS section, keeping its
 DECISIONS/TASKS/evaluation records as history. Re-add only after the review's
 fixes, with scoped consent. No force push.
+
+### 2026-11-18 — Owner consent for the LLM Wiki in-process plugin (stages A and B)
+
+Owner chose「同意開工」for docs/phases/FEATURE_PLUGIN_WIKI_PROPOSAL_DRAFT_20261118.md
+with its recommendations. This is the AGENTS22 scoped consent for the harness surfaces
+listed there: Web routing of /api/knowledge/* maintenance routes and knowledge repos,
+knowledge-pipeline capability registration, startup loading (wiki benchmark gate),
+for stage A then stage B without a further question. Decisions: D2 page acceptance
+is "same screen and operation" (HTML structure, moved lines and computed-style
+snapshots), then re-pin the page hash, instead of byte-identical output; D3 the Wiki
+data-format/read modules the Knowledge asking path uses stay in core (a format change
+still needs an AEP update); D4 add generic `in_process.page_order` and a core
+stand-in table, and move BI's NO_BI_* stand-ins to it; D5 bundled `llm-wiki.wiki`
+1.0.0, enabled by default. Not covered: Knowledge asking harness, retrieval,
+citations, permissions, data migration.
