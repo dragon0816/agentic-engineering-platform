@@ -16,6 +16,7 @@ from test_bi_ingest_runs import _call, _commit, _detail, _ok, _review, _run, _so
 
 from aep_bi.cards import runs
 from aep_bi.cards.staging import Staging
+from aep_bi.cards.store import BiStore
 
 THREE = (
     "技術,領域,成熟度,新增測試需求\n"
@@ -128,3 +129,55 @@ def test_refused_requests(tmp_path: Path) -> None:
     _ok(_call(tmp_path, "POST", f"/api/bi/runs/{run['id']}/cancel", {"dataset": "demo"}))
     status, payload = _accept(tmp_path, run["id"], ["r1"])
     assert (status, payload["code"]) == (409, "run_closed")
+
+
+# -- 「全部接受並匯入」: the same batches, then the existing commit once -------------------
+
+
+def _accept_and_import(tmp_path: Path, run_id: str, ids: list[str]) -> dict[str, Any]:
+    """What the page does: batches of at most 20, then one commit after the last."""
+    for at in range(0, len(ids), 20):
+        _ok(_accept(tmp_path, run_id, ids[at : at + 20]))
+    return _ok(_commit(tmp_path, run_id))
+
+
+def test_accept_and_import_writes_the_cards(tmp_path: Path) -> None:
+    run = _run(tmp_path, _source(tmp_path, THREE))
+    done = _accept_and_import(tmp_path, run["id"], list(_ids(tmp_path, run["id"]).values()))
+    assert done["applied"]["created"] == 3 and done["run"]["status"] == "committed"
+    keys = sorted(str(c["canonical_key"]) for c in BiStore(tmp_path).card_rows())
+    assert keys == ["EtherCAT", "PROFINET", "TSN"]
+
+
+def test_a_refused_candidate_is_left_out_and_the_rest_is_imported(tmp_path: Path) -> None:
+    run = _run(tmp_path, _source(tmp_path, THREE))
+    ids = _ids(tmp_path, run["id"])
+    _break(tmp_path, run["id"], ids["TSN"])
+    accepted = _ok(_accept(tmp_path, run["id"], list(ids.values())))
+    refused = [r for r in accepted["results"] if r["status"] == "failed"]
+    assert [(r["name"], r["code"]) for r in refused] == [("TSN", "candidate_invalid")]
+    done = _ok(_commit(tmp_path, run["id"]))
+    assert done["applied"]["created"] == 2 and done["pending"] == 1
+    keys = sorted(str(c["canonical_key"]) for c in BiStore(tmp_path).card_rows())
+    assert keys == ["EtherCAT", "PROFINET"]
+
+
+def test_pressing_twice_imports_once(tmp_path: Path) -> None:
+    run = _run(tmp_path, _source(tmp_path, THREE))
+    ids = list(_ids(tmp_path, run["id"]).values())
+    first = _accept_and_import(tmp_path, run["id"], ids)
+    # A second press: the run is closed to acceptance, and the commit answers with the first.
+    status, payload = _accept(tmp_path, run["id"], ids)
+    assert (status, payload["code"]) == (409, "run_closed")
+    again = _ok(_commit(tmp_path, run["id"]))
+    assert again["already"] is True and again["import_id"] == first["import_id"]
+    assert len(BiStore(tmp_path).card_rows()) == 3
+
+
+def test_undo_restores_what_accept_and_import_wrote(tmp_path: Path) -> None:
+    run = _run(tmp_path, _source(tmp_path, THREE))
+    done = _accept_and_import(tmp_path, run["id"], list(_ids(tmp_path, run["id"]).values()))
+    assert len(BiStore(tmp_path).card_rows()) == 3
+    body = {"dataset": "demo", "import_id": done["import_id"]}
+    _ok(_call(tmp_path, "POST", "/api/bi/import/undo", body))
+    assert BiStore(tmp_path).card_rows() == []

@@ -256,7 +256,7 @@ def test_the_whole_build_flow(
         page.wait("!document.querySelector('#bi-view-build .kp-stage[data-stage=review]').hidden")
         page.wait("document.querySelectorAll('#bi-b-cands button').length > 0")
         page.shoot("2c-review")
-        page.click("#bi-b-accept-clean")
+        page.click("#bi-b-apply-all")
         page.wait("!document.getElementById('bi-b-next4').disabled")
         assert len(store.card_rows()) == before  # review writes nothing
         page.click("#bi-b-next4")

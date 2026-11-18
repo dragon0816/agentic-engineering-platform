@@ -151,9 +151,9 @@ def test_dataset_schemas_end_to_end_in_a_browser(served: Any, tmp_path: Path) ->
         run("document.getElementById('bi-b-start').click()")
         first = item["text"].splitlines()[1].split(",")[0]  # this run's first card
         wait(f"document.getElementById('bi-b-cands').textContent.includes({json.dumps(first)})")
-        run("document.getElementById('bi-notice').textContent = ''")
-        run("document.getElementById('bi-b-accept-clean').click()")
-        wait("document.getElementById('bi-notice').textContent.includes('張沒有錯誤的候選卡')")
+        run("document.getElementById('bi-b-apply-status').textContent = ''")
+        run("document.getElementById('bi-b-apply-all').click()")
+        wait("document.getElementById('bi-b-apply-status').textContent.includes('已套用')")
         run("document.getElementById('bi-b-next4').click()")
         run("document.getElementById('bi-b-commit-go').click()")
         wait("document.getElementById('bi-b-done').textContent.includes('已寫入')")
