@@ -34,6 +34,7 @@ from common.local_agent import LocalAgentRequest, LocalCapabilityRequest
 from common.scheduling import ScheduleDefinition, ScheduledRun, ScheduleRecord
 from dut.contracts import DutPhysicalValidationRequest, DutValidationEvidence
 from host_runtime.agent import LocalAgentOutcome
+from host_runtime.answers import capability_details
 from host_runtime.assets import export_assets, include_personal_requested
 from host_runtime.contracts import CompanyHostConfiguration, HostDoctorReport, HostLayout
 from host_runtime.host import HostError, HostRuntime, build_runtime, host_report
@@ -94,6 +95,22 @@ def _parser() -> argparse.ArgumentParser:
     status = commands.add_parser("status", help="what this Bridge has installed and has run")
     status.add_argument("--config", required=True, type=Path)
     status.add_argument("--json", action="store_true")
+    operations = commands.add_parser("operations", help="inspect local worker operation records")
+    operations.add_argument("--config", required=True, type=Path)
+    operations.add_argument(
+        "--operation-id", help="inspect this exact operation instead of recent ones"
+    )
+    reconcile = commands.add_parser(
+        "reconcile-operation", help="release a claim only after confirming its execution stopped"
+    )
+    reconcile.add_argument("--config", required=True, type=Path)
+    reconcile.add_argument("--operation-id", required=True)
+    reconcile.add_argument(
+        "--confirm-stopped",
+        required=True,
+        action="store_true",
+        help="I have confirmed the original execution and its side effects have stopped",
+    )
     telegram = commands.add_parser("telegram", help="poll Telegram until interrupted")
     telegram.add_argument("--config", required=True, type=Path)
     telegram.add_argument("--once", action="store_true", help="poll a single time and stop")
@@ -638,6 +655,7 @@ def _outcome_text(outcome: LocalAgentOutcome) -> str:
         lines.append(f"route: {decision.kind}{named} ({decision.reason})")
     if outcome.capability is not None:
         lines.append(f"capability: {outcome.capability.status}")
+        lines.extend(capability_details(outcome, preview=True))
     if outcome.workflow is not None:
         run = outcome.workflow.run
         lines.append(f"run {run.run_id}: {run.status}, {run.completed_steps} step(s) completed")
@@ -1361,6 +1379,34 @@ def _cards_import(args: argparse.Namespace) -> int:
     return 0
 
 
+def _operations(runtime: HostRuntime, args: argparse.Namespace) -> int:
+    from workflow.journal import SuspensionConfirmation
+
+    try:
+        if args.command == "reconcile-operation":
+            item = runtime.state.reconcile_operation(
+                args.operation_id,
+                SuspensionConfirmation(
+                    operator=runtime.actor,
+                    process_confirmed_stopped=args.confirm_stopped,
+                ),
+            )
+            print(item.model_dump_json(indent=2))
+        elif args.operation_id is not None:
+            found = runtime.state.operation(args.operation_id)
+            if found is None:
+                raise LocalStateError("operation_unknown")
+            print(found.model_dump_json(indent=2))
+        else:
+            print(
+                "[" + ",\n".join(row.model_dump_json() for row in runtime.state.operations()) + "]"
+            )
+    except LocalStateError as error:
+        print(error.code, file=sys.stderr)
+        return 1
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     _write_in_utf8()
     args = _parser().parse_args(argv)
@@ -1418,6 +1464,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"this host is not ready: {error.code} ({error.path})", file=sys.stderr)
         return 2
     with runtime:
+        if args.command in ("operations", "reconcile-operation"):
+            return _operations(runtime, args)
         if args.command in ("ask", "run-task", "chat", "web", "telegram", "jobs", "schedules"):
             from host_runtime import telemetry_setup
 

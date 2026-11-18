@@ -9,8 +9,48 @@ something different.
 from __future__ import annotations
 
 import json
+import re
 
+from pydantic import ValidationError
+
+from capabilities.workflow_author.contracts import WorkflowDraft
 from host_runtime.agent import LocalAgentOutcome
+
+
+def capability_details(outcome: LocalAgentOutcome, *, preview: bool = False) -> list[str]:
+    """Closed failure details, plus an explicitly known draft's refusal.
+
+    Do not infer task status from arbitrary output keys or echo a capability
+    payload. Telegram uses codes only; local ingresses may show the draft's
+    intended refusal preview, never its echoed request or SOP.
+    """
+    result = outcome.capability
+    if result is None:
+        return []
+    lines: list[str] = []
+    if result.failure is not None:
+        lines.append(f"failure: {result.failure.code}")
+        if result.failure.code == "timeout" and result.handler_invoked:
+            lines.append("Execution may still be running; do not repeat it before reconciliation.")
+    for warning in result.warnings:
+        if re.fullmatch(r"operation_id=operation-[0-9a-f]{32}", warning):
+            lines.append(warning)
+    decision = outcome.decision
+    if (
+        result.status == "succeeded"
+        and decision is not None
+        and decision.target is not None
+        and decision.target.key == ("workflow-author", "draft", "1.0.0")
+    ):
+        try:
+            draft = WorkflowDraft.model_validate(result.data)
+        except (ValidationError, TypeError, ValueError):
+            return lines
+        if draft.refusal is not None:
+            lines.append(f"draft: not produced ({draft.refusal})")
+            if preview and draft.preview.strip():
+                lines.append(draft.preview)
+    return lines
 
 
 def readable(outcome: LocalAgentOutcome) -> str:
@@ -32,8 +72,7 @@ def readable(outcome: LocalAgentOutcome) -> str:
         lines.append(f"{decision.kind}: {target.namespace}/{target.name}@{target.version}")
     if outcome.capability is not None:
         lines.append(f"capability: {outcome.capability.status}")
-        if outcome.capability.failure is not None:
-            lines.append(f"failure: {outcome.capability.failure.code}")
+        lines.extend(capability_details(outcome, preview=True))
     if outcome.workflow is not None:
         run = outcome.workflow.run
         lines.append(f"{run.status}, {run.completed_steps} step(s)")

@@ -25,7 +25,6 @@ nothing is created.
 
 from __future__ import annotations
 
-import asyncio
 import json
 from collections.abc import Callable, Mapping
 from pathlib import Path
@@ -39,11 +38,12 @@ from capabilities.coding_change.workspaces import (
     has_traversal,
 )
 from capabilities.contracts import CapabilitySpec
-from capabilities.runtime import CapabilityRefused
+from capabilities.runtime import CapabilityRefused, CapabilityTaskFailed
 from common.base import Contract, Text
 from common.execution import RequestContext
 from harness.network_block import outbound_rule_present
 from harness.restricted_runner import RestrictedRunner, RunnerError, RunnerLimits, label_low
+from harness.thread_operations import run_tracked_thread
 
 RUN_SPEC = CapabilitySpec.model_validate(
     {
@@ -110,7 +110,19 @@ class RunPythonHandler:
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         step_input = RunPythonStepInput.model_validate(inputs)
-        return await asyncio.to_thread(self.run, step_input.request, step_input.arguments)
+        workspace = self._workspace(step_input.request.workspace)
+
+        def execute() -> RunPythonResult:
+            result = self.run(step_input.request, step_input.arguments)
+            if result.timed_out:
+                raise CapabilityTaskFailed("python_execution_timeout", result)
+            if result.exit_code is None:
+                raise CapabilityTaskFailed("python_execution_unknown", result, outcome_unknown=True)
+            if result.exit_code != 0:
+                raise CapabilityTaskFailed("python_execution_failed", result)
+            return result
+
+        return await run_tracked_thread(workspace, execute)
 
     def _workspace(self, raw: str) -> Path:
         """The resolved workspace, checked but not created: it lies under a

@@ -38,6 +38,29 @@ class TransientCapabilityError(Exception):
     """
 
 
+class CapabilityTaskFailed(CapabilityRefused):
+    """A task ended without success, retaining its declared output evidence.
+
+    Only trusted handlers raise this; the Bridge validates `result` against
+    the installed output contract before publishing it as failure data.
+    Normal diagnostic outputs remain successful observations. No exception
+    text or additional retry authority crosses this boundary.
+    """
+
+    def __init__(
+        self,
+        code: str,
+        result: Contract,
+        *,
+        needs_input: bool = False,
+        outcome_unknown: bool = False,
+    ) -> None:
+        super().__init__(code)
+        self.result = result
+        self.needs_input = needs_input
+        self.outcome_unknown = outcome_unknown
+
+
 class CapabilityInvocation(Contract):
     context: RequestContext
     target: AssetIdentity

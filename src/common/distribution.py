@@ -204,6 +204,10 @@ LocalStateErrorCode = Literal[
     "task_unknown",
     "task_owner_fixed",
     "task_update_stale",
+    "operation_invalid_start",
+    "operation_exists",
+    "operation_unknown",
+    "operation_already_final",
     "unavailable",
     "commit_unknown",
 ]

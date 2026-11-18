@@ -2360,6 +2360,9 @@ def build_runtime(
     except (LocalStateError, OSError, ValueError) as error:
         raise HostError("state_unavailable", place.state) from error
     try:
+        # Thread workers acknowledge finality in this existing local store,
+        # not when their caller's asyncio wait is cancelled or times out.
+        gateway.bridge.operations = state
         agent = LocalAgent(
             membership,
             gateway,

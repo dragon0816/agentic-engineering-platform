@@ -453,7 +453,7 @@ def test_a_version_three_local_state_adds_inert_contribution_and_task_storage(
         task_table = reader.execute(
             "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'task_runs'"
         ).fetchone()
-    assert version == "6"
+    assert version == "7"
     assert table == ("contribution_drafts",)
     assert task_table == ("task_runs",)
 

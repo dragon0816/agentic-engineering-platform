@@ -7,7 +7,7 @@ from typing import Protocol
 from pydantic import Field, JsonValue, StrictBool, TypeAdapter
 
 from capabilities.contracts import CapabilitySpec
-from capabilities.runtime import InstalledCapabilities
+from capabilities.runtime import CapabilityRefused, InstalledCapabilities
 from common.assets import ExecutionDependencies
 from common.base import Contract, Text
 from common.execution import Failure, RequestContext
@@ -38,6 +38,8 @@ class MCPDiscovery(Contract):
 
 
 class MCPAdapter:
+    """Discovery uses timeout_seconds; installed calls use the Bridge deadline."""
+
     def __init__(self, client: MCPClient, *, timeout_seconds: float = 10) -> None:
         if not math.isfinite(timeout_seconds) or timeout_seconds <= 0:
             raise ValueError("timeout must be finite and positive")
@@ -88,7 +90,7 @@ class MCPAdapter:
                 await self.client.call_tool(tool_name, inputs.model_dump(mode="json"))
             )
             if result.is_error:
-                raise ValueError("MCP tool reported failure")
+                raise CapabilityRefused("mcp_tool_failed")
             return output_model.model_validate(result.data, strict=True)
 
         installed.register(spec, invoke, input_model, output_model, dependencies)

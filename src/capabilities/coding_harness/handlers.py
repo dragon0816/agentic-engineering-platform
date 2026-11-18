@@ -1,12 +1,14 @@
 """Bridge-installed coding Harness capability."""
 
-import asyncio
+from pathlib import Path
 
 from capabilities.contracts import CapabilitySpec
+from capabilities.runtime import CapabilityTaskFailed
 from common.base import Contract
 from common.execution import RequestContext
-from harness.contracts import CodingHarnessRequest
+from harness.contracts import CodingHarnessRequest, CodingHarnessResult
 from harness.runtime import CodingHarness
+from harness.thread_operations import run_tracked_thread
 
 CODING_HARNESS_SPEC = CapabilitySpec.model_validate(
     {
@@ -32,4 +34,16 @@ class CodingHarnessHandler:
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = CodingHarnessRequest.model_validate(inputs)
-        return await asyncio.to_thread(self.harness.run, context.trace, request)
+
+        def execute() -> CodingHarnessResult:
+            result = self.harness.run(context.trace, request)
+            if result.status != "validated":
+                code = (
+                    result.failure.code
+                    if result.failure is not None
+                    else "coding_validation_failed"
+                )
+                raise CapabilityTaskFailed(code, result, needs_input=result.status == "needs_input")
+            return result
+
+        return await run_tracked_thread(Path(request.workspace.root), execute)

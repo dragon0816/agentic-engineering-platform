@@ -14,6 +14,7 @@ import telemetry.recorder as telemetry
 from capabilities.runtime import (
     CapabilityInvocation,
     CapabilityRefused,
+    CapabilityTaskFailed,
     InstalledCapabilities,
     LocalPolicy,
     TransientCapabilityError,
@@ -21,6 +22,12 @@ from capabilities.runtime import (
 from common.assets import AssetIdentity
 from common.base import Contract, Symbol
 from common.execution import CapabilityResult, Failure, TraceIdentifiers
+from common.operations import (
+    MemoryOperationStore,
+    OperationObservation,
+    OperationStore,
+    observe_operation,
+)
 
 
 class ExecutionEvent(Contract):
@@ -31,7 +38,7 @@ class ExecutionEvent(Contract):
 
 
 class BridgeExecutor:
-    """No retry or process isolation. Handlers must honor asynchronous cancellation."""
+    """No retry or process isolation. Opted-in workers retain ownership after cancellation."""
 
     def __init__(
         self,
@@ -48,6 +55,7 @@ class BridgeExecutor:
         self.services = services
         self.timeout_seconds = timeout_seconds
         self._events: list[ExecutionEvent] = []
+        self.operations: OperationStore = MemoryOperationStore()
         # Requests may run concurrently on separate threads (one event loop
         # each). Anything that can change a shared resource (a workbook, a
         # draft, a release) and every workflow run is serialized here; reads
@@ -79,6 +87,7 @@ class BridgeExecutor:
         retryable: bool = False,
         invoked: bool = False,
         message: str = "Capability invocation did not complete",
+        warnings: tuple[str, ...] = (),
     ) -> CapabilityResult:
         return self._finish(
             call,
@@ -87,6 +96,7 @@ class BridgeExecutor:
                 status="unavailable" if unavailable else "failed",
                 failure=Failure(code=code, message=message, retryable=retryable),
                 handler_invoked=invoked,
+                warnings=warnings,
             ),
         )
 
@@ -145,20 +155,40 @@ class BridgeExecutor:
         except (TypeError, ValueError):
             return self._failure(call, "invalid_input")
         guard = nullcontext() if binding.spec.side_effect == "read" else self.exclusive
+        operation = OperationObservation(self.operations, call.context, call.target)
         try:
-            with guard:
+            with observe_operation(operation), guard:
                 output = await asyncio.wait_for(
                     binding.handler(call.context, inputs), self.timeout_seconds
                 )
         except TimeoutError:
-            return self._failure(call, "timeout", invoked=True)
+            return self._failure(call, "timeout", invoked=True, warnings=operation.warnings())
+        except CapabilityTaskFailed as stopped:
+            try:
+                checked_failure = binding.output_model.model_validate(stopped.result, strict=True)
+            except (ValidationError, TypeError, ValueError):
+                return self._failure(call, "invalid_output", invoked=True)
+            return self._finish(
+                call,
+                CapabilityResult(
+                    trace=call.context.trace,
+                    status="needs_input" if stopped.needs_input else "failed",
+                    data=checked_failure.model_dump(mode="json"),
+                    failure=Failure(
+                        code=stopped.code,
+                        message="Task execution or required validation did not succeed",
+                    ),
+                    handler_invoked=True,
+                    warnings=operation.warnings(),
+                ),
+            )
         except CapabilityRefused as refusal:
             # The handler named why; only the code, and where in the request, travel.
             if refusal.where:
                 return self._failure(
                     call, refusal.code, invoked=True, message=f"Refused at {refusal.where}"
                 )
-            return self._failure(call, refusal.code, invoked=True)
+            return self._failure(call, refusal.code, invoked=True, warnings=operation.warnings())
         except TransientCapabilityError:
             return self._failure(
                 call,
@@ -181,6 +211,7 @@ class BridgeExecutor:
                 status="succeeded",
                 data=checked.model_dump(mode="json"),
                 handler_invoked=True,
+                warnings=operation.warnings(),
             )
         except (ValidationError, TypeError, ValueError):
             return self._failure(call, "invalid_output", invoked=True)

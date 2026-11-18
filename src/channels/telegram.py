@@ -60,7 +60,7 @@ from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalWorkflowRequest
 from common.workflow_run_form import form_offer, offer_in, person_prefill, run_intent
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
-from host_runtime.answers import run_cards, run_follow_up
+from host_runtime.answers import capability_details, run_cards, run_follow_up
 from host_runtime.attachments import (
     KINDS,
     MAX_FILE_BYTES,
@@ -681,7 +681,9 @@ def _describe(outcome: LocalAgentOutcome) -> str:
     if decision.kind == "needs_input" or target is None:
         return f"No safe route was selected: {decision.reason}"
     if outcome.capability is not None:
-        return f"{target.name}: {outcome.capability.status}"
+        return "\n".join(
+            [f"{target.name}: {outcome.capability.status}", *capability_details(outcome)]
+        )
     if outcome.workflow is not None:
         run = outcome.workflow.run
         text = f"{target.name} run {run.run_id}: {run.status}, {run.completed_steps} step(s)"

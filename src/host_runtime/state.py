@@ -35,6 +35,12 @@ from common.distribution import (
     verify_installation,
 )
 from common.enrollment import BridgeDevice
+from common.operations import (
+    OperationFinalStatus,
+    OperationRecord,
+    completed_record,
+    unknown_record,
+)
 from common.sync import FeedbackRecord
 from host_runtime.contributions import ContributionDraft
 from host_runtime.conversations import (
@@ -45,12 +51,14 @@ from host_runtime.conversations import (
     MessageFeedback,
 )
 from host_runtime.feedback_sync import feedback_record
+from workflow.journal import SuspensionConfirmation
 
 # Version 5 adds portable task-run evidence; version 6 the feedback outbox
+# and version 7 durable ownership of workers that may outlive a caller deadline.
 # (owner 2026-10-08). Tables are additive and every open creates them, so
 # older files migrate rather than being refused.
-SCHEMA_VERSION = "6"
-_MIGRATABLE = frozenset({"1", "2", "3", "4", "5"})
+SCHEMA_VERSION = "7"
+_MIGRATABLE = frozenset({"1", "2", "3", "4", "5", "6"})
 _SCHEMA = (
     "CREATE TABLE IF NOT EXISTS local_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
     "CREATE TABLE IF NOT EXISTS installed ("
@@ -76,6 +84,13 @@ _SCHEMA = (
     "CREATE TABLE IF NOT EXISTS feedback_outbox ("
     " feedback_id TEXT PRIMARY KEY, rated_at TEXT NOT NULL, attempts INTEGER NOT NULL,"
     " last_error TEXT, record TEXT NOT NULL)",
+    # Metadata-only ownership. An unresolved resource stays claimed across
+    # restart; old readers must refuse schema 7 rather than ignore the claims.
+    "CREATE TABLE IF NOT EXISTS operations ("
+    " operation_id TEXT PRIMARY KEY, resource_key TEXT NOT NULL,"
+    " status TEXT NOT NULL, record TEXT NOT NULL)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS operations_active_resource ON operations(resource_key)"
+    " WHERE status IN ('running', 'unknown')",
 )
 # Commit outcomes SQLite reports as definitely not committed; anything else is ambiguous.
 _NOT_COMMITTED = frozenset({"SQLITE_BUSY", "SQLITE_LOCKED"})
@@ -314,6 +329,106 @@ class SqliteLocalState:
         with self._read() as conn:
             rows = conn.execute("SELECT record FROM runs ORDER BY updated_at, run_id").fetchall()
             return tuple(LocalRunSummary.model_validate_json(row[0]) for row in rows)
+
+    def claim_operation(self, record: OperationRecord) -> OperationRecord:
+        item = OperationRecord.model_validate(record)
+        if item.status != "running":
+            raise LocalStateError("operation_invalid_start")
+        with self._write() as conn:
+            row = conn.execute(
+                "SELECT record FROM operations WHERE resource_key = ?"
+                " AND status IN ('running', 'unknown')",
+                (item.resource_key,),
+            ).fetchone()
+            if row is not None:
+                return OperationRecord.model_validate_json(row[0])
+            conn.execute(
+                "INSERT INTO operations (operation_id, resource_key, status, record)"
+                " VALUES (?, ?, ?, ?)",
+                (item.operation_id, item.resource_key, item.status, item.model_dump_json()),
+            )
+        return item
+
+    def operation(self, operation_id: str) -> OperationRecord | None:
+        with self._read() as conn:
+            row = conn.execute(
+                "SELECT record FROM operations WHERE operation_id = ?",
+                (operation_id,),
+            ).fetchone()
+        return None if row is None else OperationRecord.model_validate_json(row[0])
+
+    def operations(self, *, limit: int = 50) -> tuple[OperationRecord, ...]:
+        if type(limit) is not int or not 1 <= limit <= 1000:
+            raise ValueError("operation limit must be between 1 and 1000")
+        with self._read() as conn:
+            rows = conn.execute(
+                "SELECT record FROM operations ORDER BY rowid DESC LIMIT ?",
+                (limit,),
+            ).fetchall()
+        return tuple(OperationRecord.model_validate_json(row[0]) for row in rows)
+
+    def complete_operation(
+        self,
+        operation_id: str,
+        status: OperationFinalStatus,
+        code: str | None = None,
+    ) -> OperationRecord:
+        with self._write() as conn:
+            row = conn.execute(
+                "SELECT record FROM operations WHERE operation_id = ?",
+                (operation_id,),
+            ).fetchone()
+            if row is None:
+                raise LocalStateError("operation_unknown")
+            item = completed_record(OperationRecord.model_validate_json(row[0]), status, code)
+            conn.execute(
+                "UPDATE operations SET status = ?, record = ? WHERE operation_id = ?",
+                (item.status, item.model_dump_json(), operation_id),
+            )
+        return item
+
+    def mark_operation_unknown(self, operation_id: str) -> OperationRecord:
+        with self._write() as conn:
+            row = conn.execute(
+                "SELECT record FROM operations WHERE operation_id = ?",
+                (operation_id,),
+            ).fetchone()
+            if row is None:
+                raise LocalStateError("operation_unknown")
+            item = unknown_record(OperationRecord.model_validate_json(row[0]))
+            conn.execute(
+                "UPDATE operations SET status = ?, record = ? WHERE operation_id = ?",
+                (item.status, item.model_dump_json(), operation_id),
+            )
+        return item
+
+    def reconcile_operation(
+        self,
+        operation_id: str,
+        confirmation: SuspensionConfirmation,
+    ) -> OperationRecord:
+        """Reuse the journal's explicit stopped-process confirmation; never infer it."""
+        checked = SuspensionConfirmation.model_validate(confirmation)
+        with self._write() as conn:
+            row = conn.execute(
+                "SELECT record FROM operations WHERE operation_id = ?",
+                (operation_id,),
+            ).fetchone()
+            if row is None:
+                raise LocalStateError("operation_unknown")
+            stopped = completed_record(
+                OperationRecord.model_validate_json(row[0]),
+                "failed",
+                "operation_reconciled",
+            )
+            item = OperationRecord.model_validate(
+                stopped.model_dump() | {"reconciled_by": checked.operator},
+            )
+            conn.execute(
+                "UPDATE operations SET status = ?, record = ? WHERE operation_id = ?",
+                (item.status, item.model_dump_json(), operation_id),
+            )
+        return item
 
     def create_task_run(self, record: TaskRunState) -> TaskRunState:
         """Persist only portable progress; the task objective stays with its caller."""

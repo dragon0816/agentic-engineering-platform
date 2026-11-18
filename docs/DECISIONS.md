@@ -6314,3 +6314,20 @@ Measured in `docs/phases/BI_EXTRACTION_VARIANCE.md`: gpt-5.5 gives different car
 - **An identical request reuses its answer,** per PC, with `fresh` to ask anyway. Consequence: a re-run repeats until the prompt changes, including a mistake it made; and it does not make a first run complete. The key holds the model's alias, not the endpoint's model, so changing what an alias points at needs `fresh`.
 - **A card with no domain takes its application's, marked inference,** on imports and through `fill-domains`. A library folder gives none. Mixed `domain` storage is the schema's: `enum` on 5 types, `list` on 16. Not a bug.
 - **Rejected for now: sending only the known names a chunk mentions.** It steadied supply links on one chunk but halved revenue facts there and made same-named `Account` cards.
+
+## 2026-11-18 — Harness worker finality on machine 141
+
+Owner selected tracking in-flight operations and blocking conflicting replay until
+execution has ended, using existing state storage. This is the explicit answer to
+the timeout-overlap experiment, not approval to replace the Harness or add RBAC.
+
+The isolated reliability branch implements metadata-only resource claims in the
+existing SqliteLocalState database (schema 7), initially for Python and Coding
+Harness workers. A caller timeout/cancellation is unknown, not proof of stopped
+work. No lease expiry or automatic replay releases a claim. Actual worker finality
+or the journal's existing explicit stopped-process confirmation resolves it.
+
+See docs/proposals/harness-reliability/slice-2-design.md for scope and rollback.
+Other side-effecting handlers, cross-database coordination, overlapping workspace
+roots and mandatory business-artifact validation are not implicitly approved or
+claimed solved by this decision.
