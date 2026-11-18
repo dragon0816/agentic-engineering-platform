@@ -2755,16 +2755,38 @@ async function biToVersion() {
   // 版本 sits in step 3, under the tests: open it there, clear of the sticky row and steps.
   if (bi.view !== "build") await biJump("build");
   biBuildStage("test", false);
+  // What loads after this moves it: the Dashboard, tests and analyses above it, the share
+  // step inside it, the sticky row and steps over it. Each arrives in its own time (a slow
+  // computer: after any fixed wait), so it is placed again whenever one of them changes
+  // size, until the person scrolls, clicks or types somewhere else.
+  bi.keepVersion = true;
+  biKeepVersion();
+  if (!el("bi-b-ver").hidden) el("bi-b-ver-purpose").focus({preventScroll: true});
+}
+
+function biKeepVersion() {
+  if (!bi.keepVersion) return;
   const box = el("bi-b-ver");
+  if (bi.view !== "build" || bi.build.stage !== "test") { bi.keepVersion = false; return; }
   if (box.hidden) return;
   // Clear of the top row while it sticks (not on a phone): its own height, as it is now.
   const row = el("bi-top-row");
   box.style.setProperty("--bi-top-h",
     getComputedStyle(row).position === "sticky" ? row.offsetHeight + "px" : "0px");
   box.scrollIntoView({block: "start"});
-  el("bi-b-ver-purpose").focus({preventScroll: true});
-  // What loads after this (the share step, the tests above it) moves it: place it again then.
-  bi.toVersionAt = Date.now();
+}
+
+const biVersionMoved = new ResizeObserver(() => biKeepVersion());
+for (const moves of [el("bi-top-row"), el("bi-build-steps"),
+  document.querySelector('#bi-view-build .kp-stage[data-stage="test"]')]) {
+  biVersionMoved.observe(moves);
+}
+for (const type of ["wheel", "touchstart", "pointerdown", "keydown"]) {
+  window.addEventListener(type, (event) => {
+    // Typing the commit's purpose is being where it was opened.
+    if (type === "keydown" && event.target && event.target.id === "bi-b-ver-purpose") return;
+    bi.keepVersion = false;
+  }, {capture: true, passive: true});
 }
 
 function biBuildStage(name, focus = true) {
@@ -4400,10 +4422,7 @@ function biShareDraw(plan) {
       ? "這次的內容在它改到的領域測試退步，push 會被擋下；請先修正或再跑一次測試。" : "";
   el("bi-b-share-why").textContent = why;
   el("bi-b-share-go").disabled = Boolean(why) || Boolean(bi.shareBusy);
-  if (Date.now() - (bi.toVersionAt || 0) < 10000) {
-    bi.toVersionAt = 0;
-    el("bi-b-ver").scrollIntoView({block: "start"});
-  }
+  biKeepVersion();
 }
 
 function biShareProgress(skipCommit) {
