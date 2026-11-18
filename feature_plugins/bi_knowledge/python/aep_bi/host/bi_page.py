@@ -2980,9 +2980,15 @@ async function biBuildVault() {
 async function biProposals() {
   // Every pending proposal of the working copy, so a person can settle them in one place.
   const dataset = biDataset();
+  // Newest call only: each decision refreshes the list, and a list read before the next
+  // decision, arriving after it, would show that one as pending again beside its mark.
+  const seq = bi.proposalsSeq = (bi.proposalsSeq || 0) + 1;
   const reply = await call("/api/bi/proposals?dataset=" + encodeURIComponent(dataset));
-  if (dataset !== biDataset()) return;
-  bi.proposals = reply.proposals || [];
+  if (dataset !== biDataset() || seq !== bi.proposalsSeq) return;
+  // What was decided here is not pending, whenever the list was read.
+  const decided = bi.proposalsFor === dataset
+    ? new Set((bi.proposalsDecided || []).map((done) => done.item.id)) : new Set();
+  bi.proposals = (reply.proposals || []).filter((item) => !decided.has(item.id));
   biBuildSteps();
   // What was decided here stays on the list, with its mark, until the page is left.
   if (bi.proposalsFor !== dataset) { bi.proposalsFor = dataset; bi.proposalsDecided = []; }
@@ -3023,11 +3029,23 @@ function biProposalsShown() {
       + " 筆都是 confidence 或 evidence_grade：一次決定前要先在「欄位」選定其中一個，"
       + "也可以逐筆決定。"));
   }
-  const rows = shown.map((item) => biProposalRow(item, biDataset()));
+  // A reason being written survives the redraw: a refresh after another decision (or a
+  // sync) lands while the person types the next one, and their words must not go with it.
+  const typed = {};
+  for (const input of el("bi-b-props-list").querySelectorAll("li[data-proposal] > .bi-actions"
+    + " > input")) {
+    const id = input.closest("li").dataset.proposal;
+    if (input.value) typed[id] = {value: input.value, focused: input === document.activeElement};
+  }
+  const rows = shown.map((item) => biProposalRow(item, biDataset(), typed[item.id]));
   for (const done of bi.proposalsDecided || []) {
     rows.splice(Math.min(done.at, rows.length), 0, biProposalDone(done));
   }
   el("bi-b-props-list").replaceChildren(...rows);
+  for (const row of rows) {
+    const kept = typed[row.dataset.proposal], input = row.querySelector(".bi-actions > input");
+    if (kept && kept.focused && input) input.focus({preventScroll: true});
+  }
   return {field, origin, shown, chosen};
 }
 
@@ -3105,8 +3123,9 @@ function biProposalDone(done) {
   return box;
 }
 
-function biProposalRow(item, dataset) {
+function biProposalRow(item, dataset, typed) {
   const reason = bh("input", "bi-input");
+  if (typed) reason.value = typed.value;
   reason.placeholder = item.needs_reason ? "理由（這是判斷欄位，必填）" : "理由（否決時必填）";
   reason.setAttribute("aria-label", "理由：" + item.card_name + " 的 " + item.label);
   const error = bh("div", "bi-err");
