@@ -83,6 +83,12 @@ def test_shared_platform_bundle_is_reproducible_and_role_specific(tmp_path: Path
         assert "--no-index" in installer
         assert "aep-host*" in installer
         assert "aep-platform.exe" in installer
+        # The platform's BI snapshot reader ships as the BI feature plugin, and the
+        # installer puts it where `plugins.in_process` finds it (CI 2026-11-18).
+        assert prefix + "feature-plugins/bi_knowledge/plugin.json" in names
+        assert prefix + "feature-plugins/bi_knowledge/python/aep_bi/cards/snapshot.py" in names
+        assert not any("__pycache__" in name for name in names)
+        assert '"aep-feature-plugins"' in installer
         start_here = bundle.read(prefix + "START-HERE.md").decode("utf-8")
         assert "Shared Platform" in start_here
         assert "Personal Agent + Bridge" in start_here
@@ -141,3 +147,39 @@ def test_shared_platform_bundle_needs_every_core_dependency(tmp_path: Path) -> N
             output_dir=tmp_path / "out",
             revision="a" * 40,
         )
+
+
+def test_the_platform_starts_from_the_feature_plugins_the_bundle_installs(
+    tmp_path: Path,
+) -> None:
+    """CI 2026-11-18: an installed Shared Platform had no `aep_bi` and stopped at
+    import. With only the core package, the platform needs the shipped feature
+    plugins folder the installer copies; with it, it imports."""
+    import os
+    import subprocess
+    import sys
+
+    from scripts.build_windows_preview import FEATURE_PLUGINS, copy_feature_plugins
+
+    repo = Path(__file__).resolve().parents[1]
+    shipped = tmp_path / "aep-feature-plugins"
+    copy_feature_plugins(repo / FEATURE_PLUGINS, shipped)
+    script = "import control_plane.app; print('platform imports')"
+
+    def run(bundled: str) -> subprocess.CompletedProcess[str]:
+        env = {**os.environ, "PYTHONPATH": str(repo / "src"), "AEP_BUNDLED_PLUGINS": bundled}
+        return subprocess.run(
+            [sys.executable, "-c", script],
+            cwd=tmp_path,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=300,
+            check=False,
+        )
+
+    without = run("")
+    assert without.returncode != 0 and "aep_bi" in without.stderr
+    installed = run(str(shipped))
+    assert installed.returncode == 0, installed.stderr[-2000:]
+    assert "platform imports" in installed.stdout

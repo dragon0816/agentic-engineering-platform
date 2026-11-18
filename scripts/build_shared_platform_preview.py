@@ -11,8 +11,11 @@ import zipfile
 from pathlib import Path
 
 from scripts.build_windows_preview import (
+    BUNDLE_FEATURE_PLUGINS,
+    FEATURE_PLUGINS,
     SECRET_ASSIGNMENT,
     TEXT_SUFFIXES,
+    copy_feature_plugins,
     digest,
 )
 
@@ -64,6 +67,10 @@ def build(
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary) / BUNDLE_NAME
         shutil.copytree(template, root)
+        # The platform reads BI dataset snapshots with BI Knowledge's own reader,
+        # which ships as a feature plugin (Plugin API 1.2), not in the wheel;
+        # install.ps1 puts these beside the venv as aep-feature-plugins.
+        copy_feature_plugins(repo / FEATURE_PLUGINS, root / BUNDLE_FEATURE_PLUGINS)
         wheels = root / "wheels"
         wheels.mkdir()
         shutil.copy2(platform_wheel, wheels / platform_wheel.name)

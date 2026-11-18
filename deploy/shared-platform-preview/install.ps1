@@ -58,6 +58,15 @@ $PlatformWheels = @(Get-ChildItem -LiteralPath (Join-Path $BundleRoot "wheels") 
 if ($PlatformWheels.Count -ne 1) { throw "Bundle must contain exactly one platform wheel." }
 & $VenvPython -m pip install --disable-pip-version-check --no-index --find-links (Join-Path $BundleRoot "wheels") --force-reinstall agentic-engineering-platform
 if ($LASTEXITCODE -ne 0) { throw "Offline wheel installation failed." }
+# Feature plugins shipped with AEP (Plugin API 1.2): the platform reads BI dataset
+# snapshots with BI Knowledge's own reader, loaded from the venv's
+# aep-feature-plugins folder, which this install or update replaces.
+$ShippedPlugins = Join-Path $BundleRoot "feature-plugins"
+$VenvPlugins = Join-Path $Venv "aep-feature-plugins"
+if (Test-Path -LiteralPath $VenvPlugins) { Remove-Item -LiteralPath $VenvPlugins -Recurse -Force }
+if (Test-Path -LiteralPath $ShippedPlugins -PathType Container) {
+    Copy-Item -LiteralPath $ShippedPlugins -Destination $VenvPlugins -Recurse -Force
+}
 # This is the Shared Platform role. Do not expose the Personal Agent, Bridge or
 # local coding-worker launchers from this installation.
 Get-ChildItem -LiteralPath (Join-Path $Venv "Scripts") -Filter "aep-host*" -ErrorAction SilentlyContinue | Remove-Item -Force
