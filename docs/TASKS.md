@@ -5116,3 +5116,8 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   (9d417cea weekly drafting stubs only the matplotlib chart; 4b7adc85 BI upload
   list race; 639d6323 review rejection reason/refresh race; 5ba92388 + 29a2ab29 BI
   版本 link placement while content loads). No assertions changed.
+- [x] 2026-11-19 CI green on main ea956681 (run 44393884375): full suite, ruff,
+  format, mypy, build, both Windows bundles built and installed; artifacts
+  aep-windows-preview-ea956681… (184 MB) and aep-shared-platform-windows-ea956681…
+  (5 MB) uploaded, kept until 2026-12-02. Last fix ea956681: BI working-domain
+  select drew from a superseded /skills read (race), now newest read only.
