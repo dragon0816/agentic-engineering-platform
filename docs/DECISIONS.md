@@ -8015,3 +8015,30 @@ still needs an AEP update); D4 add generic `in_process.page_order` and a core
 stand-in table, and move BI's NO_BI_* stand-ins to it; D5 bundled `llm-wiki.wiki`
 1.0.0, enabled by default. Not covered: Knowledge asking harness, retrieval,
 citations, permissions, data migration.
+
+### 2026-11-18 — LLM Wiki plugin stages A and B: implementation choices
+
+Within the consent above (branch phase-plugins/wiki-20261118). Decisions:
+- The pipeline's 21 capabilities need host.json, the layout and the routing model,
+  which `Feature.capability_bindings(workspace_root, approved)` does not receive; the
+  Host asks the existing `Feature.service("knowledge_pipeline_bindings")` at the
+  place it registered them before (same order, same specs). Agent Web asks
+  `service("wiki_web")` for the maintenance part (`AgentWeb.wiki`); Reviews and the
+  agent mode use it and fall back to "manual"/"knowledge_pipeline_disabled" without
+  it. No new hook beyond D4. Rejected: widening `capability_bindings` (changes BI's
+  hook) and registering through `startup` (changes the registration order).
+- `knowledge.wiki_repos` keeps the read side (listing, reads, reading_folder,
+  agent_source); the writes moved to `aep_wiki.knowledge.wiki_repos_write` (D3).
+- Page (D2): Wiki CSS rules are moved only when every selector token is used by the
+  Wiki alone; `.kp-nav button`, `.kp-repos` and `.kp-doc` stay in core order because
+  later shell rules override them and moving them changed computed styles.
+  Evidence: page lines identical as a multiset, HTML element sequence identical,
+  computed styles of every element identical in Knowledge (both tabs), Reviews and
+  memory. Page sha256 be54b2e7… → 7a15fdce… (re-pinned; no test pinned it).
+- The skill guide files are renamed to lowercase (`guide.zh-tw.md`,
+  `ingest.skill.md`, `answer.skill.md`) because plugin package paths are lowercase;
+  their bytes and the SkillGuide answer are unchanged.
+- Packaging follows BI: the core wheel no longer ships the maintenance modules or
+  `skill_guide/*.md`; the Windows bundle copies `feature_plugins/llm_wiki` with the
+  other in-process plugins; `scripts/build_llm_wiki_plugin.py` builds the update
+  package.
