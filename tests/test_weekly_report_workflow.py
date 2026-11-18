@@ -673,12 +673,21 @@ def test_one_run_writes_the_workbook_then_drafts_the_mail(tmp_path: Path) -> Non
     assert "#1" in drafted.preview, "the plain text is what a person checks"
 
 
-def test_drafting_uses_actual_write_without_a_tool_approval(tmp_path: Path) -> None:
+def test_drafting_uses_actual_write_without_a_tool_approval(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """A draft changes the member's own mailbox, so it is a write like the
     workbook's and is refused the same way without an approval."""
     from test_weekly_report_apply import RecordingWriter
 
+    from capabilities.weekly_report import chart
     from integrations.outlook_draft import RecordingDraftWriter
+
+    # This run drafts, and drafting draws the chart with matplotlib, the
+    # optional weekly-mail extra CI does not install. What is checked here is
+    # the write without an approval, not the picture (that is the
+    # requires_matplotlib run above), so the picture is a fixed PNG.
+    monkeypatch.setattr(chart, "composite_for", lambda items, **_: b"\x89PNG\r\n\x1a\n")
 
     assert MAIL_SPEC.side_effect == "write"
     assert MAIL_SPEC.policy.approval_required
