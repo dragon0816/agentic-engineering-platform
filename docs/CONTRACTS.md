@@ -4140,6 +4140,12 @@ runs, candidates), `src/capabilities/bi_cards/runs.py` (rule-path run, review, c
   An edited field is normalised as a card edit (`value_invalid` on a bad value), becomes `basis:
   "human"`, and is recorded in `edits`. Accepting a candidate with errors is 400 `candidate_invalid`
   (with `errors`). A run not in `review` is 409 `run_closed`.
+- **Accept many.** `POST /api/bi/runs/<id>/accept {"dataset", "ids": [cid, ...]}` (at most 50 ids;
+  owner 2026-11-18) accepts each through the same Review rules, once: per id `applied`, `skipped`
+  (`already_accepted`, `rejected`) or `failed` with its code and reason; a refusal never stops the rest
+  and a repeated batch changes nothing. Request problems: 400 `ids_invalid` / `ids_too_many`, 404
+  `run_unknown`, 409 `run_closed`. The page's 「全部套用」 sends batches of 20; 「全部接受並匯入」 then
+  calls Commit once (undoable with the run's undo).
 - **Recheck.** `POST /api/bi/runs/<id>/recheck {"dataset"}` recomputes match, `base_version`,
   `current`, `change` and errors of every candidate against the store now (reviews and edits kept;
   a candidate whose diff changed goes back to `pending`) → `{"ok": true, "run", "candidates",

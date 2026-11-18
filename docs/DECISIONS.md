@@ -8042,3 +8042,12 @@ Within the consent above (branch phase-plugins/wiki-20261118). Decisions:
   `skill_guide/*.md`; the Windows bundle copies `feature_plugins/llm_wiki` with the
   other in-process plugins; `scripts/build_llm_wiki_plugin.py` builds the update
   package.
+
+### 2026-11-18 — BI review: accept all, and accept all and import
+
+Owner asked for one-click apply of all review cards. Review has no per-card write: 接受 marks a
+candidate, 確認匯入 writes the accepted ones (undoable as one import). Owner chose both buttons:
+「全部套用（N 張）」 accepts every pending candidate the filters show (no write, revertible, no
+confirmation) and 「全部接受並匯入（N 張）」 accepts them and then commits once (undo named in the
+result). The old 「接受所有沒有錯誤的候選卡」 button is removed. New route `POST /api/bi/runs/<id>/accept`
+reuses the single-candidate review rules, at most once per id; progress per AGENTS rule 23.

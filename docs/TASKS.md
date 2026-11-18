@@ -5097,3 +5097,6 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   scripts/build_llm_wiki_plugin.py). Same-screen evidence per D2; choices in
   DECISIONS 2026-11-18. Component runs only; full suite, 445/46 comparison, wheel
   and live acceptance not yet done here.
+- [x] 2026-11-18 BI review accept-all + accept-and-import (81a5f660, f56c7004): new /accept route,
+  old bulk button removed; 135 API/static + 17 UI tests pass. Parallel test runs: pytest-xdist in dev
+  extras; full suite `python -m pytest -n auto --dist loadfile` (CI too).
