@@ -5308,12 +5308,23 @@ function biScopeFollowed() {
   biDashDomainBox();
 }
 
-async function biSourceFolders() {
+function biSourceFolders() {
+  // Settles when the newest list of domains is drawn, whichever call that was.
+  const drawn = biSourceFoldersOnce();
+  bi.foldersDrawn = drawn;
+  return drawn;
+}
+
+async function biSourceFoldersOnce() {
   const vault = biVaultOf(biDataset()), box = el("bi-b-src-folder-box");
   box.hidden = !vault || biReadOnly();
   if (box.hidden) return;
+  // Newest call only: a list read before a domain was created, answered after it, would
+  // drop the new domain and turn the working domain back to 全部領域.
+  const seq = bi.foldersSeq = (bi.foldersSeq || 0) + 1;
   const listed = biDataset(), reply = await call("/api/bi/vaults/" + vault.id + "/skills");
   if (listed !== biDataset()) return;
+  if (seq !== bi.foldersSeq) { await bi.foldersDrawn.catch(() => {}); return; }
   bi.build.homes = reply.homes || [];
   if (bi.share && bi.shareVault === vault.id && vault.id === bi.verVault) {
     biShareDraw(bi.share);
