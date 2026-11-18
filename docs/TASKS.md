@@ -4275,3 +4275,11 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
 Design/evidence: docs/proposals/harness-reliability/slice-1-design.md and slice-1-results.md. No push, PR, merge or deployment.
 - Harness reliability slice 2 (2026-11-18): owner selected existing-state operation/resource claims. Implemented durable worker finality and exclusion for Python/CodingHarness; explicit stopped-confirmation reconciliation CLI; migration 6->7. Focused 105 passed/1 skipped and final two files 22 passed, including real restricted process timeout/replay prevention. Full-suite/final checks pending; see docs/proposals/harness-reliability/slice-2-results.md.
 - [x] 2026-11-19 reliability verification: final full run 5315 passed/35 skipped/4 failed in 1723.74 s; three baseline BI failures and one obsolete migration assertion. Assertion corrected, fresh relevant group 56 passed; Ruff/format/mypy/build/pip check passed. Live gpt-5.6 controlled Excel exit-1 repair passed (3 model turns/2 workers, independent oracle). No full clean rerun or historical-fix claim. Await actual SOP/Excel oracle before extending mandatory artifact validation.
+
+
+## Harness reliability 141 — synthetic SAP OI acceptance (2026-11-19)
+
+- [x] Build isolated fictional date/Sales/paginated SAP page and SOP; native browser download, model-authored Python normalization and typed benchmark Excel exporter. Preserve complete dialogue, scripts, all six attempts and final native PivotTable workbook. See `benchmarks/harness_reliability_sap_oi/RESULTS.md` and `outputs/harness-sap-oi-20261119/`.
+- [x] Verify run6 repair after real exit1; 12 valid details, TWD13580, source/formulas/pivot/cache acceptance. Guard final task acceptance against failed exporter or unfinished conversation. Focused38, Ruff and mypy pass; no source/BI/production changes.
+- [ ] Owner/company-PC Microsoft Excel open/recalculate/Refresh All verification; 141 has no Excel.
+- [ ] Authorized real SAP parity with actual SOP/schema/expected output; synthetic case does not establish historical incident root cause.

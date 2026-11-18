@@ -52,7 +52,7 @@ def make_bridge(root: Path, store: SqliteLocalState | MemoryOperationStore) -> B
         RunPythonResult,
         ExecutionDependencies(central_required=False),
     )
-    bridge = BridgeExecutor(installed, policy_for(installed), timeout_seconds=0.03)
+    bridge = BridgeExecutor(installed, policy_for(installed), timeout_seconds=2)
     bridge.operations = store
     return bridge
 

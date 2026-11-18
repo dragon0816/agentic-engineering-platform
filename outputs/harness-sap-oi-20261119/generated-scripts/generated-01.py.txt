@@ -1,0 +1,77 @@
+import csv, json, os, glob
+from datetime import datetime
+
+root = os.getcwd()
+files = glob.glob(os.path.join(root, 'output', 'downloads', '*.csv'))
+print('INPUT_FILES', [os.path.relpath(p, root) for p in files])
+if len(files) != 1:
+    raise RuntimeError(f'expected exactly one downloaded CSV, found {len(files)}')
+source = files[0]
+with open(source, 'r', encoding='utf-8-sig', newline='') as f:
+    rows = list(csv.DictReader(f))
+print('HEADERS', list(rows[0].keys()) if rows else [])
+print('ROW_COUNT', len(rows))
+print('SAMPLE_ROWS', rows[:3])
+
+required = ['OI Document', 'Line', 'CreatedAt', 'Sales', 'Customer', 'Status', 'Currency', 'OI Amount']
+if not rows or list(rows[0].keys()) != required:
+    raise RuntimeError('unexpected CSV headers')
+
+# Exact duplicate removal, while rejecting same-key conflicting content.
+seen_rows = set()
+by_key = {}
+unique = []
+for row in rows:
+    frozen = tuple(row[h] for h in required)
+    key = (row['OI Document'], row['Line'])
+    if key in by_key and by_key[key] != frozen:
+        raise RuntimeError(f'conflicting duplicate key: {key}')
+    if frozen in seen_rows:
+        continue
+    seen_rows.add(frozen)
+    by_key[key] = frozen
+    unique.append(row)
+
+fx_map = {'TWD': 1, 'USD': 32}
+normalized = []
+for row in unique:
+    if row['Status'] != 'Booked':
+        continue
+    if row['Currency'] not in fx_map:
+        raise RuntimeError(f"unsupported currency: {row['Currency']}")
+    dt = datetime.strptime(row['CreatedAt'], '%Y-%m-%d %H:%M:%S')
+    amount = float(row['OI Amount'].replace(',', ''))
+    normalized.append({
+        'document': row['OI Document'],
+        'line': str(row['Line']),
+        'created_at': row['CreatedAt'],
+        'sales': row['Sales'],
+        'customer': row['Customer'],
+        'status': row['Status'],
+        'currency': row['Currency'],
+        'amount': amount,
+        'fx': fx_map[row['Currency']],
+        'month': dt.strftime('%Y-%m'),
+    })
+
+outdir = os.path.join(root, 'output')
+os.makedirs(outdir, exist_ok=True)
+out = os.path.join(outdir, 'normalized.json')
+with open(out, 'w', encoding='utf-8') as f:
+    json.dump(normalized, f, ensure_ascii=False, indent=2)
+
+# Independent local requirement checks on the saved output.
+with open(out, 'r', encoding='utf-8') as f:
+    check = json.load(f)
+if len(check) != 13:
+    raise RuntimeError(f'expected 13 valid Booked rows after one exact duplicate, got {len(check)}')
+for r in check:
+    if set(r) != {'document','line','created_at','sales','customer','status','currency','amount','fx','month'}:
+        raise RuntimeError('normalized schema mismatch')
+    if not isinstance(r['line'], str) or not isinstance(r['amount'], (int, float)) or not isinstance(r['fx'], (int, float)):
+        raise RuntimeError('normalized types mismatch')
+    if r['status'] != 'Booked' or r['currency'] not in fx_map:
+        raise RuntimeError('filter or currency check failed')
+print('UNIQUE_SOURCE_ROWS', len(unique))
+print('NORMALIZED_ROWS', len(check))
+print('OUTPUT', out)
