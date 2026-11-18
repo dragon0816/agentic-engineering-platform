@@ -115,7 +115,7 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
         page.wait("!document.querySelector('#bi-view-build .kp-stage[data-stage=review]').hidden")
         page.click("#bi-b-start")
         page.wait("document.querySelectorAll('#bi-b-cands button').length === 1")
-        page.click("#bi-b-accept-clean")
+        page.click("#bi-b-apply-all")
         page.see("bi-b-chips", "已接受 1")
         assert len(store.card_rows()) == before
         page.click("#bi-b-next4")

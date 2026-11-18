@@ -228,11 +228,11 @@ def test_a_reading_run_of_180_is_opened_worked_through_and_written(tmp_path: Pat
             one = str(store.card_rows()[0]["id"])
             before = store.fields(one)
             started = time.monotonic()
-            page.click("#bi-b-accept-clean")
-            page.notice(f"已接受 {MANY - 2} 張")
+            page.click("#bi-b-apply-all")
+            page.see("bi-b-apply-status", f"已套用 {MANY - 2} 張。")
             print(f"accepted {MANY - 2} in {time.monotonic() - started:.1f} s")
-            assert page.run("document.getElementById('bi-b-accept-clean').textContent.trim()") == (
-                "接受所有沒有錯誤的候選卡"
+            assert page.run("document.getElementById('bi-b-apply-all').textContent.trim()") == (
+                "全部套用（0 張）"
             )
             assert "待決定 0" in page.text_of("bi-b-cand-count")
             page.see("bi-b-chips", f"已接受 {MANY - 1}")
@@ -319,7 +319,8 @@ def test_the_combobox_opens_an_ordinary_run_and_a_reading_trial_too(tmp_path: Pa
             page.shoot("trial")
             detail = page.text_of("bi-b-cand")
             assert "接受" not in detail and "拒絕" not in detail
-            assert page.run("document.getElementById('bi-b-accept-clean').disabled")
+            assert page.run("document.getElementById('bi-b-apply-all').disabled")
+            assert page.run("document.getElementById('bi-b-apply-import').disabled")
             assert page.run(
                 "document.querySelector('#bi-build-steps [data-stage=commit]').disabled"
             )
@@ -906,8 +907,8 @@ def test_a_candidate_that_only_adds_a_citation_says_so_and_writes_only_that(tmp_
 def test_moving_on_while_all_are_being_accepted_waits_for_them_and_says_so(
     tmp_path: Path,
 ) -> None:
-    """Acceptance F18: after 接受所有沒有錯誤的候選卡, 下一步 stayed grey for seconds and a quick
-    press did nothing. It now says why it waits, and a press goes on once all are saved."""
+    """Acceptance F18: after the bulk accept (now 全部套用), 下一步 stayed grey for seconds and a
+    quick press did nothing. It now says why it waits, and a press goes on once all are saved."""
     config, layout = _bi_host(tmp_path / "pc")
     workspace = layout.workspace_root
     dataset = _vault(tmp_path, workspace, [_page(i) for i in range(40, 44)])
@@ -918,8 +919,8 @@ def test_moving_on_while_all_are_being_accepted_waits_for_them_and_says_so(
             _shown(page, 4)
             nxt = "document.getElementById('bi-b-next4')"
             assert page.run(f"{nxt}.disabled")  # nothing accepted yet
-            _hold(page, "/candidates/")
-            page.click("#bi-b-accept-clean")
+            _hold(page, "/accept")
+            page.click("#bi-b-apply-all")
             page.wait(f"{nxt}.textContent.includes('接受中')")
             assert not page.run(f"{nxt}.disabled"), "a press is kept, not lost on a grey button"
             page.click("#bi-b-next4")
@@ -928,3 +929,131 @@ def test_moving_on_while_all_are_being_accepted_waits_for_them_and_says_so(
             _free(page)
             _stage_shown(page, "commit")
             page.see("bi-b-summary", "更新 4 張")
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_apply_all_accepts_what_the_filters_show_and_says_how_far_it_is(tmp_path: Path) -> None:
+    """Owner 2026-11-18: 「BI卡片審核的部份，想要加入一鍵apply所有卡片的功能」. One press
+    accepts every undecided candidate the filters show; beside the button it says n/N, the
+    name and the seconds while it works (AGENTS rule 23), then what was applied and what was
+    not, and why; the list is drawn again with the new marks."""
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    dataset = _vault(tmp_path, workspace, [_page(i) for i in range(45)])  # 30 accounts
+    run_id = _reading(workspace, dataset, kind="ingest")
+    staging = Staging(workspace, dataset)
+    broken = next(c for c in staging.candidates(run_id) if c["name"] == "FAKE-005")
+    error = {"code": "value_invalid", "message": "不是允許的值", "field": "summary"}
+    broken.setdefault("value_errors", []).append(error)
+    broken["errors"] = [*broken["errors"], error]
+    staging.put_candidates(run_id, [broken])
+    button, status = "document.getElementById('bi-b-apply-all')", "bi-b-apply-status"
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(tmp_path / "browser", server.address) as page:
+            _review(page, dataset)
+            _shown(page, 45)
+            page.wait(f"{button}.textContent.trim() === '全部套用（45 張）'")
+            assert not page.run(f"{button}.disabled")
+            assert "套用所有待決定的" in page.text_of("bi-b-apply-note")
+            assert "匯入寫入所有已接受的" in page.text_of("bi-b-apply-note")
+            assert (
+                page.run("document.getElementById('bi-b-apply-import').textContent.trim()")
+                == "全部接受並匯入（45 張）"
+            )
+
+            # -- the filters decide what it takes, and the label says so ----------------------
+            _choose(page, "bi-b-cand-type", "Account")
+            _counted(page, f"顯示 {ACCOUNTS}／45")
+            assert page.run(f"{button}.textContent.trim()") == f"全部套用（{ACCOUNTS} 張）"
+            assert "只套用目前篩選顯示的" in page.text_of("bi-b-apply-note")
+
+            # -- while it works: n/N, the name and the seconds, beside the button -----------
+            _hold(page, "/accept")
+            page.click("#bi-b-apply-all")
+            page.see(status, f"套用中 0/{ACCOUNTS}：FAKE-000 等 20 張・")
+            assert re.search(r"・\d+ 秒$", page.text_of(status))
+            assert page.run(f"{button}.getAttribute('aria-busy')") == "true"
+            assert page.run(f"{button}.disabled")
+            assert page.run("document.getElementById('bi-b-apply-import').disabled")
+            assert "接受中" in page.text_of("bi-b-next4")
+            _free(page)
+
+            # -- it ends in place: what was applied, what was not and why -------------------
+            page.see(status, f"已套用 {ACCOUNTS - 1} 張；1 張未套用：FAKE-005：")
+            assert "這張候選卡還有錯誤，修正後才能接受" in page.text_of(status)
+            assert page.run(f"{button}.getAttribute('aria-busy')") is None
+            assert "套用中" not in page.text_of(status)
+
+            # -- the list is drawn again: marks, counts and the button --------------------
+            _counted(page, f"待決定 {45 - ACCOUNTS + 1}")
+            assert page.run(f"!!{_row('FAKE-001')}.querySelector('.bi-state-accepted')")
+            assert not page.run(f"!!{_row('FAKE-005')}.querySelector('.bi-state-accepted')")
+            assert page.run(f"{button}.textContent.trim()") == "全部套用（1 張）"
+            page.see("bi-b-chips", f"已接受 {ACCOUNTS - 1}")
+            assert not page.run("document.getElementById('bi-b-next4').disabled")
+    reviews = {c["name"]: c["review"] for c in staging.candidates(run_id)}
+    assert sum(r == "accepted" for r in reviews.values()) == ACCOUNTS - 1
+    assert reviews["FAKE-005"] == "pending"
+    assert all(reviews[f"FAKE-{i:03d}"] == "pending" for i in range(ACCOUNTS, 45))
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_accept_and_import_writes_once_reports_what_it_left_and_can_be_undone(
+    tmp_path: Path,
+) -> None:
+    """Owner 2026-11-18: 「全部接受並匯入」 runs the 全部套用 batches, then 確認匯入 once.
+    Both phases say how far they are beside the button; the end names the undo."""
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    dataset = _vault(tmp_path, workspace, [_page(i) for i in range(40, 48)])
+    run_id = _reading(workspace, dataset, kind="ingest")
+    staging, store = Staging(workspace, dataset), BiStore(workspace, dataset)
+    broken = next(c for c in staging.candidates(run_id) if c["name"] == "FAKE-043")
+    error = {"code": "value_invalid", "message": "不是允許的值", "field": "summary"}
+    broken.setdefault("value_errors", []).append(error)
+    broken["errors"] = [*broken["errors"], error]
+    staging.put_candidates(run_id, [broken])
+
+    def summarised() -> list[str]:
+        rows = store.card_rows()
+        return sorted(str(c["name"]) for c in rows if "summary" in store.fields(str(c["id"])))
+
+    button, status = "document.getElementById('bi-b-apply-import')", "bi-b-apply-status"
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(tmp_path / "browser", server.address) as page:
+            _review(page, dataset)
+            _shown(page, 8)
+            page.wait(f"{button}.textContent.trim() === '全部接受並匯入（8 張）'")
+
+            # -- first the batches, then the import, each with its own words ----------------
+            _hold(page, "/accept")
+            page.click("#bi-b-apply-import")
+            page.see(status, "套用中 0/8：FAKE-040 等 8 張・")
+            assert page.run(f"{button}.getAttribute('aria-busy')") == "true"
+            assert page.run("document.getElementById('bi-b-apply-all').disabled")
+            _free(page)
+            _hold(page, "/commit")
+            page.see(status, "匯入中・")
+            assert re.search(r"匯入中・\d+ 秒$", page.text_of(status))
+            assert summarised() == [], "nothing is written before the commit"
+            _free(page)
+
+            # -- it ends in place: written, what was left out, and the undo named ------------
+            page.see(status, "已接受 7 張並匯入（新建 0、更新 7）；可用『復原這次匯入』撤回。")
+            assert "1 張未接受、沒有匯入：FAKE-043：這張候選卡還有錯誤" in page.text_of(status)
+            assert "套用中" not in page.text_of(status)
+            assert "匯入中" not in page.text_of(status)
+            assert page.run(f"{button}.getAttribute('aria-busy')") is None
+            assert summarised() == [f"FAKE-{i:03d}" for i in range(40, 48) if i != 43]
+
+            # -- pressed again: the run is written, so there is nothing to press ------------
+            page.wait(f"{button}.disabled")
+            page.click("#bi-b-apply-import")
+            time.sleep(1)
+            assert len(summarised()) == 7
+            assert "已接受 7 張並匯入" in page.text_of(status)
+
+            # -- undo, from beside the button ------------------------------------------------
+            page.click_text("#bi-b-apply-status", "復原這次匯入")
+            page.see(status, "已復原這次匯入。")
+    assert summarised() == []

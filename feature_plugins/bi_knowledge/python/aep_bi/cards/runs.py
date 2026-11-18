@@ -950,6 +950,81 @@ def review(
     return {"candidate": public(candidate), "run": run_view(staging, run_id)}
 
 
+#: How many candidates one `accept_many` call takes. The page sends the rest in further
+#: calls, so what it counts is what was accepted, not a guess.
+ACCEPT_BATCH = 50
+
+
+def accept_many(
+    workspace: Path, dataset: str, run_id: str, ids: Any, *, actor: str
+) -> dict[str, Any]:
+    """「全部套用」: accept each of `ids` through `review`, the very check one 接受 makes.
+    One already accepted is skipped, not accepted again, so sending the same batch twice
+    changes nothing; one rejected meanwhile stays rejected; one refused keeps its code and
+    reason, and the rest still go on. Only acceptance happens here: nothing is written to
+    the cards until the run's commit, and each one goes back with 待決定."""
+    if not isinstance(ids, list) or not ids or not all(isinstance(i, str) and i for i in ids):
+        raise BiStoreError("ids_invalid", "ids 必須是候選卡 id 的清單（至少一張）")
+    if len(ids) > ACCEPT_BATCH:
+        raise BiStoreError("ids_too_many", f"一次最多 {ACCEPT_BATCH} 張；其餘請分批送")
+    staging = Staging(workspace, dataset)
+    staging.store.refuse_write()
+    _open_run(staging, run_id)
+    held = {c["id"]: c for c in staging.candidates(run_id)}
+    results: list[dict[str, Any]] = []
+    chosen = list(dict.fromkeys(ids))  # an id sent twice is decided once
+    for candidate_id in chosen:
+        candidate = held.get(candidate_id)
+        if candidate is None:
+            results.append(
+                {
+                    "id": candidate_id,
+                    "name": "",
+                    "status": "failed",
+                    "code": "candidate_unknown",
+                    "reason": "找不到這張候選卡",
+                }
+            )
+            continue
+        item = {"id": candidate_id, "name": candidate.get("name") or candidate.get("canonical_key")}
+        if candidate["review"] == "accepted":
+            results.append(
+                {**item, "status": "skipped", "code": "already_accepted", "reason": "先前已接受"}
+            )
+            continue
+        if candidate["review"] == "rejected":
+            results.append(
+                {**item, "status": "skipped", "code": "rejected", "reason": "已拒絕，沒有改成接受"}
+            )
+            continue
+        try:
+            review(
+                workspace,
+                dataset,
+                run_id,
+                candidate_id,
+                decision="accepted",
+                fields=None,
+                match=None,
+                actor=actor,
+            )
+        except BiStoreError as failure:
+            results.append(
+                {**item, "status": "failed", "code": failure.code, "reason": failure.message}
+            )
+        else:
+            results.append({**item, "status": "applied"})
+    everything = {c["id"]: public(c) for c in staging.candidates(run_id)}
+    return {
+        "results": results,
+        "applied": sum(r["status"] == "applied" for r in results),
+        "skipped": sum(r["status"] == "skipped" for r in results),
+        "failed": sum(r["status"] == "failed" for r in results),
+        "candidates": [everything[i] for i in chosen if i in everything],
+        "run": run_view(staging, run_id),
+    }
+
+
 def merge_relations(
     store: BiStore, held: list[dict[str, Any]], found: list[dict[str, Any]]
 ) -> list[dict[str, Any]]:

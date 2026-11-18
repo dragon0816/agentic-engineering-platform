@@ -142,7 +142,7 @@ def test_build_and_import_steps_in_a_browser(served: Any, tmp_path: Path) -> Non
         click("#bi-b-cands button")
         wait("document.getElementById('bi-b-cand').textContent.includes('有出處')")
         assert "「mature」" in text_of("bi-b-cand") or "「growth」" in text_of("bi-b-cand")
-        click("#bi-b-accept-clean")
+        click("#bi-b-apply-all")
         wait("document.getElementById('bi-b-chips').textContent.includes('已接受 2')")
         assert not locked("commit")
         assert not cards_db.exists()
