@@ -5110,3 +5110,9 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   plugins active, BI accept-all buttons present (old bulk button gone), Knowledge APIs
   200. Wiki 1.0.1 installed via Plugins → live after restart; disabled → maintenance
   gone, asking and BI still 200; uninstalled → bundled 1.0.0 back.
+- [x] 2026-11-19 CI: repo made public, Actions run again. CI on 063d8f65 found the
+  Shared Platform bundle missing aep_bi (fixed 108147c9: bundle ships feature
+  plugins; regression test). Four tests failing on every CI run fixed at the root
+  (9d417cea weekly drafting stubs only the matplotlib chart; 4b7adc85 BI upload
+  list race; 639d6323 review rejection reason/refresh race; 5ba92388 + 29a2ab29 BI
+  版本 link placement while content loads). No assertions changed.
