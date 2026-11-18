@@ -17,6 +17,10 @@ aep-local-codex-worker = "development.codex_worker:main"
 [project.optional-dependencies]
 dev = [
     "pytest>=8,<10",
+    # Runs the suite in parallel worker processes (MIT, pytest-dev): the full
+    # suite is `python -m pytest -n auto --dist loadfile` (owner 2026-11-18); a
+    # file stays on one worker, so tests of one file never race each other.
+    "pytest-xdist>=3.6,<4",
     "ruff>=0.9,<1",
     "mypy>=1.14,<2",
     "build>=1.2,<2",
