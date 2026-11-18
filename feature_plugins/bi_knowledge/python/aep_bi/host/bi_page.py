@@ -5460,13 +5460,23 @@ function biWithdrawForm(source) {
     biButton("取消", () => { box.hidden = true; box.replaceChildren(); }, "bi-btn", "取消撤回")));
 }
 
-async function biBuildSources() {
+function biBuildSources() {
+  // Settles when the newest list is drawn, whichever call that was: a caller that goes on to
+  // read `bi.build.sources` (the upload opening what it added) reads that list, not one a
+  // later call (the build tab still loading, a sync) made stale before it was drawn.
+  const drawn = biBuildSourcesOnce();
+  bi.sourcesDrawn = drawn;
+  return drawn;
+}
+
+async function biBuildSourcesOnce() {
   // Newest call only: an older list arriving late must not drop the source just added.
   const seq = bi.sourcesSeq = (bi.sourcesSeq || 0) + 1, listed = biDataset();
   const reply = await call("/api/bi/sources?dataset=" + encodeURIComponent(listed));
   // Read once with the page (`biLoad`); here only if that failed or this dataset is new to it.
   if (!(bi.build.homes || []).length) await biSourceFolders().catch(() => {});
-  if (seq !== bi.sourcesSeq || listed !== biDataset()) return;
+  if (listed !== biDataset()) return;
+  if (seq !== bi.sourcesSeq) { await bi.sourcesDrawn.catch(() => {}); return; }
   bi.build.sources = reply.sources || []; bi.build.sourcesFor = listed;
   biRenderCounts();
   const cloud = bi.build.sources.filter((s) => s.shared === "cloud_only").length;
