@@ -2862,7 +2862,8 @@ async function biBuildLoad() {
   biBuildFollowDataset();
   if (biBuildReadOnly()) {
     // A subscribed copy is only read: here it is the way to another dataset.
-    el("bi-b-v-state").replaceChildren(); el("bi-b-target").textContent = "";
+    el("bi-b-v-state").replaceChildren(); delete el("bi-b-v-state").dataset.vault;
+    el("bi-b-target").textContent = "";
     biStatus("bi-status-build", "");
     el("bi-b-sources").tBodies[0].replaceChildren();
     bi.build.sourceId = null; el("bi-b-next1").disabled = true;
@@ -2944,7 +2945,10 @@ async function biBuildVault() {
   const vault = biVaultOf(biDataset());
   el("bi-b-v-sync").hidden = !vault;
   el("bi-b-v-convert").hidden = Boolean(vault) || !bi.datasets.some((d) => d.name === biDataset());
-  const box = el("bi-b-v-state"); box.replaceChildren();
+  // The same vault's line stays until its new state replaces it: emptied in between, its
+  // links to 版本 would vanish under a press made just then. Another's goes at once.
+  const box = el("bi-b-v-state");
+  if (!vault || box.dataset.vault !== vault.id) { box.replaceChildren(); delete box.dataset.vault; }
   el("bi-b-ver-none").hidden = Boolean(vault);
   if (!vault) {
     el("bi-b-v-info").replaceChildren();
@@ -3187,7 +3191,7 @@ function biProposalRow(item, dataset, typed) {
 
 function biVaultState(state) {
   const box = el("bi-b-v-state"), v = state.vault || {};
-  box.replaceChildren();
+  box.replaceChildren(); box.dataset.vault = v.id || "";
   bi.verSchemaConflicts = state.schema_conflicts || [];
   if (v.id) biVerConflictList(v.id);
   // Whatever moved the vault (a sync, an import, a commit) may have moved its proposals.
