@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import ParseResult, parse_qs
 
+from aep_wiki.knowledge import wiki_repos_write
 from knowledge import wiki_repos
 from knowledge.repo.repository import RepoError
 
@@ -84,45 +85,47 @@ def _route(
         if len(parts) == 2:
             repo_id, what = parts
             if what == "status":
-                return 200, wiki_repos.status(workspace, repo_id)
+                return 200, wiki_repos_write.status(workspace, repo_id)
             if what == "pending":
-                return 200, wiki_repos.pending(workspace, repo_id)
+                return 200, wiki_repos_write.pending(workspace, repo_id)
             if what == "history":
-                return 200, wiki_repos.history(workspace, repo_id, _limit(query))
+                return 200, wiki_repos_write.history(workspace, repo_id, _limit(query))
             if what == "diff":
-                return 200, wiki_repos.diff(workspace, repo_id, str(query.get("commit") or ""))
+                return 200, wiki_repos_write.diff(
+                    workspace, repo_id, str(query.get("commit") or "")
+                )
             if what == "settings":
-                return 200, wiki_repos.work_settings(workspace, repo_id)
+                return 200, wiki_repos_write.work_settings(workspace, repo_id)
         return _error(404, "route_unknown", "沒有這個知識庫路徑")
     if method != "POST":
         return _error(405, "method_not_allowed", "只接受 GET 與 POST")
     if not parts:
-        return 200, {"ok": True, **wiki_repos.create(workspace, given, actor)}
+        return 200, {"ok": True, **wiki_repos_write.create(workspace, given, actor)}
     if parts == ["import"]:
-        return 200, {"ok": True, **wiki_repos.import_copy(workspace, given, actor)}
+        return 200, {"ok": True, **wiki_repos_write.import_copy(workspace, given, actor)}
     if parts == ["join"]:
-        return 200, {"ok": True, **wiki_repos.join(workspace, given, actor)}
+        return 200, {"ok": True, **wiki_repos_write.join(workspace, given, actor)}
     if len(parts) != 2:
         return _error(404, "route_unknown", "沒有這個知識庫路徑")
     repo_id, action = parts
     if action == "sync":
         return 200, {"ok": True, "sync": wiki_repos.repository(workspace, repo_id).sync()}
     if action == "commit":
-        return 200, {"ok": True, **wiki_repos.commit(workspace, repo_id, given)}
+        return 200, {"ok": True, **wiki_repos_write.commit(workspace, repo_id, given)}
     if action == "push":
-        return 200, {"ok": True, **wiki_repos.push(workspace, repo_id)}
+        return 200, {"ok": True, **wiki_repos_write.push(workspace, repo_id)}
     if action == "resolve":
-        return 200, {"ok": True, **wiki_repos.resolve(workspace, repo_id, given)}
+        return 200, {"ok": True, **wiki_repos_write.resolve(workspace, repo_id, given)}
     if action == "discard":
-        return 200, {"ok": True, **wiki_repos.discard(workspace, repo_id)}
+        return 200, {"ok": True, **wiki_repos_write.discard(workspace, repo_id)}
     if action == "revert":
-        return 200, {"ok": True, **wiki_repos.revert(workspace, repo_id, given)}
+        return 200, {"ok": True, **wiki_repos_write.revert(workspace, repo_id, given)}
     if action == "tag":
-        return 200, {"ok": True, **wiki_repos.tag(workspace, repo_id, given)}
+        return 200, {"ok": True, **wiki_repos_write.tag(workspace, repo_id, given)}
     if action == "publish":
-        return 200, {"ok": True, **wiki_repos.publish(workspace, repo_id, given)}
+        return 200, {"ok": True, **wiki_repos_write.publish(workspace, repo_id, given)}
     if action == "settings":
-        return 200, {"ok": True, **wiki_repos.save_work_settings(workspace, repo_id, given)}
+        return 200, {"ok": True, **wiki_repos_write.save_work_settings(workspace, repo_id, given)}
     return _error(404, "route_unknown", "沒有這個知識庫路徑")
 
 

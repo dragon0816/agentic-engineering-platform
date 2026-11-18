@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
+from aep_wiki.knowledge.sandbox import SandboxError, Sandboxes
 from knowledge.evolution import decision_digest, knowledge_digest, raw_digest
-from knowledge.sandbox import SandboxError, Sandboxes
 from knowledge.vault import Vault
 
 

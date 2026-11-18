@@ -26,6 +26,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
+from common.plugins import DEFAULT_PAGE_ORDER
+
 if TYPE_CHECKING:
     from plugins.in_process import FeatureSource
 
@@ -72,6 +74,10 @@ class Feature:
     """One feature's contributions. Subclasses override what they add."""
 
     name = "feature"
+    #: Its page fragments' place in their slots: lower first, equal ones in
+    #: feature order (an in-process plugin's is its manifest's
+    #: `in_process.page_order`, owner 2026-11-18 D4).
+    page_order = DEFAULT_PAGE_ORDER
 
     def startup(self, workspace_root: Path) -> None:
         """Process-wide setup when the Host is assembled."""
@@ -242,7 +248,7 @@ class FeatureSet:
 
     def page_fragments(self) -> dict[str, str]:
         joined = {slot: "" for slot in PAGE_SLOTS}
-        for feature in self.features:
+        for feature in sorted(self.features, key=lambda item: item.page_order):
             for slot, text in feature.page_fragments().items():
                 if slot not in joined:
                     raise ValueError(f"feature {feature.name} fills unknown page slot {slot}")
@@ -323,6 +329,7 @@ def _import(source: FeatureSource) -> Feature:
     feature = getattr(module, spec.attribute)
     if not isinstance(feature, Feature):
         raise TypeError(f"{spec.entry}.{spec.attribute} is not a Feature")
+    feature.page_order = spec.page_order  # the manifest places its fragments
     return feature
 
 

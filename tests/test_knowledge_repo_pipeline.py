@@ -31,9 +31,11 @@ from test_knowledge_repos_api import (
 )
 from test_knowledge_sandbox import _base
 
+from aep_wiki.host.wiki_web import PIPELINE_STEPS
+from aep_wiki.knowledge import wiki_work
 from host_runtime.host import build_runtime
-from host_runtime.web import PIPELINE_STEPS, AgentWeb, AgentWebServer
-from knowledge import wiki_repos, wiki_work
+from host_runtime.web import AgentWeb, AgentWebServer
+from knowledge import wiki_repos
 from knowledge.repo import wiki
 
 QUESTION = "---\nname: tester-options\n---\n\n# Tester X 有哪些選項？\n\n必須提到:\n  - K1\n"

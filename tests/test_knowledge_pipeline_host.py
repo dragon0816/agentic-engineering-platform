@@ -7,7 +7,7 @@ from typing import Any
 from test_host_wiring import grant_record, membership_record, workspace
 from test_knowledge_sandbox import _base, _snapshot
 
-from capabilities.knowledge_pipeline.handlers import (
+from aep_wiki.capabilities.handlers import (
     CONVERT_SPEC,
     DROP_ADD_SPEC,
     INGEST_APPLY_SPEC,

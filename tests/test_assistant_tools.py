@@ -13,10 +13,10 @@ from test_host_wiring import membership_record, workspace
 from test_knowledge_pipeline_host import _grants
 from test_knowledge_sandbox import _base
 
+from aep_wiki.host.knowledge_bench import catalog_for
 from common.assets import AssetIdentity
 from host_runtime.assistant_tools import AssistantTools, assistant_token, handle
 from host_runtime.host import build_runtime
-from host_runtime.knowledge_bench import catalog_for
 from host_runtime.web import AgentWeb, AgentWebServer
 from knowledge.vault import Vault
 

@@ -641,6 +641,9 @@ def _run_action(
             confirm_same_name=given.get("confirm_same_name"),
         )
         return 200, {"ok": True, **answer}
+    if rest == ["accept"]:
+        accepted = runs.accept_many(workspace, dataset, run_id, given.get("ids"), actor=who)
+        return 200, {"ok": True, **accepted}
     if len(rest) == 2 and rest[0] == "relations":
         decided = runs.decide_relation(
             workspace, dataset, run_id, rest[1], given.get("status"), actor=who

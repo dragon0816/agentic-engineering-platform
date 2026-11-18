@@ -27,9 +27,10 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from knowledge import wiki_repos, wiki_work
+from aep_wiki.knowledge import wiki_work
+from aep_wiki.knowledge.merge import ROOT_FILES, TEXT_AREAS
+from knowledge import wiki_repos
 from knowledge.evolution import decision_digest, knowledge_digest, raw_digest
-from knowledge.merge import ROOT_FILES, TEXT_AREAS
 from knowledge.repo.repository import RepoError, Repository
 from knowledge.vault import Vault, VaultError
 

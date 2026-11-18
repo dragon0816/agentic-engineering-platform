@@ -14,6 +14,8 @@ import binascii
 from collections.abc import Callable
 from typing import Any
 
+from aep_wiki.knowledge.pipeline import KnowledgePipeline, PipelineError
+from aep_wiki.knowledge.sandbox import SandboxError
 from capabilities.contracts import CapabilitySpec
 from capabilities.knowledge_pipeline.contracts import (
     AdoptRequest,
@@ -42,8 +44,6 @@ from capabilities.knowledge_pipeline.contracts import (
 from capabilities.runtime import CapabilityRefused
 from common.base import Contract
 from common.execution import RequestContext
-from knowledge.pipeline import KnowledgePipeline, PipelineError
-from knowledge.sandbox import SandboxError
 from knowledge.vault import VaultError
 
 PERMISSION = "knowledge-pipeline.use"

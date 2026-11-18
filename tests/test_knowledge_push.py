@@ -7,11 +7,11 @@ from typing import Any
 from test_knowledge_bench import WIFI7
 from test_knowledge_sandbox import _base, _snapshot
 
+from aep_wiki.host.knowledge_push import latest_push, run_push
+from aep_wiki.knowledge.pipeline import KnowledgePipeline
+from aep_wiki.knowledge.sandbox import Sandboxes
 from host_runtime.contracts import KnowledgeAskRequest
-from host_runtime.knowledge_push import latest_push, run_push
 from knowledge.evolution import KnowledgeCatalog
-from knowledge.pipeline import KnowledgePipeline
-from knowledge.sandbox import Sandboxes
 
 PAGE = "---\ntitle: CMX500\n---\nCMX500\n\n## 規格\n\n- 8 GHz\n\n## Option\n\n- K100\n"
 

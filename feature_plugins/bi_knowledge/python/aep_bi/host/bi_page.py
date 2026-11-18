@@ -129,7 +129,7 @@ BI_CSS = r"""
 .bi-err { color: var(--bad); font-size: 13px; }
 /* A folder path has nowhere to break; it wraps instead of widening the page on a phone. */
 #bi-notice, #bi-b-v-state, .bi-err { overflow-wrap: anywhere; }
-.bi-err:empty { display: none; }
+.bi-err:empty, #bi-b-apply-status:empty { display: none; }
 .bi-schema-note { flex: 1 1 100%; margin: 0; overflow-wrap: anywhere; }
 .bi-schema-note:empty { display: none; }
 .bi-empty-state { flex: 1 1 100%; padding: 8px 12px; border: 1px dashed var(--line);
@@ -956,8 +956,6 @@ BI_PANE_HTML = r"""
           <h3 class="kp-stage-title" id="bi-b-review" tabindex="-1">步驟 2／3・審核</h3>
           <div class="bi-actions">
             <label class="bi-meta">待審核的執行 <select id="bi-b-run-pick"></select></label>
-            <button class="bi-btn" id="bi-b-accept-clean" type="button" disabled>
-              接受所有沒有錯誤的候選卡</button>
             <button class="bi-btn" id="bi-b-props-jump" type="button" hidden></button></div>
           <div id="bi-b-chips" class="bi-chips" aria-label="候選卡摘要"></div>
           <div id="bi-b-same"></div>
@@ -972,6 +970,13 @@ BI_PANE_HTML = r"""
                 <span class="bi-meta"><span id="bi-b-cand-count" role="status"></span><span
                   id="bi-b-cand-last" role="status"></span></span>
               </div>
+              <div class="bi-actions">
+                <button class="bi-btn" id="bi-b-apply-all" type="button" disabled>
+                  全部套用（0 張）</button>
+                <button class="bi-btn" id="bi-b-apply-import" type="button" disabled>
+                  全部接受並匯入（0 張）</button>
+                <span class="bi-meta" id="bi-b-apply-note"></span></div>
+              <p class="bi-meta" id="bi-b-apply-status" role="status" aria-live="polite"></p>
               <div class="bi-scroll bi-scroller"><table class="bi-table bi-stack" id="bi-b-cands"
                 aria-label="候選卡清單"><thead><tr><th>卡片</th><th>欄位</th><th>提議值</th>
                 <th>狀態</th></tr></thead><tbody></tbody></table></div>
@@ -2805,7 +2810,7 @@ for (const button of document.querySelectorAll("#bi-view-build [data-bi-next]"))
   button.addEventListener("click", () => biBuildStage(button.dataset.biNext));
 }
 el("bi-b-next4").addEventListener("click", async () => {
-  // A quick hand presses as soon as 「接受所有」 is pressed: the press is kept, and goes on
+  // A quick hand presses as soon as 「全部套用」 is pressed: the press is kept, and goes on
   // when the last decision is saved.
   if (bi.build.accepting || bi.build.saving) {
     const button = el("bi-b-next4");
@@ -7233,7 +7238,139 @@ function biBuildCandRows() {
   // The rows are drawn anew: a keyboard stays on the row it was on.
   const here = focused && body.querySelector('tr[aria-selected="true"] button');
   if (here) here.focus({preventScroll: true});
+  biApplyAllLabel();
 }
+
+// -- 「全部套用」 and 「全部接受並匯入」 --------------------------------------------------
+// Owner 2026-11-18. 「全部套用」 accepts every undecided candidate the filters show: the same
+// check one 接受 makes, on the host, a few at a time so the count beside the button is what
+// was saved. Each goes back with 待決定, so there is no confirmation. 「全部接受並匯入」 does
+// the same and then 確認匯入 once, after the last batch; that write is undone with
+// 「復原這次匯入」, so it asks nothing either.
+const BI_APPLY_CHUNK = 20;
+
+function biApplyAllTodo() {
+  return biCandShown().filter((c) => c.review === "pending" && c.action !== "skip");
+}
+
+function biApplyAllLabel() {
+  if (bi.build.applying) return;
+  const open = biRunOpen(bi.build.run), todo = open ? biApplyAllTodo() : [];
+  for (const [id, label] of [["bi-b-apply-all", "全部套用"],
+    ["bi-b-apply-import", "全部接受並匯入"]]) {
+    el(id).textContent = label + "（" + todo.length + " 張）";
+    el(id).disabled = !todo.length || !!bi.build.accepting;
+  }
+  const filtered = el("bi-b-cand-type").value || el("bi-b-cand-state").value;
+  el("bi-b-apply-note").textContent = !open ? "" : (filtered
+    ? "只套用目前篩選顯示的" : "套用所有待決定的")
+    + "（＝接受，可改回待決定）；匯入寫入所有已接受的";
+}
+
+function biApplyAllName(candidate) {
+  return candidate.name || candidate.canonical_key || "（無名稱）";
+}
+
+async function biApplyAll(andImport) {
+  const run = bi.build.run, todo = biApplyAllTodo();
+  if (!biRunOpen(run) || !todo.length || bi.build.applying) return;
+  const button = el(andImport ? "bi-b-apply-import" : "bi-b-apply-all");
+  const status = el("bi-b-apply-status"), others = ["bi-b-apply-all", "bi-b-apply-import"];
+  const total = todo.length, left = [];
+  let started = Date.now(), done = 0, applied = 0, before = 0, current = "", stopped = null;
+  let importing = false;
+  const show = () => {
+    const seconds = Math.floor((Date.now() - started) / 1000) + " 秒";
+    status.textContent = importing ? "匯入中・" + seconds
+      : "套用中 " + done + "/" + total + "：" + current + "・" + seconds;
+  };
+  // 「下一步」 and the other button wait for it.
+  bi.build.applying = true; bi.build.accepting = true; bi.build.acceptProgress = "0／" + total;
+  for (const id of others) el(id).disabled = true;
+  button.setAttribute("aria-busy", "true");
+  status.classList.remove("bi-err"); status.replaceChildren();
+  biBuildRunPick(); biBuildSteps(); biNext4();
+  const tick = setInterval(show, 1000);
+  let wrote = null, unwritten = null;
+  try {
+    for (let at = 0; at < total; at += BI_APPLY_CHUNK) {
+      const chunk = todo.slice(at, at + BI_APPLY_CHUNK);
+      current = biApplyAllName(chunk[0]) + (chunk.length > 1 ? " 等 " + chunk.length + " 張" : "");
+      show();
+      const reply = await biCall("/api/bi/runs/" + run.id + "/accept",
+        {dataset: biDataset(), ids: chunk.map((c) => c.id)});
+      if (!bi.build.run || bi.build.run.id !== run.id) return;  // another run was opened
+      for (const fresh of reply.candidates) {
+        const index = bi.build.candidates.findIndex((c) => c.id === fresh.id);
+        if (index >= 0) bi.build.candidates[index] = fresh;
+      }
+      bi.build.run = reply.run;
+      for (const result of reply.results) {
+        if (result.status === "applied") applied += 1;
+        else if (result.code === "already_accepted") before += 1;
+        else left.push(result);
+      }
+      done += chunk.length; bi.build.acceptProgress = done + "／" + total;
+      biNext4(); biBuildCandRows(); show();
+    }
+    if (andImport) {
+      // Once, after every batch: what was refused stays out, and the rest is written.
+      importing = true; started = Date.now(); bi.build.acceptProgress = null; biNext4(); show();
+      try { wrote = await biBuildCommit(run); } catch (failure) { unwritten = failure; }
+    }
+  } catch (failure) {
+    stopped = failure;
+  } finally {
+    clearInterval(tick);
+    bi.build.applying = false; bi.build.accepting = false; bi.build.acceptProgress = null;
+    button.removeAttribute("aria-busy");
+  }
+  const named = left.slice(0, 10).map((r) => (r.name || r.id) + "：" + r.reason).join("；")
+    + (left.length > 10 ? "；…等 " + left.length + " 張" : "");
+  const notAccepted = left.length ? left.length + " 張未" + (andImport ? "接受、沒有匯入" : "套用")
+    + "：" + named : "";
+  const earlier = before ? "（另有 " + before + " 張先前已接受）" : "";
+  let message;
+  if (stopped) {
+    message = "套用到第 " + (done + 1) + " 張時停下：" + stopped.message
+      + "。其餘沒有送出，可以再按一次（已接受的不會重複）" + (andImport ? "；沒有匯入" : "")
+      + "。已套用 " + applied + " 張" + earlier + (notAccepted ? "；" + notAccepted : "") + "。";
+  } else if (wrote) {
+    const a = wrote.applied || {};
+    message = "已接受 " + applied + " 張並匯入" + earlier + "（新建 " + (a.created || 0)
+      + "、更新 " + (a.updated || 0) + "）；可用『復原這次匯入』撤回。"
+      + (notAccepted ? notAccepted + "。" : "");
+  } else if (unwritten) {
+    message = "已接受 " + applied + " 張" + earlier + "，但沒有匯入：" + unwritten.message
+      + "。已接受的還在，可以按「下一步：確認寫入」再試。"
+      + (notAccepted ? notAccepted + "。" : "");
+  } else {
+    message = "已套用 " + applied + " 張" + earlier
+      + (notAccepted ? "；" + notAccepted : "") + "。";
+  }
+  status.replaceChildren(message);
+  status.classList.toggle("bi-err", !!stopped || !!unwritten || left.length > 0);
+  if (wrote) {
+    const committed = bi.build.run;
+    status.append(" ", biButton("看匯入結果", () => biBuildStage("result"), "bi-link"), " ",
+      biButton("復原這次匯入", async (event) => {
+        event.target.disabled = true;  // one undo per import
+        try { await biBuildUndoImport(committed); }
+        catch (failure) { event.target.disabled = false; throw failure; }
+        status.replaceChildren("已復原這次匯入。");
+      }, "bi-btn"));
+  }
+  biBuildSave(); biBuildRenderRun();
+}
+
+el("bi-b-apply-all").addEventListener("click", () => biApplyAll(false)
+  .catch((failure) => biNotice(false, failure.message)));
+el("bi-b-apply-import").addEventListener("click", () => biApplyAll(true)
+  .catch((failure) => biNotice(false, failure.message)));
+
+el("bi-b-run-pick").addEventListener("change", () => {
+  el("bi-b-apply-status").textContent = "";
+});
 
 function biBuildPickCandidate(candidateId) {
   biBuildShowCandidate(candidateId);
@@ -7251,7 +7388,6 @@ for (const id of ["bi-b-cand-type", "bi-b-cand-state"]) {
 function biBuildRenderRun(detail = true) {
   const run = bi.build.run, body = el("bi-b-cands").tBodies[0];
   body.replaceChildren(); el("bi-b-chips").replaceChildren();
-  el("bi-b-accept-clean").disabled = !biRunOpen(run);
   biNext4();
   biBuildSteps(); biBuildRunPick();
   // With no run the table is not drawn: empty, it pushed 待審提案 out of sight below it.
@@ -7261,6 +7397,7 @@ function biBuildRenderRun(detail = true) {
     el("bi-b-same").replaceChildren();
     el("bi-b-cand").replaceChildren(bh("p", "bi-empty", "選一列，看原文與引用。"));
     el("bi-b-chips").append(bh("p", "bi-empty", "到上一步按「Ingest」產生候選卡。"));
+    biApplyAllLabel();
     return;
   }
   // What decides the next press on the line; the rest of the run's counts folded.
@@ -7313,7 +7450,7 @@ function biBuildSameNames() {
   }
   box.append(bh("h4", "", "和既有卡片同名（" + open.length + "）"),
     bh("p", "bi-meta", "AI 想新建的卡片，名字和另一種類型的卡片相同。"
-      + "不會自動合併，也不會被「接受所有」帶過。"),
+      + "不會自動合併；「全部套用」不會接受它們，會列在未套用裡。"),
     list);
 }
 
@@ -7597,34 +7734,6 @@ async function biBuildCandSource(item, chosen = null) {
   if (chosen) box.scrollIntoView({block: "nearest"});
 }
 
-el("bi-b-accept-clean").addEventListener("click", async () => {
-  const button = el("bi-b-accept-clean"), label = button.textContent;
-  const todo = bi.build.candidates.filter((c) => c.review === "pending" && !c.errors.length
-    && c.action !== "skip" && !biSameNameOpen(c).length);
-  const held = bi.build.candidates.filter((c) => c.review === "pending"
-    && biSameNameOpen(c).length).length;
-  // 「下一步」 waits for all of them: moving on early wrote only the ones accepted so far.
-  bi.build.accepting = true; button.disabled = true;
-  bi.build.acceptProgress = "0／" + todo.length;
-  biBuildRunPick(); biBuildSteps(); biNext4();
-  let done = 0;
-  try {
-    for (const candidate of todo) {
-      await biBuildReview(candidate.id, {review: "accepted"}, true);
-      done += 1; button.textContent = "接受中… " + done + "／" + todo.length;
-      bi.build.acceptProgress = done + "／" + todo.length; biNext4();
-      biBuildCandRows();
-    }
-    biNotice(true, "已接受 " + todo.length + " 張沒有錯誤的候選卡。"
-      + (held ? held + " 張和既有卡片同名，要在清單上逐張確認。" : ""));
-  } catch (failure) {
-    biNotice(false, "接受到第 " + (done + 1) + " 張時停下：" + failure.message + "。");
-  } finally {
-    bi.build.accepting = false; bi.build.acceptProgress = null; button.textContent = label;
-    biBuildSave(); biBuildRenderRun();
-  }
-});
-
 // -- steps 5-6: commit and result --------------------------------------------
 function biBuildSummary() {
   const run = bi.build.run, box = el("bi-b-summary"); box.replaceChildren();
@@ -7647,15 +7756,28 @@ function biBuildSummary() {
     || (c.citations || []).length);
 }
 
+async function biBuildCommit(run) {
+  // 「確認匯入」 and 「全部接受並匯入」 write the same way. Pressed again, or retried after a
+  // lost reply, the host answers with the write it already made (`already`).
+  const reply = await biCall("/api/bi/runs/" + run.id + "/commit", {dataset: biDataset()});
+  bi.build.run = reply.run; bi.build.result = reply; bi.loaded = {};
+  biRefreshCounts();
+  // The commit may have made proposals, and moved the vault's state.
+  biBuildVault().catch((failure) => biNotice(false, "知識庫狀態沒有載入：" + failure.message));
+  return reply;
+}
+
+async function biBuildUndoImport(run) {
+  await biCall("/api/bi/import/undo", {dataset: biDataset(), import_id: run.commit.import_id});
+  biNotice(true, "已復原這次匯入。"); bi.loaded = {}; biRefreshCounts();
+}
+
 el("bi-b-commit-go").addEventListener("click", async () => {
   const run = bi.build.run, msg = el("bi-b-commit-msg"); msg.replaceChildren();
   const button = el("bi-b-commit-go"); button.disabled = true;
   try {
-    const reply = await biCall("/api/bi/runs/" + run.id + "/commit", {dataset: biDataset()});
-    bi.build.run = reply.run; bi.build.result = reply; bi.loaded = {};
-    biBuildStage("result"); biRefreshCounts();
-    // The commit may have made proposals, and moved the vault's state.
-    biBuildVault().catch((failure) => biNotice(false, "知識庫狀態沒有載入：" + failure.message));
+    await biBuildCommit(run);
+    biBuildStage("result");
   } catch (failure) {
     const cards = (failure.payload && failure.payload.cards) || [];
     msg.append(bh("p", "bi-err", "沒有寫入：" + failure.message
@@ -7688,11 +7810,7 @@ function biBuildResult() {
     bh("div", "bi-actions",
       biButton("到卡片查看", () => biJump("cards"), "go"),
       biButton("看 Dashboard", () => biJump("dashboard"), "bi-btn"),
-      biButton("復原這次匯入", async () => {
-        await biCall("/api/bi/import/undo", {dataset: biDataset(),
-          import_id: run.commit.import_id});
-        biNotice(true, "已復原這次匯入。"); bi.loaded = {}; biRefreshCounts();
-      }, "bi-btn"),
+      biButton("復原這次匯入", () => biBuildUndoImport(run), "bi-btn"),
       biButton("再匯入另一份來源", () => {
         bi.build.run = null; bi.build.candidates = []; biBuildStage("source");
       }, "bi-btn")));

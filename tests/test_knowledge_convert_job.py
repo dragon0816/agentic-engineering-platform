@@ -12,7 +12,7 @@ from typing import Any
 from test_agent_web import base, fetch
 from test_knowledge_pipeline_web import _step, served_pipeline  # noqa: F401 - fixture
 
-from host_runtime.knowledge_convert import ConvertedItem, ConvertRun, run_convert
+from aep_wiki.host.knowledge_convert import ConvertedItem, ConvertRun, run_convert
 from host_runtime.web import AgentWebServer
 from host_runtime.web_page import PAGE
 

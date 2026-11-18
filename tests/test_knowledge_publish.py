@@ -8,12 +8,12 @@ from test_host_wiring import workspace
 from test_knowledge_sandbox import _base, _snapshot
 from test_product_e2e_05 import manifest
 
+from aep_wiki.host.knowledge_publish import PublishError, publish_candidate
+from aep_wiki.knowledge.pipeline import KnowledgePipeline
+from aep_wiki.knowledge.sandbox import Sandboxes
 from common.assets import AssetIdentity
 from host_runtime.contracts import CompanyHostConfiguration, HostLayout
-from host_runtime.knowledge_publish import PublishError, publish_candidate
 from knowledge.evolution import KnowledgeCatalog, KnowledgeManifest
-from knowledge.pipeline import KnowledgePipeline
-from knowledge.sandbox import Sandboxes
 from knowledge.vault import Vault
 
 V1 = AssetIdentity(namespace="engineering", name="rs-knowledge", version="1.0.2")
@@ -89,7 +89,7 @@ def test_only_a_candidate_of_that_base_can_be_published(tmp_path: Path) -> None:
 
 
 def test_refresh_stages_the_project_vault_as_the_agents_next_version(tmp_path: Path) -> None:
-    from host_runtime.knowledge_publish import refresh_from_project
+    from aep_wiki.host.knowledge_publish import refresh_from_project
 
     path, _, base = _host(tmp_path)
     data = json.loads(path.read_text(encoding="utf-8"))

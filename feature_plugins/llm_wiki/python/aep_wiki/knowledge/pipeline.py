@@ -20,12 +20,8 @@ from typing import Literal
 
 from pydantic import Field
 
-from common.base import Contract
-from knowledge.conflicts import decisions_text
-from knowledge.evolution import knowledge_digest
-from knowledge.layered_index import KEYS, EnrichReport, IndexReport, LayeredIndex, read_entry
-from knowledge.lint import scan
-from knowledge.merge import (
+from aep_wiki.knowledge.conflicts import decisions_text
+from aep_wiki.knowledge.merge import (
     ROOT_FILES,
     TEXT_AREAS,
     MergeChange,
@@ -34,9 +30,14 @@ from knowledge.merge import (
     read_tree,
     three_way,
 )
-from knowledge.migrate import adopt
-from knowledge.planning import DEFAULT_CONVENTIONS, IngestPlanner
-from knowledge.progress import reporter
+from aep_wiki.knowledge.migrate import adopt
+from aep_wiki.knowledge.planning import DEFAULT_CONVENTIONS, IngestPlanner
+from aep_wiki.knowledge.progress import reporter
+from aep_wiki.knowledge.sandbox import BASE, REPO_PREFIX, SandboxError, Sandboxes, SandboxInfo
+from common.base import Contract
+from knowledge.evolution import knowledge_digest
+from knowledge.layered_index import KEYS, EnrichReport, IndexReport, LayeredIndex, read_entry
+from knowledge.lint import scan
 from knowledge.questions import category as question_category
 from knowledge.questions import default_sets, set_categories
 from knowledge.questions import load as load_questions
@@ -50,7 +51,6 @@ from knowledge.raw import (
     RawIndex,
     load_document,
 )
-from knowledge.sandbox import BASE, REPO_PREFIX, SandboxError, Sandboxes, SandboxInfo
 from knowledge.schema import front_fields, ingest_conventions
 from knowledge.sections import like_endings, lost_lines
 from knowledge.vault import Vault, WritePlan, normalize
@@ -377,9 +377,10 @@ class KnowledgePipeline:
         """The writing guide and the two templates shipped with the platform."""
         folder = Path(__file__).parent / "skill_guide"
         return SkillGuide(
-            guide=(folder / "GUIDE.zh-TW.md").read_text(encoding="utf-8"),
-            ingest_template=(folder / "ingest.SKILL.md").read_text(encoding="utf-8"),
-            answer_template=(folder / "answer.SKILL.md").read_text(encoding="utf-8"),
+            # Plugin package paths are lowercase; the texts are the files they were.
+            guide=(folder / "guide.zh-tw.md").read_text(encoding="utf-8"),
+            ingest_template=(folder / "ingest.skill.md").read_text(encoding="utf-8"),
+            answer_template=(folder / "answer.skill.md").read_text(encoding="utf-8"),
         )
 
     def read_file(self, sandbox_id: str, path: str) -> SandboxFile:

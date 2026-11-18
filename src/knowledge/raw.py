@@ -348,7 +348,7 @@ class ImageDescription(Contract):
 
 class Describer(Protocol):
     """Gives image sections without text a description before the Raw file is
-    written; `knowledge.describe.ImageDescriber` does so through a model."""
+    written; the LLM Wiki plugin's `ImageDescriber` does so through a model."""
 
     def describe_sections(
         self,

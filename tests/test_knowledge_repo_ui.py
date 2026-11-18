@@ -20,6 +20,7 @@ import pytest
 from test_knowledge_repo_pipeline import QUESTION, served  # noqa: F401 - the fixture
 from test_knowledge_repos_api import _wiki_folder
 
+from aep_wiki.knowledge import wiki_repos_write
 from host_runtime.web import AgentWebServer
 from knowledge import wiki_repos
 
@@ -163,7 +164,7 @@ def test_a_repository_on_the_knowledge_page(served: AgentWebServer, tmp_path: Pa
         wait(has("kp-ver-result", "已發佈「v1」"))
         wait(has("kp-ver-history", "發佈中"))
         wait(has("kp-ver-reads", "發佈版本「v1」"))
-        assert wiki_repos.history(workspace, listed["id"])["published"]["tag"] == "v1"
+        assert wiki_repos_write.history(workspace, listed["id"])["published"]["tag"] == "v1"
         shoot("repo-published")
 
         # -- phone width ---------------------------------------------------------------------

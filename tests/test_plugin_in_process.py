@@ -118,6 +118,29 @@ def test_an_older_manifest_serializes_as_before() -> None:
     assert "in_process" not in PluginManifest.model_validate(raw).model_dump(mode="json")
 
 
+def test_a_manifest_places_its_page_parts_and_its_default_is_left_off_the_wire(
+    tmp_path: Path,
+) -> None:
+    package = _name()
+    plain = PluginManifest.model_validate(_manifest(package))
+    assert plain.in_process is not None and plain.in_process.page_order == 100
+    assert "page_order" not in plain.model_dump(mode="json")["in_process"]
+    placed = _manifest(package, in_process={"package": package, "entry": f"{package}.feature"})
+    placed["in_process"]["page_order"] = 50
+    early = PluginManifest.model_validate(placed)
+    assert early.model_dump(mode="json")["in_process"]["page_order"] == 50
+    for wrong in (-1, 1001, "50"):
+        placed["in_process"]["page_order"] = wrong
+        with pytest.raises(ValidationError):
+            PluginManifest.model_validate(placed)
+    # Loading takes the manifest's place for the feature's page fragments.
+    folder = _bundle(tmp_path, package, "!")
+    placed["in_process"]["page_order"] = 7
+    (folder / in_process.MANIFEST_FILE).write_text(json.dumps(placed), encoding="utf-8")
+    sources, _ = in_process.resolve(None, (tmp_path,))
+    assert [feature.page_order for feature in features.load_sources(sources)] == [7]
+
+
 def test_python_files_belong_to_the_declared_package() -> None:
     package = _name()
     manifest = PluginManifest.model_validate(_manifest(package))
@@ -314,3 +337,43 @@ def test_the_bi_knowledge_plugin_builds_as_an_installable_in_process_package() -
     assert "python/aep_bi/host/bi_page.py" in paths
     assert "python/aep_bi/cards/samples/product-spec@1.0.0.json" in paths
     assert not any("__pycache__" in path for path in paths)
+
+
+def test_the_llm_wiki_plugin_builds_deterministically_within_the_plugin_limits() -> None:
+    import importlib.util
+
+    from common import plugins
+
+    spec = importlib.util.spec_from_file_location(
+        "build_llm_wiki_plugin", ROOT / "scripts" / "build_llm_wiki_plugin.py"
+    )
+    assert spec is not None and spec.loader is not None
+    builder = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(builder)
+    payload = builder.package_bytes()
+    assert payload == builder.package_bytes()  # deterministic
+    package = plugins.parse_plugin_package(payload)
+    manifest = package.manifest
+    assert manifest.plugin_id == "llm-wiki.wiki" and manifest.identity.version == "1.0.0"
+    assert (manifest.core_api.minimum, manifest.core_api.below) == ("1.2.0", "2.0.0")
+    assert manifest.in_process is not None and manifest.in_process.entry == "aep_wiki.feature"
+    assert manifest.in_process.page_order == 50
+    sizes = {item.path: item.size for item in package.files}
+    assert len(sizes) <= plugins.MAX_FILES == 256
+    assert sum(sizes.values()) <= plugins.MAX_TOTAL_FILE_BYTES == 6 * 1024 * 1024
+    assert max(sizes.values()) <= plugins.MAX_FILE_BYTES == 2 * 1024 * 1024
+    for path in (
+        "python/aep_wiki/feature.py",
+        "python/aep_wiki/host/wiki_page.py",
+        "python/aep_wiki/knowledge/pipeline.py",
+        "python/aep_wiki/knowledge/skill_guide/guide.zh-tw.md",
+    ):
+        assert path in sizes, path
+    assert not any("__pycache__" in path for path in sizes)
+
+
+def test_the_llm_wiki_plugin_is_bundled_and_loads_by_default() -> None:
+    chosen, skipped = in_process.resolve(None)
+    assert "llm-wiki.wiki" in {source.plugin_id for source in chosen}
+    assert not [item for item in skipped if item.plugin_id == "llm-wiki.wiki"]
+    assert "llm-wiki" in {feature.name for feature in features.active()}

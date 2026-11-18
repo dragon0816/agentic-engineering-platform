@@ -6,7 +6,7 @@ import threading
 from pathlib import Path
 from typing import Any
 
-from host_runtime.knowledge_reingest import ReingestRun, latest, one, run_reingest
+from aep_wiki.host.knowledge_reingest import ReingestRun, latest, one, run_reingest
 from host_runtime.web_page import PAGE
 
 

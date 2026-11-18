@@ -5,8 +5,8 @@ from typing import Any
 
 import pytest
 
+from aep_wiki.host.skill_assist import Turn, assist, proposal_of
 from common.execution import Failure, TraceIdentifiers
-from host_runtime.skill_assist import Turn, assist, proposal_of
 from host_runtime.web_page import PAGE
 from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
 
@@ -92,7 +92,7 @@ def test_the_page_offers_the_assistant() -> None:
 
 
 def test_the_assistant_reports_its_states_and_checks_the_frontmatter() -> None:
-    from host_runtime.skill_assist import check_proposal
+    from aep_wiki.host.skill_assist import check_proposal
 
     states: list[str] = []
     reply = assist(

@@ -12,8 +12,7 @@ from typing import Any
 import pytest
 from test_raw import make_vault
 
-from common.execution import Failure
-from knowledge.planning import (
+from aep_wiki.knowledge.planning import (
     PLAN_CONTRACT,
     RELEVANCE_CONTRACT,
     IngestPlanner,
@@ -21,6 +20,7 @@ from knowledge.planning import (
     extract_json,
     source_text,
 )
+from common.execution import Failure
 from knowledge.raw import RawDocument, RawSection, source_for
 from knowledge.vault import PlannedPage, Vault, WritePlan, provenance_lines
 from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent

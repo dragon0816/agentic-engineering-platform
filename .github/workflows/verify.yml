@@ -81,7 +81,7 @@ jobs:
       # cascade into confusing install failures. The preview uploads keep the
       # default `success()`: a red commit never publishes a bundle.
       - id: pytest
-        run: python -m pytest --junitxml=pytest-results.xml
+        run: python -m pytest -n auto --dist loadfile --junitxml=pytest-results.xml
         env:
           # Opt-in browser diagnostics (src/integrations/browser.py).
           AEP_BROWSER_DIAG_DIR: ${{ runner.temp }}/browser-diag

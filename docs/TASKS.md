@@ -5088,5 +5088,15 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   → restart → new text live. Disable → restart → no BI pane, /api/bi 404,
   Knowledge pipeline API 200. Uninstall → bundled 1.0.0 back after restart.
   Backup of the preview venv packages: preview-0.1.0/backups/pre-bi-plugin-20261118.
-- [ ] Open: GitHub Actions blocked by account billing; LLM Wiki plugin proposal
-  (docs/phases/FEATURE_PLUGIN_WIKI_PROPOSAL_DRAFT_20261118.md) awaits owner scope.
+- [ ] Open: GitHub Actions blocked by account billing.
+- [x] 2026-11-18 LLM Wiki in-process plugin, stages A and B (owner consent 8dcda28c),
+  branch phase-plugins/wiki-20261118: characterization first; A routes the Wiki
+  maintenance through feature mount points (generic `in_process.page_order`, core
+  stand-in table holding BI's and the Wiki's); B moves it to bundled
+  `feature_plugins/llm_wiki` (`llm-wiki.wiki` 1.0.0, package `aep_wiki`, builder
+  scripts/build_llm_wiki_plugin.py). Same-screen evidence per D2; choices in
+  DECISIONS 2026-11-18. Component runs only; full suite, 445/46 comparison, wheel
+  and live acceptance not yet done here.
+- [x] 2026-11-18 BI review accept-all + accept-and-import (81a5f660, f56c7004): new /accept route,
+  old bulk button removed; 135 API/static + 17 UI tests pass. Parallel test runs: pytest-xdist in dev
+  extras; full suite `python -m pytest -n auto --dist loadfile` (CI too).

@@ -16,9 +16,9 @@ from typing import Self
 
 from pydantic import model_validator
 
+from aep_wiki.knowledge.planning import NO_DECISIONS
 from common.base import Contract, Text
 from knowledge.lint import CONFLICT, OpenConflict, find_conflicts, line_ending, read_pages
-from knowledge.planning import NO_DECISIONS
 from knowledge.vault import Vault, normalize
 
 DECISIONS_FILE = "decisions.md"

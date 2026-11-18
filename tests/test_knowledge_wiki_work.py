@@ -12,7 +12,8 @@ from pathlib import Path
 
 from test_knowledge_repos_api import PAGE, _call, _deliver, _ok, _push, _two_pcs
 
-from knowledge import wiki_repos, wiki_work
+from aep_wiki.knowledge import wiki_work
+from knowledge import wiki_repos
 from knowledge.repo import skills, wiki
 from knowledge.vault import Vault
 
