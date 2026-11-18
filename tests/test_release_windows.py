@@ -141,8 +141,11 @@ def test_the_guide_explains_every_setting_and_ships_with_the_manual() -> None:
     ]
     positions = [guide.index(chapter) for chapter in chapters]
     assert positions == sorted(positions)
-    # The labels a colleague looks for on screen are the code's own.
-    page = (REPO / "src" / "host_runtime" / "web_page.py").read_text(encoding="utf-8")
+    # The labels a colleague looks for on screen are the code's own: the page as
+    # served, with the bundled feature plugins' parts (BI, LLM Wiki) in it.
+    from host_runtime.web_page import page as served_page
+
+    page = served_page()
     for label in (
         "New session",
         "Natural-language model",
