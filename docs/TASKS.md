@@ -5077,3 +5077,16 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
 - [x] 2026-11-08, Codex (codex-lead): preserve queued-send notice during delayed backend checks (c0553d76), with coordinated browser regression failing on b9d96ac7 and all original assertions retained. Focused 9 passed; final full 6018 passed/13 skipped.
 
 - [x] 2026-11-08, Codex (codex-lead): build local Windows offline release 20261108-0234-e564e1ad from clean tested e564e1ad. Official builder exit0; archive SHA256, integrity, all manifest hashes/sizes/revision and inner-wheel repair content verified. Package189186782 bytes; SHA256/path in HANDOFF. No tag, publish, push, install or owner restart performed.
+- [x] 2026-11-18 445 Knowledge comparison on the full run of 662998b9 (src/tests
+  = main 9b019e76): 445/445 present and passed; 45/46 Knowledge sources
+  unchanged, knowledge_binding.py +2/-3 is the intended features seam.
+- [x] 2026-11-18 live acceptance on the owner's resident AEP (runs main's source
+  via the repo .venv, port 53583), each restart after an idle check of
+  /api/activity and /api/tasks: restart on main → BI loads as bundled
+  bi-knowledge.bi 1.0.0 (pane, convert progress, 3 datasets). Installed a 1.0.1
+  package with one visible text change via the Plugins API → restart_required
+  → restart → new text live. Disable → restart → no BI pane, /api/bi 404,
+  Knowledge pipeline API 200. Uninstall → bundled 1.0.0 back after restart.
+  Backup of the preview venv packages: preview-0.1.0/backups/pre-bi-plugin-20261118.
+- [ ] Open: GitHub Actions blocked by account billing; LLM Wiki plugin proposal
+  (docs/phases/FEATURE_PLUGIN_WIKI_PROPOSAL_DRAFT_20261118.md) awaits owner scope.
