@@ -90,74 +90,6 @@ from capabilities.excel_blocks.handlers import (
     UpsertResult,
 )
 from capabilities.files import READ_FILE_SPEC, ReadFileHandler, ReadFileInput, ReadFileOutput
-from capabilities.knowledge_pipeline.contracts import (
-    AdoptRequest,
-    ConvertRequest,
-    DropAdded,
-    DropAddRequest,
-    DropFoldersRequest,
-    FileRequest,
-    IndexBuildRequest,
-    IndexEnrichRequest,
-    IngestApplyRequest,
-    IngestPlanRequest,
-    LintRequest,
-    MergeRequest,
-    PlanPageRequest,
-    PullRequest,
-    RuleWriteRequest,
-    SandboxCreateRequest,
-    SandboxDiscarded,
-    SandboxList,
-    SandboxListRequest,
-    SandboxRecord,
-    SandboxRef,
-    SkillGuideRequest,
-)
-from capabilities.knowledge_pipeline.handlers import (
-    ADOPT_SPEC,
-    CONVERT_SPEC,
-    DROP_ADD_SPEC,
-    DROP_FOLDERS_SPEC,
-    FILE_READ_SPEC,
-    INDEX_BUILD_SPEC,
-    INDEX_ENRICH_SPEC,
-    INGEST_APPLY_SPEC,
-    INGEST_PLAN_SPEC,
-    LINT_SPEC,
-    MERGE_SPEC,
-    PLAN_PAGE_SPEC,
-    PULL_SPEC,
-    QUESTION_SETS_SPEC,
-    RULE_FILES_SPEC,
-    RULE_WRITE_SPEC,
-    SANDBOX_CONTENTS_SPEC,
-    SANDBOX_CREATE_SPEC,
-    SANDBOX_DISCARD_SPEC,
-    SANDBOX_LIST_SPEC,
-    SKILL_GUIDE_SPEC,
-    AdoptHandler,
-    ConvertHandler,
-    DropAddHandler,
-    DropFoldersHandler,
-    FileReadHandler,
-    IndexBuildHandler,
-    IndexEnrichHandler,
-    IngestApplyHandler,
-    IngestPlanHandler,
-    LintHandler,
-    MergeHandler,
-    PlanPageHandler,
-    PullHandler,
-    QuestionSetsHandler,
-    RuleFilesHandler,
-    RuleWriteHandler,
-    SandboxContentsHandler,
-    SandboxCreateHandler,
-    SandboxDiscardHandler,
-    SandboxListHandler,
-    SkillGuideHandler,
-)
 from capabilities.knowledge_query.handlers import (
     KNOWLEDGE_QUERY_SPEC,
     MARKET_MATRIX_SPEC,
@@ -306,7 +238,7 @@ from harness.restricted_runner import (
     RunnerError,
     RunnerLimits,
 )
-from host_runtime import features, wiki_bench
+from host_runtime import features
 from host_runtime.agent import LocalAgent
 from host_runtime.attachments import AttachmentStore
 from host_runtime.bridge_tools import bridge_tools
@@ -362,35 +294,13 @@ from integrations.outlook_draft import require_com as require_outlook
 from integrations.outlook_send import OutlookComDraftSender
 from integrations.web_script import WebScript, WebScriptResult
 from knowledge import wiki_repos
-from knowledge.describe import ImageDescriber
 from knowledge.evolution import (
     KnowledgeAnswerRecord,
     KnowledgeCatalog,
     KnowledgeManifest,
     KnowledgeQueryRequest,
 )
-from knowledge.layered_index import EnrichReport, IndexReport
 from knowledge.market_matrix import MarketMatrixRecord, MarketMatrixRequest
-from knowledge.office import office_extractors
-from knowledge.pipeline import (
-    AdoptSummary,
-    ConvertResult,
-    DropFolders,
-    IngestApplyResult,
-    IngestPlanResult,
-    KnowledgePipeline,
-    LintSummary,
-    MergeReport,
-    PlanPage,
-    PullResult,
-    QuestionSets,
-    RuleFiles,
-    SandboxContents,
-    SandboxFile,
-    SkillGuide,
-)
-from knowledge.repo import wiki
-from knowledge.sandbox import Sandboxes
 from knowledge.vault import Vault, VaultError
 from models.approved import ApprovedModelClient
 from models.clients import ModelClients
@@ -1399,8 +1309,13 @@ def build_gateway(
                     KnowledgeAnswerRecord,
                     ExecutionDependencies(central_required=False),
                 )
-    if config.knowledge_pipeline is not None:
-        _register_knowledge_pipeline(installed, config, layout, drafting_model)
+    # The LLM Wiki's sandboxed pipeline (a feature): its capabilities, when the
+    # Wiki is installed and host.json configures it.
+    pipeline_bindings = features.active().service("knowledge_pipeline_bindings")
+    if config.knowledge_pipeline is not None and pipeline_bindings is not None:
+        local = ExecutionDependencies(central_required=False)
+        for spec, handler, request, response in pipeline_bindings(config, layout, drafting_model):
+            installed.register(spec, handler, request, response, local)
     # Legacy grant files and profile tool lists are not execution admission.
     # Actor/device identity and model/data eligibility remain their own contracts.
     policy = LocalPolicy(owner_mode=authorization is None and config.local_owner_grants)
@@ -2351,11 +2266,10 @@ def build_runtime(
     """Assemble this company host, or say which file stopped it."""
     checked = CompanyHostConfiguration.model_validate(config)
     place = layout if layout is not None else HostLayout.under(checked.workspace_root)
-    # A wiki repository's push is checked against its recorded test runs (R4a).
-    wiki.set_benchmark(partial(wiki_bench.gate, place.workspace_root))
     # The features this workspace runs: bundled and installed in-process
     # plugins (Plugin API 1.2), loaded now; an update takes effect at a start.
-    # Each feature's own setup follows (a BI vault's push gate, BI T1).
+    # Each feature's own setup follows (a BI vault's push gate, BI T1; a wiki
+    # repository's push gate, R4a).
     features.for_host(place.workspace_root).startup(place.workspace_root)
     membership = load_membership(checked, place)
     gateway = build_gateway(
@@ -2576,80 +2490,3 @@ def _register_business_cards(
         installed.register(
             spec, handler, request, response, ExecutionDependencies(central_required=False)
         )
-
-
-def _register_knowledge_pipeline(
-    installed: InstalledCapabilities,
-    config: CompanyHostConfiguration,
-    layout: HostLayout,
-    model: ModelClient | None,
-) -> None:
-    """Sandboxed convert/ingest/lint (docs/phases/KNOWLEDGE_K1.md). Ingest
-    planning and image description use the routing model when there is one;
-    images are described only when its endpoint declares vision."""
-    assert config.knowledge_pipeline is not None
-    binding = config.models
-    alias = binding.routing_alias if binding is not None else None
-    endpoints = binding.catalog.endpoints if binding is not None else ()
-    endpoint = next((e for e in endpoints if e.alias == alias), None)
-    describer = (
-        ImageDescriber(model, alias=alias)
-        if model is not None
-        and alias is not None
-        and endpoint is not None
-        and endpoint.capabilities.vision
-        else None
-    )
-    pipeline = KnowledgePipeline(
-        Sandboxes(
-            layout.workspace_root,
-            root=(
-                Path(config.knowledge_pipeline.sandbox_root)
-                if config.knowledge_pipeline.sandbox_root
-                else None
-            ),
-        ),
-        {item.name: Path(item.root) for item in config.knowledge_pipeline.vaults},
-        extractors=office_extractors(),
-        model=model,
-        alias=alias,
-        describer=describer,
-        drop_roots={
-            item.name: Path(item.drop_root)
-            for item in config.knowledge_pipeline.vaults
-            if item.drop_root
-        },
-        questions_roots={
-            item.name: Path(item.questions_root)
-            for item in config.knowledge_pipeline.vaults
-            if item.questions_root
-        },
-        maintainers={
-            item.name: tuple(item.maintainers) for item in config.knowledge_pipeline.vaults
-        },
-    )
-    local = ExecutionDependencies(central_required=False)
-    for spec, handler, request, response in (
-        (SANDBOX_CREATE_SPEC, SandboxCreateHandler(pipeline), SandboxCreateRequest, SandboxRecord),
-        (SANDBOX_LIST_SPEC, SandboxListHandler(pipeline), SandboxListRequest, SandboxList),
-        (CONVERT_SPEC, ConvertHandler(pipeline), ConvertRequest, ConvertResult),
-        (INGEST_PLAN_SPEC, IngestPlanHandler(pipeline), IngestPlanRequest, IngestPlanResult),
-        (INGEST_APPLY_SPEC, IngestApplyHandler(pipeline), IngestApplyRequest, IngestApplyResult),
-        (LINT_SPEC, LintHandler(pipeline), LintRequest, LintSummary),
-        (ADOPT_SPEC, AdoptHandler(pipeline), AdoptRequest, AdoptSummary),
-        (INDEX_ENRICH_SPEC, IndexEnrichHandler(pipeline), IndexEnrichRequest, EnrichReport),
-        (INDEX_BUILD_SPEC, IndexBuildHandler(pipeline), IndexBuildRequest, IndexReport),
-        (MERGE_SPEC, MergeHandler(pipeline), MergeRequest, MergeReport),
-        (DROP_FOLDERS_SPEC, DropFoldersHandler(pipeline), DropFoldersRequest, DropFolders),
-        (PULL_SPEC, PullHandler(pipeline), PullRequest, PullResult),
-        (QUESTION_SETS_SPEC, QuestionSetsHandler(pipeline), SandboxRef, QuestionSets),
-        (RULE_FILES_SPEC, RuleFilesHandler(pipeline), SandboxRef, RuleFiles),
-        (FILE_READ_SPEC, FileReadHandler(pipeline), FileRequest, SandboxFile),
-        (RULE_WRITE_SPEC, RuleWriteHandler(pipeline), RuleWriteRequest, SandboxFile),
-        (PLAN_PAGE_SPEC, PlanPageHandler(pipeline), PlanPageRequest, PlanPage),
-        (SKILL_GUIDE_SPEC, SkillGuideHandler(pipeline), SkillGuideRequest, SkillGuide),
-        (DROP_ADD_SPEC, DropAddHandler(pipeline), DropAddRequest, DropAdded),
-        (SANDBOX_CONTENTS_SPEC, SandboxContentsHandler(pipeline), SandboxRef, SandboxContents),
-        (SANDBOX_DISCARD_SPEC, SandboxDiscardHandler(pipeline), SandboxRef, SandboxDiscarded),
-    ):
-        installed.register(spec, handler, request, response, local)

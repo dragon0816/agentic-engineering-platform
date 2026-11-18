@@ -32,7 +32,8 @@ from test_knowledge_repos_api import (
 from test_knowledge_sandbox import _base
 
 from host_runtime.host import build_runtime
-from host_runtime.web import PIPELINE_STEPS, AgentWeb, AgentWebServer
+from host_runtime.web import AgentWeb, AgentWebServer
+from host_runtime.wiki_web import PIPELINE_STEPS
 from knowledge import wiki_repos, wiki_work
 from knowledge.repo import wiki
 

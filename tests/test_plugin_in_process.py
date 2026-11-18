@@ -118,6 +118,29 @@ def test_an_older_manifest_serializes_as_before() -> None:
     assert "in_process" not in PluginManifest.model_validate(raw).model_dump(mode="json")
 
 
+def test_a_manifest_places_its_page_parts_and_its_default_is_left_off_the_wire(
+    tmp_path: Path,
+) -> None:
+    package = _name()
+    plain = PluginManifest.model_validate(_manifest(package))
+    assert plain.in_process is not None and plain.in_process.page_order == 100
+    assert "page_order" not in plain.model_dump(mode="json")["in_process"]
+    placed = _manifest(package, in_process={"package": package, "entry": f"{package}.feature"})
+    placed["in_process"]["page_order"] = 50
+    early = PluginManifest.model_validate(placed)
+    assert early.model_dump(mode="json")["in_process"]["page_order"] == 50
+    for wrong in (-1, 1001, "50"):
+        placed["in_process"]["page_order"] = wrong
+        with pytest.raises(ValidationError):
+            PluginManifest.model_validate(placed)
+    # Loading takes the manifest's place for the feature's page fragments.
+    folder = _bundle(tmp_path, package, "!")
+    placed["in_process"]["page_order"] = 7
+    (folder / in_process.MANIFEST_FILE).write_text(json.dumps(placed), encoding="utf-8")
+    sources, _ = in_process.resolve(None, (tmp_path,))
+    assert [feature.page_order for feature in features.load_sources(sources)] == [7]
+
+
 def test_python_files_belong_to_the_declared_package() -> None:
     package = _name()
     manifest = PluginManifest.model_validate(_manifest(package))

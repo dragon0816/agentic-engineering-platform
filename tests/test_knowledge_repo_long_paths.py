@@ -10,7 +10,7 @@ from tempfile import TemporaryDirectory
 import pytest
 from test_knowledge_repos_api import _call, _ok
 
-from knowledge import wiki_repos
+from knowledge import wiki_repos, wiki_repos_write
 from knowledge.evolution import knowledge_digest, raw_digest
 from knowledge.vault import Vault
 
@@ -50,7 +50,7 @@ def test_a_long_path_imports_publishes_and_reads(tmp_path: Path) -> None:
             "id": "long-wiki",
             "author": "x",
         }
-        done = wiki_repos.import_copy(workspace, given, "x")
+        done = wiki_repos_write.import_copy(workspace, given, "x")
     assert done["imported"]["raw"] == 1 and done["imported"]["pages"] >= 1
     folder = workspace / "knowledge-repos" / "long-wiki" / "work" / "files" / "sources"
     assert len(str(folder)) + len(NAME) + 9 > LIMIT  # what this test is about

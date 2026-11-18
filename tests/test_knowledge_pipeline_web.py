@@ -277,6 +277,8 @@ def test_a_project_vault_is_offered_first(tmp_path: Path) -> None:
         },
     )
     with build_runtime(config) as runtime:
-        info = AgentWeb(runtime).knowledge_pipeline()
+        wiki = AgentWeb(runtime).wiki
+        assert wiki is not None
+        info = wiki.knowledge_pipeline()
     assert info["bases"] == ["rs-project", "k-test"]
     assert info["vaults"][0] == {"name": "rs-project", "project": True, "asset": "rs-knowledge"}

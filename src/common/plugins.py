@@ -69,6 +69,8 @@ CORE_PLUGIN_API_VERSION = "1.2.0"
 FEATURE_API_MINIMUM = "1.1.0"
 #: The lowest core Plugin API an in-process feature plugin (`in_process`) may declare.
 IN_PROCESS_API_MINIMUM = "1.2.0"
+#: An in-process feature's page fragments' place when its manifest names none.
+DEFAULT_PAGE_ORDER = 100
 #: The existing Bridge Extension JSON-lines protocol, reused unchanged.
 WORKER_PROTOCOL: Literal["aep-extension-jsonl/v1"] = "aep-extension-jsonl/v1"
 
@@ -302,6 +304,16 @@ class PluginInProcess(Contract):
     attribute: Annotated[str, StringConstraints(pattern=r"^[A-Za-z_][A-Za-z0-9_]{0,39}$")] = (
         "FEATURE"
     )
+    #: Where its page fragments go in their slots: lower first, equal ones by
+    #: plugin id (owner 2026-11-18 D4). Left out of the wire form at its default.
+    page_order: Annotated[StrictInt, Field(ge=0, le=1000)] = DEFAULT_PAGE_ORDER
+
+    @model_serializer(mode="wrap")
+    def _wire(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        if self.page_order == DEFAULT_PAGE_ORDER:
+            data.pop("page_order", None)  # the form before page_order, byte for byte
+        return data
 
     @model_validator(mode="after")
     def entry_in_package(self) -> Self:
