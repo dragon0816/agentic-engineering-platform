@@ -191,6 +191,9 @@ def test_the_rendered_configuration_holds_references_not_secrets() -> None:
         ("api_key: os.environ/CHATRS_TOKEN", "api_key: " + fake_jwt(5)),
         ("master_key: os.environ/LITELLM_MASTER_KEY", "master_key: sk-abcdef1234567890"),
     ],
+    # Fixed ids: the JWT carries the current time, and parallel workers must
+    # collect the same test names (pytest-xdist).
+    ids=["jwt_api_key", "master_key"],
 )
 def test_a_configuration_with_a_credential_value_is_refused(change: str, problem: str) -> None:
     text = render_config(GatewaySettings()).replace(change, problem, 1)
