@@ -135,7 +135,7 @@ def test_step_3(
         assert page.run("document.getElementById('bi-b-bq-q').value") == ""
         assert page.run("document.getElementById('bi-b-bq-del').hidden")
         page.click("#bi-b-bq-list tbody tr")
-        page.click("#bi-b-bq-del")
+        page.click("#bi-b-bq-del")  # no confirmation: undone by not committing
         page.see("bi-b-bench-state", "0 題")
         assert _questions(workspace) == {}
         page.see("bi-b-bq-title", "新增題目")
@@ -166,6 +166,36 @@ def test_step_3(
             " >= document.getElementById('bi-b-test-results').getBoundingClientRect().bottom"
         )
         page.shoot("results-and-dashboard")
+
+        # -- delete added questions: one or several ticked, at once; past results stay ------
+        page.run("document.getElementById('bi-b-bench').open = true")
+        for text in ("第二題？", "第三題？"):
+            page.set_value("bi-b-bq-q", text)
+            page.set_value("bi-b-bq-must", "FicTech")
+            page.click("#bi-b-bq-form button[type=submit]")
+            page.see("bi-b-bq-list", text)
+        page.see("bi-b-bench-state", "3 題")
+        assert page.run("document.getElementById('bi-b-bq-bulk') === null")
+        rows = "[...document.querySelectorAll('#bi-b-bq-list tbody tr')]"
+        row_of = f"{rows}.find((r) => r.textContent.includes('FicTech 是什麼'))"
+        page.run(f"{row_of}.querySelector('.bi-bq-tick').click()")
+        assert page.text_of("bi-b-bq-title") == "新增題目"  # ticking does not open the row
+        page.see("bi-b-bq-bulk", "刪除選取的 1 題")
+        page.click_text("#bi-b-bq-bulk", "刪除選取的 1 題")
+        page.see("bi-b-bench-state", "2 題")
+        assert all(q["question"] != "FicTech 是什麼？" for q in _questions(workspace).values())
+        # The run's result for it stays readable, marked as deleted.
+        page.see("bi-b-bench-report", "FicTech 是什麼？（已刪除）")
+        # Pending until commit and push, like any edit.
+        page.see("bi-b-ver-pending", "測試題")
+        page.run("document.querySelectorAll('#bi-b-bq-list .bi-bq-tick').forEach((t) => t.click())")
+        page.see("bi-b-bq-bulk", "刪除選取的 2 題")
+        page.click_text("#bi-b-bq-bulk", "刪除選取的 2 題")
+        page.see("bi-b-bench-state", "0 題")
+        assert _questions(workspace) == {}
+        assert page.run("document.getElementById('bi-b-bq-bulk') === null")
+        page.see("bi-b-bench-report", "（已刪除）")
+        page.run("document.getElementById('bi-b-bench').open = false")
 
         # -- a card opens beside what it came from: no tab change, same scroll ---------------
         page.run("document.getElementById('bi-b-ver').scrollIntoView()")
@@ -212,9 +242,30 @@ def test_step_3(
         # The tabs do the same, and the Dashboard moves to its tab and back.
         page.click("#bi-views [data-bi-view=dashboard]")
         page.wait("bi.view === 'dashboard'")
+        # The working domain is the Dashboard's domain: nothing to choose (owner 2026-11-19).
+        assert page.run("document.getElementById('bi-domain-box').hidden")
         assert page.run("document.getElementById('bi-view-dashboard').contains("
                         "document.getElementById('bi-dash-sections'))")  # fmt: skip
         assert page.run("document.getElementById('bi-back').hidden")  # the tabs are the way back
         page.click("#bi-views [data-bi-view=build]")
         page.wait("bi.view === 'build'")
         assert abs(float(page.run(SCROLL)) - before) < 2
+
+        # -- each analysis follows the working domain: no 領域 per analysis, rarer actions in 更多
+        # This vault's domains are library entries (no card domain), and its analyses narrow only
+        # by the card domain: each says so instead of offering a run into an empty chart.
+        page.run("document.getElementById('bi-b-an').open = true")
+        rows = "[...document.querySelectorAll('#bi-b-an-list tbody tr:not(.bi-detail-row)')]"
+        page.wait(f"{rows}.length > 0")
+        unsupported = f"{rows}.filter((r) => r.textContent.includes('不支援依資料夾篩選'))"
+        assert page.run(f"{unsupported}.length") > 0
+        assert page.run(
+            f"{unsupported}.every((r) => ![...r.querySelectorAll("
+            "':scope td > .bi-actions > button')].some((b) => b.textContent === '執行'))"
+        )
+        assert page.run(f"{rows}[0].querySelector('details.bi-row-menu').textContent"
+                        ".includes('和 AI 一起修改')")  # fmt: skip
+        assert page.run("document.querySelector('#bi-b-an-list [data-param=domain]') === null")
+        assert page.run("biDashDomain()") == page.run(
+            "biScopeDomain() || biScope().split('/').pop()"
+        )

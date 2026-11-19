@@ -293,15 +293,39 @@ def test_the_whole_build_flow(
         page.choose("bi-b-src-folder", str(page.run("bi.build.homes[0].folder")))
         page.click("#bi-b-qa-open")
         page.ai_opened("questions")
-        # The questions stay beside the AI, and 跑測試 is not pushed down by it.
-        beside = page.run(
-            "(() => { const r = (i) => document.getElementById(i).getBoundingClientRect();"
-            " return r('bi-b-bq-list').right <= r('bi-ai').left"
-            " && r('bi-b-bq-list').top < innerHeight && r('bi-b-bq-list').bottom > 0"
-            " && r('bi-b-bench-run').right <= r('bi-ai').left"
-            " && r('bi-ai-send').bottom <= innerHeight; })()"
+        # Step 3 shows Benchmark | Dashboard | the AI session as tabs (owner 2026-11-19): the AI
+        # tab is chosen, it lies in the page instead of covering it, and nothing makes room.
+        tabs = "[...document.querySelectorAll('#bi-b-tabs [role=tab]')]"
+        assert page.run(f"{tabs}.map((t) => t.textContent).join('|')") == (
+            "Benchmark|Dashboard|AI 出題"
         )
-        assert beside
+        assert (
+            page.run(f"{tabs}.find((t) => t.getAttribute('aria-selected') === 'true').dataset.tab")
+            == "ai"
+        )
+        assert page.run("document.getElementById('bi-b-tab-ai').contains("
+                        "document.getElementById('bi-ai'))")  # fmt: skip
+        assert page.run("getComputedStyle(document.getElementById('bi-ai')).position") == "static"
+        assert page.run("!document.getElementById('kn-pane-bi').classList.contains('bi-ai-open')")
+        assert page.run("document.getElementById('bi-b-bench').offsetParent === null")
+        assert page.run("document.getElementById('bi-b-an').offsetParent === null")
+        visible = (
+            "(() => { const r = document.getElementById('bi-ai-send').getBoundingClientRect();"
+            " return r.height > 0 && r.bottom <= innerHeight && r.top >= 0; })()"
+        )
+        assert page.run(visible)
+        # What is typed stays across tab switches; the Benchmark tab shows the questions.
+        page.set_value("bi-ai-msg", "還沒送出的草稿")
+        page.click("#bi-b-tab-bench-tab")
+        assert page.run("document.getElementById('bi-b-bq-list').offsetParent !== null")
+        assert page.run("document.getElementById('bi-b-bench').open")
+        assert page.run("document.getElementById('bi-ai').offsetParent === null")
+        page.click("#bi-b-tab-dash-tab")
+        assert page.run("document.getElementById('bi-b-an').offsetParent !== null")
+        assert page.run("document.getElementById('bi-b-bench').offsetParent === null")
+        page.click("#bi-b-tab-ai-tab")
+        assert page.run("document.getElementById('bi-ai-msg').value") == "還沒送出的草稿"
+        assert page.run(visible)
         page.set_value("bi-ai-msg", "出題")
         page.click("#bi-ai-send")
         page.see("bi-ai-log", "加入測試題")
@@ -323,6 +347,15 @@ def test_the_whole_build_flow(
             == "true,false"
         )
         page.shoot("3-questions")
+        # Closing the session removes its tab, and the step shows both sections again.
+        page.click("#bi-ai-close")
+        page.wait("document.getElementById('bi-ai').hidden")
+        assert page.run("document.getElementById('bi-b-tabs').hidden")
+        assert page.run("document.querySelectorAll('#bi-b-tabs [role=tab]').length") == 0
+        assert page.run("document.getElementById('bi-b-bench').offsetParent !== null")
+        assert page.run("document.getElementById('bi-b-an').offsetParent !== null")
+        assert page.run("!document.getElementById('bi-b-tab-ai').contains("
+                        "document.getElementById('bi-ai'))")  # fmt: skip
 
         # -- step 3: AI dashboard, applied in one step (K1) -----------------------------------
         agent.then(
@@ -339,6 +372,10 @@ def test_the_whole_build_flow(
         )
         page.click("#bi-b-an-new")
         page.ai_opened("analysis")
+        # The Dashboard's AI is a tab too.
+        page.see("bi-b-tabs", "AI 分析")
+        assert page.run("document.getElementById('bi-b-tab-ai-tab').getAttribute("
+                        "'aria-selected')") == "true"  # fmt: skip
         page.set_value("bi-ai-msg", "幫我排一個 Dashboard")
         page.click("#bi-ai-send")
         page.see("bi-ai-log", "套用 Dashboard")

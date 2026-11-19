@@ -394,10 +394,21 @@ def requires_problem(requires: Any) -> str | None:
     return None
 
 
-def enum_values(spec: Mapping[str, Any], registry: Any | None) -> list[str]:
+def _merged(*lists: Any) -> list[str]:
+    """One list without repeats, ignoring case: `aidc` is `AIDC`, the first spelling kept."""
+    seen: dict[str, str] = {}
+    for items in lists:
+        for item in items or ():
+            seen.setdefault(str(item).casefold(), str(item))
+    return list(seen.values())
+
+
+def enum_values(spec: Mapping[str, Any], registry: Any | None, domains: Any = None) -> list[str]:
     """An enum parameter's values: its own `values`, else the schema field
-    `values_from` names (its allowed values; a `domain` field without them
-    takes the schema's domains)."""
+    `values_from` names (its allowed values). A `domain` field takes the domains the
+    vault has now as well: the schema's, widened by created homes, and `domains` (the
+    vault's working domains). A type's own copy of the built-in domains is not the list:
+    it left out every domain created since (owner 2026-11-19, `products`)."""
     if spec.get("values"):
         return [str(v) for v in spec["values"]]
     source = str(spec.get("values_from") or "")
@@ -408,11 +419,20 @@ def enum_values(spec: Mapping[str, Any], registry: Any | None) -> list[str]:
         found = registry.type(type_name).get(field_name)
     except KeyError:
         return []
+    if found is not None and field_name == "domain":
+        return _merged(found.enum, registry.domains, domains)
     if found is not None and found.enum:
         return list(found.enum)
-    if found is not None and field_name == "domain":
-        return list(registry.domains)
     return []
+
+
+def vault_domains(units: Mapping[str, Any]) -> list[str]:
+    """A vault's working domains as domain values, by their short names: `aidc`, and
+    `products` for the library entry `library/products`, which has no card domain of its own
+    (owner 2026-11-19: the working domain decides every panel's domain)."""
+    from aep_bi.cards import vault_skills
+
+    return _merged(item["home"].rpartition("/")[2] for item in vault_skills.home_list(units))
 
 
 def requires_missing(requires: Mapping[str, Any] | None, registry: Any | None) -> list[str]:
@@ -439,13 +459,15 @@ def requires_met(requires: Mapping[str, Any] | None, registry: Any | None) -> bo
     return registry is not None and not requires_missing(requires, registry)
 
 
-def described_params(params: Mapping[str, Any] | None, registry: Any | None) -> dict[str, Any]:
+def described_params(
+    params: Mapping[str, Any] | None, registry: Any | None, domains: Any = None
+) -> dict[str, Any]:
     """The declared parameters with each enum's values resolved (for a page or the feed)."""
     shown = {}
     for name, spec in sorted((params or {}).items()):
         item = dict(spec)
         if spec.get("type") == "enum":
-            item["values"] = enum_values(spec, registry)
+            item["values"] = enum_values(spec, registry, domains)
             if item.get("default") is None and item["values"]:
                 item["default"] = item["values"][0]
         shown[name] = item
@@ -458,10 +480,11 @@ def resolve_params(
     registry: Any | None,
     *,
     today: str,
+    domains: Any = None,
 ) -> dict[str, Any]:
     """Every declared parameter's value: the given one (checked; text from a
     query string is converted) or its default. Unknown names are refused."""
-    declared = described_params(params, registry)
+    declared = described_params(params, registry, domains)
     unknown = sorted(set(given) - set(declared))
     if unknown:
         raise BiStoreError("param_invalid", f"沒有這個參數：{', '.join(unknown)}")
@@ -688,6 +711,41 @@ def uses_domain(item: Mapping[str, Any]) -> bool:
     return _READS_DOMAIN.search(code) is not None and not _passes_domain_unused(code)
 
 
+_READS_HOME = re.compile(":home\\b|PARAMS(?:\\.get\\(|\\[)\\s*[\"']home[\"']")
+UNSUPPORTED = "不支援依資料夾篩選"
+
+
+def supports_home(item: Mapping[str, Any]) -> bool:
+    """Whether an analysis can narrow to a working domain's folder: its code reads `home`
+    (`PARAMS["home"]` or `:home`), as the default pack's do from 1.1.0 (owner 2026-11-19)."""
+    return _READS_HOME.search(str(item.get("code") or "")) is not None
+
+
+def home_domain(registry: Any | None, home: str | None) -> str | None:
+    """The card domain a working domain stands for; None for a library entry or a folder
+    whose name no schema domain has."""
+    if not home:
+        return None
+    return homes.domain_of_folder(
+        registry.domains if registry is not None else (), homes.sources_dir(home)
+    )
+
+
+def folder_filter(
+    item: Mapping[str, Any], values: Mapping[str, Any], home: str | None, registry: Any | None
+) -> dict[str, Any]:
+    """The values an analysis runs with in the working domain `home`: its folder added when
+    the analysis reads it. One that narrows only by the card `domain` field cannot show a
+    working domain with no card domain (`library/products`): refused, not an empty chart."""
+    if not home or not uses_domain(item):
+        return dict(values)
+    if supports_home(item):
+        return {**values, "home": home}
+    if home_domain(registry, home) is None:
+        raise BiStoreError("folder_filter_unsupported", UNSUPPORTED)
+    return dict(values)
+
+
 def _passes_domain_unused(code: str) -> bool:
     """A built-in analysis calls its function with `D`: `result = out(f(cards(), D))`. Two of
     them take it as `d` and never look at it, so they show the whole vault in every domain."""
@@ -741,19 +799,21 @@ def listing(workspace: Path, vault_id: str, home: Any = None) -> dict[str, Any]:
     `filters_domain`; `order` is the Dashboard's (offered, not hidden) and `dashboard` the
     stored layout, the vault's or `home`'s."""
     home = _checked_home(home)
-    from aep_bi.cards import vault
+    from aep_bi.cards import packs, vault
 
     units = vault.Vault(workspace, vault_id).repo.working_units()
     registry = _registry(workspace, vault_id)
+    domains = vault_domains(units)
     found = []
     for item in saved(units):
         found.append(
             {
                 **item,
-                "inputs": described_params(item.get("params"), registry),
+                "inputs": described_params(item.get("params"), registry, domains),
                 "offered": requires_met(item.get("requires"), registry),
                 "missing": requires_missing(item.get("requires"), registry),
                 "filters_domain": uses_domain(item),
+                "folder_filter": supports_home(item),
             }
         )
     offered = [a["slug"] for a in found if a["offered"]]
@@ -762,6 +822,9 @@ def listing(workspace: Path, vault_id: str, home: Any = None) -> dict[str, Any]:
         "order": order(units, offered, home),
         "dashboard": dashboard_layout(units, home),
         "home": home,
+        "domains": domains,
+        # The default pack's analyses that 「更新預設分析」 would bring up to date.
+        "pack_updates": len(packs.default_updates(units, registry)),
     }
 
 
@@ -813,18 +876,26 @@ def _registry(workspace: Path, vault_id: str) -> Any | None:
 
 
 def run_saved(
-    workspace: Path, vault_id: str, slug: Any, given: Mapping[str, Any] | None = None
+    workspace: Path,
+    vault_id: str,
+    slug: Any,
+    given: Mapping[str, Any] | None = None,
+    home: Any = None,
 ) -> dict[str, Any]:
-    found = next((a for a in listing(workspace, vault_id)["analyses"] if a["slug"] == slug), None)
+    listed = listing(workspace, vault_id)
+    found = next((a for a in listed["analyses"] if a["slug"] == slug), None)
     if found is None:
         raise BiStoreError("analysis_unknown", "沒有這個分析")
+    registry = _registry(workspace, vault_id)
     values = resolve_params(
         found.get("params"),
         given or {},
-        _registry(workspace, vault_id),
+        registry,
         today=date.today().isoformat(),
+        domains=listed["domains"],
     )
-    table = run(_db(workspace, vault_id), found["kind"], found["code"], values)
+    ran_with = folder_filter(found, values, _checked_home(home), registry)
+    table = run(_db(workspace, vault_id), found["kind"], found["code"], ran_with)
     return {"analysis": found, "params": values, "table": table}
 
 

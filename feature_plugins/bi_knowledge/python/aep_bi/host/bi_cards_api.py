@@ -318,6 +318,9 @@ def _route(
         if path == "/api/bi/sessions":
             listed = Staging(workspace, store.dataset).sessions(query.get("target") or None)
             return 200, {"sessions": listed}
+        if path.startswith("/api/bi/sessions/") and path.endswith("/progress"):
+            # What a turn under way is doing, read every second beside 送出 (AGENTS.md 23).
+            return 200, {"progress": questions_session.progress(path.split("/")[4])}
         if path.startswith("/api/bi/sessions/") and path.count("/") == 4:
             staging = Staging(workspace, store.dataset)
             return 200, {"session": sessions.load(staging, path.rsplit("/", 1)[1])}
@@ -796,6 +799,7 @@ def _session_write(
             message=given.get("message"),
             actor=who,
             asker=questions_for(dataset, actor) if questions_for is not None else None,
+            home=given.get("scope"),
         )
         return 200, {"ok": True, "session": turned}
     if session["kind"] == "questions" and action == "apply":

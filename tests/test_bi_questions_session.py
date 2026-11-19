@@ -18,7 +18,7 @@ from test_bi_vault import _call, _ok
 from test_business_cards_conversation import Conversation
 from test_host_wiring import ready
 
-from aep_bi.cards import analyses, questions_session, vault, vault_checks
+from aep_bi.cards import analyses, board, questions_session, sessions, vault, vault_checks
 from aep_bi.cards.store import BiStore, BiStoreError, PlannedRow
 from aep_bi.host import bi_bench, bi_questions_agent
 from aep_bi.host.bi_cards_api import route
@@ -200,13 +200,13 @@ def test_results_are_run_again_only_when_something_changed(
         "title": "類型", "slug": "types", "kind": "sql",
         "code": "SELECT 'one' AS word", "chart": {"type": "table"}})  # fmt: skip
     ran: list[Any] = []
-    real = analyses.run_saved
+    real = board._run
 
     def counted(*args: Any, **kwargs: Any) -> Any:
-        ran.append(args[2])
+        ran.append(args[1]["slug"])
         return real(*args, **kwargs)
 
-    monkeypatch.setattr(analyses, "run_saved", counted)
+    monkeypatch.setattr(board, "_run", counted)
     first = questions_session.saved_results(ws, vault_id)
     count = len(ran)
     assert count == len(first) > 0
@@ -241,3 +241,102 @@ def test_outside_agent_web_or_a_vault_there_is_no_turn(tmp_path: Path) -> None:
     with pytest.raises(BiStoreError) as refused:
         questions_session.create_session(ws, "lab", "main", "alice")
     assert refused.value.code == "not_a_vault"
+
+
+def test_ticked_questions_are_staged_by_one_write_and_listed_once(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """「加入測試題」 with many ticks: one write of the working copy and one read of the
+    working units, however many questions, and applied once (owner 2026-11-19: adding was slow)."""
+    _config, layout = ready(tmp_path)
+    ws = layout.workspace_root
+    dataset, vault_id = _vault(ws, tmp_path)
+    session = questions_session.create_session(ws, dataset, "main", "alice")
+    asked = [{"question": f"TSN 第 {n} 題？", "must": ["IEEE"]} for n in range(8)]
+
+    def asker(*_args: Any) -> Any:
+        answer = {"reply": "八題", "questions": asked, "reasons": []}
+        return sessions.Asked(answer=answer, attempts=1), "m", []
+
+    turned = questions_session.session_turn(
+        ws, dataset, session["id"], message="出八題", actor="alice", asker=asker
+    )
+    index = len(turned["turns"]) - 1
+    repo_type = type(vault.Vault(ws, vault_id).repo)
+    writes: list[int] = []
+    reads: list[int] = []
+    real_stage, real_units = repo_type.stage_many, repo_type.working_units
+
+    def stage_many(self: Any, changes: Any) -> None:
+        writes.append(len(changes))
+        real_stage(self, changes)
+
+    def working_units(self: Any, **kwargs: Any) -> Any:
+        reads.append(1)
+        return real_units(self, **kwargs)
+
+    monkeypatch.setattr(repo_type, "stage_many", stage_many)
+    monkeypatch.setattr(repo_type, "working_units", working_units)
+    added = questions_session.apply_suggestion(
+        ws, dataset, session["id"], index, [0, 1, 2, 3, 4, 5, 6, 7, 3], "alice", None
+    )
+    assert writes == [8]
+    assert len(reads) == 1
+    assert len(added["units"]) == 8 and len(added["questions"]) == 8
+    listed = vault_checks.listing(ws, vault_id)["questions"]
+    assert sorted(q["unit"] for q in listed) == sorted(added["units"])
+    with pytest.raises(BiStoreError) as again:
+        questions_session.apply_suggestion(ws, dataset, session["id"], index, [0], "alice")
+    assert again.value.code == "suggestion_applied"
+    assert writes == [8]
+
+
+def test_saving_several_questions_stages_none_when_one_is_invalid(tmp_path: Path) -> None:
+    _config, layout = ready(tmp_path)
+    ws = layout.workspace_root
+    _dataset, vault_id = _vault(ws, tmp_path)
+    with pytest.raises(BiStoreError):
+        vault_checks.save_questions(ws, vault_id, [GOOD, {"question": ""}])
+    assert vault_checks.listing(ws, vault_id)["questions"] == []
+
+
+def test_a_working_domain_checks_only_its_dashboards_analyses_and_says_how_far(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Owner 2026-11-19: the first AI round ran every analysis (~20 s). In a working domain only
+    its Dashboard's analyses are run, through the Dashboard's cache, and the turn says 「核對
+    n/N 個分析」 while it does."""
+    _config, layout = ready(tmp_path)
+    ws = layout.workspace_root
+    dataset, vault_id = _vault(ws, tmp_path)
+    for slug in ("mine", "other"):
+        analyses.save(ws, vault_id, {
+            "title": slug, "slug": slug, "kind": "sql",
+            "code": f"SELECT '{slug}-word' AS word", "chart": {"type": "table"}})  # fmt: skip
+    analyses.set_dashboard(ws, vault_id, {"order": ["mine"], "hidden": []}, "aidc")
+    session = questions_session.create_session(ws, dataset, "main", "alice")
+    seen: list[Any] = []
+    real = board._run
+
+    def watched(*args: Any, **kwargs: Any) -> Any:
+        seen.append(questions_session.progress(session["id"]))
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(board, "_run", watched)
+
+    def asker(_context: str, _turns: Any, check: Any) -> Any:
+        answer = {"reply": "一題", "questions": [GOOD], "reasons": []}
+        assert check(answer) == []
+        return sessions.Asked(answer=answer, attempts=1), "m", []
+
+    questions_session.session_turn(
+        ws, dataset, session["id"], message="出題", actor="alice", asker=asker, home="aidc"
+    )
+    assert len(seen) == 1  # only `mine`, the working domain's
+    assert seen[0]["step"] == "check" and seen[0]["total"] == 1 and seen[0]["seconds"] >= 0
+    text = questions_session._corpus(ws, dataset, "aidc")
+    assert "mine-word" in text and "other-word" not in text
+    assert questions_session.progress(session["id"]) is None  # nothing under way
+    path = f"/api/bi/sessions/{session['id']}/progress"
+    status, reply = route(ws, "alice", "GET", path, {"dataset": dataset}, {}, None, None, None)
+    assert status == 200 and reply == {"progress": None}

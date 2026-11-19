@@ -211,6 +211,19 @@ BI_CSS = r"""
   gap: 6px; }
 #bi-ai-log { margin: 0; }
 #kn-pane-bi.bi-ai-open { margin-right: calc(min(440px, 40vw) + 12px); }
+/* Step 3's tabs, while an AI session of the step is open (owner 2026-11-19). */
+.bi-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0 10px;
+  border-bottom: 1px solid var(--line); }
+.bi-tabs[hidden] { display: none; }
+.bi-tabs [role=tab] { min-height: 40px; padding: 0 14px; border: 1px solid transparent;
+  border-bottom: 0; border-radius: 6px 6px 0 0; background: none; color: inherit;
+  cursor: pointer; font: inherit; }
+.bi-tabs [role=tab][aria-selected="true"] { border-color: var(--line); background: var(--panel);
+  box-shadow: inset 0 3px 0 var(--accent); font-weight: 600; }
+.bi-tab-off { display: none !important; }
+#bi-b-tab-ai[hidden] { display: none; }
+#bi-b-tab-ai > .bi-ai-panel { position: static; width: auto; height: max(420px, 72vh);
+  border: 1px solid var(--line); border-radius: 8px; box-shadow: none; }
 tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
 @media (max-width: 760px) {
   .bi-ai-panel { top: auto; left: 0; width: auto; height: 66vh; border-left: 0;
@@ -1060,6 +1073,8 @@ BI_PANE_HTML = r"""
           <p class="bi-meta" id="bi-b-overview" hidden>
             全部領域只能看：選工作領域才能新增題目或分析。</p>
           <p class="bi-meta" id="bi-b-ver-none" hidden>只在這台電腦：確認寫入後就生效。</p>
+          <div id="bi-b-tabs" class="bi-tabs" role="tablist" aria-label="步驟 3 的畫面" hidden>
+          </div>
           <details id="bi-b-bench" class="card bi-sec" hidden>
             <summary><span class="bi-sec-title"><strong>Benchmark</strong></span>
               <span class="bi-meta" id="bi-b-bench-state"></span></summary>
@@ -1165,6 +1180,7 @@ BI_PANE_HTML = r"""
           </details>
             </div>
           </details>
+          <div id="bi-b-tab-ai" role="tabpanel" hidden></div>
           <div id="bi-b-run" class="bi-run">
             <button class="go" id="bi-b-bench-run" type="button">跑測試</button>
             <span class="bi-meta" id="bi-b-run-why"></span></div>
@@ -1349,7 +1365,7 @@ const BI_NAME = /^[A-Za-z0-9_-]{1,40}$/;
 const bh = (tag, cls, ...children) => memEl(tag, cls, ...children);
 
 function biDataset() { return el("bi-dataset").value || "demo"; }
-function biDomain() { return el("bi-domain").value || "robotics"; }
+function biDomain() { return biDashDomain() || el("bi-domain").value || "robotics"; }
 
 async function biCall(path, body) {
   let reply;
@@ -1940,7 +1956,7 @@ function biSection(section) {
   if (section.note) body.append(bh("p", "bi-sec-note", section.note));
   const rows = section.rows || [];
   const chart = section.chart || {type: "table"};
-  if (!rows.length) body.append(bh("p", "bi-empty", "沒有資料。"));
+  if (!rows.length && !section.unsupported) body.append(bh("p", "bi-empty", "沒有資料。"));
   else if (chart.type !== "table") {
     const plain = rows.map((row) => row.map((cell) =>
       cell && typeof cell === "object" ? cell.label : cell));
@@ -2196,8 +2212,9 @@ el("bi-q").addEventListener("keydown", (event) => {
 });
 
 function biSideRoom() {
+  // A panel in step 3's tabs takes no room beside the page.
   el("kn-pane-bi").classList.toggle("bi-ai-open",
-    !el("bi-ai").hidden || !el("bi-card-peek").hidden);
+    !el("bi-ai").hidden && !biAiTabbed() || !el("bi-card-peek").hidden);
 }
 
 function biCardPeekClose() {
@@ -3376,11 +3393,15 @@ function biBenchReport(report, standing) {
     Number(regressed.has(y.unit)) - Number(regressed.has(x.unit)));
   if (rows.length) {
     const table = biListTable(["題目", "工作版本", "發佈版本", "回答"]);
+    // A question deleted since keeps its result here, as what that run found.
+    const listed = new Set(((bi.benchReply || {}).reply || {questions: []}).questions
+      .map((q) => q.unit));
     for (const row of rows) {
       const answers = bh("details", "", bh("summary", "", "看兩邊"),
         bh("p", "", bh("strong", "", "工作版本："), row.working.answer || "（沒有）"),
         bh("p", "", bh("strong", "", "發佈版本："), row.published.answer || "（沒有）"));
-      const line = biRow(table, [row.question,
+      const gone = bi.benchReply && !listed.has(row.unit) ? "（已刪除）" : "";
+      const line = biRow(table, [row.question + gone,
         biBenchGrade(row.working) + (regressed.has(row.unit) ? "・退步" : ""),
         biBenchGrade(row.published), answers]);
       if (regressed.has(row.unit)) line.className = "bi-warn";
@@ -3444,14 +3465,28 @@ function biBenchDraw(reply) {
   const shown = reply.questions.filter((q) => !scope || q.home === scope);
   const waiting = scope ? reply.questions.filter((q) => !q.home) : [];
   const shownCases = reply.cases.filter((c) => !scope || biFolderHome(c.folder) === scope);
+  const reads = biOverview();
+  bi.bqTicked = new Set([...(bi.bqTicked || [])]
+    .filter((unit) => reply.questions.some((q) => q.unit === unit)));
   const table = (items) => {
-    const list = biListTable(["題目", "必須提到", "不可以說", "題組", "領域"]);
+    const list = biListTable([...(reads ? [] : ["選取"]), "題目", "必須提到", "不可以說",
+      "題組", "領域"]);
     for (const q of items) {
-      const row = biRow(list, [q.question, q.must.join("、") || "—",
-        q.must_not.join("、") || "—", q.set, q.home || "全庫"]);
-      row.dataset.unit = q.unit;
+      const cells = [q.question, q.must.join("、") || "—",
+        q.must_not.join("、") || "—", q.set, q.home || "全庫"];
       // The overview only reads.
-      if (biOverview()) continue;
+      if (reads) { biRow(list, cells).dataset.unit = q.unit; continue; }
+      const tick = document.createElement("input");
+      tick.type = "checkbox"; tick.className = "bi-bq-tick";
+      tick.checked = bi.bqTicked.has(q.unit);
+      tick.setAttribute("aria-label", "選取：" + q.question);
+      tick.addEventListener("click", (event) => event.stopPropagation());
+      tick.addEventListener("change", () => {
+        if (tick.checked) bi.bqTicked.add(q.unit); else bi.bqTicked.delete(q.unit);
+        biBqBulk();
+      });
+      const row = biRow(list, [tick, ...cells]);
+      row.dataset.unit = q.unit;
       row.tabIndex = 0;
       row.setAttribute("aria-selected", String(!!bi.bqSel && bi.bqSel.unit === q.unit));
       row.addEventListener("click", () => biBqPick(q));
@@ -3471,6 +3506,7 @@ function biBenchDraw(reply) {
     apart.open = Boolean(bi.bqSel && waiting.some((q) => q.unit === bi.bqSel.unit));
     questions.append(apart);
   }
+  biBqBulk();
   // The question being edited may be gone (deleted here, or by a colleague's commit).
   if (bi.bqSel && ![...shown, ...waiting].some((q) => q.unit === bi.bqSel.unit)) biBqPick(null);
   el("bi-b-bq-sets").replaceChildren(...[...new Set(reply.questions.map((q) => q.set))]
@@ -3535,13 +3571,45 @@ async function biBenchSave(body) {
   return reply;
 }
 
+function biBqBulk() {
+  // 「刪除選取的 N 題」 under the table, there only while something is ticked.
+  const list = el("bi-b-bq-list");
+  let bar = el("bi-b-bq-bulk");
+  const ticked = [...(bi.bqTicked || [])];
+  if (!ticked.length || biOverview()) { if (bar) bar.remove(); return; }
+  if (!bar) { bar = bh("div", "bi-actions"); bar.id = "bi-b-bq-bulk"; }
+  const questions = ((bi.benchReply || {}).reply || {questions: []}).questions
+    .filter((q) => bi.bqTicked.has(q.unit));
+  bar.replaceChildren(biButton("刪除選取的 " + ticked.length + " 題",
+    () => biBqDelete(bar, questions), "bi-btn", "刪除選取的題目"));
+  list.append(bar);
+}
+
+async function biBqDelete(where, questions) {
+  // No confirmation: a deletion is an uncommitted change until commit and push, so it can be
+  // undone, and past runs keep what they found for these questions.
+  if (!questions.length) return;
+  const status = bh("span", "bi-meta", "正在刪除 " + questions.length + " 題…");
+  status.setAttribute("role", "status"); where.append(status);
+  try {
+    const units = questions.map((q) => q.unit);
+    await biBenchSave({delete: units.length === 1 ? units[0] : units});
+    for (const unit of units) bi.bqTicked.delete(unit);
+    if (bi.bqSel && units.includes(bi.bqSel.unit)) biBqPick(null);
+    status.remove();
+    await biBench(bi.verVault);
+  } catch (failure) {
+    if (status.isConnected) status.textContent = "沒有刪除：" + failure.message;
+    else biNotice(false, "沒有刪除：" + failure.message);
+  }
+}
+
 el("bi-b-bq-add").addEventListener("click", () => {
   biBqPick(null); el("bi-b-bq-q").focus();
 });
-el("bi-b-bq-del").addEventListener("click", async () => {
+el("bi-b-bq-del").addEventListener("click", () => {
   const q = bi.bqSel; if (!q) return;
-  try { await biBenchSave({delete: q.unit}); biBqPick(null); }
-  catch (failure) { biNotice(false, "沒有刪除：" + failure.message); }
+  biBqDelete(el("bi-b-bq-del").parentElement, [q]);
 });
 el("bi-b-bq-form").addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -3595,16 +3663,43 @@ function biQuestionsSuggestion(session, turn, index) {
     parts.push(bh("p", "bi-meta", "已加入 " + turn.applied.units.length
       + " 題（commit 並 push 後才會跟著知識庫）。"));
   } else {
-    parts.push(bh("div", "bi-actions", biButton("加入測試題", async () => {
+    // Progress and the outcome stay beside the button (AGENTS.md 23); one request stages them
+    // all, and the list and the vault state are read again side by side.
+    const status = bh("span", "bi-meta bi-qa-add-status");
+    status.setAttribute("role", "status");
+    const add = biButton("加入測試題", async () => {
       const picks = ticks.flatMap((tick, i) => tick.checked ? [i] : []);
-      const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
-        {dataset: bi.ai.dataset, turn: index, picks, home: bi.ai.scope});
-      biAiShow(reply.session);
-      await biBench(bi.verVault);
-      biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
-      biNotice(true, "已加入 " + reply.units.length
-        + " 題測試題；commit 並 push 後才會跟著知識庫。");
-    }, "go", "把勾選的題目加入測試題")));
+      if (!picks.length) { status.textContent = "請至少勾選一題。"; return; }
+      const started = Date.now();
+      let step = "正在加入 " + picks.length + " 題", reply = null;
+      const show = () => {
+        status.textContent = step + "…・" + Math.floor((Date.now() - started) / 1000) + " 秒";
+      };
+      add.disabled = true; add.setAttribute("aria-busy", "true"); show();
+      const timer = setInterval(show, 1000);
+      try {
+        reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
+          {dataset: bi.ai.dataset, turn: index, picks, home: bi.ai.scope});
+        step = "已加入 " + reply.units.length + " 題，正在更新測試題清單"; show();
+        const vaultId = bi.verVault;
+        await Promise.all([biBench(vaultId),
+          call("/api/bi/vaults/" + vaultId + "/status").then(biVaultState)]);
+        biAiShow(reply.session);
+        biNotice(true, "已加入 " + reply.units.length
+          + " 題測試題；commit 並 push 後才會跟著知識庫。");
+      } catch (failure) {
+        if (reply) {
+          // Added: only the refresh failed, and adding again would be refused.
+          biAiShow(reply.session);
+          biNotice(false, "已加入 " + reply.units.length + " 題，但清單沒有更新："
+            + failure.message + "。重新整理頁面即可看到。");
+        } else {
+          status.textContent = "沒有加入：" + failure.message + "。可以再按一次「加入測試題」。";
+          add.disabled = false; add.removeAttribute("aria-busy");
+        }
+      } finally { clearInterval(timer); }
+    }, "go", "把勾選的題目加入測試題");
+    parts.push(bh("div", "bi-actions", add, status));
   }
   return parts;
 }
@@ -3621,10 +3716,68 @@ function biAiShow(session) {
 
 function biAiTarget(text) { el("bi-ai-target").textContent = text; }
 
+// -- step 3's tabs: Benchmark | Dashboard | the AI session (owner 2026-11-19) ---------------
+// While an AI session opened in step 3 is open, the step shows one view at a time by tab, so
+// the panel covers nothing; each view is only hidden, so what it holds stays as it was.
+const BI_AI_TAB_KINDS = {questions: "AI 出題", analysis: "AI 分析"};
+
+function biAiTabbed() { return el("bi-ai").parentElement === el("bi-b-tab-ai"); }
+
+function biTestStageShown() {
+  const stage = document.querySelector("#bi-view-build .kp-stage[data-stage=test]");
+  return bi.view === "build" && Boolean(stage) && !stage.hidden;
+}
+
+function biAiDock(tabbed) {
+  // The one AI panel, in step 3's AI tab or back beside the page.
+  const panel = el("bi-ai"), home = tabbed ? el("bi-b-tab-ai") : el("kn-pane-bi");
+  if (panel.parentElement !== home) home.prepend(panel);
+}
+
+function biTestTabs(chosen) {
+  const bar = el("bi-b-tabs"), on = biAiTabbed() && !el("bi-ai").hidden && Boolean(bi.ai);
+  const panels = {bench: el("bi-b-bench"), dash: el("bi-b-an"), ai: el("bi-b-tab-ai")};
+  bar.hidden = !on; panels.ai.hidden = !on;
+  if (!on) {
+    bi.testTab = null; bar.replaceChildren();
+    for (const panel of Object.values(panels)) panel.classList.remove("bi-tab-off");
+    return;
+  }
+  const names = ["bench", "dash"].filter((name) => !panels[name].hidden).concat("ai");
+  bi.testTab = names.includes(chosen) ? chosen : names.includes(bi.testTab) ? bi.testTab : "ai";
+  const labels = {bench: "Benchmark", dash: "Dashboard",
+    ai: BI_AI_TAB_KINDS[bi.ai.kind] || bi.ai.title};
+  bar.replaceChildren(...names.map((name) => {
+    const tab = bh("button", "", labels[name]);
+    tab.type = "button"; tab.id = "bi-b-tab-" + name + "-tab"; tab.dataset.tab = name;
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-controls", panels[name].id);
+    tab.setAttribute("aria-selected", String(name === bi.testTab));
+    tab.tabIndex = name === bi.testTab ? 0 : -1;
+    tab.addEventListener("click", () => biTestTabs(name));
+    tab.addEventListener("keydown", (event) => {
+      const step = {ArrowRight: 1, ArrowLeft: -1}[event.key];
+      if (!step) return;
+      event.preventDefault();
+      const next = names[(names.indexOf(name) + step + names.length) % names.length];
+      biTestTabs(next);
+      el("bi-b-tab-" + next + "-tab").focus();
+    });
+    return tab;
+  }));
+  for (const [name, panel] of Object.entries(panels)) {
+    panel.classList.toggle("bi-tab-off", name !== bi.testTab);
+  }
+  panels.ai.setAttribute("aria-labelledby", "bi-b-tab-ai-tab");
+  if (bi.testTab !== "ai") panels[bi.testTab].open = true;
+}
+
 function biAiClose() {
   const spec = bi.ai; if (!spec) return;
   bi.ai = null;
   el("bi-ai").hidden = true;
+  // Its tab goes with it, and the step shows both sections again.
+  biAiDock(false); biTestTabs();
   biSideRoom();
   document.querySelectorAll("tr.bi-ai-from").forEach((r) => r.classList.remove("bi-ai-from"));
   if (spec.from && spec.from.isConnected) spec.from.focus();
@@ -3638,7 +3791,10 @@ async function biAiOpen(spec) {
   bi.ai = spec;
   spec.scope = biScope();
   el("bi-ai").dataset.kind = spec.kind;
+  const tabbed = Boolean(BI_AI_TAB_KINDS[spec.kind]) && biTestStageShown();
+  biAiDock(tabbed);
   el("bi-ai").hidden = false;
+  biTestTabs("ai");
   biSideRoom();
   el("bi-ai-title").textContent = spec.title;
   el("bi-ai-label").textContent = spec.label;
@@ -3648,15 +3804,16 @@ async function biAiOpen(spec) {
   biStatus("bi-ai-status", "");
   biAiTarget((spec.scope ? "工作領域 " + spec.scope + "・" : "") + spec.about);
   biBuildSessionLog("bi-ai-log", null, spec.render);
-  // After the page has made room: what it came from stays in view beside the panel.
-  const shown = row || spec.shows || spec.from;
-  if (shown && shown.closest && shown.closest("details.bi-sec")) {
+  // After the page has made room: what it came from stays in view beside the panel; in step 3's
+  // tabs, the tabs come into view and what it came from is one tab away.
+  const shown = tabbed ? el("bi-b-tabs") : row || spec.shows || spec.from;
+  if (!tabbed && shown && shown.closest && shown.closest("details.bi-sec")) {
     shown.closest("details.bi-sec").open = true;
   }
   // On a phone the panel takes the lower part, so what it came from goes to the top.
   const phone = matchMedia("(max-width: 760px)").matches;
   if (shown && shown.isConnected) {
-    shown.scrollIntoView({block: phone ? "start" : row ? "nearest" : "center"});
+    shown.scrollIntoView({block: tabbed || phone ? "start" : row ? "nearest" : "center"});
   }
   await biBuildAiState("bi-ai-sent", spec.sends, spec.agent);
   if (bi.ai === spec && spec.ref) {
@@ -3682,16 +3839,28 @@ el("bi-ai-send").addEventListener("click", async () => {
   const message = el("bi-ai-msg").value.trim();
   if (!message) { el("bi-ai-msg").focus(); return; }
   const button = el("bi-ai-send"); button.disabled = true;
-  // The wait beside the send button counts its seconds (AGENTS 23).
+  // What it is doing and for how long, beside 送出 (AGENTS.md 23); a questions turn also says
+  // which analyses it is checking.
   const started = Date.now();
-  const tick = () => {
-    if (bi.ai === spec) {
-      biStatus("bi-ai-status", "loading", spec.busy + "（已經 "
-        + Math.round((Date.now() - started) / 1000) + " 秒）");
+  let step = spec.busy, live = true;
+  const show = () => {
+    if (live && bi.ai === spec) {
+      biStatus("bi-ai-status", "loading",
+        step + "・" + Math.floor((Date.now() - started) / 1000) + " 秒");
     }
   };
-  tick();
-  const timer = setInterval(tick, 1000);
+  show();
+  const ticker = setInterval(() => {
+    show();
+    if (spec.kind !== "questions" || !spec.session) return;
+    call("/api/bi/sessions/" + spec.session.id + "/progress?dataset="
+      + encodeURIComponent(spec.dataset)).then((reply) => {
+      const now = reply.progress;
+      step = now && now.step === "check"
+        ? "核對 " + now.done + "/" + now.total + " 個分析" : spec.busy;
+      show();
+    }).catch(() => {});
+  }, 1000);
   try {
     if (spec.agent !== undefined && spec.checkModel !== false) {
       await biBuildAiState("bi-ai-sent", spec.sends, spec.agent);
@@ -3707,17 +3876,17 @@ el("bi-ai-send").addEventListener("click", async () => {
         ...(spec.turn ? spec.turn() : {})});
     spec.session = reply.session;
     if (spec.saved) spec.saved(reply.session);
-    clearInterval(timer);
+    live = false; clearInterval(ticker);
     if (bi.ai === spec) {
       el("bi-ai-msg").value = ""; biAiShow(reply.session); biStatus("bi-ai-status", "");
     }
   } catch (failure) {
-    clearInterval(timer);
+    live = false; clearInterval(ticker);
     if (bi.ai === spec) {
       biStatus("bi-ai-status", "error", (failure.code === "model_unavailable"
         ? "沒有可用的模型：" : "沒有送出：") + failure.message + "。");
     }
-  } finally { clearInterval(timer); button.disabled = false; }
+  } finally { live = false; clearInterval(ticker); button.disabled = false; }
 });
 
 async function biQuestionsAi() {
@@ -3758,15 +3927,21 @@ function biParamInputs(item, values, onChange) {
   for (const name of names) {
     const spec = inputs[name], label = spec.label || name;
     let control;
+    if (name === "domain") {
+      // No choice here: the working domain decides (owner 2026-11-19); 全部領域 keeps the
+      // analysis's default, as the vault's Dashboard does.
+      const own = biDashDomain();
+      const found = own && (spec.values || []).find((value) =>
+        value.toLowerCase() === own.toLowerCase());
+      if (found) values[name] = found; else delete values[name];
+      continue;
+    }
     if (spec.type === "enum") {
       control = document.createElement("select");
       for (const value of spec.values || []) {
         const option = document.createElement("option");
         option.value = value; option.textContent = value; control.append(option);
       }
-      const own = name === "domain" && (spec.values || []).find((value) =>
-        value.toLowerCase() === String(biScopeDomain() || "").toLowerCase());
-      if (own && values[name] === undefined) values[name] = own;
       control.value = values[name] ?? spec.default ?? "";
     } else if (spec.type === "bool") {
       control = document.createElement("input"); control.type = "checkbox";
@@ -3785,7 +3960,7 @@ function biParamInputs(item, values, onChange) {
     });
     row.append(bh("label", "bi-meta", label + " ", control));
   }
-  return row;
+  return row.children.length ? row : null;
 }
 
 function biAnState(vaultId, slug) {
@@ -3805,7 +3980,7 @@ function biAnOut(where, item, state) {
 
 async function biRunInto(vaultId, item, state, out) {
   const ran = await biCall("/api/bi/vaults/" + vaultId + "/analyses",
-    {run: item.slug, params: state.values});
+    {run: item.slug, params: state.values, home: biScope()});
   state.table = ran.table;
   // The list may have been drawn again meanwhile: draw into the one shown now.
   const shown = out.isConnected ? out
@@ -3857,6 +4032,26 @@ async function biAnalyses(vaultId) {
   }
   el("bi-b-an").hidden = false;
   const box = el("bi-b-an-list"); box.replaceChildren();
+  if (reply.pack_updates && !biOverview()) {
+    // The default pack's newer code (it narrows to a folder too), as a pending change.
+    const status = bh("span", "bi-meta");
+    status.setAttribute("role", "status");
+    const update = biButton("更新", async () => {
+      update.disabled = true; status.textContent = "正在更新…";
+      try {
+        await biCall("/api/bi/vaults/" + vaultId + "/packs", {update: "bi-market-default"});
+        biVaultState(await call("/api/bi/vaults/" + vaultId + "/status"));
+        bi.anState = {};
+        await biAnalyses(vaultId);
+        biNotice(true, "已更新預設分析（commit 並 push 後大家才會用到）。");
+      } catch (failure) {
+        update.disabled = false; status.textContent = "沒有更新：" + failure.message;
+      }
+    }, "bi-btn", "更新預設分析");
+    update.id = "bi-b-an-update";
+    box.append(bh("p", "bi-meta", reply.pack_updates + " 個預設分析有新版（可依資料夾篩選）。",
+      " ", update, " ", status));
+  }
   if (!reply.analyses.length) box.append(bh("p", "bi-meta", "還沒有存起來的分析。"));
   // Shown in the Dashboard's order, then hidden and not offered ones.
   const rank = (a) => { const i = reply.order.indexOf(a.slug); return i < 0 ? 1e6 : i; };
@@ -3902,6 +4097,11 @@ async function biAnalyses(vaultId) {
     const title = [bh("strong", "", item.title)];
     // It would show the same numbers in any domain, and must not pass for this one's.
     if (scope && !item.filters_domain) title.push(" ", biBadge("全庫資料", "dim"));
+    // It narrows only by the card domain, which this working domain does not have: said, and
+    // not run into an empty chart.
+    const unsupported = Boolean(scope && item.filters_domain && !item.folder_filter
+      && !biScopeDomain());
+    if (unsupported) title.push(" ", biBadge("不支援依資料夾篩選", "warn"));
     if (item.question) title.push(bh("div", "bi-meta", item.question));
     const row = biRow(table, [title, (item.kind === "sql" ? "SQL" : "Python") + "・"
       + item.chart.type, where, ""]);
@@ -3912,12 +4112,13 @@ async function biAnalyses(vaultId) {
       out).catch((failure) => biNotice(false, failure.message))), out].filter(Boolean));
     row.lastChild.append(
       biRowActions([
-        biButton("執行", () => {
+        unsupported ? null : biButton("執行", () => {
           under.row.hidden = false;
           return biRunInto(vaultId, item, state, out);
-        }, "bi-btn", "執行分析 " + item.title),
+        }, "bi-btn", "執行分析 " + item.title)],
+        // The rarer ones in 更多 (owner 2026-11-19: simpler).
         reply.order.includes(item.slug) ? biButton("上移", () => move(item.slug, -1), "bi-btn",
-          "在 Dashboard 上移分析 " + item.title) : null],
+          "在 Dashboard 上移分析 " + item.title) : null,
         biButton("和 AI 一起修改", (event) =>
           biAnalysisAi(item.slug, item.title, event.currentTarget),
           "bi-btn", "和 AI 一起修改分析 " + item.title),
@@ -5678,10 +5879,17 @@ function biScopeDomain() {
   return item ? item.domain : null;
 }
 
+function biDashDomain() {
+  // The working domain is the Dashboard's and every analysis's domain (owner 2026-11-19): its
+  // card domain, else its own short name (`library/products` is `products`).
+  const scope = biScope();
+  return biScopeDomain() || (scope ? scope.split("/").pop() : null);
+}
+
 function biDashDomainBox() {
-  // A working domain with a card domain decides the Dashboard's, so there is nothing to choose.
+  // A working domain decides the Dashboard's, so there is nothing to choose.
   const schema = bi.schema || {};
-  el("bi-domain-box").hidden = Boolean(biScopeDomain())
+  el("bi-domain-box").hidden = Boolean(biDashDomain())
     || (Array.isArray(schema.domains) && !schema.domains.length);
 }
 
@@ -5695,8 +5903,10 @@ function biScopeFollowed() {
   const option = [...el("bi-domain").options].find((o) => o.value.toLowerCase() === wanted);
   if (wanted && option && el("bi-domain").value !== option.value) {
     el("bi-domain").value = option.value;
-    if (bi.loaded) bi.loaded.dashboard = false;
   }
+  // Another working domain is another Dashboard, and results run for the last one are not its.
+  if (bi.loaded) bi.loaded.dashboard = false;
+  bi.anState = {};
   const filter = el("bi-card-domain");
   const own = [...filter.options].find((o) => o.value && o.value.toLowerCase() === wanted);
   const next = own ? own.value : "";
@@ -6150,7 +6360,7 @@ async function biDeleteRun(sources, ask) {
       }
     }
   } finally {
-    clearInterval(timer);
+    live = false; clearInterval(ticker);
     bi.build.deleting = false;
     ask.removeAttribute("aria-busy"); ask.setAttribute("role", "group");
     ask.hidden = true; ask.replaceChildren();
@@ -6814,7 +7024,7 @@ function biSuggestBusy(event, words) {
   tick();
   const timer = setInterval(tick, 1000);
   return (failure) => {
-    clearInterval(timer);
+    live = false; clearInterval(ticker);
     if (!failure) { note.remove(); return; }
     for (const button of buttons) button.disabled = false;
     note.className = "bi-err bi-sg-wait"; note.textContent = failure;

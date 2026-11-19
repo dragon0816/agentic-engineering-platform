@@ -29,7 +29,8 @@ from aep_bi.cards.store import BiStoreError
 
 FORMAT = "aep.bi.analysis_pack/v1"
 DEFAULT_ID = "bi-market-default"
-DEFAULT_VERSION = "1.0.0"
+#: 1.1.0 (2026-11-19): the prelude narrows to the working domain's folder (`home`) too.
+DEFAULT_VERSION = "1.1.0"
 SOURCE = Path(__file__).with_name("pack_default")
 MAX_ANALYSES = 200
 LINK_LINE = re.compile(r"^LINK_FIELDS: dict\[str, dict\[str, list\[str\]\]\] = \{.*\}.*$", re.M)
@@ -148,9 +149,14 @@ def _prelude() -> str:
     return (SOURCE / "_prelude.py").read_text(encoding="utf-8")
 
 
+@cache
+def _section_text(source: str) -> str:
+    return (SOURCE / f"{source}.py").read_text(encoding="utf-8")
+
+
 def section_code(source: str) -> str:
     """One section's script: the prelude, then the section."""
-    return _prelude() + "\n\n" + (SOURCE / f"{source}.py").read_text(encoding="utf-8")
+    return _prelude() + "\n\n" + _section_text(source)
 
 
 def default_pack() -> dict[str, Any]:
@@ -302,6 +308,44 @@ def import_pack(workspace: Path, vault_id: str, pack: Any) -> dict[str, Any]:
     with target.lock, vault._repo_errors():
         done = stage_pack(target, target._registry(), pack)
     return {**done, **analyses.listing(workspace, vault_id)}
+
+
+def default_updates(units: Mapping[str, Any], registry: Any | None) -> dict[str, dict[str, Any]]:
+    """The vault's analyses that are the default pack's, unchanged since it was imported but
+    for its older helpers, with the current code: unit key -> new value. A section someone
+    edited is theirs and is left alone; so is anything not from the pack."""
+    sources = {slug: source for slug, source, *_ in SECTIONS}
+    found: dict[str, dict[str, Any]] = {}
+    for item in analyses.saved(units):
+        source = sources.get(item["slug"])
+        if source is None or item.get("kind") != "python":
+            continue
+        code = str(item.get("code") or "")
+        own = fill(_section_text(source), registry)
+        current = fill(section_code(source), registry)
+        if code == current or not code.endswith("\n\n" + own):
+            continue
+        if not code.startswith("# The bi-market-default pack's shared helpers"):
+            continue
+        value = {k: v for k, v in item.items() if k not in ("unit", "slug")}
+        found[item["unit"]] = {**value, "code": current}
+    return found
+
+
+def update_default(workspace: Path, vault_id: str) -> dict[str, Any]:
+    """「更新預設分析」: stage the default pack's current code for its unchanged analyses, an
+    uncommitted change like any other that commit and push share."""
+    from aep_bi.cards import vault
+
+    target = vault._vault(workspace, vault_id)
+    with target.lock, vault._repo_errors():
+        changes = default_updates(target.repo.working_units(), target._registry())
+        if changes:
+            target.repo.stage_many(dict(sorted(changes.items())))
+    return {
+        "updated": sorted(k[len(analyses.PREFIX) :] for k in changes),
+        **analyses.listing(workspace, vault_id),
+    }
 
 
 def export_pack(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:

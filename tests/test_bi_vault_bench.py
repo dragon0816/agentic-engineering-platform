@@ -224,3 +224,38 @@ def test_a_question_is_asked_through_the_agent_on_the_chosen_version(tmp_path: P
         assert bi_cards_tools.bi_cards_tools(gateway)[0].handler is not None
     assert "ETSI" in working[0] and "工作版本" in working[0]
     assert "IEEE 802.1" in published[0] and "ETSI" not in published[0]
+
+
+def test_applied_questions_are_deleted_together_and_past_results_stay(tmp_path: Path) -> None:
+    """Owner 2026-11-19: 「無法刪除apply的benchmark」. Committed questions are deleted per row or
+    several at once by one change, uncommitted until commit and push; a past run keeps them."""
+    drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
+    units = [
+        _ok(_save(a, vault_id, {**QUESTION, "question": f"TSN 第 {n} 題？"}))["unit"]
+        for n in range(3)
+    ]
+    _commit(a, vault_id, "加上測試")
+    report = bi_bench.run(
+        a, vault_id, ask=lambda q, s: {"ok": True, "answer": "IEEE"}, extract=lambda c: [],
+        actor="alice",
+    )  # fmt: skip
+    assert report["total"] == 3
+    # One unknown among them: nothing is deleted.
+    _refused(_save(a, vault_id, {"delete": [units[0], "check:question:main/q-nope"]}), 404,
+             "check_unknown")  # fmt: skip
+    assert len(_checks(a, vault_id)["questions"]) == 3
+    deleted = _ok(_save(a, vault_id, {"delete": units[:2]}))
+    assert deleted["deleted"] == units[:2]
+    assert [q["unit"] for q in deleted["questions"]] == [units[2]]
+    pending = _ok(_call(a, "GET", f"/api/bi/vaults/{vault_id}/pending"))
+    assert {c["unit"] for c in pending["uncommitted"]} >= set(units[:2])
+    # The past run is history: it still holds each question's text and verdicts.
+    latest = _checks(a, vault_id)["latest"]
+    assert latest["run_id"] == report["run_id"]
+    assert {r["unit"] for r in latest["results"]} == set(units)
+    assert all(r["question"].startswith("TSN 第") for r in latest["results"])
+    _ok(_save(a, vault_id, {"delete": units[2]}))
+    assert _checks(a, vault_id)["questions"] == []
+    _commit(a, vault_id, "刪掉測試")
+    assert vault.Vault(a, vault_id).repo.working_units(pending=False).get(units[0]) is None
+    del drive, dataset, b
