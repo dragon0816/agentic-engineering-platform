@@ -34,7 +34,17 @@ from aep_bi.host.bi_cards_tools import (
     bi_skill_on,
     with_bi_sources,
 )
-from host_runtime.features import Feature, PackageInstaller, PackageRefused, PreparedPackage
+from aep_bi.inbox import bot as inbox_bot
+from aep_bi.inbox.runtime import RUNTIME as INBOX
+from host_runtime.features import (
+    Feature,
+    Messenger,
+    PackageInstaller,
+    PackageRefused,
+    PreparedPackage,
+    TelegramAnswer,
+    TelegramItem,
+)
 
 FEED_POST_REFUSAL = "the feed answers GET only"
 
@@ -45,6 +55,8 @@ class BiFeature(Feature):
     def startup(self, workspace_root: Path) -> None:
         # A BI vault's push is checked against its recorded test runs (BI T1).
         bi_vault.set_benchmark(partial(bi_bench.gate, workspace_root))
+        # The Telegram inbox's workspace (owner 2026-11-19).
+        INBOX.workspace = workspace_root
 
     def capability_bindings(
         self, workspace_root: Path, approved: Sequence[str]
@@ -111,6 +123,19 @@ class BiFeature(Feature):
     def service(self, name: str) -> Any | None:
         # The chat's saved-analysis proposals (BI C3) plan and apply here.
         return bi_chat_save if name == "bi_chat_save" else None
+
+    def telegram_commands(self) -> Iterable[tuple[str, str]]:
+        # /bi link, /bi links, /bi unlink, /bi domain (owner consent 2026-11-19).
+        return inbox_bot.COMMANDS
+
+    def telegram_item(self, item: TelegramItem, host: Any) -> TelegramAnswer | None:
+        # A shared link or file goes to the BI inbox with domain buttons.
+        bot = INBOX.bot(host)
+        return None if bot is None else bot.handle(item)
+
+    def telegram_ready(self, messenger: Messenger, host: Any) -> None:
+        # Reminders and results go out through Telegram; the inbox schedule starts.
+        INBOX.ready(messenger, host)
 
 
 class _Prepared:

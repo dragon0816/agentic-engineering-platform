@@ -97,6 +97,7 @@ from aep_bi.cards.store import (
     is_subscribed,
 )
 from aep_bi.host import bi_atlas_embed, bi_atlas_import, bi_subscriptions, bi_vaults_api
+from aep_bi.inbox import api as inbox_api
 from models.approved import ApprovedModelClient
 
 #: A CSV travels in the JSON body; larger than an ordinary request.
@@ -178,6 +179,9 @@ def route(
         if path == bi_vaults_api.PREFIX or path.startswith(bi_vaults_api.PREFIX + "/"):
             given = body if isinstance(body, dict) else {}
             return bi_vaults_api.route(workspace, actor, method, path, query, given, bench)
+        if path == inbox_api.PREFIX or path.startswith(inbox_api.PREFIX + "/"):
+            # BI 管理 → Telegram 收集 (owner 2026-11-19).
+            return inbox_api.route(workspace, actor, method, path, query, body)
         return _route(workspace, actor, method, path, query, body, ai, bench)
     except catalog.SchemaInstallError as error:
         # An installed id@version is immutable: different content is a conflict.
@@ -532,7 +536,7 @@ def _route(
         dataset = _dataset(given.get("dataset"))
         return 200, {"ok": True, **rerun.confirm(workspace, dataset, parts[4], given, who)}
     if len(parts) >= 6 and parts[:4] == ["", "api", "bi", "runs"]:
-        return _run_action(workspace, who, parts[4], parts[5:], given, ai)
+        return _run_action(workspace, who, parts[4], parts[5:], given, ai, bench)
     if len(parts) == 6 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "rename":
         return _rename_card(workspace, who, parts[4], given)
     if len(parts) == 6 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "unmark":
@@ -645,6 +649,7 @@ def _run_action(
     rest: list[str],
     given: dict[str, Any],
     ai: ai_runs.AiRuntime | None = None,
+    bench: Any = None,
 ) -> Answer:
     dataset = _dataset(given.get("dataset"))
     if len(rest) == 2 and rest[0] == "candidates":
@@ -677,7 +682,13 @@ def _run_action(
     if rest == ["recheck"]:
         return 200, {"ok": True, **runs.recheck(workspace, dataset, run_id)}
     if rest == ["commit"]:
-        return 200, {"ok": True, **runs.commit(workspace, dataset, run_id, actor=who)}
+        committed = runs.commit(workspace, dataset, run_id, actor=who)
+        # A run from the Telegram inbox: its domain's tests, Dashboard and a result notice.
+        from aep_bi.inbox.process import Processor
+        from aep_bi.inbox.runtime import RUNTIME
+
+        Processor(workspace, ai, RUNTIME.messenger).after_commit(dataset, run_id, committed, bench)
+        return 200, {"ok": True, **committed}
     if rest == ["cancel"]:
         return 200, {"ok": True, "run": runs.cancel(workspace, dataset, run_id)}
     if rest == ["retry"]:

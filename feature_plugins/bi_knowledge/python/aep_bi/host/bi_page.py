@@ -7,6 +7,7 @@ Moved unchanged from `web_page.py` (feature mount points, proposal r3);
 from __future__ import annotations
 
 from aep_bi.host.bi_chart_html import BI_CHART_CSS, BI_CHART_JS
+from aep_bi.inbox.page import INBOX_BUTTON, INBOX_JS, INBOX_PANEL
 
 BI_CSS = r"""
 .bi-pane { max-width: 1240px; min-width: 0; }
@@ -484,6 +485,7 @@ BI_PANE_HTML = r"""
             aria-expanded="false" aria-controls="bi-b-v-form">加入</button>
           <details class="bi-manage bi-menu" id="bi-b-v-menu"><summary>管理</summary>
             <button class="bi-btn" id="bi-b-v-sync" type="button" hidden>立即同步</button>
+            <!-- BI_INBOX_BUTTON -->
           </details>
         <div class="bi-scope" id="bi-b-src-folder-box" hidden>
           <label class="bi-label" for="bi-b-src-folder">工作領域</label>
@@ -502,7 +504,7 @@ BI_PANE_HTML = r"""
         </div>
         <p class="bi-err" id="bi-b-home-err" role="alert" hidden></p>
         <p class="bi-warn" id="bi-b-scope-empty" role="status" hidden></p>
-        <div id="bi-b-v-state" role="status" aria-live="polite"></div>
+        <div id="bi-b-v-state" role="status" aria-live="polite"></div><!-- BI_INBOX_PANEL -->
             <form id="bi-b-v-form" class="bi-step" hidden novalidate>
               <h4 id="bi-b-v-form-h"></h4>
               <div class="bi-step-grid">
@@ -3020,6 +3022,7 @@ async function biBuildVault() {
   bi.vaults = reply.vaults || [];
   const vault = biVaultOf(biDataset());
   el("bi-b-v-sync").hidden = !vault;
+  el("bi-inbox-open").hidden = !vault;
   el("bi-b-v-convert").hidden = Boolean(vault) || !bi.datasets.some((d) => d.name === biDataset());
   // The same vault's line stays until its new state replaces it: emptied in between, its
   // links to 版本 would vanish under a press made just then. Another's goes at once.
@@ -9149,3 +9152,7 @@ el("bi-example").addEventListener("click", async () => {
 BI_CSS, BI_PANE_HTML, BI_JS = BI_CSS[1:], BI_PANE_HTML[1:], BI_JS[1:]
 BI_CSS = BI_CSS.replace("/* BI_CHART_CSS */", BI_CHART_CSS, 1)
 BI_JS = BI_JS.replace("/* BI_CHART_JS */", BI_CHART_JS.rstrip(), 1)
+# BI 管理 → Telegram 收集 (owner 2026-11-19), kept in `aep_bi.inbox.page`.
+BI_PANE_HTML = BI_PANE_HTML.replace("<!-- BI_INBOX_BUTTON -->", INBOX_BUTTON, 1)
+BI_PANE_HTML = BI_PANE_HTML.replace("<!-- BI_INBOX_PANEL -->", INBOX_PANEL, 1)
+BI_JS += INBOX_JS
