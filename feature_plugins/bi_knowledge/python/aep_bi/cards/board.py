@@ -212,6 +212,10 @@ def board(
         "domain": domain,
         "home": home,
         "include_sample": include_sample,
+        # Whether there is any sample card to include: the page offers the choice only then.
+        "has_sample": any(
+            str(row["name"]).startswith(quality.SAMPLE_PREFIX) for row in store.card_rows()
+        ),
         "source": source,
         "ordered": True,
         "params": _extra_params(items, registry, domains),

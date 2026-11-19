@@ -156,10 +156,11 @@ def test_vault_panel_and_dashboard_in_a_browser(
         click("#nav-knowledge")
         click("#kn-tabs [data-kn=bi]")
         wait("document.getElementById('bi-status-bar').hidden")
-        # The page opens on 「建立與匯入」, what the flow does not name folded away; this test
-        # starts on the Dashboard.
+        # The page opens on 「建立與匯入」, what the flow does not name folded away (the 管理
+        # menu holds the former 進階：資料集與發佈); this test starts on the Dashboard.
         assert not run("document.getElementById('bi-view-build').hidden")
-        assert not run("document.getElementById('bi-advanced').open")
+        assert not run("document.getElementById('bi-b-v-menu').open")
+        assert run("document.getElementById('bi-demo').closest('#bi-b-v-menu') !== null")
         run("document.querySelector('#bi-views [data-bi-view=dashboard]').click()")
         click("#bi-demo")
         wait("document.getElementById('bi-notice').textContent.includes('示範資料已載入')")
@@ -301,7 +302,8 @@ def test_vault_panel_and_dashboard_in_a_browser(
         assert not run("document.getElementById('bi-b-skills').hidden")
         wait("document.getElementById('bi-b-sk-list').textContent.includes('依 schema 產生')")
         assert "classify" in text_of("bi-b-sk-list")
-        assert not run("document.getElementById('bi-b-folder-box').hidden")
+        # The folder choice shows only for 全部領域; a working domain decides it (E2).
+        assert run("document.getElementById('bi-b-folder-box').hidden") == run("!!biScope()")
         assert run(
             "[...document.getElementById('bi-b-folder').options]"
             ".some((o) => o.value === 'applications/aidc/sources')"

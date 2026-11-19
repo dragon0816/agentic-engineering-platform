@@ -101,16 +101,9 @@ def test_ticked_sources_run_one_after_another_and_a_failure_does_not_stop_the_re
             assert _ticked(page) == 0 and "已選 0 份" in page.text_of("bi-b-src-count")
             page.click("#bi-b-src-all")
             assert _ticked(page) == 4
-            # A search narrows what the header box ticks.
-            page.set_value("bi-b-src-q", "會議3")
-            page.run("document.getElementById('bi-b-src-q').dispatchEvent(new Event('input'))")
-            page.wait("document.querySelectorAll('#bi-b-sources tbody tr').length === 1")
-            page.click("#bi-b-src-all")
-            assert "已選 3 份" in page.text_of("bi-b-src-count")
-            page.click("#bi-b-src-all")
-            page.set_value("bi-b-src-q", "")
-            page.run("document.getElementById('bi-b-src-q').dispatchEvent(new Event('input'))")
-            page.wait("document.querySelectorAll('#bi-b-sources tbody tr').length === 4")
+            # Four sources need no search (owner 2026-11-19, C3): it shows past ten, where
+            # test_bi_many_sources_ui checks that it narrows what the header box ticks.
+            assert page.run("document.getElementById('bi-b-src-q-box').hidden")
             page.shoot("ticked")
 
             # -- step 2b says what will run, before anything is pressed --------------------------

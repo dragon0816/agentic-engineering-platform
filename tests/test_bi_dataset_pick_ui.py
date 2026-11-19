@@ -111,7 +111,7 @@ def test_the_bi_area_opens_on_a_dataset_that_exists(served: Any, tmp_path: Path)
             run("[...document.getElementById('bi-dataset').options].map(o => o.value).join()")
         )
 
-        # Nothing at all (acceptance F2): 新增知識庫 leads, 加入 beside it, a small demo link,
+        # Nothing at all (acceptance F2): 新增知識庫 and 加入 in the guide, a small demo link,
         # and no select, tabs or steps for a dataset that does not exist.
         stub.own = []
         stub.subs.clear()
@@ -123,13 +123,22 @@ def test_the_bi_area_opens_on_a_dataset_that_exists(served: Any, tmp_path: Path)
         shown = "(id) => document.getElementById(id).offsetParent !== null"
         for gone in ("bi-dataset", "bi-views", "bi-view-build", "bi-counts", "bi-b-v-state"):
             assert not run(f"({shown})('{gone}')"), gone
-        for kept in ("bi-b-v-new", "bi-b-v-join", "bi-empty-demo", "bi-advanced"):
+        for kept in ("bi-empty-new", "bi-empty-join", "bi-empty-demo", "bi-b-v-menu"):
             assert run(f"({shown})('{kept}')"), kept
-        assert "go" in str(run("document.getElementById('bi-b-v-new').className"))
-        # 新增資料集 is under 進階.
-        run("document.getElementById('bi-advanced').open = true")
+        assert "go" in str(run("document.getElementById('bi-empty-new').className"))
+        # The guide's 新增知識庫 opens the same form as the one in 管理.
+        run("document.getElementById('bi-empty-new').click()")
+        wait("!document.getElementById('bi-b-v-form').hidden")
+        assert run("document.getElementById('bi-b-v-form').dataset.mode") == "new"
+        run("document.getElementById('bi-b-v-cancel').click()")
+        # 新增資料集 is in 管理 (owner 2026-11-19, B1).
+        run("document.querySelector('#bi-b-v-menu > summary').click()")
+        wait("document.getElementById('bi-b-v-menu').open")
+        for item in ("bi-b-v-new", "bi-b-v-join", "bi-new", "bi-install"):
+            assert run(f"({shown})('{item}')"), item
         run("document.getElementById('bi-new').click()")
         wait("!document.getElementById('bi-new-panel').hidden")
+        assert not run("document.getElementById('bi-b-v-menu').open")
     finally:
         browser.close()
         proxy.shutdown()

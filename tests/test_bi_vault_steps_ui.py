@@ -155,8 +155,11 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
         page.wait("!document.getElementById('bi-b-overview').hidden")
 
         # -- K2: an Atlas dashboard's order, previewed and confirmed --------------------------
+        # One Atlas address, the Dashboard tab's 「Atlas 位址」 (H2): its port is the one read.
+        page.run(f"localStorage.setItem('bi-atlas-url', 'http://127.0.0.1:{atlas}')")
         page.run("document.getElementById('bi-b-atl').open = true")
-        page.set_value("bi-b-atl-port", str(atlas))
+        assert page.run("document.getElementById('bi-b-atl-port') === null")
+        page.see("bi-b-atl-at", f"127.0.0.1:{atlas}")
         page.click("#bi-b-atl-load")
         page.notice("Atlas 有 2 個 Dashboard")
         assert page.run("document.getElementById('bi-b-atl-name').options.length") == 2

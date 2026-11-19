@@ -63,7 +63,13 @@ PANE = _pane()
 
 
 def _in_advanced(ident: str) -> bool:
-    return any(tag == "details" and name.startswith(("bi-b-adv-", "bi-advanced"))
+    return any(tag == "details" and name.startswith("bi-b-adv-")
+               for tag, name in PANE.around[ident])  # fmt: skip
+
+
+def _in_manage(ident: str) -> bool:
+    """In the top row's 管理 menu, or a panel only that menu opens (owner 2026-11-19, B1)."""
+    return any((tag, name) in (("details", "bi-b-v-menu"), ("div", "bi-advanced"))
                for tag, name in PANE.around[ident])  # fmt: skip
 
 
@@ -80,7 +86,6 @@ MAIN_PATH = (
     "bi-b-tl-list",
     "bi-b-sk-new",
     # Step 2a's schema (acceptance F5, F8): suggest, the AI, and the draft as a table.
-    "bi-b-sg-scope",
     "bi-b-sg-run",
     "bi-b-sg-table",
     "bi-b-sa-open",
@@ -104,10 +109,15 @@ MAIN_PATH = (
     "bi-b-ver-history",
 )
 
-#: Not named by the owner: under 進階, and still there.
-ADVANCED = (
+#: The former 進階：資料集與發佈, now in the 管理 menu (owner 2026-11-19, B1 and S3), with
+#: 新增知識庫 and 加入.
+MANAGE = (
+    "bi-b-v-new",
+    "bi-b-v-join",
+    "bi-b-v-sync",
     "bi-publish",
     "bi-publish-panel",
+    "bi-subs-open",
     "bi-subs",
     "bi-new",
     "bi-new-panel",
@@ -115,6 +125,10 @@ ADVANCED = (
     "bi-install-panel",
     "bi-demo",
     "bi-schema-note",
+)
+
+#: Not named by the owner: under 進階, and still there.
+ADVANCED = (
     "bi-b-v-convert",
     "bi-b-askable",
     "bi-b-pages",
@@ -125,7 +139,8 @@ ADVANCED = (
     "bi-b-draft-new",
     "bi-b-draft-text",
     "bi-b-versions",
-    "bi-b-fit",
+    # 「建議 schema」 reads the sources not yet ingested; the other choice is here (D1).
+    "bi-b-sg-scope",
     "bi-b-fresh",
     "bi-b-recipe",
     "bi-b-instr",
@@ -153,7 +168,41 @@ def test_what_the_owner_did_not_name_is_under_advanced_and_still_there(ident: st
     assert _in_advanced(ident), ident
 
 
-@pytest.mark.parametrize("ident", ["bi-ask", "bi-hint", "bi-refresh", "bi-b-ds", "bi-b-src-shared"])
+@pytest.mark.parametrize("ident", MANAGE)
+def test_the_former_datasets_section_and_create_join_are_in_the_manage_menu(ident: str) -> None:
+    assert ident in PANE.around, ident
+    assert _in_manage(ident), ident
+
+
+def test_there_is_no_folded_section_at_the_foot_of_the_page() -> None:
+    assert "進階：資料集與發佈" not in PAGE
+    assert PANE.tags["bi-advanced"] == "div"
+    # The panels open under the top row, where the menu is.
+    assert (
+        PAGE.index('id="bi-b-v-menu"')
+        < PAGE.index('id="bi-advanced"')
+        < PAGE.index('id="bi-views"')
+    )
+
+
+@pytest.mark.parametrize(
+    "ident",
+    [
+        "bi-ask",
+        "bi-hint",
+        "bi-refresh",
+        "bi-b-ds",
+        "bi-b-src-shared",
+        # Owner 2026-11-19 first batch: the step bar and the tabs already do these.
+        "bi-b-to-cards",
+        "bi-b-ro-cards",
+        "bi-b-ro-dash",
+        "bi-b-ro-links",
+        "bi-b-md-close",
+        "bi-b-fit",
+        "bi-b-atl-port",
+    ],
+)
 def test_the_removed_controls_are_gone_from_markup_and_script(ident: str) -> None:
     assert ident not in PANE.around
     assert f'"{ident}"' not in PAGE
@@ -168,8 +217,7 @@ def test_there_is_one_selection_above_every_tab_vault_then_domain() -> None:
     assert ("div", "bi-top-row") in PANE.around["bi-b-src-folder"]
     order = [
         'id="bi-dataset"',
-        'id="bi-b-v-new"',
-        'id="bi-b-v-join"',
+        'id="bi-b-v-menu"',
         'id="bi-b-src-folder"',
         'id="bi-b-home-new"',
         'id="bi-views"',
@@ -181,13 +229,16 @@ def test_there_is_one_selection_above_every_tab_vault_then_domain() -> None:
     assert "bi-bar" not in PAGE[PAGE.index('<div id="kn-pane-bi"') :].split("<section")[0]
 
 
-def test_create_and_join_sit_beside_the_selection_and_the_rest_is_folded() -> None:
-    for ident in ("bi-b-v-new", "bi-b-v-join"):
-        assert ("details", "bi-b-v-menu") not in PANE.around[ident], ident
-        assert ("div", "bi-top-row") in PANE.around[ident], ident
-    assert ("details", "bi-b-v-menu") in PANE.around["bi-b-v-sync"]
+def test_create_and_join_are_in_the_manage_menu_and_in_sight_with_no_knowledge_base() -> None:
+    # Owner 2026-11-19 (S3) moved them from beside the selection into 管理.
+    for ident in ("bi-b-v-new", "bi-b-v-join", "bi-b-v-sync"):
+        assert ("details", "bi-b-v-menu") in PANE.around[ident], ident
     # Their form is not in the menu, or closing the menu would hide it.
     assert not any(tag == "details" for tag, _name in PANE.around["bi-b-v-form"])
+    # With nothing on this PC the guide shows both, not folded.
+    for ident in ("bi-empty-new", "bi-empty-join"):
+        assert ("div", "bi-empty-state") in PANE.around[ident], ident
+        assert not any(tag == "details" for tag, _name in PANE.around[ident]), ident
 
 
 def test_the_market_field_is_named_and_the_button_is_convert() -> None:
@@ -215,6 +266,8 @@ def test_the_main_path_has_no_explanatory_paragraphs() -> None:
         and not any(tag == "details" for tag, _name in around)
         # A warning or an error says something happened; it is not an explanation.
         and ("div", "bi-b-bench-report") not in around
+        # A panel only the 管理 menu opens is as folded as 進階.
+        and ("div", "bi-advanced") not in around
     ]
     assert long == []
 
@@ -224,16 +277,19 @@ def test_a_read_only_dataset_keeps_a_way_to_another_one() -> None:
     assert 'if (name === "build" && biReadOnly()) name = "dashboard";' not in PAGE
     # Step 1 hides only what cannot be done there.
     assert 'el("bi-b-src-input").hidden = readOnly' in PAGE
-    assert 'el("bi-b-ro-links").hidden = !readOnly' in PAGE
-    assert not any(tag == "details" for tag, _name in PANE.around["bi-b-ro-links"])
+    # The 卡片 and Dashboard tabs above are the way there (C9: no buttons repeating them).
+    assert "bi-b-ro-links" not in PAGE
 
 
 def test_the_other_tabs_sentence_does_not_show_on_this_one() -> None:
     assert 'el("kn-note").hidden = knPane !== "pipeline";' in PAGE
 
 
-def test_a_panel_opened_from_elsewhere_opens_advanced_first() -> None:
-    assert 'el("bi-advanced").open = true;' in PAGE
+def test_a_panel_opened_from_the_manage_menu_closes_it_and_comes_into_view() -> None:
+    panel = PAGE[PAGE.index("function biPanel(") :]
+    panel = panel[: panel.index("\n}\n")]
+    assert 'el("bi-b-v-menu").open = false;' in panel
+    assert "panel.scrollIntoView(" in panel
 
 
 def test_every_element_the_script_names_is_in_the_page() -> None:
@@ -321,3 +377,26 @@ def test_every_bi_function_the_page_calls_is_defined() -> None:
     called = set(re.findall(r"(?<![\w.])(bi[A-Z]\w*)\(", PAGE))
     defined = set(re.findall(r"(?:function\s+|(?:const|let|var)\s+)(bi[A-Z]\w*)", PAGE))
     assert called - defined == set()
+
+
+def test_controls_with_nothing_to_choose_stay_out_of_sight() -> None:
+    """Owner 2026-11-19 first batch: shown only when there is a choice to make."""
+    # H1: 含 SAMPLE 示範卡 only where the Dashboard has sample cards.
+    assert '<div id="bi-sample-box" hidden>' in PAGE
+    assert 'el("bi-sample-box").hidden = !reply.has_sample' in PAGE
+    # C1: the revision choice with two or more; C3: the source search past ten.
+    assert '<div id="bi-b-md-rev-box" hidden>' in PAGE
+    assert '<div id="bi-b-src-q-box" hidden>' in PAGE
+    # E2: the run's folder follows the source under a working domain.
+    assert 'el("bi-b-folder-box").hidden = !pick.options.length || Boolean(biScope());' in PAGE
+    # G4: a new question is the working domain's.
+    assert ("div", "bi-b-bq-home-box") in PANE.around["bi-b-bq-home"]
+
+
+def test_the_wording_names_what_is_on_the_page() -> None:
+    # S1, F3: step 3 has 分享, no 版本 block and no separate Push.
+    assert "到「版本」" not in PAGE and "測試與 Push" not in PAGE
+    assert ' 個：到「分享」")' in PAGE
+    # J1: the step bar is the way back.
+    pane = PAGE[PAGE.index('<div id="kn-pane-bi"') : PAGE.index('<section id="panel-reviews"')]
+    assert "上一步" not in pane

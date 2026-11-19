@@ -103,12 +103,13 @@ def test_source_markdown_and_search_in_a_browser(served: Any, tmp_path: Path) ->
         assert "轉檔" in text_of("bi-b-md-info")
         # It opens on the preview; the table is a table there, and editing is a choice.
         wait("document.querySelectorAll('#bi-b-md-view table').length === 1")
-        assert run("document.getElementById('bi-b-md-mode').value") == "view"
-        run(
-            "{ const s = document.getElementById('bi-b-md-mode'); s.value = 'edit';"
-            " s.dispatchEvent(new Event('change')); }"
-        )
+        # One 編輯 button (C2); the revision choice only with two or more (C1).
+        assert run("document.getElementById('bi-b-md-mode').dataset.mode") == "view"
+        assert text_of("bi-b-md-mode") == "編輯"
+        assert run("document.getElementById('bi-b-md-rev-box').hidden")
+        click("#bi-b-md-mode")
         wait("!document.getElementById('bi-b-md-edit').hidden")
+        assert text_of("bi-b-md-mode") == "預覽"
         run(
             "{ const box = document.getElementById('bi-b-md-text');"
             " box.value = box.value.replace('| TSN |', '| TSN-2026 |'); }"
@@ -119,6 +120,7 @@ def test_source_markdown_and_search_in_a_browser(served: Any, tmp_path: Path) ->
         wait("document.getElementById('bi-b-sources').textContent.includes('第 2 版')")
         wait("document.getElementById('bi-b-md-info').textContent.includes('人工修改')")
         shoot("markdown-rev2")
+        wait("!document.getElementById('bi-b-md-rev-box').hidden")
         run(
             "{ const s = document.getElementById('bi-b-md-rev'); s.value = '1';"
             " s.dispatchEvent(new Event('change')); }"

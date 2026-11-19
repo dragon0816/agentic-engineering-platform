@@ -178,7 +178,7 @@ def test_build_and_import_steps_in_a_browser(served: Any, tmp_path: Path) -> Non
         assert sorted(c["name"] for c in BiStore(workspace).card_rows()) == ["EtherCAT", "TSN"]
         shoot("6-result")
 
-        # -- 3 測試與 Push: a dataset on this PC only has nothing to commit -------------------
+        # -- 3 測試: a dataset on this PC only has nothing to commit -------------------
         click("[data-stage=result] [data-bi-next=test]")
         wait(stage_shown("test"))
         assert run("document.getElementById('bi-substeps').hidden")
