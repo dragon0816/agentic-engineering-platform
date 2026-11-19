@@ -8097,3 +8097,18 @@ working domain only. Defaults taken from the design for the rest: a tool's descr
 from its module docstring into the tool unit; a same-role conflict becomes a new version and a
 different-role clash is imported under a new name; analysis packs and Shared Platform publishing
 of packages are out of scope for now; a matching 「匯出」 produces packages.
+
+### 2026-11-20 — Telegram collection: one bot per BI domain (supersedes single-bot routing)
+
+Owner found single-bot routing (buttons/commands to tell chat from collection) inconvenient and
+chose multiple Telegram bots, one per BI domain: sharing to 「BI-<domain>」 means that domain, no
+classification. AGENTS22 scoped consent 「同意開工」 for core changes: (1) a Host may configure
+several Telegram bots, each marked for ordinary conversation or for a feature plugin's collection
+with a target (BI domain); (2) messages to a collection bot (links, files, replies) go straight to
+the plugin, never to a model turn; (3) proactive messages (review reminders, results) per bot;
+the existing conversation bot is unchanged. From the unmerged single-bot P1
+(telegram-links-p1-20261119) keep the shared parts (fetch, HTML→Markdown, inbox, per-domain
+schedule with at-most-once runs, review reminder, tests after import, proactive send); drop the
+single-bot link/file detection, domain buttons and `/bi link|domain` routing. Earlier owner
+confirmations stay: plugin timer instead of Host schedules; files with captions to a conversation
+bot still go to the model; AI-suggest threshold 0.7 only matters if a generic BI bot is added later.
