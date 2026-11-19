@@ -3433,7 +3433,7 @@ function biBenchDraw(reply) {
     .filter((unit) => reply.questions.some((q) => q.unit === unit)));
   const table = (items) => {
     const list = biListTable([...(reads ? [] : ["選取"]), "題目", "必須提到", "不可以說",
-      "題組", "領域", ...(reads ? [] : [""])]);
+      "題組", "領域"]);
     for (const q of items) {
       const cells = [q.question, q.must.join("、") || "—",
         q.must_not.join("、") || "—", q.set, q.home || "全庫"];
@@ -3448,14 +3448,7 @@ function biBenchDraw(reply) {
         if (tick.checked) bi.bqTicked.add(q.unit); else bi.bqTicked.delete(q.unit);
         biBqBulk();
       });
-      const actions = bh("div", "bi-actions");
-      actions.append(biButton("刪除", () => biBqConfirmDelete(actions, [q]),
-        "bi-btn bi-bq-del-row", "刪除題目：" + q.question));
-      // The delete and its confirmation do not also open the row in the editor.
-      for (const type of ["click", "keydown"]) {
-        actions.addEventListener(type, (event) => event.stopPropagation());
-      }
-      const row = biRow(list, [tick, ...cells, actions]);
+      const row = biRow(list, [tick, ...cells]);
       row.dataset.unit = q.unit;
       row.tabIndex = 0;
       row.setAttribute("aria-selected", String(!!bi.bqSel && bi.bqSel.unit === q.unit));
@@ -3551,32 +3544,27 @@ function biBqBulk() {
   const questions = ((bi.benchReply || {}).reply || {questions: []}).questions
     .filter((q) => bi.bqTicked.has(q.unit));
   bar.replaceChildren(biButton("刪除選取的 " + ticked.length + " 題",
-    () => biBqConfirmDelete(bar, questions), "bi-btn", "刪除選取的題目"),
-  biButton("取消選取", () => { bi.bqTicked.clear(); biBenchDraw(bi.benchReply.reply); }));
+    () => biBqDelete(bar, questions), "bi-btn", "刪除選取的題目"));
   list.append(bar);
 }
 
-function biBqConfirmDelete(where, questions) {
-  // One confirmation in place; the deletion is an uncommitted change like any other edit,
-  // and past runs keep what they found for these questions.
+async function biBqDelete(where, questions) {
+  // No confirmation: a deletion is an uncommitted change until commit and push, so it can be
+  // undone, and past runs keep what they found for these questions.
   if (!questions.length) return;
-  const what = questions.length === 1 ? "「" + questions[0].question + "」"
-    : questions.length + " 題";
-  biConfirm(where, "刪除" + what
-    + "？已跑過的測試結果會留著；commit 並 push 後大家才會少這些題目。", "刪除", async () => {
-      const status = bh("span", "bi-meta", "正在刪除 " + what + "…");
-      status.setAttribute("role", "status"); where.append(status);
-      try {
-        const units = questions.map((q) => q.unit);
-        await biBenchSave({delete: units.length === 1 ? units[0] : units});
-        for (const unit of units) bi.bqTicked.delete(unit);
-        if (bi.bqSel && units.includes(bi.bqSel.unit)) biBqPick(null);
-        await biBench(bi.verVault);
-      } catch (failure) {
-        if (status.isConnected) status.textContent = "沒有刪除：" + failure.message;
-        else biNotice(false, "沒有刪除：" + failure.message);
-      }
-    });
+  const status = bh("span", "bi-meta", "正在刪除 " + questions.length + " 題…");
+  status.setAttribute("role", "status"); where.append(status);
+  try {
+    const units = questions.map((q) => q.unit);
+    await biBenchSave({delete: units.length === 1 ? units[0] : units});
+    for (const unit of units) bi.bqTicked.delete(unit);
+    if (bi.bqSel && units.includes(bi.bqSel.unit)) biBqPick(null);
+    status.remove();
+    await biBench(bi.verVault);
+  } catch (failure) {
+    if (status.isConnected) status.textContent = "沒有刪除：" + failure.message;
+    else biNotice(false, "沒有刪除：" + failure.message);
+  }
 }
 
 el("bi-b-bq-add").addEventListener("click", () => {
@@ -3584,7 +3572,7 @@ el("bi-b-bq-add").addEventListener("click", () => {
 });
 el("bi-b-bq-del").addEventListener("click", () => {
   const q = bi.bqSel; if (!q) return;
-  biBqConfirmDelete(el("bi-b-bq-del").parentElement, [q]);
+  biBqDelete(el("bi-b-bq-del").parentElement, [q]);
 });
 el("bi-b-bq-form").addEventListener("submit", async (event) => {
   event.preventDefault();

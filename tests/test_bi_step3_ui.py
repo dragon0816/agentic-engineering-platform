@@ -135,11 +135,7 @@ def test_step_3(
         assert page.run("document.getElementById('bi-b-bq-q').value") == ""
         assert page.run("document.getElementById('bi-b-bq-del').hidden")
         page.click("#bi-b-bq-list tbody tr")
-        page.click("#bi-b-bq-del")
-        # One confirmation in place, then it goes.
-        page.wait("document.querySelector('#bi-b-bq-pane .bi-confirm') !== null")
-        assert len(_questions(workspace)) == 1
-        page.click_text("#bi-b-bq-pane .bi-confirm", "刪除")
+        page.click("#bi-b-bq-del")  # no confirmation: undone by not committing
         page.see("bi-b-bench-state", "0 題")
         assert _questions(workspace) == {}
         page.see("bi-b-bq-title", "新增題目")
@@ -171,7 +167,7 @@ def test_step_3(
         )
         page.shoot("results-and-dashboard")
 
-        # -- delete an added question: per row and the ticked ones; past results stay ---------
+        # -- delete added questions: one or several ticked, at once; past results stay ------
         page.run("document.getElementById('bi-b-bench').open = true")
         for text in ("第二題？", "第三題？"):
             page.set_value("bi-b-bq-q", text)
@@ -179,16 +175,13 @@ def test_step_3(
             page.click("#bi-b-bq-form button[type=submit]")
             page.see("bi-b-bq-list", text)
         page.see("bi-b-bench-state", "3 題")
-        first = "[...document.querySelectorAll('#bi-b-bq-list tbody tr')]"
-        row_of = f"{first}.find((r) => r.textContent.includes('FicTech 是什麼'))"
-        page.run(f"{row_of}.querySelector('.bi-bq-del-row').click()")
-        page.wait(f"{row_of}.querySelector('.bi-confirm') !== null")
-        assert page.text_of("bi-b-bq-title") == "新增題目"  # the row did not open
-        assert len(_questions(workspace)) == 3  # not before the confirmation
-        page.run(
-            f"[...{row_of}.querySelectorAll('.bi-confirm button')]"
-            ".find((b) => b.textContent === '刪除').click()"
-        )
+        assert page.run("document.getElementById('bi-b-bq-bulk') === null")
+        rows = "[...document.querySelectorAll('#bi-b-bq-list tbody tr')]"
+        row_of = f"{rows}.find((r) => r.textContent.includes('FicTech 是什麼'))"
+        page.run(f"{row_of}.querySelector('.bi-bq-tick').click()")
+        assert page.text_of("bi-b-bq-title") == "新增題目"  # ticking does not open the row
+        page.see("bi-b-bq-bulk", "刪除選取的 1 題")
+        page.click_text("#bi-b-bq-bulk", "刪除選取的 1 題")
         page.see("bi-b-bench-state", "2 題")
         assert all(q["question"] != "FicTech 是什麼？" for q in _questions(workspace).values())
         # The run's result for it stays readable, marked as deleted.
@@ -198,8 +191,6 @@ def test_step_3(
         page.run("document.querySelectorAll('#bi-b-bq-list .bi-bq-tick').forEach((t) => t.click())")
         page.see("bi-b-bq-bulk", "刪除選取的 2 題")
         page.click_text("#bi-b-bq-bulk", "刪除選取的 2 題")
-        page.wait("document.querySelector('#bi-b-bq-bulk .bi-confirm') !== null")
-        page.click_text("#bi-b-bq-bulk .bi-confirm", "刪除")
         page.see("bi-b-bench-state", "0 題")
         assert _questions(workspace) == {}
         assert page.run("document.getElementById('bi-b-bq-bulk') === null")
