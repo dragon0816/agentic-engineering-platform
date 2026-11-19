@@ -3558,16 +3558,43 @@ function biQuestionsSuggestion(session, turn, index) {
     parts.push(bh("p", "bi-meta", "已加入 " + turn.applied.units.length
       + " 題（commit 並 push 後才會跟著知識庫）。"));
   } else {
-    parts.push(bh("div", "bi-actions", biButton("加入測試題", async () => {
+    // Progress and the outcome stay beside the button (AGENTS.md 23); one request stages them
+    // all, and the list and the vault state are read again side by side.
+    const status = bh("span", "bi-meta bi-qa-add-status");
+    status.setAttribute("role", "status");
+    const add = biButton("加入測試題", async () => {
       const picks = ticks.flatMap((tick, i) => tick.checked ? [i] : []);
-      const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
-        {dataset: bi.ai.dataset, turn: index, picks, home: bi.ai.scope});
-      biAiShow(reply.session);
-      await biBench(bi.verVault);
-      biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
-      biNotice(true, "已加入 " + reply.units.length
-        + " 題測試題；commit 並 push 後才會跟著知識庫。");
-    }, "go", "把勾選的題目加入測試題")));
+      if (!picks.length) { status.textContent = "請至少勾選一題。"; return; }
+      const started = Date.now();
+      let step = "正在加入 " + picks.length + " 題", reply = null;
+      const show = () => {
+        status.textContent = step + "…・" + Math.floor((Date.now() - started) / 1000) + " 秒";
+      };
+      add.disabled = true; add.setAttribute("aria-busy", "true"); show();
+      const timer = setInterval(show, 1000);
+      try {
+        reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
+          {dataset: bi.ai.dataset, turn: index, picks, home: bi.ai.scope});
+        step = "已加入 " + reply.units.length + " 題，正在更新測試題清單"; show();
+        const vaultId = bi.verVault;
+        await Promise.all([biBench(vaultId),
+          call("/api/bi/vaults/" + vaultId + "/status").then(biVaultState)]);
+        biAiShow(reply.session);
+        biNotice(true, "已加入 " + reply.units.length
+          + " 題測試題；commit 並 push 後才會跟著知識庫。");
+      } catch (failure) {
+        if (reply) {
+          // Added: only the refresh failed, and adding again would be refused.
+          biAiShow(reply.session);
+          biNotice(false, "已加入 " + reply.units.length + " 題，但清單沒有更新："
+            + failure.message + "。重新整理頁面即可看到。");
+        } else {
+          status.textContent = "沒有加入：" + failure.message + "。可以再按一次「加入測試題」。";
+          add.disabled = false; add.removeAttribute("aria-busy");
+        }
+      } finally { clearInterval(timer); }
+    }, "go", "把勾選的題目加入測試題");
+    parts.push(bh("div", "bi-actions", add, status));
   }
   return parts;
 }

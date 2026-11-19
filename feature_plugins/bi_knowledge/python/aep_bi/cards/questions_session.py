@@ -228,24 +228,24 @@ def apply_suggestion(
     if not picks:
         raise BiStoreError("picks_empty", "請至少勾選一題")
     group = session["target_ref"][len(TARGET_PREFIX) :]
-    units = []
-    listed: dict[str, Any] = {}
-    for pick in dict.fromkeys(picks):
-        item = proposed[pick]
-        slug = item["unit"].rpartition("/")[2]
-        saved = vault_checks.save_question(
-            workspace,
-            vault_id,
+    # One write of the working copy for all of them (one per question took a second or
+    # more on a real vault), and marked applied only once they are staged.
+    saved = vault_checks.save_questions(
+        workspace,
+        vault_id,
+        [
             {
-                "question": item["question"],
-                "must": item["must"],
-                "must_not": item["must_not"],
+                "question": proposed[pick]["question"],
+                "must": proposed[pick]["must"],
+                "must_not": proposed[pick]["must_not"],
                 "set": group,
-                "slug": slug,
+                "slug": proposed[pick]["unit"].rpartition("/")[2],
                 "home": home,
-            },
-        )
-        units.append(saved["unit"])
-        listed = {k: v for k, v in saved.items() if k != "unit"}
+            }
+            for pick in dict.fromkeys(picks)
+        ],
+    )
+    units = saved.pop("units")
+    listed = saved
     sessions.mark_applied(staging, session, index, {"units": units, "at": now(), "by": actor})
     return {"session": session, "units": units, **listed}

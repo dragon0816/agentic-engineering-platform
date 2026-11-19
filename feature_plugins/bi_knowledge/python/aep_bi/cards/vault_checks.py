@@ -195,23 +195,35 @@ def listing(workspace: Path, vault_id: str) -> dict[str, Any]:
     return {"questions": questions(units), "cases": cases(units)}
 
 
-def _stage(workspace: Path, vault_id: str, key: str, value: Any) -> dict[str, Any]:
+def _stage(workspace: Path, vault_id: str, changes: Mapping[str, Any]) -> dict[str, Any]:
+    """Stage `changes` with one write of the working copy and list the checks once: a
+    vault's working units take a few tenths of a second to read on every list."""
     from aep_bi.cards import vault
 
     target = vault._vault(workspace, vault_id)
     with target.lock, vault._repo_errors():
-        target.repo.stage(key, value)
-    return listing(workspace, vault_id)
+        target.repo.stage_many(changes)
+        units = target.repo.working_units()
+    return {"questions": questions(units), "cases": cases(units)}
 
 
 def save_question(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
     key, value = checked_question(given)
-    return {"unit": key, **_stage(workspace, vault_id, key, value)}
+    return {"unit": key, **_stage(workspace, vault_id, {key: value})}
+
+
+def save_questions(
+    workspace: Path, vault_id: str, given: list[Mapping[str, Any]]
+) -> dict[str, Any]:
+    """Several questions at once (「加入測試題」): all checked first, then staged by one
+    write; none is staged when one is invalid."""
+    changes = dict(checked_question(item) for item in given)
+    return {"units": list(changes), **_stage(workspace, vault_id, changes)}
 
 
 def save_case(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
     key, value = checked_case(given)
-    return {"unit": key, **_stage(workspace, vault_id, key, value)}
+    return {"unit": key, **_stage(workspace, vault_id, {key: value})}
 
 
 def delete(workspace: Path, vault_id: str, unit: Any) -> dict[str, Any]:
@@ -222,4 +234,4 @@ def delete(workspace: Path, vault_id: str, unit: Any) -> dict[str, Any]:
     units = vault.Vault(workspace, vault_id).repo.working_units()
     if unit not in units:
         raise BiStoreError("check_unknown", "沒有這個測試")
-    return _stage(workspace, vault_id, unit, None)
+    return _stage(workspace, vault_id, {unit: None})

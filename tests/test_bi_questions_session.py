@@ -18,7 +18,7 @@ from test_bi_vault import _call, _ok
 from test_business_cards_conversation import Conversation
 from test_host_wiring import ready
 
-from aep_bi.cards import analyses, questions_session, vault, vault_checks
+from aep_bi.cards import analyses, questions_session, sessions, vault, vault_checks
 from aep_bi.cards.store import BiStore, BiStoreError, PlannedRow
 from aep_bi.host import bi_bench, bi_questions_agent
 from aep_bi.host.bi_cards_api import route
@@ -241,3 +241,60 @@ def test_outside_agent_web_or_a_vault_there_is_no_turn(tmp_path: Path) -> None:
     with pytest.raises(BiStoreError) as refused:
         questions_session.create_session(ws, "lab", "main", "alice")
     assert refused.value.code == "not_a_vault"
+
+
+def test_ticked_questions_are_staged_by_one_write_and_listed_once(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """「加入測試題」 with many ticks: one write of the working copy and one read of the
+    working units, however many questions, and applied once (owner 2026-11-19: adding was slow)."""
+    _config, layout = ready(tmp_path)
+    ws = layout.workspace_root
+    dataset, vault_id = _vault(ws, tmp_path)
+    session = questions_session.create_session(ws, dataset, "main", "alice")
+    asked = [{"question": f"TSN 第 {n} 題？", "must": ["IEEE"]} for n in range(8)]
+
+    def asker(*_args: Any) -> Any:
+        answer = {"reply": "八題", "questions": asked, "reasons": []}
+        return sessions.Asked(answer=answer, attempts=1), "m", []
+
+    turned = questions_session.session_turn(
+        ws, dataset, session["id"], message="出八題", actor="alice", asker=asker
+    )
+    index = len(turned["turns"]) - 1
+    repo_type = type(vault.Vault(ws, vault_id).repo)
+    writes: list[int] = []
+    reads: list[int] = []
+    real_stage, real_units = repo_type.stage_many, repo_type.working_units
+
+    def stage_many(self: Any, changes: Any) -> None:
+        writes.append(len(changes))
+        real_stage(self, changes)
+
+    def working_units(self: Any, **kwargs: Any) -> Any:
+        reads.append(1)
+        return real_units(self, **kwargs)
+
+    monkeypatch.setattr(repo_type, "stage_many", stage_many)
+    monkeypatch.setattr(repo_type, "working_units", working_units)
+    added = questions_session.apply_suggestion(
+        ws, dataset, session["id"], index, [0, 1, 2, 3, 4, 5, 6, 7, 3], "alice", None
+    )
+    assert writes == [8]
+    assert len(reads) == 1
+    assert len(added["units"]) == 8 and len(added["questions"]) == 8
+    listed = vault_checks.listing(ws, vault_id)["questions"]
+    assert sorted(q["unit"] for q in listed) == sorted(added["units"])
+    with pytest.raises(BiStoreError) as again:
+        questions_session.apply_suggestion(ws, dataset, session["id"], index, [0], "alice")
+    assert again.value.code == "suggestion_applied"
+    assert writes == [8]
+
+
+def test_saving_several_questions_stages_none_when_one_is_invalid(tmp_path: Path) -> None:
+    _config, layout = ready(tmp_path)
+    ws = layout.workspace_root
+    _dataset, vault_id = _vault(ws, tmp_path)
+    with pytest.raises(BiStoreError):
+        vault_checks.save_questions(ws, vault_id, [GOOD, {"question": ""}])
+    assert vault_checks.listing(ws, vault_id)["questions"] == []
