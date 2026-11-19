@@ -8051,3 +8051,14 @@ candidate, 確認匯入 writes the accepted ones (undoable as one import). Owner
 confirmation) and 「全部接受並匯入（N 張）」 accepts them and then commits once (undo named in the
 result). The old 「接受所有沒有錯誤的候選卡」 button is removed. New route `POST /api/bi/runs/<id>/accept`
 reuses the single-candidate review rules, at most once per id; progress per AGENTS rule 23.
+
+### 2026-11-19 — BI GUI simplification first batch and S3
+
+Owner direction 「GUI和操作，請盡量減化」. From docs/phases/BI_SIMPLIFICATION_OPTIONS_20261119.md the
+owner chose all ten first-batch items and S3: 「新增知識庫」 and 「加入」 move into the 「管理」 menu,
+superseding the 2026-11-05 placement beside the knowledge-base select. Also decided the same day:
+dashboards filter by the cards' folder for library/home working domains (default analysis pack
+1.1.0; custom domain-only analyses show 「不支援依資料夾篩選」); the AI question round checks only
+the working domain's dashboard analyses; the tool editor text follows the 2026-11-12 no-approval
+decision; the three stray schema versions 5.2/5.3/5.4 made by repeated 「加入」 presses are removed
+(backed up) and Battlecard.landmines is kept.
