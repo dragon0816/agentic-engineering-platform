@@ -3802,7 +3802,28 @@ el("bi-ai-send").addEventListener("click", async () => {
   const message = el("bi-ai-msg").value.trim();
   if (!message) { el("bi-ai-msg").focus(); return; }
   const button = el("bi-ai-send"); button.disabled = true;
-  biStatus("bi-ai-status", "loading", spec.busy);
+  // What it is doing and for how long, beside 送出 (AGENTS.md 23); a questions turn also says
+  // which analyses it is checking.
+  const started = Date.now();
+  let step = spec.busy, live = true;
+  const show = () => {
+    if (live && bi.ai === spec) {
+      biStatus("bi-ai-status", "loading",
+        step + "・" + Math.floor((Date.now() - started) / 1000) + " 秒");
+    }
+  };
+  show();
+  const ticker = setInterval(() => {
+    show();
+    if (spec.kind !== "questions" || !spec.session) return;
+    call("/api/bi/sessions/" + spec.session.id + "/progress?dataset="
+      + encodeURIComponent(spec.dataset)).then((reply) => {
+      const now = reply.progress;
+      step = now && now.step === "check"
+        ? "核對 " + now.done + "/" + now.total + " 個分析" : spec.busy;
+      show();
+    }).catch(() => {});
+  }, 1000);
   try {
     if (spec.agent !== undefined && spec.checkModel !== false) {
       await biBuildAiState("bi-ai-sent", spec.sends, spec.agent);
@@ -3826,7 +3847,7 @@ el("bi-ai-send").addEventListener("click", async () => {
       biStatus("bi-ai-status", "error", (failure.code === "model_unavailable"
         ? "沒有可用的模型：" : "沒有送出：") + failure.message + "。");
     }
-  } finally { button.disabled = false; }
+  } finally { live = false; clearInterval(ticker); button.disabled = false; }
 });
 
 async function biQuestionsAi() {

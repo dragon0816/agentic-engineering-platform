@@ -18,7 +18,7 @@ from test_bi_vault import _call, _ok
 from test_business_cards_conversation import Conversation
 from test_host_wiring import ready
 
-from aep_bi.cards import analyses, questions_session, sessions, vault, vault_checks
+from aep_bi.cards import analyses, board, questions_session, sessions, vault, vault_checks
 from aep_bi.cards.store import BiStore, BiStoreError, PlannedRow
 from aep_bi.host import bi_bench, bi_questions_agent
 from aep_bi.host.bi_cards_api import route
@@ -200,13 +200,13 @@ def test_results_are_run_again_only_when_something_changed(
         "title": "類型", "slug": "types", "kind": "sql",
         "code": "SELECT 'one' AS word", "chart": {"type": "table"}})  # fmt: skip
     ran: list[Any] = []
-    real = analyses.run_saved
+    real = board._run
 
     def counted(*args: Any, **kwargs: Any) -> Any:
-        ran.append(args[2])
+        ran.append(args[1]["slug"])
         return real(*args, **kwargs)
 
-    monkeypatch.setattr(analyses, "run_saved", counted)
+    monkeypatch.setattr(board, "_run", counted)
     first = questions_session.saved_results(ws, vault_id)
     count = len(ran)
     assert count == len(first) > 0
@@ -298,3 +298,45 @@ def test_saving_several_questions_stages_none_when_one_is_invalid(tmp_path: Path
     with pytest.raises(BiStoreError):
         vault_checks.save_questions(ws, vault_id, [GOOD, {"question": ""}])
     assert vault_checks.listing(ws, vault_id)["questions"] == []
+
+
+def test_a_working_domain_checks_only_its_dashboards_analyses_and_says_how_far(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Owner 2026-11-19: the first AI round ran every analysis (~20 s). In a working domain only
+    its Dashboard's analyses are run, through the Dashboard's cache, and the turn says 「核對
+    n/N 個分析」 while it does."""
+    _config, layout = ready(tmp_path)
+    ws = layout.workspace_root
+    dataset, vault_id = _vault(ws, tmp_path)
+    for slug in ("mine", "other"):
+        analyses.save(ws, vault_id, {
+            "title": slug, "slug": slug, "kind": "sql",
+            "code": f"SELECT '{slug}-word' AS word", "chart": {"type": "table"}})  # fmt: skip
+    analyses.set_dashboard(ws, vault_id, {"order": ["mine"], "hidden": []}, "aidc")
+    session = questions_session.create_session(ws, dataset, "main", "alice")
+    seen: list[Any] = []
+    real = board._run
+
+    def watched(*args: Any, **kwargs: Any) -> Any:
+        seen.append(questions_session.progress(session["id"]))
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(board, "_run", watched)
+
+    def asker(_context: str, _turns: Any, check: Any) -> Any:
+        answer = {"reply": "一題", "questions": [GOOD], "reasons": []}
+        assert check(answer) == []
+        return sessions.Asked(answer=answer, attempts=1), "m", []
+
+    questions_session.session_turn(
+        ws, dataset, session["id"], message="出題", actor="alice", asker=asker, home="aidc"
+    )
+    assert len(seen) == 1  # only `mine`, the working domain's
+    assert seen[0]["step"] == "check" and seen[0]["total"] == 1 and seen[0]["seconds"] >= 0
+    text = questions_session._corpus(ws, dataset, "aidc")
+    assert "mine-word" in text and "other-word" not in text
+    assert questions_session.progress(session["id"]) is None  # nothing under way
+    path = f"/api/bi/sessions/{session['id']}/progress"
+    status, reply = route(ws, "alice", "GET", path, {"dataset": dataset}, {}, None, None, None)
+    assert status == 200 and reply == {"progress": None}

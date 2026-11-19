@@ -15,12 +15,16 @@ from __future__ import annotations
 
 import copy
 import json
+import threading
+import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
+from contextvars import ContextVar
+from datetime import date
 from pathlib import Path
 from typing import Any
 
-from aep_bi.cards import analyses, sessions, vault_checks
+from aep_bi.cards import analyses, board, homes, sessions, vault_checks
 from aep_bi.cards.staging import Staging
 from aep_bi.cards.store import VAULT_PREFIX, BiStore, BiStoreError, now
 
@@ -52,39 +56,89 @@ def create_session(workspace: Path, dataset: str, target: str, actor: str) -> di
     )
 
 
-#: The last results per vault with what they were read from: a turn reads them for the
-#: model and again for the check of its proposal.
-_LAST_RESULTS: dict[tuple[str, str], tuple[Any, list[dict[str, Any]]]] = {}
+#: The last results per vault and working domain with what they were read from: a turn reads
+#: them for the model and again for the check of its proposal.
+_LAST_RESULTS: dict[tuple[str, str, str], tuple[Any, list[dict[str, Any]]]] = {}
+#: The working domain and the session of the turn under way, for the Agent's tools, which run
+#: in the turn's context (`asyncio.to_thread` copies it).
+_HOME: ContextVar[str | None] = ContextVar("bi_questions_home", default=None)
+_SESSION: ContextVar[str | None] = ContextVar("bi_questions_session", default=None)
+#: What each turn under way is doing, for the page to show beside 送出 (AGENTS.md 23).
+_PROGRESS: dict[str, dict[str, Any]] = {}
+_PROGRESS_LOCK = threading.Lock()
 
 
-def saved_results(workspace: Path, vault_id: str) -> list[dict[str, Any]]:
+def _report(**state: Any) -> None:
+    session_id = _SESSION.get()
+    if session_id is None:
+        return
+    with _PROGRESS_LOCK:
+        if session_id in _PROGRESS:
+            _PROGRESS[session_id].update(state)
+
+
+def progress(session_id: str) -> dict[str, Any] | None:
+    """What the turn of `session_id` is doing now: `step` (`ai` or `check`), the analyses
+    checked of how many, and seconds since it started; None when no turn is under way."""
+    with _PROGRESS_LOCK:
+        found = _PROGRESS.get(session_id)
+        if found is None:
+            return None
+        return {**found, "seconds": round(time.monotonic() - found["since"], 1)}
+
+
+def saved_results(workspace: Path, vault_id: str, home: str | None = None) -> list[dict[str, Any]]:
     """The saved analyses with their results on the working data; one that cannot
-    run reports why and is left out of what supports a term. Run again only when
-    the analyses or the data changed."""
-    saved = analyses.listing(workspace, vault_id)["analyses"]
-    data = analyses._db(workspace, vault_id).stat()
+    run reports why and is left out of what supports a term. In a working domain, only its
+    Dashboard's analyses, run as its Dashboard runs them (its domain and folder): the rest
+    say nothing of its questions (owner 2026-11-19). Results come from the Dashboard's cache
+    when it drew them, and are run again only when the analyses or the data changed."""
+    home = home if home is not None else _HOME.get()
+    listed = analyses.listing(workspace, vault_id, home)
+    saved = listed["analyses"]
+    if home:
+        saved = [a for a in saved if a["slug"] in listed["order"]]
+    db = analyses._db(workspace, vault_id)
+    data = db.stat()
     stamp = (data.st_mtime_ns, data.st_size, json.dumps(saved, sort_keys=True, default=str))
-    place = (str(workspace), vault_id)
+    place = (str(workspace), vault_id, home or "")
     known = _LAST_RESULTS.get(place)
     if known is not None and known[0] == stamp:
         return copy.deepcopy(known[1])
+    registry = analyses._registry(workspace, vault_id)
+    domain = (analyses.home_domain(registry, home) or home.rpartition("/")[2]) if home else None
+    today = date.today().isoformat()
+    total, done = len(saved), [0]
+    lock = threading.Lock()
+    _report(step="check", done=0, total=total)
 
     def one(item: dict[str, Any]) -> dict[str, Any]:
         entry = {key: item.get(key) for key in ("slug", "title", "question")}
         try:
-            entry["table"] = analyses.run_saved(workspace, vault_id, item["slug"])["table"]
+            declared = item.get("params") or {}
+            given = {"domain": domain} if domain and "domain" in declared else {}
+            values = analyses.resolve_params(
+                declared, given, registry, today=today, domains=listed["domains"]
+            )
+            values = analyses.folder_filter(item, values, home, registry)
+            entry["table"] = board._run(db, item, values)
         except BiStoreError as error:
             entry["error"] = error.message
+        with lock:
+            done[0] += 1
+            _report(done=done[0], name=item.get("title"))
         return entry
 
     with ThreadPoolExecutor(max_workers=RUN_WORKERS) as pool:
         found = list(pool.map(one, saved))
+    _report(step="ai")
     _LAST_RESULTS[place] = (stamp, copy.deepcopy(found))
     return found
 
 
-def _corpus(workspace: Path, dataset: str) -> str:
-    """What a `must` term may come from: the working cards and analysis results."""
+def _corpus(workspace: Path, dataset: str, home: str | None = None) -> str:
+    """What a `must` term may come from: the working cards and analysis results (in a
+    working domain, its Dashboard's)."""
     store = BiStore(workspace, dataset)
     fields = store.all_fields() if store.exists else {}
     pieces: list[Any] = []
@@ -92,7 +146,8 @@ def _corpus(workspace: Path, dataset: str) -> str:
         pieces.append(card["name"])
         pieces.extend(item["value"] for item in fields.get(card["id"], {}).values())
     pieces.extend(
-        entry.get("table", {}).get("rows") for entry in saved_results(workspace, _vault_id(dataset))
+        entry.get("table", {}).get("rows")
+        for entry in saved_results(workspace, _vault_id(dataset), home)
     )
     return json.dumps(pieces, ensure_ascii=False, default=str).casefold()
 
@@ -141,8 +196,12 @@ def session_turn(
     message: Any,
     actor: str,
     asker: Asker | None,
+    home: Any = None,
 ) -> dict[str, Any]:
     vault_id = _vault_id(dataset)
+    home = str(home) if home else None
+    if home is not None and homes.home_problem(home):
+        raise BiStoreError("home_invalid", "領域必須是應用資料夾或 library 的項目")
     staging = Staging(workspace, dataset)
     staging.store.refuse_write()
     session = sessions.load(staging, session_id, "questions")
@@ -158,7 +217,7 @@ def session_turn(
 
     def corpus() -> str:
         if not known:
-            known.append(_corpus(workspace, dataset))
+            known.append(_corpus(workspace, dataset, home))
         return known[0]
 
     def check(answer: dict[str, Any]) -> list[str]:
@@ -177,7 +236,16 @@ def session_turn(
         )
     )
     turns = [*session["turns"], {"role": "user", "text": text}]
-    asked, alias, tools = asker(context, turns, check)
+    with _PROGRESS_LOCK:
+        _PROGRESS[session_id] = {"step": "ai", "since": time.monotonic(), "done": 0, "total": 0}
+    home_set, session_set = _HOME.set(home), _SESSION.set(session_id)
+    try:
+        asked, alias, tools = asker(context, turns, check)
+    finally:
+        _HOME.reset(home_set)
+        _SESSION.reset(session_set)
+        with _PROGRESS_LOCK:
+            _PROGRESS.pop(session_id, None)
     suggestion = None
     if asked.answer is not None and asked.failure is None and not check(asked.answer):
         chosen = []
