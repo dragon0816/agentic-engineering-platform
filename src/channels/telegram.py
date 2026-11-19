@@ -191,6 +191,50 @@ _ATTACHMENT_REPLIES = {
 HTML_CHART_CAPTION = "互動式組織圖：請下載後用瀏覽器開啟（可搜尋、切換樹狀／分組檢視）。"
 
 
+#: A feature's button (owner consent 2026-11-19, Telegram link collection P1): the
+#: callback data is this prefix and the feature's payload.
+FEATURE_TAP = "fi:"
+_FEATURE_PAYLOAD = re.compile(rf"^[A-Za-z0-9._-]{{1,{features.MAX_TAP_PAYLOAD}}}$")
+#: A web address in a message, and a `#tag` word.
+_URL = re.compile(r"https?://[^\s<>\"'「」（）]+", re.IGNORECASE)
+_TAG = re.compile(r"(?<!\S)#[^\s#]{1,40}")
+#: How much other text a link message may carry and still be one (a shared
+#: page's title, a short note); a question is never one.
+MAX_LINK_NOTE_CHARS = 300
+
+
+def link_urls(text: str) -> tuple[str, ...]:
+    """The addresses of a message that is links (owner consent 2026-11-19): at least
+    one http(s) address, and besides addresses and `#tags` at most a short note
+    without a question mark. Anything else (a question about a page) is () and
+    stays a conversation."""
+    urls = tuple(dict.fromkeys(url.rstrip(".,;:!，。；：！") for url in _URL.findall(text)))
+    if not urls:
+        return ()
+    rest = _TAG.sub(" ", _URL.sub(" ", text)).strip()
+    if len(rest) > MAX_LINK_NOTE_CHARS or "?" in rest or "？" in rest:
+        return ()
+    return urls
+
+
+def tags_only(text: str) -> bool:
+    """True for no words at all or only `#tags`: a file sent like that is an item."""
+    return not _TAG.sub(" ", text).strip()
+
+
+def _feature_rows(buttons: features.Buttons) -> tuple[tuple[tuple[str, str], ...], ...]:
+    """A feature's keyboard with the channel's prefix; an unusable payload is dropped."""
+    rows = tuple(
+        tuple(
+            (label[:64], FEATURE_TAP + payload)
+            for label, payload in row
+            if label.strip() and _FEATURE_PAYLOAD.match(payload)
+        )
+        for row in buttons
+    )
+    return tuple(row for row in rows if row)
+
+
 #: 「存成筆記」 under a 結果摘要: the button's data, and the words typed.
 SUMMARY_NOTE_TAP = re.compile(r"^sumnote:(ts-[0-9a-f]{12})$")
 SUMMARY_NOTE_WORDS = frozenset({"存成筆記", "存成筆記。", "把結果摘要存成筆記"})
@@ -1040,6 +1084,24 @@ class TelegramIngress:
         # A plain reason for a failed model turn (e.g. the LLM gateway is not
         # running or still starting); set by the host, None says nothing more.
         self.explain_failure: Callable[[Failure], str | None] | None = None
+        # Features that take link, file and button items before a model turn
+        # (owner consent 2026-11-19); set by the host, None takes none.
+        self.feature_items: features.FeatureSet | None = None
+
+    def attach_features(self, feature_set: features.FeatureSet, host: Any) -> None:
+        """Let `feature_set` take Telegram items and send proactive messages."""
+        self.feature_items = feature_set
+        feature_set.telegram_ready(self, host)
+
+    def send(self, actor: str, text: str, buttons: features.Buttons = ()) -> bool:
+        """A proactive message to `actor`'s own chat with the bot (owner consent
+        2026-11-19), for background work such as reminders. Only an actor in the
+        sender map gets one: there is no other chat this can reach. False when
+        nothing was sent. Safe from any thread."""
+        sender = next((item.sender_id for item in self.config.senders if item.actor == actor), None)
+        if sender is None or not text.strip():
+            return False
+        return self._reply(sender, scrub(text), _feature_rows(buttons))
 
     def offset(self) -> int | None:
         """How far this bot has been consumed, from the Bridge's own durable
@@ -1299,6 +1361,9 @@ class TelegramIngress:
             if isinstance(heard, TelegramDelivery):
                 return heard
             update.text = heard
+        taken = await self._feature_item(base, actor, update)
+        if taken is not None:
+            return taken
         if update.files:
             waiting = self._flows.get((update.chat_id, update.sender_id))
             if (
@@ -1432,6 +1497,95 @@ class TelegramIngress:
             buttons=(_note_row(finished.summary.summary_id),) if finished.summary else (),
             attached=finished.images,
         )
+
+    def _item_of(self, actor: str, update: _Update) -> features.TelegramItem | None:
+        """The feature item this update is, by fixed rules and never a model (owner
+        consent 2026-11-19): a tap on a feature's button; files with no words but
+        `#tags`; one of a feature's own slash commands; a message that is links
+        (`link_urls`); a Reply. While a question flow waits on this chat only taps
+        and commands are items, so an answer to the flow stays its answer. Spoken
+        text and anything that looks like a credential are never items."""
+        hooks = self.feature_items
+        if hooks is None or update.spoken:
+            return None
+        text = (update.text or "").strip()
+        if SECRET_PATTERN.search(text):
+            return None
+        waiting = self._flows.get((update.chat_id, update.sender_id))
+        flowing = waiting is not None and not waiting.expired()
+        kind: features.TelegramItemKind
+        urls: tuple[str, ...] = ()
+        data = ""
+        files: tuple[features.TelegramFile, ...] = ()
+        if update.callback_id is not None:
+            if not text.startswith(FEATURE_TAP):
+                return None
+            kind, data, text = "tap", text[len(FEATURE_TAP) :], ""
+        elif update.files:
+            if flowing or not tags_only(text):
+                return None
+            kind = "file"
+            files = tuple(
+                features.TelegramFile(
+                    item.filename, item.size, partial(self._download, item.file_id)
+                )
+                for item in update.files
+            )
+        elif not text:
+            return None
+        elif (parsed := slash_command(text)) is not None:
+            alias, command, rest = parsed
+            if command is None or (alias, command) not in hooks.telegram_commands():
+                return None
+            kind, data, text = "command", f"{alias} {command}", rest or ""
+        elif flowing:
+            return None
+        elif urls := link_urls(text):
+            kind = "link"
+        elif update.quoted is not None:
+            kind = "reply"
+        else:
+            return None
+        return features.TelegramItem(
+            kind=kind,
+            actor=actor,
+            text=text,
+            received_at=datetime.now(UTC),
+            sender_name=update.sender_name,
+            urls=urls,
+            files=files,
+            data=data,
+            quoted=update.quoted if kind == "reply" else None,
+        )
+
+    async def _feature_item(
+        self, base: dict[str, Any], actor: str, update: _Update
+    ) -> TelegramDelivery | None:
+        """A feature's answer to this update, or None when no feature takes it and
+        it goes on as before."""
+        item = self._item_of(actor, update)
+        if item is None or self.feature_items is None:
+            return None
+        if item.kind in ("link", "file"):
+            # Reading a link or a file can take a few seconds; Telegram shows "typing".
+            await asyncio.to_thread(self._typing, update.chat_id)
+        answer = await asyncio.to_thread(self.feature_items.telegram_item, item, self.cards)
+        if answer is None:
+            return None
+        edit = answer.edit and item.kind == "tap" and update.message_id is not None
+        return TelegramDelivery(
+            **base,
+            disposition="answered",
+            reply=scrub(answer.text) if answer.text.strip() else DONE_NOTICE,
+            buttons=_feature_rows(answer.buttons),
+            edit_message_id=update.message_id if edit else None,
+        )
+
+    def _typing(self, chat_id: int) -> None:
+        try:
+            self._call("sendChatAction", {"chat_id": chat_id, "action": "typing"})
+        except Exception as error:  # noqa: BLE001 - a courtesy, never a failure
+            _LOG.warning("Telegram sendChatAction failed: %s", describe(error))
 
     async def _hear(
         self, base: dict[str, Any], actor: str, update: _Update

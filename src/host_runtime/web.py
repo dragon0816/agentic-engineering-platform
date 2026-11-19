@@ -778,6 +778,8 @@ class AgentWeb:
         )
         if runtime.telegram is not None:
             runtime.telegram.cards = self
+            # Feature items and proactive messages (owner consent 2026-11-19).
+            runtime.telegram.attach_features(features.active(), self)
         # Preferences and notes (accumulated memory M3): the proposal cards,
         # the preferences a turn is given, the one-click note routes.
         self.personal_memory = PersonalMemory(self)
@@ -2648,6 +2650,7 @@ class AgentWeb:
         """Poll with the host's current Telegram ingress, if it has one."""
         if self.runtime.telegram is not None:
             self.runtime.telegram.cards = self
+            self.runtime.telegram.attach_features(features.active(), self)
             self.telegram_loop = ResidentTelegram(self.runtime.telegram)
             self.telegram_loop.start()
 

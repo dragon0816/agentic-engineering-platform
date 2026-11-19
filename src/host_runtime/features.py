@@ -23,8 +23,9 @@ import threading
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 from common.plugins import DEFAULT_PAGE_ORDER
 
@@ -68,6 +69,61 @@ class PackageInstaller(Protocol):
     ) -> PreparedPackage:
         """Check a package whole; raises `PackageRefused`."""
         ...
+
+
+#: Inline keyboard rows of (label, payload). A payload is the feature's own
+#: short word (`[A-Za-z0-9._-]`, at most `MAX_TAP_PAYLOAD`); the channel adds
+#: its prefix, and a tap on it comes back as a `tap` item with that payload.
+Buttons = tuple[tuple[tuple[str, str], ...], ...]
+MAX_TAP_PAYLOAD = 60
+
+#: What a Telegram item is (owner consent 2026-11-19, Telegram link collection P1):
+#: a message that is links, a message that is files, a tap on a feature's button,
+#: one of the feature's own slash commands, or a Reply to one of its messages.
+TelegramItemKind = Literal["link", "file", "tap", "command", "reply"]
+
+
+@dataclass(frozen=True)
+class TelegramFile:
+    """A file a Telegram message carries; `read` downloads it (Bot API limits apply)."""
+
+    name: str
+    size: int | None
+    read: Callable[[], bytes]
+
+
+@dataclass(frozen=True)
+class TelegramItem:
+    """A Telegram message a feature may take before any model turn. `actor` is the
+    sender's mapped platform actor; an unmapped sender never reaches a feature."""
+
+    kind: TelegramItemKind
+    actor: str
+    text: str
+    received_at: datetime
+    sender_name: str = ""
+    urls: tuple[str, ...] = ()
+    files: tuple[TelegramFile, ...] = ()
+    #: A tap's payload, or a command as `<alias> <command>` (its arguments are `text`).
+    data: str = ""
+    #: The text of the message a Reply answers (trimmed, redacted).
+    quoted: str | None = None
+
+
+@dataclass(frozen=True)
+class TelegramAnswer:
+    """A feature's reply to an item; `edit` replaces the tapped message instead."""
+
+    text: str
+    buttons: Buttons = ()
+    edit: bool = False
+
+
+class Messenger(Protocol):
+    """Proactive messages to a mapped person (owner consent 2026-11-19): False when
+    the actor has no Telegram sender mapping or the message could not be sent."""
+
+    def send(self, actor: str, text: str, buttons: Buttons = ()) -> bool: ...
 
 
 class Feature:
@@ -150,6 +206,18 @@ class Feature:
     def package_installer(self, kind: str) -> PackageInstaller | None:
         """The installer of a Shared Platform package kind this feature owns."""
         return None
+
+    def telegram_commands(self) -> Iterable[tuple[str, str]]:
+        """`(alias, command)` slash commands this feature answers as `command` items."""
+        return ()
+
+    def telegram_item(self, item: TelegramItem, host: Any) -> TelegramAnswer | None:
+        """Take a Telegram item instead of a model turn; None leaves it to the channel.
+        `host` is the resident host object (Agent Web), None when there is none."""
+        return None
+
+    def telegram_ready(self, messenger: Messenger, host: Any) -> None:
+        """The channel is up: `messenger` sends proactive messages from now on."""
 
 
 class FeatureSet:
@@ -245,6 +313,20 @@ class FeatureSet:
             if found is not None:
                 return found
         return None
+
+    def telegram_commands(self) -> frozenset[tuple[str, str]]:
+        return frozenset(pair for feature in self.features for pair in feature.telegram_commands())
+
+    def telegram_item(self, item: TelegramItem, host: Any) -> TelegramAnswer | None:
+        for feature in self.features:
+            answer = feature.telegram_item(item, host)
+            if answer is not None:
+                return answer
+        return None
+
+    def telegram_ready(self, messenger: Messenger, host: Any) -> None:
+        for feature in self.features:
+            feature.telegram_ready(messenger, host)
 
     def page_fragments(self) -> dict[str, str]:
         joined = {slot: "" for slot in PAGE_SLOTS}
