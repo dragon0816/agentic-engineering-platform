@@ -239,6 +239,9 @@ def route(
         return 200, {"ok": True, **profile_merge.decide(workspace, vault_id, given, actor)}
     if action == "tool-approve":
         return 200, {"ok": True, **tool_runs.approve(workspace, vault_id, given, actor)}
+    if action == "tool-try":
+        # The editor's code on one source, shown only (the page's 「試跑」).
+        return 200, {"ok": True, **tool_runs.try_code(workspace, vault_id, given)}
     if action == "tool-run":
         return 200, {"ok": True, **tool_runs.run(workspace, vault_id, given, actor)}
     if action == "tools":

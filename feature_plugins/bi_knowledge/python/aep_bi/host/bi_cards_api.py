@@ -80,6 +80,7 @@ from aep_bi.cards import (
     sessions,
     skill_session,
     source_markdown,
+    tool_session,
     vault_sources,
 )
 from aep_bi.cards.staging import Staging
@@ -704,8 +705,13 @@ def _session_create(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
     if kind == "questions":
         made = questions_session.create_session(workspace, dataset, target, who)
         return 200, {"ok": True, "session": made}
+    if kind == "tool":
+        made = tool_session.create_session(workspace, dataset, target, who)
+        return 200, {"ok": True, "session": made}
     return _error(
-        400, "session_kind_invalid", "kind 只能是 method、schema、skill、analysis 或 questions"
+        400,
+        "session_kind_invalid",
+        "kind 只能是 method、schema、skill、analysis、questions 或 tool",
     )
 
 
@@ -812,6 +818,22 @@ def _session_write(
         done = skill_session.apply_suggestion(
             workspace, dataset, session_id, given.get("turn"), who
         )
+        return 200, {"ok": True, **done}
+    if session["kind"] == "tool" and action == "turns":
+        turned = tool_session.session_turn(
+            workspace,
+            dataset,
+            ai,
+            session_id,
+            message=given.get("message"),
+            code=given.get("code"),
+            source_ids=given.get("source_ids"),
+            trial=given.get("trial"),
+            actor=who,
+        )
+        return 200, {"ok": True, "session": turned}
+    if session["kind"] == "tool" and action == "apply":
+        done = tool_session.apply_suggestion(workspace, dataset, session_id, given.get("turn"), who)
         return 200, {"ok": True, **done}
     if session["kind"] == "schema" and action == "apply":
         done = schema_session.apply_suggestion(

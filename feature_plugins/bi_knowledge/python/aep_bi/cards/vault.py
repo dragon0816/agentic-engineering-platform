@@ -2716,6 +2716,11 @@ def _profile_types(vault: Vault, folder: str, units: Mapping[str, Any]) -> list[
     return list((part.get("profile") or {}).get("types") or {}) or None
 
 
+def profile_types_of(vault: Vault, folder: str, units: Mapping[str, Any]) -> list[str] | None:
+    """`_profile_types` for the tool AI's context (`tool_session`)."""
+    return _profile_types(vault, folder, units)
+
+
 def _run_types(
     vault: Vault, units: Mapping[str, Any], reg: Registry, given: Mapping[str, Any]
 ) -> tuple[list[str], str, list[str] | None]:

@@ -230,6 +230,37 @@ def draft(workspace: Path, vault_id: str, given: Mapping[str, Any], actor: str) 
     }
 
 
+def _tried(outputs: list[Output], printed: str) -> dict[str, Any]:
+    return {
+        "printed": printed,
+        "files": [
+            {
+                "name": o.name,
+                "bytes": len(o.data),
+                "text": o.data.decode("utf-8", errors="replace")[:MAX_TRIED_TEXT],
+            }
+            for o in outputs
+        ],
+    }
+
+
+def try_code(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
+    """「試跑」 of the page's editor on one source of the vault: the same sandbox as every
+    run; the output is only shown, and nothing is kept, staged or approved."""
+    code = given.get("code")
+    if not isinstance(code, str) or not code.strip():
+        raise BiStoreError("tool_invalid", "編輯區還沒有程式碼")
+    if len(code) > vault_tools.MAX_TEXT:
+        raise BiStoreError("tool_invalid", f"工具內容最多 {vault_tools.MAX_TEXT} 字")
+    target = vault._vault(workspace, vault_id)
+    staging = Staging(workspace, target.dataset)
+    source = staging.source(str(given.get("source_id") or ""))
+    if source is None:
+        raise BiStoreError("source_unknown", "找不到這個來源")
+    outputs, printed = execute(code.encode(), staging.stored_file(source["id"]), source["name"])
+    return {"source": {"id": source["id"], "name": source["name"]}, **_tried(outputs, printed)}
+
+
 def try_draft(workspace: Path, vault_id: str, sha256: str, source_id: str) -> dict[str, Any]:
     """Run a draft without application approval.
 
@@ -246,17 +277,7 @@ def try_draft(workspace: Path, vault_id: str, sha256: str, source_id: str) -> di
     outputs, printed = execute(
         str(found["code"]).encode(), staging.stored_file(source_id), source["name"]
     )
-    return {
-        "printed": printed,
-        "files": [
-            {
-                "name": o.name,
-                "bytes": len(o.data),
-                "text": o.data.decode("utf-8", errors="replace")[:MAX_TRIED_TEXT],
-            }
-            for o in outputs
-        ],
-    }
+    return _tried(outputs, printed)
 
 
 # -- running a revision ------------------------------------------------------------------
