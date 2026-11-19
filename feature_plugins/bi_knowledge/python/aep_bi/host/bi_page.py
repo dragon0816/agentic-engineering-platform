@@ -44,6 +44,7 @@ BI_CSS = r"""
 .bi-meta { color: var(--dim); font-size: 12.5px; }
 .bi-empty { color: var(--dim); padding: 18px 12px; text-align: center; }
 .bi-scroll { overflow-x: auto; max-width: 100%; }
+.bi-rr-list { max-height: 16rem; overflow-y: auto; }
 .bi-table td, .bi-table th { vertical-align: top; }
 .bi-table td { overflow-wrap: anywhere; min-width: 72px; }
 .bi-table tr.bi-flag-red td:first-child { box-shadow: inset 4px 0 0 var(--bad); }
@@ -821,8 +822,8 @@ BI_PANE_HTML = r"""
               <h5>改完規則後重跑</h5>
               <p class="bi-meta">用現在的規則重讀來源，只列出和卡片不同的值；你確認的才會寫入。
                 模型這次沒讀到的值不會被清掉。</p>
-              <label class="bi-label" for="bi-b-rr-app">應用資料夾</label>
-              <select id="bi-b-rr-app"></select>
+              <div id="bi-b-rr-app-box"><label class="bi-label" for="bi-b-rr-app">應用資料夾</label>
+                <select id="bi-b-rr-app"></select></div>
               <div id="bi-b-rr-sources"></div>
               <div class="bi-actions">
                 <button class="bi-btn" id="bi-b-rr-count" type="button">看要重跑幾份</button></div>
@@ -4851,31 +4852,83 @@ function biRerunApplication(folder) {
 }
 
 function biRerunForm(folders) {
-  const pick = el("bi-b-rr-app"), kept = pick.value;
+  // The working domain decides what is reread (owner: 「上面已經有選工作領域了，這部份應該要依照
+  // 工作領域，只列出相關的資料」); only 全部領域 chooses an application here.
+  const pick = el("bi-b-rr-app"), kept = pick.value, scope = biScope();
   const names = [...new Set(folders.map(biRerunApplication).filter(Boolean))];
-  pick.replaceChildren(...["", ...names].map((name) => {
-    const option = bh("option", "", name || "（選下面的來源）"); option.value = name;
+  const label = (name) => ((bi.build.homes || []).find((h) => h.home === name) || {}).label
+    || name;
+  const shown = scope ? [scope] : ["", ...names];
+  pick.replaceChildren(...shown.map((name) => {
+    const option = bh("option", "", name ? label(name) : "（所有來源）"); option.value = name;
     return option;
   }));
-  if (names.includes(kept)) pick.value = kept;
-  const box = el("bi-b-rr-sources"); box.replaceChildren();
-  for (const source of bi.build.sources || []) {
-    const tick = document.createElement("input"); tick.type = "checkbox"; tick.value = source.id;
-    box.append(bh("label", "bi-meta", tick, " " + source.name), document.createElement("br"));
-  }
+  // A choice made under 全部領域 stays there; coming from a domain starts from all sources.
+  pick.value = scope || (bi.rrUnscoped && names.includes(kept) ? kept : "");
+  bi.rrUnscoped = !scope;
+  biRerunSources();
 }
 
+function biRerunSources() {
+  // The chosen application's sources, every one ticked; untick what should not be reread.
+  // With a working domain there is nothing to choose: the label and select stay out of sight.
+  const scope = biScope(), box = el("bi-b-rr-sources");
+  el("bi-b-rr-app-box").hidden = Boolean(scope);
+  const app = scope || el("bi-b-rr-app").value;
+  const off = bi.rrApp === app ? (bi.rrOff || new Set()) : new Set();
+  bi.rrApp = app; bi.rrOff = off;
+  const sources = (bi.build.sources || []).filter((source) => !app
+    || biFolderHome(source.folder) === app);
+  box.replaceChildren();
+  if (!sources.length) {
+    box.append(bh("p", "bi-meta", app ? "這個領域還沒有來源。" : "還沒有來源。"));
+    return;
+  }
+  const every = document.createElement("input"); every.type = "checkbox";
+  every.setAttribute("aria-label", "重跑：全選");
+  const count = bh("span", "", "");
+  count.id = "bi-b-rr-picked";
+  const ticks = sources.map((source) => {
+    const tick = document.createElement("input"); tick.type = "checkbox";
+    tick.value = source.id; tick.checked = !off.has(source.id);
+    return tick;
+  });
+  const recount = () => {
+    for (const tick of ticks) {
+      if (tick.checked) off.delete(tick.value); else off.add(tick.value);
+    }
+    const picked = ticks.filter((t) => t.checked).length;
+    count.textContent = "全選（已選 " + picked + "／" + ticks.length + " 份）";
+    every.checked = picked === ticks.length;
+    every.indeterminate = picked > 0 && picked < ticks.length;
+  };
+  every.addEventListener("change", () => {
+    for (const tick of ticks) tick.checked = every.checked;
+    recount();
+  });
+  const list = bh("div", "bi-rr-list");
+  sources.forEach((source, at) => {
+    ticks[at].addEventListener("change", recount);
+    list.append(bh("label", "bi-meta", ticks[at], " " + source.name), document.createElement("br"));
+  });
+  box.append(bh("label", "bi-meta", every, " ", count), list);
+  recount();
+}
+
+el("bi-b-rr-app").addEventListener("change", biRerunSources);
+el("bi-b-adv-skills").addEventListener("toggle", () => {
+  if (el("bi-b-adv-skills").open) biRerunSources();
+});
+
 function biRerunScope() {
-  const application = el("bi-b-rr-app").value;
-  const scope = {dataset: biDataset()};
-  if (application) return {...scope, application, all: true};
   const ticked = [...el("bi-b-rr-sources").querySelectorAll("input:checked")];
-  return {...scope, sources: ticked.map((t) => t.value)};
+  return {dataset: biDataset(), sources: ticked.map((t) => t.value)};
 }
 
 async function biRerunCount() {
   const out = el("bi-b-rr-out"); out.replaceChildren();
   const scope = biRerunScope();
+  if (!scope.sources.length) { out.append(bh("p", "bi-err", "先勾要重跑的來源。")); return; }
   try {
     const reply = await biCall("/api/bi/reruns/preview", scope);
     const go = biButton("開始重跑", () => biRerunStart(scope), "go");
