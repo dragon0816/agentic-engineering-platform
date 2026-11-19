@@ -6405,6 +6405,7 @@ charts inline in the chat; Dashboards from the analysis AI or an Atlas import" (
   stored values `{"vault", "slug", "analysis": <unit value + slug>}`; fingerprint = the working unit under the
   slug. Apply = `analyses.save` (staged). Code `host_runtime/bi_chat_save.py`.
 - **`requires` the schema lacks** (2026-11-04): `bi_analysis__propose` and `bi_analysis__propose_dashboard` refuse them with `requires_unmet`, a failed tool result naming them. `GET /api/bi/vaults/<id>/analyses` items gain `missing: [str]`; `GET /api/bi/dashboard` gains `not_shown: [{slug, title, missing}]`, shown on the page. A saved analysis or pack is not refused: a pack may hold analyses for other schemas.
+- **Domain values follow the working domain** (2026-11-19): a `domain` enum parameter (`values_from` `<Type>.domain`) takes the field's enum, the schema's domains widened by created homes, and the vault's homes by short name (`library/products` is `products`), without repeats ignoring case. `GET /api/bi/vaults/<id>/analyses` gains `domains: [str]`; runs and `GET /api/bi/dashboard` accept those values. The page sends the working domain (its card domain, else its short name) and shows no domain control under a working domain.
 - **Dashboard from the analysis AI** (K1): harness tool `bi_analysis__propose_dashboard {reply?, analyses:
   [<as bi_analysis__propose>] (≤ 12), order: [slug]}`. The suggestion
   (`aep.bi.analysis_suggestion/v1`) then has `"analysis": null`, `"dashboard": {"analyses": [<unit value +
