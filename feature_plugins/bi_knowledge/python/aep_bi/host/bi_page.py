@@ -1328,7 +1328,7 @@ const BI_NAME = /^[A-Za-z0-9_-]{1,40}$/;
 const bh = (tag, cls, ...children) => memEl(tag, cls, ...children);
 
 function biDataset() { return el("bi-dataset").value || "demo"; }
-function biDomain() { return el("bi-domain").value || "robotics"; }
+function biDomain() { return biDashDomain() || el("bi-domain").value || "robotics"; }
 
 async function biCall(path, body) {
   let reply;
@@ -3879,15 +3879,21 @@ function biParamInputs(item, values, onChange) {
   for (const name of names) {
     const spec = inputs[name], label = spec.label || name;
     let control;
+    if (name === "domain") {
+      // No choice here: the working domain decides (owner 2026-11-19); 全部領域 keeps the
+      // analysis's default, as the vault's Dashboard does.
+      const own = biDashDomain();
+      const found = own && (spec.values || []).find((value) =>
+        value.toLowerCase() === own.toLowerCase());
+      if (found) values[name] = found; else delete values[name];
+      continue;
+    }
     if (spec.type === "enum") {
       control = document.createElement("select");
       for (const value of spec.values || []) {
         const option = document.createElement("option");
         option.value = value; option.textContent = value; control.append(option);
       }
-      const own = name === "domain" && (spec.values || []).find((value) =>
-        value.toLowerCase() === String(biScopeDomain() || "").toLowerCase());
-      if (own && values[name] === undefined) values[name] = own;
       control.value = values[name] ?? spec.default ?? "";
     } else if (spec.type === "bool") {
       control = document.createElement("input"); control.type = "checkbox";
@@ -3906,7 +3912,7 @@ function biParamInputs(item, values, onChange) {
     });
     row.append(bh("label", "bi-meta", label + " ", control));
   }
-  return row;
+  return row.children.length ? row : null;
 }
 
 function biAnState(vaultId, slug) {
@@ -4036,9 +4042,10 @@ async function biAnalyses(vaultId) {
         biButton("執行", () => {
           under.row.hidden = false;
           return biRunInto(vaultId, item, state, out);
-        }, "bi-btn", "執行分析 " + item.title),
+        }, "bi-btn", "執行分析 " + item.title)],
+        // The rarer ones in 更多 (owner 2026-11-19: simpler).
         reply.order.includes(item.slug) ? biButton("上移", () => move(item.slug, -1), "bi-btn",
-          "在 Dashboard 上移分析 " + item.title) : null],
+          "在 Dashboard 上移分析 " + item.title) : null,
         biButton("和 AI 一起修改", (event) =>
           biAnalysisAi(item.slug, item.title, event.currentTarget),
           "bi-btn", "和 AI 一起修改分析 " + item.title),
@@ -5448,10 +5455,17 @@ function biScopeDomain() {
   return item ? item.domain : null;
 }
 
+function biDashDomain() {
+  // The working domain is the Dashboard's and every analysis's domain (owner 2026-11-19): its
+  // card domain, else its own short name (`library/products` is `products`).
+  const scope = biScope();
+  return biScopeDomain() || (scope ? scope.split("/").pop() : null);
+}
+
 function biDashDomainBox() {
-  // A working domain with a card domain decides the Dashboard's, so there is nothing to choose.
+  // A working domain decides the Dashboard's, so there is nothing to choose.
   const schema = bi.schema || {};
-  el("bi-domain-box").hidden = Boolean(biScopeDomain())
+  el("bi-domain-box").hidden = Boolean(biDashDomain())
     || (Array.isArray(schema.domains) && !schema.domains.length);
 }
 
@@ -5465,8 +5479,10 @@ function biScopeFollowed() {
   const option = [...el("bi-domain").options].find((o) => o.value.toLowerCase() === wanted);
   if (wanted && option && el("bi-domain").value !== option.value) {
     el("bi-domain").value = option.value;
-    if (bi.loaded) bi.loaded.dashboard = false;
   }
+  // Another working domain is another Dashboard, and results run for the last one are not its.
+  if (bi.loaded) bi.loaded.dashboard = false;
+  bi.anState = {};
   const filter = el("bi-card-domain");
   const own = [...filter.options].find((o) => o.value && o.value.toLowerCase() === wanted);
   const next = own ? own.value : "";

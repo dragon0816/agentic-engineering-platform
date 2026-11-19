@@ -107,3 +107,32 @@ def test_an_enum_value_is_matched_without_case_and_given_as_the_schema_spells_it
     assert analyses.resolve_params(declared, {}, None, today="2026-11-05")["domain"] == "wireless"
     with pytest.raises(BiStoreError):
         analyses.resolve_params(declared, {"domain": "nowhere"}, None, today="2026-11-05")
+
+
+def test_the_domain_values_are_the_vaults_domains_with_the_created_ones(tmp_path: Path) -> None:
+    """Owner 2026-11-19: the working domain `products` and the analyses' 領域 list
+    (wireless/AIDC/...) differed. The list came from a type's own copy of the built-in
+    domains; it is now the vault's domains, created ones included, so the working domain can
+    be every panel's domain."""
+    ws = _joined(tmp_path)
+    # A created domain, and the library entry `library/products` by its short name.
+    _ok(_call(ws, "POST", f"/api/bi/vaults/{fixtures.VAULT_ID}/homes", {"name": "marine"}))
+    listed = _listed(ws)
+    assert "marine" in listed["domains"]
+    assert "products" in listed["domains"]
+    values = {a["slug"]: a for a in listed["analyses"]}["accounts-by-region"]["inputs"]["domain"]
+    assert "products" in values["values"] and "AIDC" in values["values"]
+    assert len({v.casefold() for v in values["values"]}) == len(values["values"])
+    ran = _ok(_call(ws, "POST", URL, {"run": "accounts-by-region",
+                                      "params": {"domain": "products"}}))  # fmt: skip
+    assert ran["params"] == {"domain": "products"}
+    # The Dashboard of that working domain asks its panels with it.
+    from aep_bi.cards import board
+    from aep_bi.cards.store import BiStore
+
+    dataset = f"vault-{fixtures.VAULT_ID}"
+    _ok(_call(ws, "POST", URL, {"dashboard": {"order": ["accounts-by-region"], "hidden": []},
+                                "home": "library/products"}))  # fmt: skip
+    drawn = board.board(ws, BiStore(ws, dataset), "products", False, {}, "library/products")
+    assert [s["id"] for s in drawn["sections"]] == ["accounts-by-region"]
+    assert not drawn["sections"][0]["note"].startswith("沒有畫出來")

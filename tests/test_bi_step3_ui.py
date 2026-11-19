@@ -251,9 +251,32 @@ def test_step_3(
         # The tabs do the same, and the Dashboard moves to its tab and back.
         page.click("#bi-views [data-bi-view=dashboard]")
         page.wait("bi.view === 'dashboard'")
+        # The working domain is the Dashboard's domain: nothing to choose (owner 2026-11-19).
+        assert page.run("document.getElementById('bi-domain-box').hidden")
         assert page.run("document.getElementById('bi-view-dashboard').contains("
                         "document.getElementById('bi-dash-sections'))")  # fmt: skip
         assert page.run("document.getElementById('bi-back').hidden")  # the tabs are the way back
         page.click("#bi-views [data-bi-view=build]")
         page.wait("bi.view === 'build'")
         assert abs(float(page.run(SCROLL)) - before) < 2
+
+        # -- each analysis follows the working domain: no 領域 per analysis, rarer actions in 更多
+        page.run("document.getElementById('bi-b-an').open = true")
+        row = "[...document.querySelectorAll('#bi-b-an-list tbody tr')].find((r) =>"
+        row += " r.textContent.includes('執行'))"
+        page.wait(f"{row} !== undefined")
+        assert page.run(f"[...{row}.querySelectorAll(':scope td > .bi-actions > button')]"
+                        ".map((b) => b.textContent).join()") == "執行"  # fmt: skip
+        assert page.run(f"{row}.querySelector('details.bi-row-menu').textContent"
+                        ".includes('和 AI 一起修改')")  # fmt: skip
+        page.run(f"[...{row}.querySelectorAll('button')].find((b) => b.textContent === '執行')"
+                 ".click()")  # fmt: skip
+        page.wait(
+            f"!{row}.nextElementSibling.hidden"
+            f" && {row}.nextElementSibling.querySelector('[data-an-out]').childElementCount > 0"
+        )
+        assert page.text_of("bi-notice") == ""  # it ran with the working domain
+        assert page.run("document.querySelector('#bi-b-an-list [data-param=domain]') === null")
+        assert page.run("biDashDomain()") == page.run(
+            "biScopeDomain() || biScope().split('/').pop()"
+        )

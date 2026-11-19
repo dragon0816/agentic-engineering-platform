@@ -63,21 +63,23 @@ def _run(db: Path, item: dict[str, Any], values: dict[str, Any]) -> dict[str, An
 
 def _items(
     workspace: Path, store: BiStore, registry: Any, home: str | None = None
-) -> tuple[list[dict[str, Any]], Path, str]:
-    """(the analyses to draw in order, the database they read, where they come from)."""
+) -> tuple[list[dict[str, Any]], Path, str, list[str]]:
+    """(the analyses to draw in order, the database they read, where they come from, the
+    vault's working domains)."""
     if store.vault_id is not None:
         from aep_bi.cards import vault
 
         listed = analyses.listing(workspace, store.vault_id, home)
         by_slug = {a["slug"]: a for a in listed["analyses"]}
         found = [by_slug[s] for s in listed["order"]]
-        return found, vault.Vault(workspace, store.vault_id).db_path, "vault"
+        db_path = vault.Vault(workspace, store.vault_id).db_path
+        return found, db_path, "vault", listed["domains"]
     pack = packs.default_pack()
     found = []
     for item in pack["analyses"]:
         if analyses.requires_met(item.get("requires"), registry):
             found.append({**item, "code": packs.fill(item["code"], registry)})
-    return found, store.path, "pack"
+    return found, store.path, "pack", []
 
 
 def _names(store: BiStore) -> dict[str, dict[str, str]]:
@@ -133,11 +135,12 @@ def _section(
     }
 
 
-def _extra_params(items: list[dict[str, Any]], registry: Any) -> dict[str, Any]:
+def _extra_params(items: list[dict[str, Any]], registry: Any, domains: list[str]) -> dict[str, Any]:
     """Parameters some analysis declares beyond the shared ones (shown at the top)."""
     found: dict[str, Any] = {}
     for item in items:
-        for name, spec in analyses.described_params(item.get("params"), registry).items():
+        described = analyses.described_params(item.get("params"), registry, domains)
+        for name, spec in described.items():
             if name not in SHARED and name != "today" and name not in found:
                 found[name] = spec
     return found
@@ -157,7 +160,7 @@ def board(
 
     registry = catalog.for_store(store)
     home = home if store.vault_id is not None else None
-    items, db, source = _items(workspace, store, registry, home)
+    items, db, source, domains = _items(workspace, store, registry, home)
     today = date.today().isoformat()
     names = _names(store)
     shared: dict[str, Any] = {"domain": domain, "include_sample": include_sample, **given}
@@ -166,7 +169,11 @@ def board(
         declared = item.get("params") or {}
         try:
             values = analyses.resolve_params(
-                declared, {k: v for k, v in shared.items() if k in declared}, registry, today=today
+                declared,
+                {k: v for k, v in shared.items() if k in declared},
+                registry,
+                today=today,
+                domains=domains,
             )
             drawn_one = _section(item, _run(db, item, values), "", names)
             if home and not analyses.uses_domain(item):
@@ -199,7 +206,7 @@ def board(
         "include_sample": include_sample,
         "source": source,
         "ordered": True,
-        "params": _extra_params(items, registry),
+        "params": _extra_params(items, registry, domains),
         "summary": {
             "red": sum(1 for f in flags if f["level"] == "red"),
             "warn": sum(1 for f in flags if f["level"] != "red"),
@@ -252,7 +259,7 @@ def pack_sections(
     on a dataset only on this PC: the built-in pack's analyses its schema
     satisfies. A coded section's old name (`trend_coverage`) finds its slug."""
     registry = catalog.for_store(store)
-    listed, db, _source = _items(workspace, store, registry)
+    listed, db, _source, _domains = _items(workspace, store, registry)
     items = {i["slug"]: i for i in listed}
     slug = name.replace("_", "-")
     slugs = list(items) if slug == "all" else [slug]
