@@ -2208,7 +2208,8 @@ def pending(workspace: Path, vault_id: str) -> dict[str, Any]:
         changes = [
             {
                 "unit": k,
-                "label": unit_label(units, k),
+                # A removed unit is named as it was.
+                "label": unit_label(units if v is not None else head, k),
                 "homes": unit_homes(units, k, card_homes),
                 "before": card_model.render_links_within(head.get(k), shown),
                 "after": card_model.render_links_within(v, shown),
@@ -2536,14 +2537,24 @@ def commit(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str
     vault = _vault(workspace, vault_id)
     with vault.lock, _repo_errors():
         record = vault_sources.commit_split(vault.repo, str(given.get("purpose") or ""))
+        _settle_removals(vault)
     vault.rebuild()
     return {"commit": record}
+
+
+def _settle_removals(vault: Vault) -> None:
+    """A source whose removal was just committed leaves this PC; one whose removal was
+    discarded stays (`source_delete`)."""
+    from aep_bi.cards.staging import Staging
+
+    vault_sources.settle_removals(vault.repo, Staging(vault.workspace, vault.dataset))
 
 
 def discard(workspace: Path, vault_id: str) -> dict[str, Any]:
     vault = _vault(workspace, vault_id)
     with vault.lock, _repo_errors():
         vault.repo.discard()
+        _settle_removals(vault)
     vault.rebuild()
     return {"discarded": True}
 

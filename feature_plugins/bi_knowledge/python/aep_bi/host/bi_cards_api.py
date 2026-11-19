@@ -39,6 +39,7 @@ Source Markdown (BI vault V2; contract "BI source Markdown"):
 and its revisions and saves a person's edit as a new revision; `POST
 /api/bi/runs` takes `path: "ai" | "rules"`. The search index (BI vault V3;
 contract "BI search index"): `/api/bi/index` and `/api/bi/search`.
+`POST /api/bi/sources/delete` deletes sources added by mistake (`source_delete`).
 """
 
 from __future__ import annotations
@@ -79,6 +80,7 @@ from aep_bi.cards import (
     service,
     sessions,
     skill_session,
+    source_delete,
     source_markdown,
     vault_sources,
 )
@@ -275,6 +277,9 @@ def _route(
             repo = staging._vault_repo()
             if repo is None:
                 return 200, {"sources": staging.sources()}
+            if staging.removals():  # a removal committed elsewhere on this PC
+                with repo.lock:
+                    vault_sources.settle_removals(repo, staging)
             return 200, vault_sources.listed(repo, staging.sources())
         parts = path.split("/")
         if len(parts) in (6, 7) and parts[:4] == ["", "api", "bi", "sources"]:
@@ -431,6 +436,12 @@ def _route(
             actor=who,
         )
         return 200, {"ok": True, "source": source}
+    if path == "/api/bi/sources/delete":
+        # A person's 刪除 in step 1: a result per id, a refusal never stops the others.
+        deleted = source_delete.delete(
+            workspace, _dataset(given.get("dataset")), given.get("ids"), who
+        )
+        return 200, {"ok": True, **deleted}
     parts = path.split("/")
     if len(parts) == 6 and parts[:4] == ["", "api", "bi", "sources"] and parts[5] == "markdown":
         saved = source_markdown.save(

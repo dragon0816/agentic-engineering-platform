@@ -322,6 +322,12 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
 .bi-src-row > [hidden] { display: none; }
 .bi-src-row > :last-child .go { min-width: 110px; }
 .bi-src-row select { width: 100%; }
+.bi-filters > .bi-src-del { flex: 0 0 auto; }
+.bi-src-del-ask { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center;
+  margin: 0 0 8px; }
+.bi-src-del-ask[hidden], #bi-b-src-del-status[hidden] { display: none; }
+#bi-b-sources td .bi-src-del-ask { margin: 0; }
+#bi-b-src-del-status { margin: 0 0 8px; }
 .bi-pane .bi-label { display: block; font-size: 12px; color: var(--dim); margin: 0 0 4px; }
 .bi-md-bar { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: flex-end; }
 .bi-md-bar > div:first-child { flex: 1 1 160px; min-width: 0; }
@@ -674,12 +680,18 @@ BI_PANE_HTML = r"""
                   <input id="bi-b-src-q" class="bi-input" type="search" autocomplete="off"
                     placeholder="檔名"></div>
                 <div class="bi-meta" id="bi-b-src-count" role="status"></div>
+                <div class="bi-src-del"><button class="bi-btn" id="bi-b-src-del" type="button"
+                  disabled>刪除已選（0 份）</button></div>
               </div>
+              <div class="bi-src-del-ask" id="bi-b-src-del-ask" role="group"
+                aria-label="確認刪除已選的來源" hidden></div>
+              <div class="mem-status" id="bi-b-src-del-status" role="status" aria-live="polite"
+                hidden></div>
               <div class="bi-scroll bi-scroller"><table class="bi-table bi-stack" id="bi-b-sources">
                 <thead><tr><th><label class="bi-meta"><input type="checkbox"
                   id="bi-b-src-all" aria-label="全選顯示的來源"> 使用</label></th><th>來源</th>
                   <th>格式</th><th>Markdown</th>
-                  <th>機密等級</th><th>共用資料夾</th></tr></thead>
+                  <th>機密等級</th><th>共用資料夾</th><th>刪除</th></tr></thead>
                 <tbody></tbody></table></div>
             </div>
             <div class="bi-split-pane" id="bi-b-src-pane" aria-live="polite">
@@ -5237,7 +5249,7 @@ el("bi-b-v-form").addEventListener("submit", async (event) => {
 
 // -- step 1: sources ---------------------------------------------------------
 const BI_SHARED = {local: "只在這台電腦", staged: "commit、push 後才會放上去",
-  pushed: "已放上去", cloud_only: "只在雲端"};
+  pushed: "已放上去", cloud_only: "只在雲端", removing: "commit、push 後移除"};
 
 // -- the working domain (BI_PAGE_SIMPLE.md §9): one home, per person and per PC ------
 function biFolderHome(folder) {
@@ -5554,13 +5566,14 @@ function biRenderSources() {
     && (!words || source.name.toLowerCase().includes(words)));
   bi.build.shownCount = shown.length;
   const body = el("bi-b-sources").tBodies[0]; body.replaceChildren();
-  bi.build.shownSources = shown.filter((source) => source.format).map((source) => source.id);
+  bi.build.shownSources = shown.filter((source) => source.format
+    && source.shared !== "removing").map((source) => source.id);
   for (const source of shown) {
     const radio = document.createElement("input");
     radio.type = "checkbox"; radio.name = "bi-b-source"; radio.value = source.id;
     radio.checked = biChosen().includes(source.id);
     radio.setAttribute("aria-label", "使用 " + source.name);
-    radio.disabled = !source.format;
+    radio.disabled = !source.format || source.shared === "removing";
     radio.addEventListener("change", () => {
       // A row of the dataset just left would be dropped as soon as the new list arrives, and
       // the steps after this one would quietly stay shut.
@@ -5580,7 +5593,8 @@ function biRenderSources() {
       bh("td", "", md, " ", source.format
         ? biButton("看／改", () => biPickSource(source), "bi-btn", "看或修改 "
           + source.name + " 的 Markdown") : ""),
-      bh("td", "", source.classification), bh("td", "", biSharedCell(source)));
+      bh("td", "", source.classification), bh("td", "", biSharedCell(source)),
+      biDeleteCell(source));
     row.dataset.source = source.id;
     row.setAttribute("aria-selected", String(source.id === bi.build.sourceId));
     // A press anywhere on the row opens it; its own controls do their own thing.
@@ -5601,7 +5615,7 @@ function biRenderSources() {
 function biChosen() {
   // What Ingest runs: the ticked sources still listed, in the working domain.
   const listed = new Set(bi.build.sources.filter((source) => source.format
-    && biSourceInScope(source)).map((source) => source.id));
+    && source.shared !== "removing" && biSourceInScope(source)).map((source) => source.id));
   return (bi.build.chosen || []).filter((id) => listed.has(id));
 }
 
@@ -5634,7 +5648,142 @@ function biChosenShown() {
       : bh("details", "", bh("summary", "", "這次 Ingest：" + chosen.length + " 份來源，"
         + "一份一次，依序執行"), bh("ul", "", ...names.map((name) => bh("li", "", name)))));
   if (!bi.build.batchRunning) el("bi-b-start").disabled = !chosen.length;
+  const remove = el("bi-b-src-del");
+  remove.textContent = "刪除已選（" + chosen.length + " 份）";
+  remove.disabled = !chosen.length || Boolean(bi.build.deleting);
 }
+
+// -- step 1: deleting sources added by mistake (owner 2026-11-19) ------------------
+// One confirmation beside the control that asked; then one request per source, so the
+// line beside it says which one is under way (AGENTS 23); a refusal never stops the rest.
+function biDeleteCell(source) {
+  const cell = bh("td", "");
+  if (source.shared === "removing") return cell;
+  const button = biButton("刪除", () => biDeleteAsk([source.id], cell), "bi-btn",
+    "刪除 " + source.name);
+  button.disabled = Boolean(bi.build.deleting);
+  cell.append(button);
+  return cell;
+}
+
+// Removing a pushed source leaves its file in the shared folder; 撤回 takes it out.
+const BI_DELETE_PUSHED = "已 push 的檔案仍留在共用資料夾的版本紀錄裡；要從共用資料夾完全移除，"
+  + "請按該列「共用資料夾」欄的「撤回」。";
+
+function biDeletePushed(sources) {
+  return sources.some((s) => s.shared === "pushed" || s.shared === "cloud_only");
+}
+
+function biDeleteWords(sources) {
+  // What happens to each kind, said before the person confirms.
+  const later = sources.filter((s) => ["staged", "pushed", "cloud_only"].includes(s.shared));
+  const now = sources.length - later.length;
+  const parts = [];
+  if (now) parts.push("將刪除 " + now + " 份來源與它們的 Markdown；尚未 push 的刪除無法復原");
+  if (later.length) {
+    parts.push((now ? "另外 " : "") + later.length + " 份已在共用資料夾或已 commit，"
+      + "會在下次 commit、push 時移除；版本紀錄保留舊版，可以從版本還原");
+  }
+  return parts.join("。") + "。被卡片當作證據的來源不會刪除。"
+    + (biDeletePushed(sources) ? BI_DELETE_PUSHED : "");
+}
+
+function biDeleteAsk(ids, place) {
+  // `place`: the row's cell or the line under 「刪除已選」; the question stays beside the press.
+  if (bi.build.deleting) return;
+  const sources = ids.map((id) => bi.build.sources.find((s) => s.id === id)).filter(Boolean);
+  if (!sources.length) return;
+  const bulk = place === el("bi-b-src-del-ask");
+  const ask = bulk ? place : bh("div", "bi-src-del-ask");
+  const restore = () => {
+    if (bulk) { ask.hidden = true; ask.replaceChildren(); } else biRenderSources();
+  };
+  ask.replaceChildren(bh("span", "bi-warn", biDeleteWords(sources)),
+    biButton("確定刪除", () => biDeleteRun(sources, ask), "go",
+      "確定刪除 " + sources.length + " 份來源"),
+    biButton("取消", restore, "bi-btn", "取消刪除"));
+  ask.hidden = false;
+  if (!bulk) place.replaceChildren(ask);
+  ask.querySelector("button.go").focus();
+}
+
+function biDeleteSummary(results, sources) {
+  // In place of the progress: what went, and each source kept with its reason.
+  const deleted = results.filter((r) => r.status === "deleted").length;
+  const staged = results.filter((r) => r.status === "staged_removal").length;
+  const missing = results.filter((r) => r.status === "not_found").length;
+  const kept = results.filter((r) => r.status === "refused");
+  const done = [];
+  if (deleted) done.push("已刪除 " + deleted + " 份");
+  if (staged) done.push(staged + " 份會在下次 commit、push 時移除");
+  if (missing) done.push(missing + " 份已不在");
+  const status = el("bi-b-src-del-status");
+  const head = (done.length ? done.join("，") : "沒有刪除任何來源")
+    + (kept.length ? "；" + kept.length + " 份未刪除：" : "。");
+  const pushed = biDeletePushed((sources || []).filter((s) => results.some((r) =>
+    r.id === s.id && r.status === "staged_removal")));
+  status.replaceChildren(bh("span", "", head));
+  if (kept.length) {
+    status.append(bh("ul", "", ...kept.map((r) => bh("li", "",
+      (r.name || r.id) + "：" + r.reason))));
+  }
+  if (pushed) status.append(bh("span", "", BI_DELETE_PUSHED));
+  status.className = "mem-status" + (kept.length ? " error" : "");
+  status.hidden = false;
+}
+
+async function biDeleteRun(sources, ask) {
+  const dataset = biDataset(), started = Date.now(), results = [];
+  bi.build.deleting = true;
+  el("bi-b-src-del").disabled = true;
+  el("bi-b-src-del-status").hidden = true;
+  for (const button of el("bi-b-sources").querySelectorAll("tbody td:last-child button")) {
+    button.disabled = true;
+  }
+  let current = 0;
+  const show = () => {
+    const source = sources[Math.min(current, sources.length - 1)];
+    const words = "刪除中 " + Math.min(current + 1, sources.length) + "/" + sources.length
+      + "：" + source.name + "・" + Math.round((Date.now() - started) / 1000) + " 秒";
+    ask.replaceChildren(bh("span", "mem-spinner"), bh("span", "", words));
+  };
+  ask.hidden = false; ask.setAttribute("aria-busy", "true"); ask.setAttribute("role", "status");
+  show();
+  const timer = setInterval(show, 500);
+  try {
+    for (current = 0; current < sources.length; current++) {
+      show();
+      const source = sources[current];
+      try {
+        const reply = await biCall("/api/bi/sources/delete", {dataset, ids: [source.id]});
+        results.push(...(reply.results || []));
+      } catch (failure) {
+        results.push({id: source.id, name: source.name, status: "refused",
+          reason: failure.message});
+      }
+    }
+  } finally {
+    clearInterval(timer);
+    bi.build.deleting = false;
+    ask.removeAttribute("aria-busy"); ask.setAttribute("role", "group");
+    ask.hidden = true; ask.replaceChildren();
+  }
+  biDeleteSummary(results, sources);
+  const removed = new Set(results.filter((r) => ["deleted", "staged_removal"]
+    .includes(r.status)).map((r) => r.id));
+  bi.build.chosen = (bi.build.chosen || []).filter((id) => !removed.has(id));
+  if (bi.build.md && removed.has(bi.build.md.source.id)) {
+    bi.build.md = null; el("bi-b-md").hidden = true; el("bi-b-md-empty").hidden = false;
+  }
+  if (removed.has(bi.build.sourceId)) bi.build.sourceId = null;
+  biBuildSave();
+  if (dataset === biDataset()) await biBuildSources();
+  else biChosenShown();
+}
+
+el("bi-b-src-del").addEventListener("click", () => {
+  biDeleteAsk(biChosen(), el("bi-b-src-del-ask"));
+});
 
 el("bi-b-src-all").addEventListener("change", () => {
   biChoose(bi.build.shownSources || [], el("bi-b-src-all").checked);

@@ -5121,3 +5121,11 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   aep-windows-preview-ea956681… (184 MB) and aep-shared-platform-windows-ea956681…
   (5 MB) uploaded, kept until 2026-12-02. Last fix ea956681: BI working-domain
   select drew from a superseded /skills read (race), now newest read only.
+- [x] 2026-11-19 BI step 1 「刪除」 for sources added by mistake (owner request; branch
+  bi-source-delete-20261119): POST /api/bi/sources/delete with per-id results
+  (deleted / staged_removal / refused / not_found); local-only sources go with Markdown,
+  conversion record and index passages; committed/pushed vault sources get a staged unit
+  removal for the next commit/push (history keeps them; discard restores); sources cited
+  as card evidence or read by an open run are refused. Row 刪除 + 刪除已選（N 份） with
+  inline confirmation and live 刪除中 n/N progress. Tests: tests/test_bi_source_delete.py,
+  tests/test_bi_source_delete_ui.py; contract in docs/CONTRACTS.md.

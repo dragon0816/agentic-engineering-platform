@@ -4112,6 +4112,25 @@ runs, candidates), `src/capabilities/bi_cards/runs.py` (rule-path run, review, c
   `"already": true`). `name` is a file name without folders (1–200 characters). Errors: 400
   `source_missing`, `source_name_invalid`, `source_base64_invalid`, `classification_invalid`.
   `GET /api/bi/sources?dataset=` → `{"sources": [...]}` newest first.
+- **Deleting sources** (step 1 「刪除」, owner 2026-11-19; code `aep_bi/cards/source_delete.py`,
+  tests `tests/test_bi_source_delete.py`, `tests/test_bi_source_delete_ui.py`).
+  `POST /api/bi/sources/delete {"dataset", "ids": [source id...]}` (1–500 ids) → `{"ok": true,
+  "results": [{"id", "name", "status": "deleted" | "staged_removal" | "refused" | "not_found",
+  "already"?, "code"?, "reason"?, "cards"?, "count"?, "runs"?}], "counts": {"deleted",
+  "staged_removal", "refused", "not_found"}}`, one result per id in order; a refusal never stops the
+  others. `deleted`: a source only on this PC (a dataset not in a vault, or a vault source never
+  committed, whose staged unit and files are unstaged) goes with its copies, Markdown revisions,
+  conversion record and index passages. `staged_removal`: a vault source committed or pushed has the
+  removal of its unit `source:<sha256>` staged (`already: true` when it was); the next commit and push
+  carry it (its own commit purpose `移除來源：…` when other changes are committed with it), the files
+  and earlier versions stay in the vault's history, and the source leaves this PC once the removal is
+  committed; discarding the uncommitted changes keeps it. Until then `GET /api/bi/sources` lists it
+  with `shared: "removing"`. `refused` codes: `source_cited` (cards cite it as evidence, or a pending
+  proposal would; `cards` the first 3 names, `count` all; evidence is never deleted or rewritten),
+  `source_in_open_run` (an Ingest run not committed, cancelled or failed reads it; `runs`). A repeat
+  changes nothing (`not_found` for what was deleted). Errors: 400 `ids_missing`, `ids_invalid`,
+  `ids_too_many`, `source_unreachable` (a vault whose shared folder is out of reach); 409
+  `dataset_read_only` for a subscribed copy.
 - **Runs.** `POST /api/bi/runs {"dataset", "kind": "trial" | "ingest", "source_id", "entity_type":
   str | null, "mapping": obj | null}` → `{"ok": true, "run": <run>}`. Phase 1 runs the rule path on a
   CSV/TSV source synchronously; the run ends in `review`. A source that is not a table is 400
