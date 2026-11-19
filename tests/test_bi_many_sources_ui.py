@@ -156,11 +156,20 @@ def test_many_sources_stay_in_their_scroller_and_the_markdown_opens_beside_them(
             page.see("bi-b-md-h", "來源-0003.md")
             assert page.run("document.getElementById('bi-b-md-status').hidden")
 
-            # -- the name search, with the count -------------------------------------------
+            # -- the name search, with the count; it shows past ten sources (C3) ------------
+            assert not page.run("document.getElementById('bi-b-src-q-box').hidden")
             page.set_value("bi-b-src-q", "來源-012")
             page.run("document.getElementById('bi-b-src-q').dispatchEvent(new Event('input'))")
             page.wait("document.querySelectorAll('#bi-b-sources tbody tr').length === 10")
             assert page.text_of("bi-b-src-count").startswith(f"顯示 10／{MANY} 份・已選 ")
+            # A search narrows what the header box ticks: the ten shown, none of the rest.
+            outside = page.run(
+                "biChosen().filter((id) => !bi.build.shownSources.includes(id)).length"
+            )
+            page.click("#bi-b-src-all")
+            page.wait(f"biChosen().length === {outside} + 10")
+            page.click("#bi-b-src-all")
+            page.wait(f"biChosen().length === {outside}")
 
 
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")

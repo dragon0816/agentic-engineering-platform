@@ -41,10 +41,11 @@ tags: 網通, 量測
 
 
 def _mode(page: BiPage, value: str) -> None:
-    page.run(
-        "(() => { const s = document.getElementById('bi-b-md-mode');"
-        f" s.value = {json.dumps(value)}; s.dispatchEvent(new Event('change')); }})()"
-    )
+    """One button switches between the preview and the editor (owner 2026-11-19, C2)."""
+    if page.run("document.getElementById('bi-b-md-mode').dataset.mode") != value:
+        page.click("#bi-b-md-mode")
+    assert page.run("document.getElementById('bi-b-md-mode').dataset.mode") == value
+    assert page.text_of("bi-b-md-mode") == ("預覽" if value == "edit" else "編輯")
 
 
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
@@ -80,7 +81,7 @@ def test_the_markdown_opens_as_a_preview_with_real_tables_and_nothing_runs(
             page.upload("note.md", SOURCE, "text/markdown")
             page.wait("!document.getElementById('bi-b-md').hidden")
             page.wait("!document.getElementById('bi-b-md-view').hidden")
-            assert page.run("document.getElementById('bi-b-md-mode').value") == "view"
+            assert page.run("document.getElementById('bi-b-md-mode').dataset.mode") == "view"
             assert page.run("document.getElementById('bi-b-md-edit').hidden")
 
             # -- a table is a table, the frontmatter a tidy one ---------------------------
@@ -135,7 +136,7 @@ def test_the_markdown_opens_as_a_preview_with_real_tables_and_nothing_runs(
             _mode(page, "edit")
             page.click("#bi-b-md-save")
             page.wait("document.getElementById('bi-b-md-info').textContent.includes('人工修改')")
-            page.wait("document.getElementById('bi-b-md-mode').value === 'view'")
+            page.wait("document.getElementById('bi-b-md-mode').dataset.mode === 'view'")
             page.see("bi-b-md-view", "改過")
 
             # -- the row after 轉檔: the chosen file is forgotten, in Chinese -------------

@@ -12,9 +12,10 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-from test_bi_vault import _call, _ok
+from test_bi_vault import _call, _import, _ok, _row
 
 from aep_bi.cards import analyses, vault
+from aep_bi.cards.store import BiStore
 from scripts import bi_feed_fixtures as fixtures
 
 DATASET = vault.dataset_name(fixtures.VAULT_ID)
@@ -104,3 +105,14 @@ def test_a_dataset_only_on_this_pc_draws_the_built_in_pack(tmp_path: Path) -> No
     assert found["source"] == "pack" and found["sections"][0]["id"] == "gaps"
     assert found["sections"][-1]["id"] == "Q"
     assert not {"6", "A", "A2", "A3"} & {s["id"] for s in found["sections"]}
+
+
+def test_the_board_says_whether_there_is_a_sample_card_to_include(tmp_path: Path) -> None:
+    # The page offers 「含 SAMPLE 示範卡」 only when there is one (owner 2026-11-19, H1).
+    ws = _joined(tmp_path)
+    names = [str(row["name"]) for row in BiStore(ws, DATASET).card_rows()]
+    assert _board(ws, domain="robotics")["has_sample"] is any(
+        name.startswith("SAMPLE-") for name in names
+    )
+    _import(ws, DATASET, _row("SAMPLE-虛構技術"))
+    assert _board(ws, domain="robotics")["has_sample"] is True

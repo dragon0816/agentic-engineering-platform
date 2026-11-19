@@ -147,7 +147,7 @@ BI_CSS = r"""
   border-radius: 8px; overflow-wrap: anywhere; }
 .bi-empty-state[hidden] { display: none; }
 .bi-empty-state .bi-link { min-height: 0; padding: 0; margin-left: 4px; }
-#kn-pane-bi.bi-none :is(.bi-top-pick, #bi-b-v-menu, #bi-b-v-state, .bi-views-row, #bi-back,
+#kn-pane-bi.bi-none :is(.bi-top-pick, #bi-b-v-state, .bi-views-row, #bi-back,
   #bi-view-build, #bi-view-dashboard, #bi-view-cards) { display: none; }
 .bi-empty-state p { margin: 0 0 6px; }
 .bi-errors { margin: 6px 0 0; padding-left: 18px; color: var(--bad); font-size: 13px; }
@@ -478,12 +478,22 @@ BI_PANE_HTML = r"""
         <div class="bi-top-row" id="bi-top-row">
           <div class="bi-top-pick"><label class="bi-label" for="bi-dataset">知識庫</label>
             <select id="bi-dataset"><option value="demo">demo</option></select></div>
-          <button class="bi-btn" id="bi-b-v-new" type="button" data-mode="new"
-            aria-expanded="false" aria-controls="bi-b-v-form">新增知識庫</button>
-          <button class="bi-btn" id="bi-b-v-join" type="button" data-mode="join"
-            aria-expanded="false" aria-controls="bi-b-v-form">加入</button>
           <details class="bi-manage bi-menu" id="bi-b-v-menu"><summary>管理</summary>
+            <button class="bi-btn" id="bi-b-v-new" type="button" data-mode="new"
+              aria-expanded="false" aria-controls="bi-b-v-form">新增知識庫</button>
+            <button class="bi-btn" id="bi-b-v-join" type="button" data-mode="join"
+              aria-expanded="false" aria-controls="bi-b-v-form">加入</button>
             <button class="bi-btn" id="bi-b-v-sync" type="button" hidden>立即同步</button>
+            <p class="bi-meta bi-schema-note" id="bi-schema-note"></p>
+            <button class="bi-btn" id="bi-publish" type="button" aria-expanded="false"
+              aria-controls="bi-publish-panel">發佈到 Shared Platform</button>
+            <button class="bi-btn" id="bi-new" type="button" aria-expanded="false"
+              aria-controls="bi-new-panel">新增資料集</button>
+            <button class="bi-btn" id="bi-install" type="button" aria-expanded="false"
+              aria-controls="bi-install-panel">安裝 schema</button>
+            <button class="bi-btn" id="bi-demo" type="button">載入示範資料</button>
+            <button class="bi-btn" id="bi-subs-open" type="button" aria-expanded="false"
+              aria-controls="bi-subs">已訂閱的資料集</button>
           </details>
         <div class="bi-scope" id="bi-b-src-folder-box" hidden>
           <label class="bi-label" for="bi-b-src-folder">工作領域</label>
@@ -538,9 +548,105 @@ BI_PANE_HTML = r"""
               <div id="bi-b-v-err" role="alert"></div>
             </form>
       </div>
+      <div class="bi-advanced" id="bi-advanced" role="region" aria-label="管理">
+        <p class="bi-pub-state" id="bi-pub-state" role="status" aria-live="polite"></p>
+      <form class="card bi-step" id="bi-publish-panel" aria-labelledby="bi-pub-heading" hidden
+            novalidate>
+        <h3 id="bi-pub-heading">發佈到 Shared Platform</h3>
+        <p class="bi-meta" id="bi-pub-dataset"></p>
+        <div class="bi-step-grid">
+          <div id="bi-pub-name-box"><label class="bi-label" for="bi-pub-name">
+              平台名稱（第一次發佈時決定，之後不變）</label>
+            <input id="bi-pub-name" class="bi-input" type="text" autocomplete="off"
+              spellcheck="false" maxlength="81" placeholder="namespace/name"
+              aria-describedby="bi-pub-err"></div>
+          <div><label class="bi-label" for="bi-pub-note">版本說明（必填）</label>
+            <input id="bi-pub-note" class="bi-input" type="text" autocomplete="off"
+              maxlength="200" placeholder="例如 加入 10 月的客戶產品"
+              aria-describedby="bi-pub-err" required></div>
+          <fieldset class="bi-pub-readers">
+            <legend class="bi-label">讀者</legend>
+            <p class="bi-pub-team" id="bi-pub-team">我的團隊（預設）</p>
+            <label class="bi-check"><input id="bi-pub-org" type="checkbox">
+              開放給全公司</label>
+            <label class="bi-check bi-pub-confirm" id="bi-pub-confirm-box" hidden>
+              <input id="bi-pub-org-confirm" type="checkbox">
+              我確認：這是 INTERNAL 資料，會開放給平台上所有成員</label>
+          </fieldset>
+        </div>
+        <div class="bi-pub-what" id="bi-pub-what" aria-label="將分享的內容"></div>
+        <p class="bi-pub-first" id="bi-pub-first" hidden><strong>第一次發佈需要管理員審核</strong
+          >：管理員確認名稱、擁有團隊與讀者後，同事才看得到；之後的版本會直接發佈。</p>
+        <p class="bi-err" id="bi-pub-err" role="alert"></p>
+        <div class="bi-actions">
+          <button class="go" id="bi-pub-go" type="submit">發佈</button>
+          <button class="bi-btn" id="bi-pub-cancel" type="button">取消</button>
+        </div>
+      </form>
+      <div class="card bi-result" id="bi-pub-result" role="status" aria-live="polite" hidden></div>
+      <details class="card bi-sec bi-subs" id="bi-subs" hidden>
+        <summary><span class="bi-sec-title">已訂閱的資料集</span>
+          <span class="bi-badge dim" id="bi-subs-count">…</span></summary>
+        <div class="bi-sec-body">
+          <div class="mem-status" id="bi-status-subs" role="status" aria-live="polite"
+               hidden></div>
+          <ul class="bi-list bi-subs-list" id="bi-subs-list" aria-label="已訂閱的資料集"></ul>
+          <div class="bi-actions bi-subs-more">
+            <button class="bi-btn" id="bi-subs-browse" type="button">瀏覽平台上的資料集</button>
+          </div>
+          <div class="mem-status" id="bi-status-avail" role="status" aria-live="polite"
+               hidden></div>
+          <ul class="bi-list bi-subs-list" id="bi-subs-avail" aria-label="可以訂閱的資料集"
+              hidden></ul>
+          <p class="bi-meta" id="bi-subs-how">要讀同事分享的資料集：按「瀏覽平台上的資料集」
+            訂閱，或到 Shared Platform 選取資料集後在 Settings 同步。</p>
+        </div>
+      </details>
+      <form class="card bi-step" id="bi-new-panel" aria-label="新增資料集" hidden novalidate>
+        <h3>新增資料集</h3>
+        <div class="bi-step-grid">
+          <div><label class="bi-label" for="bi-new-name">
+              名稱（英文字母、數字、- 或 _，最多 40 字）</label>
+            <input id="bi-new-name" class="bi-input" type="text" autocomplete="off"
+              maxlength="40" spellcheck="false" placeholder="例如 product-spec"
+              aria-describedby="bi-new-err"></div>
+          <div><label class="bi-label" for="bi-new-schema">Schema</label>
+            <select id="bi-new-schema"><option value="">載入中…</option></select></div>
+        </div>
+        <p class="bi-meta">建立後只能升級到同一個 schema 的新版本，不能換成別的 schema。
+          Dashboard 與對話查詢只支援 BI schema（bi.schema/*）；
+          其他 schema 的資料集可以匯入、瀏覽卡片，並用更正單改值。</p>
+        <p class="bi-err" id="bi-new-err" role="alert"></p>
+        <div class="bi-actions">
+          <button class="go" id="bi-new-go" type="submit">建立</button>
+          <button class="bi-btn" id="bi-new-cancel" type="button">取消</button>
+        </div>
+      </form>
+      <form class="card bi-step" id="bi-install-panel" aria-label="安裝 schema" hidden novalidate>
+        <h3>安裝 schema</h3>
+        <div class="bi-step-grid">
+          <div><label class="bi-label" for="bi-schema-file">Schema 檔（.json）</label>
+            <input id="bi-schema-file" type="file" accept=".json,application/json"
+              aria-describedby="bi-install-msg"></div>
+          <div><button class="go" id="bi-install-go" type="submit"
+              disabled>驗證並安裝</button></div>
+        </div>
+        <p class="bi-meta">同一個 id@version 安裝後不能修改；要改內容，請把 version
+          改成新版本再安裝。</p>
+        <div id="bi-install-msg" role="status" aria-live="polite"></div>
+        <div class="bi-actions">
+          <button class="bi-btn" id="bi-example" type="button">安裝範例 schema（產品規格）</button>
+          <button class="bi-btn" id="bi-install-cancel" type="button">關閉</button>
+        </div>
+        <div id="bi-example-files" class="bi-meta" hidden></div>
+      </form>
+      </div>
         <div class="bi-empty-state" id="bi-empty-state" role="note" hidden>
           <p class="bi-meta">還沒有知識庫：新增一個，或加入同事的。
             <button class="bi-link" id="bi-empty-demo" type="button">載入示範資料</button></p>
+          <div class="bi-actions">
+            <button class="go" id="bi-empty-new" type="button">新增知識庫</button>
+            <button class="go" id="bi-empty-join" type="button">加入</button></div>
         </div>
       <div class="bi-ro" id="bi-ro" role="note" hidden>
         <strong id="bi-ro-title"></strong>
@@ -594,7 +700,8 @@ BI_PANE_HTML = r"""
               <option value="wireless">無線通訊 Wireless</option>
               <option value="aidc">AIDC</option>
             </select></div>
-          <div id="bi-sample-box"><label class="bi-check"><input type="checkbox" id="bi-sample">
+          <div id="bi-sample-box" hidden><label class="bi-check">
+            <input type="checkbox" id="bi-sample">
             含 SAMPLE 示範卡</label></div>
         </div>
         <div id="bi-dash-block">
@@ -671,10 +778,6 @@ BI_PANE_HTML = r"""
         <div class="mem-status" id="bi-status-build" role="status" aria-live="polite" hidden></div>
         <section class="kp-stage card bi-step" data-stage="source" aria-labelledby="bi-b-source">
           <h3 class="kp-stage-title" id="bi-b-source" tabindex="-1">步驟 1／3・輸入與轉檔</h3>
-          <div class="bi-actions" id="bi-b-ro-links" hidden>
-            <button class="bi-btn" id="bi-b-ro-cards" type="button">看卡片</button>
-            <button class="bi-btn" id="bi-b-ro-dash" type="button">看 Dashboard</button>
-          </div>
           <div class="bi-src-row" id="bi-b-src-input">
             <div><label class="bi-label" for="bi-b-class">機密等級</label>
               <select id="bi-b-class">
@@ -700,7 +803,8 @@ BI_PANE_HTML = r"""
           <div class="bi-split bi-src-split" id="bi-b-src-split">
             <div class="bi-split-list">
               <div class="bi-filters">
-                <div><label class="bi-label" for="bi-b-src-q">搜尋來源</label>
+                <div id="bi-b-src-q-box" hidden><label class="bi-label" for="bi-b-src-q">
+                  搜尋來源</label>
                   <input id="bi-b-src-q" class="bi-input" type="search" autocomplete="off"
                     placeholder="檔名"></div>
                 <div class="bi-meta" id="bi-b-src-count" role="status"></div>
@@ -725,13 +829,10 @@ BI_PANE_HTML = r"""
             <h4 id="bi-b-md-h"></h4>
             <p class="bi-meta" id="bi-b-md-info"></p>
             <div class="bi-md-bar">
-              <div><label class="bi-label" for="bi-b-md-rev">看哪一版</label>
-                <select id="bi-b-md-rev"></select></div>
-              <div><label class="bi-label" for="bi-b-md-mode">顯示</label>
-                <select id="bi-b-md-mode">
-                  <option value="view">預覽</option>
-                  <option value="edit">編輯</option></select></div>
-              <div><button class="bi-btn" id="bi-b-md-close" type="button">關閉</button></div>
+              <div id="bi-b-md-rev-box" hidden><label class="bi-label" for="bi-b-md-rev">
+                看哪一版</label><select id="bi-b-md-rev"></select></div>
+              <div><button class="bi-btn" id="bi-b-md-mode" type="button"
+                data-mode="view" aria-pressed="false">編輯</button></div>
             </div>
             <div id="bi-b-md-view" class="kp-markdown bi-md-view" tabindex="0"
               role="region" aria-label="Markdown 預覽"></div>
@@ -777,10 +878,6 @@ BI_PANE_HTML = r"""
           <h3 class="kp-stage-title" id="bi-b-schema" tabindex="-1">步驟 2／3・類別與規則</h3>
           <p class="bi-meta" id="bi-b-schema-now"></p>
           <div class="bi-step-grid" id="bi-b-sg-bar">
-            <div><label class="bi-label" for="bi-b-sg-scope">看哪些來源</label>
-              <select id="bi-b-sg-scope">
-                <option value="new">這個領域還沒 ingest 的來源</option>
-                <option value="picked">步驟 1 選的來源</option></select></div>
             <div><button class="go" id="bi-b-sg-run" type="button">建議 schema</button></div>
             <div><button class="bi-btn" id="bi-b-sa-open" type="button">
               和 AI 調整 schema</button></div>
@@ -907,6 +1004,12 @@ BI_PANE_HTML = r"""
           </div>
           <details class="bi-manage bi-adv" id="bi-b-adv-schema">
             <summary>進階：Schema</summary>
+          <div class="bi-step-grid">
+            <div><label class="bi-label" for="bi-b-sg-scope">「建議 schema」看哪些來源</label>
+              <select id="bi-b-sg-scope">
+                <option value="new">這個領域還沒 ingest 的來源</option>
+                <option value="picked">步驟 1 選的來源</option></select></div>
+          </div>
           <div id="bi-b-versions"></div>
           <h4>Schema 草稿</h4>
           <div class="bi-actions"><button class="bi-btn" id="bi-b-draft-new" type="button">
@@ -928,8 +1031,7 @@ BI_PANE_HTML = r"""
             <div id="bi-b-draft-info" role="status" aria-live="polite"></div>
           </div>
           </details>
-          <div class="bi-actions"><button class="bi-btn" type="button" data-bi-next="source">
-            上一步</button><button class="go" type="button" data-bi-next="method">
+          <div class="bi-actions"><button class="go" type="button" data-bi-next="method">
             下一步：Ingest</button></div>
         </section>
         <section class="kp-stage card bi-step" data-stage="method" aria-labelledby="bi-b-method"
@@ -953,8 +1055,6 @@ BI_PANE_HTML = r"""
               <select id="bi-b-folder"></select></div>
             <div><label><input id="bi-b-fresh" type="checkbox">
               不沿用上次的回答（同樣的來源和規則，重新問模型一次）</label></div>
-            <div><label><input id="bi-b-fit" type="checkbox">
-              同時檢查內容和綱要合不合（知識庫才有；輸出約多四到五成，也會多出要人回答的問題）</label></div>
             <div><label class="bi-label" for="bi-b-m-name">另存為新的 Skill（名稱）</label>
               <input id="bi-b-m-name" class="bi-input" maxlength="80"
                 placeholder="例如：會議紀錄擷取"></div>
@@ -997,8 +1097,7 @@ BI_PANE_HTML = r"""
           </div>
           <div id="bi-b-cmp" aria-live="polite"></div>
           </details>
-          <div class="bi-actions"><button class="bi-btn" type="button" data-bi-next="schema">
-            上一步</button><button class="bi-btn" type="button" data-bi-next="review">
+          <div class="bi-actions"><button class="bi-btn" type="button" data-bi-next="review">
             審核</button></div>
         </section>
         <section class="kp-stage card bi-step" data-stage="review" aria-labelledby="bi-b-review"
@@ -1047,8 +1146,7 @@ BI_PANE_HTML = r"""
               <div id="bi-b-props-confirm" role="alert"></div>
               <ul id="bi-b-props-list" class="bi-fit"></ul>
             </div>
-          <div class="bi-actions"><button class="bi-btn" type="button" data-bi-next="method">
-            上一步</button><button class="go" type="button" data-bi-next="commit"
+          <div class="bi-actions"><button class="go" type="button" data-bi-next="commit"
             id="bi-b-next4" disabled>下一步：確認寫入</button></div>
         </section>
         <section class="kp-stage card bi-step" data-stage="commit" aria-labelledby="bi-b-commit"
@@ -1056,7 +1154,6 @@ BI_PANE_HTML = r"""
           <h3 class="kp-stage-title" id="bi-b-commit" tabindex="-1">步驟 2／3・確認寫入</h3>
           <div id="bi-b-summary"></div>
           <div class="bi-actions">
-            <button class="bi-btn" type="button" data-bi-next="review">上一步</button>
             <button class="go" id="bi-b-commit-go" type="button">確認匯入</button></div>
           <div id="bi-b-commit-msg" role="alert"></div>
         </section>
@@ -1065,7 +1162,7 @@ BI_PANE_HTML = r"""
           <h3 class="kp-stage-title" id="bi-b-result" tabindex="-1">步驟 2／3・結果</h3>
           <div id="bi-b-done"></div>
           <div class="bi-actions"><button class="go" type="button" data-bi-next="test">
-            下一步：測試與 Push</button></div>
+            下一步：測試</button></div>
         </section>
         <section class="kp-stage card bi-step" data-stage="test" aria-labelledby="bi-b-test"
           hidden>
@@ -1101,8 +1198,8 @@ BI_PANE_HTML = r"""
                   <input id="bi-b-bq-set" class="bi-input" maxlength="60" spellcheck="false"
                     list="bi-b-bq-sets" value="main">
                   <datalist id="bi-b-bq-sets"></datalist>
-                  <label class="bi-label" for="bi-b-bq-home">領域</label>
-                  <select id="bi-b-bq-home"></select>
+                  <div id="bi-b-bq-home-box"><label class="bi-label" for="bi-b-bq-home">
+                    領域</label><select id="bi-b-bq-home"></select></div>
                   <div class="bi-actions">
                     <button class="go" type="submit" id="bi-b-bq-save">儲存</button>
                     <button class="bi-btn" id="bi-b-bq-del" type="button" hidden>刪除</button>
@@ -1160,9 +1257,7 @@ BI_PANE_HTML = r"""
                 只匯入這個知識庫的分析由上到下的順序；不在順序裡的分析會在
                 Dashboard 隱藏，不會刪除。Atlas 的位置、大小與參數不會匯入，
                 也不會改動 Atlas。</p>
-              <label class="bi-label" for="bi-b-atl-port">Atlas 的 port</label>
-              <input id="bi-b-atl-port" class="bi-input" inputmode="numeric" maxlength="5"
-                value="8127">
+              <p class="bi-meta" id="bi-b-atl-at"></p>
               <div class="bi-actions">
                 <button class="bi-btn" id="bi-b-atl-load" type="button">
                   讀取 Atlas 的 Dashboard</button></div>
@@ -1188,8 +1283,6 @@ BI_PANE_HTML = r"""
             <div id="bi-b-bench-report" aria-live="polite"></div>
             <div class="bi-split-pane" id="bi-b-test-dash"><h5>Dashboard</h5></div>
           </div>
-          <div class="bi-actions">
-            <button class="bi-btn" id="bi-b-to-cards" type="button">看卡片</button></div>
           <div id="bi-b-ver" class="bi-step" role="region" aria-labelledby="bi-b-ver-h" hidden>
             <h4 id="bi-b-ver-h">分享</h4>
             <p class="bi-meta" id="bi-b-ver-reads"></p>
@@ -1220,118 +1313,8 @@ BI_PANE_HTML = r"""
                 捨棄還沒 commit 的改動</button></div>
           </details>
           </div>
-          <div class="bi-actions"><button class="bi-btn" type="button" data-bi-next="ingest">
-            上一步</button></div>
         </section>
       </div>
-      <details class="card bi-sec" id="bi-advanced">
-      <summary><span class="bi-sec-title">進階：資料集與發佈</span></summary>
-      <div class="bi-sec-body">
-        <div class="bi-step-grid">
-        </div>
-        <p class="bi-meta bi-schema-note" id="bi-schema-note"></p>
-        <div class="bi-actions">
-          <button class="bi-btn" id="bi-publish" type="button" aria-expanded="false"
-            aria-controls="bi-publish-panel">發佈到 Shared Platform</button>
-              <button class="bi-btn" id="bi-new" type="button" aria-expanded="false"
-                aria-controls="bi-new-panel">新增資料集</button>
-              <button class="bi-btn" id="bi-install" type="button" aria-expanded="false"
-                aria-controls="bi-install-panel">安裝 schema</button>
-              <button class="bi-btn" id="bi-demo" type="button">載入示範資料</button>
-        </div>
-        <p class="bi-pub-state" id="bi-pub-state" role="status" aria-live="polite"></p>
-      <form class="card bi-step" id="bi-publish-panel" aria-labelledby="bi-pub-heading" hidden
-            novalidate>
-        <h3 id="bi-pub-heading">發佈到 Shared Platform</h3>
-        <p class="bi-meta" id="bi-pub-dataset"></p>
-        <div class="bi-step-grid">
-          <div id="bi-pub-name-box"><label class="bi-label" for="bi-pub-name">
-              平台名稱（第一次發佈時決定，之後不變）</label>
-            <input id="bi-pub-name" class="bi-input" type="text" autocomplete="off"
-              spellcheck="false" maxlength="81" placeholder="namespace/name"
-              aria-describedby="bi-pub-err"></div>
-          <div><label class="bi-label" for="bi-pub-note">版本說明（必填）</label>
-            <input id="bi-pub-note" class="bi-input" type="text" autocomplete="off"
-              maxlength="200" placeholder="例如 加入 10 月的客戶產品"
-              aria-describedby="bi-pub-err" required></div>
-          <fieldset class="bi-pub-readers">
-            <legend class="bi-label">讀者</legend>
-            <p class="bi-pub-team" id="bi-pub-team">我的團隊（預設）</p>
-            <label class="bi-check"><input id="bi-pub-org" type="checkbox">
-              開放給全公司</label>
-            <label class="bi-check bi-pub-confirm" id="bi-pub-confirm-box" hidden>
-              <input id="bi-pub-org-confirm" type="checkbox">
-              我確認：這是 INTERNAL 資料，會開放給平台上所有成員</label>
-          </fieldset>
-        </div>
-        <div class="bi-pub-what" id="bi-pub-what" aria-label="將分享的內容"></div>
-        <p class="bi-pub-first" id="bi-pub-first" hidden><strong>第一次發佈需要管理員審核</strong
-          >：管理員確認名稱、擁有團隊與讀者後，同事才看得到；之後的版本會直接發佈。</p>
-        <p class="bi-err" id="bi-pub-err" role="alert"></p>
-        <div class="bi-actions">
-          <button class="go" id="bi-pub-go" type="submit">發佈</button>
-          <button class="bi-btn" id="bi-pub-cancel" type="button">取消</button>
-        </div>
-      </form>
-      <div class="card bi-result" id="bi-pub-result" role="status" aria-live="polite" hidden></div>
-      <details class="card bi-sec bi-subs" id="bi-subs">
-        <summary><span class="bi-sec-title">已訂閱的資料集</span>
-          <span class="bi-badge dim" id="bi-subs-count">…</span></summary>
-        <div class="bi-sec-body">
-          <div class="mem-status" id="bi-status-subs" role="status" aria-live="polite"
-               hidden></div>
-          <ul class="bi-list bi-subs-list" id="bi-subs-list" aria-label="已訂閱的資料集"></ul>
-          <div class="bi-actions bi-subs-more">
-            <button class="bi-btn" id="bi-subs-browse" type="button">瀏覽平台上的資料集</button>
-          </div>
-          <div class="mem-status" id="bi-status-avail" role="status" aria-live="polite"
-               hidden></div>
-          <ul class="bi-list bi-subs-list" id="bi-subs-avail" aria-label="可以訂閱的資料集"
-              hidden></ul>
-          <p class="bi-meta" id="bi-subs-how">要讀同事分享的資料集：按「瀏覽平台上的資料集」
-            訂閱，或到 Shared Platform 選取資料集後在 Settings 同步。</p>
-        </div>
-      </details>
-      <form class="card bi-step" id="bi-new-panel" aria-label="新增資料集" hidden novalidate>
-        <h3>新增資料集</h3>
-        <div class="bi-step-grid">
-          <div><label class="bi-label" for="bi-new-name">
-              名稱（英文字母、數字、- 或 _，最多 40 字）</label>
-            <input id="bi-new-name" class="bi-input" type="text" autocomplete="off"
-              maxlength="40" spellcheck="false" placeholder="例如 product-spec"
-              aria-describedby="bi-new-err"></div>
-          <div><label class="bi-label" for="bi-new-schema">Schema</label>
-            <select id="bi-new-schema"><option value="">載入中…</option></select></div>
-        </div>
-        <p class="bi-meta">建立後只能升級到同一個 schema 的新版本，不能換成別的 schema。
-          Dashboard 與對話查詢只支援 BI schema（bi.schema/*）；
-          其他 schema 的資料集可以匯入、瀏覽卡片，並用更正單改值。</p>
-        <p class="bi-err" id="bi-new-err" role="alert"></p>
-        <div class="bi-actions">
-          <button class="go" id="bi-new-go" type="submit">建立</button>
-          <button class="bi-btn" id="bi-new-cancel" type="button">取消</button>
-        </div>
-      </form>
-      <form class="card bi-step" id="bi-install-panel" aria-label="安裝 schema" hidden novalidate>
-        <h3>安裝 schema</h3>
-        <div class="bi-step-grid">
-          <div><label class="bi-label" for="bi-schema-file">Schema 檔（.json）</label>
-            <input id="bi-schema-file" type="file" accept=".json,application/json"
-              aria-describedby="bi-install-msg"></div>
-          <div><button class="go" id="bi-install-go" type="submit"
-              disabled>驗證並安裝</button></div>
-        </div>
-        <p class="bi-meta">同一個 id@version 安裝後不能修改；要改內容，請把 version
-          改成新版本再安裝。</p>
-        <div id="bi-install-msg" role="status" aria-live="polite"></div>
-        <div class="bi-actions">
-          <button class="bi-btn" id="bi-example" type="button">安裝範例 schema（產品規格）</button>
-          <button class="bi-btn" id="bi-install-cancel" type="button">關閉</button>
-        </div>
-        <div id="bi-example-files" class="bi-meta" hidden></div>
-      </form>
-      </div>
-      </details>
     </div>"""
 
 
@@ -1579,8 +1562,8 @@ function biRenderBar() {
   const names = bi.datasets.map((item) => item.name);
   const empty = !names.includes(keep);
   if (empty) names.unshift(keep); else biRemember(keep);
-  // Nothing on this PC yet (acceptance F2): the row's 新增知識庫 and 加入, and no steps
-  // for a dataset that does not exist. 新增資料集 stays under 進階.
+  // Nothing on this PC yet (acceptance F2): 新增知識庫 and 加入 in sight, and no steps
+  // for a dataset that does not exist. Both, and 新增資料集, are also under 管理.
   const none = empty && !bi.datasets.length;
   el("bi-empty-state").hidden = !none;
   el("kn-pane-bi").classList.toggle("bi-none", none);
@@ -1603,10 +1586,6 @@ function biRenderBar() {
   }
   select.append(mine);
   if (subscribed.children.length) select.append(subscribed);
-  // Someone with no vault yet starts here: creating one or joining a colleague's, as many
-  // do one as the other (acceptance F21).
-  el("bi-b-v-new").className = (bi.vaults || []).length ? "bi-btn" : "go";
-  el("bi-b-v-join").className = el("bi-b-v-new").className;
   select.value = keep;
   biRenderCounts();
 }
@@ -1722,6 +1701,8 @@ el("bi-dataset").addEventListener("change", () => {
   biRemember(el("bi-dataset").value); biLeaveDataset(); biBuildFollowDataset(); biLoad();
 });
 el("bi-empty-demo").addEventListener("click", () => el("bi-demo").click());
+el("bi-empty-new").addEventListener("click", () => biVaultForm("new"));
+el("bi-empty-join").addEventListener("click", () => biVaultForm("join"));
 const biStuck = new ResizeObserver(() => {
   // Not on a phone, where the row does not stick.
   const row = el("bi-top-row"), sticks = getComputedStyle(row).position === "sticky";
@@ -1811,6 +1792,8 @@ async function biLoadDashboard() {
   }
   if (seq !== bi.dashSeq) return;
   biStatus("bi-status-dash", ""); bi.loaded.dashboard = true;
+  // Offered only where there are sample cards (or the box is already ticked).
+  el("bi-sample-box").hidden = !reply.has_sample && !el("bi-sample").checked;
   biRenderDashboard(reply);
   // An old domain configuration still to move (BI D4).
   el("bi-dom").hidden = !reply.domains_left; el("bi-dom-plan").replaceChildren();
@@ -1896,8 +1879,8 @@ function biRenderDashboard(reply) {
     return;
   }
   if (!sections.length && reply.home) {
-    holder.append(bh("p", "bi-empty", "這個領域的 Dashboard 還是空的："
-      + "按「和 AI 做新分析」，或從「Dashboard」區塊把現有的分析加進來。"));
+    holder.append(bh("p", "bi-empty", "這個領域的 Dashboard 還是空的"
+      + (bi.view === "build" ? "。" : "：到「建立與匯入」步驟 3 的「Dashboard」區塊加入分析。")));
     return;
   }
   if (!sections.length) {
@@ -2900,15 +2883,10 @@ el("bi-b-next4").addEventListener("click", async () => {
   }
   biBuildStage("commit");
 });
-for (const [id, view] of [["bi-b-to-cards", "cards"],
-  ["bi-b-ro-dash", "dashboard"], ["bi-b-ro-cards", "cards"]]) {
-  el(id).addEventListener("click", () => biJump(view));
-}
 
 function biBuildReadOnly() {
   const readOnly = biReadOnly();
   el("bi-b-src-input").hidden = readOnly; el("bi-b-adv-source").hidden = readOnly;
-  el("bi-b-ro-links").hidden = !readOnly;
   el("bi-b-src-split").hidden = readOnly;  // a copy has no sources here
   el("bi-b-next1").parentNode.hidden = readOnly;
   return readOnly;
@@ -3284,10 +3262,10 @@ function biVaultState(state) {
     return;
   }
   const count = bh("span", ""); count.id = "bi-b-v-count";
-  // Something to commit or push opens 版本 from any tab, not only after a run (acceptance F12).
+  // Something to commit or push opens 分享 from any tab, not only after a run (acceptance F12).
   const toVersion = (words, n) => n
     ? biButton(words + n + " 個", biToVersion, "bi-link",
-      words + n + " 個：到「版本」commit 或 push")
+      words + n + " 個：到「分享」")
     : words + n + " 個";
   box.append(bh("p", "bi-meta", count, "・別人 push 了還沒套用的 " + state.behind + " 個・",
     toVersion("你還沒 push 的 commit ", state.ahead), "・",
@@ -3559,6 +3537,9 @@ function biBqHomes() {
     const option = bh("option", "", home || "全庫"); option.value = home; return option;
   }));
   el("bi-b-bq-home").value = own;
+  // A new question is the working domain's; the choice shows on a question being edited
+  // (to move it), or with no working domain, and only where there is one to make.
+  el("bi-b-bq-home-box").hidden = (!q && Boolean(biScope())) || homes.length < 1;
 }
 
 async function biBenchSave(body) {
@@ -4281,9 +4262,22 @@ const BI_ATLAS_STATUS = {kept: "匯入", duplicate: "重複，略過", unknown_a
   "知識庫沒有這個分析，略過", other_vault: "別的知識庫，略過", not_aep: "不是 AEP 的分析，略過",
   not_a_panel: "略過"};
 
-function biAtlasAsked() {
-  return {name: el("bi-b-atl-name").value, port: el("bi-b-atl-port").value.trim()};
+function biAtlasPort() {
+  // One Atlas address, set on the Dashboard tab (「Atlas 位址」); its port is read here.
+  try {
+    const url = new URL(biAtlasUrl());
+    return url.port || (url.protocol === "https:" ? "443" : "80");
+  } catch (e) { return "8127"; }
 }
+
+function biAtlasAsked() {
+  return {name: el("bi-b-atl-name").value, port: biAtlasPort()};
+}
+
+el("bi-b-atl").addEventListener("toggle", () => {
+  el("bi-b-atl-at").textContent = "Atlas 位址：" + biAtlasUrl()
+    + "（在「Dashboard」分頁的「Atlas 位址」修改）";
+});
 
 function biAtlasPlan(asked, plan) {
   // The dry run: the new order, what becomes hidden, and what became of every panel.
@@ -4314,7 +4308,7 @@ function biAtlasPlan(asked, plan) {
 
 el("bi-b-atl-load").addEventListener("click", async () => {
   try {
-    const port = el("bi-b-atl-port").value.trim();
+    const port = biAtlasPort();
     const reply = await biCall("/api/bi/vaults/" + bi.verVault + "/atlas-dashboards?port="
       + encodeURIComponent(port));
     el("bi-b-atl-name").replaceChildren(...reply.names.map((name) => {
@@ -4562,7 +4556,7 @@ function biVerHistory(vaultId, history) {
       actions.push(biButton("回到這個版本", () => biVerAsk(row, "回復的目的",
         "回到「" + commit.purpose + "」的版本", "回復（成為新的 commit）", (purpose) =>
           biVerRun(vaultId, "revert", {version: commit.id, purpose},
-            "已回復成新的 commit；按「Push 給大家」送出。")),
+            "已回復成新的 commit；按「分享」送出。")),
       "bi-btn", "回到「" + commit.purpose + "」的版本"));
     }
     actions.push(biButton("加 tag", () => biVerAsk(row,
@@ -4814,7 +4808,7 @@ function biVerConflictList(vaultId) {
   if (!conflicts.length) return;
   const decided = {};
   box.append(bh("p", "bi-warn", "沒有送出：有 " + conflicts.length + " 個地方別人也改了。"
-    + "每一項選一邊（或自己填），再按「Push 給大家」。"));
+    + "每一項選一邊（或自己填），再按「分享」。"));
   const list = bh("ul", "bi-log");
   for (const conflict of conflicts) {
     const label = conflict.label || conflict.unit;
@@ -4829,7 +4823,7 @@ function biVerConflictList(vaultId) {
       theirs.classList.toggle("chosen", choice === "theirs");
       const left = conflicts.filter((c) => !decided[c.unit]).length;
       biNotice(true, left ? "已決定；還有 " + left + " 項。"
-        : "全部決定了，按「Push 給大家」送出。");
+        : "全部決定了，按「分享」送出。");
     };
     const row = bh("li", "", bh("strong", "", label), bh("div", "bi-ver-pair", mine, theirs));
     const actions = bh("div", "bi-actions",
@@ -4926,7 +4920,6 @@ function biSkillsDraw(reply) {
   }));
   if ((reply.folders || []).includes(kept)) pick.value = kept;
   biFollowSourceFolder();
-  el("bi-b-folder-box").hidden = false;
   biRerunForm(reply.folders || []);
 }
 
@@ -4980,6 +4973,7 @@ function biSkillDefault(item, cell) {
 function biFollowSourceFolder() {
   // The run's folder decides whose skill and profile apply: it starts as the source's own.
   const pick = el("bi-b-folder");
+  el("bi-b-folder-box").hidden = !pick.options.length || Boolean(biScope());
   const chosen = (bi.build.sources || []).find((s) => s.id === bi.build.sourceId);
   if (!chosen || !chosen.folder || !pick.options.length) return;
   if (![...pick.options].some((o) => o.value === chosen.folder)) {
@@ -5598,7 +5592,7 @@ el("bi-b-sk-new").addEventListener("click", () => biSkillNew()
 el("bi-b-rr-count").addEventListener("click", biRerunCount);
 
 // An AI session on a vault skill (knowledge repositories R3): the AI suggests a new
-// text; 「套用」 stages the next revision, which is committed and pushed in 「版本」.
+// text; 「套用」 stages the next revision, which is committed and pushed in 「分享」.
 function biSkillSpec(dataset) {
   return {kind: "skill", dataset, title: "和 AI 修改規則",
     sends: "這條規則、卡片類型與資料夾、最近兩次試跑的候選卡", agent: true,
@@ -5692,7 +5686,7 @@ el("bi-b-ver-commit").addEventListener("click", async () => {
   const input = el("bi-b-ver-purpose"), purpose = input.value.trim();
   if (!purpose) { biNotice(false, "請先寫這次改動的目的。"); input.focus(); return; }
   try {
-    await biVerRun(bi.verVault, "commit", {purpose}, "已 commit；按「Push 給大家」才會送出。");
+    await biVerRun(bi.verVault, "commit", {purpose}, "已 commit；按「分享」才會送出。");
     input.value = "";
   } catch (failure) { biNotice(false, "沒有 commit：" + failure.message); }
 });
@@ -5994,10 +5988,15 @@ function biScopeEmpty() {
   const has = !skills || (skills).some((item) => item.role === "extract"
     && (item.applies_to || []).some((folder) => biFolderHome(folder) === scope));
   box.hidden = !scope || has;
-  box.textContent = box.hidden ? "" : "這個領域還沒有判讀規則，AI 擷取只會找 "
+  box.replaceChildren();
+  if (box.hidden) return;
+  box.append(text("這個領域還沒有判讀規則（只會找 "
     + (((bi.skills || {}).profile_types || {})[scope]
-      || (bi.skills || {}).default_types || []).join("、")
-    + "。可以用「和 AI 新增規則」，或參考 library/skill-review 的範例。";
+      || (bi.skills || {}).default_types || []).join("、") + "）"),
+    biButton("新增規則", async () => {
+      if (bi.view !== "build") await biJump("build");
+      biBuildStage("schema"); el("bi-b-sk-new").click();
+    }, "bi-link"));
 }
 
 function biHomeForm(open) {
@@ -6157,7 +6156,10 @@ async function biBuildSourcesOnce() {
 }
 
 function biRenderSources() {
-  // The working domain and the words typed.
+  // The working domain and the words typed; the search shows past ten sources.
+  const many = bi.build.sources.filter((source) => biSourceInScope(source)).length > 10;
+  el("bi-b-src-q-box").hidden = !many;
+  if (!many) el("bi-b-src-q").value = "";
   const words = el("bi-b-src-q").value.trim().toLowerCase();
   const shown = bi.build.sources.filter((source) => biSourceInScope(source)
     && (!words || source.name.toLowerCase().includes(words)));
@@ -6439,7 +6441,10 @@ function biMdRender() {
 }
 
 function biMdMode(mode) {
-  el("bi-b-md-mode").value = mode;
+  // One button: 編輯 opens the editor, 預覽 shows what is typed (not saved until 存成新版次).
+  const button = el("bi-b-md-mode");
+  button.dataset.mode = mode; button.setAttribute("aria-pressed", String(mode === "edit"));
+  button.textContent = mode === "edit" ? "預覽" : "編輯";
   el("bi-b-md-edit").hidden = mode !== "edit"; el("bi-b-md-view").hidden = mode === "edit";
   if (mode !== "edit") biMdRender();
 }
@@ -6493,11 +6498,14 @@ async function biBuildMarkdown(sourceId, rev) {
     option.value = String(item.rev); pick.append(option);
   }
   pick.value = String(r.rev || "");
+  el("bi-b-md-rev-box").hidden = (view.revisions || []).length < 2;
   el("bi-b-md-text").value = view.markdown || "";
   el("bi-b-md-note").value = "";
   // Opens on the preview; choosing another revision stays where the person is, and with
   // nothing to preview there is only pasting a first revision.
-  biMdMode(!view.markdown ? "edit" : rev ? el("bi-b-md-mode").value : "view");
+  biMdMode(!view.markdown ? "edit" : rev ? el("bi-b-md-mode").dataset.mode : "view");
+  // With nothing to preview there is only pasting a first revision.
+  el("bi-b-md-mode").hidden = !view.markdown;
   const old = Boolean(view.current_rev) && r.rev !== view.current_rev;
   el("bi-b-md-save").disabled = old;
   if (old) msg.append(bh("p", "bi-meta", "這是舊版次，只能看；要改請先選目前的版次。"));
@@ -6506,9 +6514,8 @@ async function biBuildMarkdown(sourceId, rev) {
 el("bi-b-md-rev").addEventListener("change", () => {
   if (bi.build.md) biBuildMarkdown(bi.build.md.source.id, el("bi-b-md-rev").value);
 });
-el("bi-b-md-mode").addEventListener("change", () => biMdMode(el("bi-b-md-mode").value));
-el("bi-b-md-close").addEventListener("click", () => {
-  el("bi-b-md").hidden = true; el("bi-b-md-empty").hidden = false;
+el("bi-b-md-mode").addEventListener("click", () => {
+  biMdMode(el("bi-b-md-mode").dataset.mode === "edit" ? "view" : "edit");
 });
 el("bi-b-md-save").addEventListener("click", async () => {
   const view = bi.build.md, msg = el("bi-b-md-msg"); if (!view) return;
@@ -7308,7 +7315,6 @@ function biRunBody(kind, sourceId = bi.build.sourceId, batch = false) {
   if (methodId === "builtin:llm" && source && source.format === "table") body.path = "ai";
   if (methodId === "builtin:rules") body.path = "rules";
   if (el("bi-b-fresh").checked) body.fresh = true;
-  if (el("bi-b-fit").checked && biDataset().startsWith("vault-")) body.check_fit = true;
   // 「不指定」 sends nothing: the server then uses the source's own folder. Several sources
   // each keep their own, so a batch never sends one.
   if (!batch && biDataset().startsWith("vault-") && el("bi-b-folder").value
@@ -8263,7 +8269,7 @@ function biBuildRenderRun(detail = true) {
     el("bi-b-cand-count").textContent = ""; el("bi-b-cand-type").replaceChildren();
     el("bi-b-same").replaceChildren();
     el("bi-b-cand").replaceChildren(bh("p", "bi-empty", "選一列，看原文與引用。"));
-    el("bi-b-chips").append(bh("p", "bi-empty", "到上一步按「Ingest」產生候選卡。"));
+    el("bi-b-chips").append(bh("p", "bi-empty", "在「Ingest」這一步按「Ingest」產生候選卡。"));
     biApplyAllLabel();
     return;
   }
@@ -8994,14 +9000,23 @@ function biPanel(which, open) {
   const panel = el("bi-" + which + "-panel"), button = el("bi-" + which);
   panel.hidden = !open; button.setAttribute("aria-expanded", String(open));
   if (open) {
-    el("bi-advanced").open = true;
+    // Opened from the 管理 menu: the menu closes and the panel shows under the top row.
+    el("bi-b-v-menu").open = false;
     for (const other of ["new", "install", "publish"]) {
       if (other === which) continue;
       el("bi-" + other + "-panel").hidden = true;
       el("bi-" + other).setAttribute("aria-expanded", "false");
     }
+    panel.scrollIntoView({block: "nearest"});
   }
 }
+
+el("bi-subs-open").addEventListener("click", () => {
+  const box = el("bi-subs"), open = box.hidden;
+  box.hidden = !open; box.open = open; el("bi-b-v-menu").open = false;
+  el("bi-subs-open").setAttribute("aria-expanded", String(open));
+  if (open) box.scrollIntoView({block: "nearest"});
+});
 
 async function biRefreshSchemas() {
   const reply = await biCall("/api/bi/schemas");

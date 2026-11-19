@@ -221,7 +221,10 @@ def test_step_3(
         before = float(page.run(SCROLL))
 
         # -- a jump that stays has a way back to the same step and scroll position -----------
-        page.click("#bi-b-to-cards")
+        # Step 3 has no 看卡片 of its own (G1: the 卡片 tab is above); the jump the other
+        # steps' buttons make (e.g. 到卡片查看 after an import) keeps the way back.
+        assert page.run("document.getElementById('bi-b-to-cards') === null")
+        page.run("biJump('cards')")
         page.wait("bi.view === 'cards' && !document.getElementById('bi-back').hidden")
         page.see("bi-back-go", "步驟 3・測試")
         assert page.run("document.getElementById('bi-card-split').contains("
