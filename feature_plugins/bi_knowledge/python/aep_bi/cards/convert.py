@@ -14,6 +14,7 @@ evidence line number points at something a person can open.
 | Word (`.docx`) | headings, paragraphs, list items and tables in order |
 | PowerPoint (`.pptx`) | per slide a heading, its text, tables and notes |
 | Markdown, text | as is |
+| Web page (`.html`, `.htm`) | provenance, title, summary, image, visible text (`html_markdown`) |
 
 Table cells are written so they read back exactly (`table_cell` /
 `readers.split_row`): `\\` and `|` are escaped and a line break becomes
@@ -36,7 +37,7 @@ from collections.abc import Iterable
 from pathlib import PurePath
 from typing import Any
 
-from aep_bi.cards import readers
+from aep_bi.cards import html_markdown, readers
 from aep_bi.cards.store import BiStoreError
 
 #: Recorded with every converted revision, so a later converter can tell.
@@ -45,7 +46,9 @@ CONVERTER = "aep.bi.convert/1"
 TABLES = (*readers.DELIMITED, *readers.EXCEL)
 DOCUMENTS = (".pdf", ".docx", ".pptx")
 TEXTS = (".md", ".markdown", ".txt")
-CONVERTIBLE = (*TABLES, *DOCUMENTS, *TEXTS)
+#: A web page a person shared (Telegram link collection P1), read without running it.
+PAGES = (".html", ".htm")
+CONVERTIBLE = (*TABLES, *DOCUMENTS, *TEXTS, *PAGES)
 
 NO_TEXT_MESSAGE = (
     "這個 PDF 沒有可擷取的文字（可能是掃描檔）；AEP 不做文字辨識（OCR），"
@@ -58,7 +61,7 @@ def kind(name: str) -> str | None:
     suffix = readers.suffix(name)
     if suffix in TABLES:
         return "table"
-    if suffix in DOCUMENTS:
+    if suffix in DOCUMENTS or suffix in PAGES:
         return "document"
     if suffix in TEXTS:
         return "text"
@@ -82,10 +85,12 @@ def convert(name: str, data: bytes) -> str:
         return pptx_markdown(data)
     if suffix in TEXTS:
         return decode_text(data).replace("\r\n", "\n")
+    if suffix in PAGES:
+        return html_markdown.markdown(html_markdown.decode(data))
     raise BiStoreError(
         "file_type_unsupported",
         f"「{PurePath(name).name}」無法轉成 Markdown；可用 CSV、TSV、Excel、PDF、Word、"
-        "PowerPoint、Markdown 或文字檔",
+        "PowerPoint、Markdown、網頁或文字檔",
     )
 
 
