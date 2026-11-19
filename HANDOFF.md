@@ -24,3 +24,6 @@
 - Deliver owner final Excel, SOP, dialogue and full review ZIP; next action is owner/company-PC Excel open/Refresh All acceptance, then authorized real SAP SOP parity. Do not claim original historical root cause or universal SOP/Excel capability. Keep BI separate; no push, PR, merge or deployment.
 - Dedicated .venv and ignored .scratch only. Gateway http://172.25.228.59:4000/v1, model gpt-5.6. Credential via private delivery/environment; never persist its value or private file path in Git.
 - Baseline BI/R6 handoff remains in Git history; no other checkout's HANDOFF changed.
+
+- Owner restriction (2026-11-19): all 141 reliability tests must keep Telegram off. Do not load daily host config/copy telegram.json/start polling. Benchmark entry clears only its own TELEGRAM_*/AEP_TELEGRAM_* environment; no persistent tokens/services changed. Inspection found no active reliability process or Telegram config in test/preview workspace. Existing evidence ZIP remains frozen; see 141-test-environment.md.
+- Telegram isolation verification: 13 benchmark tests passed; Ruff and mypy src/tests passed. No live model/bot calls were made for this change.

@@ -48,6 +48,7 @@ from workflow.engine import InstalledWorkflows, WorkflowEngine
 from .acceptance import task_passed
 from .adapter import SPEC as EXPORT_SPEC
 from .adapter import ExportHandler, ExportInput, ExportResult
+from .environment import disable_test_telegram
 from .oracle import verify_workbook
 
 HERE = Path(__file__).resolve().parent
@@ -78,6 +79,7 @@ class RecordedModel:
 
 
 async def run(args: argparse.Namespace) -> int:
+    disable_test_telegram()
     workspace = args.workspace.resolve()
     workspace.mkdir(parents=True, exist_ok=False)
     (workspace / "input").mkdir()
@@ -95,6 +97,8 @@ async def run(args: argparse.Namespace) -> int:
         "oracle.py",
         "live.py",
         "site.py",
+        "environment.py",
+        "acceptance.py",
     ):
         shutil.copyfile(HERE / name, evidence / name)
     if args.secret_file:

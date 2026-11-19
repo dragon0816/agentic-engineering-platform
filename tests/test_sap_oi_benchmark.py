@@ -143,3 +143,17 @@ def test_task_acceptance_requires_exporter_and_completed_conversation(
     from benchmarks.harness_reliability_sap_oi.acceptance import task_passed
 
     assert task_passed(status, artifact, exporter, rows) is expected
+
+
+def test_141_benchmark_drops_only_its_telegram_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    import os
+
+    from benchmarks.harness_reliability_sap_oi.environment import disable_test_telegram
+
+    monkeypatch.setenv("AEP_TELEGRAM_BOT_TOKEN", "synthetic-test-value")
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "synthetic-test-value")
+    monkeypatch.setenv("TELEGRAM_CONTROL_CHAT_ID", "synthetic-chat")
+    monkeypatch.setenv("AEP_GATEWAY_59_KEY", "synthetic-model-key")
+    disable_test_telegram()
+    assert not any(name.upper().startswith(("TELEGRAM_", "AEP_TELEGRAM_")) for name in os.environ)
+    assert os.environ["AEP_GATEWAY_59_KEY"] == "synthetic-model-key"

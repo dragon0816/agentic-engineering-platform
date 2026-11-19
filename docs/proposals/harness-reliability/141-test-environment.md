@@ -61,3 +61,23 @@ Result: **69 passed in 3.42 seconds**. These use fixture/fake model transports, 
 .venv and .scratch are ignored by existing repository rules. Scratch/configuration and test output belong only to this worktree. The old AEP main checkout and the separate personal-proof checkout stayed clean on their original branches.
 
 This is the original setup snapshot. The owner subsequently authorized implementation/testing and selected existing-state operation ownership. Follow slice-1-results.md, slice-2-results.md and controlled-excel-benchmark.md for current results. The setup itself did not approve a verification DSL, new framework or containment redesign.
+
+
+## Owner restriction: no Telegram on 141 reliability tests (2026-11-19)
+
+The owner reports interference with daily Telegram work. All reliability tests on
+141 must leave Telegram disabled: use synthetic/local workspaces, never copy the
+daily host's telegram.json, never run the telegram poller, and never invoke
+build_runtime/web against the daily host configuration for a test. If a future
+isolated host fixture includes a Telegram config, disable it using the existing
+telegram.disabled.json mechanism before launch. Never clear global/user tokens
+or alter another host/bot's configuration.
+
+Inspection found no telegram.json in this reliability worktree, coordinator root
+or the installed preview host workspace, and no running reliability benchmark.
+The benchmark builds only browser/Python/export tools and does not build Telegram.
+It now explicitly removes TELEGRAM_* and AEP_TELEGRAM_* variables from its own
+process before setup, so child tools cannot inherit these daily bot settings.
+This does not modify persistent Windows environment, existing services or any
+other process. The original SAP review ZIP remains frozen; this change applies
+to future test runs and is recorded separately in Git.

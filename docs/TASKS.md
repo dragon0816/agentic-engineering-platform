@@ -4283,3 +4283,5 @@ Design/evidence: docs/proposals/harness-reliability/slice-1-design.md and slice-
 - [x] Verify run6 repair after real exit1; 12 valid details, TWD13580, source/formulas/pivot/cache acceptance. Guard final task acceptance against failed exporter or unfinished conversation. Focused38, Ruff and mypy pass; no source/BI/production changes.
 - [ ] Owner/company-PC Microsoft Excel open/recalculate/Refresh All verification; 141 has no Excel.
 - [ ] Authorized real SAP parity with actual SOP/schema/expected output; synthetic case does not establish historical incident root cause.
+
+- [x] Owner isolation restriction (2026-11-19): keep Telegram disabled on 141 reliability tests, clear benchmark-only inherited Telegram environment and document prohibition on daily host config/pollers; do not modify daily services or global credentials.
