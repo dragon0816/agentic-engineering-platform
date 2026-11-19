@@ -791,23 +791,26 @@ BI_PANE_HTML = r"""
           <details class="bi-manage bi-adv" id="bi-b-adv-skills">
             <summary>進階：規則與程式</summary>
             <div class="bi-step" id="bi-b-profile">
-              <h5>應用的 profile</h5>
-              <p class="bi-meta">每個應用用到哪些卡片類型和欄位。AI 判讀這個應用的來源時，
-                只問這裡列的；沒有列的值仍會留下，並在審核時標出來。
-                存成新版本後，commit 並 push 大家才會用到。</p>
+              <h5>這個領域要哪些欄位（profile）</h5>
+              <p class="bi-meta" id="bi-b-pf-about">Profile 是一個領域的欄位清單：
+                這個領域用哪些卡片類型和欄位、哪些必填。AI 讀這個領域的來源時
+                只找清單上的欄位；清單外的值不會丟掉，會在審核時標出來。
+                沒有 profile 就用整份 schema。</p>
               <label class="bi-label" for="bi-b-pf-home">應用或資料庫項目</label>
               <select id="bi-b-pf-home"></select>
               <div id="bi-b-pf-view"></div>
               <div id="bi-b-pf-proposals"></div>
+              <details class="bi-manage"><summary>直接編輯（JSON）</summary>
               <label class="bi-label" for="bi-b-pf-json">Profile 內容（JSON）</label>
               <textarea id="bi-b-pf-json" class="bi-input" rows="10" spellcheck="false"></textarea>
               <p class="bi-meta">格式：{"types": {"類型": {"category": "這個類型在這裡的意思",
                 "fields": {"欄位": {"use": "required 或 optional", "note": "說明"}}}},
                 "proposals": [{"type": "類型", "field": "新欄位", "definition": {"kind": "str",
                 "class": "sourced", "label": "名稱"}, "reason": "為什麼需要"}]}。
-                schema 沒有的欄位只能放在 proposals。</p>
+                schema 沒有的欄位只能放在 proposals。存成新版本後，commit 並 push 大家才會用到。</p>
               <div class="bi-actions">
                 <button class="bi-btn" id="bi-b-pf-save" type="button">存成新版本</button></div>
+              </details>
             </div>
             <div class="bi-step" id="bi-b-tool-new">
               <p class="bi-meta">把原始來源轉成 CSV 或 Markdown，產出會成為新的來源，
