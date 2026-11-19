@@ -8086,3 +8086,14 @@ scheduled/background work (review reminders, results); (2) deterministic routing
 messages that are links or files, and of the domain-button callbacks, to the BI inbox instead of a
 model turn; (3) a generic feature hook so a plugin can receive such Telegram items and send
 messages. Not covered: multiple bots, audio/video, auto-accepting cards, auto-push, permissions.
+
+### 2026-11-19 — BI skill/tool package import: owner choices
+
+For docs/phases/BI_SKILL_TOOL_PACKAGE_IMPORT_DESIGN_20261119.md the owner chose: command-line
+scripts that do not follow the INPUT/OUTPUT contract import with status 「需改寫」 (kept, not
+runnable until rewritten, one-click AI rewrite); a folder/zip without aep-bi-package.json is
+inferred from file names and content and confirmed in the preview; import goes into the current
+working domain only. Defaults taken from the design for the rest: a tool's description is read
+from its module docstring into the tool unit; a same-role conflict becomes a new version and a
+different-role clash is imported under a new name; analysis packs and Shared Platform publishing
+of packages are out of scope for now; a matching 「匯出」 produces packages.
