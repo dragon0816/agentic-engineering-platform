@@ -145,6 +145,10 @@ def test_a_tool_is_picked_talked_through_tried_and_saved_in_the_working_domain(
     with _served(config, layout, _Model("none", {})) as server:
         with BiPage(tmp_path / "browser", server.address) as page:
             _open_step2(page, dataset, AIDC)
+            # One line on what a tool does and what the sandbox blocks; no approval step
+            # (owner decision 2026-11-12 cancelled local execution approvals).
+            about = page.text_of("bi-b-tl-about")
+            assert "擋網路、子程序和輸出資料夾以外的寫入" in about and "核准" not in about
             # Only this domain's tools; the other domain's are counted.
             page.see("bi-b-tl-list", "其他領域還有 1 個")
             assert "wireless/split" not in page.text_of("bi-b-tl-list")

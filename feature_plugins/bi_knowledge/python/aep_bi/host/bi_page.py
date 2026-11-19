@@ -819,10 +819,8 @@ BI_PANE_HTML = r"""
             </div>
             <div class="bi-step" id="bi-b-tool-new">
               <h5>新增或修改資料處理程式</h5>
-              <p class="bi-meta">把原始來源轉成 CSV 或 Markdown，產出會成為新的來源，
-                再走一樣的預覽和審核，不會直接寫卡片。每個新版本第一次在這台電腦執行前，
-                要由人看過程式碼並核准。執行時擋網路、子程序和輸出資料夾以外的寫入；
-                這是防止失誤，不是防範蓄意攻擊的邊界。</p>
+              <p class="bi-meta" id="bi-b-tl-about">產出會成為新來源，再走預覽和審核；
+                執行時擋網路、子程序和輸出資料夾以外的寫入。</p>
               <div class="bi-actions">
                 <button class="go" id="bi-b-tl-pick" type="button">選擇 Python 檔</button>
                 <input id="bi-b-tl-file" type="file" accept=".py,text/x-python" multiple hidden>
