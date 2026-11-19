@@ -89,6 +89,7 @@ def test_deleting_chosen_and_single_sources_in_step_one(tmp_path: Path) -> None:
             page.see(
                 "bi-b-src-del-ask", "將刪除 3 份來源與它們的 Markdown；尚未 push 的刪除無法復原"
             )
+            assert PUSHED_HINT not in page.text_of("bi-b-src-del-ask")  # nothing pushed
             page.click_text("#bi-b-src-del-ask", "取消")
             page.wait("document.getElementById('bi-b-src-del-ask').hidden")
             assert len(_rows(page)) == 4
@@ -126,3 +127,50 @@ def test_deleting_chosen_and_single_sources_in_step_one(tmp_path: Path) -> None:
             page.wait("document.querySelectorAll('#bi-b-sources tbody tr').length === 1")
             assert _rows(page) == ["tech.csv"]
             assert {s["name"] for s in Staging(workspace, "lab").sources()} == {"tech.csv"}
+
+
+PUSHED_HINT = (
+    "已 push 的檔案仍留在共用資料夾的版本紀錄裡；要從共用資料夾完全移除，"
+    "請按該列「共用資料夾」欄的「撤回」。"
+)
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_deleting_a_pushed_vault_source_points_to_withdraw(tmp_path: Path) -> None:
+    from test_bi_vault import _commit, _push
+    from test_bi_vault_sources_ui import FOLDER, _open_build
+
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    shared = tmp_path / "sharepoint"
+    shared.mkdir()
+    made = _ok(
+        route(workspace, "alice", "POST", "/api/bi/vaults", {},
+              {"path": str(shared), "title": "Market", "schema": "bi.schema/v1.1",
+               "author": "alice"})
+    )  # fmt: skip
+    vault_id = str(made["vault"]["id"])
+    dataset = f"vault-{vault_id}"
+    Staging(workspace, dataset).add_source(
+        "pushed.md", text="# 已放上去\n", folder=FOLDER, actor="alice"
+    )
+    _commit(workspace, vault_id, "加入來源")
+    _push(workspace, vault_id)
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(tmp_path / "browser", server.address) as page:
+            _open_build(page, dataset)
+            page.see("bi-b-sources", "已放上去")
+            _row_button(page, "pushed.md", "刪除")
+            page.wait(
+                "[...document.querySelectorAll('#bi-b-sources tbody tr')]"
+                f".some((r) => r.textContent.includes({json.dumps(PUSHED_HINT)}))"
+            )
+            row = page.run(
+                "[...document.querySelectorAll('#bi-b-sources tbody tr')]"
+                ".find((r) => r.textContent.includes('pushed.md')).textContent"
+            )
+            assert "會在下次 commit、push 時移除；版本紀錄保留舊版" in row
+            _row_button(page, "pushed.md", "確定刪除")
+            page.see("bi-b-src-del-status", "1 份會在下次 commit、push 時移除。")
+            page.see("bi-b-src-del-status", PUSHED_HINT)
+            page.see("bi-b-sources", "commit、push 後移除")

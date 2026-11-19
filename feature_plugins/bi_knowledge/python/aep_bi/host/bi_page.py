@@ -5666,6 +5666,14 @@ function biDeleteCell(source) {
   return cell;
 }
 
+// Removing a pushed source leaves its file in the shared folder; 撤回 takes it out.
+const BI_DELETE_PUSHED = "已 push 的檔案仍留在共用資料夾的版本紀錄裡；要從共用資料夾完全移除，"
+  + "請按該列「共用資料夾」欄的「撤回」。";
+
+function biDeletePushed(sources) {
+  return sources.some((s) => s.shared === "pushed" || s.shared === "cloud_only");
+}
+
 function biDeleteWords(sources) {
   // What happens to each kind, said before the person confirms.
   const later = sources.filter((s) => ["staged", "pushed", "cloud_only"].includes(s.shared));
@@ -5676,7 +5684,8 @@ function biDeleteWords(sources) {
     parts.push((now ? "另外 " : "") + later.length + " 份已在共用資料夾或已 commit，"
       + "會在下次 commit、push 時移除；版本紀錄保留舊版，可以從版本還原");
   }
-  return parts.join("。") + "。被卡片當作證據的來源不會刪除。";
+  return parts.join("。") + "。被卡片當作證據的來源不會刪除。"
+    + (biDeletePushed(sources) ? BI_DELETE_PUSHED : "");
 }
 
 function biDeleteAsk(ids, place) {
@@ -5698,7 +5707,7 @@ function biDeleteAsk(ids, place) {
   ask.querySelector("button.go").focus();
 }
 
-function biDeleteSummary(results) {
+function biDeleteSummary(results, sources) {
   // In place of the progress: what went, and each source kept with its reason.
   const deleted = results.filter((r) => r.status === "deleted").length;
   const staged = results.filter((r) => r.status === "staged_removal").length;
@@ -5711,11 +5720,14 @@ function biDeleteSummary(results) {
   const status = el("bi-b-src-del-status");
   const head = (done.length ? done.join("，") : "沒有刪除任何來源")
     + (kept.length ? "；" + kept.length + " 份未刪除：" : "。");
+  const pushed = biDeletePushed((sources || []).filter((s) => results.some((r) =>
+    r.id === s.id && r.status === "staged_removal")));
   status.replaceChildren(bh("span", "", head));
   if (kept.length) {
     status.append(bh("ul", "", ...kept.map((r) => bh("li", "",
       (r.name || r.id) + "：" + r.reason))));
   }
+  if (pushed) status.append(bh("span", "", BI_DELETE_PUSHED));
   status.className = "mem-status" + (kept.length ? " error" : "");
   status.hidden = false;
 }
@@ -5756,7 +5768,7 @@ async function biDeleteRun(sources, ask) {
     ask.removeAttribute("aria-busy"); ask.setAttribute("role", "group");
     ask.hidden = true; ask.replaceChildren();
   }
-  biDeleteSummary(results);
+  biDeleteSummary(results, sources);
   const removed = new Set(results.filter((r) => ["deleted", "staged_removal"]
     .includes(r.status)).map((r) => r.id));
   bi.build.chosen = (bi.build.chosen || []).filter((id) => !removed.has(id));
