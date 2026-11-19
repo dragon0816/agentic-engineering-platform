@@ -2772,6 +2772,7 @@ def skills(workspace: Path, vault_id: str) -> dict[str, Any]:
                         if skill.role == "extract"
                         else {}
                     ),
+                    **_default_view(units, reg, skill),
                 }
             )
     roots = [
@@ -2811,6 +2812,41 @@ def skills(workspace: Path, vault_id: str) -> dict[str, Any]:
         "roles": ["classify", "extract"],
         "tools": vault_tools.current_tools(units),
     }
+
+
+def _default_view(
+    units: Mapping[str, Any], reg: Registry, skill: repo_skills.Skill
+) -> dict[str, Any]:
+    """The shipped text of a rule that has one (the classify rule, generated from the schema
+    and the homes), and whether the rule a run reads differs from it (owner 2026-11-19:
+    「判讀規則的skills，無法看default版本」)."""
+    if skill.unit_name != vault_skills.CLASSIFY or skill.role != "classify":
+        return {}
+    body = vault_skills.default_classify_body(reg, units)
+    return {"default_body": body, "modified": not vault_skills.is_default(skill, body)}
+
+
+def restore_default_skill(
+    workspace: Path, vault_id: str, given: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Stage the shipped text of a rule as its next revision, generated again from then on;
+    the person commits it. The revision the page compared is required, so a rule changed
+    meanwhile is never overwritten unseen."""
+    vault = _vault(workspace, vault_id)
+    name = str(given.get("name") or "")
+    if name != vault_skills.CLASSIFY:
+        raise BiStoreError("skill_no_default", "只有依 schema 產生的分類規則有預設版本")
+    with vault.lock, _repo_errors():
+        units = vault.repo.working_units()
+        current = repo_skills.read_skill(vault.repo, name, units)
+        if str(given.get("revision") or "") != str(current.revision):
+            raise BiStoreError(
+                "skill_changed", f"規則已經是第 {current.revision} 版，請重新整理再比對"
+            )
+        value = repo_skills.stage_skill(
+            vault.repo, vault_skills.default_classify_skill(vault._registry(), units)
+        )
+    return {"skill": {"name": name, **value}, "status": vault.status()}
 
 
 def create_home(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:

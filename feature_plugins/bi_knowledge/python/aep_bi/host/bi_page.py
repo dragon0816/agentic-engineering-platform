@@ -45,6 +45,11 @@ BI_CSS = r"""
 .bi-empty { color: var(--dim); padding: 18px 12px; text-align: center; }
 .bi-scroll { overflow-x: auto; max-width: 100%; }
 .bi-rr-list { max-height: 16rem; overflow-y: auto; }
+.bi-sk-compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 8px; }
+.bi-sk-text { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 20rem; overflow-y: auto;
+  margin: 4px 0; }
+.bi-sk-diff { background: color-mix(in srgb, var(--warn, #b58900) 22%, transparent); }
 .bi-table td, .bi-table th { vertical-align: top; }
 .bi-table td { overflow-wrap: anywhere; min-width: 72px; }
 .bi-table tr.bi-flag-red td:first-child { box-shadow: inset 4px 0 0 var(--bad); }
@@ -4632,7 +4637,8 @@ function biSkillsDraw(reply) {
         return at ? ["、", name] : [name];
       }) : "所有來源";
     const state = [];
-    if (item.generated) state.push(biBadge("依 schema 產生", "dim"));
+    if (item.generated && !item.modified) state.push(biBadge("依 schema 產生", "dim"));
+    if (item.modified) state.push(biBadge("和預設不同", "warn"));
     if (item.needs_update && item.update_blocks === false) {
       state.push(biBadge("可以看一下", "dim"), bh("p", "bi-meta", item.update_reason || ""));
     } else if (item.needs_update) {
@@ -4655,8 +4661,15 @@ function biSkillsDraw(reply) {
     const talk = biButton("和 AI 一起修改", (event) => biSkillAi(item, event.currentTarget),
       "bi-btn",
       "和 AI 一起修改判讀規則 " + item.name);
+    // A rule shipped with the vault: its default text, beside the current one when they differ.
+    let detail = null;
+    const shipped = "default_body" in item ? biButton("預設版本", () => {
+      detail.row.hidden = !detail.row.hidden;
+      if (!detail.row.hidden) biSkillDefault(item, detail.cell);
+    }, "bi-btn", "看判讀規則 " + item.name + " 的預設版本") : null;
     biRow(list, [bh("strong", "", item.name), item.role === "classify" ? "分類" : "擷取",
-      "第 " + item.revision + " 版", where, state, biRowActions([edit, talk])]);
+      "第 " + item.revision + " 版", where, state, biRowActions([edit, talk], shipped)]);
+    if (shipped) { detail = biRowDetail(list); detail.row.hidden = true; }
   }
   box.append(skills.length ? list.box : bh("p", "bi-meta", "還沒有判讀規則。"));
   if (skills.length < (reply.skills || []).length) {
@@ -4672,6 +4685,53 @@ function biSkillsDraw(reply) {
   biFollowSourceFolder();
   el("bi-b-folder-box").hidden = false;
   biRerunForm(reply.folders || []);
+}
+
+function biLineDiff(before, after) {
+  // Which lines of each side the other lacks (a longest common subsequence of lines).
+  const a = before.split("\n"), b = after.split("\n");
+  const n = a.length, m = b.length;
+  const same = Array.from({length: n + 1}, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i -= 1) {
+    for (let j = m - 1; j >= 0; j -= 1) {
+      same[i][j] = a[i] === b[j] ? same[i + 1][j + 1] + 1
+        : Math.max(same[i + 1][j], same[i][j + 1]);
+    }
+  }
+  const left = new Set(), right = new Set();
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (a[i] === b[j]) { i += 1; j += 1; } else if (same[i + 1][j] >= same[i][j + 1]) {
+      left.add(i); i += 1;
+    } else { right.add(j); j += 1; }
+  }
+  for (; i < n; i += 1) left.add(i);
+  for (; j < m; j += 1) right.add(j);
+  return [a.map((line, at) => [line, left.has(at)]), b.map((line, at) => [line, right.has(at)])];
+}
+
+function biSkillDefault(item, cell) {
+  cell.replaceChildren();
+  const side = (title, lines) => bh("div", "bi-sk-side", bh("strong", "", title),
+    bh("pre", "bi-sk-text", ...lines.map(([line, other]) =>
+      bh("span", other ? "bi-sk-diff" : "", line + "\n"))));
+  if (!item.modified) {
+    cell.append(bh("p", "bi-meta",
+      "現在用的就是預設版本（依 schema 和領域產生，schema 變了會跟著更新）："),
+      bh("pre", "bi-sk-text", item.default_body));
+    return;
+  }
+  const [now, shipped] = biLineDiff(item.body || "", item.default_body);
+  cell.append(bh("p", "bi-meta", "標色的行只在其中一邊。"),
+    bh("div", "bi-sk-compare", side("目前（第 " + item.revision + " 版）", now),
+      side("預設", shipped)),
+    bh("div", "bi-actions", biButton("恢復成預設", async () => {
+      const reply = await biVerRun(bi.verVault, "skill-default",
+        {name: item.name, revision: item.revision});
+      biNotice(true, "「" + item.name + "」存成第 " + reply.skill.revision
+        + " 版（預設內容）；舊版本還在版本紀錄裡，commit 並 push 後大家才會用到。");
+      await biSkills(bi.verVault);
+    }, "bi-btn", "把判讀規則 " + item.name + " 恢復成預設，存成新版本")));
 }
 
 function biFollowSourceFolder() {

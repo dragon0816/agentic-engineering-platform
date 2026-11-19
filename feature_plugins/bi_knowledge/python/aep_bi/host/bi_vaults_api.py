@@ -230,6 +230,9 @@ def route(
         return 200, {"ok": True, **vault_sources.withdraw(workspace, vault_id, given)}
     if action == "skills":
         return 200, {"ok": True, **vault.save_skill(workspace, vault_id, given)}
+    if action == "skill-default":
+        # The shipped text as the next revision, on the person's press after comparing.
+        return 200, {"ok": True, **vault.restore_default_skill(workspace, vault_id, given)}
     if action == "profiles":
         return 200, {"ok": True, **vault.save_profile(workspace, vault_id, given)}
     if action == "profile-proposals":

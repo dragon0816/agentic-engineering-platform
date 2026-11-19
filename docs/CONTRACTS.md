@@ -5839,6 +5839,12 @@ skills contract above.
   lacks, a folder outside `sources/`, an empty body or a bad name) → `{"ok", "skill": {name, path, revision,
   schema, role, applies_to}, "status"}`. The person commits and pushes it like any change. The unit's label
   is `skill「<name>」`.
+- **Default version (owner 2026-11-19).** The `classify` item adds `default_body` (the text generating it
+  gives now, from the schema and the homes) and `modified` (a run does not read that text). `POST
+  /api/bi/vaults/<id>/skill-default {"name": "classify", "revision"}` stages the default text as the next
+  revision, generated again from then on → `{"ok", "skill", "status"}`. `revision` is the one the page
+  compared; another is 409 `skill_changed`, a rule with no default 400 `skill_no_default`. The page's
+  「預設版本」 shows the default, or both side by side with the differing lines marked, and 「恢復成預設」.
 - **Page.** 「版本」 lists the skills (分類／擷取, revision, 「依 schema 產生」, 「需要更新」 with the vault's
   schema), 「修改」 and 「新增擷取規則」 open one form (name, kind, folders, card types, text) saved as a new
   revision; step 3 shows 「來源在知識庫的哪個資料夾」 for a vault and sends it as `folder`. Saving domain
