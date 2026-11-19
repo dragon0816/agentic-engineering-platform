@@ -137,6 +137,12 @@ CREATE TABLE IF NOT EXISTS conversions (
   message TEXT NOT NULL,
   at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS removals (
+  source_id TEXT PRIMARY KEY,
+  sha256 TEXT NOT NULL,
+  by TEXT NOT NULL,
+  at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS sessions (
   id TEXT PRIMARY KEY,
   kind TEXT NOT NULL,
@@ -408,20 +414,71 @@ class Staging:
         with self._db(write=True) as db:
             for row in rows:
                 source_id = str(row["id"])
-                revisions = db.execute(
-                    "SELECT stored FROM markdown WHERE source_id = ?", (source_id,)
-                ).fetchall()
-                for stored in [row["stored"], *(r["stored"] for r in revisions)]:
-                    if not str(stored).startswith(REPOSITORY_FILE):
-                        (self.dir / str(stored)).unlink(missing_ok=True)
-                db.execute("DELETE FROM markdown WHERE source_id = ?", (source_id,))
-                db.execute("DELETE FROM conversions WHERE source_id = ?", (source_id,))
-                db.execute("DELETE FROM sources WHERE id = ?", (source_id,))
+                self._forget_source(db, source_id, str(row["stored"]))
                 self._purge_runs(db, source_id)
         from aep_bi.cards import search_index  # its passages (BI vault V3)
 
         search_index.sync_quietly(self.store)
         return len(rows)
+
+    def _forget_source(self, db: sqlite3.Connection, source_id: str, stored: str) -> None:
+        """A source's row, its copies on this PC, its Markdown and conversion record; a
+        file read through from the shared folder is never touched."""
+        revisions = db.execute(
+            "SELECT stored FROM markdown WHERE source_id = ?", (source_id,)
+        ).fetchall()
+        for name in [stored, *(str(r["stored"]) for r in revisions)]:
+            if not name.startswith(REPOSITORY_FILE):
+                (self.dir / name).unlink(missing_ok=True)
+        folder = self.dir / MARKDOWN_DIR / source_id
+        if folder.is_dir() and not any(folder.iterdir()):
+            folder.rmdir()
+        db.execute("DELETE FROM markdown WHERE source_id = ?", (source_id,))
+        db.execute("DELETE FROM conversions WHERE source_id = ?", (source_id,))
+        db.execute("DELETE FROM removals WHERE source_id = ?", (source_id,))
+        db.execute("DELETE FROM sources WHERE id = ?", (source_id,))
+
+    def remove_source(self, source_id: str) -> bool:
+        """Delete a source from this PC (a person's 刪除, `source_delete`): False when it
+        is not here. Its runs stay as they were; the caller has refused a source still
+        in use."""
+        if not self.exists:
+            return False
+        with self._db(write=True) as db:
+            row = db.execute("SELECT stored FROM sources WHERE id = ?", (source_id,)).fetchone()
+            if row is None:
+                return False
+            self._forget_source(db, source_id, str(row["stored"]))
+        from aep_bi.cards import search_index  # its passages (BI vault V3)
+
+        search_index.sync_quietly(self.store)
+        return True
+
+    def mark_removal(self, source_id: str, sha256: str, actor: str) -> bool:
+        """Remember that a pushed source's removal is staged in the vault, so it leaves
+        this PC once that removal is committed; False when it was already marked."""
+        with self._db(write=True) as db:
+            done = db.execute(
+                "INSERT OR IGNORE INTO removals (source_id, sha256, by, at) VALUES (?, ?, ?, ?)",
+                (source_id, sha256, actor, now()),
+            )
+            return bool(done.rowcount)
+
+    def removals(self) -> dict[str, str]:
+        """Source id to sha256 of every source whose removal is staged here."""
+        if not self.exists:
+            return {}
+        with self._db() as db:
+            if not _has_table(db, "removals"):
+                return {}
+            return {
+                str(r["source_id"]): str(r["sha256"])
+                for r in db.execute("SELECT source_id, sha256 FROM removals")
+            }
+
+    def drop_removal(self, source_id: str) -> None:
+        with self._db(write=True) as db:
+            db.execute("DELETE FROM removals WHERE source_id = ?", (source_id,))
 
     @staticmethod
     def _purge_runs(db: sqlite3.Connection, source_id: str) -> None:

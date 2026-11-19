@@ -163,14 +163,19 @@ def cloud_only(path: Path) -> bool:
 
 def listed(repo: Any, sources: list[dict[str, Any]]) -> dict[str, Any]:
     """The source list for the page with where each one stands: `local` (only on
-    this PC), `staged` (waits for a commit and push), `pushed` or `cloud_only`,
+    this PC), `staged` (waits for a commit and push), `pushed`, `cloud_only` or
+    `removing` (its removal waits for a commit and push),
     plus the files of commits still waiting for OneDrive."""
     working, pushed = repo.working_units(), repo.units()
+    committed = repo.working_units(pending=False)
     found = []
     for source in sources:
         key = unit_key(source["sha256"])
         value = working.get(key)
-        if not isinstance(value, dict):
+        if value is None and isinstance(committed.get(key), dict):
+            # Its removal is staged (a person's 刪除): it goes with the next commit and push.
+            state, value = "removing", committed[key]
+        elif not isinstance(value, dict):
             state = "local"
         elif key not in pushed:
             state = "staged"
@@ -210,16 +215,87 @@ def commit_split(
     pending = repo._pending()
     keys = [*pending["sets"], *pending["files"]]
     names = [v["name"] for k, v in pending["sets"].items() if k.startswith(PREFIX) and v]
+    before = repo.working_units(pending=False)
+    removed = [
+        str(before[k]["name"])
+        for k, v in pending["sets"].items()
+        if k.startswith(PREFIX) and v is None and isinstance(before.get(k), dict)
+    ]
     sources = any(is_source_change(k) for k in keys)
     others = any(not is_source_change(k) and (only is None or only(k)) for k in keys)
     if sources and others:
-        repo.commit(_sources_purpose(names), only=is_source_change)
+        repo.commit(_sources_purpose(names, removed), only=is_source_change)
     return dict(repo.commit(purpose, only=only))
 
 
-def _sources_purpose(names: list[str]) -> str:
-    listed = "、".join(names[:5]) + ("…" if len(names) > 5 else "")
-    return f"加入來源：{listed}"[: repo_engine.MAX_PURPOSE] if listed else "更新來源的 Markdown"
+def _named(names: list[str]) -> str:
+    return "、".join(names[:5]) + ("…" if len(names) > 5 else "")
+
+
+def _sources_purpose(names: list[str], removed: list[str] | None = None) -> str:
+    parts = [f"加入來源：{_named(names)}"] if names else []
+    parts += [f"移除來源：{_named(removed)}"] if removed else []
+    return "；".join(parts)[: repo_engine.MAX_PURPOSE] if parts else "更新來源的 Markdown"
+
+
+def _pending_paths(pending: Mapping[str, Any], sha256: str, value: Any) -> list[str]:
+    """The uncommitted files of a source: its original and its Markdown revisions."""
+    named = set()
+    if isinstance(value, dict):
+        named = {str(value["file"]), *(str(item["file"]) for item in value.get("markdown") or ())}
+    marker = f"/{MARKDOWN_DIR}/{sha256[:8]}/"
+    return [
+        path
+        for path in pending["files"]
+        if path in named or (homes.LAYOUT.is_source_path(path) and marker in path)
+    ]
+
+
+def remove_from_vault(repo: Any, source: Mapping[str, Any]) -> str:
+    """A person's 刪除 of a source in a vault, under `repo.lock`. One never committed
+    leaves the working copy (`unstaged`: nothing of it will be pushed); one committed
+    or pushed has its removal staged (`staged`), which the next commit and push carry,
+    while the history keeps every earlier version; `already` when that is staged."""
+    key = unit_key(str(source["sha256"]))
+    committed = repo.working_units(pending=False)
+    pending = repo._pending()
+    current = pending["sets"].get(key, committed.get(key))
+    paths = _pending_paths(pending, str(source["sha256"]), current)
+    if key not in committed:
+        pending["sets"].pop(key, None)
+        for path in paths:
+            pending["files"].pop(path, None)
+        repo._save_pending(pending)
+        return "unstaged"
+    if key in pending["sets"] and pending["sets"][key] is None and not paths:
+        return "already"
+    for path in paths:  # a Markdown edit not committed yet goes with it
+        pending["files"].pop(path, None)
+    repo._save_pending(pending)
+    repo.stage(key, None)
+    return "staged"
+
+
+def settle_removals(repo: Any, staging: Any) -> int:
+    """Make the staged removals true on this PC: a removal now committed takes the
+    source off this PC; one dropped (the uncommitted changes discarded) is forgotten,
+    and the source stays. The number of sources taken off."""
+    marked = staging.removals()
+    if not marked:
+        return 0
+    working = repo.working_units()
+    committed = repo.working_units(pending=False)
+    taken = 0
+    for source_id, sha256 in marked.items():
+        key = unit_key(sha256)
+        if key in working:
+            staging.drop_removal(source_id)
+        elif key not in committed:
+            if staging.remove_source(source_id):
+                taken += 1
+            else:  # gone from this PC already
+                staging.drop_removal(source_id)
+    return taken
 
 
 def _with_derived(units: Mapping[str, Any], value: Mapping[str, Any]) -> list[Mapping[str, Any]]:
