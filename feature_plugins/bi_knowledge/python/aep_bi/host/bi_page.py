@@ -4037,10 +4037,11 @@ async function biAnalyses(vaultId) {
     const title = [bh("strong", "", item.title)];
     // It would show the same numbers in any domain, and must not pass for this one's.
     if (scope && !item.filters_domain) title.push(" ", biBadge("全庫資料", "dim"));
-    // It narrows only by the card domain, which this working domain does not have.
-    if (scope && item.filters_domain && !item.folder_filter && !biScopeDomain()) {
-      title.push(" ", biBadge("不支援依資料夾篩選", "warn"));
-    }
+    // It narrows only by the card domain, which this working domain does not have: said, and
+    // not run into an empty chart.
+    const unsupported = Boolean(scope && item.filters_domain && !item.folder_filter
+      && !biScopeDomain());
+    if (unsupported) title.push(" ", biBadge("不支援依資料夾篩選", "warn"));
     if (item.question) title.push(bh("div", "bi-meta", item.question));
     const row = biRow(table, [title, (item.kind === "sql" ? "SQL" : "Python") + "・"
       + item.chart.type, where, ""]);
@@ -4051,7 +4052,7 @@ async function biAnalyses(vaultId) {
       out).catch((failure) => biNotice(false, failure.message))), out].filter(Boolean));
     row.lastChild.append(
       biRowActions([
-        biButton("執行", () => {
+        unsupported ? null : biButton("執行", () => {
           under.row.hidden = false;
           return biRunInto(vaultId, item, state, out);
         }, "bi-btn", "執行分析 " + item.title)],

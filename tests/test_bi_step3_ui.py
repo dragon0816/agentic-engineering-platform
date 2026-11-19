@@ -252,21 +252,19 @@ def test_step_3(
         assert abs(float(page.run(SCROLL)) - before) < 2
 
         # -- each analysis follows the working domain: no 領域 per analysis, rarer actions in 更多
+        # This vault's domains are library entries (no card domain), and its analyses narrow only
+        # by the card domain: each says so instead of offering a run into an empty chart.
         page.run("document.getElementById('bi-b-an').open = true")
-        row = "[...document.querySelectorAll('#bi-b-an-list tbody tr')].find((r) =>"
-        row += " r.textContent.includes('執行'))"
-        page.wait(f"{row} !== undefined")
-        assert page.run(f"[...{row}.querySelectorAll(':scope td > .bi-actions > button')]"
-                        ".map((b) => b.textContent).join()") == "執行"  # fmt: skip
-        assert page.run(f"{row}.querySelector('details.bi-row-menu').textContent"
-                        ".includes('和 AI 一起修改')")  # fmt: skip
-        page.run(f"[...{row}.querySelectorAll('button')].find((b) => b.textContent === '執行')"
-                 ".click()")  # fmt: skip
-        page.wait(
-            f"!{row}.nextElementSibling.hidden"
-            f" && {row}.nextElementSibling.querySelector('[data-an-out]').childElementCount > 0"
+        rows = "[...document.querySelectorAll('#bi-b-an-list tbody tr:not(.bi-detail-row)')]"
+        page.wait(f"{rows}.length > 0")
+        unsupported = f"{rows}.filter((r) => r.textContent.includes('不支援依資料夾篩選'))"
+        assert page.run(f"{unsupported}.length") > 0
+        assert page.run(
+            f"{unsupported}.every((r) => ![...r.querySelectorAll("
+            "':scope td > .bi-actions > button')].some((b) => b.textContent === '執行'))"
         )
-        assert page.text_of("bi-notice") == ""  # it ran with the working domain
+        assert page.run(f"{rows}[0].querySelector('details.bi-row-menu').textContent"
+                        ".includes('和 AI 一起修改')")  # fmt: skip
         assert page.run("document.querySelector('#bi-b-an-list [data-param=domain]') === null")
         assert page.run("biDashDomain()") == page.run(
             "biScopeDomain() || biScope().split('/').pop()"
