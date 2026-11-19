@@ -230,12 +230,18 @@ def route(
         return 200, {"ok": True, **vault_sources.withdraw(workspace, vault_id, given)}
     if action == "skills":
         return 200, {"ok": True, **vault.save_skill(workspace, vault_id, given)}
+    if action == "skill-default":
+        # The shipped text as the next revision, on the person's press after comparing.
+        return 200, {"ok": True, **vault.restore_default_skill(workspace, vault_id, given)}
     if action == "profiles":
         return 200, {"ok": True, **vault.save_profile(workspace, vault_id, given)}
     if action == "profile-proposals":
         return 200, {"ok": True, **profile_merge.decide(workspace, vault_id, given, actor)}
     if action == "tool-approve":
         return 200, {"ok": True, **tool_runs.approve(workspace, vault_id, given, actor)}
+    if action == "tool-try":
+        # The editor's code on one source, shown only (the page's 「試跑」).
+        return 200, {"ok": True, **tool_runs.try_code(workspace, vault_id, given)}
     if action == "tool-run":
         return 200, {"ok": True, **tool_runs.run(workspace, vault_id, given, actor)}
     if action == "tools":

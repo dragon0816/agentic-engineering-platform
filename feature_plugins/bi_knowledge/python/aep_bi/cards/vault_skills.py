@@ -217,6 +217,21 @@ def classify_skill(
     )
 
 
+def default_classify_body(reg: Registry, units: Mapping[str, Any]) -> str:
+    """The classify rule as generating it gives it now: the schema's types and the homes."""
+    return classify_body(reg, _segments(units), _library(units))
+
+
+def default_classify_skill(reg: Registry, units: Mapping[str, Any]) -> skills.Skill:
+    return classify_skill(reg, _segments(units), _library(units))
+
+
+def is_default(skill: skills.Skill, body: str) -> bool:
+    """Whether a run reads the shipped text: the same text, or a generated rule that holds
+    only generated lines (`_still_generated`), which a run reads as `body`."""
+    return skill.body.strip() == body.strip() or _still_generated(skill, body)
+
+
 def _slug(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", str(text).lower()).strip("-")
 

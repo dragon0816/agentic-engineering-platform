@@ -4279,7 +4279,8 @@ schema is chosen at creation and never changed" (owner 2026-10-27): a dataset ma
     in the source, which are never rows. No rows on `done` is the answer 「不用改」.
   - `<row>` = `{"id", "kind": "extend_schema" | "dictionary_change" | "propose_type" |
     "needs_clarification", "what", "proposal", "summary", "reason", "questions", "quote", "locator",
-    "source_id", "source", "places", "applies": bool, "status": "proposed" | "applied" | "rejected"}`. A type
+    "source_id", "source", "places", "applies": bool, "status": "proposed" | "applying" | "applied" |
+    "rejected"}`; an `applying` row also has `applying_at`. A type
     the schema has, or a field it has, is `needs_clarification` with a question (`schema_fit`). `applies`: a
     new field, or a new allowed value with no `maps_to`, that leaves a valid schema.
   - `POST /api/bi/schema-suggest/apply {"dataset", "id", "row"}` → `{"ok": true, "suggestion", "schema":
@@ -4287,8 +4288,15 @@ schema is chosen at creation and never changed" (owner 2026-10-27): a dataset ma
     the vault turns it into units on the version; the draft is removed. Nothing is committed. Refusals: 400
     `suggest_apply_vault_only`, `suggest_not_direct`, `suggest_invalid`, `suggest_field_exists`,
     `suggest_not_enum`, `suggest_value_exists`, `suggest_row_unknown`; 409 `suggest_stale`,
-    `suggest_row_decided`.
+    `suggest_row_decided`, `suggest_row_busy` (an add of the row is running). The row is `applying` while
+    the add runs (one add at a time; 15 minutes on is taken as stopped); an add that fails sets it back to
+    `proposed` and removes the version published on the way, so no upgrade is offered from it.
   - `POST /api/bi/schema-suggest/reject {"dataset", "id", "row", "reason"}` → `{"ok": true, "suggestion"}`.
+    409 `suggest_row_busy` while the row is being added.
+  - `POST /api/bi/schema-suggest/reopen {"dataset", "id", "row"}` → `{"ok": true, "suggestion"}`: a
+    `rejected` row, or an `applying` row past 15 minutes (the host stopped in the middle), back to
+    `proposed` (the page's 「改回待決定」). Refusals: 409 `suggest_row_applied` (already in the schema;
+    removing it is a schema change), `suggest_row_busy`, `suggest_stale`; 400 `suggest_row_unknown`.
 
 ## BI schema 2.0, new kinds and widening (BI vault V9, owner 2026-10-29)
 
@@ -5850,6 +5858,12 @@ skills contract above.
   lacks, a folder outside `sources/`, an empty body or a bad name) → `{"ok", "skill": {name, path, revision,
   schema, role, applies_to}, "status"}`. The person commits and pushes it like any change. The unit's label
   is `skill「<name>」`.
+- **Default version (owner 2026-11-19).** The `classify` item adds `default_body` (the text generating it
+  gives now, from the schema and the homes) and `modified` (a run does not read that text). `POST
+  /api/bi/vaults/<id>/skill-default {"name": "classify", "revision"}` stages the default text as the next
+  revision, generated again from then on → `{"ok", "skill", "status"}`. `revision` is the one the page
+  compared; another is 409 `skill_changed`, a rule with no default 400 `skill_no_default`. The page's
+  「預設版本」 shows the default, or both side by side with the differing lines marked, and 「恢復成預設」.
 - **Page.** 「版本」 lists the skills (分類／擷取, revision, 「依 schema 產生」, 「需要更新」 with the vault's
   schema), 「修改」 and 「新增擷取規則」 open one form (name, kind, folders, card types, text) saved as a new
   revision; step 3 shows 「來源在知識庫的哪個資料夾」 for a vault and sends it as `folder`. Saving domain
@@ -6884,6 +6898,8 @@ A tool is a Python script stored as an immutable revision. It gets `INPUT` (a co
 **Approval.** The first run of a revision on a PC needs a person's approval of that code, by its hash, kept per PC in the vault's local folder. A revision with the same code as an approved draft is already approved there.
 
 **API.** `GET /api/bi/vaults/<id>/tools` → `{tools: [{name, revision, author, path, sha256, code, approved}], drafts: [{name, sha256, code, approved, ...}], guard}`. `POST …/tool-approve` `{sha256, confirm: true}`. `POST …/tool-run` `{name, source_id}` → `{sources: [{id, name, already}], printed, tool}`; `tool_needs_approval` (409, with `sha256` and `code_text`), `tool_failed`, `tool_output_invalid`, `tool_not_python`, `tool_missing` (400), `tool_unknown`, `source_unknown` (404).
+
+**Writing a tool in the page (owner 2026-11-19).** `POST /api/bi/vaults/<id>/tool-try` `{code, source_id}` runs the page editor's code on one source in the same sandbox as `tool-run` (`tool_runs.try_code`) → `{source: {id, name}, files: [{name, bytes, text}], printed}`; nothing is kept, staged or approved. Refusals: `tool_invalid` (no code, too long), `tool_failed`, `tool_output_invalid` (400), `source_unknown` (404). A session of kind `tool` (`cards/tool_session.py`, `POST /api/bi/sessions {"dataset", "kind": "tool", "target": "<home>"}`, target_ref `tool:<home>`; 400 `home_invalid` without a home) is one structured model call per turn, contract `aep.bi.tool_suggestion.v1` → `{reply, needs: [..], code | null, notes: [..]}`; a turn takes `{message, scope, code (the editor's), source_ids (samples, at most 5), trial (the last trial's outcome)}`, and the model sees the working domain, its card types (the profile's, else the schema's), its sources by name and its tools. Code must compile and use `INPUT` and `OUTPUT`, or it goes back to the model. `POST /api/bi/sessions/<id>/apply {"dataset", "turn"}` → `{session, code}` marks the turn and hands the code to the editor; nothing is saved or run. The page: 「選擇 Python 檔」 (read in the browser, listed on the right read-only, the first one into the editor), 「和 AI 討論」, 「試跑」 on ticked sources of the working domain (one at a time, the step and seconds beside the button, each result or failure in place, 「產出加入來源」 saves a version and runs `tool-run` only on that press), 「存成」 `<working domain>/<name from the file>` and 「存成新版本」. The tool list shows the working domain's tools and drafts with 「其他領域還有 N 個」; a domain switch refills the name prefix and the trial sources and clears the last trial.
 
 **Skill AI (Session B).** `bi_skill__draft_tool {home, name, code}` keeps a draft on this PC and stages nothing. `bi_skill__try_tool {sha256, source_id}` runs an approved draft on a source whose classification the model may see, and shows the output without keeping it. The AI cannot approve a tool or save a revision.
 ## BI schema fit per item (Phase 2, 2026-11-04)

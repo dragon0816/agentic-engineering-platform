@@ -380,6 +380,9 @@ def test_vault_panel_and_dashboard_in_a_browser(
             "[...document.getElementById('bi-b-pf-home').options]"
             ".some((o) => o.value === 'library/products')"
         )
+        # What a profile is, in a line (owner 2026-11-19: 「應用的profile是幹嘛用的」).
+        about = text_of("bi-b-pf-about")
+        assert "欄位清單" in about and "只找清單上的欄位" in about
         set_value("bi-b-pf-home", "aidc")
         wait("document.getElementById('bi-b-pf-view').textContent.includes('還沒有 profile')")
         set_value("bi-b-pf-json", "{not json")

@@ -24,6 +24,7 @@ import threading
 import time
 import uuid
 from collections.abc import Mapping
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -40,6 +41,10 @@ OUTPUT_CONTRACT = "aep.bi.schema_suggest.v1"
 #: Sources read per press: what a person can review, and a bound on what it costs.
 MAX_SOURCES = 10
 MAX_ATTEMPTS = 2
+#: A row being added: one press at a time, and nothing decides it under the add.
+APPLYING = "applying"
+#: After this long an add is taken as stopped (the host restarted in the middle).
+STUCK_SECONDS = 15 * 60
 #: What a row may be: the three schema changes, and a question the model could not settle.
 KINDS = (
     schema_fit.EXTEND_SCHEMA,
@@ -369,13 +374,32 @@ def _applies(reg: Registry, kind: str, given: Mapping[str, Any]) -> bool:
     return not catalog.validate(document)[1]
 
 
-def _row_of(state: Mapping[str, Any], row_id: Any) -> dict[str, Any]:
+def _find_row(state: Mapping[str, Any], row_id: Any) -> dict[str, Any]:
     row: dict[str, Any] | None = next(
         (r for r in state.get("items") or [] if r["id"] == row_id), None
     )
     if row is None:
         raise BiStoreError("suggest_row_unknown", "這次建議沒有這一列")
-    if row["status"] != "proposed":
+    return row
+
+
+def _stuck(row: Mapping[str, Any]) -> bool:
+    """An add that has run longer than any add takes: the host stopped in the middle."""
+    started = str(row.get("applying_at") or "")
+    try:
+        since = time.time() - datetime.fromisoformat(started).timestamp()
+    except ValueError:
+        return True
+    return since > STUCK_SECONDS
+
+
+def _row_of(state: Mapping[str, Any], row_id: Any) -> dict[str, Any]:
+    row = _find_row(state, row_id)
+    if row["status"] == APPLYING and not _stuck(row):
+        # A second press while the first still runs (an add takes half a minute on a
+        # shared vault) would add it twice, or decide the row under the running add.
+        raise BiStoreError("suggest_row_busy", "這一項正在加入，請等它完成")
+    if row["status"] not in ("proposed", APPLYING):
         raise BiStoreError("suggest_row_decided", "這一列已經決定了")
     return row
 
@@ -402,6 +426,29 @@ def reject(
     return state
 
 
+def reopen(workspace: Path, dataset: str, suggestion_id: Any, row_id: Any) -> dict[str, Any]:
+    """Back to undecided (the owner's 「不小心選擇不要時，沒機會退回去」): a rejected row, or
+    an add that stopped with the host. An added row is in the schema already; taking it
+    out again is a schema change, not an undo."""
+    store = BiStore(workspace, dataset)
+    store.refuse_write()
+    with _LOCK:
+        state = _held(store, suggestion_id)
+        row = _find_row(state, row_id)
+        if row["status"] == "applied":
+            raise BiStoreError(
+                "suggest_row_applied",
+                "這一項已經加入 schema；要拿掉請用「和 AI 調整 schema」",
+            )
+        if row["status"] == APPLYING and not _stuck(row):
+            raise BiStoreError("suggest_row_busy", "這一項正在加入，請等它完成")
+        for key in ("by", "decided_at", "reason_given", "applying_at"):
+            row.pop(key, None)
+        row["status"] = "proposed"
+        _write(store, state)
+    return state
+
+
 def apply(
     workspace: Path, dataset: str, suggestion_id: Any, row_id: Any, actor: str
 ) -> dict[str, Any]:
@@ -417,11 +464,42 @@ def apply(
     with _LOCK:
         state = _held(store, suggestion_id)
         row = _row_of(state, row_id)
-    if not row["applies"]:
-        raise BiStoreError("suggest_not_direct", "這一項要先和 AI 討論定義，不能直接加入")
+        if not row["applies"]:
+            raise BiStoreError("suggest_not_direct", "這一項要先和 AI 討論定義，不能直接加入")
+        row.update(status=APPLYING, applying_at=now(), by=actor)
+        _write(store, state)
+    try:
+        _apply_row(workspace, dataset, store, row, actor)
+    except BaseException:
+        with _LOCK:
+            held = _read(store)
+            if held is not None and held.get("id") == suggestion_id:
+                back = _find_row(held, row_id)
+                if back["status"] == APPLYING:
+                    back["status"] = "proposed"
+                    back.pop("applying_at", None)
+                    _write(store, held)
+        raise
+    after = schema_versions.state(workspace, dataset)
+    with _LOCK:
+        state = _held(store, suggestion_id)
+        row = _find_row(state, row_id)
+        row.pop("applying_at", None)
+        row.update(status="applied", by=actor, decided_at=now(), schema=after["label"])
+        _write(store, state)
+    return {"suggestion": state, "schema": after}
+
+
+def _apply_row(
+    workspace: Path, dataset: str, store: BiStore, row: Mapping[str, Any], actor: str
+) -> None:
+    """Draft, publish and upgrade with the row's addition. The version published on the
+    way is gone afterwards: the vault takes it as units (`Vault._schema_units`), and when
+    the add stops before that it is removed here, so it is never offered as an upgrade."""
     before = catalog.for_store(store)
     made = schema_versions.create_draft(workspace, before.ref, f"建議：{row['what']}", actor)
     draft_id = made["draft"]["id"]
+    published: dict[str, Any] | None = None
     try:
         document = _added(dict(made["document"]), row)
         saved = schema_versions.save_revision(
@@ -444,16 +522,15 @@ def apply(
         schema_versions.upgrade_apply(
             workspace, dataset, published["ref"], preview["preview_token"], actor
         )
+    except BaseException:
+        if published is not None and not published.get("already"):
+            schema_id, _, version = str(published["ref"]).partition("@")
+            if catalog.for_store(store).ref != published["ref"]:
+                catalog.schema_path(workspace, schema_id, version).unlink(missing_ok=True)
+        raise
     finally:
         # The draft was only the way in; what stays is the vault's units.
         shutil.rmtree(schema_versions.drafts_root(workspace) / draft_id, ignore_errors=True)
-    after = schema_versions.state(workspace, dataset)
-    with _LOCK:
-        state = _held(store, suggestion_id)
-        row = _row_of(state, row_id)
-        row.update(status="applied", by=actor, decided_at=now(), schema=after["label"])
-        _write(store, state)
-    return {"suggestion": state, "schema": after}
 
 
 def _values(definition: Mapping[str, Any]) -> list[str]:
