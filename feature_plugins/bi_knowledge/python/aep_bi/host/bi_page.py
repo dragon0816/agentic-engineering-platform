@@ -6360,7 +6360,7 @@ async function biDeleteRun(sources, ask) {
       }
     }
   } finally {
-    live = false; clearInterval(ticker);
+    clearInterval(timer);
     bi.build.deleting = false;
     ask.removeAttribute("aria-busy"); ask.setAttribute("role", "group");
     ask.hidden = true; ask.replaceChildren();
@@ -7024,7 +7024,7 @@ function biSuggestBusy(event, words) {
   tick();
   const timer = setInterval(tick, 1000);
   return (failure) => {
-    live = false; clearInterval(ticker);
+    clearInterval(timer);
     if (!failure) { note.remove(); return; }
     for (const button of buttons) button.disabled = false;
     note.className = "bi-err bi-sg-wait"; note.textContent = failure;
