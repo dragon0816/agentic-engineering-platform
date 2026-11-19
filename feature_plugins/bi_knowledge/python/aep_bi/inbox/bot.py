@@ -70,6 +70,11 @@ class Bot:
     # -- entry -----------------------------------------------------------------------------------
 
     def handle(self, item: TelegramItem) -> TelegramAnswer | None:
+        # Cheap refusals first: a Reply without an item number, a button that is not ours.
+        if item.kind == "reply" and not _ITEM_REF.search(item.quoted or ""):
+            return None
+        if item.kind == "tap" and not _TAP.match(item.data):
+            return None
         listed = dom.listed(self.workspace)
         if item.kind == "command":
             return self._command(item, listed)
