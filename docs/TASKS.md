@@ -5129,6 +5129,21 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   as card evidence or read by an open run are refused. Row 刪除 + 刪除已選（N 份） with
   inline confirmation and live 刪除中 n/N progress. Tests: tests/test_bi_source_delete.py,
   tests/test_bi_source_delete_ui.py; contract in docs/CONTRACTS.md.
+- [x] 2026-11-19 BI GUI simplification first batch + S3 (owner 「GUI和操作，請盡量減化」; branch
+  bi-simplify-20261119; inventory docs/phases/BI_SIMPLIFICATION_OPTIONS_20261119.md). 管理 menu
+  holds 新增知識庫/加入 (S3; the empty-state guide keeps both in sight) and the former page-foot
+  進階：資料集與發佈 (B1/S2; panels open under the top row). Removed: five 上一步 (J1), step 3
+  看卡片 (G1), read-only 看卡片/看 Dashboard (C9), 同時檢查內容和綱要 (E1), 關閉 and the
+  預覽/編輯 select (C2: one 編輯/預覽 button), Atlas 的 port (H2: reads the Dashboard tab's
+  Atlas 位址). Shown only when there is a choice: 看哪一版 (2+ revisions, C1), 搜尋來源 (>10
+  sources, C3), run folder (全部領域 only, E2), 含 SAMPLE (board reply `has_sample`, H1),
+  a new question's 領域 (G4, adapted: an edited question still shows it to move it).
+  看哪些來源 moved under 進階：Schema (D1). Wording: 到「分享」 (S1), 下一步：測試 (F3),
+  「Push 給大家」 notices → 「分享」, empty-Dashboard hint once (G2), no-rules hint one line +
+  新增規則 (S5). Visible controls on 7 screens (fixture vault, same driver) 146 → 126 excluding
+  list rows. Guides BI_BUILD.zh-TW.md and USER_GUIDE.zh-TW.md §6.8 updated (分享, accept-all,
+  source delete, tabs, no tool approval). BI_SOP.zh-TW.md screenshots/steps still show the old
+  top row and controls (owner to retake).
 
 ## Telegram link collection P1 — 2026-11-19
 

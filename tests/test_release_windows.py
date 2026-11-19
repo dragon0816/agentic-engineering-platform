@@ -160,6 +160,9 @@ def test_the_guide_explains_every_setting_and_ships_with_the_manual() -> None:
         "Save agent mode",
         "Check who messaged the bot",
         "Save schedule",
+        # BI: the tool list's badge (no approval since 2026-11-12) and the 管理 menu's item.
+        "不需核准",
+        "已訂閱的資料集",
     ):
         assert label in page and label in guide, label
     for document in (manual, guide):

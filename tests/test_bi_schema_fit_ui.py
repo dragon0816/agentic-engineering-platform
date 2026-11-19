@@ -1,5 +1,7 @@
-"""Schema fit's tick in a browser: off by default, and on it shows what needs a person.
-All fictional.
+"""Schema fit in a browser. The page no longer offers the tick (owner 2026-11-19, E1:
+decided in BI_PAGE_SIMPLE.md §5 S2; 「建議 schema」 replaced it), so a run from the page never
+asks for it; a run that does ask (the API's `check_fit`) still shows in the review what needs
+a person. All fictional.
 """
 
 from __future__ import annotations
@@ -34,7 +36,7 @@ FITTED = {
 
 
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
-def test_a_run_checks_the_fit_only_when_ticked(
+def test_the_page_never_asks_for_the_fit_and_the_review_still_shows_it(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     config, layout = _bi_host(tmp_path / "pc")
@@ -78,14 +80,19 @@ def test_a_run_checks_the_fit_only_when_ticked(
             page.upload("raw.md", NOTE, "text/markdown")
             page.stage("method")
 
-            # Off unless ticked: the model is not asked.
-            assert page.run("document.getElementById('bi-b-fit').checked") is False
+            # No tick on the page, and a run from it does not ask the model.
+            assert page.run("document.getElementById('bi-b-fit') === null")
+            assert "check_fit" not in str(page.run("JSON.stringify(biRunBody('trial'))"))
             page.click("#bi-b-trial")
             page.see("bi-b-trial-result", "試跑完成")
             assert "Schema fit" not in extractor.requests[-1].messages[0].text
 
-            # Ticked: it is asked, and the review shows what needs a person.
-            page.click("#bi-b-fit")
+            # A run that asks for it (as the API allows): the review shows what needs a person.
+            page.run(
+                "(() => { const plain = biRunBody;"
+                " biRunBody = (...given) => Object.assign(plain(...given), {check_fit: true});"
+                " })()"
+            )
             page.click("[data-stage=method] [data-bi-next=review]")
             page.wait(
                 "!document.querySelector('#bi-view-build .kp-stage[data-stage=review]').hidden"

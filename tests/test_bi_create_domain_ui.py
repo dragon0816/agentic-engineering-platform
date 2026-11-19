@@ -98,7 +98,12 @@ def test_a_domain_is_created_in_the_row_and_becomes_the_working_domain(tmp_path:
             # -- it is empty, and says what that means ------------------------------------
             page.wait("!document.getElementById('bi-b-scope-empty').hidden")
             empty = page.text_of("bi-b-scope-empty")
-            assert "Signal" in empty and "library/skill-review" in empty
+            # One line and a 新增規則 link (S5); the folder of examples is in the guide.
+            assert "Signal" in empty and "library/skill-review" not in empty
+            assert page.run(
+                "[...document.querySelectorAll('#bi-b-scope-empty button')]"
+                ".map((b) => b.textContent).join() === '新增規則'"
+            )
             page.shoot("created")
 
             # -- a new rule applies to it, unpushed (acceptance F9) --------------------------

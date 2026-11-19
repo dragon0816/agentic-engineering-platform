@@ -51,8 +51,12 @@ def test_a_person_can_name_the_vault_id(served: Any, tmp_path: Path) -> None:  #
         wait("document.getElementById('bi-status-bar').hidden")
         click("#bi-views [data-bi-view=build]")
         click("#bi-stepper [data-stage=source]")
+        # 新增知識庫 is in 管理 (owner 2026-11-19, S3); the menu closes as the form opens.
+        click("#bi-b-v-menu > summary")
+        wait("document.getElementById('bi-b-v-new').offsetParent !== null")
         click("#bi-b-v-new")
         wait("!document.getElementById('bi-b-v-form').hidden")
+        assert not browser._evaluate("document.getElementById('bi-b-v-menu').open")
         assert not browser._evaluate("document.getElementById('bi-b-v-id').parentElement.hidden")
         put("bi-b-v-path", str(shared))
         put("bi-b-v-title", "Market Signals")
@@ -73,6 +77,8 @@ def test_a_person_can_name_the_vault_id(served: Any, tmp_path: Path) -> None:  #
         assert (shared / "market-fiction" / "repo.json").is_file()
 
         # In the other modes the field is not offered.
+        click("#bi-b-v-menu > summary")
+        wait("document.getElementById('bi-b-v-join').offsetParent !== null")
         click("#bi-b-v-join")
         wait("!document.getElementById('bi-b-v-form').hidden")
         assert browser._evaluate("document.getElementById('bi-b-v-id').parentElement.hidden")

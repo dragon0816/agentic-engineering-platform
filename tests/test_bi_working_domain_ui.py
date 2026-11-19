@@ -262,9 +262,10 @@ def test_one_working_domain_carries_through_the_three_steps(tmp_path: Path) -> N
                 ".map((o) => o.textContent).join('/')"
             )
             assert str(homes).startswith("全庫/") and "aidc" in str(homes)
-            # A new one starts on the working domain.
+            # A new one starts on the working domain, with no choice shown (G4).
             page.click("#bi-b-bq-add")
             assert page.run("document.getElementById('bi-b-bq-home').value") == "aidc"
+            assert page.run("document.getElementById('bi-b-bq-home-box').hidden")
 
             def edit(slug: str) -> None:
                 page.run(
@@ -276,8 +277,10 @@ def test_one_working_domain_carries_through_the_three_steps(tmp_path: Path) -> N
             def home_of(unit: str) -> Any:
                 return vault.Vault(workspace, vault_id).repo.working_units()[unit].get("home")
 
-            # An old question shows 全庫, and gaining a domain keeps its set and slug.
+            # An old question shows 全庫, and gaining a domain keeps its set and slug. A question
+            # being edited shows the choice, to move it.
             edit("whole")
+            assert not page.run("document.getElementById('bi-b-bq-home-box').hidden")
             assert page.run("document.getElementById('bi-b-bq-home').value") == ""
             assert "全庫" in page.text_of("bi-b-bq-list")
             page.choose("bi-b-bq-home", "aidc")

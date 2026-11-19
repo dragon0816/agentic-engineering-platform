@@ -79,15 +79,16 @@ def test_someone_with_no_vault_starts_at_creating_one(
                 60,
             )
             page.wait(QUIET, 60)
-            assert "go" in str(page.run("document.getElementById('bi-b-v-new').className"))
+            # The guide shows 新增知識庫; they live in 管理 since 2026-11-19 (S3).
+            assert "go" in str(page.run("document.getElementById('bi-empty-new').className"))
             # Joining is as much a first step as creating (F21).
-            assert "go" in str(page.run("document.getElementById('bi-b-v-join').className"))
+            assert "go" in str(page.run("document.getElementById('bi-empty-join').className"))
             assert page.run("document.getElementById('bi-b-src-folder-box').hidden")
-            assert page.run(f"({VISIBLE})('bi-b-v-new')")
+            assert page.run(f"({VISIBLE})('bi-empty-new') && ({VISIBLE})('bi-empty-join')")
             page.shoot("first-time")
 
             # -- the form: the schema under 進階 on the newest, the folder checked ------------
-            page.click("#bi-b-v-new")
+            page.click("#bi-empty-new")
             page.wait("!document.getElementById('bi-b-v-form').hidden")
             assert page.run(
                 "(() => { const d = document.getElementById('bi-b-v-schema').closest('details');"
@@ -129,8 +130,11 @@ def test_someone_with_no_vault_starts_at_creating_one(
                 page.run("bi.build.homes.filter((h) => !h.home.startsWith('library/')).length") == 0
             )
 
-            # -- joining a vault of one domain starts in it (F22) ---------------------------
+            # -- joining a vault of one domain starts in it (F22), from 管理 ------------------
+            page.click("#bi-b-v-menu > summary")
+            page.wait(f"({VISIBLE})('bi-b-v-join')")
             page.click("#bi-b-v-join")
+            assert not page.run("document.getElementById('bi-b-v-menu').open")
             page.wait("!document.getElementById('bi-b-v-form').hidden")
             page.set_value("bi-b-v-path", str(shared / theirs))
             page.set_value("bi-b-v-author", "carol")
@@ -193,7 +197,7 @@ def test_the_row_is_first_on_every_tab_and_the_tabs_read_under_it(tmp_path: Path
             page.choose("bi-dataset", dataset)
             page.wait("document.getElementById('bi-b-src-folder').options.length > 1", 60)
             page.wait(QUIET, 60)
-            assert "go" not in str(page.run("document.getElementById('bi-b-v-new').className"))
+            assert page.run("document.getElementById('bi-empty-state').hidden")
 
             # -- on the one row, vault then domain, above the tabs, above the stepper ---------
             page.click("#bi-views [data-bi-view=build]")
@@ -207,9 +211,16 @@ def test_the_row_is_first_on_every_tab_and_the_tabs_read_under_it(tmp_path: Path
                 " < document.getElementById('bi-b-src-folder').getBoundingClientRect().left"
             )
             assert lefts
-            # New and join are out of the fold; the rest of it stays folded.
-            assert page.run(f"({VISIBLE})('bi-b-v-new') && ({VISIBLE})('bi-b-v-join')")
+            # New and join are in the folded 管理 menu (owner 2026-11-19, S3), with the former
+            # 進階：資料集與發佈 (B1); there is no folded section at the foot any more.
             assert not page.run("document.getElementById('bi-b-v-menu').open")
+            folded = "(id) => !!document.getElementById(id).closest('details:not([open])')"
+            assert page.run(f"({folded})('bi-b-v-new') && ({folded})('bi-b-v-join')")
+            page.click("#bi-b-v-menu > summary")
+            for item in ("bi-b-v-new", "bi-b-v-join", "bi-new", "bi-install", "bi-demo"):
+                assert page.run(f"({VISIBLE})('{item}')"), item
+            page.click("#bi-b-v-menu > summary")
+            assert page.run("document.getElementById('bi-advanced').tagName") == "DIV"
             # Step 1 starts at the files.
             assert page.run(
                 "document.querySelector('.kp-stage[data-stage=source] #bi-b-class') !== null"
@@ -269,7 +280,7 @@ def test_the_row_is_first_on_every_tab_and_the_tabs_read_under_it(tmp_path: Path
             # -- a plain dataset has no domain part, and the vault part stays ----------------
             page.choose("bi-dataset", "demo")
             page.wait("document.getElementById('bi-b-src-folder-box').hidden", 60)
-            assert page.run(f"({VISIBLE})('bi-dataset') && ({VISIBLE})('bi-b-v-new')")
+            assert page.run(f"({VISIBLE})('bi-dataset') && ({VISIBLE})('bi-b-v-menu')")
 
             # -- sticky: both stay when the page scrolls --------------------------------------
             page.choose("bi-dataset", dataset)

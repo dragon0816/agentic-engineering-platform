@@ -408,9 +408,12 @@ def test_bi_sharing_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None
         click("bi-pub-cancel")
         assert hidden("bi-publish-panel")
 
-        # -- 已訂閱的資料集: badges, 更新 -----------------------------------------------------
-        run("document.querySelector('#bi-subs > summary').click()")
+        # -- 已訂閱的資料集: badges, 更新; opened from 管理 (owner 2026-11-19, B1) -------------
+        assert hidden("bi-subs")
+        assert run("document.getElementById('bi-subs-open').closest('#bi-b-v-menu') !== null")
+        click("bi-subs-open")
         wait("document.getElementById('bi-subs').open")
+        assert not hidden("bi-subs")
         rows = json.loads(
             run(
                 "JSON.stringify([...document.querySelectorAll('#bi-subs-list li[data-sub]')]"
@@ -457,14 +460,16 @@ def test_bi_sharing_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None
         # what cannot be done on a copy is hidden, and the later steps are shut.
         run("document.querySelector('#bi-views [data-bi-view=build]').click()")
         wait("!document.getElementById('bi-view-build').hidden")
-        assert not hidden("bi-b-ro-links") and hidden("bi-b-src-input")
+        # No buttons repeating the tabs above (C9).
+        assert run("document.getElementById('bi-b-ro-links') === null")
+        assert hidden("bi-b-src-input")
         assert hidden("bi-b-src-split")
         assert hidden("bi-status-build"), content("bi-status-build")
         assert not run("document.querySelector('#bi-stepper [data-stage=source]').disabled")
         assert run("document.querySelector('#bi-stepper [data-stage=ingest]').disabled")
         assert run("document.querySelector('#bi-stepper [data-stage=test]').disabled")
         shoot("read-only-step-1")
-        run("document.getElementById('bi-b-ro-dash').click()")
+        run("document.querySelector('#bi-views [data-bi-view=dashboard]').click()")
         wait("!document.getElementById('bi-view-dashboard').hidden")
         wait("document.getElementById('bi-dash-sections').textContent.includes('6. 缺口')")
         run("document.querySelector('#bi-views [data-bi-view=cards]').click()")
@@ -511,6 +516,8 @@ def test_bi_sharing_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None
         assert small_buttons() == "", small_buttons()
         shoot("publish-dark-390")
         click("bi-pub-cancel")
+        if hidden("bi-subs"):
+            click("bi-subs-open")
         run("document.querySelector('#bi-subs').open = true")
         no_side_scroll()
         assert small_buttons() == "", small_buttons()
