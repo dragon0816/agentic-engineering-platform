@@ -8070,3 +8070,19 @@ video (no Reels transcription); phase P3 of docs/phases/TELEGRAM_LINK_COLLECTION
 is dropped. Threads/Instagram start from the shared link's HTML. Proposed architecture (awaiting
 owner confirmation): one Telegram bot with a per-domain BI inbox and schedule rather than a
 multi-agent bot binding (§8 of the assessment).
+
+### 2026-11-19 — Owner consent: Telegram link collection P1
+
+Owner 「好的，這樣可以，請開始開發」 to the design in docs/phases/TELEGRAM_LINK_COLLECTION_ASSESSMENT_20261119.md
+§8 plus domain classification: share a web/Threads/IG link or a file to the one Telegram bot →
+bot replies at once with domain buttons (AI-suggested domain first from title/summary against domain
+profiles/schemas, then recent domains, multi-select); `#domain` tag, `/bi domain <d>` default and
+`/bi link <d> <url>` skip the question; untapped items use a confident AI suggestion at processing
+time, else 「未分類」. Per-domain times in BI 管理: collect (fetch → convert → ingest to review) and
+review reminder; after 「全部接受並匯入」 the domain's tests run and the dashboard refreshes, then a
+result notice. Static content only (no audio/video); Threads/IG from the shared link's HTML.
+AGENTS22 scoped consent for these core/harness surfaces: (1) Telegram proactive messages from
+scheduled/background work (review reminders, results); (2) deterministic routing of non-command
+messages that are links or files, and of the domain-button callbacks, to the BI inbox instead of a
+model turn; (3) a generic feature hook so a plugin can receive such Telegram items and send
+messages. Not covered: multiple bots, audio/video, auto-accepting cards, auto-push, permissions.
