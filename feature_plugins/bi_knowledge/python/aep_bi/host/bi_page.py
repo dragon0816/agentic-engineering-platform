@@ -200,6 +200,19 @@ BI_CSS = r"""
   gap: 6px; }
 #bi-ai-log { margin: 0; }
 #kn-pane-bi.bi-ai-open { margin-right: calc(min(440px, 40vw) + 12px); }
+/* Step 3's tabs, while an AI session of the step is open (owner 2026-11-19). */
+.bi-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0 10px;
+  border-bottom: 1px solid var(--line); }
+.bi-tabs[hidden] { display: none; }
+.bi-tabs [role=tab] { min-height: 40px; padding: 0 14px; border: 1px solid transparent;
+  border-bottom: 0; border-radius: 6px 6px 0 0; background: none; color: inherit;
+  cursor: pointer; font: inherit; }
+.bi-tabs [role=tab][aria-selected="true"] { border-color: var(--line); background: var(--panel);
+  box-shadow: inset 0 3px 0 var(--accent); font-weight: 600; }
+.bi-tab-off { display: none !important; }
+#bi-b-tab-ai[hidden] { display: none; }
+#bi-b-tab-ai > .bi-ai-panel { position: static; width: auto; height: max(420px, 72vh);
+  border: 1px solid var(--line); border-radius: 8px; box-shadow: none; }
 tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
 @media (max-width: 760px) {
   .bi-ai-panel { top: auto; left: 0; width: auto; height: 66vh; border-left: 0;
@@ -1023,6 +1036,8 @@ BI_PANE_HTML = r"""
           <p class="bi-meta" id="bi-b-overview" hidden>
             全部領域只能看：選工作領域才能新增題目或分析。</p>
           <p class="bi-meta" id="bi-b-ver-none" hidden>只在這台電腦：確認寫入後就生效。</p>
+          <div id="bi-b-tabs" class="bi-tabs" role="tablist" aria-label="步驟 3 的畫面" hidden>
+          </div>
           <details id="bi-b-bench" class="card bi-sec" hidden>
             <summary><span class="bi-sec-title"><strong>Benchmark</strong></span>
               <span class="bi-meta" id="bi-b-bench-state"></span></summary>
@@ -1128,6 +1143,7 @@ BI_PANE_HTML = r"""
           </details>
             </div>
           </details>
+          <div id="bi-b-tab-ai" role="tabpanel" hidden></div>
           <div id="bi-b-run" class="bi-run">
             <button class="go" id="bi-b-bench-run" type="button">跑測試</button>
             <span class="bi-meta" id="bi-b-run-why"></span></div>
@@ -2159,8 +2175,9 @@ el("bi-q").addEventListener("keydown", (event) => {
 });
 
 function biSideRoom() {
+  // A panel in step 3's tabs takes no room beside the page.
   el("kn-pane-bi").classList.toggle("bi-ai-open",
-    !el("bi-ai").hidden || !el("bi-card-peek").hidden);
+    !el("bi-ai").hidden && !biAiTabbed() || !el("bi-card-peek").hidden);
 }
 
 function biCardPeekClose() {
@@ -3674,10 +3691,68 @@ function biAiShow(session) {
 
 function biAiTarget(text) { el("bi-ai-target").textContent = text; }
 
+// -- step 3's tabs: Benchmark | Dashboard | the AI session (owner 2026-11-19) ---------------
+// While an AI session opened in step 3 is open, the step shows one view at a time by tab, so
+// the panel covers nothing; each view is only hidden, so what it holds stays as it was.
+const BI_AI_TAB_KINDS = {questions: "AI 出題", analysis: "AI 分析"};
+
+function biAiTabbed() { return el("bi-ai").parentElement === el("bi-b-tab-ai"); }
+
+function biTestStageShown() {
+  const stage = document.querySelector("#bi-view-build .kp-stage[data-stage=test]");
+  return bi.view === "build" && Boolean(stage) && !stage.hidden;
+}
+
+function biAiDock(tabbed) {
+  // The one AI panel, in step 3's AI tab or back beside the page.
+  const panel = el("bi-ai"), home = tabbed ? el("bi-b-tab-ai") : el("kn-pane-bi");
+  if (panel.parentElement !== home) home.prepend(panel);
+}
+
+function biTestTabs(chosen) {
+  const bar = el("bi-b-tabs"), on = biAiTabbed() && !el("bi-ai").hidden && Boolean(bi.ai);
+  const panels = {bench: el("bi-b-bench"), dash: el("bi-b-an"), ai: el("bi-b-tab-ai")};
+  bar.hidden = !on; panels.ai.hidden = !on;
+  if (!on) {
+    bi.testTab = null; bar.replaceChildren();
+    for (const panel of Object.values(panels)) panel.classList.remove("bi-tab-off");
+    return;
+  }
+  const names = ["bench", "dash"].filter((name) => !panels[name].hidden).concat("ai");
+  bi.testTab = names.includes(chosen) ? chosen : names.includes(bi.testTab) ? bi.testTab : "ai";
+  const labels = {bench: "Benchmark", dash: "Dashboard",
+    ai: BI_AI_TAB_KINDS[bi.ai.kind] || bi.ai.title};
+  bar.replaceChildren(...names.map((name) => {
+    const tab = bh("button", "", labels[name]);
+    tab.type = "button"; tab.id = "bi-b-tab-" + name + "-tab"; tab.dataset.tab = name;
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-controls", panels[name].id);
+    tab.setAttribute("aria-selected", String(name === bi.testTab));
+    tab.tabIndex = name === bi.testTab ? 0 : -1;
+    tab.addEventListener("click", () => biTestTabs(name));
+    tab.addEventListener("keydown", (event) => {
+      const step = {ArrowRight: 1, ArrowLeft: -1}[event.key];
+      if (!step) return;
+      event.preventDefault();
+      const next = names[(names.indexOf(name) + step + names.length) % names.length];
+      biTestTabs(next);
+      el("bi-b-tab-" + next + "-tab").focus();
+    });
+    return tab;
+  }));
+  for (const [name, panel] of Object.entries(panels)) {
+    panel.classList.toggle("bi-tab-off", name !== bi.testTab);
+  }
+  panels.ai.setAttribute("aria-labelledby", "bi-b-tab-ai-tab");
+  if (bi.testTab !== "ai") panels[bi.testTab].open = true;
+}
+
 function biAiClose() {
   const spec = bi.ai; if (!spec) return;
   bi.ai = null;
   el("bi-ai").hidden = true;
+  // Its tab goes with it, and the step shows both sections again.
+  biAiDock(false); biTestTabs();
   biSideRoom();
   document.querySelectorAll("tr.bi-ai-from").forEach((r) => r.classList.remove("bi-ai-from"));
   if (spec.from && spec.from.isConnected) spec.from.focus();
@@ -3691,7 +3766,10 @@ async function biAiOpen(spec) {
   bi.ai = spec;
   spec.scope = biScope();
   el("bi-ai").dataset.kind = spec.kind;
+  const tabbed = Boolean(BI_AI_TAB_KINDS[spec.kind]) && biTestStageShown();
+  biAiDock(tabbed);
   el("bi-ai").hidden = false;
+  biTestTabs("ai");
   biSideRoom();
   el("bi-ai-title").textContent = spec.title;
   el("bi-ai-label").textContent = spec.label;
@@ -3701,15 +3779,16 @@ async function biAiOpen(spec) {
   biStatus("bi-ai-status", "");
   biAiTarget((spec.scope ? "工作領域 " + spec.scope + "・" : "") + spec.about);
   biBuildSessionLog("bi-ai-log", null, spec.render);
-  // After the page has made room: what it came from stays in view beside the panel.
-  const shown = row || spec.shows || spec.from;
-  if (shown && shown.closest && shown.closest("details.bi-sec")) {
+  // After the page has made room: what it came from stays in view beside the panel; in step 3's
+  // tabs, the tabs come into view and what it came from is one tab away.
+  const shown = tabbed ? el("bi-b-tabs") : row || spec.shows || spec.from;
+  if (!tabbed && shown && shown.closest && shown.closest("details.bi-sec")) {
     shown.closest("details.bi-sec").open = true;
   }
   // On a phone the panel takes the lower part, so what it came from goes to the top.
   const phone = matchMedia("(max-width: 760px)").matches;
   if (shown && shown.isConnected) {
-    shown.scrollIntoView({block: phone ? "start" : row ? "nearest" : "center"});
+    shown.scrollIntoView({block: tabbed || phone ? "start" : row ? "nearest" : "center"});
   }
   await biBuildAiState("bi-ai-sent", spec.sends, spec.agent);
   if (bi.ai === spec && spec.ref) {
