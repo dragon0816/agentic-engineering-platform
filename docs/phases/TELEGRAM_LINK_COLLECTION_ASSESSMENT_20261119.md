@@ -106,3 +106,18 @@ MD、PM、sales 平常從網頁、Threads、Instagram 取得新消息。希望�
 
 建議順序：owner 先決定 D1–D9 → P1 → 實測一週 → 決定 D10（P1.5）→ P2。
 每個階段完工都要寫入 `docs/TASKS.md`；有技術決策就追加到 `docs/DECISIONS.md`。
+
+## 8. Owner 修訂（2026-11-19）
+
+- **範圍只做靜態內容**：網頁、Threads／Instagram 分享連結的文字與圖片資訊，以及傳到 bot 的檔案。
+  不做語音、影片（含 Reels 轉文字）；**P3 不做**。
+- Threads／IG：先用分享連結下載 HTML，取 `og:` 與頁面可見文字；拿不到全文時標「只取得摘要」，
+  並讓傳送者在 Telegram 補一句文字。是否需要無頭瀏覽器渲染，以 owner 提供的實際連結實測後決定。
+- 架構：owner 提的「多 Agent＋BI data agent 綁 bot」改為**同一個 bot＋BI 收集箱與排程**：
+  多 Agent V1 只是對話內委派、不是常駐排程 agent；一台 Host 只綁一個 Telegram bot
+  （`TelegramIngressConfig`，多 bot 屬 core 變更）。
+  - 每個工作領域在 BI「管理」設：收集處理時間（convert＋ingest）、審核提醒時間。
+  - 到時自動抓取→轉檔→ingest→候選卡停在待審；審核時間提醒；「全部接受並匯入」後自動跑該領域
+    測試並更新 Dashboard，再通知結果。
+  - 需 AGENTS22 同意的兩處（core）：Telegram 主動通知；不打指令直接分享連結的確定性分流。
+- 待 owner 確認：P1 範圍、上述兩處是否做、§7 其餘建議預設。

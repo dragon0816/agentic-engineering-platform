@@ -8062,3 +8062,11 @@ dashboards filter by the cards' folder for library/home working domains (default
 the working domain's dashboard analyses; the tool editor text follows the 2026-11-12 no-approval
 decision; the three stray schema versions 5.2/5.3/5.4 made by repeated 「加入」 presses are removed
 (backed up) and Battlecard.landmines is kept.
+
+### 2026-11-19 — Telegram link collection: static content only
+
+Owner: only static content for collecting links/files into BI domains via Telegram; no audio or
+video (no Reels transcription); phase P3 of docs/phases/TELEGRAM_LINK_COLLECTION_ASSESSMENT_20261119.md
+is dropped. Threads/Instagram start from the shared link's HTML. Proposed architecture (awaiting
+owner confirmation): one Telegram bot with a per-domain BI inbox and schedule rather than a
+multi-agent bot binding (§8 of the assessment).
