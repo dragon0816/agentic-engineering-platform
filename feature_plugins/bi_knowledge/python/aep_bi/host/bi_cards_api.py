@@ -918,6 +918,7 @@ CONFLICTS = {
     "suggest_running",
     "suggest_stale",
     "suggest_row_decided",
+    "suggest_row_busy",
 }
 
 #: The GET routes that read one dataset (besides `/api/bi/cards/<id>[/history]`).

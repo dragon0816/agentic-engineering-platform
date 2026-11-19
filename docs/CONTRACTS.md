@@ -4260,7 +4260,8 @@ schema is chosen at creation and never changed" (owner 2026-10-27): a dataset ma
     in the source, which are never rows. No rows on `done` is the answer 「不用改」.
   - `<row>` = `{"id", "kind": "extend_schema" | "dictionary_change" | "propose_type" |
     "needs_clarification", "what", "proposal", "summary", "reason", "questions", "quote", "locator",
-    "source_id", "source", "places", "applies": bool, "status": "proposed" | "applied" | "rejected"}`. A type
+    "source_id", "source", "places", "applies": bool, "status": "proposed" | "applying" | "applied" |
+    "rejected"}`; an `applying` row also has `applying_at`. A type
     the schema has, or a field it has, is `needs_clarification` with a question (`schema_fit`). `applies`: a
     new field, or a new allowed value with no `maps_to`, that leaves a valid schema.
   - `POST /api/bi/schema-suggest/apply {"dataset", "id", "row"}` → `{"ok": true, "suggestion", "schema":
@@ -4268,8 +4269,11 @@ schema is chosen at creation and never changed" (owner 2026-10-27): a dataset ma
     the vault turns it into units on the version; the draft is removed. Nothing is committed. Refusals: 400
     `suggest_apply_vault_only`, `suggest_not_direct`, `suggest_invalid`, `suggest_field_exists`,
     `suggest_not_enum`, `suggest_value_exists`, `suggest_row_unknown`; 409 `suggest_stale`,
-    `suggest_row_decided`.
+    `suggest_row_decided`, `suggest_row_busy` (an add of the row is running). The row is `applying` while
+    the add runs (one add at a time; 15 minutes on is taken as stopped); an add that fails sets it back to
+    `proposed` and removes the version published on the way, so no upgrade is offered from it.
   - `POST /api/bi/schema-suggest/reject {"dataset", "id", "row", "reason"}` → `{"ok": true, "suggestion"}`.
+    409 `suggest_row_busy` while the row is being added.
 
 ## BI schema 2.0, new kinds and widening (BI vault V9, owner 2026-10-29)
 

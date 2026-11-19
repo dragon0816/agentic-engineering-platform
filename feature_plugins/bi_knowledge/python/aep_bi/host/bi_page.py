@@ -6233,14 +6233,19 @@ function biSuggestRow(state, row) {
     act.append(biBadge("✓ 已加入", "good"), " " + (row.schema || ""));
   } else if (row.status === "rejected") {
     act.append(biBadge("✕ 不要", "dim"));
+  } else if (row.status === "applying") {
+    // Another press (or a page before a reload) is adding it: one add at a time.
+    const since = Math.max(0, Math.round((Date.now() - Date.parse(row.applying_at)) / 1000));
+    act.append(biBadge("加入中…", "dim"), bh("p", "bi-meta", "開始 " + since
+      + " 秒了；完成後重新整理會看到結果。"));
   } else {
     // One way first: add it when a press can, else talk it through; the rest in a menu.
     const direct = row.applies && biDataset().startsWith("vault-");
-    const add = direct ? biButton("加入 schema", () => biSuggestApply(state, row), "go",
-      "把「" + row.what + "」加入 schema") : null;
+    const add = direct ? biButton("加入 schema", (event) => biSuggestApply(state, row, event),
+      "go", "把「" + row.what + "」加入 schema") : null;
     const ask = biButton("和 AI 討論", () => biSuggestAsk(row), direct ? "bi-btn" : "go",
       "和 AI 討論「" + row.what + "」");
-    const no = biButton("不要", () => biSuggestReject(state, row), "bi-btn",
+    const no = biButton("不要", (event) => biSuggestReject(state, row, event), "bi-btn",
       "不要「" + row.what + "」");
     act.append(add || ask, biRowMenu(add ? ask : null, no));
   }
@@ -6250,9 +6255,37 @@ function biSuggestRow(state, row) {
   return tr;
 }
 
-async function biSuggestApply(state, row) {
-  const reply = await biCall("/api/bi/schema-suggest/apply",
-    {dataset: biDataset(), id: state.id, row: row.id});
+function biSuggestBusy(event, words) {
+  // The row's own wait (AGENTS 23): its buttons off, the seconds beside them, and the
+  // result or the failure in the same place. An add takes half a minute on a shared vault.
+  const tr = event.currentTarget.closest("tr"), cell = tr.lastElementChild;
+  const buttons = [...tr.querySelectorAll("button")];
+  for (const button of buttons) button.disabled = true;
+  cell.querySelector(".bi-sg-wait")?.remove();
+  const note = bh("p", "bi-meta bi-sg-wait", "");
+  note.setAttribute("role", "status"); cell.append(note);
+  const started = Date.now();
+  const tick = () => {
+    note.textContent = words + "已經 " + Math.round((Date.now() - started) / 1000) + " 秒";
+  };
+  tick();
+  const timer = setInterval(tick, 1000);
+  return (failure) => {
+    clearInterval(timer);
+    if (!failure) { note.remove(); return; }
+    for (const button of buttons) button.disabled = false;
+    note.className = "bi-err bi-sg-wait"; note.textContent = failure;
+  };
+}
+
+async function biSuggestApply(state, row, event) {
+  const done = biSuggestBusy(event, "加入中（建立新增、檢查既有卡片；共用知識庫要約半分鐘）…");
+  let reply;
+  try {
+    reply = await biCall("/api/bi/schema-suggest/apply",
+      {dataset: biDataset(), id: state.id, row: row.id});
+  } catch (failure) { done("沒有加入：" + failure.message); return; }
+  done(null);
   biNotice(true, "已加入「" + row.what + "」：目前的 schema 是 " + reply.schema.label
     + "（相容的新增，不是新版本；commit 並 push 後大家才會用到）。");
   bi.schema = await biCall("/api/bi/schema?dataset=" + encodeURIComponent(biDataset()));
@@ -6260,9 +6293,14 @@ async function biSuggestApply(state, row) {
   biSuggestShow(reply.suggestion);
 }
 
-async function biSuggestReject(state, row) {
-  const reply = await biCall("/api/bi/schema-suggest/reject",
-    {dataset: biDataset(), id: state.id, row: row.id, reason: "不需要"});
+async function biSuggestReject(state, row, event) {
+  const done = biSuggestBusy(event, "記下中…");
+  let reply;
+  try {
+    reply = await biCall("/api/bi/schema-suggest/reject",
+      {dataset: biDataset(), id: state.id, row: row.id, reason: "不需要"});
+  } catch (failure) { done("沒有記下：" + failure.message); return; }
+  done(null);
   biSuggestShow(reply.suggestion);
 }
 

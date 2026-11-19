@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -16,7 +17,7 @@ from test_bi_extract import Scripted
 from test_bi_vault import _call, _ok, _use_homes
 from test_vault_asking_e2e import _bi_host, _Model, _served
 
-from aep_bi.cards import vault
+from aep_bi.cards import schema_versions, vault
 from aep_bi.cards.ai_runs import AiRuntime
 from aep_bi.cards.store import BiStore
 from aep_bi.host import bi_cards_api
@@ -116,8 +117,28 @@ def test_a_press_suggests_with_quotes_and_a_field_is_added_on_the_version(
             page.shoot("1-suggested")
 
             row = "#bi-b-sg-table tr[data-row=s1]"
+            # An add takes half a minute on a shared vault: the row says so in place, with
+            # its buttons off, so a second press cannot start a second add (「沒反應」).
+            real, release = schema_versions.upgrade_apply, threading.Event()
+
+            def held(*args: Any, **kwargs: Any) -> Any:
+                assert release.wait(60)
+                return real(*args, **kwargs)
+
+            monkeypatch.setattr(schema_versions, "upgrade_apply", held)
             page.click_text(row, "加入 schema")
+            page.wait(
+                f"document.querySelector('{row} .bi-sg-wait')?.textContent.includes('加入中')"
+                f" && [...document.querySelectorAll('{row} button')].every((b) => b.disabled)"
+            )
+            page.wait(
+                f"/已經 [1-9][0-9]* 秒/.test(document.querySelector('{row} .bi-sg-wait')"
+                ".textContent)"
+            )
+            page.shoot("2a-adding")
+            release.set()
             page.notice("相容的新增，不是新版本")
+            assert not page.run(f"document.querySelector('{row} .bi-sg-wait')")
             assert "5.0 加 1 項新增" in page.text_of("bi-notice")
             page.see("bi-b-schema-now", "5.0 加 1 項新增")
             assert not re.search(r"[0-9a-f]{12}", page.text_of("bi-b-schema-now"))

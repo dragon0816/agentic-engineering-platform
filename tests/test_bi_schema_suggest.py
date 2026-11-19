@@ -4,6 +4,7 @@ added as units on the version, never a new one. All data is fictional."""
 
 from __future__ import annotations
 
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -11,8 +12,8 @@ from test_bi_ai_runs import Jobs, _runtime
 from test_bi_extract import Scripted
 from test_bi_vault import _call, _ok, _two_pcs
 
-from aep_bi.cards import catalog, schema_suggest, vault
-from aep_bi.cards.store import BiStore
+from aep_bi.cards import catalog, schema_suggest, schema_versions, vault
+from aep_bi.cards.store import BiStore, BiStoreError
 from aep_bi.host.bi_cards_api import route
 
 NOTE = (
@@ -209,3 +210,64 @@ def test_a_list_field_with_no_values_needs_the_ai_and_one_with_values_applies(
     )
     added = catalog.for_store(BiStore(a, dataset)).types["Technology"].get("cooling2")
     assert added is not None and list(added.enum or ()) == ["氣冷", "液冷"]
+
+
+def test_one_add_at_a_time_and_a_stopped_add_goes_back_without_a_version(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """The owner's 「加入時沒反應」: an add takes half a minute on a shared vault, so a
+    second press ran a second add beside the first, and 「不要」 decided the row under it.
+    Now the row is 「加入中」 until it ends; a second press and a 「不要」 wait; an add that
+    stops leaves the row to decide again and no published version offered as an upgrade."""
+    _, vault_id, dataset, a, _ = _two_pcs(tmp_path)
+    source = _source(a, dataset)
+    done, _ = _suggest(a, dataset, [source], {"items": [COOLING]})
+    row = done["items"][0]
+    body = {"dataset": dataset, "id": done["id"], "row": row["id"]}
+    real, started, release = schema_versions.upgrade_apply, threading.Event(), threading.Event()
+
+    def held(*args: Any, **kwargs: Any) -> Any:
+        started.set()
+        assert release.wait(30)
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(schema_versions, "upgrade_apply", held)
+    first: list[Any] = []
+    worker = threading.Thread(
+        target=lambda: first.append(_post(a, "/api/bi/schema-suggest/apply", body))
+    )
+    worker.start()
+    assert started.wait(30)
+    shown = _ok(_call(a, "GET", "/api/bi/schema-suggest", dataset=dataset))["suggestion"]
+    assert shown["items"][0]["status"] == "applying"
+    for path, extra in (("apply", {}), ("reject", {"reason": "x"})):
+        status, busy = _post(a, f"/api/bi/schema-suggest/{path}", {**body, **extra})
+        assert (status, busy["code"]) == (409, "suggest_row_busy")
+    release.set()
+    worker.join(60)
+    status, applied = first[0]
+    assert status == 200 and applied["suggestion"]["items"][0]["status"] == "applied"
+    assert "applying_at" not in applied["suggestion"]["items"][0]
+    units = vault.Vault(a, vault_id).repo.working_units()
+    assert "schema_change:field:Technology.cooling" in units
+
+    # An add that stops: the row is proposed again and the version made on the way is gone.
+    other = {**COOLING, "proposal": {**COOLING["proposal"], "field": "weight"}}
+    done, _ = _suggest(a, dataset, [source], {"items": [other]})
+    body = {"dataset": dataset, "id": done["id"], "row": done["items"][0]["id"]}
+    before = {r.ref for r in catalog.available(a)}
+
+    def stops(*_args: Any, **_kwargs: Any) -> Any:
+        raise BiStoreError("preview_stale", "資料集在預覽後有變動，請重新預覽")
+
+    monkeypatch.setattr(schema_versions, "upgrade_apply", stops)
+    status, failed = _post(a, "/api/bi/schema-suggest/apply", body)
+    assert (status, failed["code"]) == (409, "preview_stale")
+    again = _ok(_call(a, "GET", "/api/bi/schema-suggest", dataset=dataset))["suggestion"]
+    assert again["items"][0]["status"] == "proposed"
+    assert {r.ref for r in catalog.available(a)} == before
+    assert _ok(_call(a, "GET", "/api/bi/schema", dataset=dataset))["upgrades"] == []
+    monkeypatch.setattr(schema_versions, "upgrade_apply", real)
+    assert _ok(_post(a, "/api/bi/schema-suggest/apply", body))["schema"]["label"] == (
+        "5.0 加 2 項新增"
+    )
