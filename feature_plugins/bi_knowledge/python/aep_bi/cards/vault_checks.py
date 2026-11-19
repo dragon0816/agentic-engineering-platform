@@ -227,11 +227,20 @@ def save_case(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[
 
 
 def delete(workspace: Path, vault_id: str, unit: Any) -> dict[str, Any]:
-    if not isinstance(unit, str) or not unit.startswith((QUESTION_PREFIX, EXTRACT_PREFIX)):
-        raise BiStoreError("check_unknown", "沒有這個測試")
+    """Delete one check, or several (a list) by one write; none when one is unknown. It is an
+    uncommitted change until commit and push, and past runs keep their results: a report
+    holds each question's text and answers, not a reference to the unit."""
     from aep_bi.cards import vault
 
-    units = vault.Vault(workspace, vault_id).repo.working_units()
-    if unit not in units:
+    wanted = unit if isinstance(unit, list) else [unit]
+    if not wanted or not all(
+        isinstance(u, str) and u.startswith((QUESTION_PREFIX, EXTRACT_PREFIX)) for u in wanted
+    ):
         raise BiStoreError("check_unknown", "沒有這個測試")
-    return _stage(workspace, vault_id, {unit: None})
+    units = vault.Vault(workspace, vault_id).repo.working_units()
+    if any(u not in units for u in wanted):
+        raise BiStoreError("check_unknown", "沒有這個測試（可能已經刪除）")
+    return {
+        "deleted": list(dict.fromkeys(wanted)),
+        **_stage(workspace, vault_id, dict.fromkeys(wanted)),
+    }

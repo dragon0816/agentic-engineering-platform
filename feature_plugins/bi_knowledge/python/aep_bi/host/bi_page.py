@@ -3339,11 +3339,15 @@ function biBenchReport(report, standing) {
     Number(regressed.has(y.unit)) - Number(regressed.has(x.unit)));
   if (rows.length) {
     const table = biListTable(["題目", "工作版本", "發佈版本", "回答"]);
+    // A question deleted since keeps its result here, as what that run found.
+    const listed = new Set(((bi.benchReply || {}).reply || {questions: []}).questions
+      .map((q) => q.unit));
     for (const row of rows) {
       const answers = bh("details", "", bh("summary", "", "看兩邊"),
         bh("p", "", bh("strong", "", "工作版本："), row.working.answer || "（沒有）"),
         bh("p", "", bh("strong", "", "發佈版本："), row.published.answer || "（沒有）"));
-      const line = biRow(table, [row.question,
+      const gone = bi.benchReply && !listed.has(row.unit) ? "（已刪除）" : "";
+      const line = biRow(table, [row.question + gone,
         biBenchGrade(row.working) + (regressed.has(row.unit) ? "・退步" : ""),
         biBenchGrade(row.published), answers]);
       if (regressed.has(row.unit)) line.className = "bi-warn";
@@ -3407,14 +3411,35 @@ function biBenchDraw(reply) {
   const shown = reply.questions.filter((q) => !scope || q.home === scope);
   const waiting = scope ? reply.questions.filter((q) => !q.home) : [];
   const shownCases = reply.cases.filter((c) => !scope || biFolderHome(c.folder) === scope);
+  const reads = biOverview();
+  bi.bqTicked = new Set([...(bi.bqTicked || [])]
+    .filter((unit) => reply.questions.some((q) => q.unit === unit)));
   const table = (items) => {
-    const list = biListTable(["題目", "必須提到", "不可以說", "題組", "領域"]);
+    const list = biListTable([...(reads ? [] : ["選取"]), "題目", "必須提到", "不可以說",
+      "題組", "領域", ...(reads ? [] : [""])]);
     for (const q of items) {
-      const row = biRow(list, [q.question, q.must.join("、") || "—",
-        q.must_not.join("、") || "—", q.set, q.home || "全庫"]);
-      row.dataset.unit = q.unit;
+      const cells = [q.question, q.must.join("、") || "—",
+        q.must_not.join("、") || "—", q.set, q.home || "全庫"];
       // The overview only reads.
-      if (biOverview()) continue;
+      if (reads) { biRow(list, cells).dataset.unit = q.unit; continue; }
+      const tick = document.createElement("input");
+      tick.type = "checkbox"; tick.className = "bi-bq-tick";
+      tick.checked = bi.bqTicked.has(q.unit);
+      tick.setAttribute("aria-label", "選取：" + q.question);
+      tick.addEventListener("click", (event) => event.stopPropagation());
+      tick.addEventListener("change", () => {
+        if (tick.checked) bi.bqTicked.add(q.unit); else bi.bqTicked.delete(q.unit);
+        biBqBulk();
+      });
+      const actions = bh("div", "bi-actions");
+      actions.append(biButton("刪除", () => biBqConfirmDelete(actions, [q]),
+        "bi-btn bi-bq-del-row", "刪除題目：" + q.question));
+      // The delete and its confirmation do not also open the row in the editor.
+      for (const type of ["click", "keydown"]) {
+        actions.addEventListener(type, (event) => event.stopPropagation());
+      }
+      const row = biRow(list, [tick, ...cells, actions]);
+      row.dataset.unit = q.unit;
       row.tabIndex = 0;
       row.setAttribute("aria-selected", String(!!bi.bqSel && bi.bqSel.unit === q.unit));
       row.addEventListener("click", () => biBqPick(q));
@@ -3434,6 +3459,7 @@ function biBenchDraw(reply) {
     apart.open = Boolean(bi.bqSel && waiting.some((q) => q.unit === bi.bqSel.unit));
     questions.append(apart);
   }
+  biBqBulk();
   // The question being edited may be gone (deleted here, or by a colleague's commit).
   if (bi.bqSel && ![...shown, ...waiting].some((q) => q.unit === bi.bqSel.unit)) biBqPick(null);
   el("bi-b-bq-sets").replaceChildren(...[...new Set(reply.questions.map((q) => q.set))]
@@ -3498,13 +3524,50 @@ async function biBenchSave(body) {
   return reply;
 }
 
+function biBqBulk() {
+  // 「刪除選取的 N 題」 under the table, there only while something is ticked.
+  const list = el("bi-b-bq-list");
+  let bar = el("bi-b-bq-bulk");
+  const ticked = [...(bi.bqTicked || [])];
+  if (!ticked.length || biOverview()) { if (bar) bar.remove(); return; }
+  if (!bar) { bar = bh("div", "bi-actions"); bar.id = "bi-b-bq-bulk"; }
+  const questions = ((bi.benchReply || {}).reply || {questions: []}).questions
+    .filter((q) => bi.bqTicked.has(q.unit));
+  bar.replaceChildren(biButton("刪除選取的 " + ticked.length + " 題",
+    () => biBqConfirmDelete(bar, questions), "bi-btn", "刪除選取的題目"),
+  biButton("取消選取", () => { bi.bqTicked.clear(); biBenchDraw(bi.benchReply.reply); }));
+  list.append(bar);
+}
+
+function biBqConfirmDelete(where, questions) {
+  // One confirmation in place; the deletion is an uncommitted change like any other edit,
+  // and past runs keep what they found for these questions.
+  if (!questions.length) return;
+  const what = questions.length === 1 ? "「" + questions[0].question + "」"
+    : questions.length + " 題";
+  biConfirm(where, "刪除" + what
+    + "？已跑過的測試結果會留著；commit 並 push 後大家才會少這些題目。", "刪除", async () => {
+      const status = bh("span", "bi-meta", "正在刪除 " + what + "…");
+      status.setAttribute("role", "status"); where.append(status);
+      try {
+        const units = questions.map((q) => q.unit);
+        await biBenchSave({delete: units.length === 1 ? units[0] : units});
+        for (const unit of units) bi.bqTicked.delete(unit);
+        if (bi.bqSel && units.includes(bi.bqSel.unit)) biBqPick(null);
+        await biBench(bi.verVault);
+      } catch (failure) {
+        if (status.isConnected) status.textContent = "沒有刪除：" + failure.message;
+        else biNotice(false, "沒有刪除：" + failure.message);
+      }
+    });
+}
+
 el("bi-b-bq-add").addEventListener("click", () => {
   biBqPick(null); el("bi-b-bq-q").focus();
 });
-el("bi-b-bq-del").addEventListener("click", async () => {
+el("bi-b-bq-del").addEventListener("click", () => {
   const q = bi.bqSel; if (!q) return;
-  try { await biBenchSave({delete: q.unit}); biBqPick(null); }
-  catch (failure) { biNotice(false, "沒有刪除：" + failure.message); }
+  biBqConfirmDelete(el("bi-b-bq-del").parentElement, [q]);
 });
 el("bi-b-bq-form").addEventListener("submit", async (event) => {
   event.preventDefault();

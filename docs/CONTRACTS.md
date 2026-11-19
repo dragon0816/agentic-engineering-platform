@@ -5988,8 +5988,10 @@ skill AI: owner decisions". Code `capabilities/bi_cards/vault_checks.py`, `host_
   page sequences commit, push, tag and publish through their own routes, so the push check is unchanged.
 - `POST /api/bi/vaults/<id>/checks`: `{"question", "must"?, "must_not"? (list or comma text), "set"? ("main"),
   "slug"?, "home"?}` stages a question (`question_invalid` 400); `{"kind": "case", "slug", "note", "expected",
-  "folder"?}` stages a case (`case_invalid` 400); `{"delete": <unit>}` removes one (`check_unknown` 404). Answer
-  `{"ok", "unit"?, "questions", "cases"}`.
+  "folder"?}` stages a case (`case_invalid` 400); `{"delete": <unit>}` removes one, `{"delete": [<unit>, ...]}`
+  several by one write of the working copy, none when one is unknown (`check_unknown` 404; 2026-11-19). A
+  deletion is uncommitted until commit and push; bench reports keep the deleted questions' text and verdicts.
+  Answer `{"ok", "unit"?, "deleted"? (on a delete), "questions", "cases"}`.
 - `POST /api/bi/vaults/<id>/bench` with optional `{"home"}` starts a run as an Agent Web background task
   (`bi-benchmark`) → `{"ok", "run_id"}`; `bench_empty` 400 (no checks, or none for that home), `home_invalid` 400,
   `bench_running` 400, `bench_unavailable` 400 (no runtime). With `home` it runs that home's checks only; without

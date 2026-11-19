@@ -136,6 +136,10 @@ def test_step_3(
         assert page.run("document.getElementById('bi-b-bq-del').hidden")
         page.click("#bi-b-bq-list tbody tr")
         page.click("#bi-b-bq-del")
+        # One confirmation in place, then it goes.
+        page.wait("document.querySelector('#bi-b-bq-pane .bi-confirm') !== null")
+        assert len(_questions(workspace)) == 1
+        page.click_text("#bi-b-bq-pane .bi-confirm", "刪除")
         page.see("bi-b-bench-state", "0 題")
         assert _questions(workspace) == {}
         page.see("bi-b-bq-title", "新增題目")
@@ -166,6 +170,41 @@ def test_step_3(
             " >= document.getElementById('bi-b-test-results').getBoundingClientRect().bottom"
         )
         page.shoot("results-and-dashboard")
+
+        # -- delete an added question: per row and the ticked ones; past results stay ---------
+        page.run("document.getElementById('bi-b-bench').open = true")
+        for text in ("第二題？", "第三題？"):
+            page.set_value("bi-b-bq-q", text)
+            page.set_value("bi-b-bq-must", "FicTech")
+            page.click("#bi-b-bq-form button[type=submit]")
+            page.see("bi-b-bq-list", text)
+        page.see("bi-b-bench-state", "3 題")
+        first = "[...document.querySelectorAll('#bi-b-bq-list tbody tr')]"
+        row_of = f"{first}.find((r) => r.textContent.includes('FicTech 是什麼'))"
+        page.run(f"{row_of}.querySelector('.bi-bq-del-row').click()")
+        page.wait(f"{row_of}.querySelector('.bi-confirm') !== null")
+        assert page.text_of("bi-b-bq-title") == "新增題目"  # the row did not open
+        assert len(_questions(workspace)) == 3  # not before the confirmation
+        page.run(
+            f"[...{row_of}.querySelectorAll('.bi-confirm button')]"
+            ".find((b) => b.textContent === '刪除').click()"
+        )
+        page.see("bi-b-bench-state", "2 題")
+        assert all(q["question"] != "FicTech 是什麼？" for q in _questions(workspace).values())
+        # The run's result for it stays readable, marked as deleted.
+        page.see("bi-b-bench-report", "FicTech 是什麼？（已刪除）")
+        # Pending until commit and push, like any edit.
+        page.see("bi-b-ver-pending", "測試題")
+        page.run("document.querySelectorAll('#bi-b-bq-list .bi-bq-tick').forEach((t) => t.click())")
+        page.see("bi-b-bq-bulk", "刪除選取的 2 題")
+        page.click_text("#bi-b-bq-bulk", "刪除選取的 2 題")
+        page.wait("document.querySelector('#bi-b-bq-bulk .bi-confirm') !== null")
+        page.click_text("#bi-b-bq-bulk .bi-confirm", "刪除")
+        page.see("bi-b-bench-state", "0 題")
+        assert _questions(workspace) == {}
+        assert page.run("document.getElementById('bi-b-bq-bulk') === null")
+        page.see("bi-b-bench-report", "（已刪除）")
+        page.run("document.getElementById('bi-b-bench').open = false")
 
         # -- a card opens beside what it came from: no tab change, same scroll ---------------
         page.run("document.getElementById('bi-b-ver').scrollIntoView()")
