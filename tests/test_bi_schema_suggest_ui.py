@@ -159,6 +159,12 @@ def test_a_press_suggests_with_quotes_and_a_field_is_added_on_the_version(
             page.click("#bi-ai-close")
             page.click_text("#bi-b-sg-table tr[data-row=s2]", "不要")
             page.see("bi-b-sg-table", "✕ 不要")
+            # A 「不要」 by mistake goes back to undecided, and can be decided again.
+            page.click_text("#bi-b-sg-table tr[data-row=s2]", "改回待決定")
+            page.wait("!document.getElementById('bi-b-sg-table').textContent.includes('✕ 不要')")
+            assert "和 AI 討論" in page.text_of("bi-b-sg-table")
+            page.click_text("#bi-b-sg-table tr[data-row=s2]", "不要")
+            page.see("bi-b-sg-table", "✕ 不要")
             assert len(model.requests) == 1, "one press, one question to the model"
             # A reload shows the same suggestion and its decisions again.
             page.reload()

@@ -426,6 +426,29 @@ def reject(
     return state
 
 
+def reopen(workspace: Path, dataset: str, suggestion_id: Any, row_id: Any) -> dict[str, Any]:
+    """Back to undecided (the owner's 「不小心選擇不要時，沒機會退回去」): a rejected row, or
+    an add that stopped with the host. An added row is in the schema already; taking it
+    out again is a schema change, not an undo."""
+    store = BiStore(workspace, dataset)
+    store.refuse_write()
+    with _LOCK:
+        state = _held(store, suggestion_id)
+        row = _find_row(state, row_id)
+        if row["status"] == "applied":
+            raise BiStoreError(
+                "suggest_row_applied",
+                "這一項已經加入 schema；要拿掉請用「和 AI 調整 schema」",
+            )
+        if row["status"] == APPLYING and not _stuck(row):
+            raise BiStoreError("suggest_row_busy", "這一項正在加入，請等它完成")
+        for key in ("by", "decided_at", "reason_given", "applying_at"):
+            row.pop(key, None)
+        row["status"] = "proposed"
+        _write(store, state)
+    return state
+
+
 def apply(
     workspace: Path, dataset: str, suggestion_id: Any, row_id: Any, actor: str
 ) -> dict[str, Any]:

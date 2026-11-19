@@ -4274,6 +4274,10 @@ schema is chosen at creation and never changed" (owner 2026-10-27): a dataset ma
     `proposed` and removes the version published on the way, so no upgrade is offered from it.
   - `POST /api/bi/schema-suggest/reject {"dataset", "id", "row", "reason"}` → `{"ok": true, "suggestion"}`.
     409 `suggest_row_busy` while the row is being added.
+  - `POST /api/bi/schema-suggest/reopen {"dataset", "id", "row"}` → `{"ok": true, "suggestion"}`: a
+    `rejected` row, or an `applying` row past 15 minutes (the host stopped in the middle), back to
+    `proposed` (the page's 「改回待決定」). Refusals: 409 `suggest_row_applied` (already in the schema;
+    removing it is a schema change), `suggest_row_busy`, `suggest_stale`; 400 `suggest_row_unknown`.
 
 ## BI schema 2.0, new kinds and widening (BI vault V9, owner 2026-10-29)
 

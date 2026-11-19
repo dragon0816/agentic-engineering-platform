@@ -13,7 +13,7 @@ from test_bi_extract import Scripted
 from test_bi_vault import _call, _ok, _two_pcs
 
 from aep_bi.cards import catalog, schema_suggest, schema_versions, vault
-from aep_bi.cards.store import BiStore, BiStoreError
+from aep_bi.cards.store import BiStore, BiStoreError, now
 from aep_bi.host.bi_cards_api import route
 
 NOTE = (
@@ -271,3 +271,38 @@ def test_one_add_at_a_time_and_a_stopped_add_goes_back_without_a_version(
     assert _ok(_post(a, "/api/bi/schema-suggest/apply", body))["schema"]["label"] == (
         "5.0 加 2 項新增"
     )
+
+
+def test_a_rejected_row_goes_back_to_undecided_and_an_added_one_does_not(
+    tmp_path: Path,
+) -> None:
+    """The owner's 「新增欄位不小心選擇不要時，沒機會退回去」: 「改回待決定」 reopens a
+    rejected row (and an add that stopped with the host); an added row is in the schema."""
+    _, _vault_id, dataset, a, _ = _two_pcs(tmp_path)
+    source = _source(a, dataset)
+    done, _ = _suggest(a, dataset, [source], {"items": [COOLING, MISSION]})
+    field = next(r for r in done["items"] if r["kind"] == "extend_schema")
+    body = {"dataset": dataset, "id": done["id"], "row": field["id"]}
+    _ok(_post(a, "/api/bi/schema-suggest/reject", {**body, "reason": "不需要"}))
+    reopened = _ok(_post(a, "/api/bi/schema-suggest/reopen", body))["suggestion"]
+    row = next(r for r in reopened["items"] if r["id"] == field["id"])
+    assert row["status"] == "proposed" and "reason_given" not in row and "by" not in row
+    # Undecided again, so it can be added after all.
+    _ok(_post(a, "/api/bi/schema-suggest/apply", body))
+    status, refused = _post(a, "/api/bi/schema-suggest/reopen", body)
+    assert (status, refused["code"]) == (409, "suggest_row_applied")
+    # An add the host stopped in the middle: running, it waits; stopped long ago, it reopens.
+    mission = next(r for r in done["items"] if r["kind"] == "propose_type")
+    store = BiStore(a, dataset)
+    held = schema_suggest._read(store)
+    assert held is not None
+    target = next(r for r in held["items"] if r["id"] == mission["id"])
+    target.update(status=schema_suggest.APPLYING, applying_at=now())
+    schema_suggest._write(store, held)
+    status, busy = _post(a, "/api/bi/schema-suggest/reopen", {**body, "row": mission["id"]})
+    assert (status, busy["code"]) == (409, "suggest_row_busy")
+    target["applying_at"] = "2020-01-01T00:00:00+00:00"
+    schema_suggest._write(store, held)
+    back = _ok(_post(a, "/api/bi/schema-suggest/reopen", {**body, "row": mission["id"]}))
+    shown = next(r for r in back["suggestion"]["items"] if r["id"] == mission["id"])
+    assert shown["status"] == "proposed" and "applying_at" not in shown

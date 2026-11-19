@@ -475,6 +475,11 @@ def _route(
             actor=who,
         )
         return 200, {"ok": True, "suggestion": started}
+    if path == "/api/bi/schema-suggest/reopen":
+        state = schema_suggest.reopen(
+            workspace, _dataset(given.get("dataset")), given.get("id"), given.get("row")
+        )
+        return 200, {"ok": True, "suggestion": state}
     if path in ("/api/bi/schema-suggest/apply", "/api/bi/schema-suggest/reject"):
         dataset = _dataset(given.get("dataset"))
         if path.endswith("/apply"):
@@ -919,6 +924,7 @@ CONFLICTS = {
     "suggest_stale",
     "suggest_row_decided",
     "suggest_row_busy",
+    "suggest_row_applied",
 }
 
 #: The GET routes that read one dataset (besides `/api/bi/cards/<id>[/history]`).

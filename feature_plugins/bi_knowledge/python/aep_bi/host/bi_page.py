@@ -6232,12 +6232,19 @@ function biSuggestRow(state, row) {
   if (row.status === "applied") {
     act.append(biBadge("✓ 已加入", "good"), " " + (row.schema || ""));
   } else if (row.status === "rejected") {
-    act.append(biBadge("✕ 不要", "dim"));
+    // A 「不要」 pressed by mistake goes back to undecided, as a candidate does (待決定).
+    act.append(biBadge("✕ 不要", "dim"), " ", biButton("改回待決定",
+      (event) => biSuggestReopen(state, row, event), "bi-btn", "把「" + row.what + "」改回待決定"));
   } else if (row.status === "applying") {
     // Another press (or a page before a reload) is adding it: one add at a time.
     const since = Math.max(0, Math.round((Date.now() - Date.parse(row.applying_at)) / 1000));
     act.append(biBadge("加入中…", "dim"), bh("p", "bi-meta", "開始 " + since
       + " 秒了；完成後重新整理會看到結果。"));
+    // An add that ran past any add's time stopped with the host: it can be decided again.
+    if (since > 15 * 60) {
+      act.append(biButton("改回待決定", (event) => biSuggestReopen(state, row, event), "bi-btn",
+        "把「" + row.what + "」改回待決定"));
+    }
   } else {
     // One way first: add it when a press can, else talk it through; the rest in a menu.
     const direct = row.applies && biDataset().startsWith("vault-");
@@ -6300,6 +6307,17 @@ async function biSuggestReject(state, row, event) {
     reply = await biCall("/api/bi/schema-suggest/reject",
       {dataset: biDataset(), id: state.id, row: row.id, reason: "不需要"});
   } catch (failure) { done("沒有記下：" + failure.message); return; }
+  done(null);
+  biSuggestShow(reply.suggestion);
+}
+
+async function biSuggestReopen(state, row, event) {
+  const done = biSuggestBusy(event, "改回中…");
+  let reply;
+  try {
+    reply = await biCall("/api/bi/schema-suggest/reopen",
+      {dataset: biDataset(), id: state.id, row: row.id});
+  } catch (failure) { done("沒有改回：" + failure.message); return; }
   done(null);
   biSuggestShow(reply.suggestion);
 }
