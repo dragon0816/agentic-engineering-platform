@@ -7322,3 +7322,60 @@ or ToolAccess. Tool-to-page updates use the normal version/busy/rollback semanti
 namespace ownership survives even when the plugin registers no Agent tools.
 No new policy, grant, per-call approval, model-data or TurnEffects contract is added.
 The existing worker protocol and PluginManagerProtocol remain unchanged.
+
+## Telegram feature items and the BI inbox (owner consent 2026-11-19)
+
+Scope: AGENTS22 consent "Owner consent: Telegram link collection P1" in docs/DECISIONS.md;
+design docs/phases/TELEGRAM_LINK_COLLECTION_ASSESSMENT_20261119.md §8.
+
+Core (`host_runtime.features`, `channels.telegram`):
+
+- `TelegramItem(kind, actor, text, received_at, sender_name, urls, files, data, quoted)`;
+  `kind` is `link | file | tap | command | reply`. `TelegramFile(name, size, read)`;
+  `read()` downloads through the Bot API with the existing limits.
+- `TelegramAnswer(text, buttons, edit)`; `buttons` are rows of `(label, payload)` with
+  payload `[A-Za-z0-9._-]{1,60}`; the channel sends `fi:<payload>` as callback data and an
+  unusable payload is dropped. `edit` replaces the tapped message (tap items only).
+- `Feature.telegram_commands() -> (alias, command)` pairs; `Feature.telegram_item(item,
+  host) -> TelegramAnswer | None` (None leaves the update to the existing path);
+  `Feature.telegram_ready(messenger, host)`. `FeatureSet` asks features in order.
+- `Messenger.send(actor, text, buttons=()) -> bool`; `TelegramIngress.send` sends only to
+  an actor in the sender map (the private chat with the bot), never to another chat, and
+  returns False otherwise. Safe from background threads.
+- Routing before any model turn, by fixed rules: a callback `fi:*`; files whose caption
+  is empty or only `#tags`; a feature's own slash command; a message that is links
+  (`link_urls`: at least one http(s) address and at most 300 other characters without
+  `?`/`？`); a Reply. Not items: spoken (voice) text, credential-like text, anything while
+  a question flow waits on the chat (except taps and commands), unmapped senders. Without
+  `attach_features` (tests, hosts without Agent Web) nothing changes.
+- Agent Web calls `TelegramIngress.attach_features(features.active(), web)` where it sets
+  `telegram.cards`.
+
+BI inbox (`aep_bi.inbox`, `<workspace>/bi/inbox/inbox.sqlite`):
+
+- Items (link, file, text), picks (`person | tag | default | ai`), results per
+  (item, domain) inserted once as the processing claim, `seen` (domain, normalized URL,
+  content sha256) for dedup, per-actor default and recent domains, per-domain settings
+  (`enabled`, `collect_at`, `review_at` as local `HH:MM`) and schedule claims
+  (`<kind>:<domain>:<UTC occurrence>`). A domain is `<vault id>:<home>`.
+- Item states `queued | done | needs_text | unassigned | withdrawn` (withdrawn final;
+  refused once any domain claimed the item); result states `processing | review | summary
+  | duplicate | failed` with `code`, `source_id`, `run_id`.
+- Commands: `/bi link [<domain>] <url> [note]`, `/bi links`, `/bi unlink <id>`,
+  `/bi domain [<domain>|無]`.
+- A fetched page becomes the source `<platform>-<title>-<item>.html`: the bytes as served,
+  preceded by `<!-- aep-bi-link-provenance {json} -->` (ASCII JSON: original_url,
+  final_url, sender, sender_name, sent_at, fetched_at, fetch_method `http|browser`,
+  http_status, content_sha256, summary_only, item, note). `.html/.htm` convert through
+  `cards.html_markdown`; the Markdown opens with that provenance and says 「只取得摘要」
+  when only meta was obtained. A sender's added text becomes `note-<parent>-<item>.md`.
+- Each processed item starts `ai_runs.start(kind="ingest", folder=<home>/sources)` with
+  actor `<sender> via telegram`; nothing is accepted, committed or pushed by the inbox.
+- Page routes: `GET /api/bi/inbox?dataset=`, `POST /api/bi/inbox/settings {domain,
+  enabled, collect_at, review_at}`, `POST /api/bi/inbox/assign {item, domain}`.
+- `POST /api/bi/runs/<id>/commit` of an inbox run (not a repeated `already` answer) runs
+  `bi_bench.run(home=<home>)`, draws the home's Dashboard and sends the result to the
+  run's senders, in the background.
+- Optional `<workspace>/bi/inbox/options.json` `{"browser_fallback": true}` lets a
+  login-walled Threads/Instagram post be read with the local headless Edge profile
+  `<workspace>/bi/inbox/browser-profile`; off by default.

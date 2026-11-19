@@ -5129,3 +5129,21 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   as card evidence or read by an open run are refused. Row 刪除 + 刪除已選（N 份） with
   inline confirmation and live 刪除中 n/N progress. Tests: tests/test_bi_source_delete.py,
   tests/test_bi_source_delete_ui.py; contract in docs/CONTRACTS.md.
+
+## Telegram link collection P1 — 2026-11-19
+
+- [x] Core c3ee4082 (AGENTS22 consent 2026-11-19): Telegram link/file/button/command/
+  Reply items reach `Feature.telegram_item` before a model turn; `TelegramIngress.send`
+  proactive messages to mapped actors only; Agent Web attaches features. Tests:
+  tests/test_telegram_feature_items.py.
+- [x] dc91e1f9: `.html` sources convert with the standard library (`cards/html_markdown.py`).
+- [x] 2ef5e582: BI inbox (`aep_bi/inbox/`): domain buttons (AI suggestion, recent, more,
+  multi-select), `#tag`, default, `/bi link|links|unlink|domain`, Reply text for
+  summary-only items; per-domain collect/review times in BI 管理 → Telegram 收集; collect
+  fetch → immutable source with provenance → dedup → ingest to review; untapped →
+  confident AI suggestion else 未分類; reminder to senders; after import tests +
+  Dashboard + result. Tests: tests/test_bi_inbox.py (fixtures tests/fixtures/bi_inbox/).
+- [ ] Owner: test real Threads/Instagram links on this PC (HTTP gives og summary only;
+  decide `browser_fallback`); confirm the plugin timer instead of the Host schedule store
+  and the `/bi` commands on the feature hook (DECISIONS 2026-11-19 implementation entry).
+- [ ] Live check with the real bot after merge (map MD/PM/sales senders first).
