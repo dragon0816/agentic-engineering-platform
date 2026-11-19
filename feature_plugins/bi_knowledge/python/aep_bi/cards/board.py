@@ -175,6 +175,14 @@ def board(
                 today=today,
                 domains=domains,
             )
+            try:
+                values = analyses.folder_filter(item, values, home, registry)
+            except BiStoreError as unsupported:
+                # Said in place of a chart that would be empty (owner 2026-11-19).
+                drawn_one = _section(item, None, "", names)
+                drawn_one["note"] = unsupported.message
+                drawn_one["unsupported"] = True
+                return drawn_one
             drawn_one = _section(item, _run(db, item, values), "", names)
             if home and not analyses.uses_domain(item):
                 drawn_one["title"] = f"{drawn_one['title']}（全庫資料）"

@@ -272,6 +272,8 @@ def route(
                 "ok": True,
                 "pack": packs.export_pack(workspace, vault_id, given["export"]),
             }
+        if given.get("update") == packs.DEFAULT_ID:
+            return 200, {"ok": True, **packs.update_default(workspace, vault_id)}
         return 200, {"ok": True, **packs.import_pack(workspace, vault_id, given.get("import"))}
     if action == "analyses":
         if given.get("delete"):
@@ -286,7 +288,7 @@ def route(
                 ),
             }
         params = given.get("params") if isinstance(given.get("params"), dict) else {}
-        ran = analyses.run_saved(workspace, vault_id, given.get("run"), params)
+        ran = analyses.run_saved(workspace, vault_id, given.get("run"), params, given.get("home"))
         bi_feed_api.refresh(workspace, vault_id)
         return 200, {"ok": True, **ran}
     return _error(404, "route_unknown", "沒有這個 BI 路徑")

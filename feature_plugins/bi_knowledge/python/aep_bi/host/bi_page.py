@@ -1919,7 +1919,7 @@ function biSection(section) {
   if (section.note) body.append(bh("p", "bi-sec-note", section.note));
   const rows = section.rows || [];
   const chart = section.chart || {type: "table"};
-  if (!rows.length) body.append(bh("p", "bi-empty", "沒有資料。"));
+  if (!rows.length && !section.unsupported) body.append(bh("p", "bi-empty", "沒有資料。"));
   else if (chart.type !== "table") {
     const plain = rows.map((row) => row.map((cell) =>
       cell && typeof cell === "object" ? cell.label : cell));
@@ -3920,7 +3920,7 @@ function biAnOut(where, item, state) {
 
 async function biRunInto(vaultId, item, state, out) {
   const ran = await biCall("/api/bi/vaults/" + vaultId + "/analyses",
-    {run: item.slug, params: state.values});
+    {run: item.slug, params: state.values, home: biScope()});
   state.table = ran.table;
   // The list may have been drawn again meanwhile: draw into the one shown now.
   const shown = out.isConnected ? out
@@ -3972,6 +3972,26 @@ async function biAnalyses(vaultId) {
   }
   el("bi-b-an").hidden = false;
   const box = el("bi-b-an-list"); box.replaceChildren();
+  if (reply.pack_updates && !biOverview()) {
+    // The default pack's newer code (it narrows to a folder too), as a pending change.
+    const status = bh("span", "bi-meta");
+    status.setAttribute("role", "status");
+    const update = biButton("更新", async () => {
+      update.disabled = true; status.textContent = "正在更新…";
+      try {
+        await biCall("/api/bi/vaults/" + vaultId + "/packs", {update: "bi-market-default"});
+        biVaultState(await call("/api/bi/vaults/" + vaultId + "/status"));
+        bi.anState = {};
+        await biAnalyses(vaultId);
+        biNotice(true, "已更新預設分析（commit 並 push 後大家才會用到）。");
+      } catch (failure) {
+        update.disabled = false; status.textContent = "沒有更新：" + failure.message;
+      }
+    }, "bi-btn", "更新預設分析");
+    update.id = "bi-b-an-update";
+    box.append(bh("p", "bi-meta", reply.pack_updates + " 個預設分析有新版（可依資料夾篩選）。",
+      " ", update, " ", status));
+  }
   if (!reply.analyses.length) box.append(bh("p", "bi-meta", "還沒有存起來的分析。"));
   // Shown in the Dashboard's order, then hidden and not offered ones.
   const rank = (a) => { const i = reply.order.indexOf(a.slug); return i < 0 ? 1e6 : i; };
@@ -4017,6 +4037,10 @@ async function biAnalyses(vaultId) {
     const title = [bh("strong", "", item.title)];
     // It would show the same numbers in any domain, and must not pass for this one's.
     if (scope && !item.filters_domain) title.push(" ", biBadge("全庫資料", "dim"));
+    // It narrows only by the card domain, which this working domain does not have.
+    if (scope && item.filters_domain && !item.folder_filter && !biScopeDomain()) {
+      title.push(" ", biBadge("不支援依資料夾篩選", "warn"));
+    }
     if (item.question) title.push(bh("div", "bi-meta", item.question));
     const row = biRow(table, [title, (item.kind === "sql" ? "SQL" : "Python") + "・"
       + item.chart.type, where, ""]);

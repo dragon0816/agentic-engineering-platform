@@ -10,6 +10,9 @@ from typing import Any
 query = globals()["query"]
 PARAMS = globals()["PARAMS"]
 D = str(PARAMS.get("domain") or "robotics")
+# The working domain's folder (`library/products`): a card is in it when it has evidence from a
+# source there (`card_app_folders`), whatever its `domain` field says (owner 2026-11-19).
+HOME = str(PARAMS.get("home") or "")
 TODAY = date.fromisoformat(PARAMS["today"]) if PARAMS.get("today") else datetime.now(UTC).date()
 LINK_FIELDS: dict[str, dict[str, list[str]]] = {}  # the schema's link fields, filled on import
 
@@ -43,6 +46,11 @@ def cards() -> dict[str, list[Card]]:
         values.setdefault(row["card_id"], {})[row["field"]] = (
             None if text is None else json.loads(text)
         )
+    folders: dict[str, set[str]] = {}
+    if HOME:
+        tables = query("SELECT name FROM sqlite_master WHERE name = 'card_app_folders'")
+        for row in query("SELECT card_id, application FROM card_app_folders") if tables else []:
+            folders.setdefault(row["card_id"], set()).add(row["application"])
     found: dict[str, list[Card]] = {}
     sql = "SELECT id, entity_type, canonical_key, name, updated FROM cards"
     for row in query(sql + " ORDER BY entity_type, canonical_key"):
@@ -54,6 +62,7 @@ def cards() -> dict[str, list[Card]]:
         card["_id"] = row["id"]
         card["_type"] = row["entity_type"]
         card["_updated"] = row["updated"]
+        card["_homes"] = sorted(folders.get(row["id"], ()))
         found.setdefault(row["entity_type"], []).append(card)
     return found
 
@@ -80,6 +89,8 @@ def _list(value: Any) -> list[Any]:
 
 
 def _in(card: Card, domain: str) -> bool:
+    if HOME and HOME in card.get("_homes", ()):
+        return True
     values = _list(card.get("domain") or "wireless")
     return domain.lower() in {str(v).lower() for v in values}
 
