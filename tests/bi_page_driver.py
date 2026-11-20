@@ -182,9 +182,21 @@ class BiPage:
         self.wait(self.shows("bi-notice", text))
 
     def stage(self, name: str) -> None:
-        """Open a step, or a sub-step of step 2, and wait until it shows."""
+        """Open a step, or a sub-step of step 2, and wait until it shows. The old 2a, schema
+        and rules, is Ingest's gear settings now (owner 2026-11-20): opened beside it."""
+        if name == "schema":
+            self.gear("ingest")
+            return
         self.click(f"#bi-build-steps [data-stage={name}]")
         self.wait(f"!document.querySelector('#bi-view-build .kp-stage[data-stage={name}]').hidden")
+
+    def gear(self, name: str) -> None:
+        """Open a stage's settings with its gear, and wait until they show in the side area."""
+        self.click(f"#bi-b-gear-{name}")
+        self.wait(
+            f"!document.getElementById('bi-b-set-{name}').hidden"
+            f" && document.getElementById('bi-b-set-{name}').closest('.extra-panel') !== null"
+        )
 
     def attach(self, name: str, text: str, media_type: str) -> None:
         self.run(

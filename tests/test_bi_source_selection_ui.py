@@ -110,7 +110,7 @@ def test_what_was_selected_before_converting_stays_selected_in_the_vault(tmp_pat
                 "document.querySelector('#bi-build-steps [data-stage=method]').disabled"
             )
             page.stage("method")
-            assert _visible_stage(page) == "method"
+            assert _visible_stage(page) == "method,review"  # one view (owner 2026-11-20)
 
 
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
@@ -159,11 +159,11 @@ def test_a_step_opened_while_the_page_loads_is_not_taken_away(tmp_path: Path) ->
             _hold(page, SOURCES)
             _switch(page, "two")
             page.see("bi-b-target", "two")  # the load has begun and waits for its sources
-            page.stage("schema")
+            page.stage("method")  # 2a is a gear tab now: Ingest's view is the step
             _free(page)
             page.wait(page.shows("bi-b-sources", "second.md"))
             page.wait("document.getElementById('bi-status-build').hidden")
-            assert _visible_stage(page) == "schema"
+            assert _visible_stage(page).startswith("method")
 
 
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
@@ -226,4 +226,5 @@ def test_a_load_overtaken_by_a_dataset_change_does_not_write_over_the_new_ones_s
             page.run(f"window.__gates[{json.dumps(SCHEMA)}].go(); 0")
             page.wait(page.shows("bi-b-sources", "second.md"))
             page.wait("document.getElementById('bi-status-build').hidden")
-            assert _visible_stage(page) == "schema"
+            # A step kept as 2a (before 2026-11-20) opens Ingest's view.
+            assert _visible_stage(page) == "method"

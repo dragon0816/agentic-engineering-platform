@@ -67,9 +67,16 @@ def test_step_3(
         # -- two collapsed sections with a status; the button in view without opening them --
         page.wait("document.getElementById('bi-b-an-state').textContent.includes('個分析')")
         page.wait("document.getElementById('bi-b-bench-state').textContent.includes('題')")
-        # One tab at a time (owner 2026-11-20): Benchmark in front, the Dashboard one tab away.
+        # One tab at a time (owner 2026-11-20): Benchmark's results in front, the Dashboard
+        # one tab away; the questions and analyses are edited in the stage's gear tab.
         page.wait("document.getElementById('bi-b-bench').open")
-        assert page.run("document.getElementById('bi-b-an').classList.contains('bi-tab-off')")
+        assert page.run(
+            "document.getElementById('bi-b-test-dash').classList.contains('bi-tab-off')"
+        )
+        assert not page.run(
+            "document.getElementById('bi-b-bench-report').classList.contains('bi-tab-off')"
+        )
+        assert page.run("document.getElementById('bi-b-set-test').hidden")
         run_button = "document.getElementById('bi-b-bench-run')"
         assert page.run(f"{run_button}.closest('details') === null")
         assert page.run(f"{run_button}.offsetHeight >= 52")
@@ -84,9 +91,14 @@ def test_step_3(
         assert page.run("!document.getElementById('bi-b-ver-bar').hidden")
         page.see("bi-b-run-why", "還沒有測試題")
         assert page.run(f"{run_button}.disabled")
+        # First use: one line, and its button opens the stage's settings (owner 2026-11-20).
+        page.wait("!document.getElementById('bi-b-need-test').hidden")
         page.shoot("collapsed")
 
-        # -- the question table: a new one, a row opens the editor on the right --------------
+        # -- the question table, in the gear tab: a new one, a row opens the editor -----------
+        page.click("#bi-b-need-test button")
+        page.wait("document.getElementById('bi-b-set-test').closest('.extra-panel') !== null")
+        assert not page.run("document.getElementById('bi-b-set-test').hidden")
         page.run("document.getElementById('bi-b-bench').open = true")
         page.set_value("bi-b-bq-q", "FicTech 是什麼？")
         page.set_value("bi-b-bq-must", "FicTech")
@@ -95,6 +107,7 @@ def test_step_3(
         page.see("bi-b-bq-list", "FicTech 是什麼")
         page.see("bi-b-bench-state", "1 題")
         page.wait(f"!{run_button}.disabled")
+        page.wait("document.getElementById('bi-b-need-test').hidden")
         assert "這次跑" in page.text_of("bi-b-run-why")
         (unit,) = _questions(workspace)
         page.click("#bi-b-bq-list tbody tr")
@@ -184,6 +197,7 @@ def test_step_3(
         page.wait("document.getElementById('bi-b-ver').closest('.extra-panel') !== null")
         assert page.run(
             "[...document.querySelectorAll('#extra-tabs [role=tab]')].map((t) => t.textContent)"
+            ".filter((t) => t !== 'Benchmark testing 設定')"  # the stage's gear tab, still open
         ) == [  # fmt: skip
             "Benchmark 每題結果",
             "歷史紀錄",
@@ -274,6 +288,7 @@ def test_step_3(
         page.see("bi-detail-body", str(card["name"]))
         assert page.run(f"{panel.format(key)}.contains(document.getElementById('bi-detail'))")
         page.run(f"sideClose({key!r})")
+        page.run("sideClose('bi-gear:test')")  # the stage's settings, opened above
         page.wait("document.getElementById('extra-area').hidden")
         assert page.run(
             "document.getElementById('bi-card-split').contains(document.getElementById('bi-detail'))"
@@ -290,7 +305,7 @@ def test_step_3(
         assert page.run("document.getElementById('bi-b-to-cards') === null")
         page.run("biJump('cards')")
         page.wait("bi.view === 'cards' && !document.getElementById('bi-back').hidden")
-        page.see("bi-back-go", "步驟 3・測試")
+        page.see("bi-back-go", "步驟 3・Benchmark testing")
         assert page.run("document.getElementById('bi-card-split').contains("
                         "document.getElementById('bi-detail'))")  # fmt: skip
         page.shoot("way-back")

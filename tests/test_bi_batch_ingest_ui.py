@@ -118,6 +118,8 @@ def test_ticked_sources_run_one_after_another_and_a_failure_does_not_stop_the_re
 
             # -- one run each; the broken one is said, and the others are there ----------------
             page.click("#bi-b-start")
+            # 審核 shows with Ingest (owner 2026-11-20): wait for the runs to end.
+            page.wait("!bi.build.batchRunning")
             page.wait(
                 "!document.querySelector('#bi-view-build .kp-stage[data-stage=review]').hidden"
             )
@@ -182,6 +184,8 @@ def test_one_source_still_runs_as_before(tmp_path: Path, scripted: Scripted) -> 
             assert page.text_of("bi-b-batch") == "這次 Ingest：會議1.md"
             assert page.run("document.getElementById('bi-b-batch-stop').hidden")
             page.click("#bi-b-start")
+            # 審核 shows with Ingest (owner 2026-11-20): wait for the runs to end.
+            page.wait("!bi.build.batchRunning")
             page.wait(
                 "!document.querySelector('#bi-view-build .kp-stage[data-stage=review]').hidden"
             )

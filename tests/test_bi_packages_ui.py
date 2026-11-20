@@ -104,7 +104,9 @@ def test_export_and_import_a_package_from_more(
             page.wait(f"{tabs}.includes('AI 擷取（內建）')")
             page.see("extra-panel-bi-builtin-llm", "出處規則")
             page.click_text("#bi-b-tl-list", "檢視")
-            assert page.run(f"{tabs}.length") == 1, "pressed again, the same tab"
+            assert page.run(f"{tabs}.filter((t) => t === 'AI 擷取（內建）').length") == 1, (
+                "pressed again, the same tab"
+            )
             page.see("bi-b-sk-list", "vendor-extract")
             page.run(
                 "[...document.querySelectorAll('#bi-b-sk-list tr')]"

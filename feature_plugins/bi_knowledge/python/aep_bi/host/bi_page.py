@@ -230,6 +230,22 @@ BI_CSS = r"""
 .bi-bench-sum strong { display: block; font-size: 20px; }
 .bi-run-progress { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .bi-run-progress progress { width: 220px; height: 14px; }
+/* Each stage: its title, and its ⚙ that opens the stage's settings beside (owner 2026-11-20). */
+.bi-stage-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.bi-stage-head .kp-stage-title { margin: 0; }
+.bi-gear { min-width: 44px; padding: 4px 10px; font-size: 20px; line-height: 1; }
+.bi-gear[aria-expanded="true"] { border-color: var(--accent); }
+.bi-gear-set > * + * { margin-top: 10px; }
+.bi-setup { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 8px 0;
+  padding: 8px 12px; border: 1px dashed var(--line); border-radius: 8px; }
+.bi-setup[hidden] { display: none; }
+/* 審核 under Ingest: one card in two parts, so the list stays in sight. */
+#bi-view-build .kp-stage[data-stage="method"]:has(
+  + .kp-stage[data-stage="review"]:not([hidden])) {
+  margin-bottom: 0; border-bottom: 0; border-radius: 10px 10px 0 0; padding-bottom: 0; }
+#bi-view-build .kp-stage[data-stage="method"]:not([hidden]) + .kp-stage[data-stage="review"] {
+  border-top-style: dashed; border-radius: 0 0 10px 10px; }
+#bi-view-build .kp-stage[data-stage="review"] .kp-stage-title { font-size: 15px; margin: 0 0 2px; }
 tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
 @media (max-width: 760px) {
   .bi-ai-panel { top: auto; left: 0; width: auto; height: 66vh; border-left: 0;
@@ -758,11 +774,11 @@ BI_PANE_HTML = r"""
         <nav id="bi-stepper" class="kp-stepper" aria-label="建立與匯入步驟">
           <ol>
             <li><button type="button" data-stage="source"><span class="kp-step-n">1</span>
-              <span><strong>輸入與轉檔</strong></span></button></li>
+              <span><strong>Data input</strong></span></button></li>
             <li><button type="button" data-stage="ingest"><span class="kp-step-n">2</span>
-              <span><strong>Schema 與 Ingest</strong></span></button></li>
+              <span><strong>Ingest</strong></span></button></li>
             <li><button type="button" data-stage="test"><span class="kp-step-n">3</span>
-              <span><strong>測試</strong></span></button></li>
+              <span><strong>Benchmark testing</strong></span></button></li>
           </ol>
         </nav>
         <nav id="bi-substeps" class="kp-stepper bi-substeps" aria-label="步驟 2 的細項" hidden>
@@ -780,14 +796,12 @@ BI_PANE_HTML = r"""
         </div>
         <div class="mem-status" id="bi-status-build" role="status" aria-live="polite" hidden></div>
         <section class="kp-stage card bi-step" data-stage="source" aria-labelledby="bi-b-source">
-          <h3 class="kp-stage-title" id="bi-b-source" tabindex="-1">步驟 1／3・輸入與轉檔</h3>
+          <div class="bi-stage-head">
+            <h3 class="kp-stage-title" id="bi-b-source" tabindex="-1">步驟 1／3・Data input</h3>
+            <button class="bi-btn bi-gear" type="button" id="bi-b-gear-source"
+              data-bi-gear="source" aria-label="Data input 設定" title="Data input 設定"
+              aria-expanded="false" aria-controls="bi-b-set-source">⚙</button></div>
           <div class="bi-src-row" id="bi-b-src-input">
-            <div><label class="bi-label" for="bi-b-class">機密等級</label>
-              <select id="bi-b-class">
-                <option value="INTERNAL">INTERNAL（預設）</option>
-                <option value="UNCLASSIFIED">UNCLASSIFIED</option>
-                <option value="CONFIDENTIAL">CONFIDENTIAL</option>
-                <option value="RESTRICTED">RESTRICTED</option></select></div>
             <div><span class="bi-label" id="bi-b-file-h">來源檔</span>
               <input id="bi-b-file" class="bi-file-input" type="file" multiple
                 aria-labelledby="bi-b-file-h"
@@ -854,10 +868,18 @@ BI_PANE_HTML = r"""
           </div>
             </div>
           </div>
-          <details class="bi-manage bi-adv" id="bi-b-adv-source">
-            <summary>進階：知識庫與匯入</summary>
+          <div class="bi-gear-set" id="bi-b-set-source" role="region"
+            aria-label="Data input 設定" hidden>
+            <div><label class="bi-label" for="bi-b-class">機密等級</label>
+              <select id="bi-b-class">
+                <option value="INTERNAL">INTERNAL（預設）</option>
+                <option value="UNCLASSIFIED">UNCLASSIFIED</option>
+                <option value="CONFIDENTIAL">CONFIDENTIAL</option>
+                <option value="RESTRICTED">RESTRICTED</option></select></div>
             <p class="bi-meta" id="bi-b-target"></p>
             <div id="bi-b-v-info"></div>
+          <details class="bi-manage bi-adv" id="bi-b-adv-source">
+            <summary>進階：知識庫與匯入</summary>
               <button class="bi-btn" id="bi-b-v-convert" type="button" data-mode="convert"
                 aria-expanded="false" aria-controls="bi-b-v-form">把這個資料集轉成 vault</button>
             <div id="bi-b-askable" aria-live="polite"></div>
@@ -873,12 +895,36 @@ BI_PANE_HTML = r"""
               aria-label="卡片頁匯入預覽"></div>
           </details>
           </details>
-          <div class="bi-actions"><button class="go" type="button" data-bi-next="schema"
-            id="bi-b-next1" disabled>下一步：Schema 與 Ingest</button></div>
+          </div>
+          <div class="bi-actions"><button class="go" type="button" data-bi-next="method"
+            id="bi-b-next1" disabled>下一步：Ingest</button></div>
         </section>
-        <section class="kp-stage card bi-step" data-stage="schema" aria-labelledby="bi-b-schema"
+        <section class="kp-stage card bi-step" data-stage="method" aria-labelledby="bi-b-method"
           hidden>
-          <h3 class="kp-stage-title" id="bi-b-schema" tabindex="-1">步驟 2／3・類別與規則</h3>
+          <div class="bi-stage-head">
+            <h3 class="kp-stage-title" id="bi-b-method" tabindex="-1">步驟 2／3・Ingest</h3>
+            <button class="bi-btn bi-gear" type="button" id="bi-b-gear-ingest"
+              data-bi-gear="ingest" aria-label="Ingest 設定" title="Ingest 設定"
+              aria-expanded="false" aria-controls="bi-b-set-ingest">⚙</button></div>
+          <div class="bi-setup" id="bi-b-need-ingest" role="note" hidden>
+            <span id="bi-b-need-ingest-why"></span>
+            <button class="go" type="button" data-bi-gear="ingest">先設定</button></div>
+          <div class="bi-actions" id="bi-b-ingest-run">
+            <button class="go" id="bi-b-start" type="button">Ingest</button>
+            <button class="bi-btn" id="bi-b-batch-stop" type="button" hidden>停止</button>
+          </div>
+          <div class="bi-meta" id="bi-b-batch" role="status"></div>
+          <div class="bi-gear-set" id="bi-b-set-ingest" role="region"
+            aria-label="Ingest 設定" hidden>
+          <div class="bi-step-grid">
+            <div><label class="bi-label" for="bi-b-m-pick">使用的擷取 Skill</label>
+              <select id="bi-b-m-pick">
+                <option value="builtin:llm">AI 擷取（內建）</option>
+                <option value="builtin:rules">表格規則（內建，不用模型）</option>
+              </select></div>
+            <div><button class="bi-btn" id="bi-b-install-open" type="button">
+              安裝 schema</button></div>
+          </div>
           <p class="bi-meta" id="bi-b-schema-now"></p>
           <div id="bi-b-draft-main" role="region" aria-labelledby="bi-b-draft-h" hidden>
             <h4 id="bi-b-draft-h">Schema 草稿</h4>
@@ -1010,22 +1056,6 @@ BI_PANE_HTML = r"""
             <div id="bi-b-draft-info" role="status" aria-live="polite"></div>
           </div>
           </details>
-          <div class="bi-actions"><button class="go" type="button" data-bi-next="method">
-            下一步：Ingest</button></div>
-        </section>
-        <section class="kp-stage card bi-step" data-stage="method" aria-labelledby="bi-b-method"
-          hidden>
-          <h3 class="kp-stage-title" id="bi-b-method" tabindex="-1">步驟 2／3・Ingest</h3>
-          <div class="bi-step-grid">
-            <div><label class="bi-label" for="bi-b-m-pick">使用的擷取 Skill</label>
-              <select id="bi-b-m-pick">
-                <option value="builtin:llm">AI 擷取（內建）</option>
-                <option value="builtin:rules">表格規則（內建，不用模型）</option>
-              </select></div>
-            <div><button class="go" id="bi-b-start" type="button">Ingest</button>
-              <button class="bi-btn" id="bi-b-batch-stop" type="button" hidden>停止</button></div>
-          </div>
-          <div class="bi-meta" id="bi-b-batch" role="status"></div>
           <details class="bi-manage bi-adv" id="bi-b-adv-method">
             <summary>進階：擷取設定與試跑</summary>
           <div class="bi-step-grid">
@@ -1076,8 +1106,7 @@ BI_PANE_HTML = r"""
           </div>
           <div id="bi-b-cmp" aria-live="polite"></div>
           </details>
-          <div class="bi-actions"><button class="bi-btn" type="button" data-bi-next="review">
-            審核</button></div>
+          </div>
         </section>
         <section class="kp-stage card bi-step" data-stage="review" aria-labelledby="bi-b-review"
           hidden>
@@ -1127,27 +1156,42 @@ BI_PANE_HTML = r"""
           <h3 class="kp-stage-title" id="bi-b-result" tabindex="-1">步驟 2／3・結果</h3>
           <div id="bi-b-done"></div>
           <div class="bi-actions"><button class="go" type="button" data-bi-next="test">
-            下一步：測試</button></div>
+            下一步：Benchmark testing</button></div>
         </section>
         <section class="kp-stage card bi-step" data-stage="test" aria-labelledby="bi-b-test"
           hidden>
-          <h3 class="kp-stage-title" id="bi-b-test" tabindex="-1">步驟 3／3・測試</h3>
+          <div class="bi-stage-head">
+            <h3 class="kp-stage-title" id="bi-b-test"
+              tabindex="-1">步驟 3／3・Benchmark testing</h3>
+            <button class="bi-btn bi-gear" type="button" id="bi-b-gear-test"
+              data-bi-gear="test" aria-label="Benchmark testing 設定" title="Benchmark testing 設定"
+              aria-expanded="false" aria-controls="bi-b-set-test">⚙</button></div>
           <p class="bi-meta" id="bi-b-overview" hidden>
             全部領域只能看：選工作領域才能新增題目或分析。</p>
           <p class="bi-meta" id="bi-b-ver-none" hidden>只在這台電腦：確認寫入後就生效。</p>
           <div class="bi-actions" id="bi-b-ver-bar" hidden>
             <button class="bi-btn" id="bi-b-ver-open" type="button">分享</button>
             <button class="bi-btn" id="bi-b-hist-open" type="button">看歷史紀錄</button></div>
-          <div id="bi-b-tabs" class="bi-tabs" role="tablist" aria-label="步驟 3 的畫面" hidden>
-          </div>
-          <div id="bi-b-bench-sum" class="bi-bench-sum" aria-live="polite" hidden></div>
           <div id="bi-b-run" class="bi-run" hidden>
             <button class="go" id="bi-b-bench-run" type="button">跑測試</button>
             <span class="bi-meta" id="bi-b-run-why"></span>
             <div class="bi-run-progress" id="bi-b-run-progress" role="status" aria-live="polite"
               hidden><progress id="bi-b-run-bar" max="1" value="0"></progress>
               <span id="bi-b-run-text"></span></div></div>
-          <details id="bi-b-bench" class="card bi-sec" hidden>
+          <div class="bi-setup" id="bi-b-need-test" role="note" hidden>
+            <span id="bi-b-need-test-why"></span>
+            <button class="go" type="button" data-bi-gear="test">先設定</button></div>
+          <div id="bi-b-tabs" class="bi-tabs" role="tablist"
+            aria-label="Benchmark testing 的畫面" hidden>
+          </div>
+          <div id="bi-b-bench-sum" class="bi-bench-sum" aria-live="polite" hidden></div>
+          <div id="bi-b-test-results" class="bi-test-results">
+            <div id="bi-b-bench-report" aria-live="polite"></div>
+            <div class="bi-split-pane" id="bi-b-test-dash"><h5>Dashboard</h5></div>
+          </div>
+          <div class="bi-gear-set" id="bi-b-set-test" role="region"
+            aria-label="Benchmark testing 設定" hidden>
+          <details id="bi-b-bench" class="card bi-sec" open hidden>
             <summary><span class="bi-sec-title"><strong>Benchmark</strong></span>
               <span class="bi-meta" id="bi-b-bench-state"></span></summary>
             <div class="bi-sec-body">
@@ -1211,7 +1255,7 @@ BI_PANE_HTML = r"""
           </details>
             </div>
           </details>
-          <details id="bi-b-an" class="card bi-sec" hidden>
+          <details id="bi-b-an" class="card bi-sec" open hidden>
             <summary><span class="bi-sec-title"><strong>Dashboard</strong></span>
               <span class="bi-meta" id="bi-b-an-state"></span></summary>
             <div class="bi-sec-body">
@@ -1250,9 +1294,6 @@ BI_PANE_HTML = r"""
           </details>
             </div>
           </details>
-          <div id="bi-b-test-results" class="bi-test-results">
-            <div id="bi-b-bench-report" aria-live="polite"></div>
-            <div class="bi-split-pane" id="bi-b-test-dash"><h5>Dashboard</h5></div>
           </div>
           <div id="bi-b-side-hold" hidden>
           <div id="bi-b-ver" class="bi-step" role="region" aria-labelledby="bi-b-ver-h" hidden>
@@ -1643,9 +1684,9 @@ async function biShowView(name) {
   biScroller().scrollTop = back;
 }
 
-const BI_STAGE_WORDS = {source: "步驟 1・輸入與轉檔", schema: "步驟 2・類別與規則",
-  method: "步驟 2・Ingest", review: "步驟 2・審核", commit: "步驟 2・確認", result: "步驟 2・結果",
-  test: "步驟 3・測試"};
+const BI_STAGE_WORDS = {source: "步驟 1・Data input", schema: "步驟 2・Ingest",
+  method: "步驟 2・Ingest", review: "步驟 2・Ingest", commit: "步驟 2・確認",
+  result: "步驟 2・結果", test: "步驟 3・Benchmark testing"};
 const BI_VIEW_WORDS = {dashboard: "Dashboard", cards: "卡片"};
 
 async function biJump(view) {
@@ -1868,7 +1909,7 @@ function biRenderDashboard(reply) {
   }
   if (!sections.length && reply.home) {
     holder.append(bh("p", "bi-empty", "這個領域的 Dashboard 還是空的"
-      + (bi.view === "build" ? "。" : "：到「建立與匯入」步驟 3 的「Dashboard」區塊加入分析。")));
+      + (bi.view === "build" ? "。" : "：到「建立與匯入」Benchmark testing 的 ⚙ 設定加入分析。")));
     return;
   }
   if (!sections.length) {
@@ -2749,7 +2790,9 @@ function biSubLabel(info, sub) {
 // the person's 「確認匯入」, and the result. Trial runs and review write only the
 // dataset's staging store; only the commit writes cards.
 const BI_STAGES = ["source", "schema", "method", "review", "commit", "result", "test"];
-// Step 2 of three (Schema 與 Ingest) holds these parts, shown in `#bi-substeps`.
+// Step 2 of three (Ingest) holds these parts. Owner 2026-11-20: its schema and rules (the old
+// 2a) are in the stage's ⚙ settings; Ingest and 審核 show together as its main view, and
+// `#bi-substeps` stays hidden, kept as the parts' buttons.
 const BI_INGEST = ["schema", "method", "review", "commit", "result"];
 const BI_BASIS = {fact: ["有出處", "good"], inference: ["推論", "warn"],
   unknown: ["無出處", "dim"], human: ["人工", "dim"]};
@@ -2786,7 +2829,11 @@ function biBuildAllowed() {
   const accepted = open && run.summary && run.summary.accepted > 0;
   // A run may wait for review with no source chosen, one started through the API; and
   // proposals are decided in the same step.
-  return {source: true, schema: true, method: has,
+  // Ingest's main view opens without a ticked source too (owner 2026-11-20): its button is
+  // shut and the line under it says to tick one in Data input. Under 全部領域 a source with a
+  // home is only read.
+  const overviewOnly = !!(biOverview() && chosen && biFolderHome(chosen.folder));
+  return {source: true, schema: true, method: !overviewOnly,
     review: has || !!run || (bi.build.waiting || []).length > 0
       || (bi.proposals || []).length > 0 || (bi.proposalsDone || []).length > 0,
     commit: !!accepted && !bi.build.accepting && !bi.build.saving,
@@ -2799,10 +2846,47 @@ function biBuildStepper(stage, allowed) {
   stepperSet(el("bi-stepper"), ingest ? "ingest" : stage,
     {source: true, ingest: allowed.schema, test: allowed.test}, "這是唯讀的副本");
   stepperSet(el("bi-substeps"), stage, allowed, "先完成前面的步驟");
-  el("bi-substeps").hidden = !ingest;
+  el("bi-substeps").hidden = true;  // Ingest and 審核 are one view; 2a is the stage's ⚙
 }
 
 function biBuildSteps() { biBuildStepper(bi.build.stage, biBuildAllowed()); }
+
+// -- each stage's ⚙ settings (owner 2026-11-20) -----------------------------------------
+// What a stage needs set once (file location, schema and rules, questions and analyses) opens
+// as a tab of the side area from the stage's ⚙; the main view keeps its run and its results.
+// The settings' own markup moves into the tab, ids and all, and back when the tab closes.
+const BI_GEARS = {source: "Data input 設定", ingest: "Ingest 設定",
+  test: "Benchmark testing 設定"};
+
+function biGearOpen(name) {
+  const key = "bi-gear:" + name, box = el("bi-b-set-" + name), button = el("bi-b-gear-" + name);
+  if (sideHas(key)) { sideFocus(key); return; }
+  box.hidden = false;
+  button.setAttribute("aria-expanded", "true");
+  biSideTab(key, BI_GEARS[name], box, () => {
+    box.hidden = true; button.setAttribute("aria-expanded", "false");
+  });
+  if (name === "ingest") {
+    biBuildSchema().catch((failure) => biNotice(false, "讀不到 schema：" + failure.message));
+    biBuildMethodStage();
+  }
+}
+
+function biNeedShown() {
+  // First use (owner 2026-11-20): a stage with nothing set yet says so in one line, and its
+  // button opens that stage's ⚙.
+  const readOnly = biReadOnly();
+  const types = bi.schema ? (bi.schema.types || []).length : null;
+  el("bi-b-need-ingest").hidden = readOnly || types === null || types > 0;
+  el("bi-b-need-ingest-why").textContent = "還沒有類別（schema）。";
+  const held = bi.benchReply && bi.benchReply.vaultId === bi.verVault ? bi.benchReply.reply
+    : null;
+  const scope = biScope();
+  const has = held && (held.questions.some((q) => !scope || q.home === scope)
+    || held.cases.some((c) => !scope || biFolderHome(c.folder) === scope));
+  el("bi-b-need-test").hidden = readOnly || !held || el("bi-b-bench").hidden || !!has;
+  el("bi-b-need-test-why").textContent = (scope ? "「" + scope + "」" : "") + "還沒有測試題。";
+}
 
 function biShareOpen() { biSideTab("bi-share", "分享", el("bi-b-ver")); }
 function biHistoryOpen() { biSideTab("bi-history", "歷史紀錄", el("bi-b-hist")); }
@@ -2859,19 +2943,27 @@ for (const type of ["wheel", "touchstart", "pointerdown", "keydown"]) {
 function biBuildStage(name, focus = true) {
   bi.build.moves = (bi.build.moves || 0) + 1;
   const allowed = biBuildAllowed();
-  // Step 2 opens where it was left, or at its first part.
-  if (name === "ingest") name = allowed[bi.build.ingestAt] ? bi.build.ingestAt : "schema";
+  // Step 2 opens where it was left, or at its main view. Its old part a (schema and rules)
+  // is the stage's ⚙ settings now (owner 2026-11-20): asked for, it opens them beside.
+  if (name === "schema") { name = "method"; if (focus) biGearOpen("ingest"); }
+  if (name === "ingest") {
+    name = allowed[bi.build.ingestAt] && bi.build.ingestAt !== "schema" ? bi.build.ingestAt
+      : "method";
+  }
+  // Ingest and 審核 are one view: its stage is 審核 whenever there is something to review.
+  if (name === "method" && allowed.review) name = "review";
+  if (name === "review" && !allowed.review) name = "method";
   const stage = BI_STAGES.includes(name) && allowed[name] ? name : "source";
   bi.build.stage = stage;
   if (BI_INGEST.includes(stage)) bi.build.ingestAt = stage;
   biBuildStepper(stage, allowed);
+  const shown = stage === "review" ? ["method", "review"] : [stage];
   for (const section of document.querySelectorAll("#bi-view-build .kp-stage")) {
-    section.hidden = section.dataset.stage !== stage;
+    section.hidden = !shown.includes(section.dataset.stage);
   }
   biBuildSave();
   biDashHome();
-  if (stage === "schema") biBuildSchema();
-  if (stage === "method") biBuildMethodStage();
+  if (shown.includes("method")) { biBuildMethodStage(); biNeedShown(); }
   if (stage === "review") biBuildReviewStage();
   if (stage === "commit") biBuildSummary();
   if (stage === "result") biBuildResult();
@@ -2885,8 +2977,9 @@ function biBuildStage(name, focus = true) {
       .catch((failure) => biNotice(false, "讀不到知識庫的狀態：" + failure.message)));
   }
   if (focus) {
-    const title = document.querySelector('#bi-view-build .kp-stage[data-stage="' + stage
-      + '"] .kp-stage-title');
+    // 審核 shows under Ingest: the stage's own title is the one to land on.
+    const title = document.querySelector('#bi-view-build .kp-stage[data-stage="'
+      + (stage === "review" ? "method" : stage) + '"] .kp-stage-title');
     if (title) title.focus({preventScroll: false});
   }
 }
@@ -2894,6 +2987,10 @@ function biBuildStage(name, focus = true) {
 for (const button of document.querySelectorAll("#bi-build-steps [data-stage]")) {
   button.addEventListener("click", () => biBuildStage(button.dataset.stage));
 }
+for (const button of document.querySelectorAll("#bi-view-build [data-bi-gear]")) {
+  button.addEventListener("click", () => biGearOpen(button.dataset.biGear));
+}
+el("bi-b-install-open").addEventListener("click", () => el("bi-install").click());
 for (const button of document.querySelectorAll("#bi-view-build [data-bi-next]")) {
   if (button.id === "bi-b-next4") continue;  // waits for the decisions being saved
   button.addEventListener("click", () => biBuildStage(button.dataset.biNext));
@@ -2957,9 +3054,8 @@ async function biBuildLoad() {
   const stored = biBuildStored();
   const load = bi.build.load = (bi.build.load || 0) + 1, dataset = biDataset();
   // The step comes back at once where it needs no source; its data follows.
-  if (["schema", "test"].includes(stored.stage) && bi.build.stage !== stored.stage) {
-    biBuildStage(stored.stage, false);
-  }
+  const back = stored.stage === "schema" ? "method" : stored.stage;
+  if (["method", "test"].includes(back) && bi.build.stage !== back) biBuildStage(back, false);
   const moves = bi.build.moves;
   const schema = bi.schema || {};
   el("bi-b-target").textContent = "寫入目的地：資料集「" + biDataset() + "」・schema "
@@ -2999,7 +3095,9 @@ async function biBuildLoad() {
   // the step below would be saved as that dataset's.
   if (load !== bi.build.load || dataset !== biDataset()) return;
   // A step the person opened meanwhile stays open.
-  if (moves === bi.build.moves) biBuildStage(stored.stage || "source", false);
+  if (moves === bi.build.moves) {
+    biBuildStage(stored.stage === "schema" ? "method" : stored.stage || "source", false);
+  }
   else if (bi.build.stage === "review") biBuildRenderRun();
   else biBuildSteps();
 }
@@ -3596,18 +3694,21 @@ function biAiTarget(spec, text) {
 // run's per-question results open in the shell's side area instead. A view is only hidden, so
 // what it holds stays as it was.
 function biTestGroups() {
-  return {bench: [el("bi-b-bench"), el("bi-b-bench-sum"), el("bi-b-run"),
-    el("bi-b-bench-report")], dash: [el("bi-b-an"), el("bi-b-test-dash")]};
+  // The first of each says whether the tab is there (its settings, in the ⚙ tab); the rest are
+  // the results the tab shows. 跑測試 sits above both (owner 2026-11-20).
+  return {bench: [el("bi-b-bench"), el("bi-b-bench-sum"), el("bi-b-bench-report")],
+    dash: [el("bi-b-an"), el("bi-b-test-dash")]};
 }
 
 function biTestTabs(chosen) {
+  biNeedShown();
   const bar = el("bi-b-tabs"), groups = biTestGroups();
   el("bi-b-run").hidden = el("bi-b-bench").hidden;
   const names = ["bench", "dash"].filter((name) => !groups[name][0].hidden);
   if (names.length < 2) {
     bar.hidden = true; bar.replaceChildren(); bi.testTab = null;  // a choice needs two tabs
     for (const items of Object.values(groups)) {
-      for (const item of items) item.classList.remove("bi-tab-off");
+      for (const item of items.slice(1)) item.classList.remove("bi-tab-off");
     }
     return;
   }
@@ -3619,7 +3720,7 @@ function biTestTabs(chosen) {
     const tab = bh("button", "", labels[name]);
     tab.type = "button"; tab.id = "bi-b-tab-" + name + "-tab"; tab.dataset.tab = name;
     tab.setAttribute("role", "tab");
-    tab.setAttribute("aria-controls", groups[name][0].id);
+    tab.setAttribute("aria-controls", groups[name][1].id);
     tab.setAttribute("aria-selected", String(name === bi.testTab));
     tab.tabIndex = name === bi.testTab ? 0 : -1;
     tab.addEventListener("click", () => biTestTabs(name));
@@ -3634,9 +3735,8 @@ function biTestTabs(chosen) {
     return tab;
   }));
   for (const [name, items] of Object.entries(groups)) {
-    for (const item of items) item.classList.toggle("bi-tab-off", name !== bi.testTab);
+    for (const item of items.slice(1)) item.classList.toggle("bi-tab-off", name !== bi.testTab);
   }
-  groups[bi.testTab][0].open = true;
 }
 
 function biSideTab(id, title, element, onClose) {
@@ -6380,7 +6480,7 @@ function biChosenShown() {
     + bi.build.sources.length + " 份・已選 " + chosen.length + " 份" : "";
   const names = chosen.map((id) => (bi.build.sources.find((s) => s.id === id) || {}).name);
   const line = el("bi-b-batch");
-  line.replaceChildren(!chosen.length ? "還沒有選來源：到步驟 1 勾選「使用」。"
+  line.replaceChildren(!chosen.length ? "還沒有選來源：到 Data input 勾選「使用」。"
     : chosen.length === 1 ? "這次 Ingest：" + names[0]
       : bh("details", "", bh("summary", "", "這次 Ingest：" + chosen.length + " 份來源，"
         + "一份一次，依序執行"), bh("ul", "", ...names.map((name) => bh("li", "", name)))));
@@ -6862,7 +6962,8 @@ function biUploadProgress(state, message) {
   }
 }
 
-el("bi-b-upload").addEventListener("click", async () => {
+// 轉檔 and 自動執行's first stage: what came of each file, and the sources it added.
+async function biConvert() {
   const button = el("bi-b-upload"); button.disabled = true;
   const files = Array.from(el("bi-b-file").files);
   const started = Date.now();
@@ -6880,6 +6981,7 @@ el("bi-b-upload").addEventListener("click", async () => {
     show();
   };
   const added = [], failed = [], described = [];
+  const outcome = {total: files.length, added, failed, error: null};
   try {
     for (const [index, file] of files.entries()) {
       Object.assign(now, {index: index + 1, name: file.name, step: "讀取檔案"}); show();
@@ -6929,9 +7031,13 @@ el("bi-b-upload").addEventListener("click", async () => {
     if (last && last.format) biPickSource(last);
     if (described.length) await biDescribeWait(described, result, failed.length > 0);
   } catch (failure) {
+    outcome.error = failure;
     biUploadProgress("error", "來源沒有加入：" + failure.message + "。");
   } finally { clearInterval(ticker); biFileChosen(); }
-});
+  return outcome;
+}
+
+el("bi-b-upload").addEventListener("click", () => biConvert());
 
 // After 轉檔, the pictures' descriptions (owner 2026-11-20), beside 轉檔 as rule 23 asks:
 // which file, n of N pictures, seconds; then how many were described, in the same place.
@@ -7423,7 +7529,7 @@ el("bi-b-draft-trial").addEventListener("click", async () => {
   box.replaceChildren();
   if (!draft) return;
   if (!bi.build.sourceId) {
-    box.append(bh("p", "bi-err", "先在步驟 1 選一份來源。")); return;
+    box.append(bh("p", "bi-err", "先在 Data input 選一份來源。")); return;
   }
   try {
     const reply = await biCall("/api/bi/runs", {dataset: biDataset(), kind: "trial",
@@ -8545,7 +8651,10 @@ function biBuildRenderRun(detail = true) {
   el("bi-b-review-split").hidden = !biRunReviewable(run) && !biReviewItems().length;
   if (!biRunReviewable(run)) {
     el("bi-b-same").replaceChildren();
-    el("bi-b-chips").append(bh("p", "bi-empty", "在「Ingest」這一步按「Ingest」產生候選卡。"));
+    // Ingest is just above (owner 2026-11-20): said only when there is nothing to list.
+    if (!biReviewItems().length) {
+      el("bi-b-chips").append(bh("p", "bi-empty", "按上面的「Ingest」產生候選卡。"));
+    }
     biBuildCandTypes(); biBuildCandRows();
     if (detail && biChangeOf(bi.build.candidateId)) biBuildShowCandidate(bi.build.candidateId);
     else if (detail) el("bi-b-cand").replaceChildren(bh("p", "bi-empty", "選一列，看內容與出處。"));
