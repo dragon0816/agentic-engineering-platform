@@ -5683,6 +5683,18 @@ Tests: `tests/test_agents_settings.py`, `tests/test_telegram_agent_bots.py`,
   `token_present`. Empty token = the variable is used as it is; a new token overwrites it;
   deleting a bot leaves its variable in place. A pasted token in `variable` stays
   `bot_token_value_refused`.
+- **Bot identity (owner 2026-11-20).** Every bot in `GET /api/settings/agents` (main, agent,
+  collection) and every `bot` in `GET /api/agents` carries `username`, `title` (from Telegram
+  `getMe` with the token in its variable, `src/host_runtime/bot_identity.py`) and `variable`; the
+  main bot also `token_present`. Lookups run in parallel with a 3 s timeout, are cached per
+  SHA-256 fingerprint of origin + token (never the token; 1 h, failures 60 s) and cleared on every
+  Agents or Telegram settings save. Unresolved → `problem` (unless polling already set one):
+  `token_missing`, `token_invalid` (401/404), `network_unreachable`, `telegram_error`. The page's
+  Telegram column shows `@username · state` first and the variable as secondary text; rows without
+  a bot show 「未綁定」 and a 「綁定」 button opening the form at the bot fieldset; the main row's
+  編輯 goes to the Telegram bot form; no sub-agents → 「還沒有子代理。」 with 新增 agent; the
+  sidebar's Agents entries show a TG mark with `@username`. Tests use `tests/conftest.py`, which
+  keeps every test offline (`bot_identity.TRANSPORT_FACTORY`).
 - **Applying.** After a save the bots are rebuilt on the kept conversation-bot ingress and the
   polling loop restarts only once no Telegram turn or flow runs on any bot (`reload`: `waiting`,
   `applying`, `applied`, `not_running`, `failed`); no Agent Web restart.

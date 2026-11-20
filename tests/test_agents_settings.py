@@ -395,7 +395,8 @@ def test_a_pasted_token_goes_only_to_the_user_environment_and_applies_at_once(
     web: AgentWeb, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     _telegram_on(web)
-    monkeypatch.delenv("AEP_TG_SALES", raising=False)
+    monkeypatch.setenv("AEP_TG_SALES", "unset")  # recorded, so teardown removes it
+    monkeypatch.delenv("AEP_TG_SALES")
     store = web.user_environment
     assert isinstance(store, Store)
     view = web.agent_settings_action(
@@ -439,7 +440,8 @@ def test_a_collection_bot_takes_a_pasted_token_too(
     web: AgentWeb, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     _telegram_on(web)
-    monkeypatch.delenv("AEP_TG_BI_BI_RF", raising=False)
+    monkeypatch.setenv("AEP_TG_BI_BI_RF", "unset")  # recorded, so teardown removes it
+    monkeypatch.delenv("AEP_TG_BI_BI_RF")
     view = web.agent_settings_action(
         "/api/settings/collection-bots",
         {"name": "bi_rf", "target": "RF", "bot": {"token": f"bot{AGENT_TOKEN}"}},
@@ -455,7 +457,8 @@ def test_a_bad_token_or_a_taken_variable_writes_nothing(
     web: AgentWeb, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     _telegram_on(web)
-    monkeypatch.delenv("AEP_TG_SALES", raising=False)
+    monkeypatch.setenv("AEP_TG_SALES", "unset")  # recorded, so teardown removes it
+    monkeypatch.delenv("AEP_TG_SALES")
     monkeypatch.setenv("AEP_SOME_PATH", "C:/tools")
     store = web.user_environment
     assert isinstance(store, Store)
@@ -490,7 +493,8 @@ def test_a_host_that_cannot_store_a_token_says_so_and_writes_nothing(
     web: AgentWeb, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     _telegram_on(web)
-    monkeypatch.delenv("AEP_TG_SALES", raising=False)
+    monkeypatch.setenv("AEP_TG_SALES", "unset")  # recorded, so teardown removes it
+    monkeypatch.delenv("AEP_TG_SALES")
 
     def unsupported(name: str, value: str) -> None:
         raise TelegramSettingsError("token_store_unavailable")
@@ -512,7 +516,8 @@ def test_the_default_store_refuses_off_windows_without_touching_a_registry(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(sys, "platform", "linux")
-    monkeypatch.delenv("AEP_TG_SALES", raising=False)
+    monkeypatch.setenv("AEP_TG_SALES", "unset")  # recorded, so teardown removes it
+    monkeypatch.delenv("AEP_TG_SALES")
     with pytest.raises(AgentSettingsError, match="^bot_token_store_unsupported$"):
         agents_settings._store_token(None, "AEP_TG_SALES", AGENT_TOKEN)
     assert "AEP_TG_SALES" not in os.environ
@@ -563,7 +568,8 @@ def test_the_windows_store_writes_hkcu_and_broadcasts_without_a_command_line(
     monkeypatch.setitem(sys.modules, "winreg", winreg)
     monkeypatch.setitem(sys.modules, "ctypes", ctypes)
     monkeypatch.setattr(subprocess, "Popen", no_process)
-    monkeypatch.delenv("AEP_TG_SALES", raising=False)
+    monkeypatch.setenv("AEP_TG_SALES", "unset")  # recorded, so teardown removes it
+    monkeypatch.delenv("AEP_TG_SALES")
     agents_settings._store_token(None, "AEP_TG_SALES", AGENT_TOKEN)
     assert calls == [
         ("open", "HKCU", "Environment"),

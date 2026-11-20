@@ -270,7 +270,8 @@ def test_a_token_pasted_on_the_page_is_stored_and_the_field_is_cleared(
     web.user_environment = store  # never the real registry in tests
     monkeypatch.setattr(web, "start_telegram", lambda: None)  # no network
     monkeypatch.setenv("AEP_TELEGRAM_BOT_TOKEN", TOKEN)
-    monkeypatch.delenv("AEP_TG_SALES", raising=False)
+    monkeypatch.setenv("AEP_TG_SALES", "unset")  # recorded, so teardown removes it
+    monkeypatch.delenv("AEP_TG_SALES")
     assert web.update_telegram_settings(_update())["ok"] is True
     pasted = "987654321:BBz" + "y" * 33
     ui.browser.navigate(server.address)
@@ -292,6 +293,9 @@ def test_a_token_pasted_on_the_page_is_stored_and_the_field_is_cleared(
     rows = str(ui.run("document.getElementById('agents-rows').textContent"))
     assert "AEP_TG_SALES" in rows and pasted not in rows
     # Edit opens with the default name and an empty token field.
-    ui.run("document.querySelector('#agents-rows table button').click()")
+    ui.run(
+        "[...document.querySelectorAll('#agents-rows tr')]"
+        ".find((r) => r.textContent.includes('Sales')).querySelector('button').click()"
+    )
     assert ui.run("document.getElementById('agent-bot-variable').value") == "AEP_TG_SALES"
     assert ui.run("document.getElementById('agent-bot-token').value") == ""

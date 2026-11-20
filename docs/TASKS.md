@@ -5289,3 +5289,14 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   browser test with a fake store), tests/test_telegram_agent_bots.py,
   tests/test_telegram_settings.py pass; ruff, ruff format --check, mypy on changed files clean.
   Full suite not run.
+- [x] 2026-11-20 Show which Telegram bot each agent is bound to (owner 2026-11-20; branch
+  bi-knowledge-round2-20261120; contract docs/CONTRACTS.md "Persistent agents and agent bots",
+  bullet "Bot identity"). `getMe` per bot (cached per token fingerprint, 3 s timeout, cleared on
+  save) adds `username` / `title` / `problem` to `/api/settings/agents` and `/api/agents`; the
+  Agents table shows `@username · state` first with the variable second, 「未綁定」 + 「綁定」, main
+  row editable through the Telegram bot form, an empty-state line; the sidebar shows a TG mark
+  with `@username`. Verification: tests/test_bot_identity.py (new, getMe faked),
+  test_agents_settings, test_telegram_agent_bots, test_telegram_settings, test_agent_sidebar_ui
+  pass (45); ruff, ruff format --check, mypy on changed files clean. Full suite not run. Also
+  fixes the token tests' environment cleanup (monkeypatch.delenv on an absent variable does not
+  restore it).

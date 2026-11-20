@@ -399,6 +399,10 @@ select.mem-field { width: auto; flex: 0 1 220px; min-width: 0; max-width: 100%; 
 .agent-badge { margin-left: auto; padding: 0 6px; border: 1px solid var(--line);
   border-radius: 10px; color: var(--dim); font-size: 11px; font-weight: 600; }
 .agent-badge.on { color: var(--accent); border-color: var(--accent); }
+.tg-mark { display: inline-block; margin-right: 3px; padding: 0 3px; border-radius: 3px;
+  background: #229ED9; color: #fff; font-size: 9px; font-weight: 700; line-height: 1.5; }
+.bot-cell .bot-name { display: block; font-weight: 600; }
+.bot-cell .bot-detail { display: block; }
 .agent-conversations { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px;
   padding: 0 0 6px 18px; }
 .agent-conversations .session-item { min-height: 40px; padding: 6px 8px; }
@@ -4201,7 +4205,11 @@ function renderAgentList() {
     if (agent.bot) {
       const badge = document.createElement("span");
       badge.className = "agent-badge" + (agent.bot.enabled ? " on" : "");
-      badge.append(text(agent.bot.enabled ? "Telegram" : "Telegram 關"));
+      badge.title = "Telegram bot";
+      const mark = document.createElement("span"); mark.className = "tg-mark";
+      mark.setAttribute("aria-label", "Telegram"); mark.append(text("TG"));
+      const label = agent.bot.username ? "@" + agent.bot.username : "Telegram";
+      badge.append(mark, text(agent.bot.enabled ? label : label + " 關"));
       summary.append(badge);
     }
     details.append(summary);
@@ -4281,27 +4289,56 @@ function parseSenders(value) {
   return senders;
 }
 
-function botState(bot) {
-  if (!bot) return "未綁定";
-  const parts = [bot.variable || "（沒有變數）"];
-  parts.push(bot.token_present ? "token 已設定" : "環境變數沒有值");
-  parts.push(!bot.enabled ? "關" : bot.running ? "收訊中" : "開（尚未收訊）");
-  if (bot.problem) parts.push(bot.problem);
-  return parts.join(" · ");
+const BOT_PROBLEMS = {
+  token_missing: "環境變數裡沒有 token",
+  token_invalid: "token 無效（Telegram 不認得）",
+  network_unreachable: "連不上 Telegram",
+  telegram_error: "Telegram 回應錯誤",
+};
+
+// One bot's cell: its @username and state first, then the variable it reads.
+function botCell(bot, options) {
+  const cell = document.createElement("span"); cell.className = "bot-cell";
+  if (!bot) {
+    cell.append(text("未綁定"));
+    if (options && options.bind) {
+      const bind = document.createElement("button"); bind.type = "button";
+      bind.className = "bot-bind"; bind.append(text("綁定"));
+      bind.addEventListener("click", options.bind);
+      cell.append(" ", bind);
+    }
+    return cell;
+  }
+  const name = bot.username ? "@" + bot.username : bot.title || "（bot 名稱未知）";
+  const state = !bot.enabled ? "關"
+    : bot.running === undefined ? "開" : bot.running ? "收訊中" : "開（尚未收訊）";
+  const head = document.createElement("span"); head.className = "bot-name";
+  head.append(text(name + " · " + state));
+  const detail = document.createElement("small"); detail.className = "note bot-detail";
+  const parts = [];
+  if (bot.username && bot.title) parts.push(bot.title);
+  parts.push(bot.variable || "（沒有變數）");
+  if (bot.problem) parts.push(BOT_PROBLEMS[bot.problem] || bot.problem);
+  else if (!bot.token_present) parts.push("環境變數沒有值");
+  if (options && options.where) parts.push(options.where);
+  detail.append(text(parts.join(" · ")));
+  cell.append(head, detail);
+  return cell;
 }
 
 function renderAgentSettings(view) {
   agentSettings = view;
+  const mainBot = view.main && view.main.bot;
   const rows = [
     {who: view.main ? "主 Agent" : "", purpose: "這台電腦的 Agent（固定）",
-     bot: view.main && view.main.bot
-       ? (view.main.bot.variable || "") + " · " + (view.main.bot.enabled ? "開" : "關")
-       + "（在上面的 Telegram bot 設定）"
-       : "未設定（在上面的 Telegram bot 設定）", edit: null},
+     bot: mainBot ? botCell(mainBot, {where: "在上面的 Telegram bot 設定"})
+       : botCell(null, {bind: openMainBotForm}),
+     edit: openMainBotForm},
     ...view.agents.map((agent) => ({who: agent.name, purpose: agent.purpose || "",
-      bot: botState(agent.bot), edit: () => openAgentForm(agent)})),
+      bot: botCell(agent.bot, {bind: () => openAgentForm(agent, true)}),
+      edit: () => openAgentForm(agent)})),
     ...view.collection_bots.map((bot) => ({who: bot.name, purpose: bot.purpose,
-      bot: botState(bot), edit: () => openCollectForm(bot)})),
+      bot: botCell(bot), edit: () => openCollectForm(bot)})),
   ];
   const t = table(["Agent / bot", "用途", "Telegram bot", ""], rows, (row) => {
     let button = "";
@@ -4312,7 +4349,16 @@ function renderAgentSettings(view) {
     return [row.who, row.purpose, row.bot, button];
   });
   t.classList.add("agents-table");
-  el("agents-rows").replaceChildren(t);
+  const shown = [t];
+  if (!view.agents.length) {
+    const empty = document.createElement("p"); empty.className = "note"; empty.id = "agents-empty";
+    const add = document.createElement("button"); add.type = "button";
+    add.append(text("新增 agent")); add.disabled = !view.writable;
+    add.addEventListener("click", () => openAgentForm(null));
+    empty.append(text("還沒有子代理。"), " ", add);
+    shown.push(empty);
+  }
+  el("agents-rows").replaceChildren(...shown);
   el("agent-add").disabled = !view.writable;
   el("collect-add").disabled = !view.writable || !view.telegram_configured;
   const profiles = el("agent-profile");
@@ -4339,7 +4385,13 @@ function showAgentSkills(chosen) {
   box.replaceChildren(legend, ...boxes);
 }
 
-function openAgentForm(agent) {
+// The main agent's bot is edited in the Telegram bot form above.
+function openMainBotForm() {
+  el("telegram-settings").scrollIntoView({block: "center"});
+  el("telegram-token").focus();
+}
+
+function openAgentForm(agent, bind) {
   el("collect-form").hidden = true;
   el("agent-form").hidden = false;
   el("agent-form-title").textContent = agent ? "編輯 agent" : "新增 agent";
@@ -4356,7 +4408,14 @@ function openAgentForm(agent) {
   el("agent-bot-senders").value = bot ? sendersText(bot.senders) : "";
   el("agent-bot-enabled").checked = bot ? bot.enabled : true;
   el("agent-delete").hidden = !agent;
-  el("agent-form-name").focus();
+  if (bind) {
+    // 綁定 from the table: straight to the bot part, ready for a pasted token.
+    el("agent-bot-on").checked = true;
+    el("agent-bot-on").closest("fieldset").scrollIntoView({block: "center"});
+    el("agent-bot-token").focus();
+  } else {
+    el("agent-form-name").focus();
+  }
 }
 
 // The variable a bot's token is kept in when the name field is left as is.
