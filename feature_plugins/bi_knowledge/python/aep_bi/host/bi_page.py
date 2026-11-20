@@ -246,6 +246,13 @@ BI_CSS = r"""
 #bi-view-build .kp-stage[data-stage="method"]:not([hidden]) + .kp-stage[data-stage="review"] {
   border-top-style: dashed; border-radius: 0 0 10px 10px; }
 #bi-view-build .kp-stage[data-stage="review"] .kp-stage-title { font-size: 15px; margin: 0 0 2px; }
+/* 自動執行 in the stage bar's row, its progress beside it; the bar keeps its height. */
+#bi-build-steps { display: flex; flex-wrap: wrap; align-items: center; gap: 0 12px; }
+#bi-build-steps > .kp-stepper { flex: 1 1 520px; min-width: 0; }
+.bi-auto { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px;
+  flex: 0 1 auto; margin: 0 0 6px; }
+.bi-auto[hidden], .bi-run-progress[hidden] { display: none; }
+.bi-auto .bi-err { color: var(--bad, #b42318); }
 tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
 @media (max-width: 760px) {
   .bi-ai-panel { top: auto; left: 0; width: auto; height: 66vh; border-left: 0;
@@ -793,6 +800,11 @@ BI_PANE_HTML = r"""
             <li hidden><button type="button" data-stage="result"></button></li>
           </ol>
         </nav>
+        <div class="bi-auto" id="bi-b-auto-box">
+          <button class="go" id="bi-b-auto" type="button">自動執行</button>
+          <div class="bi-run-progress" id="bi-b-auto-progress" role="status"
+            aria-live="polite" hidden><progress id="bi-b-auto-bar" max="4" value="0"></progress>
+            <span id="bi-b-auto-text"></span></div></div>
         </div>
         <div class="mem-status" id="bi-status-build" role="status" aria-live="polite" hidden></div>
         <section class="kp-stage card bi-step" data-stage="source" aria-labelledby="bi-b-source">
@@ -3014,6 +3026,7 @@ el("bi-b-next4").addEventListener("click", async () => {
 function biBuildReadOnly() {
   const readOnly = biReadOnly();
   el("bi-b-src-input").hidden = readOnly; el("bi-b-adv-source").hidden = readOnly;
+  el("bi-b-auto-box").hidden = readOnly;
   el("bi-b-src-split").hidden = readOnly;  // a copy has no sources here
   el("bi-b-next1").parentNode.hidden = readOnly;
   return readOnly;
@@ -3100,6 +3113,7 @@ async function biBuildLoad() {
   }
   else if (bi.build.stage === "review") biBuildRenderRun();
   else biBuildSteps();
+  biAutoResume();  // a 自動執行 cut off by a reload carries on, once
 }
 
 // -- step 1: the knowledge base (BI vaults V4, docs/phases/BI_VAULT.md §3, §7.1) --
@@ -9209,6 +9223,281 @@ function biBuildResult() {
         bi.build.run = null; bi.build.candidates = []; biBuildStage("source");
       }, "bi-btn")));
 }
+
+// -- 自動執行 (owner 2026-11-20) -----------------------------------------------------------
+// One press runs 轉檔 → Ingest → accepting every pending row (new cards and changes,
+// judgement fields too, no reason) and 匯入 → 跑測試, with no stop. Beside it (AGENTS 23): the
+// stage n/4, that stage's own progress and the seconds; it ends there with the result, or the
+// failure and the stage it stopped in. Each stage's view shows as it starts, so its results
+// stay in sight. At most once (AGENTS 21): the button is shut while it runs, and the run is
+// kept in this browser per dataset, so neither a second press nor a reload starts another. A
+// reload carries on from its stage: Ingest takes the runs of these sources started since the
+// press instead of starting them again, the test takes a run started since the press, and the
+// host answers accept and commit done before with what it already did (already_accepted,
+// `already`). A reload during 轉檔 stops there: which files were sent cannot be known.
+const BI_AUTO_STAGES = ["轉檔", "Ingest", "接受並匯入", "跑測試"];
+const BI_AUTO_TAB = (() => {
+  // This tab, across its reloads: a run another tab of this browser drives is not resumed.
+  const made = Math.random().toString(36).slice(2);
+  try {
+    const kept = sessionStorage.getItem("bi-auto-tab");
+    if (kept) return kept;
+    sessionStorage.setItem("bi-auto-tab", made);
+  } catch (e) { /* private mode: this load only */ }
+  return made;
+})();
+
+function biAutoRead(dataset) {
+  try { return JSON.parse(localStorage.getItem("bi-auto-" + dataset) || "null"); }
+  catch (e) { return null; }
+}
+
+function biAutoWrite(state) {
+  state.beat = Date.now();
+  try { localStorage.setItem("bi-auto-" + state.dataset, JSON.stringify(state)); }
+  catch (e) { /* */ }
+}
+
+function biAutoShow(state) {
+  const box = el("bi-b-auto-progress"), bar = el("bi-b-auto-bar"), text = el("bi-b-auto-text");
+  const button = el("bi-b-auto"), running = !!state && state.status === "running";
+  button.disabled = running;
+  if (running) button.setAttribute("aria-busy", "true"); else button.removeAttribute("aria-busy");
+  box.hidden = !state;
+  if (!state) return;
+  box.classList.toggle("bi-err", state.status === "failed");
+  bar.max = BI_AUTO_STAGES.length;
+  bar.value = state.status === "done" ? BI_AUTO_STAGES.length : state.stage - 1;
+  const seconds = Math.max(0, Math.floor(((state.ended || Date.now()) - state.started) / 1000));
+  const stage = "第 " + state.stage + "/" + BI_AUTO_STAGES.length + " 步（"
+    + BI_AUTO_STAGES[state.stage - 1] + "）";
+  text.textContent = running ? stage + (state.sub ? "・" + state.sub : "") + "・" + seconds + " 秒"
+    : (state.status === "done" ? "自動執行完成：" : "自動執行停在" + stage + "：")
+      + state.message + "・" + seconds + " 秒";
+}
+
+function biAutoSleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
+
+function biAutoHere(dataset) {
+  if (biDataset() !== dataset) throw new Error("換了知識庫，自動執行停下");
+}
+
+async function biAutoRun(resume) {
+  if (bi.autoRunning) return;  // a second press while it runs
+  const dataset = biDataset(), stored = biAutoRead(dataset);
+  if (!resume && stored && stored.status === "running") { biAutoResume(); return; }
+  bi.autoRunning = true;
+  const state = resume || {dataset, stage: 1, status: "running", started: Date.now(), made: {},
+    sources: [], message: ""};
+  state.tab = BI_AUTO_TAB; state.ended = null;
+  biAutoWrite(state); biAutoShow(state);
+  // Stages 1 and 2 say what they do in their own line; 3 and 4 set it here.
+  const live = {1: "bi-b-upload-status", 2: "bi-status-build"};
+  const ticker = setInterval(() => {
+    if (live[state.stage]) state.sub = el(live[state.stage]).textContent.trim();
+    biAutoWrite(state); biAutoShow(state);
+  }, 1000);
+  const show = (stage) => {
+    if (bi.view === "build" && biDataset() === dataset) biBuildStage(stage, false);
+  };
+  const next = (stage) => { state.stage = stage; state.sub = ""; biAutoWrite(state); };
+  try {
+    if (state.stage === 1) {
+      if (resume) {
+        throw new Error("頁面在轉檔時重新載入，不知道哪些檔案已經送出；請在 Data input 確認來源後"
+          + "再按一次");
+      }
+      show("source");
+      if (el("bi-b-file").files.length) {
+        if (!biAddReady()) throw new Error("先在上面選工作領域，才能加入檔案");
+        const out = await biConvert();
+        if (out.error) throw new Error(out.error.message);
+        if (out.failed.length) {
+          throw new Error(out.failed.length + " 份沒有轉檔：" + out.failed.join("；"));
+        }
+      }
+      state.sources = biChosen();
+      if (!state.sources.length) {
+        throw new Error("沒有要 Ingest 的來源：加入檔案，或在 Data input 勾選「使用」");
+      }
+      next(2);
+    }
+    if (state.stage === 2) {
+      show("method");
+      await biAutoIngest(state, dataset);
+      next(3);
+    }
+    if (state.stage === 3) {
+      state.imported = await biAutoAccept(state, dataset);
+      next(4);
+    }
+    show("test");
+    state.tested = await biAutoBench(state, dataset);
+    const a = state.imported;
+    state.status = "done";
+    state.message = "匯入新建 " + a.created + "、更新 " + a.updated + " 張" + (a.changes
+      ? "；接受修改 " + a.changes + " 筆" : "") + (a.left ? "；" + a.left + " 張沒有接受（"
+        + a.why.slice(0, 3).join("；") + (a.left > 3 ? "…" : "") + "）" : "")
+      + "；" + state.tested;
+  } catch (failure) {
+    state.status = "failed"; state.message = failure.message;
+  } finally {
+    clearInterval(ticker);
+    bi.autoRunning = false; state.ended = Date.now(); state.sub = "";
+    biAutoWrite(state); biAutoShow(state);
+  }
+}
+
+async function biAutoIngest(state, dataset) {
+  const listed = await call("/api/bi/runs?dataset=" + encodeURIComponent(dataset));
+  const since = state.started - 5000, batch = state.sources.length > 1, failed = [];
+  const name = (id) => (bi.build.sources.find((s) => s.id === id) || {}).name || id;
+  for (const [index, sourceId] of state.sources.entries()) {
+    biAutoHere(dataset);
+    const where = "第 " + (index + 1) + "／" + state.sources.length + " 份「" + name(sourceId)
+      + "」：";
+    // Started by this press before a reload: taken, never started twice.
+    let runId = state.made[sourceId] || ((listed.runs || []).find((run) => run.kind === "ingest"
+      && (run.source_ids || []).includes(sourceId) && Date.parse(run.at) >= since) || {}).id;
+    if (!runId) {
+      biStatus("bi-status-build", "loading", where + "正在產生候選卡…");
+      runId = (await biCall("/api/bi/runs", biRunBody("ingest", sourceId, batch))).run.id;
+    }
+    state.made[sourceId] = runId; biAutoWrite(state);
+    const detail = await biBuildFollow(runId, where);
+    if (["failed", "cancelled"].includes(detail.run.status)) {
+      delete state.made[sourceId];
+      failed.push(name(sourceId) + "：" + (detail.run.error
+        || (detail.run.status === "cancelled" ? "已取消" : "判讀失敗")));
+    }
+  }
+  biStatus("bi-status-build", "");
+  if (failed.length) throw new Error(failed.length + " 份沒有 Ingest：" + failed.join("；"));
+  const first = Object.values(state.made)[0];
+  if (first && biDataset() === dataset) {
+    await biBuildFetchRun(first); bi.build.candidateId = null; biBuildSave();
+    if (bi.view === "build") biBuildStage("review", false);
+  }
+}
+
+async function biAutoAccept(state, dataset) {
+  // Every pending row of 審核, as 「全部接受並匯入」 and 「接受顯示的待決定」 with no filter.
+  const total = {created: 0, updated: 0, changes: 0, left: 0, why: []};
+  const runs = Object.values(state.made);
+  const read = (runId) => call("/api/bi/runs/" + runId + "?dataset="
+    + encodeURIComponent(dataset));
+  for (const [index, runId] of runs.entries()) {
+    biAutoHere(dataset);
+    const where = runs.length > 1 ? "第 " + (index + 1) + "/" + runs.length + " 次執行・" : "";
+    let detail = await read(runId);
+    if (detail.run.status === "committed") {
+      total.created += (detail.run.commit || {}).created || 0;
+      total.updated += (detail.run.commit || {}).updated || 0;
+      continue;
+    }
+    if (!biRunOpen(detail.run)) continue;
+    const todo = detail.candidates.filter((c) => c.review === "pending" && c.action !== "skip");
+    for (let at = 0; at < todo.length; at += BI_APPLY_CHUNK) {
+      const chunk = todo.slice(at, at + BI_APPLY_CHUNK);
+      state.sub = where + "接受 " + (at + chunk.length) + "/" + todo.length + " 張";
+      biAutoShow(state);
+      const reply = await biCall("/api/bi/runs/" + runId + "/accept",
+        {dataset, ids: chunk.map((c) => c.id)});
+      const refused = reply.results.filter((r) => r.status !== "applied"
+        && r.code !== "already_accepted");
+      total.left += refused.length;
+      total.why.push(...refused.map((r) => (r.name || r.id) + "：" + r.reason));
+    }
+    detail = await read(runId);
+    const writes = detail.candidates.some((c) => c.review === "accepted"
+      && (["create", "update"].includes(c.action) || (c.citations || []).length));
+    if (!writes) continue;
+    state.sub = where + "匯入中"; biAutoShow(state);
+    const done = await biCall("/api/bi/runs/" + runId + "/commit", {dataset});
+    const applied = done.applied || (done.run || {}).commit || {};
+    total.created += applied.created || 0; total.updated += applied.updated || 0;
+  }
+  // The changes to existing cards, after the commits that may have made some.
+  biAutoHere(dataset);
+  const listed = await call("/api/bi/proposals?dataset=" + encodeURIComponent(dataset));
+  const pending = (listed.proposals || []).length;
+  if (pending) {
+    state.sub = "接受修改 " + pending + " 筆"; biAutoShow(state);
+    const reply = await biCall("/api/bi/proposals/decide", {dataset, action: "accept",
+      field: null, origin: null, count: pending});
+    total.changes = reply.decided || 0;
+  }
+  // The page as it stands now: the cards, 審核 and the knowledge base's state.
+  bi.loaded = {}; biRefreshCounts();
+  const last = runs[runs.length - 1];
+  if (last) { await biBuildFetchRun(last); biBuildSave(); }
+  await biProposals().catch(() => {});
+  biBuildVault().catch(() => {});
+  if (bi.view === "build" && BI_INGEST.includes(bi.build.stage)) biBuildStage("review", false);
+  return total;
+}
+
+async function biAutoBench(state, dataset) {
+  const vault = biVaultOf(dataset);
+  if (!vault) return "這個資料集不是知識庫，沒有測試";
+  const home = biScope(), query = home ? "?home=" + encodeURIComponent(home) : "";
+  const checks = () => call("/api/bi/vaults/" + vault.id + "/checks" + query);
+  if (!state.bench) {
+    const newest = (await checks()).newest;
+    // Started by this press before a reload: watched, not started again.
+    if (newest && newest.progress
+      && Date.parse(newest.progress.started_at) >= state.started - 5000) {
+      state.bench = newest.run_id;
+    } else {
+      state.bench = (await biCall("/api/bi/vaults/" + vault.id + "/bench", {home})).run_id;
+    }
+    biAutoWrite(state);
+  }
+  bi.benchWatch = state.bench; bi.runShown = state.bench;
+  if (bi.verVault === vault.id) biBench(vault.id).catch(() => {});
+  for (;;) {
+    biAutoHere(dataset);
+    const reply = await checks(), newest = reply.newest;
+    if (newest && newest.run_id === state.bench && newest.status !== "running") {
+      if (newest.status !== "finished") {
+        throw new Error("測試沒有跑完：" + (newest.error || newest.status));
+      }
+      const report = reply.latest || {};
+      return report.run_id === state.bench
+        ? "測試通過 " + (report.working_score || 0) + "/" + (report.total || 0) + " 題"
+        : "測試跑完了";
+    }
+    const p = (newest && newest.run_id === state.bench && newest.progress) || {};
+    state.sub = p.total ? "第 " + Math.min((p.done || 0) + 1, p.total) + "/" + p.total + " 題"
+      + (p.current ? "：" + p.current : "") : "開始中";
+    biAutoShow(state);
+    await biAutoSleep(1500);
+  }
+}
+
+function biAutoResume() {
+  // What this dataset's last 自動執行 is doing, or how it ended, beside its button.
+  clearInterval(bi.autoMirror);
+  if (bi.autoRunning) return;
+  const state = biAutoRead(biDataset());
+  if (!state || state.status !== "running") { biAutoShow(state); return; }
+  if (state.tab !== BI_AUTO_TAB && Date.now() - (state.beat || 0) < 5000) {
+    // Another tab of this browser runs it: followed here, never run a second time.
+    biAutoShow(state);
+    bi.autoMirror = setInterval(() => {
+      const now = biAutoRead(state.dataset);
+      if (biDataset() !== state.dataset) { clearInterval(bi.autoMirror); return; }
+      if (now && now.status === "running" && Date.now() - (now.beat || 0) < 5000) {
+        biAutoShow(now); return;
+      }
+      clearInterval(bi.autoMirror); biAutoResume();
+    }, 1000);
+    return;
+  }
+  biAutoRun(state);
+}
+
+el("bi-b-auto").addEventListener("click", () => biAutoRun(null));
 
 function biRenderReadOnly() {
   const info = biCurrent(), readOnly = biReadOnly();

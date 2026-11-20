@@ -21,7 +21,9 @@ from test_bi_extract import Scripted
 from test_bi_vault import _call, _ok
 from test_draft_install_cards import served  # noqa: F401 - the real Agent Web fixture
 
+from aep_bi.cards import vault_checks
 from aep_bi.cards.ai_runs import AiRuntime
+from aep_bi.cards.store import BiStore
 from aep_bi.host import bi_bench, bi_cards_api
 from scripts import bi_feed_fixtures as fixtures
 
@@ -166,3 +168,87 @@ def test_each_gear_opens_its_stages_settings_beside_and_the_main_view_has_none(
         # The source file location is in Data input's settings.
         page.gear("source")
         page.see("bi-b-v-info", "共用資料夾")
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_auto_run_does_every_stage_once_with_its_progress_even_across_a_reload(
+    served: Any,  # noqa: F811
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server, workspace, benches = _setup(served, tmp_path, monkeypatch)
+    with BiPage(tmp_path / "browser", server.address) as page:
+        _open(page)
+        page.stage("test")
+        # No questions yet: the stage says so, and its button opens the settings.
+        page.wait("!document.getElementById('bi-b-need-test').hidden")
+        home = page.run("biScope()")
+        vault_checks.save_question(
+            workspace,
+            VAULT,
+            {"question": "FAKE-7 在評估什麼？", "must": "FAKE-7", "slug": "fake7", "home": home},
+        )
+        page.run("biBench(bi.verVault)")
+        page.wait("document.getElementById('bi-b-need-test').hidden")
+
+        page.stage("source")
+        page.attach("會議.md", NOTE, "text/markdown")
+        # A double press starts one run.
+        page.run(
+            "document.getElementById('bi-b-auto').click();"
+            " document.getElementById('bi-b-auto').click();"
+        )
+        page.wait(
+            "document.getElementById('bi-b-auto-text').textContent.includes('第 2/4 步（Ingest）')"
+        )
+        assert page.run("document.getElementById('bi-b-auto').disabled")
+        assert page.run("!document.getElementById('bi-b-auto-progress').hidden")
+        assert "秒" in page.text_of("bi-b-auto-text")
+        # Pressed again while it runs (and enabled by force): still one run.
+        page.run(
+            "document.getElementById('bi-b-auto').disabled = false;"
+            " document.getElementById('bi-b-auto').click()"
+        )
+        # A reload in the middle of Ingest carries on with the same run.
+        page.reload()
+        page.click("#bi-views [data-bi-view=build]")
+        page.wait(
+            "document.getElementById('bi-b-auto-text').textContent.includes('自動執行完成')",
+            120,
+        )
+        said = page.text_of("bi-b-auto-text")
+        assert "匯入新建 1" in said and "測試通過 1/1 題" in said, said
+        assert page.run("document.getElementById('bi-b-auto-bar').value") == 4
+        assert not page.run("document.getElementById('bi-b-auto').disabled")
+
+    runs = _ingests(workspace)
+    assert len(runs) == 1, runs
+    assert runs[0]["status"] == "committed"
+    names = [card["name"] for card in BiStore(workspace, DATASET).card_rows()]
+    assert len([n for n in names if "FAKE-7" in n]) == 1, names
+    assert len([title for title in benches if title.startswith("BI 測試")]) == 1
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_auto_run_ends_in_place_with_the_stage_that_failed(
+    served: Any,  # noqa: F811
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server, workspace, benches = _setup(served, tmp_path, monkeypatch)
+    with BiPage(tmp_path / "browser", server.address) as page:
+        _open(page)
+        page.stage("source")
+        page.attach("會議.md", NOTE, "text/markdown")
+        page.click("#bi-b-auto")
+        # No benchmark question: everything up to the test is done, and the test says why.
+        page.wait(
+            "document.getElementById('bi-b-auto-text').textContent.includes('自動執行停在')", 120
+        )
+        said = page.text_of("bi-b-auto-text")
+        assert "第 4/4 步（跑測試）" in said and "還沒有測試題" in said, said
+        assert page.run(
+            "document.getElementById('bi-b-auto-progress').classList.contains('bi-err')"
+        )
+    assert [run["status"] for run in _ingests(workspace)] == ["committed"]
+    assert benches == []

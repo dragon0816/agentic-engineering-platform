@@ -249,6 +249,14 @@ def test_the_stages_have_the_owners_names() -> None:
         assert old not in PAGE, old
 
 
+def test_auto_run_is_one_button_beside_the_stage_bar_with_its_progress() -> None:
+    assert ("div", "bi-build-steps") in PANE.around["bi-b-auto"]
+    assert ("div", "bi-b-auto-progress") in PANE.around["bi-b-auto-bar"]
+    assert PAGE.index('id="bi-stepper"') < PAGE.index('id="bi-b-auto"')
+    assert PAGE.index('id="bi-b-auto"') < PAGE.index('id="bi-b-auto-progress"')
+    assert PAGE.count(">自動執行</button>") == 1
+
+
 @pytest.mark.parametrize("ident", MAIN_PATH)
 def test_the_owners_flow_is_not_folded_away(ident: str) -> None:
     assert ident in PANE.around, ident
