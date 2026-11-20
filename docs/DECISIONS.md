@@ -8134,3 +8134,18 @@ bot still go to the model; AI-suggest threshold 0.7 only matters if a generic BI
   without an address: Agent Web's address carries its page token and listens on loopback only.
 - The headless-browser fallback for login-walled Threads/Instagram posts exists but is off
   (`options.json` `browser_fallback`) until the owner tests real links (assessment §8).
+
+### 2026-11-20 — One bot per BI domain: implementation choices
+
+- Collection bots live in `telegram.json` as `collection_bots` beside the conversation bot
+  (one file, no new layout path); the settings page keeps them when it saves. They run on the
+  conversation bot's resident loop thread, each with its own cursor and token, and stop with it.
+  A bot whose token name `host.json` does not map is left out, never blocking the conversation bot.
+- A bot is bound to a domain on the BI page (stored in the inbox, one domain per bot); the
+  config `target` is the fallback. Everything a mapped sender sends goes to that domain:
+  links, files (with or without words) and words alone (kept as a text source).
+- Kept from the single-bot P1: fetch, HTML→Markdown, inbox, plugin timer, reminder, tests after
+  import, 只取得摘要 + Reply. `/links` and `/unlink` stay on the bot (plain text, no routing).
+  Dropped: link/file detection on the conversation bot, domain buttons, AI suggestion,
+  untapped/未分類 handling, defaults and `#tag`.
+

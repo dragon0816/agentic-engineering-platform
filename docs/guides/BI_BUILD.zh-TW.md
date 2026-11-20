@@ -146,6 +146,29 @@ Atlas 是另外安裝的程式，不在 AEP 的安裝包裡；怎麼安裝看 At
 
 Dashboard 分頁的 **含 SAMPLE 示範卡** 只在知識庫裡有示範卡時出現。
 
+## Telegram 收集（每個領域一個 bot）
+
+同事把網頁、Threads、Instagram 的連結，或檔案、文字，分享給某個領域的 bot（例如「BI-AIDC」），
+就會收進那個領域，不用再分類。bot 會回「已收進 AIDC，明天 07:30 處理（#12）」。
+到收集時間，AEP 抓取並轉成 Markdown，保留原始頁面與來源紀錄，然後 Ingest 到「待審」；不會自動接受，也不會自動 push。
+只抓到摘要時，bot 會傳「#12 只取得摘要…」；回覆那則訊息貼上內文就能補上。
+到審核提醒時間，傳送者會收到「AIDC 有 N 張候選卡待審」；按「全部接受並匯入」後，AEP 會跑該領域的測試、更新 Dashboard，再通知結果。
+在 bot 裡傳 `/links` 可看自己最近傳的項目，傳 `/unlink 12` 可在處理前撤回第 12 筆。
+
+**owner 設定一次（每個領域一個 bot）**
+
+1. 在 Telegram 找 **@BotFather**，傳 `/newbot`，名稱例如「BI-AIDC」，帳號例如 `xxx_bi_aidc_bot`；記下它給的 token。
+2. 把 token 存成這台電腦的使用者環境變數，不要寫進任何檔案，例如在 PowerShell 執行
+   `[Environment]::SetEnvironmentVariable("AEP_TELEGRAM_BI_AIDC", "<token>", "User")`。
+3. 在 `host.json` 的 `credentials` 加一筆 `{"secret": "telegram_bi_aidc", "environment_variable": "AEP_TELEGRAM_BI_AIDC"}`。
+4. 在工作區的 `telegram.json`（對話 bot 的設定）加上 `collection_bots`：
+   `[{"name": "bi_aidc", "credential": {"name": "telegram_bi_aidc"}, "feature": "bi-knowledge", "target": "aidc", "senders": [{"sender_id": <同事的 Telegram id>, "actor": "<同事的帳號>"}]}]`。
+   `senders` 和對話 bot 一樣：沒列在裡面的人傳來的訊息一律不理。
+5. 重新啟動 AEP（先確認沒有進行中的工作），讓新的環境變數生效。
+6. 在 BI 頁 **管理 → Telegram 收集**，在那個領域那一列選這個 bot，填收集時間和審核提醒時間，勾「開啟」，按「儲存」。
+
+對話用的 bot 照舊；收集 bot 收到的訊息不會交給 AI 對話。
+
 ## 這一版還沒有的
 
 - **把知識庫上傳到 Shared Platform**：共用靠同步資料夾（OneDrive／SharePoint）和發佈 tag。

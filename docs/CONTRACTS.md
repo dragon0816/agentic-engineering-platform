@@ -7323,59 +7323,60 @@ namespace ownership survives even when the plugin registers no Agent tools.
 No new policy, grant, per-call approval, model-data or TurnEffects contract is added.
 The existing worker protocol and PluginManagerProtocol remain unchanged.
 
-## Telegram feature items and the BI inbox (owner consent 2026-11-19)
+## Telegram collection bots and the BI inbox (owner consent 2026-11-20)
 
-Scope: AGENTS22 consent "Owner consent: Telegram link collection P1" in docs/DECISIONS.md;
-design docs/phases/TELEGRAM_LINK_COLLECTION_ASSESSMENT_20261119.md §8.
+Scope: AGENTS22 consent "2026-11-20 — Telegram collection: one bot per BI domain" in
+docs/DECISIONS.md. The conversation bot (`channels.telegram.TelegramIngress`) is unchanged.
 
-Core (`host_runtime.features`, `channels.telegram`):
+Core:
 
-- `TelegramItem(kind, actor, text, received_at, sender_name, urls, files, data, quoted)`;
-  `kind` is `link | file | tap | command | reply`. `TelegramFile(name, size, read)`;
-  `read()` downloads through the Bot API with the existing limits.
-- `TelegramAnswer(text, buttons, edit)`; `buttons` are rows of `(label, payload)` with
-  payload `[A-Za-z0-9._-]{1,60}`; the channel sends `fi:<payload>` as callback data and an
-  unusable payload is dropped. `edit` replaces the tapped message (tap items only).
-- `Feature.telegram_commands() -> (alias, command)` pairs; `Feature.telegram_item(item,
-  host) -> TelegramAnswer | None` (None leaves the update to the existing path);
-  `Feature.telegram_ready(messenger, host)`. `FeatureSet` asks features in order.
-- `Messenger.send(actor, text, buttons=()) -> bool`; `TelegramIngress.send` sends only to
-  an actor in the sender map (the private chat with the bot), never to another chat, and
-  returns False otherwise. Safe from background threads.
-- Routing before any model turn, by fixed rules: a callback `fi:*`; files whose caption
-  is empty or only `#tags`; a feature's own slash command; a message that is links
-  (`link_urls`: at least one http(s) address and at most 300 other characters without
-  `?`/`？`); a Reply. Not items: spoken (voice) text, credential-like text, anything while
-  a question flow waits on the chat (except taps and commands), unmapped senders. Without
-  `attach_features` (tests, hosts without Agent Web) nothing changes.
-- Agent Web calls `TelegramIngress.attach_features(features.active(), web)` where it sets
-  `telegram.cards`.
+- `TelegramIngressConfig.collection_bots: tuple[TelegramCollectionBot, ...] = ()`; each
+  `{name (Symbol), credential (SecretRef), feature (feature name, e.g. bi-knowledge),
+  target (optional, e.g. a BI domain), senders}`. Bot names and token names are unique,
+  including the conversation bot's; a pasted token is refused like everywhere in the
+  record. The settings page keeps them when it saves the conversation bot and writes no
+  `collection_bots` key when there are none.
+- `host.build_telegram` builds a `channels.telegram_collect.TelegramCollector` for each bot
+  whose credential name `host.json` maps (`credentials`), as `TelegramIngress.collectors`;
+  an unmapped one is left out. `ResidentTelegram` runs them on its loop beside the
+  conversation bot; each has its own cursor `telegram-collect.<name>` and own token.
+- A collection bot answers only its mapped senders (others are ignored and listed in
+  `unmapped`). Every message becomes `features.TelegramItem(feature, bot, target, kind,
+  actor, text, received_at, sender_name, urls, files, quoted)` with `kind` `file` (files),
+  `link` (an http(s) address in the words), `reply` (a Reply), else `text`; credential-like
+  text is refused. It goes to `FeatureSet.telegram_item` → the feature whose `name` is the
+  bot's `feature`; its `TelegramAnswer(text)` is sent back. No model turn, Workflow or
+  command router is involved; with no such feature the bot says it is not connected.
+- `features.Messenger`: `bots() -> (TelegramBot(name, feature, target), ...)` and
+  `send(bot, actor, text) -> bool` (only to that bot's mapped senders). Agent Web calls
+  `telegram_collect.attach(collectors, features.active(), web)`, which calls
+  `Feature.telegram_ready(messenger, host)`.
 
 BI inbox (`aep_bi.inbox`, `<workspace>/bi/inbox/inbox.sqlite`):
 
-- Items (link, file, text), picks (`person | tag | default | ai`), results per
-  (item, domain) inserted once as the processing claim, `seen` (domain, normalized URL,
-  content sha256) for dedup, per-actor default and recent domains, per-domain settings
-  (`enabled`, `collect_at`, `review_at` as local `HH:MM`) and schedule claims
-  (`<kind>:<domain>:<UTC occurrence>`). A domain is `<vault id>:<home>`.
-- Item states `queued | done | needs_text | unassigned | withdrawn` (withdrawn final;
-  refused once any domain claimed the item); result states `processing | review | summary
-  | duplicate | failed` with `code`, `source_id`, `run_id`.
-- Commands: `/bi link [<domain>] <url> [note]`, `/bi links`, `/bi unlink <id>`,
-  `/bi domain [<domain>|無]`.
-- A fetched page becomes the source `<platform>-<title>-<item>.html`: the bytes as served,
-  preceded by `<!-- aep-bi-link-provenance {json} -->` (ASCII JSON: original_url,
-  final_url, sender, sender_name, sent_at, fetched_at, fetch_method `http|browser`,
-  http_status, content_sha256, summary_only, item, note). `.html/.htm` convert through
+- A domain is `<vault id>:<home>`; `settings(domain, enabled, collect_at, review_at, bot)`
+  binds one collection bot to one domain (binding it elsewhere unbinds it). An item goes to
+  the bot's bound domain, else to the domain its `target` names; an unbound bot says so.
+- Items (link, file, text; `bot`, `actor`, `parent` for a Reply's added text), picks (`by`
+  = `bot`), results per (item, domain) inserted once as the processing claim, `seen`
+  (domain, normalized URL, content sha256) for dedup, schedule claims
+  (`<kind>:<domain>:<UTC occurrence>`). Item states `queued | done | needs_text |
+  withdrawn` (withdrawn final; refused once processing claimed it); result states
+  `processing | review | summary | duplicate | failed`.
+- On the bot: `/links` and `/unlink <id>`; a Reply to 「#N 只取得摘要…」 adds text to #N.
+- A fetched page becomes `<platform>-<title>-<item>.html`: the bytes as served after
+  `<!-- aep-bi-link-provenance {json} -->` (ASCII JSON: original_url, final_url, sender,
+  sender_name, sent_at, fetched_at, fetch_method `http|browser`, http_status,
+  content_sha256, summary_only, item, note). `.html/.htm` convert through
   `cards.html_markdown`; the Markdown opens with that provenance and says 「只取得摘要」
-  when only meta was obtained. A sender's added text becomes `note-<parent>-<item>.md`.
+  when only meta was obtained. Words become `text-<item>.md` / `note-<parent>-<item>.md`.
 - Each processed item starts `ai_runs.start(kind="ingest", folder=<home>/sources)` with
   actor `<sender> via telegram`; nothing is accepted, committed or pushed by the inbox.
-- Page routes: `GET /api/bi/inbox?dataset=`, `POST /api/bi/inbox/settings {domain,
-  enabled, collect_at, review_at}`, `POST /api/bi/inbox/assign {item, domain}`.
+- Page routes: `GET /api/bi/inbox?dataset=` (domains with bot and times; the Host's
+  `bi-knowledge` collection bots), `POST /api/bi/inbox/settings {domain, bot, enabled,
+  collect_at, review_at}` (`bot_unknown`, `time_invalid`, `collect_time_missing`).
 - `POST /api/bi/runs/<id>/commit` of an inbox run (not a repeated `already` answer) runs
-  `bi_bench.run(home=<home>)`, draws the home's Dashboard and sends the result to the
-  run's senders, in the background.
-- Optional `<workspace>/bi/inbox/options.json` `{"browser_fallback": true}` lets a
-  login-walled Threads/Instagram post be read with the local headless Edge profile
-  `<workspace>/bi/inbox/browser-profile`; off by default.
+  `bi_bench.run(home=<home>)`, draws the home's Dashboard and sends the result from each
+  item's bot to its sender, in the background. Reminders go the same way.
+- Optional `<workspace>/bi/inbox/options.json` `{"browser_fallback": true}`: a login-walled
+  Threads/Instagram post is read with the local headless Edge; off by default.

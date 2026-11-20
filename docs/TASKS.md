@@ -5158,7 +5158,13 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   fetch → immutable source with provenance → dedup → ingest to review; untapped →
   confident AI suggestion else 未分類; reminder to senders; after import tests +
   Dashboard + result. Tests: tests/test_bi_inbox.py (fixtures tests/fixtures/bi_inbox/).
-- [ ] Owner: test real Threads/Instagram links on this PC (HTTP gives og summary only;
-  decide `browser_fallback`); confirm the plugin timer instead of the Host schedule store
-  and the `/bi` commands on the feature hook (DECISIONS 2026-11-19 implementation entry).
-- [ ] Live check with the real bot after merge (map MD/PM/sales senders first).
+- [x] (superseded 2026-11-20 by one bot per domain; see below)
+- [x] Owner 2026-11-20: one bot per BI domain (DECISIONS "Telegram collection: one bot per
+  BI domain"). Rework on the same branch: the conversation bot is back to main's behaviour
+  (single-bot routing, domain buttons and `/bi link|domain` removed); `collection_bots` in
+  telegram.json, each polled on its own (`channels/telegram_collect.py`) straight to the
+  feature hook; per-bot proactive send; BI 管理 → Telegram 收集 binds a bot to a domain.
+  Tests: tests/test_telegram_collect.py, tests/test_bi_inbox.py. Guide:
+  docs/guides/BI_BUILD.zh-TW.md 「Telegram 收集」.
+- [ ] Owner: create one bot per domain with BotFather and add it (guide), map senders;
+  test real Threads/Instagram links and decide `browser_fallback`; live check after merge.
