@@ -5144,3 +5144,13 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   list rows. Guides BI_BUILD.zh-TW.md and USER_GUIDE.zh-TW.md §6.8 updated (分享, accept-all,
   source delete, tabs, no tool approval). BI_SOP.zh-TW.md screenshots/steps still show the old
   top row and controls (owner to retake).
+- [x] 2026-11-20 BI skill/tool package import and export (owner 2026-11-19; branch
+  bi-package-import-20261119; design docs/phases/BI_SKILL_TOOL_PACKAGE_IMPORT_DESIGN_20261119.md):
+  aep.bi.package/v1 (manifest or inferred), zip or folder, preview new/update/same/conflict/
+  invalid plus 需改寫 for command-line scripts (kept, not runnable, one-press 用 AI 改寫 via the
+  tool AI session), batches of 10 staged as uncommitted vault changes into the current working
+  domain, export as zip. 匯入/匯出 under step 2's 更多 with progress beside each button. Zip
+  slip/symlink/size/count/ratio checks; nothing runs at import. Tool unit gains optional
+  description (docstring) and needs_rewrite. Tests: tests/test_bi_packages.py,
+  tests/test_bi_packages_ui.py; contract in docs/CONTRACTS.md. Not done: analysis packs inside a
+  package, Shared Platform publishing of packages (out of scope by owner choice).

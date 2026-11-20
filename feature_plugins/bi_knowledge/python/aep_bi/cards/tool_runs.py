@@ -317,6 +317,12 @@ def run(workspace: Path, vault_id: str, given: Mapping[str, Any], actor: str) ->
         raise BiStoreError("tool_unknown", f"沒有工具「{name}」")
     if not str(value["path"]).lower().endswith(PYTHON):
         raise BiStoreError("tool_not_python", "目前只能執行 Python 工具（.py）")
+    if value.get("needs_rewrite") is True:
+        raise BiStoreError(
+            "tool_needs_rewrite",
+            f"「{name}」是匯入的命令列腳本，還沒有改寫成讀 INPUT、寫到 OUTPUT 的工具；"
+            "先按「用 AI 改寫」，試跑後存成新版本",
+        )
     code = _read_revision(target.repo, value)
     staging = Staging(workspace, target.dataset)
     staging.store.refuse_write()

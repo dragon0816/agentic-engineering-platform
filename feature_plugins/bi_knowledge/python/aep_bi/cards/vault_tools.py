@@ -2,10 +2,16 @@
 
 A revision is a file `<home>/tools/<name>/rev-<n>-<author>.<ext>`, written once;
 `tool:<home>/<name>` names the current one. Running one in an ingest: `tool_runs`.
+
+A Python revision's unit also carries `description`, the first paragraph of its module
+docstring, when it has one; a revision imported from a package that does not follow the
+INPUT/OUTPUT contract yet carries `needs_rewrite` (owner 2026-11-19: 「需改寫」), which
+`tool_runs.run` refuses until a rewritten revision replaces it.
 """
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import re
 import uuid
@@ -18,13 +24,32 @@ from aep_bi.cards.store import BiStoreError
 
 _SUFFIX = re.compile(r"^\.[a-z0-9]{1,10}$")
 MAX_TEXT = 200_000
+MAX_DESCRIPTION = 300
 
 
 def unit_key(home: str, name: str) -> str:
     return f"{card_model.TOOL_PREFIX}{home}/{name}"
 
 
-def stage_file(repo: Any, home: str, name: str, source: Path) -> dict[str, Any]:
+def description_of(text: str) -> str:
+    """The first paragraph of a Python tool's module docstring; empty without one."""
+    try:
+        doc = ast.get_docstring(ast.parse(text)) or ""
+    except (SyntaxError, ValueError):
+        return ""
+    first = doc.strip().split("\n\n", 1)[0]
+    return " ".join(first.split())[:MAX_DESCRIPTION]
+
+
+def stage_file(
+    repo: Any,
+    home: str,
+    name: str,
+    source: Path,
+    *,
+    description: str = "",
+    needs_rewrite: bool = False,
+) -> dict[str, Any]:
     """Stage `source` as the next revision of the tool `name` of `home`."""
     problem = homes.home_problem(home)
     if problem:
@@ -45,12 +70,22 @@ def stage_file(repo: Any, home: str, name: str, source: Path) -> dict[str, Any]:
         "path": path,
         "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
     }
+    description = " ".join(str(description or "").split())[:MAX_DESCRIPTION]
+    if suffix == ".py":
+        description = (
+            description_of(source.read_text(encoding="utf-8", errors="replace")) or description
+        )
+    if description:
+        value["description"] = description
+    if needs_rewrite:
+        value["needs_rewrite"] = True
     repo.stage(key, value)
     return {"name": f"{home}/{name}", **value}
 
 
 def stage_text(repo: Any, given: Mapping[str, Any]) -> dict[str, Any]:
-    """`stage_file` for a tool sent as text: `home`, `name`, `suffix`, `text`."""
+    """`stage_file` for a tool sent as text: `home`, `name`, `suffix`, `text`; optional
+    `description` (used when the code has no docstring) and `needs_rewrite`."""
     text = given.get("text")
     if not isinstance(text, str) or not text.strip():
         raise BiStoreError("tool_invalid", "工具內容不能是空的")
@@ -63,7 +98,14 @@ def stage_text(repo: Any, given: Mapping[str, Any]) -> dict[str, Any]:
     draft.parent.mkdir(parents=True, exist_ok=True)
     draft.write_bytes(text.encode())
     try:
-        return stage_file(repo, str(given.get("home") or ""), str(given.get("name") or ""), draft)
+        return stage_file(
+            repo,
+            str(given.get("home") or ""),
+            str(given.get("name") or ""),
+            draft,
+            description=str(given.get("description") or ""),
+            needs_rewrite=given.get("needs_rewrite") is True,
+        )
     finally:
         draft.unlink(missing_ok=True)
 

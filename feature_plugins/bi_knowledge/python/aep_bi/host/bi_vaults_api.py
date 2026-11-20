@@ -6,9 +6,10 @@ vault is used through every other `/api/bi/*` route as the dataset
 the version operations: commit, push, resolve, discard, history, diff, revert,
 tag and publish, and say what a share would carry (`share`); and list or save a
 skill revision (R3); and import a Dashboard order from Atlas (BI K2, a dry run
-first). Publish needs `confirm: true` and is an Agent Web action, never a
-capability the model can call. Errors are raised as `BiStoreError` and answered
-by `bi_cards_api.route`.
+first); and preview, apply or drop a skill/tool package (`package`; a zip is uploaded
+and exported as raw bytes by `bi_cards_api`). Publish needs `confirm: true` and is
+an Agent Web action, never a capability the model can call. Errors are raised as
+`BiStoreError` and answered by `bi_cards_api.route`.
 """
 
 from __future__ import annotations
@@ -23,6 +24,7 @@ from aep_bi.cards import (
     domain_assign,
     homes,
     migrate,
+    packages,
     packs,
     profile_merge,
     tool_runs,
@@ -126,6 +128,9 @@ def route(
             return 200, tool_runs.listing(workspace, parts[0])
         if len(parts) == 2 and parts[1] == "profiles":
             return 200, vault.profiles(workspace, parts[0])
+        if len(parts) == 2 and parts[1] == "package":
+            # What 「匯出」 can put in a package: the working domain's skills and tools.
+            return 200, {"items": packages.exportable(workspace, parts[0], query.get("home"))}
         if len(parts) == 2 and parts[1] == "checks":
             newest = bi_bench.latest(workspace, parts[0])
             # The page reads this every 2 s during a run; a run changes nothing about it until
@@ -272,6 +277,8 @@ def route(
     if action == "atlas-import":
         # BI K2: a dry run of an Atlas dashboard's order, or `apply` with its token.
         return 200, {"ok": True, **bi_atlas_import.import_order(workspace, vault_id, given)}
+    if action == "package":
+        return 200, {"ok": True, **_package(workspace, vault_id, given)}
     if action == "packs":
         if isinstance(given.get("export"), dict):
             return 200, {
@@ -298,6 +305,21 @@ def route(
         bi_feed_api.refresh(workspace, vault_id)
         return 200, {"ok": True, **ran}
     return _error(404, "route_unknown", "沒有這個 BI 路徑")
+
+
+def _package(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
+    """A skill/tool package: a folder's preview, one batch of an apply, or dropping it."""
+    if isinstance(given.get("preview"), dict):
+        asked = given["preview"]
+        unpacked = packages.read_files(asked.get("files"))
+        return packages.preview(
+            workspace, vault_id, asked.get("home"), unpacked, str(asked.get("name") or "")
+        )
+    if isinstance(given.get("apply"), dict):
+        return packages.apply_batch(workspace, vault_id, given["apply"])
+    if "discard" in given:
+        return packages.discard(workspace, vault_id, given["discard"])
+    raise BiStoreError("package_invalid", "要給 preview、apply 或 discard")
 
 
 # -- whether the chat can ask a vault (BI_VAULT_ASKING.md V2) ------------------------------
