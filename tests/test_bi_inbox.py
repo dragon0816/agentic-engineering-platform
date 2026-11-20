@@ -664,3 +664,41 @@ def test_the_feature_offers_no_question_tool_while_the_bi_skill_is_off(
     monkeypatch.setattr(runtime.RUNTIME, "workspace", ws)
     # No switched-on BI Skill on this gateway: `bi_cards_tools` offers nothing.
     assert FEATURE.telegram_question(item("text", "液冷？"), None, SimpleNamespace()) is None
+
+
+def test_the_bot_form_sets_its_domains_collect_time_in_one_save(ws: Path) -> None:
+    # Settings → Agents → 新增 BI 收集 bot (owner 2026-11-21): the target names one domain.
+    path = "/api/bi/inbox/bot-time"
+    inbox = Inbox(ws)
+    aidc = keys(ws)["AIDC"]
+    inbox.save_setting(aidc, enabled=False, collect_at=None, review_at="09:00", bot=AIDC_BOT)
+    body = {"bot": "bi_new", "target": "aidc", "enabled": True, "collect_at": "18:00"}
+    # Checked first, nothing written.
+    checked = _ok(route(ws, ALICE, "POST", path, {}, {**body, "dry_run": True}))
+    assert checked["domain"] == {"domain": aidc, "label": "AIDC"}
+    assert inbox.settings()[aidc].bot == AIDC_BOT
+    saved = _ok(route(ws, ALICE, "POST", path, {}, body))["domain"]
+    assert (saved["bot"], saved["enabled"], saved["collect_at"]) == ("bi_new", True, "18:00")
+    assert saved["review_at"] == "09:00" and "18:00" in saved["next"]
+    assert inbox.bound("bi_new") == aidc and inbox.bound(AIDC_BOT) is None
+    # Not exactly one domain, a bad time, 開啟 without a time: said, nothing written.
+    unknown = route(ws, ALICE, "POST", path, {}, {**body, "target": "robotics"})
+    assert unknown[0] == 409 and unknown[1]["code"] == "domain_unresolved"
+    assert "找不到領域「robotics」" in unknown[1]["message"]
+    bad = route(ws, ALICE, "POST", path, {}, {**body, "collect_at": "6pm"})
+    assert bad[1]["code"] == "time_invalid"
+    missing = route(ws, ALICE, "POST", path, {}, {**body, "collect_at": None})
+    assert missing[1]["code"] == "collect_time_missing"
+    assert inbox.settings()[aidc].collect_at == "18:00"
+
+
+def test_a_target_two_domains_share_is_refused_with_both_names() -> None:
+    from aep_bi.inbox.api import unresolved
+    from aep_bi.inbox.domains import Domain
+
+    two = [
+        Domain("v1:applications/aidc", "v1", "vault-v1", "applications/aidc", "A／AIDC"),
+        Domain("v2:applications/aidc", "v2", "vault-v2", "applications/aidc", "B／AIDC"),
+    ]
+    said = unresolved("aidc", two)
+    assert "對到 2 個領域（A／AIDC、B／AIDC）" in said and "知識庫／領域" in said
