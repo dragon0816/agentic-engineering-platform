@@ -148,3 +148,17 @@ Owner 問題：能否整合 Cloudflare，讓其他電腦的 browser 也能用放
 - 公司是否已有 VPN/ZTNA 可到達 owner 的個人 PC。
 - Access JWT 驗簽需要的第三方套件能否進入公司 `--no-index` 安裝包。
 - 各聊天/Workflow 路由是同步等待還是背景執行加輪詢（決定 100 秒逾時是否影響）。
+
+## 實驗結果（2026-11-20，owner 要求的第 1 階段）
+
+在公司電腦用官方 `cloudflared` 2026.11.1（SHA-256 與 release 公布值相符）開快速通道，
+只對外一個本機 127.0.0.1:8899 的 hello 測試頁（不是 AEP），測完立即關閉。
+
+- QUIC（UDP 7844）：`Failed to dial a quic connection … timeout`，UDP Connectivity FAIL。
+- HTTP/2（TCP 7844）：`HTTP/2 connection is blocked or unreachable`，TCP Connectivity FAIL。
+- cloudflared 顯示 `Allow outbound QUIC traffic on port 7844` / `Allow outbound TCP on port 7844`。
+
+結論：公司網路擋 Cloudflare Tunnel 的出站 7844（UDP 與 TCP），通道無法建立；`cloudflared` 的
+edge 連線不走 Zscaler 這類 HTTP proxy。要在公司電腦用 Cloudflare Tunnel，必須由 IT 開放
+出站 7844，或改用公司核可的 VPN／ZTNA。第 2 階段（AEP＋Access）在此前提下不進行。
+測試用檔案（`C:\TEMP\cf-test`）可刪除。
