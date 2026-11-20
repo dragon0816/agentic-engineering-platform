@@ -6,7 +6,7 @@ from typing import Annotated, Any, Literal, Self
 from pydantic import Field, JsonValue, StrictBool, StringConstraints, model_validator
 
 from common.assets import REDACTED, SECRET_PATTERN, reject_embedded_secrets
-from common.base import Contract, Symbol, Text
+from common.base import Contract, Slug, Symbol, Text
 from common.execution import TraceIdentifiers
 from host_runtime.conversation_backends import ConversationBackendName
 
@@ -131,6 +131,9 @@ class ConversationRecord(Contract):
     title: Text
     backend: ConversationBackendName = "gateway"
     source: ConversationSource = "agent_web"
+    # The persistent sub-agent that owns this conversation (owner consent
+    # 2026-11-20, `host_runtime.persistent_agents`); None: the main agent.
+    agent: Slug | None = None
     data_classification: Literal["UNCLASSIFIED", "PUBLIC"] = "UNCLASSIFIED"
     classified_by: Symbol | None = None
     created_at: datetime
@@ -154,7 +157,11 @@ class ConversationRecord(Contract):
 
 
 class ConversationCreateRequest(Contract):
-    """An explicit empty request; identity and title come from the host."""
+    """An explicit empty request; identity and title come from the host. `agent`
+    makes a conversation owned by that persistent sub-agent (owner consent
+    2026-11-20); empty is the main agent's."""
+
+    agent: Slug | None = None
 
 
 class ConversationDeleteRequest(Contract):

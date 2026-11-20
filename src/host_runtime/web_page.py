@@ -362,7 +362,26 @@ select.mem-field { width: auto; flex: 0 1 220px; min-width: 0; max-width: 100%; 
 .side-actions.side-body { padding: 0 0 8px; }
 .side-column { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
 .side-actions.side-new { padding: 0 0 6px; }
-.agent-list { max-height: 34vh; overflow-y: auto; padding-bottom: 6px; }
+.agent-list { max-height: 34vh; overflow-x: hidden; overflow-y: auto; padding-bottom: 6px; }
+.agent-entry > summary { display: flex; align-items: center; gap: 6px; min-height: 36px;
+  padding: 4px 8px; border-radius: 7px; cursor: pointer; font-weight: 600; list-style: none; }
+.agent-entry > summary::-webkit-details-marker { display: none; }
+.agent-entry > summary::before { content: "\25b8"; color: var(--dim); width: 12px; }
+.agent-entry[open] > summary::before { content: "\25be"; }
+.agent-entry > summary:hover { background: var(--selected); }
+.agent-badge { margin-left: auto; padding: 0 6px; border: 1px solid var(--line);
+  border-radius: 10px; color: var(--dim); font-size: 11px; font-weight: 600; }
+.agent-badge.on { color: var(--accent); border-color: var(--accent); }
+.agent-conversations { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px;
+  padding: 0 0 6px 18px; }
+.agent-conversations .session-item { min-height: 40px; padding: 6px 8px; }
+.agent-conversations .agent-new { min-height: 32px; color: var(--accent); font-weight: 600; }
+.agent-form { display: grid; gap: 6px; max-width: 640px; margin-top: 10px; padding-top: 10px;
+  border-top: 1px solid var(--line); }
+.agent-form h3 { margin: 0; }
+.agent-skills, .agent-bot { display: grid; gap: 4px; border: 1px solid var(--line);
+  border-radius: 6px; padding: 6px 10px; }
+.agents-table td { vertical-align: top; }
 .session-search { width: 100%; min-height: 38px; margin-bottom: 8px; font: inherit; }
 .session-snippet { display: block; overflow-wrap: anywhere; color: var(--dim); }
 .session-list { flex: 1; overflow-y: auto; min-height: 120px; }
@@ -1284,6 +1303,59 @@ tr:last-child td { border-bottom: none; }
           <button id="telegram-check" type="button">Check who messaged the bot</button></p>
         <p id="telegram-result" class="note" role="status"></p>
         <div id="telegram-unknown"></div>
+      </form>
+    </div>
+    <h2 id="agents-heading">Agents</h2>
+    <p class="note">主 Agent 和你建立的子代理。每個 agent 可以綁一個自己的 Telegram bot：
+      填「存放 bot token 的環境變數名稱」（例如 AEP_TG_SALES），不要貼 token 本身。
+      BI 收集 bot 也在這裡設定。儲存後 bot 設定立即套用；若有 Telegram 對話正在進行，
+      會等它結束才套用。</p>
+    <div class="card settings" id="agents-card">
+      <div id="agents-rows"></div>
+      <p><button id="agent-add" type="button">新增 agent</button>
+        <button id="collect-add" type="button">新增 BI 收集 bot</button></p>
+      <p id="agents-result" class="note" role="status" aria-live="polite"></p>
+      <form id="agent-form" class="agent-form" autocomplete="off" hidden>
+        <h3 id="agent-form-title">新增 agent</h3>
+        <input type="hidden" id="agent-id">
+        <label for="agent-profile">從 AgentProfile 建立（可不選）</label>
+        <select id="agent-profile"><option value="">不使用</option></select>
+        <label for="agent-form-name">名稱</label>
+        <input id="agent-form-name" maxlength="60" required>
+        <label for="agent-purpose">用途</label>
+        <textarea id="agent-purpose" maxlength="500" rows="2"></textarea>
+        <fieldset id="agent-skills" class="agent-skills"><legend>可用的 Skills</legend></fieldset>
+        <p class="note">模型：使用對話的模型（V1 只支援這一種）。</p>
+        <fieldset class="agent-bot"><legend>Telegram bot</legend>
+          <label><input type="checkbox" id="agent-bot-on"> 綁定 Telegram bot</label>
+          <label for="agent-bot-variable">token 的環境變數名稱</label>
+          <input id="agent-bot-variable" spellcheck="false" placeholder="AEP_TG_AGENT">
+          <label for="agent-bot-senders">允許的傳送者，一行一位：
+            Telegram 數字 id，後面可接 actor</label>
+          <textarea id="agent-bot-senders" spellcheck="false" rows="2"
+                    placeholder="123456789 leo.chi"></textarea>
+          <label><input type="checkbox" id="agent-bot-enabled" checked> 開啟</label>
+        </fieldset>
+        <p><button class="go" id="agent-save" type="submit">儲存 agent</button>
+          <button id="agent-cancel" type="button">取消</button>
+          <button id="agent-delete" type="button" hidden>刪除 agent</button></p>
+      </form>
+      <form id="collect-form" class="agent-form" autocomplete="off" hidden>
+        <h3 id="collect-form-title">新增 BI 收集 bot</h3>
+        <label for="collect-name">bot 名稱（英數字）</label>
+        <input id="collect-name" maxlength="60" spellcheck="false" required>
+        <label for="collect-target">收集到哪個領域</label>
+        <input id="collect-target" maxlength="200" required>
+        <label for="collect-variable">token 的環境變數名稱</label>
+        <input id="collect-variable" spellcheck="false" placeholder="AEP_TG_BI_SALES">
+        <label for="collect-senders">允許的傳送者，一行一位：
+          Telegram 數字 id，後面可接 actor</label>
+        <textarea id="collect-senders" spellcheck="false" rows="2"
+                  placeholder="123456789 leo.chi"></textarea>
+        <label><input type="checkbox" id="collect-enabled" checked> 開啟</label>
+        <p><button class="go" id="collect-save" type="submit">儲存 bot</button>
+          <button id="collect-cancel" type="button">取消</button>
+          <button id="collect-delete" type="button" hidden>刪除 bot</button></p>
       </form>
     </div>
     <h2>Shared platform</h2>
@@ -3457,13 +3529,15 @@ async function searchStoredConversations() {
 
 function renderSessionList() {
   const query = el("session-search").value.trim().toLowerCase();
-  const titled = conversationRows.filter((item) =>
+  // A sub-agent's conversations are listed under it in Agents (owner 2026-11-20).
+  const titled = conversationRows.filter((item) => !item.agent &&
     [item.title, item.backend].filter(Boolean).join(" ").toLowerCase().includes(query));
   const shown = new Set(titled.map((item) => item.session_id));
   const hits = new Map(searchHits.map((item) => [item.session_id, item]));
   const visible = [...titled.map((item) => hits.get(item.session_id) || item),
     ...searchHits.filter((item) => !shown.has(item.session_id))];
-  el("session-count").textContent = String(conversationRows.length);
+  el("session-count").textContent =
+    String(conversationRows.filter((item) => !item.agent).length);
   const buttons = visible.map((item) => {
     const button = document.createElement("button"); button.type = "button";
     button.className = "session-item"; button.setAttribute("role", "option");
@@ -3519,20 +3593,21 @@ async function loadConversations(selectId) {
   let listed = await call("/api/conversations"
     + (selectId ? "?session_id=" + encodeURIComponent(selectId) : ""));
   // Never opens on a Telegram conversation by itself: those are only read.
-  const own = listed.conversations.filter((item) => item.source !== "telegram");
+  const own = listed.conversations.filter((item) => item.source !== "telegram" && !item.agent);
   if (!listed.conversations.length || (!selectId && !own.length)) {
     const created = await call("/api/conversations", {});
     selectId = created.conversation.session_id;
     listed = await call("/api/conversations?session_id=" + encodeURIComponent(selectId));
   }
   conversationRows = listed.conversations;
-  activeConversation = selectId
-    || listed.conversations.find((item) => item.source !== "telegram").session_id;
+  activeConversation = selectId || own[0].session_id;
   if (!listed.selected || listed.selected.session_id !== activeConversation) {
     listed = await call("/api/conversations?session_id="
       + encodeURIComponent(activeConversation));
   }
   renderSessionList();
+  // The Agents section: its conversations change with this one (owner 2026-11-20).
+  loadAgents().catch(() => {});
   renderConversation(listed.selected);
   activeConversationPublic = !!(listed.selected
     && listed.selected.data_classification === "PUBLIC");
@@ -3877,6 +3952,292 @@ document.querySelectorAll(".side-section").forEach((section) => {
     try { localStorage.setItem(key, open ? "open" : "closed"); } catch (e) { /* */ }
   });
 });
+// -- Agents (owner consent 2026-11-20) -----------------------------------------
+// The sidebar lists the main agent and each sub-agent, a badge when a Telegram
+// bot is bound, and under a sub-agent its conversations: opened here (writable),
+// arrived through its bot (read-only) and the delegation records of its profile
+// (read-only; opening one opens the conversation it is in).
+let agentRows = [];
+const openAgents = new Set();
+
+async function openSession(sessionId) {
+  selectPrimaryTab("ask");
+  activeConversation = sessionId; log.replaceChildren();
+  renderPendingTurns(sessionId);
+  try { await loadChat(sessionId); field.focus(); }
+  catch (failure) { showBootError(failure); }
+}
+
+function agentEntryButton(entry) {
+  const button = document.createElement("button"); button.type = "button";
+  button.className = "session-item";
+  button.dataset.kind = entry.kind; button.dataset.session = entry.session_id;
+  button.setAttribute("aria-selected", String(entry.session_id === activeConversation
+    && entry.kind === "conversation"));
+  const title = document.createElement("strong");
+  const detail = document.createElement("small");
+  if (entry.kind === "delegation") {
+    title.append(text("委派紀錄 · " + (entry.summary || entry.status)));
+    detail.append(text(entry.status + " · " + entry.title + " · 只能閱讀"));
+    button.title = entry.summary;
+  } else {
+    title.append(text(entry.title));
+    detail.append(text(entry.messages + " messages · "
+      + (entry.source === "telegram" ? "Telegram（只能閱讀）" : "AEP")));
+  }
+  button.append(title, detail);
+  button.addEventListener("click", () => openSession(entry.session_id));
+  return button;
+}
+
+function renderAgentList() {
+  const list = el("agent-list");
+  el("agent-count").textContent = agentRows.length ? String(agentRows.length) : "";
+  const items = agentRows.map((agent) => {
+    const details = document.createElement("details");
+    details.className = "agent-entry"; details.dataset.agent = agent.id;
+    details.open = openAgents.has(agent.id);
+    details.addEventListener("toggle", () => {
+      if (details.open) openAgents.add(agent.id); else openAgents.delete(agent.id);
+    });
+    const summary = document.createElement("summary");
+    summary.append(text(agent.name));
+    if (agent.bot) {
+      const badge = document.createElement("span");
+      badge.className = "agent-badge" + (agent.bot.enabled ? " on" : "");
+      badge.append(text(agent.bot.enabled ? "Telegram" : "Telegram 關"));
+      summary.append(badge);
+    }
+    details.append(summary);
+    const body = document.createElement("div"); body.className = "agent-conversations";
+    if (agent.main) {
+      const note = document.createElement("small"); note.className = "note";
+      note.append(text("主 Agent 的對話在上面的 Sessions。"));
+      body.append(note);
+    } else {
+      const start = document.createElement("button"); start.type = "button";
+      start.className = "session-item agent-new"; start.append(text("+ 新對話"));
+      start.addEventListener("click", async () => {
+        start.disabled = true; start.textContent = "建立中…";
+        try {
+          const created = await call("/api/conversations", {agent: agent.id});
+          await loadAgents();
+          await openSession(created.conversation.session_id);
+        } catch (failure) { showBootError(failure); }
+        finally { start.disabled = false; start.textContent = "+ 新對話"; }
+      });
+      body.append(start, ...agent.conversations.map(agentEntryButton));
+    }
+    details.append(body);
+    return details;
+  });
+  if (items.length) list.replaceChildren(...items);
+}
+
+async function loadAgents() {
+  const listed = await call("/api/agents");
+  agentRows = listed.agents || [];
+  renderAgentList();
+}
+
+let agentSettings = null;
+const AGENT_PROBLEMS = {
+  bot_token_value_refused: "這看起來是 token 本身。請填存放 token 的環境變數名稱，不要貼 token。",
+  bot_variable_invalid: "環境變數名稱只能有英數字和底線，例如 AEP_TG_SALES。",
+  bot_sender_invalid: "傳送者的 actor 不正確。",
+  telegram_not_configured: "請先在上面的 Telegram bot 設定好主 Agent 的 bot。",
+  telegram_bots_invalid: "每個 bot 要有自己的名稱和自己的 token 變數。",
+  agent_invalid: "名稱或 Skills 不正確。",
+  bot_name_invalid: "bot 名稱只能用英數字、底線、點或減號，且不能以數字開頭。",
+  bot_target_missing: "請填收集到哪個領域。",
+  settings_read_only: "這個啟動方式沒有可寫的設定檔。",
+};
+const RELOAD_NOTES = {
+  applying: "已儲存；bot 設定套用中。",
+  applied: "已儲存並套用。",
+  waiting: "已儲存；Telegram 對話正在進行，結束後自動套用。",
+  not_running: "已儲存；主 Agent 的 Telegram bot 開啟後才會收訊息。",
+  failed: "已儲存，但 bot 設定無法套用；請檢查 Telegram 設定。",
+};
+
+function sendersText(senders) {
+  return (senders || []).map((item) => item.sender_id + " " + item.actor).join("\n");
+}
+
+function parseSenders(value) {
+  const senders = [];
+  for (const line of value.split("\n")) {
+    const parts = line.trim().split(/[\s,]+/).filter(Boolean);
+    if (!parts.length) continue;
+    if (!/^\d+$/.test(parts[0])) {
+      throw Object.assign(new Error("“" + parts[0] + "” 不是 Telegram 數字 id。"),
+        {code: "sender_id"});
+    }
+    senders.push({sender_id: Number(parts[0]), actor: parts[1] || ""});
+  }
+  return senders;
+}
+
+function botState(bot) {
+  if (!bot) return "未綁定";
+  const parts = [bot.variable || "（沒有變數）"];
+  parts.push(bot.token_present ? "token 已設定" : "環境變數沒有值");
+  parts.push(!bot.enabled ? "關" : bot.running ? "收訊中" : "開（尚未收訊）");
+  if (bot.problem) parts.push(bot.problem);
+  return parts.join(" · ");
+}
+
+function renderAgentSettings(view) {
+  agentSettings = view;
+  const rows = [
+    {who: view.main ? "主 Agent" : "", purpose: "這台電腦的 Agent（固定）",
+     bot: view.main && view.main.bot
+       ? (view.main.bot.variable || "") + " · " + (view.main.bot.enabled ? "開" : "關")
+       + "（在上面的 Telegram bot 設定）"
+       : "未設定（在上面的 Telegram bot 設定）", edit: null},
+    ...view.agents.map((agent) => ({who: agent.name, purpose: agent.purpose || "",
+      bot: botState(agent.bot), edit: () => openAgentForm(agent)})),
+    ...view.collection_bots.map((bot) => ({who: bot.name, purpose: bot.purpose,
+      bot: botState(bot), edit: () => openCollectForm(bot)})),
+  ];
+  const t = table(["Agent / bot", "用途", "Telegram bot", ""], rows, (row) => {
+    let button = "";
+    if (row.edit) {
+      button = document.createElement("button"); button.type = "button";
+      button.append(text("編輯")); button.addEventListener("click", row.edit);
+    }
+    return [row.who, row.purpose, row.bot, button];
+  });
+  t.classList.add("agents-table");
+  el("agents-rows").replaceChildren(t);
+  el("agent-add").disabled = !view.writable;
+  el("collect-add").disabled = !view.writable || !view.telegram_configured;
+  const profiles = el("agent-profile");
+  profiles.replaceChildren(new Option("不使用", ""),
+    ...(view.profiles || []).map((item) => new Option(item.key, item.key)));
+}
+
+function showAgentSkills(chosen) {
+  const box = el("agent-skills");
+  const legend = document.createElement("legend"); legend.append(text("可用的 Skills"));
+  const skills = (agentSettings && agentSettings.skills) || [];
+  const boxes = skills.map((key) => {
+    const label = document.createElement("label");
+    const input = document.createElement("input"); input.type = "checkbox";
+    input.value = key; input.checked = chosen.includes(key);
+    label.append(input, text(" " + key));
+    return label;
+  });
+  if (!boxes.length) {
+    const none = document.createElement("small"); none.className = "note";
+    none.append(text("這台電腦還沒有安裝 Skill；agent 只能用對話回答。"));
+    boxes.push(none);
+  }
+  box.replaceChildren(legend, ...boxes);
+}
+
+function openAgentForm(agent) {
+  el("collect-form").hidden = true;
+  el("agent-form").hidden = false;
+  el("agent-form-title").textContent = agent ? "編輯 agent" : "新增 agent";
+  el("agent-id").value = agent ? agent.id : "";
+  el("agent-profile").value = agent && agent.profile ? agent.profile : "";
+  el("agent-form-name").value = agent ? agent.name : "";
+  el("agent-purpose").value = agent ? agent.purpose : "";
+  showAgentSkills(agent ? agent.skills : []);
+  const bot = agent && agent.bot;
+  el("agent-bot-on").checked = !!bot;
+  el("agent-bot-variable").value = bot ? bot.variable : "";
+  el("agent-bot-senders").value = bot ? sendersText(bot.senders) : "";
+  el("agent-bot-enabled").checked = bot ? bot.enabled : true;
+  el("agent-delete").hidden = !agent;
+  el("agent-form-name").focus();
+}
+
+function openCollectForm(bot) {
+  el("agent-form").hidden = true;
+  el("collect-form").hidden = false;
+  el("collect-form-title").textContent = bot ? "編輯 BI 收集 bot" : "新增 BI 收集 bot";
+  el("collect-name").value = bot ? bot.name : "";
+  el("collect-name").readOnly = !!bot;
+  el("collect-target").value = bot ? bot.target : "";
+  el("collect-variable").value = bot ? bot.variable : "";
+  el("collect-senders").value = bot ? sendersText(bot.senders) : "";
+  el("collect-enabled").checked = bot ? bot.enabled : true;
+  el("collect-delete").hidden = !bot;
+}
+
+async function agentAction(path, body, button, working) {
+  const result = el("agents-result");
+  const label = button.textContent;
+  button.disabled = true; button.textContent = working;
+  result.textContent = working;
+  try {
+    const saved = await call(path, body);
+    if (saved.ok === false) throw Object.assign(new Error(saved.code), {code: saved.code});
+    renderAgentSettings(saved);
+    el("agent-form").hidden = true; el("collect-form").hidden = true;
+    result.textContent = RELOAD_NOTES[saved.reload] || "已儲存。";
+    loadAgents().catch(() => {});
+  } catch (failure) {
+    const code = failure.code || "";
+    result.textContent = "沒有儲存：" + (AGENT_PROBLEMS[code] || failure.message || code);
+  } finally { button.disabled = false; button.textContent = label; }
+}
+
+async function loadAgentSettings() {
+  renderAgentSettings(await call("/api/settings/agents"));
+}
+
+el("agent-add").addEventListener("click", () => openAgentForm(null));
+el("collect-add").addEventListener("click", () => openCollectForm(null));
+el("agent-cancel").addEventListener("click", () => { el("agent-form").hidden = true; });
+el("collect-cancel").addEventListener("click", () => { el("collect-form").hidden = true; });
+el("agent-profile").addEventListener("change", () => {
+  const chosen = ((agentSettings && agentSettings.profiles) || [])
+    .find((item) => item.key === el("agent-profile").value);
+  if (!chosen) return;
+  if (!el("agent-form-name").value.trim()) el("agent-form-name").value = chosen.name;
+  if (!el("agent-purpose").value.trim()) el("agent-purpose").value = chosen.description;
+  showAgentSkills(chosen.skills);
+});
+el("agent-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  let senders;
+  try { senders = parseSenders(el("agent-bot-senders").value); }
+  catch (failure) { el("agents-result").textContent = "沒有儲存：" + failure.message; return; }
+  const body = {
+    id: el("agent-id").value, name: el("agent-form-name").value,
+    purpose: el("agent-purpose").value,
+    profile: el("agent-profile").value || null,
+    skills: [...el("agent-skills").querySelectorAll("input:checked")].map((box) => box.value),
+    bot: el("agent-bot-on").checked ? {variable: el("agent-bot-variable").value, senders,
+      enabled: el("agent-bot-enabled").checked} : null,
+  };
+  agentAction("/api/settings/agents", body, el("agent-save"), "儲存中…");
+});
+el("agent-delete").addEventListener("click", () => {
+  if (!confirm("刪除這個 agent？它的對話紀錄會保留。")) return;
+  agentAction("/api/settings/agents/delete", {id: el("agent-id").value},
+    el("agent-delete"), "刪除中…");
+});
+el("collect-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  let senders;
+  try { senders = parseSenders(el("collect-senders").value); }
+  catch (failure) { el("agents-result").textContent = "沒有儲存：" + failure.message; return; }
+  agentAction("/api/settings/collection-bots", {
+    name: el("collect-name").value, target: el("collect-target").value,
+    bot: {variable: el("collect-variable").value, senders,
+      enabled: el("collect-enabled").checked},
+  }, el("collect-save"), "儲存中…");
+});
+el("collect-delete").addEventListener("click", () => {
+  if (!confirm("刪除這個收集 bot？")) return;
+  agentAction("/api/settings/collection-bots/delete", {name: el("collect-name").value},
+    el("collect-delete"), "刪除中…");
+});
+
 // New session: Send waits until the new session has loaded (#233); a message
 // sent meanwhile went into the previous one. Once the server has made it, the
 // page is bound to the new session id at once.
@@ -5378,6 +5739,7 @@ async function loadSettings() {
   loadCodingAgents().catch(() => {});
   loadAgentModeSettings().catch(() => {});
   loadMultiAgent().catch((failure) => { el("multi-agent-result").textContent = failure.message; });
+  loadAgentSettings().catch((failure) => { el("agents-result").textContent = failure.message; });
   loadGateway().catch((failure) => { el("gateway-state").textContent = failure.message; });
   el("persona-result").textContent =
     "Saved locally. Changes apply to the next natural-language turn.";
@@ -9066,7 +9428,7 @@ el("nav-memory").addEventListener("click", () => selectPrimaryTab("memory"));
 
 assetsReady = loadAssets();
 Promise.all([loadAbout(), assetsReady, loadChat(), loadSlashCommands(), loadAvatars(), loadMcp(),
-  loadPluginNav()])
+  loadPluginNav(), loadAgents().catch(() => {})])
   .catch(showBootError);
 field.focus();
 </script>

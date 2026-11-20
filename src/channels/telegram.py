@@ -56,7 +56,7 @@ from common.assets import (
 )
 from common.base import Contract, Slug, Symbol, Text
 from common.distribution import LocalStateError
-from common.execution import Failure, TraceIdentifiers
+from common.execution import Failure, RequestContext, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalWorkflowRequest
 from common.workflow_run_form import form_offer, offer_in, person_prefill, run_intent
 from host_runtime import features
@@ -286,6 +286,9 @@ class TelegramCollectionBot(Contract):
     feature: Symbol
     target: str = Field(default="", max_length=200)
     senders: tuple[TelegramSender, ...] = ()
+    # Off keeps the record and does not poll the bot (Settings → Agents,
+    # owner consent 2026-11-20).
+    enabled: StrictBool = True
 
     @model_validator(mode="after")
     def one_actor_per_sender(self) -> Self:
@@ -302,6 +305,28 @@ class TelegramCollectionBot(Contract):
         return None
 
 
+class TelegramAgentBot(Contract):
+    """A further bot of this Host bound to one persistent sub-agent (owner consent
+    2026-11-20, `host_runtime.persistent_agents`). What its mapped senders send
+    goes to that agent's own conversation (its Skills, tools and model policy),
+    through the same Agent, approvals and at-most-once rules as the conversation
+    bot; the reply goes back through this bot. Its token is a `SecretRef` of its own."""
+
+    name: Symbol
+    credential: SecretRef
+    agent: Slug
+    senders: tuple[TelegramSender, ...] = ()
+    enabled: StrictBool = True
+
+    @model_validator(mode="after")
+    def one_actor_per_sender(self) -> Self:
+        ids = [item.sender_id for item in self.senders]
+        actors = [item.actor for item in self.senders]
+        if len(ids) != len(set(ids)) or len(actors) != len(set(actors)):
+            raise ValueError("a sender maps to one actor and an actor to one sender")
+        return self
+
+
 class TelegramIngressConfig(Contract):
     """Host configuration for one bot serving one Bridge. The token is a
     `SecretRef`; a token pasted anywhere in this record is refused.
@@ -315,6 +340,9 @@ class TelegramIngressConfig(Contract):
     poll_timeout_seconds: int = Field(default=25, ge=0, le=50, strict=True)
     api_base: Text = "https://api.telegram.org"
     collection_bots: tuple[TelegramCollectionBot, ...] = ()
+    # Bots bound to persistent sub-agents (owner consent 2026-11-20), each polled
+    # on its own (`telegram-agent.<name>`); the conversation bot is unaffected.
+    agent_bots: tuple[TelegramAgentBot, ...] = ()
 
     @field_validator("api_base")
     @classmethod
@@ -329,10 +357,15 @@ class TelegramIngressConfig(Contract):
             raise ValueError("a sender maps to one actor and an actor to one sender")
         if not self.api_base.startswith("https://") or "/bot" in self.api_base:
             raise ValueError("api_base is the https origin of the Bot API, without a token")
-        names = [bot.name for bot in self.collection_bots]
-        tokens = [self.credential.name, *(bot.credential.name for bot in self.collection_bots)]
+        bots = [(bot.name, bot.credential.name) for bot in self.collection_bots]
+        bots += [(bot.name, bot.credential.name) for bot in self.agent_bots]
+        names = [name for name, _ in bots]
+        tokens = [self.credential.name, *(token for _, token in bots)]
         if len(names) != len(set(names)) or len(tokens) != len(set(tokens)):
             raise ValueError("each bot has its own name and its own token")
+        agents = [bot.agent for bot in self.agent_bots]
+        if len(agents) != len(set(agents)):
+            raise ValueError("an agent has at most one bot")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 
@@ -464,6 +497,12 @@ class _Update:
 
 
 CREDENTIAL_REPLY = "That message was not forwarded: it looks like it contains a credential."
+#: An agent bot (owner consent 2026-11-20) converses only; commands go to the main bot.
+AGENT_BOT_COMMANDS = "這個 bot 只和它的 agent 對話；/run 與指令請用主 Agent 的 bot。"
+AGENT_BOT_GONE = "這個 bot 綁定的 agent 已不存在；請在 Agent Web 設定 → Agents 重新綁定。"
+AGENT_BOT_NO_MODEL = "這個 agent 需要對話模型，這個 Bridge 目前沒有設定。"
+#: The durable cursor of an agent bot is `telegram-agent.<bot name>`.
+AGENT_CHANNEL_PREFIX = "telegram-agent."
 #: Where a card Telegram may not decide is applied (owner 2026-10-15). No
 #: address: Agent Web's page key must never travel in a chat.
 CARD_WHERE = "Agent Web on this PC, Tasks > Pending changes"
@@ -1078,12 +1117,56 @@ class TelegramIngress:
         # 2026-11-20), each a `telegram_collect.TelegramCollector` polled on its
         # own; set by the host. This bot's own handling never looks at them.
         self.collectors: list[Any] = []
+        # The bots bound to persistent sub-agents (owner consent 2026-11-20), each
+        # a `TelegramIngress` of its own with `owner_agent` set; set by the host
+        # on the conversation bot and polled beside it.
+        self.agent_bots: list[TelegramIngress] = []
+        # Set on an agent bot: the sub-agent whose conversations this bot feeds
+        # and where its definition is read at each turn (`AgentStore`).
+        self.owner_agent: str | None = None
+        self.agent_store: Any = None
+        # The durable cursor's channel: the conversation bot's own, or
+        # `telegram-agent.<name>` for an agent bot.
+        self.channel = TELEGRAM_CHANNEL
+
+    def _session(self, chat_id: int) -> str:
+        """The session a chat's turns belong to; an agent bot's are its own, so the
+        same person's chats with two bots never share a session."""
+        if self.owner_agent is None:
+            return _chat_session(chat_id)
+        return f"telegram-agent-{self.owner_agent}-chat-{chat_id}"
+
+    def _files_session(self, key: tuple[int, int]) -> str:
+        if self.owner_agent is None:
+            return _files_session(key)
+        return f"telegram-agent-{self.owner_agent}-chat-{key[0]}-sender-{key[1]}"
+
+    def _agent_options(self, request: LocalAgentRequest) -> dict[str, Any] | None:
+        """`LocalAgent.converse` options of an agent bot's turn: its Skills' tools and
+        its purpose (`persistent_agents.converse_options`); {} for the conversation
+        bot; None when the bound agent no longer exists."""
+        if self.owner_agent is None:
+            return {}
+        from host_runtime.persistent_agents import converse_options
+
+        found = None if self.agent_store is None else self.agent_store.get(self.owner_agent)
+        if found is None:
+            return None
+        context = RequestContext(
+            trace=request.trace,
+            actor=request.actor,
+            namespace=request.namespace,
+            message=request.message,
+            channel=request.ingress,
+            session_id=request.session_id,
+        )
+        return converse_options(found, self.agent.gateway.skill_tools(context))
 
     def offset(self) -> int | None:
         """How far this bot has been consumed, from the Bridge's own durable
         state rather than from memory, so a restart resumes where the last
         confirmed batch ended."""
-        return self.agent.state.cursor(TELEGRAM_CHANNEL)
+        return self.agent.state.cursor(self.channel)
 
     def _call(self, method: str, payload: Mapping[str, JsonValue]) -> tuple[int, bytes]:
         """One Bot API call. The token is resolved here, used in the URL and
@@ -1237,7 +1320,7 @@ class TelegramIngress:
         if highest is None or highest == offset:
             return TelegramPollResult(deliveries=tuple(deliveries), next_offset=offset)
         try:
-            await asyncio.to_thread(self.agent.state.advance_cursor, TELEGRAM_CHANNEL, highest)
+            await asyncio.to_thread(self.agent.state.advance_cursor, self.channel, highest)
         except LocalStateError as error:
             # The batch was handled; it just is not confirmed. Telegram will
             # offer it again, and `_seen` keeps this process from repeating it.
@@ -1312,6 +1395,10 @@ class TelegramIngress:
                     "chat": chat_hash(key),
                 }
             )
+        # The agent bots polled beside this one (owner consent 2026-11-20): a
+        # restart or a bot reload waits for their turns and flows too (rule 19).
+        for bot in self.agent_bots:
+            found += [item | {"agent": str(bot.owner_agent)} for item in bot.activity()]
         return found
 
     async def _deliver(self, update: _Update) -> TelegramDelivery:
@@ -1386,6 +1473,11 @@ class TelegramIngress:
         ):
             step = telegram_flow.answer(active, text)
             return await self._flow_step(base, key, active, step, actor, update)
+        if self.owner_agent is not None and (
+            (parsed is not None and parsed[0] == "run") or DOT_COMMAND.match(text)
+        ):
+            # An agent bot converses with its agent only (owner consent 2026-11-20).
+            return TelegramDelivery(**base, disposition="answered", reply=AGENT_BOT_COMMANDS)
         if parsed is not None and parsed[0] == "run":
             return await self._start_flow(base, key, parsed, actor, update)
         if parsed is not None and parsed[0] in ("start", "help"):
@@ -1398,12 +1490,12 @@ class TelegramIngress:
             if self.session_artifacts is not None:
                 acting, _ = self._acting(actor)
                 await asyncio.to_thread(
-                    self.session_artifacts.clear, _chat_session(update.chat_id), acting
+                    self.session_artifacts.clear, self._session(update.chat_id), acting
                 )
             # The owner's stored records list their files, so those stay until
             # the record is deleted in Agent Web, as an Agent Web chat's do.
             if self.attachments is not None and not stored:
-                await asyncio.to_thread(self.attachments.delete_session, _files_session(key))
+                await asyncio.to_thread(self.attachments.delete_session, self._files_session(key))
             return TelegramDelivery(
                 **base, disposition="answered", reply="Started a fresh conversation."
             )
@@ -1426,6 +1518,11 @@ class TelegramIngress:
             return TelegramDelivery(
                 **base, disposition="unsupported_content", reply=CREDENTIAL_REPLY
             )
+        if self.owner_agent is not None and parsed is None:
+            # Free text to an agent bot is always its agent's conversation.
+            if self.agent.gateway.router.model is None:
+                return TelegramDelivery(**base, disposition="answered", reply=AGENT_BOT_NO_MODEL)
+            return await self._converse(base, key, request, text, actor=actor, update=update)
         if parsed is None and not DOT_COMMAND.match(text):
             # "Run X" for an installed Workflow is its question flow, as
             # /run X is, never the model's prose (owner 2026-10-15).
@@ -1480,7 +1577,7 @@ class TelegramIngress:
         outcome leaves a transcript record (owner 2026-11-01)."""
         voice, media = self.voice, update.voice
         assert voice is not None and media is not None
-        session = _chat_session(update.chat_id)
+        session = self._session(update.chat_id)
 
         def refused(code: ErrorCode, reply: str | None = None) -> TelegramDelivery:
             # Nothing reached the Agent: answered, as an attachment refusal is.
@@ -1594,7 +1691,7 @@ class TelegramIngress:
         models = getattr(self.cards, "conversation_models", None)
         if actor is None or models is None:
             return None
-        chosen = models.for_turn(actor, _chat_session(update.chat_id))
+        chosen = models.for_turn(actor, self._session(update.chat_id))
         return chosen if isinstance(chosen, str) else None
 
     def _model_reply(self, actor: str, chat_id: int, wanted: str | None) -> str:
@@ -1602,7 +1699,7 @@ class TelegramIngress:
         models = getattr(self.cards, "conversation_models", None)
         if models is None:
             return "Choosing a model needs Agent Web on this Bridge."
-        session = _chat_session(chat_id)
+        session = self._session(chat_id)
         listed = models.listed(actor, session)
         if not listed.get("ok"):
             return "No model is configured. Set one in Agent Web Settings."
@@ -1663,7 +1760,7 @@ class TelegramIngress:
                     request_id=f"telegram-{update.update_id}",
                     span_id="telegram",
                 ),
-                session_id=_chat_session(update.chat_id),
+                session_id=self._session(update.chat_id),
             )
         except ValueError:
             return None
@@ -1708,7 +1805,7 @@ class TelegramIngress:
             )
         key = (update.chat_id, update.sender_id)
         try:
-            saved = await asyncio.to_thread(self._save, _files_session(key), update.files)
+            saved = await asyncio.to_thread(self._save, self._files_session(key), update.files)
             note, images = await asyncio.to_thread(for_model, saved)
         except AttachmentError as error:
             return TelegramDelivery(
@@ -1920,6 +2017,9 @@ class TelegramIngress:
             sent = [*history, ModelMessage(role="user", text=f"{text}\n\n{note}", images=images)]
         # The turn's live progress (owner 2026-10-19): Harness phase, tool
         # count and time, shown in the one status message.
+        options = await asyncio.to_thread(self._agent_options, request)
+        if options is None:
+            return TelegramDelivery(**base, disposition="answered", reply=AGENT_BOT_GONE)
         turn_state = TurnProgress(turn_id=f"telegram-{update.update_id if update else 0}")
         progress = await self._progress(base["chat_id"], "Working on it", turn_state)
         listening = TOOL_PROGRESS.set(progress.tool)
@@ -1927,7 +2027,7 @@ class TelegramIngress:
         answered = False
         started = datetime.now(UTC)
         try:
-            result = await self.agent.converse(request, tuple(sent))
+            result = await self.agent.converse(request, tuple(sent), **options)
             answered = result.conversation is not None and result.conversation.status == "answered"
         finally:
             TURN_PROGRESS.reset(tracking)
@@ -2365,7 +2465,7 @@ class TelegramIngress:
         # The history keeps the run's result and what it made, by short id
         # (owner 2026-10-25: 「這個workflow 做完之後他都忘記了」).
         finished = await self._record_run(
-            _chat_session(update.chat_id), acting, outcome.workflow, step.arguments
+            self._session(update.chat_id), acting, outcome.workflow, step.arguments
         )
         self._remember_turn(key, f"【執行】{state.workflow.name}", finished.entry or reply)
         texts, buttons = self._run_extras(outcome)
@@ -2412,7 +2512,7 @@ class TelegramIngress:
         store = self.session_artifacts
         if summary_id is None and store is not None:
             latest = await asyncio.to_thread(
-                store.summaries.for_session, _chat_session(chat_id), acting, 1
+                store.summaries.for_session, self._session(chat_id), acting, 1
             )
             summary_id = latest[-1].summary_id if latest else None
         saver = getattr(self.cards, "task_summary_note", None)
