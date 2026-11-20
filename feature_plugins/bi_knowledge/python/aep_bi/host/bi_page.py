@@ -910,7 +910,13 @@ BI_PANE_HTML = r"""
             <h4 id="bi-b-skills-h">判讀規則（skills）</h4>
             <div id="bi-b-sk-list"></div>
             <div class="bi-actions">
-              <button class="bi-btn" id="bi-b-sk-new" type="button">和 AI 新增規則</button></div>
+              <button class="bi-btn" id="bi-b-sk-new" type="button">和 AI 新增規則</button>
+              <details class="bi-row-menu" id="bi-b-pkg-menu"><summary>更多</summary>
+                <div class="bi-actions">
+                  <button class="bi-btn" id="bi-b-pkg-import" type="button">匯入</button>
+                  <button class="bi-btn" id="bi-b-pkg-export" type="button">匯出</button></div>
+              </details></div>
+            <div class="bi-step" id="bi-b-pkg" hidden></div>
             <div id="bi-b-tools">
               <h5>資料處理程式</h5>
               <div id="bi-b-tl-list"></div>
@@ -5009,7 +5015,11 @@ function biToolsDraw(vaultId, reply) {
     const title = item.name + (draft ? "（AI 提出的草稿）" : "（第 " + item.revision + " 版）");
     const code = bh("pre", "bi-meta", item.code || item.problem || "");
     const actions = [];
-    if (!draft && item.code && !item.problem) {
+    if (!draft && item.code && !item.problem && item.needs_rewrite) {
+      // Imported as a command-line script (「需改寫」): one press hands it to the tool AI.
+      actions.push(biButton("用 AI 改寫", (event) => biToolRewrite(item, event), "go",
+        "用 AI 改寫：" + item.name));
+    } else if (!draft && item.code && !item.problem) {
       actions.push(biButton("對選取的來源執行", () => runOn(item), "bi-btn", "執行：" + item.name));
     }
     if (draft) {
@@ -5024,9 +5034,13 @@ function biToolsDraw(vaultId, reply) {
         el("bi-b-tl-code").focus();
       }, "bi-btn", "修改：" + item.name));
     }
-    biRow(list, [bh("strong", "", title),
-      item.problem ? biBadge("程式無法讀取", "warn") : biBadge("不需核准", "good"),
-      biRowActions(actions)]);
+    const state = item.problem ? [biBadge("程式無法讀取", "warn")]
+      : item.needs_rewrite ? [biBadge("需改寫", "warn"), bh("p", "bi-meta",
+        "從包匯入的命令列腳本；改寫成讀 INPUT、寫到 OUTPUT 並存成新版本後才能執行。")]
+        : [biBadge("不需核准", "good")];
+    biRow(list, [[bh("strong", "", title),
+      ...(item.description ? [bh("p", "bi-meta", item.description)] : [])],
+    state, biRowActions(actions)]);
     // Code stays inspectable; historical review metadata does not admit execution.
     const shown = bh("details", "", bh("summary", "", "程式碼"), code);
     shown.open = Boolean(item.code && !item.approved);
@@ -5280,7 +5294,7 @@ async function biToolAi(event) {
   if (!home) {
     biNotice(false, "先在上面選工作領域，AI 才知道程式給哪個領域用。"); return;
   }
-  await biAiOpen({kind: "tool", dataset: "vault-" + bi.verVault, ref: "tool:" + home,
+  return biAiOpen({kind: "tool", dataset: "vault-" + bi.verVault, ref: "tool:" + home,
     from: event && event.currentTarget, title: "和 AI 寫資料處理程式",
     about: "先告訴 AI：輸入檔長怎樣（勾一份試跑來源當樣本）、要輸出哪些欄位、有哪些特殊情況。"
       + "AI 只提出程式碼；放進編輯區、試跑和存檔都由你按。",
@@ -5294,6 +5308,311 @@ async function biToolAi(event) {
 
 el("bi-b-tl-ai").addEventListener("click", (event) => biToolAi(event)
   .catch((failure) => biNotice(false, failure.message)));
+
+async function biToolRewrite(item, event) {
+  // 「需改寫」 in one press: the script goes into the editor and the tool AI is asked to
+  // rewrite it into the INPUT/OUTPUT contract; trying and saving stay the person's presses.
+  el("bi-b-adv-skills").open = true;
+  el("bi-b-tl-name").value = item.name; el("bi-b-tl-code").value = item.code;
+  const spec = await biToolAi(event);
+  if (!spec || bi.ai !== spec) return;
+  el("bi-ai-msg").value = "這是從包匯入的命令列腳本：請改寫成讀 INPUT、把 CSV 或 Markdown "
+    + "寫到 OUTPUT 的工具，保留它的解析邏輯。";
+  el("bi-ai-send").click();
+}
+
+// -- a working domain's skills and tools as one package (aep.bi.package/v1; owner 2026-11-19:
+// 匯入 and 匯出 under 更多, into the current working domain only, a preview before anything is
+// staged, and every wait with its progress beside its button, AGENTS.md 23) ------------------
+const BI_PKG_TEXT = /\.(json|md|py|txt)$/i;
+const BI_PKG_MAX = 8 * 1024 * 1024;
+const BI_PKG_STATES = {new: ["新增", "good"], update: ["更新既有", ""],
+  same: ["相同（略過）", "dim"],
+  conflict: ["衝突", "warn"], invalid: ["無效", "bad"]};
+bi.pkg = {preview: null, lastDownload: null};
+
+function biClock(started) {
+  const seconds = Math.floor((Date.now() - started) / 1000);
+  return String(Math.floor(seconds / 60)).padStart(2, "0") + ":"
+    + String(seconds % 60).padStart(2, "0");
+}
+
+function biPkgState(id, state, message) {
+  const box = el(id); if (!box) return;
+  box.replaceChildren(); box.hidden = !state;
+  box.className = "mem-status" + (state ? " " + state : "");
+  if (state === "loading") box.append(bh("span", "mem-spinner"), bh("span", "", message));
+  else if (state) box.append(bh("span", "", message));
+}
+
+function biPkgStatusLine(id) {
+  const line = bh("div", "mem-status"); line.id = id; line.hidden = true;
+  line.setAttribute("role", "status"); line.setAttribute("aria-live", "polite");
+  return line;
+}
+
+function biPkgPanel(mode) {
+  // The panel opens in place under 更多, which closes; one at a time.
+  const home = biScope();
+  el("bi-b-pkg-menu").open = false;
+  if (!home) {
+    biNotice(false, "先在上面選工作領域：" + (mode === "import" ? "包只匯入到目前的工作領域。"
+      : "匯出的是一個工作領域的規則和工具。"));
+    return null;
+  }
+  const box = el("bi-b-pkg"); box.hidden = false; box.replaceChildren();
+  box.dataset.mode = mode; box.dataset.home = home;
+  return {box, home, label: biHomeLabel(home)};
+}
+
+function biPkgClose() {
+  const box = el("bi-b-pkg"); box.hidden = true; box.replaceChildren(); bi.pkg.preview = null;
+}
+
+function biPkgImport() {
+  const panel = biPkgPanel("import"); if (!panel) return;
+  const zip = document.createElement("input");
+  zip.type = "file"; zip.accept = ".zip,application/zip"; zip.hidden = true;
+  zip.id = "bi-b-pkg-zip";
+  const dir = document.createElement("input");
+  dir.type = "file"; dir.multiple = true; dir.webkitdirectory = true; dir.hidden = true;
+  dir.id = "bi-b-pkg-dir";
+  const preview = bh("div", ""); preview.id = "bi-b-pkg-preview";
+  panel.box.append(bh("h5", "", "匯入判讀規則和工具到「" + panel.label + "」"),
+    bh("p", "bi-meta", "選 zip 或資料夾（skills/*.md、tools/*.py，可以附 aep-bi-package.json）。"
+      + "先看預覽再匯入；包裡的程式不會執行。"),
+    bh("div", "bi-actions", biButton("選 zip", () => zip.click(), "go"),
+      biButton("選資料夾", () => dir.click()), biButton("關閉", biPkgClose)),
+    zip, dir, biPkgStatusLine("bi-b-pkg-status"), preview);
+  zip.addEventListener("change", () => {
+    const file = zip.files[0]; zip.value = "";
+    if (file) biPkgZip(file, panel.home);
+  });
+  dir.addEventListener("change", () => {
+    const files = [...dir.files]; dir.value = "";
+    if (files.length) biPkgFolder(files, panel.home);
+  });
+}
+
+async function biPkgZip(file, home) {
+  const started = Date.now();
+  let step = "上傳 0 / " + biMegabytes(file.size);
+  const show = () => biPkgState("bi-b-pkg-status", "loading",
+    file.name + "・" + step + "・" + biClock(started));
+  show();
+  const ticker = setInterval(show, 1000);
+  try {
+    const query = new URLSearchParams({home, name: file.name});
+    const reply = await biSend("/api/bi/vaults/" + bi.verVault + "/package-upload?" + query,
+      file, "application/zip", (loaded, total) => {
+        step = loaded === null ? "已上傳，主機檢查內容（不執行程式）"
+          : "上傳 " + biMegabytes(loaded) + " / " + biMegabytes(total);
+        show();
+      });
+    biPkgState("bi-b-pkg-status", "good", file.name + "・預覽好了（" + biClock(started) + "）");
+    biPkgShow(reply);
+  } catch (failure) {
+    biPkgState("bi-b-pkg-status", "error", "沒有預覽：" + failure.message + "。請改正後重新選檔。");
+  } finally { clearInterval(ticker); }
+}
+
+async function biPkgFolder(files, home) {
+  const chosen = files.filter((f) => BI_PKG_TEXT.test(f.name)
+    && !/(^|\/)\./.test(f.webkitRelativePath || f.name));
+  const started = Date.now();
+  let step = "讀檔";
+  const show = () => biPkgState("bi-b-pkg-status", "loading", step + "・" + biClock(started));
+  const ticker = setInterval(show, 1000);
+  try {
+    const size = chosen.reduce((sum, f) => sum + f.size, 0);
+    if (!chosen.length) throw new Error("資料夾裡沒有 .md、.py 或 .json 檔");
+    if (size > BI_PKG_MAX) {
+      throw new Error("這些檔案有 " + biMegabytes(size) + "，上限 8 MB；請改用 zip");
+    }
+    const read = [];
+    for (const [at, file] of chosen.entries()) {
+      const path = file.webkitRelativePath || file.name;
+      step = "讀檔 " + (at + 1) + " / " + chosen.length + "：" + path; show();
+      read.push({path, text: await file.text()});
+    }
+    step = "主機檢查 " + read.length + " 個檔（不執行程式）"; show();
+    const name = (chosen[0].webkitRelativePath || "").split("/")[0];
+    const reply = await biCall("/api/bi/vaults/" + bi.verVault + "/package",
+      {preview: {home, files: read, name}});
+    biPkgState("bi-b-pkg-status", "good", "預覽好了（" + biClock(started) + "）");
+    biPkgShow(reply);
+  } catch (failure) {
+    biPkgState("bi-b-pkg-status", "error", "沒有預覽：" + failure.message
+      + "。請改正後重新選資料夾。");
+  } finally { clearInterval(ticker); }
+}
+
+function biPkgShow(preview) {
+  bi.pkg.preview = preview;
+  const out = el("bi-b-pkg-preview"); out.replaceChildren();
+  const about = preview.package || {};
+  out.append(bh("p", "", "包「" + about.name + "」" + (about.version ? " " + about.version : "")
+    + (about.description ? "：" + about.description : "")));
+  if (about.inferred) {
+    out.append(bh("p", "bi-warn", "沒有 aep-bi-package.json：依檔名和內容推斷，"
+      + "請確認下面每一項再匯入。"));
+  }
+  out.append(bh("p", "bi-meta", preview.guard));
+  const table = biListTable(["匯入", "種類", "名稱", "狀態", "原因", "動作"]);
+  for (const item of preview.items || []) {
+    const tick = document.createElement("input"); tick.type = "checkbox";
+    tick.dataset.pkg = item.id; tick.checked = Boolean(item.default);
+    tick.disabled = item.status === "invalid" || item.status === "same";
+    tick.setAttribute("aria-label", "匯入 " + item.name);
+    const [word, cls] = BI_PKG_STATES[item.status] || [item.status, ""];
+    const state = [biBadge(word, cls)];
+    if (item.needs_rewrite) state.push(" ", biBadge("需改寫", "warn"));
+    const why = [...(item.reasons || []).map((r) => bh("p", "bi-err", r)),
+      ...(item.warnings || []).map((w) => bh("p", "bi-meta", w))];
+    let action = "—";
+    if (item.status === "conflict") {
+      const pick = document.createElement("select"); pick.dataset.pkgAs = item.id;
+      pick.setAttribute("aria-label", "衝突時怎麼匯入 " + item.name);
+      for (const [value, label] of [["new_revision", "存成新版本"],
+        ["rename", "改名匯入" + (item.rename_to ? "（" + item.rename_to + "）" : "")]]) {
+        const option = bh("option", "", label); option.value = value; pick.append(option);
+      }
+      pick.value = item.action || "new_revision";
+      action = pick;
+    } else if (item.status === "update") action = "存成第 " + (item.revision + 1) + " 版";
+    else if (item.status === "new") action = "新增";
+    biRow(table, [tick, item.kind === "skill" ? "判讀規則" : "工具",
+      [bh("strong", "", item.name), ...(item.description
+        ? [bh("p", "bi-meta", item.description)] : [])],
+      state, why.length ? why : "—", action]);
+  }
+  out.append(table.box);
+  if ((preview.skipped || []).length) {
+    out.append(bh("details", "", bh("summary", "", "略過 " + preview.skipped.length + " 個檔"),
+      bh("ul", "", ...preview.skipped.map((s) => bh("li", "bi-meta", s.file + "：" + s.reason)))));
+  }
+  const go = biButton("匯入到 " + preview.home_label, biPkgApply, "go",
+    "匯入到工作領域 " + preview.home_label);
+  go.id = "bi-b-pkg-apply";
+  out.append(bh("div", "bi-actions", go), biPkgStatusLine("bi-b-pkg-apply-status"));
+}
+
+async function biPkgApply() {
+  const preview = bi.pkg.preview; if (!preview) return;
+  const out = el("bi-b-pkg-preview");
+  const chosen = [...out.querySelectorAll("input[data-pkg]:checked")].map((tick) => {
+    const pick = [...out.querySelectorAll("select[data-pkg-as]")]
+      .find((s) => s.dataset.pkgAs === tick.dataset.pkg);
+    return pick ? {id: tick.dataset.pkg, as: pick.value} : {id: tick.dataset.pkg};
+  });
+  if (!chosen.length) {
+    biPkgState("bi-b-pkg-apply-status", "error", "沒有勾選要匯入的項目。"); return;
+  }
+  const names = Object.fromEntries((preview.items || []).map((i) => [i.id, i.name]));
+  const button = el("bi-b-pkg-apply"); button.disabled = true;
+  const started = Date.now(), results = [];
+  let current = "";
+  const show = () => biPkgState("bi-b-pkg-apply-status", "loading", "寫入 " + results.length
+    + " / " + chosen.length + "：" + current + "・" + biClock(started));
+  const ticker = setInterval(show, 1000);
+  try {
+    const size = preview.batch || 10;
+    for (let at = 0; at < chosen.length; at += size) {
+      const batch = chosen.slice(at, at + size);
+      current = batch.map((c) => names[c.id]).join("、"); show();
+      const reply = await biCall("/api/bi/vaults/" + bi.verVault + "/package",
+        {apply: {token: preview.token, items: batch}});
+      results.push(...reply.results);
+    }
+  } catch (failure) {
+    clearInterval(ticker); button.disabled = false;
+    biPkgState("bi-b-pkg-apply-status", "error", "寫入 " + results.length + " / " + chosen.length
+      + " 後停下：" + failure.message + "。已寫入的是待提交改動；重新選包再試，相同的會略過。");
+    return;
+  }
+  clearInterval(ticker);
+  const staged = results.filter((r) => r.result === "staged" || r.result === "already");
+  const same = results.filter((r) => r.result === "same");
+  const failed = results.filter((r) => r.result === "failed");
+  biPkgState("bi-b-pkg-apply-status", failed.length ? "error" : "good",
+    "已加入 " + staged.length + " 項待提交改動，到「分享」commit 並 push 後大家才會用到"
+    + (same.length ? "；" + same.length + " 項相同，略過" : "")
+    + (failed.length ? "；" + failed.length + " 項沒有匯入：" + failed.map((r) =>
+      names[r.id] + "（" + r.message + "）").join("；") : "")
+    + "（" + biClock(started) + "）。");
+  bi.loaded = {}; biRefreshCounts();
+  biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
+  await Promise.all([biSkills(bi.verVault), biTools(bi.verVault)]);
+}
+
+async function biPkgExport() {
+  const panel = biPkgPanel("export"); if (!panel) return;
+  const list = bh("div", "bi-rr-list"); list.id = "bi-b-pkg-items";
+  const actions = bh("div", "bi-actions");
+  panel.box.append(bh("h5", "", "匯出「" + panel.label + "」的判讀規則和工具"), list, actions,
+    biPkgStatusLine("bi-b-pkg-export-status"));
+  biPkgState("bi-b-pkg-export-status", "loading", "讀取這個領域的規則和工具…");
+  const reply = await call("/api/bi/vaults/" + bi.verVault + "/package?home="
+    + encodeURIComponent(panel.home));
+  biPkgState("bi-b-pkg-export-status", "", "");
+  const items = reply.items || [];
+  if (!items.length) {
+    list.append(bh("p", "bi-meta", "這個領域還沒有判讀規則或工具。"));
+    actions.append(biButton("關閉", biPkgClose));
+    return;
+  }
+  for (const item of items) {
+    const tick = document.createElement("input"); tick.type = "checkbox";
+    tick.value = item.id; tick.checked = item.kind === "skill" || item.python !== false;
+    tick.disabled = item.kind === "tool" && item.python === false;
+    list.append(bh("label", "bi-meta", tick, " " + (item.kind === "skill" ? "判讀規則 " : "工具 ")
+      + item.name + "（第 " + item.revision + " 版）"
+      + (item.uncommitted ? "・含未提交版本" : "")), document.createElement("br"));
+  }
+  const go = biButton("下載 zip", () => biPkgDownload(panel.home), "go", "下載 zip");
+  go.id = "bi-b-pkg-download";
+  actions.append(go, biButton("關閉", biPkgClose));
+}
+
+async function biPkgDownload(home) {
+  const ids = [...el("bi-b-pkg-items").querySelectorAll("input:checked")].map((t) => t.value);
+  if (!ids.length) {
+    biPkgState("bi-b-pkg-export-status", "error", "沒有勾選要匯出的項目。"); return;
+  }
+  const button = el("bi-b-pkg-download"); button.disabled = true;
+  const started = Date.now();
+  let step = "打包 " + ids.length + " 項";
+  const show = () => biPkgState("bi-b-pkg-export-status", "loading",
+    step + "・" + biClock(started));
+  show();
+  const ticker = setInterval(show, 1000);
+  try {
+    const query = new URLSearchParams({home, items: ids.join(",")});
+    const reply = await fetch("/api/bi/vaults/" + bi.verVault + "/package-export?" + query,
+      {headers: {Authorization: "Bearer " + TOKEN}});
+    if (!reply.ok) {
+      let answer = {}; try { answer = await reply.json(); } catch (_) { answer = {}; }
+      throw new Error(answer.message || ("主機回應 " + reply.status));
+    }
+    step = "下載中"; show();
+    const blob = await reply.blob();
+    const name = "aep-bi-" + home.replace(/[^a-z0-9]+/g, "-") + ".zip";
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob); link.download = name;
+    document.body.append(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(link.href), 60000);
+    bi.pkg.lastDownload = {name, bytes: blob.size, items: ids.length};
+    biPkgState("bi-b-pkg-export-status", "good", "已下載 " + name + "（" + ids.length + " 項、"
+      + biMegabytes(blob.size) + "，" + biClock(started)
+      + "）；在別的知識庫用「更多 → 匯入」放進去。");
+  } catch (failure) {
+    biPkgState("bi-b-pkg-export-status", "error", "沒有匯出：" + failure.message + "。");
+  } finally { clearInterval(ticker); button.disabled = false; }
+}
+
+el("bi-b-pkg-import").addEventListener("click", biPkgImport);
+el("bi-b-pkg-export").addEventListener("click", () => biPkgExport()
+  .catch((failure) => biPkgState("bi-b-pkg-export-status", "error", failure.message)));
 
 // -- a home's profile and its field proposals (BI_CARD_MODEL.md §4.2, §4.3) --------
 async function biProfiles(vaultId) {
