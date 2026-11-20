@@ -1337,7 +1337,8 @@ tr:last-child td { border-bottom: none; }
     </div>
     <h2 id="agents-heading">Agents</h2>
     <p class="note">主 Agent 和你建立的子代理。每個 agent 可以綁一個自己的 Telegram bot：
-      填「存放 bot token 的環境變數名稱」（例如 AEP_TG_SALES），不要貼 token 本身。
+      在「貼上 bot token」貼上 token 後儲存即可。token 存在這個 Windows 帳號的環境變數
+      （名稱就是上面那格），不會寫進 AEP 的檔案；刪除 bot 不會刪除環境變數。
       BI 收集 bot 也在這裡設定。儲存後 bot 設定立即套用；若有 Telegram 對話正在進行，
       會等它結束才套用。</p>
     <div class="card settings" id="agents-card">
@@ -1359,7 +1360,11 @@ tr:last-child td { border-bottom: none; }
         <fieldset class="agent-bot"><legend>Telegram bot</legend>
           <label><input type="checkbox" id="agent-bot-on"> 綁定 Telegram bot</label>
           <label for="agent-bot-variable">token 的環境變數名稱</label>
-          <input id="agent-bot-variable" spellcheck="false" placeholder="AEP_TG_AGENT">
+          <input id="agent-bot-variable" spellcheck="false"
+                 placeholder="留空自動用 AEP_TG_<agent id>">
+          <label for="agent-bot-token">貼上 bot token（選填）</label>
+          <input id="agent-bot-token" type="password" autocomplete="new-password"
+                 spellcheck="false" placeholder="123456789:AA…（留空＝沿用變數裡的 token）">
           <label for="agent-bot-senders">允許的傳送者，一行一位：
             Telegram 數字 id，後面可接 actor</label>
           <textarea id="agent-bot-senders" spellcheck="false" rows="2"
@@ -1378,6 +1383,9 @@ tr:last-child td { border-bottom: none; }
         <input id="collect-target" maxlength="200" required>
         <label for="collect-variable">token 的環境變數名稱</label>
         <input id="collect-variable" spellcheck="false" placeholder="AEP_TG_BI_SALES">
+        <label for="collect-token">貼上 bot token（選填）</label>
+        <input id="collect-token" type="password" autocomplete="new-password"
+               spellcheck="false" placeholder="123456789:AA…（留空＝沿用變數裡的 token）">
         <label for="collect-senders">允許的傳送者，一行一位：
           Telegram 數字 id，後面可接 actor</label>
         <textarea id="collect-senders" spellcheck="false" rows="2"
@@ -4230,7 +4238,14 @@ async function loadAgents() {
 
 let agentSettings = null;
 const AGENT_PROBLEMS = {
-  bot_token_value_refused: "這看起來是 token 本身。請填存放 token 的環境變數名稱，不要貼 token。",
+  bot_token_value_refused: "這看起來是 token 本身。token 請貼到「貼上 bot token」那一格；"
+    + "名稱那格只填環境變數名稱。",
+  bot_token_invalid: "這不像 Telegram bot token（格式：數字:35 個以上英數字），"
+    + "請從 @BotFather 重新複製。",
+  bot_token_store_unsupported: "這台主機不是 Windows，無法在這裡儲存 token；"
+    + "請在服務的環境設定這個環境變數後再儲存（token 欄留空）。",
+  bot_token_store_failed: "無法寫入這個 Windows 帳號的環境變數；token 沒有儲存。",
+  bot_variable_in_use: "這個環境變數名稱已被別的設定使用（或裡面不是 bot token）；請換一個名稱。",
   bot_variable_invalid: "環境變數名稱只能有英數字和底線，例如 AEP_TG_SALES。",
   bot_sender_invalid: "傳送者的 actor 不正確。",
   telegram_not_configured: "請先在上面的 Telegram bot 設定好主 Agent 的 bot。",
@@ -4335,11 +4350,18 @@ function openAgentForm(agent) {
   showAgentSkills(agent ? agent.skills : []);
   const bot = agent && agent.bot;
   el("agent-bot-on").checked = !!bot;
-  el("agent-bot-variable").value = bot ? bot.variable : "";
+  el("agent-bot-variable").value = bot && bot.variable ? bot.variable
+    : agent ? defaultBotVariable("", agent.id) : "";
+  el("agent-bot-token").value = "";
   el("agent-bot-senders").value = bot ? sendersText(bot.senders) : "";
   el("agent-bot-enabled").checked = bot ? bot.enabled : true;
   el("agent-delete").hidden = !agent;
   el("agent-form-name").focus();
+}
+
+// The variable a bot's token is kept in when the name field is left as is.
+function defaultBotVariable(kind, name) {
+  return ("AEP_TG_" + kind + name.replace(/[^A-Za-z0-9_]/g, "_").toUpperCase()).slice(0, 100);
 }
 
 function openCollectForm(bot) {
@@ -4349,7 +4371,9 @@ function openCollectForm(bot) {
   el("collect-name").value = bot ? bot.name : "";
   el("collect-name").readOnly = !!bot;
   el("collect-target").value = bot ? bot.target : "";
-  el("collect-variable").value = bot ? bot.variable : "";
+  el("collect-variable").value = bot && bot.variable ? bot.variable
+    : bot ? defaultBotVariable("BI_", bot.name) : "";
+  el("collect-token").value = "";
   el("collect-senders").value = bot ? sendersText(bot.senders) : "";
   el("collect-enabled").checked = bot ? bot.enabled : true;
   el("collect-delete").hidden = !bot;
@@ -4365,6 +4389,7 @@ async function agentAction(path, body, button, working) {
     if (saved.ok === false) throw Object.assign(new Error(saved.code), {code: saved.code});
     renderAgentSettings(saved);
     el("agent-form").hidden = true; el("collect-form").hidden = true;
+    el("agent-bot-token").value = ""; el("collect-token").value = "";
     result.textContent = RELOAD_NOTES[saved.reload] || "已儲存。";
     loadAgents().catch(() => {});
   } catch (failure) {
@@ -4378,6 +4403,16 @@ async function loadAgentSettings() {
 }
 
 el("agent-add").addEventListener("click", () => openAgentForm(null));
+el("collect-name").addEventListener("input", () => {
+  // A new bot's variable follows its name until someone types their own.
+  const variable = el("collect-variable");
+  const name = el("collect-name");
+  if (name.readOnly) return;
+  if (!variable.value || variable.value === variable.dataset.auto) {
+    variable.value = name.value.trim() ? defaultBotVariable("BI_", name.value.trim()) : "";
+    variable.dataset.auto = variable.value;
+  }
+});
 el("collect-add").addEventListener("click", () => openCollectForm(null));
 el("agent-cancel").addEventListener("click", () => { el("agent-form").hidden = true; });
 el("collect-cancel").addEventListener("click", () => { el("collect-form").hidden = true; });
@@ -4399,7 +4434,8 @@ el("agent-form").addEventListener("submit", (event) => {
     purpose: el("agent-purpose").value,
     profile: el("agent-profile").value || null,
     skills: [...el("agent-skills").querySelectorAll("input:checked")].map((box) => box.value),
-    bot: el("agent-bot-on").checked ? {variable: el("agent-bot-variable").value, senders,
+    bot: el("agent-bot-on").checked ? {variable: el("agent-bot-variable").value,
+      token: el("agent-bot-token").value.trim() || null, senders,
       enabled: el("agent-bot-enabled").checked} : null,
   };
   agentAction("/api/settings/agents", body, el("agent-save"), "儲存中…");
@@ -4416,7 +4452,8 @@ el("collect-form").addEventListener("submit", (event) => {
   catch (failure) { el("agents-result").textContent = "沒有儲存：" + failure.message; return; }
   agentAction("/api/settings/collection-bots", {
     name: el("collect-name").value, target: el("collect-target").value,
-    bot: {variable: el("collect-variable").value, senders,
+    bot: {variable: el("collect-variable").value,
+      token: el("collect-token").value.trim() || null, senders,
       enabled: el("collect-enabled").checked},
   }, el("collect-save"), "儲存中…");
 });

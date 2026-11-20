@@ -2762,7 +2762,9 @@ class AgentWeb:
         return view
 
     def agent_settings_action(self, path: str, body: object) -> dict[str, Any]:
-        """Save or delete an agent or a collection bot, then reload the bots."""
+        """Save or delete an agent or a collection bot, then reload the bots. A pasted
+        bot token goes only to the user's environment (`user_environment`) and this
+        process; the result and every error carry only codes and `token_present`."""
         if self.config_path is None:
             return {"ok": False, "code": "settings_read_only"}
         data = body if isinstance(body, dict) else {}
@@ -2776,6 +2778,7 @@ class AgentWeb:
                         self.runtime.layout,
                         AgentForm.model_validate(data),
                         default_actor=actor,
+                        token_store=self.user_environment,
                     )
                 elif path == "/api/settings/agents/delete":
                     if not delete_agent(self.runtime.layout, str(data.get("id") or "")):
@@ -2786,6 +2789,7 @@ class AgentWeb:
                         self.runtime.layout,
                         CollectionBotForm.model_validate(data),
                         default_actor=actor,
+                        token_store=self.user_environment,
                     )
                 elif not delete_collection_bot(self.runtime.layout, str(data.get("name") or "")):
                     return {"ok": False, "code": "bot_unknown"}

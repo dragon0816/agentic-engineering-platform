@@ -241,3 +241,57 @@ def test_settings_agents_adds_an_agent_and_refuses_a_pasted_token(page: tuple) -
         .agents()
     )
     assert agent.name == "Sales"
+
+
+def test_each_bot_form_has_a_password_token_field_beside_its_variable() -> None:
+    for variable, token in (
+        ("agent-bot-variable", "agent-bot-token"),
+        ("collect-variable", "collect-token"),
+    ):
+        after = PAGE.split(f'id="{variable}"', 1)[1]
+        field = after.split(f'<input id="{token}"', 1)[1].split(">", 1)[0]
+        assert 'type="password"' in field and 'autocomplete="new-password"' in field
+        assert after.index(f'id="{token}"') < after.index("senders")
+        assert "貼上 bot token（選填）" in after.split(f'id="{token}"', 1)[0]
+    assert "不要貼 token 本身" not in PAGE
+    assert "token 存在這個 Windows 帳號的環境變數" in PAGE
+
+
+@pytest.mark.skipif(_browser_missing(), reason="no Chromium browser is installed")
+def test_a_token_pasted_on_the_page_is_stored_and_the_field_is_cleared(
+    page: tuple,  # type: ignore[type-arg]
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from test_telegram_settings import TOKEN, Store, _update
+
+    runtime, server, ui = page
+    web = server.web
+    store = Store()
+    web.user_environment = store  # never the real registry in tests
+    monkeypatch.setattr(web, "start_telegram", lambda: None)  # no network
+    monkeypatch.setenv("AEP_TELEGRAM_BOT_TOKEN", TOKEN)
+    monkeypatch.delenv("AEP_TG_SALES", raising=False)
+    assert web.update_telegram_settings(_update())["ok"] is True
+    pasted = "987654321:BBz" + "y" * 33
+    ui.browser.navigate(server.address)
+    ui.wait('!document.getElementById("send").disabled')
+    ui.run("document.getElementById('nav-settings').click()")
+    ui.wait("!!document.querySelector('#agents-rows table')")
+    ui.run("document.getElementById('agent-add').click()")
+    assert ui.run("document.getElementById('agent-bot-token').type") == "password"
+    ui.run(
+        "document.getElementById('agent-id').value = 'sales';"
+        "document.getElementById('agent-form-name').value = 'Sales';"
+        "document.getElementById('agent-bot-on').checked = true;"
+        f"document.getElementById('agent-bot-token').value = {pasted!r};"
+        "document.getElementById('agent-save').click()"
+    )
+    ui.wait("document.getElementById('agent-form').hidden")
+    assert ui.run("document.getElementById('agent-bot-token').value") == ""
+    assert store.saved["AEP_TG_SALES"] == pasted
+    rows = str(ui.run("document.getElementById('agents-rows').textContent"))
+    assert "AEP_TG_SALES" in rows and pasted not in rows
+    # Edit opens with the default name and an empty token field.
+    ui.run("document.querySelector('#agents-rows table button').click()")
+    assert ui.run("document.getElementById('agent-bot-variable').value") == "AEP_TG_SALES"
+    assert ui.run("document.getElementById('agent-bot-token').value") == ""

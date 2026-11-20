@@ -5276,3 +5276,16 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   (share step now a side tab; not touched). Known-broken redesign UI tests not run. ruff,
   ruff format --check, mypy on changed files and node --check on the page script clean. Full
   suite not run (owner reviews the page first).
+- [x] 2026-11-20 Paste a Telegram bot token in Settings → Agents (owner 2026-11-20; branch
+  bi-knowledge-round2-20261120; decision docs/DECISIONS.md "Paste a bot token in Settings →
+  Agents; AEP stores it as the user's environment variable"; contract docs/CONTRACTS.md
+  "Persistent agents and agent bots"). Agent bot and BI collection bot forms gain a password
+  field 「貼上 bot token（選填）」; the variable name defaults to `AEP_TG_<ID>` / `AEP_TG_BI_<NAME>`;
+  on save the token is format-checked, refused on a variable in use (`bot_variable_in_use`),
+  written to HKCU\Environment via winreg + WM_SETTINGCHANGE (no setx process) and os.environ,
+  and the bots reload without a restart; off Windows `bot_token_store_unsupported`. The token is
+  in no settings file or response (`token_present` only); the field is cleared after save.
+  Verification: tests/test_agents_settings.py (16), tests/test_agent_sidebar_ui.py (incl. a
+  browser test with a fake store), tests/test_telegram_agent_bots.py,
+  tests/test_telegram_settings.py pass; ruff, ruff format --check, mypy on changed files clean.
+  Full suite not run.

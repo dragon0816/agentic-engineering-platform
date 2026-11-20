@@ -5655,17 +5655,34 @@ Tests: `tests/test_agents_settings.py`, `tests/test_telegram_agent_bots.py`,
 - **API.** `GET /api/settings/agents` → `{ok, writable, reload, telegram_configured, main, agents
   [+bot {name, variable, token_present, senders, enabled, running, problem}], collection_bots
   [+purpose "BI 收集→<target>"], skills, profiles}`; `POST /api/settings/agents` (`AgentForm`:
-  id?, name, purpose, skills, profile?, bot? {variable, senders, enabled}),
+  id?, name, purpose, skills, profile?, bot? {variable, token?, senders, enabled}),
   `/api/settings/agents/delete` {id}, `/api/settings/collection-bots` (`CollectionBotForm`: name,
   target, feature?, bot), `/api/settings/collection-bots/delete` {name}; 409 codes
   `bot_token_value_refused`, `bot_variable_invalid`, `bot_sender_invalid`,
   `telegram_not_configured`, `telegram_bots_invalid`, `agent_invalid`, `agent_unknown`,
-  `bot_unknown`, `settings_read_only`. A bot binding writes `host.json` credentials
+  `bot_unknown`, `settings_read_only`, `bot_token_invalid`, `bot_variable_in_use`,
+  `bot_token_store_unsupported`, `bot_token_store_failed`. A bot binding writes `host.json` credentials
   `telegram_agent_<id>` / `telegram_collect_<name>` (an existing collection bot keeps its secret)
   → the variable, and the bot into `telegram.json` (or `telegram.disabled.json`).
   `GET /api/agents` → main + sub-agents with `bot {enabled}` and `conversations` (kind
   `conversation` and read-only `delegation` entries of the agent's `profile`).
   `POST /api/conversations` accepts `{"agent": id}`; `/api/conversations` items carry `agent`.
+- **Pasted token (owner decision 2026-11-20).** `bot.variable` empty → `AEP_TG_<AGENT ID>` /
+  `AEP_TG_BI_<BOT NAME>` (upper case, other characters `_`). `bot.token` (write-only, optional;
+  a leading `bot` from a Bot API URL is dropped) must be `<digits ≥5>:<[A-Za-z0-9_-] ≥35>`, else
+  `bot_token_invalid`. Before any file is written it is refused with `bot_variable_in_use` when
+  another `host.json` credential maps the same variable (unless the variable already holds this
+  same token) or the variable holds a value that is not a bot token; then it is stored with
+  `AgentWeb.user_environment` (default `telegram_settings.windows_user_environment`: `winreg`
+  `HKCU\Environment` REG_SZ + `SendMessageTimeoutW(HWND_BROADCAST, WM_SETTINGCHANGE,
+  "Environment")`, no process, so the token is on no command line) and set in `os.environ`, so the
+  reload resolves it at once. Off Windows → `bot_token_store_unsupported` (set the variable in the
+  service environment and save with the token field empty); a registry error →
+  `bot_token_store_failed`; both write nothing. The token is never in `host.json`,
+  `telegram.json`, `agents.json`, a response, an error or a log: responses carry only
+  `token_present`. Empty token = the variable is used as it is; a new token overwrites it;
+  deleting a bot leaves its variable in place. A pasted token in `variable` stays
+  `bot_token_value_refused`.
 - **Applying.** After a save the bots are rebuilt on the kept conversation-bot ingress and the
   polling loop restarts only once no Telegram turn or flow runs on any bot (`reload`: `waiting`,
   `applying`, `applied`, `not_running`, `failed`); no Agent Web restart.

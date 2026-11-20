@@ -8297,3 +8297,27 @@ convert, ingest and the test, step by step or automatically, and looks at the re
   error such as a missing required field) is named in the result rather than stopping the run.
   Ingest's 審核 part shows as the lower half of the Ingest card, and its old hint 「在「Ingest」
   這一步按…」 shows only when there is nothing to list, so the list stays in sight.
+
+### 2026-11-20 — Paste a bot token in Settings → Agents; AEP stores it as the user's environment variable
+
+- **Owner decision 2026-11-20.** In Agent Web settings a person pastes a Telegram bot token into
+  each agent bot and BI collection bot form (「貼上 bot token（選填）」, a password field beside the
+  variable name) and presses save; nobody opens PowerShell and AEP is not restarted. AEP writes
+  the token to this Windows user's environment (`HKCU\Environment`, REG_SZ, what `setx` does),
+  broadcasts `WM_SETTINGCHANGE "Environment"`, sets it in the running process and the existing
+  bot reload applies it. Settings files keep only the variable name (SecretRef mapping); the
+  token is in no file, response, audit record, log or error. The main conversation bot already
+  had this (owner request 2026-10-05) and reuses the same writer.
+- **Behaviour chosen in implementation:** an empty variable name defaults to
+  `AEP_TG_<AGENT ID>` / `AEP_TG_BI_<BOT NAME>`; an empty token field keeps the variable as it is;
+  a new token overwrites it; deleting a bot does not delete the variable (safe and predictable:
+  another program or a re-created bot may use it; the page says so); a token whose variable is
+  mapped to another credential (unless it already holds the same token) or holds a non-token value
+  is refused `bot_variable_in_use`, so another bot or an unrelated variable such as `PATH` is
+  never silently retargeted; off Windows `bot_token_store_unsupported` (409). The token is stored
+  before any settings file is written, so every refusal leaves the files unchanged.
+- **Rejected alternatives:** the token in `host.json` / `telegram.json` / `agents.json` (secrets
+  are never in settings files, AGENTS.md safety rules); spawning `setx NAME token` (a process
+  command line is visible to other processes on the PC); asking the person to run `setx` in
+  PowerShell by hand (the owner wants no PowerShell step).
+- Not a harness change (AGENTS.md rule 22): settings-page storage of a bot credential only.
