@@ -33,12 +33,12 @@ import re
 import shutil
 import sqlite3
 import uuid
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from pathlib import Path, PurePath
 from typing import Any, BinaryIO
 
-from aep_bi.cards import convert, schema_versions, vault_sources
+from aep_bi.cards import convert, readers, schema_versions, vault_sources
 from aep_bi.cards.store import BiStore, BiStoreError, now
 from knowledge.repo.repository import RepoError
 
@@ -245,7 +245,7 @@ class Staging:
         digest = hashlib.sha256(data).hexdigest()
         known = self._source_by_digest(digest)
         if known is not None:
-            return {**known, "already": True}
+            return self._already(known, data)
         self._refuse_withdrawn(digest)
         temporary = self._temporary()
         try:
@@ -296,13 +296,50 @@ class Staging:
                     left -= len(chunk)
             known = self._source_by_digest(digest.hexdigest())
             if known is not None:
-                return {**known, "already": True}
+                return self._already(known, None)
             self._refuse_withdrawn(digest.hexdigest())
             return self._keep(
                 label, level, digest.hexdigest(), temporary, media_type, folder, actor
             )
         finally:
             temporary.unlink(missing_ok=True)
+
+    def _already(self, known: dict[str, Any], data: bytes | None) -> dict[str, Any]:
+        """A source added again. A document converted before pictures were kept
+        (`aep.bi.convert/1`) and never edited is converted again, so adding it once
+        more brings its pictures back (owner 2026-11-20)."""
+        refreshed = False
+        revisions = self.markdown_revisions(str(known["id"]))
+        current = revisions[0] if revisions else None
+        if (
+            current is not None
+            and current["origin"] == "conversion"
+            and current["converter"] != convert.CONVERTER
+            and readers.suffix(str(known["name"])) in convert.DOCUMENTS
+        ):
+            try:
+                body = data if data is not None else self.source_bytes(str(known["id"]))
+                text, assets = convert.convert_with_assets(str(known["name"]), body)
+                if assets:
+                    self.add_markdown(
+                        str(known["id"]),
+                        text,
+                        origin="conversion",
+                        note="重新轉檔（保留圖片）",
+                        actor=str(known["by"]),
+                        base_rev=int(current["rev"]),
+                        converter=convert.CONVERTER,
+                        assets=assets,
+                    )
+                    refreshed = True
+            except BiStoreError:
+                refreshed = False
+        if refreshed:
+            from aep_bi.cards import search_index
+
+            search_index.sync_quietly(self.store)
+            known = self.source(str(known["id"])) or known
+        return {**known, "already": True, "reconverted": refreshed}
 
     def _temporary(self) -> Path:
         self.dir.mkdir(parents=True, exist_ok=True)
@@ -322,10 +359,11 @@ class Staging:
         size = temporary.stat().st_size
         # Converted before anything is kept: a PDF without text is refused.
         markdown: str | None = None
+        assets: dict[str, bytes] = {}
         failure: BiStoreError | None = None
         if convert.kind(label) is not None:
             try:
-                markdown = convert.convert(label, temporary.read_bytes())
+                markdown, assets = convert.convert_with_assets(label, temporary.read_bytes())
             except BiStoreError as error:
                 if error.code == "source_no_text":
                     raise
@@ -371,6 +409,7 @@ class Staging:
                     note="轉檔",
                     converter=convert.CONVERTER,
                     actor=actor,
+                    assets=assets,
                 )
             elif failure is not None:
                 self._record_failure(db, source_id, failure)
@@ -433,6 +472,7 @@ class Staging:
             if not name.startswith(REPOSITORY_FILE):
                 (self.dir / name).unlink(missing_ok=True)
         folder = self.dir / MARKDOWN_DIR / source_id
+        shutil.rmtree(folder / convert.ASSETS_DIR, ignore_errors=True)
         if folder.is_dir() and not any(folder.iterdir()):
             folder.rmdir()
         db.execute("DELETE FROM markdown WHERE source_id = ?", (source_id,))
@@ -692,6 +732,13 @@ class Staging:
                     target = self.dir / str(name)
                     target.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copyfile(other.dir / str(name), target)
+                pictures = other.dir / MARKDOWN_DIR / str(row["id"]) / convert.ASSETS_DIR
+                if pictures.is_dir():
+                    shutil.copytree(
+                        pictures,
+                        self.dir / MARKDOWN_DIR / str(row["id"]) / convert.ASSETS_DIR,
+                        dirs_exist_ok=True,
+                    )
                 db.execute(
                     f"INSERT INTO sources ({', '.join(row.keys())}) "
                     f"VALUES ({', '.join('?' for _ in row.keys())})",
@@ -811,10 +858,24 @@ class Staging:
         note: str,
         converter: str | None,
         actor: str,
+        assets: Mapping[str, bytes] | None = None,
     ) -> None:
         stored = f"{MARKDOWN_DIR}/{source_id}/rev-{rev}.md"
         target = self.dir / stored
         target.parent.mkdir(parents=True, exist_ok=True)
+        # The pictures a conversion took out, beside every revision of this source
+        # (owner 2026-11-20); named by content, so a later revision reuses them.
+        for ref, blob in (assets or {}).items():
+            picture = target.parent / ref
+            if picture.parent.name != convert.ASSETS_DIR or not convert.ASSET_NAME.match(
+                picture.name
+            ):
+                continue
+            if not picture.is_file():
+                picture.parent.mkdir(parents=True, exist_ok=True)
+                partial = picture.with_name(f".{picture.name}.{uuid.uuid4().hex[:8]}.tmp")
+                partial.write_bytes(blob)
+                schema_versions.replace(partial, picture)
         data = text.encode("utf-8")
         temporary = target.with_name(f".{target.name}.{uuid.uuid4().hex[:8]}.tmp")
         temporary.write_bytes(data)
@@ -901,6 +962,7 @@ class Staging:
         actor: str,
         base_rev: int | None,
         converter: str | None = None,
+        assets: Mapping[str, bytes] | None = None,
     ) -> tuple[dict[str, Any], bool]:
         """Save the next revision: (its record, False). The same text as the
         current revision saves nothing: (the current record, True). A
@@ -930,6 +992,7 @@ class Staging:
                 note=note,
                 converter=converter,
                 actor=actor,
+                assets=assets,
             )
             row = db.execute(
                 "SELECT * FROM markdown WHERE source_id = ? AND rev = ?",
@@ -943,6 +1006,35 @@ class Staging:
             except RepoError as failure:
                 raise BiStoreError(failure.code, failure.message) from None
         return self._revision(row), False
+
+    def asset_file(self, source_id: str, name: str) -> Path:
+        """A picture a source's Markdown references (`assets/<name>`): beside its
+        newest revision, here or in the shared folder a colleague's source is read
+        from (owner 2026-11-20)."""
+        if not convert.ASSET_NAME.match(name):
+            raise BiStoreError("asset_unknown", "找不到這張圖")
+        local = self.dir / MARKDOWN_DIR / source_id / convert.ASSETS_DIR / name
+        if local.is_file():
+            return local
+        if self.exists:
+            with self._db() as db:
+                row = db.execute(
+                    "SELECT stored FROM markdown WHERE source_id = ? ORDER BY rev DESC LIMIT 1",
+                    (source_id,),
+                ).fetchone()
+            if row is not None and str(row["stored"]).startswith(REPOSITORY_FILE):
+                folder = str(row["stored"]).rsplit("/", 1)[0]
+                shared = self._file(f"{folder}/{convert.ASSETS_DIR}/{name}")
+                if shared.is_file():
+                    return shared
+        raise BiStoreError("asset_unknown", "找不到這張圖")
+
+    def asset_names(self, source_id: str) -> list[str]:
+        """The pictures kept on this PC for a source."""
+        folder = self.dir / MARKDOWN_DIR / source_id / convert.ASSETS_DIR
+        if not folder.is_dir():
+            return []
+        return sorted(p.name for p in folder.iterdir() if convert.ASSET_NAME.match(p.name))
 
     def markdown_sources(self) -> list[tuple[str, int]]:
         """(source id, current revision) of every source that has Markdown."""

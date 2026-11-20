@@ -62,6 +62,7 @@ from aep_bi.cards import (
     correction,
     evidence_review,
     homes,
+    image_describe,
     importer,
     methods,
     migrate,
@@ -106,6 +107,19 @@ from models.approved import ApprovedModelClient
 MAX_BI_BODY_BYTES = 8 * 1024 * 1024
 #: A source file as the raw body, so its size is not bound by the limit above.
 SOURCE_UPLOAD = "/api/bi/sources/upload"
+#: A picture a source's Markdown references, as its bytes (owner 2026-11-20).
+SOURCE_ASSET = re.compile(
+    r"^/api/bi/sources/(?P<source>[\w-]+)/assets/(?P<name>[0-9a-f]{16}\.[a-z0-9]{1,8})$"
+)
+ASSET_TYPES = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+    ".bmp": "image/bmp",
+    ".svg": "application/octet-stream",
+}
 #: A skill/tool package: a zip uploaded as the raw body, and one exported as bytes.
 PACKAGE_UPLOAD = re.compile(r"^/api/bi/vaults/(?P<vault>[^/]+)/package-upload$")
 PACKAGE_EXPORT = re.compile(r"^/api/bi/vaults/(?P<vault>[^/]+)/package-export$")
@@ -146,7 +160,56 @@ def _upload_source(handler: Any, parsed: Any) -> None:
     except BiStoreError as failure:
         handler._json(400, {"ok": False, "code": failure.code, "message": failure.message})
         return
-    handler._json(200, {"ok": True, "source": source})
+    images = _describe_new(handler.server.web, workspace, staging.dataset, source)
+    handler._json(200, {"ok": True, "source": source, "images": images})
+
+
+def _describe_new(web: Any, workspace: Path, dataset: str, source: dict[str, Any]) -> Any:
+    """Start describing a new source's pictures when this Host's model can see
+    images; where that stands (None for a source with no pictures)."""
+    fresh = not source.get("already") or source.get("reconverted")
+    if not fresh or not source.get("markdown_rev"):
+        return None
+    try:
+        return _describe_start(web_ai_runtime(web), workspace, dataset, str(source["id"]), "")
+    except (BiStoreError, AttributeError):
+        return None
+
+
+def _describe_start(
+    ai: ai_runs.AiRuntime | None, workspace: Path, dataset: str, source_id: str, actor: str
+) -> dict[str, Any] | None:
+    shown = image_describe.progress(workspace, dataset, source_id)
+    if shown["status"] == "running" or not shown.get("pending"):
+        return shown if shown["status"] != "idle" or shown.get("pending") else None
+    chosen = ai.model() if ai is not None else None
+    if chosen is None or ai is None or not ai.vision():
+        return {**shown, "status": "no_vision"}
+    client, alias = chosen
+    staging = Staging(workspace, dataset)
+    source = staging.source(source_id) or {}
+    return image_describe.start(
+        workspace,
+        dataset,
+        source_id,
+        client,
+        alias,
+        actor=actor or str(source.get("by") or ""),
+        background=ai.background,
+    )
+
+
+def _send_asset(handler: Any, parsed: Any, source_id: str, name: str) -> None:
+    query = {k: v[0] for k, v in parse_qs(parsed.query).items() if v}
+    workspace = handler.server.web.runtime.layout.workspace_root
+    try:
+        staging = Staging(workspace, _dataset(query.get("dataset")))
+        data = staging.asset_file(source_id, name).read_bytes()
+    except (BiStoreError, OSError):
+        handler._json(404, {"ok": False, "code": "asset_unknown", "message": "找不到這張圖"})
+        return
+    suffix = "." + name.rsplit(".", 1)[-1]
+    handler._send(200, data, ASSET_TYPES.get(suffix, "application/octet-stream"))
 
 
 def _package_failure(failure: BiStoreError | RepoError) -> Answer:
@@ -341,6 +404,12 @@ def _route(
             return 200, vault_sources.listed(repo, staging.sources())
         parts = path.split("/")
         if len(parts) in (6, 7) and parts[:4] == ["", "api", "bi", "sources"]:
+            if parts[5] == "images" and len(parts) == 6:
+                # Describing a source's pictures: n of N, seconds (owner 2026-11-20).
+                return 200, {
+                    "ok": True,
+                    "images": image_describe.progress(workspace, store.dataset, parts[4]),
+                }
             if parts[5] == "markdown":
                 rev = parts[6] if len(parts) == 7 else None
                 return 200, source_markdown.view(workspace, store.dataset, parts[4], rev)
@@ -496,7 +565,12 @@ def _route(
             folder=given.get("folder"),
             actor=who,
         )
-        return 200, {"ok": True, "source": source}
+        images = None
+        fresh = not source.get("already") or source.get("reconverted")
+        if source.get("markdown_rev") and fresh:
+            dataset = _dataset(given.get("dataset"))
+            images = _describe_start(ai, workspace, dataset, source["id"], who)
+        return 200, {"ok": True, "source": source, "images": images}
     if path == "/api/bi/sources/delete":
         # A person's 刪除 in step 1: a result per id, a refusal never stops the others.
         deleted = source_delete.delete(
@@ -515,6 +589,12 @@ def _route(
             actor=who,
         )
         return 200, {"ok": True, **saved}
+    if len(parts) == 6 and parts[:4] == ["", "api", "bi", "sources"] and parts[5] == "images":
+        # 「產生圖片說明」: describe the pictures still without one (owner 2026-11-20).
+        started = _describe_start(ai, workspace, _dataset(given.get("dataset")), parts[4], who)
+        if started is not None and started["status"] == "no_vision":
+            return _error(409, "vision_unavailable", "目前的模型不能看圖，圖片保留但沒有說明")
+        return 200, {"ok": True, "images": started}
     if path == "/api/bi/index/rebuild":
         dataset = _dataset(given.get("dataset"))
         if not BiStore(workspace, dataset).exists and not Staging(workspace, dataset).exists:
@@ -1632,7 +1712,18 @@ def web_ai_runtime(web: Any) -> ai_runs.AiRuntime:
             daemon=True,
         ).start()
 
-    return ai_runs.AiRuntime(model=model, background=background)
+    def vision() -> bool:
+        # The chosen model's endpoint in this host's catalog, as the LLM Wiki intake
+        # decides whether to describe pictures (`wiki_host.pipeline_bindings`).
+        chosen = model()
+        binding = getattr(web.runtime.config, "models", None)
+        if chosen is None or binding is None:
+            return False
+        endpoints = getattr(getattr(binding, "catalog", None), "endpoints", ())
+        endpoint = next((e for e in endpoints if e.alias == chosen[1]), None)
+        return bool(endpoint is not None and endpoint.capabilities.vision)
+
+    return ai_runs.AiRuntime(model=model, background=background, vision=vision)
 
 
 def web_bench_runtime(web: Any) -> Any:
@@ -1686,6 +1777,10 @@ def handle(handler: Any, method: str, parsed: ParseResult) -> bool:
         return False
     if method == "POST" and parsed.path == SOURCE_UPLOAD:
         _upload_source(handler, parsed)
+        return True
+    asset = SOURCE_ASSET.match(parsed.path) if method == "GET" else None
+    if asset is not None:
+        _send_asset(handler, parsed, asset.group("source"), asset.group("name"))
         return True
     upload = PACKAGE_UPLOAD.match(parsed.path) if method == "POST" else None
     if upload is not None:

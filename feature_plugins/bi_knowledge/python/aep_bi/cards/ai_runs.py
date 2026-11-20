@@ -54,6 +54,9 @@ class AiRuntime:
 
     model: Callable[[], tuple[ModelClient, str] | None]
     background: Callable[[str, Callable[[], None]], None]
+    # Whether that model's endpoint declares vision, so pictures in a source can be
+    # described (owner 2026-11-20); False when it cannot tell.
+    vision: Callable[[], bool] = lambda: False
     # A source's data class is recorded and shown, never a reason to refuse it:
     # BI sends every class to the configured internal gateway (owner 2026-11-17).
 

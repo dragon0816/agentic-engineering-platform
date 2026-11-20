@@ -370,6 +370,9 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
   color: var(--dim); }
 .bi-md-view { margin-top: 10px; max-height: none; overflow-wrap: anywhere; line-height: 1.55; }
 .bi-md-view > :first-child { margin-top: 0; }
+.bi-md-figure { margin: 8px 0; }
+.bi-md-figure img { max-width: 100%; height: auto; border: 1px solid var(--line, #ddd);
+  border-radius: 4px; }
 .bi-md-view h1 { font-size: 18px; } .bi-md-view h2 { font-size: 16px; }
 .bi-md-view h3, .bi-md-view h4, .bi-md-view h5, .bi-md-view h6 { font-size: 14px; }
 .bi-md-view pre { padding: 10px; overflow-x: auto; background: var(--bg);
@@ -6750,11 +6753,51 @@ function biMdFront(markdown) {
   return {rows, body: lines.slice(end + 1).join("\n")};
 }
 
+// A picture the conversion kept (owner 2026-11-20): `![圖 n](assets/<name>)` alone on its
+// line, fetched from this Host with the page's token. Nothing else is ever fetched.
+const BI_MD_IMAGE = /^!\[([^\]\n]*)\]\((assets\/[0-9a-f]{16}\.[a-z0-9]{1,8})\)$/;
+
+function biMdImage(sourceId, alt, ref) {
+  const figure = bh("figure", "bi-md-figure"), image = document.createElement("img");
+  image.alt = alt; image.loading = "lazy";
+  const caption = bh("figcaption", "bi-meta", alt);
+  figure.append(image, caption);
+  bi.mdImages = bi.mdImages || {};
+  const key = biDataset() + "/" + sourceId + "/" + ref;
+  const known = bi.mdImages[key];
+  const url = "/api/bi/sources/" + encodeURIComponent(sourceId) + "/" + ref
+    + "?dataset=" + encodeURIComponent(biDataset());
+  (known ? Promise.resolve(known) : fetch(url, {headers: {Authorization: "Bearer " + TOKEN}})
+    .then((reply) => { if (!reply.ok) throw new Error(String(reply.status)); return reply.blob(); })
+    .then((blob) => (bi.mdImages[key] = URL.createObjectURL(blob))))
+    .then((src) => { image.src = src; })
+    .catch(() => { caption.textContent = alt + "（讀不到這張圖）"; });
+  return figure;
+}
+
+function biMdBody(body, sourceId) {
+  // Text between pictures through renderMarkdown; each picture as a figure.
+  const out = document.createDocumentFragment();
+  let chunk = [];
+  const flush = () => {
+    if (chunk.join("").trim()) out.append(renderMarkdown(chunk.join("\n")));
+    chunk = [];
+  };
+  for (const line of body.split("\n")) {
+    const found = sourceId ? BI_MD_IMAGE.exec(line.trim()) : null;
+    if (!found) { chunk.push(line); continue; }
+    flush(); out.append(biMdImage(sourceId, found[1], found[2]));
+  }
+  flush();
+  return out;
+}
+
 function biMdRender() {
   // Through renderMarkdown, as a chat answer: elements and text only, so a source's own
-  // HTML shows as words, nothing runs, and there are no images to fetch from anywhere.
+  // HTML shows as words and nothing runs; the only images are the source's own pictures.
   const front = biMdFront(el("bi-b-md-text").value), box = el("bi-b-md-view");
-  box.replaceChildren(renderMarkdown(front.body));
+  const sourceId = ((bi.build.md || {}).source || {}).id;
+  box.replaceChildren(biMdBody(front.body, sourceId));
   for (const wrap of box.querySelectorAll(".table-scroll")) {
     wrap.setAttribute("aria-label", "表格");
   }
@@ -7033,7 +7076,7 @@ el("bi-b-upload").addEventListener("click", async () => {
         + (total ? "（" + Math.floor(loaded * 100 / total) + "%）" : "");
     show();
   };
-  const added = [], failed = [];
+  const added = [], failed = [], described = [];
   try {
     for (const [index, file] of files.entries()) {
       Object.assign(now, {index: index + 1, name: file.name, step: "讀取檔案"}); show();
@@ -7060,6 +7103,8 @@ el("bi-b-upload").addEventListener("click", async () => {
         continue;
       }
       bi.build.sourceId = reply.source.id; added.push(reply.source.id);
+      if (reply.images) described.push({id: reply.source.id, name: file.name,
+        images: reply.images});
       const problem = reply.source.convert_error;
       if (problem) {
         failed.push(file.name + "：" + (problem.message || problem.code)
@@ -7079,10 +7124,45 @@ el("bi-b-upload").addEventListener("click", async () => {
     biStatus("bi-status-build", "");
     const last = bi.build.sources.find((source) => source.id === bi.build.sourceId);
     if (last && last.format) biPickSource(last);
+    if (described.length) await biDescribeWait(described, result, failed.length > 0);
   } catch (failure) {
     biUploadProgress("error", "來源沒有加入：" + failure.message + "。");
   } finally { clearInterval(ticker); biFileChosen(); }
 });
+
+// After 轉檔, the pictures' descriptions (owner 2026-11-20), beside 轉檔 as rule 23 asks:
+// which file, n of N pictures, seconds; then how many were described, in the same place.
+async function biDescribeWait(items, converted, hadFailures) {
+  const notes = [];
+  for (const item of items) {
+    let images = item.images;
+    if (images.status === "no_vision") {
+      notes.push("「" + item.name + "」有 " + images.pending
+        + " 張圖，已保留；目前的模型不能看圖，沒有加上說明");
+      continue;
+    }
+    while (images.status === "running") {
+      biUploadProgress("loading", converted + "・正在為「" + item.name + "」的圖加上說明 "
+        + images.done + "/" + images.total + " 張・" + Math.floor(images.elapsed || 0) + " 秒");
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      try {
+        images = (await biCall("/api/bi/sources/" + encodeURIComponent(item.id)
+          + "/images?dataset=" + encodeURIComponent(biDataset()))).images;
+      } catch (failure) {
+        images = {status: "failed", error: failure.message};
+      }
+    }
+    notes.push(images.status === "finished"
+      ? "「" + item.name + "」" + images.described + " 張圖加上說明"
+        + (images.failed ? "，" + images.failed + " 張沒有" : "")
+      : images.status === "failed"
+        ? "「" + item.name + "」的圖沒有加上說明：" + (images.error || "")
+      : "");
+    if (bi.build.md && bi.build.md.source.id === item.id) biBuildMarkdown(item.id);
+  }
+  const said = notes.filter(Boolean).join("；");
+  biUploadProgress(hadFailures ? "error" : "good", converted + (said ? "・" + said : ""));
+}
 
 // -- step 2: schema ----------------------------------------------------------
 function biSchemaLabel(schema) {
