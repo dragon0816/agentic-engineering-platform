@@ -724,7 +724,12 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
         wait("document.querySelectorAll('#bi-dash-sections details').length === 4")
         # a card link opens the card beside the Dashboard, with no change of tab
         click_text("#bi-dash-sections .bi-link", "WiFi7-MLO互通與吞吐量驗證")
-        wait("!document.getElementById('bi-card-peek').hidden")
+        # as a tab of the shell's side area (owner 2026-11-20), not an overlay
+        wait("[...bi.cardTabs.keys()].length === 1")
+        assert run("document.getElementById('bi-card-peek') === null")
+        assert run(
+            "document.getElementById('extra-body').contains(document.getElementById('bi-detail'))"
+        )
         assert run("bi.view") == "dashboard"
         assert run("!document.getElementById('bi-view-dashboard').hidden")
         wait(
@@ -752,7 +757,7 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
         # the cards tab has its own list, and takes the pane back beside it
         run("document.querySelector('#bi-views [data-bi-view=cards]').click()")
         wait("!document.getElementById('bi-view-cards').hidden")
-        wait("document.getElementById('bi-card-peek').hidden")
+        wait("bi.cardTabs.size === 0")
         assert run(
             "document.getElementById('bi-card-split').contains("
             "document.getElementById('bi-detail'))"

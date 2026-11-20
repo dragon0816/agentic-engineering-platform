@@ -5225,3 +5225,14 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   test_bi_working_domain_ui, test_bi_vault_steps_ui pass; test_bi_sessions_ui fails the same
   way before and after (navigation_failed, part of the redesign rewrite list); ruff, ruff
   format --check and mypy clean on the changed files.
+- [x] 2026-11-20 BI page: a card opens as a tab of the side area (owner 2026-11-20; branch
+  bi-knowledge-round2-20261120). Outside the 卡片 view, a card no longer opens in the
+  `#bi-card-peek` overlay (removed, with its CSS and the page's `bi-ai-open` margin): each card
+  gets its own side tab (`bi-card:<id>`, titled with the card's name), opening one already open
+  focuses its tab, and closing a tab closes only that card. The page's one live card view
+  (`#bi-detail`) moves into the card tab in front and reads that card again, so 提更正單, 定案,
+  覆核 and links work in the tab; the last tab closed, or switching to the 卡片 view, puts it
+  back beside the card list. 管理 → 安裝 schema unchanged. Verification: test_bi_step3_ui
+  (two card tabs, re-open focuses, action in tab, close one), test_bi_cards_ui,
+  test_bi_page_simple, test_retry_buttons_ui, test_bi_working_domain_ui,
+  test_bi_vault_steps_ui pass; ruff, ruff format --check and mypy clean on changed files.

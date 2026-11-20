@@ -191,8 +191,7 @@ BI_CSS = r"""
   background: var(--panel); border-left: 1px solid var(--line); box-shadow: -4px 0 16px #0002; }
 .bi-ai-panel[hidden] { display: none; }
 .bi-ai-panel p { margin: 0; }
-#bi-card-peek { z-index: 31; }
-#bi-card-peek .bi-split-pane { border: 0; padding: 0; overflow: visible; }
+.bi-card-tab .bi-split-pane { border: 0; padding: 0; overflow: visible; }
 .bi-run { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin: 14px 0; }
 #bi-b-bench-run { min-height: 52px; min-width: 200px; font-size: 18px; }
 /* 跑測試 and its bar sit above the questions, in sight with the Benchmark tab open. */
@@ -211,7 +210,6 @@ BI_CSS = r"""
 .bi-ai-body { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column;
   gap: 6px; }
 .bi-ai-panel > .bi-ai-body > .bi-log { margin: 0; }
-#kn-pane-bi.bi-ai-open { margin-right: calc(min(440px, 40vw) + 12px); }
 /* Step 3's tabs, while an AI session of the step is open (owner 2026-11-19). */
 .bi-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0 10px;
   border-bottom: 1px solid var(--line); }
@@ -236,7 +234,6 @@ tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
 @media (max-width: 760px) {
   .bi-ai-panel { top: auto; left: 0; width: auto; height: 66vh; border-left: 0;
     border-top: 1px solid var(--line); box-shadow: 0 -4px 16px #0002; }
-  #kn-pane-bi.bi-ai-open { margin-right: 0; margin-bottom: 68vh; }
 }
 #bi-b-ver h5 { margin: 12px 0 4px; font-size: 13px; }
 .bi-substeps ol { margin-top: 0; }
@@ -667,12 +664,6 @@ BI_PANE_HTML = r"""
       <div class="mem-status" id="bi-status-bar" role="status" aria-live="polite" hidden></div>
       <div id="bi-notice" class="mem-notice" role="status" aria-live="polite"></div>
       <div class="bi-views-row">
-      <aside id="bi-card-peek" class="bi-ai-panel" aria-label="卡片" hidden>
-        <div class="bi-ai-head">
-          <h4>卡片</h4>
-          <button class="bi-btn" id="bi-card-peek-close" type="button">關閉</button></div>
-        <div class="bi-ai-body" id="bi-card-peek-body"></div>
-      </aside>
       <div class="mem-tabs" id="bi-views" role="tablist" aria-label="BI 卡片檢視">
         <button type="button" role="tab" data-bi-view="build"
           aria-selected="true">建立與匯入</button>
@@ -1648,7 +1639,7 @@ async function biShowView(name) {
   bi.viewScroll = bi.viewScroll || {};
   if (bi.view !== name) bi.viewScroll[bi.view] = scroller.scrollTop;
   const back = bi.viewScroll[name] || 0;
-  if (name === "cards") biCardPeekClose();
+  if (name === "cards") biCardTabsClose();
   bi.view = name;
   for (const button of document.querySelectorAll("#bi-views [data-bi-view]")) {
     button.setAttribute("aria-selected", String(button.dataset.biView === name));
@@ -1693,7 +1684,7 @@ for (const button of document.querySelectorAll("#bi-views [data-bi-view]")) {
 }
 // A publish draft belongs to the dataset it was made for: switching drops it.
 function biLeaveDataset() {
-  biAiCloseAll(); biCardPeekClose(); biBackHide();
+  biAiCloseAll(); biCardTabsClose(); biBackHide();
   bi.cardId = null; bi.publish = null;
   biPanel("publish", false); el("bi-pub-result").hidden = true;
   el("bi-pub-state").replaceChildren();
@@ -2205,31 +2196,59 @@ el("bi-q").addEventListener("keydown", (event) => {
   if (event.key === "Enter") { clearTimeout(bi.searchTimer); biLoadCards(); }
 });
 
-function biSideRoom() {
-  // A panel in step 3's tabs takes no room beside the page.
-  el("kn-pane-bi").classList.toggle("bi-ai-open", !el("bi-card-peek").hidden);
+// -- a card outside the 卡片 view: a tab of the shell's side area (owner 2026-11-20) --------
+// Each open card has its own tab; opening one already open focuses it. The page has one live
+// card view (#bi-detail): it moves into the card tab in front, which reads its card again, so
+// every action in it (更正單, 定案, 覆核, links) works there as beside the card list.
+const BI_DETAIL = el("bi-detail");
+bi.cardTabs = new Map();  // card id -> the holder in its tab
+
+function biCardKey(id) { return "bi-card:" + id; }
+
+function biCardHome() {
+  if (BI_DETAIL.parentElement !== el("bi-card-split")) el("bi-card-split").append(BI_DETAIL);
 }
 
-function biCardPeekClose() {
-  if (el("bi-card-peek").hidden) return;
-  el("bi-card-peek").hidden = true;
-  el("bi-detail").parentElement === el("bi-card-peek-body")
-    && el("bi-card-split").append(el("bi-detail"));
-  biSideRoom();
+function biCardTabsClose() {
+  for (const id of [...bi.cardTabs.keys()]) sideClose(biCardKey(id));
+  biCardHome();
 }
 
-el("bi-card-peek-close").addEventListener("click", biCardPeekClose);
-el("bi-card-peek").addEventListener("keydown", (event) => {
-  if (event.key === "Escape") biCardPeekClose();
-});
+function biCardTab(id) {
+  const key = biCardKey(id);
+  let holder = bi.cardTabs.get(id);
+  if (holder && sideHas(key)) {
+    sideFocus(key);
+  } else {
+    holder = bh("div", "bi-card-tab"); holder.dataset.card = id;
+    holder.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") sideClose(key);
+    });
+    bi.cardTabs.set(id, holder);
+    const panel = biSideTab(key, "卡片", holder, () => {
+      bi.cardTabs.delete(id);
+      if (!BI_DETAIL.isConnected) biCardHome();  // it went with the closed tab
+    });
+    // Another card's tab coming to the front shows that card.
+    new MutationObserver(() => {
+      if (!panel.hidden && bi.cardTabs.get(id) === holder && !holder.contains(BI_DETAIL)) {
+        holder.append(BI_DETAIL); bi.cardId = id; biLoadDetail(false);
+      }
+    }).observe(panel, {attributes: true, attributeFilter: ["hidden"]});
+  }
+  holder.append(BI_DETAIL);
+}
+
+function biCardTabTitle(id, name) {
+  // The tab says which card it is once the card is read.
+  if (!bi.cardTabs.has(id)) return;
+  const label = document.getElementById("extra-tab-" + sideSlug(biCardKey(id)));
+  if (label) { label.textContent = name; label.title = name; }
+}
 
 async function biOpenCard(id) {
   bi.cardId = id;
-  if (bi.view !== "cards") {
-    el("bi-card-peek-body").append(el("bi-detail"));
-    el("bi-card-peek").hidden = false;
-    biSideRoom();
-  }
+  if (bi.view !== "cards") biCardTab(id);
   for (const row of document.querySelectorAll("#bi-cards [data-card]")) {
     row.setAttribute("aria-current", String(row.dataset.card === id));
   }
@@ -2252,6 +2271,7 @@ async function biLoadDetail(focus) {
   }
   if (bi.cardId !== id) return;
   biStatus("bi-status-detail", ""); bi.detail = reply;
+  biCardTabTitle(id, reply.card.name || reply.card.canonical_key);
   biRenderDetail();
   el("bi-detail").scrollTop = 0;  // a card opens at its top
   if (focus) {
@@ -3814,9 +3834,9 @@ function biTestTabs(chosen) {
   groups[bi.testTab][0].open = true;
 }
 
-function biSideTab(id, title, element) {
+function biSideTab(id, title, element, onClose) {
   // A part of this page as a tab of the side area, styled as the BI page.
-  const panel = sideOpen({id, title, element});
+  const panel = sideOpen({id, title, element, ...(onClose ? {onClose} : {})});
   panel.classList.add("bi-pane"); panel.lang = "zh-Hant";
   return panel;
 }
@@ -3856,7 +3876,6 @@ function biAiClose(spec) {
   clearInterval(spec.ticker); spec.ticker = 0;
   const root = spec.root; root.biSpec = null;
   if (spec.sfx) root.remove(); else root.hidden = true;
-  biSideRoom();
   const rows = new Set([...bi.ais.values()].map((other) => other.row));
   if (spec.row && !rows.has(spec.row)) spec.row.classList.remove("bi-ai-from");
   if (spec.from && spec.from.isConnected) spec.from.focus();

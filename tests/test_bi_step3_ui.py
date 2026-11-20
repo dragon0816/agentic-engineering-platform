@@ -226,20 +226,59 @@ def test_step_3(
         page.run("document.getElementById('bi-b-run').scrollIntoView()")
         before = float(page.run(SCROLL))
         assert before > 0
-        card = BiStore(workspace, DATASET).card_rows()[0]
+        # Each card is a tab of the shell's side area (owner 2026-11-20); no overlay is left.
+        assert page.run("document.getElementById('bi-card-peek') === null")
+        card, other = BiStore(workspace, DATASET).card_rows()[:2]
+        key, other_key = f"bi-card:{card['id']}", f"bi-card:{other['id']}"
+        panel = "document.getElementById('extra-panel-' + sideSlug({!r}))"
+        card_tabs = (
+            "[...document.querySelectorAll('#extra-tabs [role=tab]')]"
+            ".filter((t) => t.id.startsWith('extra-tab-bi-card-')).map((t) => t.textContent)"
+        )
         page.run(f"biOpenCard({card['id']!r})")
-        page.wait("!document.getElementById('bi-card-peek').hidden")
+        page.wait(f"sideHas({key!r})")
         page.see("bi-detail-body", str(card["name"]))
         assert page.run("bi.view") == "build"
-        assert page.run("document.getElementById('bi-card-peek').contains("
-                        "document.getElementById('bi-detail'))")  # fmt: skip
+        assert page.run(f"{panel.format(key)}.contains(document.getElementById('bi-detail'))")
+        page.wait(f"{card_tabs}.includes({str(card['name'])!r})")  # the tab names the card
         assert page.run(
             "document.getElementById('bi-b-run').getBoundingClientRect().right"
-            " <= document.getElementById('bi-card-peek').getBoundingClientRect().left"
+            f" <= {panel.format(key)}.getBoundingClientRect().left"
         )
         page.shoot("card-beside")
-        page.click("#bi-card-peek-close")
-        assert page.run("document.getElementById('bi-card-peek').hidden")
+        # A second card opens a second tab; opening the first again focuses its tab.
+        page.run(f"biOpenCard({other['id']!r})")
+        page.wait(f"sideHas({other_key!r})")
+        page.see("bi-detail-body", str(other["name"]))
+        assert page.run(f"{panel.format(other_key)}.contains(document.getElementById('bi-detail'))")
+        page.wait(f"{card_tabs}.length === 2")
+        page.run(f"biOpenCard({card['id']!r})")
+        page.see("bi-detail-body", str(card["name"]))
+        assert page.run(f"{card_tabs}.length") == 2
+        assert page.run(f"!{panel.format(key)}.hidden && {panel.format(other_key)}.hidden")
+        assert page.run(f"{panel.format(key)}.contains(document.getElementById('bi-detail'))")
+        # The card's own actions work in its tab: 提更正單 opens its form there.
+        fix = (
+            "[...document.querySelectorAll('#bi-detail-body button')]"
+            ".find((b) => b.textContent === '提更正單')"
+        )
+        if page.run(f"Boolean({fix})"):
+            page.run(f"{fix}.click()")
+            assert page.run(f"{panel.format(key)}.querySelector('form.bi-edit') !== null")
+        # Clicking the other card's tab shows that card in it.
+        page.click(f"#extra-tab-{page.run(f'sideSlug({other_key!r})')}")
+        page.see("bi-detail-body", str(other["name"]))
+        assert page.run(f"{panel.format(other_key)}.contains(document.getElementById('bi-detail'))")
+        # Closing a tab closes only that card; the last one gives the view back to the list.
+        page.run(f"sideClose({other_key!r})")
+        page.see("bi-detail-body", str(card["name"]))
+        assert page.run(f"{panel.format(key)}.contains(document.getElementById('bi-detail'))")
+        page.run(f"sideClose({key!r})")
+        page.wait("document.getElementById('extra-area').hidden")
+        assert page.run(
+            "document.getElementById('bi-card-split').contains(document.getElementById('bi-detail'))"
+        )
+        assert page.run("bi.cardTabs.size") == 0
         assert abs(float(page.run(SCROLL)) - before) < 400  # the page gave back its room
         # In the cards tab, the pane is the one beside its list again.
         page.run("document.getElementById('bi-b-run').scrollIntoView()")
