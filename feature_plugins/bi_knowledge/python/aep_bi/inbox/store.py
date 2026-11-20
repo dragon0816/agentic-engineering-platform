@@ -1,12 +1,13 @@
 """The inbox's own SQLite file, beside the BI stores and never inside one.
 
-    <workspace>/bi/inbox/inbox.sqlite     items, picks, results, defaults, settings, claims
+    <workspace>/bi/inbox/inbox.sqlite     items, picks, results, settings, claims
     <workspace>/bi/inbox/files/           files sent to the bot, as received
     <workspace>/bi/inbox/raw/             pages as fetched, before they become sources
 
-An item is one link or one file a person sent (`batch` groups those of one message),
-or a text a person added to an item that only had a summary (`parent`). A pick is a
-domain chosen for an item (`by`: `person`, `tag`, `default` or `ai`). A result is one
+An item is one link, file or text a person sent to a domain's collection bot (`bot`;
+`batch` groups those of one message), or a text a person added by Reply to an item that
+only had a summary (`parent`). A pick is the domain the item goes to: the domain the bot
+is bound to (`by` = `bot`; owner 2026-11-20, one bot per BI domain). A result is one
 item processed in one domain: inserted once, as the claim (AGENTS rule 21), so an item
 is processed at most once per domain however often a schedule fires. Withdrawn is
 final. A domain is `<vault id>:<home>`.
@@ -27,9 +28,9 @@ from typing import Any
 INBOX_DIR = "inbox"
 DB_FILE = "inbox.sqlite"
 
-#: An item's states. `queued` waits for its domains' collect time; `done` every pick
-#: processed; `needs_text` nothing usable was fetched; `unassigned` (未分類) untapped
-#: at processing time without a confident suggestion; `withdrawn` final.
+#: An item's states. `queued` waits for its domain's collect time; `done` processed;
+#: `needs_text` nothing usable was fetched; `unassigned` is no longer made (one bot per
+#: domain) and kept only for reading; `withdrawn` final.
 QUEUED, DONE, NEEDS_TEXT, UNASSIGNED, WITHDRAWN = (
     "queued",
     "done",
@@ -66,6 +67,7 @@ CREATE TABLE IF NOT EXISTS items (
   batch INTEGER,
   parent INTEGER,
   kind TEXT NOT NULL,
+  bot TEXT NOT NULL DEFAULT '',
   actor TEXT NOT NULL,
   sender_name TEXT NOT NULL DEFAULT '',
   received_at TEXT NOT NULL,
@@ -93,13 +95,9 @@ CREATE TABLE IF NOT EXISTS seen (
   domain TEXT NOT NULL, norm_url TEXT NOT NULL, content_sha256 TEXT NOT NULL, item INTEGER,
   PRIMARY KEY (domain, norm_url, content_sha256)
 );
-CREATE TABLE IF NOT EXISTS defaults (actor TEXT PRIMARY KEY, domain TEXT NOT NULL, at TEXT);
-CREATE TABLE IF NOT EXISTS recent (
-  actor TEXT NOT NULL, domain TEXT NOT NULL, at TEXT NOT NULL, PRIMARY KEY (actor, domain)
-);
 CREATE TABLE IF NOT EXISTS settings (
   domain TEXT PRIMARY KEY, enabled INTEGER NOT NULL, collect_at TEXT, review_at TEXT,
-  saved_at TEXT NOT NULL
+  saved_at TEXT NOT NULL, bot TEXT
 );
 CREATE TABLE IF NOT EXISTS claims (key TEXT PRIMARY KEY, at TEXT NOT NULL);
 """
@@ -118,6 +116,7 @@ class Setting:
     collect_at: str | None
     review_at: str | None
     saved_at: str
+    bot: str | None = None
 
 
 class Inbox:
@@ -270,51 +269,6 @@ class Inbox:
                 )
         return added
 
-    def unpick(self, item_id: int, domain: str) -> bool:
-        """Take a domain back; False once that domain processed the item."""
-        with self._db() as db:
-            taken = db.execute(
-                "SELECT 1 FROM results WHERE item = ? AND domain = ?", (item_id, domain)
-            ).fetchone()
-            if taken is not None:
-                return False
-            db.execute("DELETE FROM picks WHERE item = ? AND domain = ?", (item_id, domain))
-        return True
-
-    def note_recent(self, actor: str, domain: str) -> None:
-        with self._db() as db:
-            db.execute(
-                "INSERT INTO recent (actor, domain, at) VALUES (?, ?, ?) "
-                "ON CONFLICT (actor, domain) DO UPDATE SET at = excluded.at",
-                (actor, domain, now()),
-            )
-
-    def recent(self, actor: str, limit: int = 3) -> list[str]:
-        with self._db() as db:
-            rows = db.execute(
-                "SELECT domain FROM recent WHERE actor = ? ORDER BY at DESC LIMIT ?",
-                (actor, limit),
-            ).fetchall()
-        return [str(row["domain"]) for row in rows]
-
-    def set_default(self, actor: str, domain: str | None) -> None:
-        with self._db() as db:
-            if domain is None:
-                db.execute("DELETE FROM defaults WHERE actor = ?", (actor,))
-            else:
-                db.execute(
-                    "INSERT INTO defaults (actor, domain, at) VALUES (?, ?, ?) "
-                    "ON CONFLICT (actor) DO UPDATE SET domain = excluded.domain, at = excluded.at",
-                    (actor, domain, now()),
-                )
-
-    def default(self, actor: str) -> str | None:
-        with self._db() as db:
-            row = db.execute("SELECT domain FROM defaults WHERE actor = ?", (actor,)).fetchone()
-        return None if row is None else str(row["domain"])
-
-    # -- processing ----------------------------------------------------------------------------
-
     def due(self, domain: str) -> list[dict[str, Any]]:
         """Queued items picked for `domain` that it has not processed, oldest first."""
         with self._db() as db:
@@ -324,16 +278,6 @@ class Inbox:
                 "(SELECT 1 FROM results WHERE results.item = items.id AND results.domain = ?) "
                 "ORDER BY items.id",
                 (domain, QUEUED, domain),
-            ).fetchall()
-        return [self._row(row) for row in rows]
-
-    def untapped(self) -> list[dict[str, Any]]:
-        """Queued items nobody chose a domain for."""
-        with self._db() as db:
-            rows = db.execute(
-                "SELECT * FROM items WHERE status = ? AND NOT EXISTS "
-                "(SELECT 1 FROM picks WHERE picks.item = items.id) ORDER BY id",
-                (QUEUED,),
             ).fetchall()
         return [self._row(row) for row in rows]
 
@@ -412,23 +356,42 @@ class Inbox:
                 row["collect_at"],
                 row["review_at"],
                 str(row["saved_at"]),
+                row["bot"],
             )
             for row in rows
         }
 
     def save_setting(
-        self, domain: str, *, enabled: bool, collect_at: str | None, review_at: str | None
+        self,
+        domain: str,
+        *,
+        enabled: bool,
+        collect_at: str | None,
+        review_at: str | None,
+        bot: str | None = None,
     ) -> Setting:
+        """A domain's switch, times and bot; a bot is bound to one domain at a time, so
+        binding it here unbinds it elsewhere."""
         stamp = now()
         with self._db() as db:
+            if bot:
+                db.execute(
+                    "UPDATE settings SET bot = NULL WHERE bot = ? AND domain != ?", (bot, domain)
+                )
             db.execute(
-                "INSERT INTO settings (domain, enabled, collect_at, review_at, saved_at) "
-                "VALUES (?, ?, ?, ?, ?) ON CONFLICT (domain) DO UPDATE SET "
+                "INSERT INTO settings (domain, enabled, collect_at, review_at, saved_at, bot) "
+                "VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (domain) DO UPDATE SET "
                 "enabled = excluded.enabled, collect_at = excluded.collect_at, "
-                "review_at = excluded.review_at, saved_at = excluded.saved_at",
-                (domain, int(enabled), collect_at, review_at, stamp),
+                "review_at = excluded.review_at, saved_at = excluded.saved_at, bot = excluded.bot",
+                (domain, int(enabled), collect_at, review_at, stamp, bot or None),
             )
-        return Setting(domain, enabled, collect_at, review_at, stamp)
+        return Setting(domain, enabled, collect_at, review_at, stamp, bot or None)
+
+    def bound(self, bot: str) -> str | None:
+        """The domain a collection bot is bound to on the page; None when none is."""
+        with self._db() as db:
+            row = db.execute("SELECT domain FROM settings WHERE bot = ?", (bot,)).fetchone()
+        return None if row is None else str(row["domain"])
 
     def claim_occurrence(self, key: str) -> bool:
         """True exactly once per key (a domain's collect or review at one time)."""

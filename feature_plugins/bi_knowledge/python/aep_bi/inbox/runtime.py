@@ -16,7 +16,6 @@ from typing import Any
 
 from aep_bi.inbox import fetch
 from aep_bi.inbox.bot import Bot
-from aep_bi.inbox.domains import model_of
 from aep_bi.inbox.process import Processor
 from aep_bi.inbox.scheduler import Scheduler
 from aep_bi.inbox.store import Inbox
@@ -36,7 +35,7 @@ class InboxRuntime:
     def bot(self, host: Any) -> Bot | None:
         if self.workspace is None:
             return None
-        return Bot(self.workspace, model=model_of(host if host is not None else self.host))
+        return Bot(self.workspace)
 
     def options(self) -> dict[str, Any]:
         if self.workspace is None:

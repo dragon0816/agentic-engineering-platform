@@ -1,14 +1,14 @@
 """A domain's collect time and review time, and what follows an import (owner 2026-11-19).
 
-Collect: items nobody tapped take a confident AI suggestion, else go to 「未分類」; then
-each item picked for the domain is claimed once (AGENTS rule 21) and fetched over HTTP
-(a Threads/Instagram login wall may go to the local browser when the owner turned that
-on), kept whole as an immutable `.html` source whose first line records who sent it,
-when, the original address and when and how it was fetched (AGENTS rule 7), deduplicated
-by address and content, converted to Markdown, and given to an AI ingest run that stops
-at review: nothing is accepted, committed or pushed here. A file sent to the bot goes in
-as an uploaded source does. A page that gave only its summary is marked 「只取得摘要」
-and its sender is asked to Reply with the text.
+Collect: each item sent to the domain's collection bot is claimed once (AGENTS rule 21)
+and fetched over HTTP (a Threads/Instagram login wall may go to the local browser when
+the owner turned that on), kept whole as an immutable `.html` source whose first line
+records who sent it, when, the original address and when and how it was fetched (AGENTS
+rule 7), deduplicated by address and content, converted to Markdown, and given to an AI
+ingest run that stops at review: nothing is accepted, committed or pushed here. A file or
+words sent to the bot go in as uploaded sources do. A page that gave only its summary is
+marked 「只取得摘要」 and its sender is asked to Reply with the text. Every message goes
+from the bot the item came through, to its sender only.
 
 Review: the senders of the domain's items still in review hear how many candidate cards
 wait. After 「全部接受並匯入」 (or 「確認匯入」) of such a run, the domain's tests run, its
@@ -58,22 +58,16 @@ class Processor:
     def inbox(self) -> Inbox:
         return Inbox(self.workspace)
 
-    def _send(self, actor: str, text: str) -> bool:
-        return self.messenger is not None and self.messenger.send(actor, text)
+    def _send(self, who: tuple[str, str], text: str) -> bool:
+        """From the collection bot `who[0]` to its mapped sender `who[1]`."""
+        bot, actor = who
+        return self.messenger is not None and self.messenger.send(bot, actor, text)
+
+    @staticmethod
+    def _who(item: dict[str, Any]) -> tuple[str, str]:
+        return str(item.get("bot") or ""), str(item["actor"])
 
     # -- collect ---------------------------------------------------------------------------------
-
-    def sweep_untapped(self) -> dict[str, int]:
-        """Items nobody chose a domain for: a confident suggestion is used, else 未分類."""
-        counts = {"suggested": 0, "unassigned": 0}
-        for item in self.inbox.untapped():
-            if item["suggested"] and (item["confidence"] or 0) >= dom.CONFIDENT:
-                self.inbox.pick(int(item["id"]), str(item["suggested"]), "ai")
-                counts["suggested"] += 1
-            else:
-                self.inbox.update(int(item["id"]), status=store.UNASSIGNED)
-                counts["unassigned"] += 1
-        return counts
 
     def collect(self, key: str) -> dict[str, Any]:
         """Process every item waiting for domain `key`; a summary of what happened."""
@@ -81,15 +75,14 @@ class Processor:
         domain = dom.by_key(listed, key)
         if domain is None:
             return {"ok": False, "code": "domain_unknown"}
-        swept = self.sweep_untapped()
         counts = {name: 0 for name in (store.REVIEW, store.SUMMARY, store.DUPLICATE, store.FAILED)}
-        asks: list[tuple[str, str]] = []
-        senders: set[str] = set()
+        asks: list[tuple[tuple[str, str], str]] = []
+        senders: set[tuple[str, str]] = set()
         for item in self.inbox.due(key):
             item_id = int(item["id"])
             if not self.inbox.claim(item_id, key):
                 continue
-            senders.add(str(item["actor"]))
+            senders.add(self._who(item))
             try:
                 status = self._one(item, domain)
             except Exception as failure:  # noqa: BLE001 - one item never stops the others
@@ -101,16 +94,20 @@ class Processor:
                 what = "只取得摘要" if status == store.SUMMARY else "沒有取得內容"
                 asks.append(
                     (
-                        str(item["actor"]),
+                        self._who(item),
                         f"#{item_id} {what}（{(fresh['title'] or fresh['url'] or '')[:60]}）。"
                         "請回覆這則訊息，貼上貼文或頁面的文字。",
                     )
                 )
         self._tell(domain, senders, asks, counts)
-        return {"ok": True, **counts, **swept}
+        return {"ok": True, **counts}
 
     def _tell(
-        self, domain: Domain, senders: set[str], asks: list[tuple[str, str]], counts: dict[str, int]
+        self,
+        domain: Domain,
+        senders: set[tuple[str, str]],
+        asks: list[tuple[tuple[str, str], str]],
+        counts: dict[str, int],
     ) -> None:
         """One line per sender about the run, then each request for missing text."""
         converted = counts[store.REVIEW] + counts[store.SUMMARY]
@@ -124,10 +121,10 @@ class Processor:
             )
             + "。"
         )
-        for actor in sorted(senders):
-            self._send(actor, line)
-        for actor, text in asks:
-            self._send(actor, text)
+        for who in sorted(senders):
+            self._send(who, line)
+        for who, text in asks:
+            self._send(who, text)
 
     def _fetch(self, item: dict[str, Any]) -> tuple[fetch.Fetched, html_markdown.Page, bool]:
         """(the fetch, its page, whether a login wall stood in the way)."""
@@ -213,7 +210,7 @@ class Processor:
         return self._ingest(
             item_id,
             domain,
-            f"note-{item['parent']}-{item_id}.md",
+            f"note-{item['parent']}-{item_id}.md" if item["parent"] else f"text-{item_id}.md",
             text.encode("utf-8"),
             "text/markdown",
             sender,
@@ -224,8 +221,9 @@ class Processor:
         return (
             f"# {item['title'] or '補充內文'}\n\n"
             f"> 原始網址：{item['url'] or ''}\n"
-            f"> 內容由傳送者 {item['actor']} 於 {item['received_at']} 以 Telegram 補充"
-            f"（補 #{item['parent']}）\n\n{item['note']}\n"
+            f"> 內容由傳送者 {item['actor']} 於 {item['received_at']} 以 Telegram 傳送"
+            + (f"（補 #{item['parent']}）" if item["parent"] else "")
+            + f"\n\n{item['note']}\n"
         )
 
     def _ingest(
@@ -285,10 +283,11 @@ class Processor:
 
     # -- review reminder -------------------------------------------------------------------------
 
-    def waiting(self, key: str, dataset: str) -> tuple[int, set[str]]:
+    def waiting(self, key: str, dataset: str) -> tuple[int, set[tuple[str, str]]]:
         """(candidate cards still undecided in the domain's inbox runs, their senders)."""
         staging = Staging(self.workspace, dataset)
-        count, senders = 0, set()
+        count: int = 0
+        senders: set[tuple[str, str]] = set()
         for result in self.inbox.results(domain=key):
             run_id = result["run_id"]
             if not run_id:
@@ -305,7 +304,7 @@ class Processor:
                 count += pending
                 item = self.inbox.item(int(result["item"]))
                 if item is not None:
-                    senders.add(str(item["actor"]))
+                    senders.add(self._who(item))
         return count, senders
 
     def remind(self, key: str) -> int:
@@ -319,7 +318,7 @@ class Processor:
             return 0
         where = WHERE.format(vault=domain.vault_title, label=domain.label)
         text = f"{domain.label} 有 {count} 張候選卡待審：在{where}審核，可按「全部接受並匯入」。"
-        return sum(1 for actor in sorted(senders) if self._send(actor, text))
+        return sum(1 for who in sorted(senders) if self._send(who, text))
 
     # -- after an import -------------------------------------------------------------------------
 
@@ -337,7 +336,7 @@ class Processor:
         if domain is None:
             return False
         senders = sorted(
-            {str(i["actor"]) for r in rows if (i := self.inbox.item(int(r["item"]))) is not None}
+            {self._who(i) for r in rows if (i := self.inbox.item(int(r["item"]))) is not None}
         )
         applied = committed.get("applied") or committed.get("run", {}).get("commit") or {}
 
@@ -347,7 +346,7 @@ class Processor:
                 try:
                     from aep_bi.host import bi_bench
 
-                    actor = senders[0] if senders else "bi-inbox"
+                    actor = senders[0][1] if senders else "bi-inbox"
                     report = bi_bench.run(
                         self.workspace,
                         domain.vault_id,
@@ -364,8 +363,8 @@ class Processor:
                 f"{domain.label} 已匯入：新建 {applied.get('created', 0)}、"
                 f"更新 {applied.get('updated', 0)}。{tested}。{drawn}。"
             )
-            for actor in senders:
-                self._send(actor, text)
+            for who in senders:
+                self._send(who, text)
 
         background = getattr(bench, "background", None)
         if callable(background):

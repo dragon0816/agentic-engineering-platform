@@ -1,16 +1,13 @@
 """Which BI domains a link can go to, how a person names one, and the AI's suggestion.
 
 A domain is a home (an application or library entry) of a BI vault this PC uses,
-keyed `<vault id>:<home>`, shown by its label. The suggestion compares a link's title
-and summary with each domain's label, folder, the vault's purpose and the card types
-of the domain's profile; without a model there is no suggestion (owner 2026-11-19).
+keyed `<vault id>:<home>`, shown by its label; a collection bot is bound to one.
 """
 
 from __future__ import annotations
 
-import json
 import re
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -18,11 +15,6 @@ from typing import Any
 
 from aep_bi.cards import vault
 from aep_bi.cards.store import BiStoreError
-from common.execution import TraceIdentifiers
-from models.contracts import ModelClient, ModelMessage, ModelRequest
-
-#: A suggestion at least this sure is used for an item nobody tapped (owner 2026-11-19).
-CONFIDENT = 0.7
 
 
 @dataclass(frozen=True)
@@ -111,62 +103,6 @@ def labels(domains: Sequence[Domain], keys: Sequence[str]) -> str:
     return "、".join(named) or "（無）"
 
 
-# -- the AI's suggestion ---------------------------------------------------------------------
-
-
-def _described(domains: Sequence[Domain]) -> str:
-    return "\n".join(
-        f"{index}. {d.label}（資料夾 {d.home}；知識庫：{d.vault_title} {d.purpose}".rstrip()
-        + (f"；卡片類型：{'、'.join(d.types)}" if d.types else "")
-        + "）"
-        for index, d in enumerate(domains, start=1)
-    )
-
-
-def suggest(
-    model: tuple[ModelClient, str] | None,
-    domains: Sequence[Domain],
-    title: str,
-    summary: str,
-) -> tuple[str | None, float]:
-    """(domain key, confidence 0..1) for a link, or (None, 0) without a model, without
-    domains or when the answer cannot be read. One short model call."""
-    if model is None or not domains or not (title or summary).strip():
-        return None, 0.0
-    client, alias = model
-    prompt = (
-        "把一則分享的資訊歸到最適合的 BI 領域。只回 JSON："
-        '{"domain": <編號或 0 表示都不適合>, "confidence": <0 到 1>}。\n\n'
-        f"領域：\n{_described(domains)}\n\n"
-        f"標題：{title[:300]}\n摘要：{summary[:800]}"
-    )
-    try:
-        response = client.generate(
-            ModelRequest(
-                trace=TraceIdentifiers(
-                    trace_id="bi-inbox-suggest", request_id="bi-inbox-suggest", span_id="suggest"
-                ),
-                model_alias=alias,
-                messages=(ModelMessage(role="user", text=prompt),),
-                max_output_tokens=60,
-            )
-        )
-    except Exception:  # noqa: BLE001 - no suggestion is a fine answer
-        return None, 0.0
-    if response.failure is not None:
-        return None, 0.0
-    found = re.search(r"\{.*?\}", response.text or "", re.DOTALL)
-    try:
-        answer: Any = json.loads(found.group(0)) if found else None
-        number = int(answer["domain"])
-        confidence = max(0.0, min(1.0, float(answer.get("confidence", 0))))
-    except (ValueError, TypeError, KeyError, AttributeError):
-        return None, 0.0
-    if not 1 <= number <= len(domains):
-        return None, 0.0
-    return domains[number - 1].key, confidence
-
-
 # -- times -------------------------------------------------------------------------------------
 
 
@@ -204,16 +140,6 @@ def when(clock: str | None, now: datetime) -> str:
     at = next_at(clock, now)
     day = (at.date() - now.astimezone().date()).days
     return ("今天 " if day == 0 else "明天 " if day == 1 else at.strftime("%m-%d ")) + clock
-
-
-def model_of(host: Any) -> Callable[[], tuple[ModelClient, str] | None]:
-    """This host's model for BI (as AI runs use it); none without Agent Web."""
-    if host is None:
-        return lambda: None
-    from aep_bi.host.bi_cards_api import web_ai_runtime
-
-    ai = web_ai_runtime(host)
-    return ai.model
 
 
 def as_map(domains: Sequence[Domain]) -> Mapping[str, Domain]:
