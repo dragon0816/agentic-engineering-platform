@@ -8175,3 +8175,34 @@ BI 測試 step: the commit/share block leaves the main area; 「看歷史紀錄�
 Benchmark and Dashboard are tabs in the main area; benchmark details open in the side area;
 benchmark results show summary numbers. This supersedes the 2026-11-20 morning idea of putting
 AI 分析/Benchmark tabs only in the BI right panel. GUI only; no harness change.
+
+### 2026-11-20 — BI Knowledge round 2: owner decisions
+
+Owner (GUI and operations as simple as possible; every wait shows progress beside its
+control, AGENTS 23):
+1. BI conversion keeps pictures as Knowledge maintenance does: the same core extraction
+   helpers (`knowledge.office`) and the same describer, moved to core `knowledge.describe`
+   (the LLM Wiki import path stays as a re-export). Descriptions are a later revision made in
+   the background when the model can see images, so an upload never waits on a model.
+   Rejected: a BI-only copy of the image code; describing during the upload request.
+2. Schema suggestions: 「不要」 removes the row at once with 復原; no 待釐清 rows (「有就有，
+   沒有就沒有」); 建議 schema moves into 進階：Schema and runs only on a press, on the working
+   domain's current sources.
+3. The domain profile leaves the page. A stored profile still applies; without one a run uses
+   the rule's card types (else the defaults) with all their schema fields, which is what
+   `run_types` already composes, so no new derivation module was added.
+4. Step 2 has no AI collaboration: schema files, judging rules and data-processing programs
+   come in through one 匯入 (the package import, extended to schema JSON). The built-in
+   processing (AI 擷取, 表格規則) is listed among the programs with a read-only 檢視, as is
+   every rule. The 管理 → 安裝 schema entry stays for now. The step-2 session server code
+   (schema, skill and tool sessions) is left in place unreachable from the page; removing it
+   is a follow-up once the owner has reviewed the page.
+5. Superseded by "Agent Web three-area layout with a tabbed side area": the shell's side area
+   is generic (`sideOpen`), BI step 3 has Benchmark | Dashboard tabs, and AI sessions, 分享,
+   history and per-question results open as side tabs. One BI AI panel exists, so a second
+   session takes the first one's tab.
+6. 跑測試 shows a bar beside the button: n/N, the current question, the seconds; it ends in
+   place.
+Review fixes from the owner's preview: the accept-and-import button also writes cards already
+accepted; candidate warnings name their field and can be confirmed or answered by editing the
+value (never blocking); deleting an analysis redraws the list.

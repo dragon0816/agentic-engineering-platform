@@ -7485,3 +7485,48 @@ Design: `docs/phases/BI_SKILL_TOOL_PACKAGE_IMPORT_DESIGN_20261119.md`; owner cho
   docstring) and `needs_rewrite: true` (「需改寫」: a command-line script without the
   INPUT/OUTPUT contract). `tool-run` refuses it with `tool_needs_rewrite`; a revision saved after
   the AI rewrite (the existing `tool` session, which is told to rewrite such code) drops it.
+
+## BI Knowledge round 2 (owner 2026-11-20)
+
+Branch `bi-knowledge-round2-20261120`; decisions in docs/DECISIONS.md "2026-11-20 — BI
+Knowledge round 2: owner decisions".
+
+- **Pictures in converted sources.** `convert.convert_with_assets(name, data)` returns the
+  Markdown and `{"assets/<sha16>.<ext>": bytes}`; PDF, Word and PowerPoint pictures come from
+  the core helpers `knowledge.office.pdf_page_images`, `docx_pictures`, `pptx_picture` (also
+  used by the LLM Wiki extractors) and are referenced in place as `![圖 n](assets/<name>)`.
+  Converter id `aep.bi.convert/2`. Assets live at `markdown/<source_id>/assets/` and, in a
+  vault, beside the revision files (`<folder>/markdown/<sha8>/assets/`).
+- `GET /api/bi/sources/<id>/assets/<name>?dataset=` → the picture's bytes (image media type;
+  404 `asset_unknown` for a name not of the form `<16 hex>.<ext>` or not found).
+- `GET /api/bi/sources/<id>/images?dataset=` → `{"images": {"status": "idle"|"running"|
+  "finished"|"failed", "done", "total", "pending"?, "elapsed"?, "described"?, "failed"?,
+  "rev"?}}`. `POST` the same path with `{"dataset"}` starts describing the pictures still
+  without a description; 409 `vision_unavailable` when the host model's endpoint does not
+  declare vision. Uploads (`POST /api/bi/sources`, `/api/bi/sources/upload`) answer with
+  `images` (null, `no_vision`, or the started run). Descriptions use core
+  `knowledge.describe.ImageDescriber` and are saved as the next revision (origin
+  `conversion`, note `圖片說明`) as a `> 圖片說明（<alias>）：…` line under each picture.
+- Adding again a document whose current revision is an unedited `aep.bi.convert/1`
+  conversion converts it again with its pictures; the source answers `reconverted: true`.
+- **Schema suggestions** have no `needs_clarification` rows; a question-only item is dropped.
+  `reject` hides a row on the page with 復原 (`reopen`).
+- **One 匯入.** The package preview/apply (`/api/bi/vaults/<id>/package`, `package-upload`)
+  also takes schema files: any `.json` other than `aep-bi-package.json` with `schema_id`,
+  `version` and `types` is an item `{"kind": "schema", "name": "<id>@<version>"}`, checked as
+  `catalog.validate` checks it, `same` when that version is installed, and installed with
+  `catalog.install` on apply.
+- `GET /api/bi/builtins` → `{"builtins": {"llm": {title, origin, types, instructions,
+  evidence, prompt}, "rules": {title, origin, about, recipe}}}`, read only.
+- **Benchmark progress.** A run report carries `steps` and `current`; `GET
+  /api/bi/vaults/<id>/checks` returns `newest.progress = {done, total, current, started_at,
+  ended_at}`.
+- **Warnings on candidates.** Field warnings carry `field`. `POST
+  /api/bi/runs/<run>/candidates/<id>` accepts `confirm_warning: {code, field, message}`, which
+  moves that warning to `confirmed` (`by`, `at`); editing a field's value moves its warnings
+  there with `edited: true`. Warnings never block `accepted`; 404 `warning_unknown`.
+- **Agent Web side area (附加資料顯示區).** Shell JS API for every page and plugin:
+  `sideOpen({id, title, render(panel) | url | file + session | element, onClose, refresh,
+  flush})` opens or focuses a tab and returns its panel; `sideClose(id)`, `sideFocus(id)`,
+  `sideHas(id)`. An `element` moves into the tab and returns to its place on close. Nothing is
+  persisted. `openFileViewer` opens files there; the old dialog stays as `openFileDialog`.

@@ -5196,3 +5196,20 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   failures logged at debug and ignored. Presentation only. Tests:
   tests/test_telegram_typing.py; contract docs/CONTRACTS.md "Telegram ingress" (activity
   indicator). Owner live check in Telegram pending.
+- [x] 2026-11-20 BI Knowledge round 2 (owner 2026-11-20; branch bi-knowledge-round2-20261120,
+  awaiting the owner's page review before broad test runs): pictures kept in BI conversion
+  with background descriptions; schema suggestions removed on 不要 with 復原, no 待釐清,
+  under 進階 on a press; profile out of the page; one 匯入 for schema/rules/programs, built-ins
+  listed with 檢視, no step-2 AI sessions; Agent Web side area (`sideOpen`) with BI step 3
+  tabs and side tabs for AI, 分享, history and per-question results; benchmark progress bar;
+  review fixes (import accepted cards, confirmable warnings, analysis delete redraw).
+  Quick targeted tests run: test_bi_convert_images, test_bi_source_markdown, test_office,
+  test_describe, test_bi_vault_sources, test_bi_markdown_ui, test_bi_schema_suggest(_ui),
+  test_bi_page_simple, test_bi_packages(_ui), test_bi_vault_bench, test_extra_area_ui,
+  test_bi_step3_ui, test_bi_review_table_ui (2 picked), test_bi_ai_runs, test_bi_extract,
+  test_bi_ingest_runs, test_bi_extract_evidence, test_bi_reading_runs. Not yet run, and
+  expected to need rewriting for the removed step-2 AI controls and the new step 3:
+  test_bi_build_flow_ui, test_bi_create_domain_ui, test_bi_sessions_ui,
+  test_bi_share_step_ui, test_bi_step2_domain_ui, test_bi_vault_ui, test_bi_tools_ui and
+  file-viewer UI tests. Contract: docs/CONTRACTS.md "BI Knowledge round 2"; decisions:
+  docs/DECISIONS.md "2026-11-20 — BI Knowledge round 2: owner decisions".
