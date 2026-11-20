@@ -902,10 +902,9 @@ BI_PANE_HTML = r"""
             <h4 id="bi-b-skills-h">判讀規則（skills）</h4>
             <div id="bi-b-sk-list"></div>
             <div class="bi-actions">
-              <button class="bi-btn" id="bi-b-sk-new" type="button">和 AI 新增規則</button>
+              <button class="go" id="bi-b-pkg-import" type="button">匯入</button>
               <details class="bi-row-menu" id="bi-b-pkg-menu"><summary>更多</summary>
                 <div class="bi-actions">
-                  <button class="bi-btn" id="bi-b-pkg-import" type="button">匯入</button>
                   <button class="bi-btn" id="bi-b-pkg-export" type="button">匯出</button></div>
               </details></div>
             <div class="bi-step" id="bi-b-pkg" hidden></div>
@@ -922,7 +921,7 @@ BI_PANE_HTML = r"""
               <div class="bi-actions">
                 <button class="go" id="bi-b-tl-pick" type="button">選擇 Python 檔</button>
                 <input id="bi-b-tl-file" type="file" accept=".py,text/x-python" multiple hidden>
-                <button class="bi-btn" id="bi-b-tl-ai" type="button">和 AI 討論</button></div>
+              </div>
               <div class="bi-tl-grid">
                 <div><label class="bi-label" for="bi-b-tl-code">
                   程式碼（讀 INPUT，寫到 OUTPUT；也可以直接貼上或修改）</label>
@@ -983,8 +982,6 @@ BI_PANE_HTML = r"""
             建議要不要新增類型、欄位或用語；不按就不會產生。</p>
           <div class="bi-step-grid" id="bi-b-sg-bar">
             <div><button class="go" id="bi-b-sg-run" type="button">建議 schema</button></div>
-            <div><button class="bi-btn" id="bi-b-sa-open" type="button">
-              和 AI 調整 schema</button></div>
           </div>
           <div class="mem-status" id="bi-b-sg-status" role="status" aria-live="polite"
             hidden></div>
@@ -4889,9 +4886,6 @@ function biSkillsDraw(reply) {
     edit.addEventListener("click", () => {
       el("bi-b-adv-skills").open = true; biSkillForm(item);
     });
-    const talk = biButton("和 AI 一起修改", (event) => biSkillAi(item, event.currentTarget),
-      "bi-btn",
-      "和 AI 一起修改判讀規則 " + item.name);
     // A rule shipped with the vault: its default text, beside the current one when they differ.
     let detail = null;
     const shipped = "default_body" in item ? biButton("預設版本", () => {
@@ -4899,7 +4893,7 @@ function biSkillsDraw(reply) {
       if (!detail.row.hidden) biSkillDefault(item, detail.cell);
     }, "bi-btn", "看判讀規則 " + item.name + " 的預設版本") : null;
     biRow(list, [bh("strong", "", item.name), item.role === "classify" ? "分類" : "擷取",
-      "第 " + item.revision + " 版", where, state, biRowActions([edit, talk], shipped)]);
+      "第 " + item.revision + " 版", where, state, biRowActions([edit], shipped)]);
     if (shipped) { detail = biRowDetail(list); detail.row.hidden = true; }
   }
   box.append(skills.length ? list.box : bh("p", "bi-meta", "還沒有判讀規則。"));
@@ -4978,6 +4972,10 @@ function biFollowSourceFolder() {
 }
 
 // -- a home's data-processing tools (BI_CARD_MODEL.md P2-a) -------------------------
+const BI_BUILTIN_TOOLS = [
+  ["AI 擷取（內建）", "用模型讀來源的 Markdown，依 schema 和這個領域的判讀規則產生候選卡。"],
+  ["表格規則（內建，不用模型）", "CSV、Excel 依欄名對應到 schema 的欄位，不用模型。"]];
+
 async function biTools(vaultId) {
   const reply = await call("/api/bi/vaults/" + vaultId + "/tools");
   bi.toolsReply = {vaultId, reply};
@@ -5003,11 +5001,7 @@ function biToolsDraw(vaultId, reply) {
     const title = item.name + (draft ? "（AI 提出的草稿）" : "（第 " + item.revision + " 版）");
     const code = bh("pre", "bi-meta", item.code || item.problem || "");
     const actions = [];
-    if (!draft && item.code && !item.problem && item.needs_rewrite) {
-      // Imported as a command-line script (「需改寫」): one press hands it to the tool AI.
-      actions.push(biButton("用 AI 改寫", (event) => biToolRewrite(item, event), "go",
-        "用 AI 改寫：" + item.name));
-    } else if (!draft && item.code && !item.problem) {
+    if (!draft && item.code && !item.problem && !item.needs_rewrite) {
       actions.push(biButton("對選取的來源執行", () => runOn(item), "bi-btn", "執行：" + item.name));
     }
     if (draft) {
@@ -5042,10 +5036,15 @@ function biToolsDraw(vaultId, reply) {
   const mine = (item) => !scope
     || String(item.name).slice(0, String(item.name).lastIndexOf("/")) === scope;
   const tools = (reply.tools || []).filter(mine), drafts = (reply.drafts || []).filter(mine);
+  // The built-in ways a source becomes cards are data-processing programs too (owner
+  // 2026-11-20: 「目前沒有 default 處理資料的程式嗎？」): always listed, chosen in Ingest.
+  for (const [name, about] of BI_BUILTIN_TOOLS) {
+    biRow(list, [[bh("strong", "", name), bh("p", "bi-meta", about)],
+      [biBadge("內建", "good")], "在 Ingest 選用"]);
+  }
   for (const tool of tools) row(tool, false);
   for (const draft of drafts) row(draft, true);
-  box.append(tools.length + drafts.length ? list.box
-    : bh("p", "bi-meta", "還沒有資料處理程式。"));
+  box.append(list.box);
   const others = (reply.tools || []).length - tools.length;
   if (others > 0) {
     box.append(bh("p", "bi-meta", "其他領域還有 " + others + " 個，選「全部領域」可以看。"));
@@ -5253,62 +5252,6 @@ async function biToolSave(quiet) {
 
 el("bi-b-tl-save").addEventListener("click", () => biToolSave(false));
 
-function biToolSuggestion(session, turn, index) {
-  const s = turn.suggestion;
-  const parts = [bh("p", "", bh("strong", "", "AI："), s.reply),
-    biListBlock("請你提供", s.needs), biListBlock("說明", s.notes)];
-  if (!s.code) return parts;
-  const code = bh("details", "", bh("summary", "", "AI 提出的程式碼"),
-    bh("pre", "bi-meta bi-tl-view", s.code));
-  code.open = !turn.applied;
-  parts.push(code);
-  if (turn.applied) {
-    parts.push(bh("p", "bi-meta", "已放進編輯區。"));
-  } else {
-    parts.push(bh("div", "bi-actions", biButton("放進編輯區", async () => {
-      const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
-        {dataset: bi.ai.dataset, turn: index});
-      el("bi-b-adv-skills").open = true;
-      el("bi-b-tl-code").value = reply.code; biToolName("");
-      biAiShow(reply.session);
-      biNotice(true, "已放進編輯區：先按「試跑」，沒問題再「存成新版本」。");
-    }, "go", "把 AI 提出的程式碼放進編輯區")));
-  }
-  return parts;
-}
-
-async function biToolAi(event) {
-  const home = biToolHome();
-  if (!home) {
-    biNotice(false, "先在上面選工作領域，AI 才知道程式給哪個領域用。"); return;
-  }
-  return biAiOpen({kind: "tool", dataset: "vault-" + bi.verVault, ref: "tool:" + home,
-    from: event && event.currentTarget, title: "和 AI 寫資料處理程式",
-    about: "先告訴 AI：輸入檔長怎樣（勾一份試跑來源當樣本）、要輸出哪些欄位、有哪些特殊情況。"
-      + "AI 只提出程式碼；放進編輯區、試跑和存檔都由你按。",
-    sends: "工作領域與卡片類型、編輯區的程式、勾選的試跑來源、上次試跑結果",
-    label: "想把來源轉成什麼", placeholder: "例如：每個產品一列 CSV，欄位：名稱、價格、上市日",
-    busy: "AI 正在看樣本與程式…", render: biToolSuggestion, shows: el("bi-b-tool-new"),
-    sessionTarget: () => home,
-    turn: () => ({code: el("bi-b-tl-code").value, source_ids: biToolPicked().slice(0, 5),
-      trial: bi.tl.last})});
-}
-
-el("bi-b-tl-ai").addEventListener("click", (event) => biToolAi(event)
-  .catch((failure) => biNotice(false, failure.message)));
-
-async function biToolRewrite(item, event) {
-  // 「需改寫」 in one press: the script goes into the editor and the tool AI is asked to
-  // rewrite it into the INPUT/OUTPUT contract; trying and saving stay the person's presses.
-  el("bi-b-adv-skills").open = true;
-  el("bi-b-tl-name").value = item.name; el("bi-b-tl-code").value = item.code;
-  const spec = await biToolAi(event);
-  if (!spec || bi.ai !== spec) return;
-  el("bi-ai-msg").value = "這是從包匯入的命令列腳本：請改寫成讀 INPUT、把 CSV 或 Markdown "
-    + "寫到 OUTPUT 的工具，保留它的解析邏輯。";
-  el("bi-ai-send").click();
-}
-
 // -- a working domain's skills and tools as one package (aep.bi.package/v1; owner 2026-11-19:
 // 匯入 and 匯出 under 更多, into the current working domain only, a preview before anything is
 // staged, and every wait with its progress beside its button, AGENTS.md 23) ------------------
@@ -5358,28 +5301,43 @@ function biPkgClose() {
 }
 
 function biPkgImport() {
+  // One 匯入 for the three things a domain brings in (owner 2026-11-20): schema files (.json),
+  // judging rules (.md) and data-processing programs (.py), loose or in a zip or a folder.
   const panel = biPkgPanel("import"); if (!panel) return;
-  const zip = document.createElement("input");
-  zip.type = "file"; zip.accept = ".zip,application/zip"; zip.hidden = true;
-  zip.id = "bi-b-pkg-zip";
+  const pick = document.createElement("input");
+  pick.type = "file"; pick.multiple = true; pick.hidden = true; pick.id = "bi-b-pkg-zip";
+  pick.accept = ".zip,.json,.md,.py,application/zip,application/json";
   const dir = document.createElement("input");
   dir.type = "file"; dir.multiple = true; dir.webkitdirectory = true; dir.hidden = true;
   dir.id = "bi-b-pkg-dir";
   const preview = bh("div", ""); preview.id = "bi-b-pkg-preview";
-  panel.box.append(bh("h5", "", "匯入判讀規則和工具到「" + panel.label + "」"),
-    bh("p", "bi-meta", "選 zip 或資料夾（skills/*.md、tools/*.py，可以附 aep-bi-package.json）。"
-      + "先看預覽再匯入；包裡的程式不會執行。"),
-    bh("div", "bi-actions", biButton("選 zip", () => zip.click(), "go"),
+  panel.box.append(bh("h5", "", "匯入 schema、判讀規則和程式到「" + panel.label + "」"),
+    bh("p", "bi-meta", "可選：schema 檔（.json）、判讀規則（.md）、資料處理程式（.py），"
+      + "或包含它們的 zip、資料夾。規則和程式先看預覽再匯入；程式不會執行。"),
+    bh("div", "bi-actions", biButton("選檔案", () => pick.click(), "go"),
       biButton("選資料夾", () => dir.click()), biButton("關閉", biPkgClose)),
-    zip, dir, biPkgStatusLine("bi-b-pkg-status"), preview);
-  zip.addEventListener("change", () => {
-    const file = zip.files[0]; zip.value = "";
-    if (file) biPkgZip(file, panel.home);
+    pick, dir, biPkgStatusLine("bi-b-pkg-status"), preview);
+  pick.addEventListener("change", () => {
+    const files = [...pick.files]; pick.value = "";
+    if (files.length) biPkgFiles(files, panel.home);
   });
   dir.addEventListener("change", () => {
     const files = [...dir.files]; dir.value = "";
-    if (files.length) biPkgFolder(files, panel.home);
+    if (files.length) biPkgFiles(files, panel.home, true);
   });
+}
+
+async function biPkgFiles(files, home, folder) {
+  // A zip goes up as it is; loose files and a folder are read here. Either way the host
+  // previews schema files, rules and programs together, and nothing is staged before 匯入.
+  const zips = files.filter((f) => /\.zip$/i.test(f.name));
+  if (zips.length > 1 || (zips.length && files.length > 1)) {
+    biPkgState("bi-b-pkg-status", "error", "zip 請單獨選一個；其他檔案可以一起選。");
+  } else if (zips.length) {
+    await biPkgZip(zips[0], home);
+  } else {
+    await biPkgFolder(files, home, folder);
+  }
 }
 
 async function biPkgZip(file, home) {
@@ -5404,7 +5362,7 @@ async function biPkgZip(file, home) {
   } finally { clearInterval(ticker); }
 }
 
-async function biPkgFolder(files, home) {
+async function biPkgFolder(files, home, folder) {
   const chosen = files.filter((f) => BI_PKG_TEXT.test(f.name)
     && !/(^|\/)\./.test(f.webkitRelativePath || f.name));
   const started = Date.now();
@@ -5413,7 +5371,8 @@ async function biPkgFolder(files, home) {
   const ticker = setInterval(show, 1000);
   try {
     const size = chosen.reduce((sum, f) => sum + f.size, 0);
-    if (!chosen.length) throw new Error("資料夾裡沒有 .md、.py 或 .json 檔");
+    if (!chosen.length) throw new Error((folder ? "資料夾裡" : "選的檔案裡")
+      + "沒有 .json、.md 或 .py 檔");
     if (size > BI_PKG_MAX) {
       throw new Error("這些檔案有 " + biMegabytes(size) + "，上限 8 MB；請改用 zip");
     }
@@ -5469,7 +5428,8 @@ function biPkgShow(preview) {
       action = pick;
     } else if (item.status === "update") action = "存成第 " + (item.revision + 1) + " 版";
     else if (item.status === "new") action = "新增";
-    biRow(table, [tick, item.kind === "skill" ? "判讀規則" : "工具",
+    biRow(table, [tick, {skill: "判讀規則", tool: "工具", schema: "schema"}[item.kind]
+      || item.kind,
       [bh("strong", "", item.name), ...(item.description
         ? [bh("p", "bi-meta", item.description)] : [])],
       state, why.length ? why : "—", action]);
@@ -5531,6 +5491,10 @@ async function biPkgApply() {
   bi.loaded = {}; biRefreshCounts();
   biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
   await Promise.all([biSkills(bi.verVault), biTools(bi.verVault)]);
+  if ((preview.items || []).some((i) => i.kind === "schema")) {
+    // An installed schema version shows under 可以升級到的版本 in this step.
+    try { await biRefreshSchemas(); await biBuildSchema(); } catch (e) { /* next load */ }
+  }
 }
 
 async function biPkgExport() {
@@ -5767,7 +5731,8 @@ function biSkillForm(item) {
   const form = el("bi-b-sk-form");
   form.hidden = false;
   el("bi-b-sk-name").value = item.name;
-  el("bi-b-sk-name").readOnly = true;
+  // A new rule (from 「新增規則」) is named here; an existing one keeps its name.
+  el("bi-b-sk-name").readOnly = Boolean(item.name);
   el("bi-b-sk-role").value = item.role;
   el("bi-b-sk-applies").value = (item.applies_to || []).join(", ");
   el("bi-b-sk-types").value = (item.card_types || []).join(", ");
@@ -5805,86 +5770,7 @@ for (const id of ["bi-b-sk-role", "bi-b-sk-applies", "bi-b-sk-types"]) {
   el(id).addEventListener("input", biSkillTypesNote);
 }
 
-el("bi-b-sk-new").addEventListener("click", () => biSkillNew()
-  .catch((failure) => biNotice(false, failure.message)));
 el("bi-b-rr-count").addEventListener("click", biRerunCount);
-
-// An AI session on a vault skill (knowledge repositories R3): the AI suggests a new
-// text; 「套用」 stages the next revision, which is committed and pushed in 「分享」.
-function biSkillSpec(dataset) {
-  return {kind: "skill", dataset, title: "和 AI 修改規則",
-    sends: "這條規則、卡片類型與資料夾、最近兩次試跑的候選卡", agent: true,
-    label: "你想怎麼調整這條規則",
-    placeholder: "例如：電源相關的規格表，額定功率一律放在 specs 欄位",
-    busy: "正在讀來源、用草稿試跑、看測試結果…（每次最多試跑 3 次、約 6 分鐘，"
-      + "時間到會先給目前最好的草稿）", render: biApplySkill,
-    turn: () => ({source_ids: bi.build.sourceId && biDataset() === dataset
-      ? [bi.build.sourceId] : []})};
-}
-
-async function biSkillAi(item, from) {
-  const name = item.name;
-  await biAiOpen({...biSkillSpec("vault-" + bi.verVault), name, from, ref: "skill:" + name,
-    about: "規則「" + name + "」第 " + item.revision + " 版"
-      + (item.needs_update && item.update_blocks !== false
-        ? "（需要更新：寫給 " + item.schema + "，AI 會一起更新）" : "") + "。",
-    sessionTarget: () => name});
-}
-
-async function biSkillNew() {
-  // The new rule is the session's until the person applies a draft (acceptance F16: the
-  // first message was saved as revision 1 that nobody approved); applying saves revision 1.
-  // The working domain's folder, never another: under 全部領域 the person picks one (F9).
-  const pick = el("bi-ai-new-folder"), none = bh("option", "", "（選一個資料夾）");
-  none.value = "";
-  pick.replaceChildren(none, ...((bi.skills && bi.skills.folders) || [])
-    .filter((f) => f !== "sources")
-    .map((folder) => { const o = bh("option", "", folder); o.value = folder; return o; }));
-  const own = el("bi-b-src-folder").value;
-  pick.value = biScope() && [...pick.options].some((option) => option.value === own) ? own : "";
-  el("bi-ai-new-name").value = "";
-  const spec = {...biSkillSpec("vault-" + bi.verVault), mode: "new", title: "和 AI 新增規則",
-    shows: el("bi-b-sk-list"),
-    about: "AI 會依你的描述寫出草稿並試跑；按「套用為新版本」才會存成第 1 版（還沒 commit）。",
-    label: "這條規則要做什麼", placeholder: "例如：虛構電源廠是 Account",
-    sessionTarget: () => spec.name,
-    prepare: async (message) => {
-      if (spec.name) return;
-      const name = el("bi-ai-new-name").value.trim();
-      if (!name) { el("bi-ai-new-name").focus(); throw new Error("請寫規則名稱"); }
-      if (!pick.value) { pick.focus(); throw new Error("請選這條規則套用到哪個資料夾"); }
-      spec.session = (await biCall("/api/bi/sessions", {dataset: spec.dataset, kind: "skill",
-        target: name, new: {role: "extract", applies_to: [pick.value]}})).session;
-      spec.name = name; spec.mode = null; el("bi-ai-new").hidden = true;
-      spec.ref = "skill:" + name;
-      biAiTarget("新規則「" + name + "」：套用 AI 的草稿後才會存成第 1 版（還沒 commit）。");
-    }};
-  await biAiOpen(spec);
-}
-
-function biApplySkill(session, turn, index) {
-  const s = turn.suggestion;
-  const parts = [bh("p", "", bh("strong", "", "AI："), s.reply),
-    biListBlock("理由", s.reasons), biListBlock("限制", s.limits),
-    biListBlock("需要工程開發（判讀規則做不到，沒有套用）", s.needs_engineering, "bi-warn"),
-    bh("strong", "", "套用後的變化"), biMethodDiff(s.result.diff)];
-  if (turn.applied) {
-    parts.push(bh("p", "bi-meta", "已套用為第 " + turn.applied.revision
-      + " 版（commit 並 push 後大家才會用到）。"));
-  } else if (s.result.diff.length) {
-    parts.push(bh("div", "bi-actions", biButton("套用為新版本", async () => {
-      const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
-        {dataset: bi.ai.dataset, turn: index});
-      const name = bi.ai.name;
-      biAiTarget("規則「" + name + "」第 " + reply.skill.revision + " 版（剛套用，還沒 commit）。");
-      biAiShow(reply.session);
-      biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
-      biNotice(true, "判讀規則「" + name + "」存成第 " + reply.skill.revision
-        + " 版；commit 並 push 後大家才會用到。");
-    }, "go", "把這個建議套用為判讀規則的新版本")));
-  }
-  return parts;
-}
 
 el("bi-b-sk-cancel").addEventListener("click", () => { el("bi-b-sk-form").hidden = true; });
 el("bi-b-sk-form").addEventListener("submit", async (event) => {
@@ -6213,7 +6099,8 @@ function biScopeEmpty() {
       || (bi.skills || {}).default_types || []).join("、") + "）"),
     biButton("新增規則", async () => {
       if (bi.view !== "build") await biJump("build");
-      biBuildStage("schema"); el("bi-b-sk-new").click();
+      biBuildStage("schema"); el("bi-b-adv-skills").open = true;
+      biSkillForm({name: "", role: "extract", applies_to: [el("bi-b-src-folder").value]});
     }, "bi-link"));
 }
 
@@ -7400,19 +7287,6 @@ async function biSuggestReopen(state, row, event) {
   biSuggestShow(reply.suggestion);
 }
 
-async function biSuggestAsk(row) {
-  // The one AI panel, with the suggestion and its quote already written.
-  await biSchemaAi();
-  const box = el("bi-ai-sources");
-  for (const input of box.querySelectorAll("input")) {
-    if (input.value === row.source_id) input.checked = true;
-  }
-  el("bi-ai-msg").value = "建議：" + row.what + "\n理由：" + row.reason + "\n原文（"
-    + row.source + "）：「" + row.quote + "」"
-    + (row.questions.length ? "\n要回答：" + row.questions.join("；") : "")
-    + "\n請幫我決定要不要改 schema，要的話怎麼改。";
-}
-
 el("bi-b-sg-run").addEventListener("click", async () => {
   const ids = biSuggestSources();
   if (!ids.length) {
@@ -7507,64 +7381,8 @@ async function biBuildSessA(reload) {
   }
 }
 
-async function biSchemaAi() {
-  await biAiOpen({kind: "schema", dataset: biDataset(), title: "和 AI 調整 schema",
-    about: biSchemaAbout(), sends: "草稿的類型與欄位、你的目標、勾選的來源", agent: "schema",
-    label: "你想怎麼調整", placeholder: "例如：幫技術卡加一個價格帶欄位",
-    busy: "正在看來源與卡片、試草稿…（可能要幾分鐘）", render: biBuildApplySchema,
-    sessionTarget: () => bi.build.draft.draft.id,
-    prepare: async (_message, spec) => {
-      if (!bi.build.draft) {
-        biBuildShowDraft(await biCall("/api/bi/schema-drafts", {base: (bi.schema || {}).ref}));
-        await biBuildDrafts();
-      }
-      spec.session = bi.build.sessA;
-    },
-    turn: () => ({goal: el("bi-ai-goal").value, source_ids: [...el("bi-ai-sources")
-      .querySelectorAll("input:checked")].map((i) => i.value).slice(0, 5)}),
-    saved: (session) => { bi.build.sessA = session; }});
-  el("bi-ai-goal").value = bi.build.sessA ? bi.build.sessA.goal || "" : "";
-  await biBuildSessA(false);
-}
-
-el("bi-b-sa-open").addEventListener("click", () => biSchemaAi()
-  .catch((failure) => biNotice(false, failure.message)));
-
 const BI_VERDICT = {reuse: ["照用目前的 schema", "good"], extend: ["擴充這份 schema", "accent"],
   new: ["需要新的 schema（另建資料集）", "warn"], answer: ["回答問題，沒有建議", "dim"]};
-
-function biBuildApplySchema(session, turn, index) {
-  const s = turn.suggestion, r = s.result, verdict = BI_VERDICT[s.verdict] || [s.verdict, "dim"];
-  const parts = [bh("p", "", bh("strong", "", "AI："), biBadge(verdict[0], verdict[1]), " ",
-    s.reply), biListBlock("理由", s.reasons), biListBlock("假設", s.assumptions),
-    biListBlock("缺少的資訊", s.missing_information)];
-  if (r.diff.length) {
-    parts.push(bh("strong", "", "套用後和第 " + r.base_rev + " 版的差異"), bh("ul", "",
-      ...r.diff.map((c) => bh("li", c.breaking ? "bi-err" : "", (c.breaking ? "⚠ " : "")
-        + c.type + (c.field ? "." + c.field : "") + "：" + c.detail))));
-  } else {
-    parts.push(bh("p", "bi-meta", "這個建議不改動草稿。"));
-  }
-  const problems = [...r.problems, ...r.errors.map((e) => e.path + "：" + e.message)];
-  if (problems.length) parts.push(biListBlock("不能套用的原因", problems, "bi-err"));
-  if ((s.examples || []).length) {
-    parts.push(biListBlock("範例卡片", s.examples.map((e) => biTypeLabel(e.entity_type) + "・"
-      + e.name + (Object.keys(e.fields).length ? "（" + Object.entries(e.fields).map(([k, v]) =>
-        k + "＝" + biValue(v)).join("；") + "）" : ""))));
-  }
-  if (turn.applied) {
-    parts.push(bh("p", "bi-meta", "已套用為草稿第 " + turn.applied.rev + " 版。"));
-  } else if (r.valid && r.diff.length) {
-    parts.push(bh("div", "bi-actions", biButton("套用到草稿", async () => {
-      const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
-        {dataset: biDataset(), turn: index});
-      bi.build.sessA = reply.session;
-      biBuildShowDraft(reply); await biBuildDrafts();
-      biNotice(true, "已存成草稿第 " + reply.revision + " 版；可以「用樣本試跑」看看。");
-    }, "go", "把這個建議套用為草稿的新版次")));
-  }
-  return parts;
-}
 
 el("bi-b-draft-trial").addEventListener("click", async () => {
   const draft = bi.build.draft, box = el("bi-b-draft-trial-result");

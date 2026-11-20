@@ -84,7 +84,8 @@ MAIN_PATH = (
     # Step 2: skills and tools, ingest, the cards.
     "bi-b-sk-list",
     "bi-b-tl-list",
-    "bi-b-sk-new",
+    # One 匯入 for schema, rules and programs (owner 2026-11-20).
+    "bi-b-pkg-import",
     # Step 2a's schema (acceptance F8): the draft as a table. 建議 schema is under 進階
     # (owner 2026-11-20).
     "bi-b-draft-table",
@@ -206,6 +207,10 @@ def test_there_is_no_folded_section_at_the_foot_of_the_page() -> None:
         "bi-b-pf-json",
         "bi-b-pf-save",
         "bi-b-sg-scope",
+        # No AI collaboration in step 2 (owner 2026-11-20): import instead.
+        "bi-b-sk-new",
+        "bi-b-sa-open",
+        "bi-b-tl-ai",
     ],
 )
 def test_the_removed_controls_are_gone_from_markup_and_script(ident: str) -> None:

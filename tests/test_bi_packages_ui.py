@@ -38,7 +38,8 @@ def _attach_zip(page: BiPage, data: bytes, name: str) -> None:
 
 
 def _open_menu(page: BiPage, button: str) -> None:
-    page.run("document.getElementById('bi-b-pkg-menu').open = true")
+    if button != "bi-b-pkg-import":  # 匯入 is in sight (owner 2026-11-20); 匯出 is in 更多
+        page.run("document.getElementById('bi-b-pkg-menu').open = true")
     page.click(f"#{button}")
 
 
@@ -84,9 +85,17 @@ def test_export_and_import_a_package_from_more(
             page.choose("bi-b-src-folder", AIDC)
             page.stage("schema")
             page.wait("!document.getElementById('bi-b-skills').hidden")
-            # Nothing new in sight: 匯入 and 匯出 wait in 更多.
+            # One 匯入 in sight for schema, rules and programs; 匯出 waits in 更多; no AI
+            # collaboration in step 2 (owner 2026-11-20).
             assert page.run("document.getElementById('bi-b-pkg').hidden") is True
             assert page.run("document.getElementById('bi-b-pkg-menu').open") is False
+            assert page.run("!document.getElementById('bi-b-pkg-import').closest('details')"), (
+                "匯入 is not folded away"
+            )
+            for gone in ("bi-b-sk-new", "bi-b-sa-open", "bi-b-tl-ai"):
+                assert page.run(f"!document.getElementById('{gone}')"), gone
+            assert "和 AI" not in page.text_of("bi-b-skills")
+            page.see("bi-b-tl-list", "內建")  # the built-ins are listed
 
             # 匯出: the domain's rule and tool, all ticked, downloaded as one zip.
             _open_menu(page, "bi-b-pkg-export")
@@ -101,7 +110,7 @@ def test_export_and_import_a_package_from_more(
             # 匯入 into Wireless: preview, then staged with its progress beside the button.
             page.choose("bi-b-src-folder", WIRELESS)
             _open_menu(page, "bi-b-pkg-import")
-            page.see("bi-b-pkg", "匯入判讀規則和工具到")
+            page.see("bi-b-pkg", "匯入 schema、判讀規則和程式到")
             _attach_zip(page, exported, "aep-bi-aidc.zip")
             page.wait("!!document.getElementById('bi-b-pkg-apply')")
             preview = page.text_of("bi-b-pkg-preview")
@@ -134,9 +143,8 @@ def test_export_and_import_a_package_from_more(
                 "[...document.querySelectorAll('#bi-b-tl-list tr')]"
                 ".find((r) => r.textContent.includes('bi-ingest')).textContent"
             )
-            page.click_text("#bi-b-tl-list", "用 AI 改寫")
-            page.wait("bi.ai && bi.ai.kind === 'tool'")
-            page.see("bi-ai-log", "改寫好了")
-            sent = " ".join(m.text for m in rewriter.requests[0].messages)
-            assert "改寫成讀 INPUT" in sent and "argparse" in sent, "the script and the ask"
+            # No AI rewrite any more: 修改 puts the script in the editor for a person.
+            assert "用 AI 改寫" not in page.text_of("bi-b-tl-list")
+            page.click_text("#bi-b-tl-list tr", "修改")
             assert "argparse" in page.run("document.getElementById('bi-b-tl-code').value")
+            assert not rewriter.requests

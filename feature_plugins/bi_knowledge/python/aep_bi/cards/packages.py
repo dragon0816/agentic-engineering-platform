@@ -8,6 +8,8 @@ Design: `docs/phases/BI_SKILL_TOOL_PACKAGE_IMPORT_DESIGN_20261119.md`; owner cho
       aep-bi-package.json       the manifest; without it the contents are inferred
       skills/<name>.md          a skill revision file (frontmatter + instructions)
       tools/<name>.py           a single-file tool that reads INPUT and writes OUTPUT
+      <any>.json                a schema file (owner 2026-11-20: one 匯入 for schema,
+                                skills and tools), installed as its id@version
 
 Import is preview first, then apply in batches of `BATCH`: each item is staged with the
 same calls the page uses (`vault.save_skill`, `vault.save_tool`) into the current working
@@ -39,7 +41,7 @@ from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 from typing import Any
 
-from aep_bi.cards import homes, tool_runs, tool_session, vault, vault_tools
+from aep_bi.cards import catalog, homes, tool_runs, tool_session, vault, vault_tools
 from aep_bi.cards.store import BiStoreError, now
 from knowledge.repo import repository as repo_engine
 from knowledge.repo import skills as repo_skills
@@ -313,6 +315,10 @@ def _listed(document: Mapping[str, Any], unpacked: Unpacked) -> list[Entry]:
     for path in unpacked.files:
         if path.startswith((SKILLS + "/", TOOLS + "/")) and path not in named:
             unpacked.skipped.append({"file": path, "reason": f"沒有列在 {MANIFEST}"})
+        elif path.endswith(".json") and path != MANIFEST:
+            ref = _schema_ref(unpacked.files[path])
+            if ref is not None:  # a schema file beside the manifest is imported too
+                entries.append(Entry("schema", ref, path, unpacked.files[path]))
     return entries
 
 
@@ -327,6 +333,20 @@ def _looks_like_skill(text: str | None) -> bool:
     return True
 
 
+def _schema_ref(text: str | None) -> str | None:
+    """`<id>@<version>` of a schema file; None for any other JSON."""
+    try:
+        document = json.loads(text or "")
+    except ValueError:
+        return None
+    if not isinstance(document, dict) or not isinstance(document.get("types"), (dict, list)):
+        return None
+    schema_id, version = document.get("schema_id"), document.get("version")
+    if not isinstance(schema_id, str) or not isinstance(version, str):
+        return None
+    return f"{schema_id}@{version}"
+
+
 def _inferred(unpacked: Unpacked) -> list[Entry]:
     """Without a manifest (owner: inferred, then confirmed in the preview): a `.py` is a
     tool and a `.md` with a skill's frontmatter a skill, named after the file."""
@@ -338,6 +358,8 @@ def _inferred(unpacked: Unpacked) -> list[Entry]:
         elif path.endswith(".md") and _looks_like_skill(text):
             matched = re.search(r"^name\s*:\s*([a-z0-9-]+)\s*$", text or "", re.MULTILINE)
             entries.append(Entry("skill", matched.group(1) if matched else stem, path, text))
+        elif path.endswith(".json") and (ref := _schema_ref(text)) is not None:
+            entries.append(Entry("schema", ref, path, text))
         elif path != README:
             unpacked.skipped.append({"file": path, "reason": "不是判讀規則或工具"})
     if len(entries) > MAX_ITEMS:
@@ -657,6 +679,24 @@ def _plan_tool(target: Target, entry: Entry, siblings: set[str]) -> tuple[dict[s
     return _item(entry, status=UPDATE, revision=revision, **values), given
 
 
+def _plan_schema(target: Target, entry: Entry) -> tuple[dict[str, Any], Any]:
+    """A schema file's row: checked as 安裝 schema checks it, installed on apply as its
+    id@version (an installed version is never changed), and offered as an upgrade."""
+    document = json.loads(entry.text or "")
+    _clean, errors = catalog.validate(document)
+    if errors:
+        reasons = [f"{e.get('path') or '$'}：{e.get('message')}" for e in errors[:5]]
+        return _item(entry, reasons=reasons), None
+    staged = {"filename": PurePosixPath(entry.file).name, "json_text": entry.text}
+    known = next((r for r in catalog.available(target.workspace) if r.ref == entry.name), None)
+    if known is not None:
+        return _item(entry, status=SAME), staged
+    warnings = []
+    if target.schema.split("@", 1)[0] == entry.name.split("@", 1)[0]:
+        warnings.append("安裝後，步驟 2 的「可以升級到的版本」會列出它")
+    return _item(entry, warnings=warnings), staged
+
+
 def _plan(target: Target, unpacked: Unpacked, package: str) -> list[tuple[dict[str, Any], Any]]:
     entries, _about = _entries(unpacked)
     siblings = {PurePosixPath(p).stem for p in unpacked.files if p.endswith(".py")}
@@ -666,6 +706,8 @@ def _plan(target: Target, unpacked: Unpacked, package: str) -> list[tuple[dict[s
             planned.append(_plan_skill(target, entry, package))
         elif entry.kind == "tool":
             planned.append(_plan_tool(target, entry, siblings))
+        elif entry.kind == "schema":
+            planned.append(_plan_schema(target, entry))
         else:
             planned.append((_item(entry), None))
     return planned
@@ -837,11 +879,14 @@ def apply_batch(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dic
                 name = _free_name(target.units, key_of, row["name"], package)
             staged = {**staged, "name": name}
         try:
-            if row["kind"] == "skill":
+            if row["kind"] == "schema":
+                installed = catalog.install(workspace, staged["filename"], staged["json_text"])
+                saved = {"name": f"{installed['id']}@{installed['version']}", "revision": None}
+            elif row["kind"] == "skill":
                 saved = vault.save_skill(workspace, vault_id, staged)["skill"]
             else:
                 saved = vault.save_tool(workspace, vault_id, staged)["tool"]
-        except (BiStoreError, RepoError) as failure:
+        except (BiStoreError, RepoError, catalog.SchemaInstallError) as failure:
             results.append({"id": item_id, "result": "failed", "message": failure.message})
             continue
         done = {"name": str(saved["name"]), "revision": saved["revision"], "at": now()}
