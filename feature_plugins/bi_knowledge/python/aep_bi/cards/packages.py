@@ -881,7 +881,10 @@ def apply_batch(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dic
         try:
             if row["kind"] == "schema":
                 installed = catalog.install(workspace, staged["filename"], staged["json_text"])
-                saved = {"name": f"{installed['id']}@{installed['version']}", "revision": None}
+                saved: dict[str, Any] = {
+                    "name": f"{installed['id']}@{installed['version']}",
+                    "revision": None,
+                }
             elif row["kind"] == "skill":
                 saved = vault.save_skill(workspace, vault_id, staged)["skill"]
             else:
