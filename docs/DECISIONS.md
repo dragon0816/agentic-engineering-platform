@@ -8149,3 +8149,19 @@ bot still go to the model; AI-suggest threshold 0.7 only matters if a generic BI
   Dropped: link/file detection on the conversation bot, domain buttons, AI suggestion,
   untapped/未分類 handling, defaults and `#tag`.
 
+
+### 2026-11-20 — Sidebar sections and agents bound to Telegram bots
+
+Owner chose: the Agent Web left sidebar becomes three collapsible sections that remember their
+state — 主功能 (Capabilities, Settings, Schedules, Knowledge, Tasks, Reviews, 記憶, Plugins),
+Sessions (「New session」 above the search box, then the list) and Agents (the main agent and the
+configured sub-agents, whether each is bound to a Telegram bot, and each agent's conversations:
+those opened in AEP, those arriving through its bot, and delegation records).
+AGENTS22 scoped consent 「同意開工」 for: (1) persistent named agents (AgentProfile-based) that own
+their conversations; (2) Telegram routing by bot — a bot bound to an agent sends its senders'
+messages to that agent's conversation (that agent's Skills/tools/model policy), a bot bound to a
+feature collector (BI domain) keeps today's collection behaviour; (3) one settings page
+Settings → Agents holding agents, their bot binding (token environment variable name only),
+allowed senders, and the BI collection bots (purpose 「BI 收集→領域」), replacing hand edits of
+telegram.json/host.json. The existing conversation bot and main agent behave as today.
+Not covered: permissions/approvals, multi-agent delegation semantics, model routing changes.
