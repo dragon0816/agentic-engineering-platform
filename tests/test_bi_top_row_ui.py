@@ -228,6 +228,19 @@ def test_the_row_is_first_on_every_tab_and_the_tabs_read_under_it(tmp_path: Path
             )
             page.shoot("build")
 
+            # The open menu makes the row some 550px high. Closed, the step bar sticks under
+            # the row's new height at once, not a frame later when a ResizeObserver reports
+            # (a busy CI runner read the step bar there, ~470px below the row).
+            page.run("document.getElementById('bi-b-v-menu').open = true")
+            row_h = "document.getElementById('bi-top-row').offsetHeight"
+            top_h = "parseFloat(getComputedStyle(el('kn-pane-bi')).getPropertyValue('--bi-top-h'))"
+            page.wait(f"{row_h} > 300 && {top_h} === {row_h}", 30)
+            heights = page.run_awaited(
+                "(() => { document.getElementById('bi-b-v-menu').open = false;"
+                f" return Promise.resolve().then(() => [{row_h}, {top_h}]); }})()"
+            )
+            assert heights[0] < 300 and heights[1] == heights[0], heights
+
             # -- scrolled, the step bar stays whole under the row (acceptance F4) ------------
             page.run("biScroller().scrollTop = 900")
             assert float(page.run("biScroller().scrollTop")) > 100
