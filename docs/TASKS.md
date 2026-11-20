@@ -5315,3 +5315,15 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   test_bot_identity, test_telegram_agent_bots, test_telegram_settings, test_telegram_ingress,
   test_agent_sidebar_ui (incl. a browser test filling the form as the owner did) pass (72);
   ruff, ruff format --check, mypy on changed files clean. Full suite not run.
+- [x] 2026-11-21 A BI collection bot also answers questions about its domain (owner decision
+  2026-11-21; branch bi-knowledge-round2-20261120; contract docs/CONTRACTS.md "Persistent agents
+  and agent bots", bullet "Collection bot questions"; decision docs/DECISIONS.md 2026-11-21).
+  Links and files are collected as before; plain words are one conversation turn offered only
+  `bi__query` scoped to the bound domain's dataset, with domain guidance, sessions
+  `telegram-collect-<name>-chat-<id>`, typing indicator; no query tool → clear Chinese message,
+  no model asked. Settings form gains one line saying so. Finding: agent bots are never offered
+  `bi__query` (a Host tool; their `allowed_tools` are their Skills' Skill tools only).
+  Verification: tests/test_telegram_collect_questions.py (new, 9), test_bi_inbox (incl. 2 new),
+  test_telegram_collect, test_telegram_agent_bots, test_telegram_ingress pass; ruff, ruff format
+  --check clean; mypy on changed files clean except pre-existing errors from another agent's
+  uncommitted aep_bi/cards/ai_runs.py change (AiRuntime `background` type). Full suite not run.

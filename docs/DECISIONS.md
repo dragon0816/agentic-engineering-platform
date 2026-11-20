@@ -8321,3 +8321,32 @@ convert, ingest and the test, step by step or automatically, and looks at the re
   command line is visible to other processes on the PC); asking the person to run `setx` in
   PowerShell by hand (the owner wants no PowerShell step).
 - Not a harness change (AGENTS.md rule 22): settings-page storage of a bot credential only.
+
+### 2026-11-21 — A BI collection bot also answers questions about its domain
+
+- **Owner decision 2026-11-21.** One Telegram bot per BI domain both collects and answers. A
+  link or a file sent to it is collected into the domain exactly as before (static links,
+  inbox, Ingest to 待審 at the domain's collect time). A plain text question (no link, no file,
+  not a `/` command, not a Reply to one of the bot's 「#12」 item messages) is answered from that
+  domain's BI cards. Nothing to configure: no agent, no Skills.
+- **How (within existing pieces):** the question is one ordinary Telegram conversation turn on
+  the Host's Agent (`TelegramIngress.answer_question` on a never-polled ingress with the bot's
+  token and senders), offered only `bi__query` with its dataset forced to the bound domain's
+  dataset, plus guidance to answer only from those cards and to say when they do not cover the
+  question. Admission, request ids, at-most-once and the model client are those of every
+  Telegram turn; sessions `telegram-collect-<name>-chat-<id>`; typing indicator while answering.
+  Without `bi__query` (BI Skill off / query not installed) the bot replies a clear Chinese
+  message and no model is asked. A message with a link and words is collected only (kept simple).
+  Plain words are no longer stored as a text source.
+- **Why:** the owner sent a Threads link to an agent bot (@aep_knowledge_bot, Skill
+  engineering/bi-knowledge) and got "I can't access that Threads link"; agent bots only converse,
+  and their turns are offered only their Skills' installed Skill tools, so a Host tool such as
+  `bi__query` is never offered to them (docs/CONTRACTS.md "Persistent agents and agent bots",
+  Turn scope).
+- **Rejected alternatives:** an agent bot that also collects links (mixes a conversation agent
+  with the inbox's at-most-once collection path and its per-domain binding); keeping two separate
+  bots per domain, one collecting and one answering (more tokens and bindings for the person, and
+  the same domain scope configured twice). Agent bots are unchanged.
+- Not a harness change (AGENTS.md rule 22): a channel feature using the existing conversation
+  turn, tool narrowing and turn-scoped Host tools. Contract: docs/CONTRACTS.md "Persistent agents
+  and agent bots", bullet "Collection bot questions".

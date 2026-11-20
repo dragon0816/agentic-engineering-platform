@@ -5714,6 +5714,27 @@ Tests: `tests/test_agents_settings.py`, `tests/test_telegram_agent_bots.py`,
 - **Applying.** After a save the bots are rebuilt on the kept conversation-bot ingress and the
   polling loop restarts only once no Telegram turn or flow runs on any bot (`reload`: `waiting`,
   `applying`, `applied`, `not_running`, `failed`); no Agent Web restart.
+- **Collection bot questions (owner decision 2026-11-21).** A `TelegramCollector` sends to the
+  feature's `telegram_item` (collected, reply unchanged) a message with a link or a file, a `/`
+  command, or a Reply whose quoted text has `#<n>` (one of the bot's own item messages). Any other
+  words are a question (`telegram_collect.is_question`): `features.FeatureSet.telegram_question(item,
+  host, gateway)` returns `TelegramQuestion {tools: HostTool[], guidance}`, a `TelegramAnswer` (BI:
+  `UNBOUND`), or None. With tools, the collector's never-polled `asker` (`TelegramIngress` built by
+  `attach_telegram_bots` with the bot's token and senders, `session_prefix`
+  `telegram-collect-<name>`) runs `answer_question`: one `LocalAgent.converse` turn with
+  `allowed_tools` = those tool names, the guidance as `persona_guidance` and the tools offered via
+  `turn_host_tools` (they replace the Host's tools of the same name); request ids, admission,
+  at-most-once and the model client as any Telegram turn; no commands, flows or Workflows; the reply
+  is sent as text by the collection bot (files and buttons are not sent); typing indicator while it
+  runs. Sessions `telegram-collect-<name>-chat-<id>`. BI (`aep_bi.inbox.bot.Bot.question`): only
+  `bi__query`, its `dataset` forced to the bound domain's dataset (the card `domain` filter is left
+  to the model), guidance "answer only from this domain's BI cards; say when they do not cover it;
+  you cannot open links". No `bi__query` (BI Skill off or `bi-cards/query` not installed) →
+  `NO_QUERY_TOOL`; no asker or feature → `NO_ANSWERS`; no model → `AGENT_BOT_NO_MODEL`; no model is
+  asked in any of these. A message with a link and words is collected and not answered. Plain words
+  are no longer stored as a text source. Agent bots are unchanged and are not offered `bi__query`
+  (a Host tool; see Turn scope above). Tests: `tests/test_telegram_collect_questions.py`,
+  `tests/test_bi_inbox.py` (questions).
 
 ## Coding change at scale
 
