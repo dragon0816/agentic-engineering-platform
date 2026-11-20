@@ -69,6 +69,7 @@ from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, MARKET_M
 from capabilities.script_tools import load_script_tools
 from capabilities.workflow_author.review import rendered as review_rendered
 from channels import telegram_collect
+from channels.telegram import AGENT_CHANNEL_PREFIX, TelegramIngressConfig
 from channels.telegram_flow import is_run_word
 from common.action_cards import CARD_KEY, card_in
 from common.assets import AssetIdentity, Owner, WorkflowManifest
@@ -102,6 +103,17 @@ from host_runtime import (
 from host_runtime import authoring_browser_preflight_budget as preflight_budget
 from host_runtime.agent_mail import AgentMail
 from host_runtime.agent_mode import AgentMode
+from host_runtime.agents_settings import (
+    AgentForm,
+    AgentSettingsError,
+    CollectionBotForm,
+    agents_view,
+    delete_agent,
+    delete_collection_bot,
+    save_agent,
+    save_collection_bot,
+    telegram_file,
+)
 from host_runtime.answers import readable, run_cards, run_follow_up
 from host_runtime.assistant_tools import AssistantTools, assistant_token
 from host_runtime.assistant_tools import handle as assistant_handle
@@ -195,7 +207,13 @@ from host_runtime.experience_review import (
     run_review,
 )
 from host_runtime.gateway_link import explain_model_failure, timeout_reply
-from host_runtime.host import HostRuntime, build_telegram, choice_sources, load_authorization
+from host_runtime.host import (
+    HostRuntime,
+    attach_telegram_bots,
+    build_telegram,
+    choice_sources,
+    load_authorization,
+)
 from host_runtime.identity_presets import IdentityPresets
 from host_runtime.jev_shadow import SHADOW_LOG_FILE
 from host_runtime.knowledge_harness import (
@@ -215,6 +233,12 @@ from host_runtime.memory_page import GET_ROUTES as MEMORY_PAGE_GET_ROUTES
 from host_runtime.memory_page import POST_ROUTES as MEMORY_PAGE_POST_ROUTES
 from host_runtime.memory_page import MemoryPage
 from host_runtime.memory_why import MemoryWhy, memory_used_in
+from host_runtime.persistent_agents import (
+    MAIN_AGENT,
+    AgentStore,
+    converse_options,
+    delegation_entries,
+)
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.personal_memory import ROUTES as MEMORY_ROUTES
 from host_runtime.personal_memory import PersonalMemory, memory_in, preferences_in
@@ -317,6 +341,7 @@ from llm_gateway.config import GatewayConfigError
 from llm_gateway.config import load_settings as load_gateway_settings
 from memory.service import MemoryServiceError
 from models.contracts import ModelMessage
+from models.credentials import EnvironmentCredentials
 from models.selection import (
     NOT_APPROVED,
     SelectableModelClient,
@@ -655,6 +680,10 @@ def _search_snippet(record: ConversationRecord, wanted: str) -> str:
     return ""
 
 
+#: How often a waiting bot reload checks whether Telegram work has ended.
+BOT_RELOAD_POLL_S = 1.0
+
+
 class AgentWeb:
     """What the pages ask for, with no HTTP in it.
 
@@ -719,6 +748,9 @@ class AgentWeb:
         self.schedule_loop: Any = None
         # Telegram polling inside this process; replaced when its settings change.
         self.telegram_loop: ResidentTelegram | None = None
+        # Settings → Agents bot reloads (owner consent 2026-11-20).
+        self._bots_reload = "idle"
+        self._bots_generation = 0
         self.feedback_sync: Any = None
         self.knowledge_harness = KnowledgeHarness(runtime, namespace)
         self.user_environment = windows_user_environment
@@ -1187,7 +1219,7 @@ class AgentWeb:
             self.runtime.agent.converse(
                 request,
                 history,
-                persona_guidance=self.persona.load().prompt_guidance(),
+                **self._converse_options(request),
                 max_history_messages=context_settings.recent_messages,
             )
         )
@@ -2649,6 +2681,8 @@ class AgentWeb:
         """Poll with the host's current Telegram ingress, if it has one."""
         if self.runtime.telegram is not None:
             self.runtime.telegram.cards = self
+            for bot in self.runtime.telegram.agent_bots:
+                bot.cards = self
             # Collection bots to their feature plugins (owner consent 2026-11-20).
             telegram_collect.attach(self.runtime.telegram.collectors, features.active(), self)
             self.telegram_loop = ResidentTelegram(self.runtime.telegram)
@@ -2700,6 +2734,124 @@ class AgentWeb:
 
             threading.Thread(target=swap, name="telegram-swap", daemon=True).start()
         return {"ok": True, "restart_required": False, "telegram": self.telegram_settings()}
+
+    # -- Settings → Agents (owner consent 2026-11-20) ------------------------
+
+    def agent_settings(self) -> dict[str, Any]:
+        """The main agent, the sub-agents with their bot, and the collection bots."""
+        ingress = self.runtime.telegram
+        loop = self.telegram_loop
+        polled: dict[str, Any] = {}
+        if ingress is not None:
+            polled.update({c.name: c for c in ingress.collectors})
+            polled.update(
+                {b.channel.removeprefix(AGENT_CHANNEL_PREFIX): b for b in ingress.agent_bots}
+            )
+
+        def running(name: str) -> dict[str, Any]:
+            bot = polled.get(name)
+            problem = None if bot is None else bot.problem
+            return {
+                "running": bot is not None and loop is not None and loop.running,
+                "problem": None if problem is None else problem.code,
+            }
+
+        view = agents_view(self.runtime.config, self.runtime.layout, running=running)
+        view["writable"] = self.config_path is not None
+        view["reload"] = self._bots_reload
+        return view
+
+    def agent_settings_action(self, path: str, body: object) -> dict[str, Any]:
+        """Save or delete an agent or a collection bot, then reload the bots."""
+        if self.config_path is None:
+            return {"ok": False, "code": "settings_read_only"}
+        data = body if isinstance(body, dict) else {}
+        actor = self.runtime.actor
+        with self._one_at_a_time:
+            try:
+                config = None
+                if path == "/api/settings/agents":
+                    _, config = save_agent(
+                        self.config_path,
+                        self.runtime.layout,
+                        AgentForm.model_validate(data),
+                        default_actor=actor,
+                    )
+                elif path == "/api/settings/agents/delete":
+                    if not delete_agent(self.runtime.layout, str(data.get("id") or "")):
+                        return {"ok": False, "code": "agent_unknown"}
+                elif path == "/api/settings/collection-bots":
+                    config = save_collection_bot(
+                        self.config_path,
+                        self.runtime.layout,
+                        CollectionBotForm.model_validate(data),
+                        default_actor=actor,
+                    )
+                elif not delete_collection_bot(self.runtime.layout, str(data.get("name") or "")):
+                    return {"ok": False, "code": "bot_unknown"}
+            except AgentSettingsError as error:
+                return {"ok": False, "code": str(error)}
+            except (ValueError, TypeError):
+                return {"ok": False, "code": "agent_settings_invalid"}
+            except OSError:
+                return {"ok": False, "code": "agent_settings_unwritable"}
+            if config is not None:
+                self.runtime.config = config
+        self.reload_telegram_bots()
+        return self.agent_settings()
+
+    def reload_telegram_bots(self) -> None:
+        """Apply saved bot settings without restarting Agent Web (owner consent
+        2026-11-20). The conversation bot's ingress is kept (its chats' history and
+        open flows stay); its collection and agent bots are rebuilt and the polling
+        loop restarts only once no Telegram turn or question flow is running on any
+        bot (AGENTS rule 19). `_bots_reload`: `idle` (nothing saved yet), `waiting`
+        (applies when the running work ends), `applying`, `applied`,
+        `not_running` (no conversation bot to poll beside) or `failed`."""
+        ingress = self.runtime.telegram
+        if ingress is None:
+            self._bots_reload = "not_running"
+            return
+        self._bots_generation += 1
+        generation = self._bots_generation
+        self._bots_reload = "waiting" if ingress.activity() else "applying"
+
+        def apply() -> None:
+            while ingress.activity():
+                if generation != self._bots_generation:
+                    return  # a newer save took over
+                time.sleep(BOT_RELOAD_POLL_S)
+            if generation != self._bots_generation or self.runtime.telegram is not ingress:
+                return
+            self._bots_reload = "applying"
+            try:
+                path = telegram_file(self.runtime.layout)
+                if path is None:
+                    raise ValueError("telegram_not_configured")
+                ingress_config = TelegramIngressConfig.model_validate_json(
+                    path.read_text(encoding="utf-8-sig")
+                )
+                config = self.runtime.config
+                resolver = (
+                    EnvironmentCredentials(config.credential_environment())
+                    if isinstance(ingress._resolver, EnvironmentCredentials)
+                    else ingress._resolver
+                )
+            except (OSError, ValueError):
+                self._bots_reload = "failed"
+                return
+            previous, self.telegram_loop = self.telegram_loop, None
+            if previous is not None:
+                previous.stop()
+            try:
+                attach_telegram_bots(config, self.runtime.layout, ingress, ingress_config, resolver)
+                self._bots_reload = "applied"
+            except (OSError, ValueError):
+                self._bots_reload = "failed"
+            if self.runtime.telegram is ingress:
+                self.start_telegram()
+
+        threading.Thread(target=apply, name="telegram-bots-reload", daemon=True).start()
 
     def update_persona_settings(self, request: AgentPersonaUpdateRequest) -> dict[str, Any]:
         """Save local presentation guidance without changing runtime authority."""
@@ -2894,6 +3046,7 @@ class AgentWeb:
                     "messages": len(item.messages),
                     "backend": item.backend,
                     "source": item.source,
+                    "agent": item.agent,
                 }
                 for item in records
             ],
@@ -3092,17 +3245,122 @@ class AgentWeb:
             self._update_card_message(session_id, card)
         return shown
 
-    def create_conversation(self) -> dict[str, Any]:
+    def create_conversation(self, agent: str | None = None) -> dict[str, Any]:
+        """A new Agent Web conversation; with `agent`, one owned by that persistent
+        sub-agent (owner consent 2026-11-20), whose turns use its Skills."""
+        if agent is not None and self.agent_store().get(agent) is None:
+            return {"ok": False, "code": "agent_unknown"}
         now = datetime.now(UTC)
         record = ConversationRecord(
             session_id=f"conversation-{uuid.uuid4().hex}",
             actor=self.runtime.actor,
             title="New conversation",
+            agent=agent,
             created_at=now,
             updated_at=now,
         )
         created = self.runtime.state.create_conversation(record)
         return {"conversation": json.loads(created.model_dump_json())}
+
+    # -- Persistent agents (owner consent 2026-11-20) -----------------------
+
+    def agent_store(self) -> AgentStore:
+        return AgentStore(self.runtime.layout.workspace_root)
+
+    def _converse_options(self, request: LocalAgentRequest) -> dict[str, Any]:
+        """`LocalAgent.converse` options of an Agent Web turn: the persona, and for
+        a conversation a sub-agent owns, its Skills' tools and its purpose. A
+        conversation whose agent was deleted gets no tools (fail closed)."""
+        persona = self.persona.load().prompt_guidance()
+        record = (
+            None
+            if request.session_id is None
+            else self.runtime.state.conversation(request.session_id, self.runtime.actor)
+        )
+        if record is None or record.agent is None:
+            return {"persona_guidance": persona}
+        agent = self.agent_store().get(record.agent)
+        if agent is None:
+            return {"persona_guidance": persona, "allowed_tools": frozenset()}
+        context = RequestContext(
+            trace=request.trace,
+            actor=request.actor,
+            namespace=request.namespace,
+            message=request.message,
+            channel=request.ingress,
+            session_id=request.session_id,
+        )
+        options = converse_options(agent, self.runtime.agent.gateway.skill_tools(context))
+        options["persona_guidance"] = "\n\n".join(
+            part for part in (options["persona_guidance"], persona) if part
+        )
+        return options
+
+    def agents_overview(self) -> dict[str, Any]:
+        """The sidebar's Agents section: the main agent and each sub-agent with
+        whether a Telegram bot is bound, and each sub-agent's conversations (opened
+        here, arrived through its bot) and the delegation records (multi-agent V1)
+        of its AgentProfile, which are read-only."""
+        state = self.runtime.state
+        actor = self.runtime.actor
+        records = (
+            *state.conversations(actor, limit=100),
+            *state.conversations(actor, limit=100, source="telegram"),
+        )
+        try:
+            telegram_path = telegram_file(self.runtime.layout)
+            telegram = (
+                None
+                if telegram_path is None
+                else TelegramIngressConfig.model_validate_json(
+                    telegram_path.read_text(encoding="utf-8-sig")
+                )
+            )
+        except (OSError, ValueError):
+            telegram = None
+        bound = {} if telegram is None else {bot.agent: bot for bot in telegram.agent_bots}
+        agents: list[dict[str, Any]] = [
+            {
+                "id": MAIN_AGENT,
+                "name": self.persona.load().name,
+                "main": True,
+                "bot": None
+                if telegram is None
+                else {"enabled": self.runtime.layout.telegram.is_file()},
+                "conversations": [],
+            }
+        ]
+        for agent in self.agent_store().agents():
+            bot = bound.get(agent.id)
+            owned = sorted(
+                (item for item in records if item.agent == agent.id),
+                key=lambda item: item.updated_at,
+                reverse=True,
+            )
+            entries: list[dict[str, Any]] = [
+                {
+                    "kind": "conversation",
+                    "session_id": item.session_id,
+                    "title": item.title,
+                    "source": item.source,
+                    "updated_at": item.updated_at.isoformat(),
+                    "messages": len(item.messages),
+                }
+                for item in owned
+            ]
+            if agent.profile is not None:
+                entries += delegation_entries(records, agent.profile)
+            agents.append(
+                {
+                    "id": agent.id,
+                    "name": agent.name,
+                    "purpose": agent.purpose,
+                    "main": False,
+                    "bot": None if bot is None else {"enabled": bot.enabled},
+                    "conversations": entries,
+                }
+            )
+        return {"ok": True, "agents": agents}
 
     def delete_conversation(self, request: ConversationDeleteRequest) -> dict[str, Any]:
         item = ConversationDeleteRequest.model_validate(request)
@@ -3897,7 +4155,7 @@ class AgentWeb:
                         self.runtime.agent.converse(
                             local,
                             history,
-                            persona_guidance=self.persona.load().prompt_guidance(),
+                            **self._converse_options(local),
                             max_history_messages=context_settings.recent_messages,
                         )
                     )
@@ -6645,6 +6903,10 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.gateway_settings())
         elif parsed.path == "/api/settings/multi-agent":
             self._json(200, web.multi_agent_settings())
+        elif parsed.path == "/api/settings/agents":
+            self._json(200, web.agent_settings())
+        elif parsed.path == "/api/agents":
+            self._json(200, web.agents_overview())
         elif parsed.path == "/api/settings":
             self._json(200, web.settings())
         elif parsed.path == "/api/avatars":
@@ -6753,6 +7015,10 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/settings/gateway",
             "/api/settings/telegram",
             "/api/settings/multi-agent",
+            "/api/settings/agents",
+            "/api/settings/agents/delete",
+            "/api/settings/collection-bots",
+            "/api/settings/collection-bots/delete",
             "/api/mcp/save",
             "/api/mcp/delete",
             "/api/mcp/reconnect",
@@ -6949,6 +7215,15 @@ class _Handler(BaseHTTPRequestHandler):
             result = self.server.web.mcp_action(path.rsplit("/", 1)[1], body)
             self._json(200 if result.get("ok") else 409, result)
             return
+        if path in (
+            "/api/settings/agents",
+            "/api/settings/agents/delete",
+            "/api/settings/collection-bots",
+            "/api/settings/collection-bots/delete",
+        ):
+            result = self.server.web.agent_settings_action(path, body)
+            self._json(200 if result.get("ok") else 409, result)
+            return
         if path == "/api/settings/telegram":
             try:
                 telegram = TelegramSettingsForm.model_validate(body)
@@ -7050,11 +7325,12 @@ class _Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/conversations":
             try:
-                ConversationCreateRequest.model_validate(body)
+                creation = ConversationCreateRequest.model_validate(body)
             except (ValueError, TypeError):
                 self._json(400, {"error": "conversation creation requires an empty request"})
                 return
-            self._json(201, self.server.web.create_conversation())
+            created = self.server.web.create_conversation(creation.agent)
+            self._json(201 if "conversation" in created else 409, created)
             return
         if path == "/api/conversations/delete":
             try:

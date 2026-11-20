@@ -5178,3 +5178,13 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   description (docstring) and needs_rewrite. Tests: tests/test_bi_packages.py,
   tests/test_bi_packages_ui.py; contract in docs/CONTRACTS.md. Not done: analysis packs inside a
   package, Shared Platform publishing of packages (out of scope by owner choice).
+- [x] 2026-11-20 Agent Web sidebar sections and agents bound to Telegram bots (owner consent
+  docs/DECISIONS.md 2026-11-20; branch agents-sidebar-20261120): sidebar 主功能 / Sessions /
+  Agents, collapsible and remembered per browser; persistent sub-agents (agents.json: name,
+  purpose, Skills, model_policy "session", optional AgentProfile link); Settings → Agents for
+  agents, their bot (token variable name only, pasted token refused), senders, on/off, and the BI
+  collection bots; agent bots (`telegram.json` `agent_bots`) feed the agent's own conversations
+  (its Skills' tools and purpose) and reply through themselves; bot changes apply live once no
+  Telegram turn/flow runs. Tests: tests/test_agent_sidebar_ui.py, tests/test_agents_settings.py,
+  tests/test_telegram_agent_bots.py. Contract: docs/CONTRACTS.md "Persistent agents and agent
+  bots". Owner page review pending; then the broad -n 4 run.

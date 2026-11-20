@@ -1650,18 +1650,72 @@ def build_telegram(
     ingress.approvals = approvals
     ingress.session_artifacts = session_artifacts
     ingress.history = history
-    # Collection bots (owner consent 2026-11-20): one whose token name the host
-    # does not map is left out, so it can never stop the conversation bot.
+    attach_telegram_bots(config, layout, ingress, ingress_config, resolver)
+    return ingress
+
+
+def attach_telegram_bots(
+    config: CompanyHostConfiguration,
+    layout: HostLayout,
+    ingress: TelegramIngress,
+    ingress_config: TelegramIngressConfig,
+    resolver: CredentialResolver,
+) -> None:
+    """Give the conversation bot its collection bots and its agent bots (owner
+    consent 2026-11-20). A bot whose token name the host does not map, a bot
+    switched off and an agent bot whose agent no longer exists are left out, so
+    none of them can stop the conversation bot. Each agent bot is a
+    `TelegramIngress` of its own on the same Agent, with its own cursor
+    (`telegram-agent.<name>`), sessions and stored history."""
     from channels import telegram_collect
+    from channels.telegram import AGENT_CHANNEL_PREFIX
+    from host_runtime.persistent_agents import AgentStore
 
     usable = set(config.credential_environment())
+
+    def mapped(name: str) -> bool:
+        return not isinstance(resolver, EnvironmentCredentials) or name in usable
+
     ingress.collectors = [
         collector
-        for collector in telegram_collect.build(ingress_config, agent.state, resolver)
-        if not isinstance(resolver, EnvironmentCredentials)
-        or collector.bot.credential.name in usable
+        for collector in telegram_collect.build(ingress_config, ingress.agent.state, resolver)
+        if mapped(collector.bot.credential.name)
     ]
-    return ingress
+    store = AgentStore(layout.workspace_root)
+    known = {item.id for item in store.agents()}
+    bots: list[TelegramIngress] = []
+    for bot in ingress_config.agent_bots:
+        if not bot.enabled or bot.agent not in known or not mapped(bot.credential.name):
+            continue
+        own = TelegramIngress(
+            TelegramIngressConfig(
+                credential=bot.credential,
+                bridge_id=ingress_config.bridge_id,
+                namespace=ingress_config.namespace,
+                senders=bot.senders,
+                poll_timeout_seconds=ingress_config.poll_timeout_seconds,
+                api_base=ingress_config.api_base,
+            ),
+            ingress.agent,
+            resolver,
+            attachments=ingress.attachments,
+            uploads=ingress.uploads,
+            presets=ingress.presets,
+            voice=ingress.voice,
+        )
+        own.owner_agent = bot.agent
+        own.agent_store = store
+        own.channel = AGENT_CHANNEL_PREFIX + bot.name
+        own.explain_failure = ingress.explain_failure
+        own.approvals = ingress.approvals
+        own.session_artifacts = ingress.session_artifacts
+        own.history = (
+            None
+            if ingress.history is None
+            else TelegramHistory(ingress.history.state, ingress.history.actor, agent=bot.agent)
+        )
+        bots.append(own)
+    ingress.agent_bots = bots
 
 
 def build_platform(

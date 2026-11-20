@@ -54,9 +54,13 @@ class TelegramHistory:
         actor: Symbol,
         *,
         clock: Callable[[], datetime] = _now,
+        agent: str | None = None,
     ) -> None:
         self.state = state
         self.actor = actor
+        # The persistent sub-agent whose bot these chats came through (owner
+        # consent 2026-11-20); None: the main agent's conversation bot.
+        self.agent = agent
         self._clock = clock
         self._key: str | None = None
         # Chats whose next turn starts a record, after `/new`. Memory only: a
@@ -66,7 +70,13 @@ class TelegramHistory:
     def _prefix(self, chat_id: int, sender_id: int) -> str:
         if self._key is None:
             self._key = self.state.host_key("telegram_history")
-        digest = hashlib.sha256(f"{self._key}:{chat_id}:{sender_id}".encode()).hexdigest()
+        # The main bot's records keep their ids; an agent bot's chats are apart.
+        chat = (
+            f"{chat_id}:{sender_id}"
+            if self.agent is None
+            else f"{self.agent}:{chat_id}:{sender_id}"
+        )
+        digest = hashlib.sha256(f"{self._key}:{chat}".encode()).hexdigest()
         return f"{TELEGRAM_SESSION_PREFIX}{digest[:16]}-"
 
     def start_new(self, chat_id: int, sender_id: int) -> None:
@@ -96,6 +106,7 @@ class TelegramHistory:
             actor=self.actor,
             title=said[:MAX_TITLE_CHARS] + ("…" if len(said) > MAX_TITLE_CHARS else ""),
             source="telegram",
+            agent=self.agent,
             created_at=now,
             updated_at=now,
         )

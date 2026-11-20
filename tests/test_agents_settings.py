@@ -1,0 +1,348 @@
+"""Settings → Agents and agent-owned conversations (owner consent 2026-11-20,
+docs/DECISIONS.md "Sidebar sections and agents bound to Telegram bots").
+
+The page keeps persistent sub-agents (AgentProfile fields V1 allows), binds each to a
+Telegram bot by the *name* of the environment variable holding its token (a pasted
+token is refused and nothing is written), lists the BI collection bots as 「BI 收集→領域」,
+and writes `agents.json`, `telegram.json` and `host.json` atomically, keeping every
+other field. Saved bots apply without a restart, but only once no Telegram turn or
+flow is running (AGENTS rule 19). A conversation a sub-agent owns offers only its
+Skills' tools; the sidebar's Agents list shows its conversations and the delegation
+records of its profile.
+"""
+
+from __future__ import annotations
+
+import json
+import time
+from collections.abc import Iterator
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
+
+import pytest
+from test_host_wiring import host_json, ready
+from test_telegram_settings import TOKEN, Store, _update
+
+from common.execution import TraceIdentifiers
+from common.local_agent import LocalAgentRequest
+from host_runtime import web as web_module
+from host_runtime.agents_settings import (
+    AgentForm,
+    AgentSettingsError,
+    CollectionBotForm,
+    agents_view,
+    checked_variable,
+    save_agent,
+    save_collection_bot,
+)
+from host_runtime.conversations import ConversationMessage, ConversationRecord
+from host_runtime.host import HostRuntime, build_runtime
+from host_runtime.persistent_agents import AgentStore, PersistentAgent
+from host_runtime.web import AgentWeb
+
+
+@pytest.fixture
+def web(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[AgentWeb]:
+    monkeypatch.setattr(web_module, "BOT_RELOAD_POLL_S", 0.02)
+    monkeypatch.setenv("AEP_TELEGRAM_BOT_TOKEN", TOKEN)
+    config, layout = ready(tmp_path)
+    path = host_json(tmp_path, config)
+    with build_runtime(config, layout=layout) as runtime:
+        page = AgentWeb(runtime, config_path=path)
+        page.user_environment = Store()
+        page.started = 0  # type: ignore[attr-defined]
+
+        def started() -> None:  # no network in tests
+            page.started += 1  # type: ignore[attr-defined]
+
+        monkeypatch.setattr(page, "start_telegram", started)
+        yield page
+
+
+def _telegram_on(page: AgentWeb) -> None:
+    assert page.update_telegram_settings(_update())["ok"] is True
+
+
+def _wait(page: AgentWeb, state: str) -> None:
+    deadline = time.monotonic() + 10
+    while page._bots_reload != state and time.monotonic() < deadline:
+        time.sleep(0.02)
+    assert page._bots_reload == state
+
+
+def _agent(**changes: Any) -> dict[str, Any]:
+    return {
+        "name": "Sales",
+        "purpose": "Answer shipment questions.",
+        "skills": [],
+        "bot": {
+            "variable": "AEP_TG_SALES",
+            "senders": [{"sender_id": 42, "actor": ""}],
+            "enabled": True,
+        },
+        **changes,
+    }
+
+
+def test_a_pasted_token_is_refused_and_a_name_is_kept() -> None:
+    for pasted in (TOKEN, f"bot{TOKEN}", f" {TOKEN} ", "123:abc"):
+        with pytest.raises(AgentSettingsError, match="bot_token_value_refused"):
+            checked_variable(pasted)
+    with pytest.raises(AgentSettingsError, match="bot_variable_invalid"):
+        checked_variable("not a name")
+    assert checked_variable("  AEP_TG_SALES ") == "AEP_TG_SALES"
+
+
+def test_agents_are_created_edited_bound_and_deleted_on_the_page(web: AgentWeb) -> None:
+    _telegram_on(web)
+    runtime = web.runtime
+    assert runtime.telegram is not None
+    view = web.agent_settings_action("/api/settings/agents", _agent())
+    assert view["ok"] is True, view
+    (agent,) = view["agents"]
+    assert agent["name"] == "Sales" and agent["model_policy"] == "session"
+    bot = agent["bot"]
+    assert bot["variable"] == "AEP_TG_SALES" and bot["token_present"] is False
+    assert bot["senders"] == [{"sender_id": 42, "actor": runtime.actor}]
+    # host.json maps the bot's secret to the variable; telegram.json holds the bot.
+    assert runtime.config.credential_environment()[f"telegram_agent_{agent['id']}"] == (
+        "AEP_TG_SALES"
+    )
+    saved = json.loads(runtime.layout.telegram.read_text(encoding="utf-8"))
+    assert saved["agent_bots"][0]["agent"] == agent["id"]
+    assert saved["senders"] == [{"sender_id": 42, "actor": "engineer"}]  # kept
+    # Applied without a restart: the conversation bot now polls the agent bot too.
+    _wait(web, "applied")
+    assert [b.owner_agent for b in runtime.telegram.agent_bots] == [agent["id"]]
+    assert web.started >= 1  # type: ignore[attr-defined]
+
+    # Edit: off, renamed; the record is the same agent.
+    edited = web.agent_settings_action(
+        "/api/settings/agents",
+        _agent(id=agent["id"], name="Sales desk", bot={**_agent()["bot"], "enabled": False}),
+    )
+    assert [a["name"] for a in edited["agents"]] == ["Sales desk"]
+    assert edited["agents"][0]["bot"]["enabled"] is False
+    _wait(web, "applied")
+    assert runtime.telegram.agent_bots == []
+
+    deleted = web.agent_settings_action("/api/settings/agents/delete", {"id": agent["id"]})
+    assert deleted["agents"] == []
+    assert "agent_bots" not in json.loads(runtime.layout.telegram.read_text(encoding="utf-8"))
+    assert web.agent_settings_action("/api/settings/agents/delete", {"id": agent["id"]}) == {
+        "ok": False,
+        "code": "agent_unknown",
+    }
+
+
+def test_a_pasted_token_writes_nothing(web: AgentWeb) -> None:
+    _telegram_on(web)
+    layout = web.runtime.layout
+    assert web.config_path is not None
+    files = [web.config_path, layout.telegram, layout.workspace_root / "agents.json"]
+    before = [p.read_bytes() if p.exists() else None for p in files]
+    refused = web.agent_settings_action(
+        "/api/settings/agents", _agent(bot={"variable": TOKEN, "senders": []})
+    )
+    assert refused == {"ok": False, "code": "bot_token_value_refused"}
+    assert [p.read_bytes() if p.exists() else None for p in files] == before
+    for written in files:
+        if written.exists():
+            assert TOKEN.split(":")[1] not in written.read_text(encoding="utf-8")
+
+
+def test_a_bot_needs_the_conversation_bot_configured_first(web: AgentWeb) -> None:
+    refused = web.agent_settings_action("/api/settings/agents", _agent())
+    assert refused == {"ok": False, "code": "telegram_not_configured"}
+    plain = web.agent_settings_action("/api/settings/agents", _agent(bot=None))
+    assert plain["ok"] is True and plain["agents"][0]["bot"] is None
+    assert plain["reload"] == "not_running"
+
+
+def test_writes_are_atomic_and_keep_every_other_field(tmp_path: Path) -> None:
+    config, layout = ready(tmp_path)
+    path = host_json(tmp_path, config)
+    raw_host = json.loads(path.read_text(encoding="utf-8"))
+    layout.telegram.write_text(
+        json.dumps(
+            {
+                "credential": {"name": "telegram_bot"},
+                "bridge_id": config.device.bridge_id,
+                "namespace": "engineering",
+                "senders": [{"sender_id": 7, "actor": "engineer"}],
+                "poll_timeout_seconds": 10,
+            }
+        ),
+        encoding="utf-8",
+    )
+    (layout.workspace_root / "agents.json").write_text(
+        json.dumps({"note": "kept", "agents": [{"id": "ops", "name": "Ops", "colour": "red"}]}),
+        encoding="utf-8",
+    )
+    agent, updated = save_agent(
+        path,
+        layout,
+        AgentForm.model_validate(_agent(id="ops", name="Ops desk")),
+        default_actor="engineer",
+    )
+    assert agent.name == "Ops desk" and updated is not None
+    stored = json.loads((layout.workspace_root / "agents.json").read_text(encoding="utf-8"))
+    assert stored["note"] == "kept" and stored["agents"][0]["colour"] == "red"
+    assert stored["agents"][0]["name"] == "Ops desk"
+    host = json.loads(path.read_text(encoding="utf-8"))
+    assert {k: v for k, v in host.items() if k != "credentials"} == {
+        k: v for k, v in raw_host.items() if k != "credentials"
+    }
+    telegram = json.loads(layout.telegram.read_text(encoding="utf-8"))
+    assert telegram["poll_timeout_seconds"] == 10
+    assert telegram["senders"] == [{"sender_id": 7, "actor": "engineer"}]
+    # Nothing half-written is left beside them.
+    assert not list(tmp_path.rglob("*.part"))
+
+
+def test_collection_bots_are_listed_and_edited_here(tmp_path: Path) -> None:
+    config, layout = ready(tmp_path)
+    path = host_json(tmp_path, config)
+    layout.telegram.write_text(
+        json.dumps(
+            {
+                "credential": {"name": "telegram_bot"},
+                "bridge_id": config.device.bridge_id,
+                "namespace": "engineering",
+                "collection_bots": [
+                    {
+                        "name": "bi_aidc",
+                        "credential": {"name": "telegram_bi_aidc"},
+                        "feature": "bi-knowledge",
+                        "target": "aidc",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    form: dict[str, Any] = {
+        "name": "bi_aidc",
+        "target": "aidc",
+        "bot": {"variable": "AEP_TG_BI_AIDC", "senders": [{"sender_id": 5, "actor": ""}]},
+    }
+    updated = save_collection_bot(
+        path, layout, CollectionBotForm.model_validate(form), default_actor="engineer"
+    )
+    # The existing bot keeps its secret name; only its variable is mapped.
+    assert updated.credential_environment()["telegram_bi_aidc"] == "AEP_TG_BI_AIDC"
+    added = save_collection_bot(
+        path,
+        layout,
+        CollectionBotForm.model_validate(
+            {**form, "name": "bi_rf", "target": "RF", "bot": {**form["bot"], "enabled": False}}
+        ),
+        default_actor="engineer",
+    )
+    view = agents_view(added, layout)
+    bots = {bot["name"]: bot for bot in view["collection_bots"]}
+    assert bots["bi_aidc"]["purpose"] == "BI 收集→aidc"
+    assert bots["bi_rf"]["purpose"] == "BI 收集→RF" and bots["bi_rf"]["enabled"] is False
+    assert bots["bi_aidc"]["senders"] == [{"sender_id": 5, "actor": "engineer"}]
+    assert TOKEN not in json.dumps(view)
+    with pytest.raises(AgentSettingsError, match="bot_token_value_refused"):
+        save_collection_bot(
+            path,
+            layout,
+            CollectionBotForm.model_validate({**form, "bot": {"variable": TOKEN}}),
+            default_actor="engineer",
+        )
+
+
+def test_a_reload_waits_while_a_telegram_turn_runs(web: AgentWeb) -> None:
+    _telegram_on(web)
+    ingress = web.runtime.telegram
+    assert ingress is not None
+    ingress._busy[(1, 1)] = datetime.now(UTC)
+    before = web.started  # type: ignore[attr-defined]
+    view = web.agent_settings_action("/api/settings/agents", _agent())
+    assert view["reload"] == "waiting"
+    time.sleep(0.2)
+    assert web._bots_reload == "waiting" and web.started == before  # type: ignore[attr-defined]
+    assert ingress.agent_bots == []
+    del ingress._busy[(1, 1)]
+    _wait(web, "applied")
+    assert len(ingress.agent_bots) == 1
+
+
+def _request(runtime: HostRuntime, session: str) -> LocalAgentRequest:
+    return LocalAgentRequest(
+        ingress="local",
+        actor=runtime.actor,
+        bridge_id=runtime.config.device.bridge_id,
+        namespace="engineering",
+        message="hi",
+        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+        session_id=session,
+    )
+
+
+def test_a_conversation_an_agent_owns_offers_only_its_skills(web: AgentWeb) -> None:
+    runtime = web.runtime
+    assert web.create_conversation("nobody") == {"ok": False, "code": "agent_unknown"}
+    AgentStore(runtime.layout.workspace_root).save(
+        PersistentAgent(id="sales", name="Sales", purpose="Shipments.", skills=())
+    )
+    created = web.create_conversation("sales")["conversation"]
+    assert created["agent"] == "sales"
+    options = web._converse_options(_request(runtime, created["session_id"]))
+    assert options["allowed_tools"] == frozenset()
+    assert 'You are "Sales"' in options["persona_guidance"]
+    main = web.create_conversation()["conversation"]
+    assert "allowed_tools" not in web._converse_options(_request(runtime, main["session_id"]))
+    listed = {item["session_id"]: item["agent"] for item in web.conversations()["conversations"]}
+    assert listed[created["session_id"]] == "sales" and listed[main["session_id"]] is None
+
+
+def test_the_agents_list_shows_each_agents_conversations_and_delegations(web: AgentWeb) -> None:
+    runtime = web.runtime
+    AgentStore(runtime.layout.workspace_root).save(
+        PersistentAgent(
+            id="sales", name="Sales", profile="engineering/sales-profile@1.0.0", skills=()
+        )
+    )
+    owned = web.create_conversation("sales")["conversation"]
+    now = datetime.now(UTC)
+    runtime.state.create_conversation(
+        ConversationRecord(
+            session_id="conversation-parent",
+            actor=runtime.actor,
+            title="Parent turn",
+            created_at=now,
+            updated_at=now,
+            messages=(
+                ConversationMessage(
+                    message_id="m1", role="user", text="ask", created_at=now, status="submitted"
+                ),
+                ConversationMessage(
+                    message_id="m2",
+                    role="assistant",
+                    text="done",
+                    created_at=now,
+                    status="answered",
+                    delegations=(
+                        {
+                            "profile": "engineering/sales-profile@1.0.0",
+                            "status": "succeeded",
+                            "summary": "Three shipments found.",
+                        },
+                    ),
+                ),
+            ),
+        )
+    )
+    overview = web.agents_overview()
+    main, sales = overview["agents"]
+    assert main["main"] is True and main["id"] == "main"
+    assert sales["id"] == "sales" and sales["bot"] is None
+    kinds = [(e["kind"], e["session_id"]) for e in sales["conversations"]]
+    assert ("conversation", owned["session_id"]) in kinds
+    assert ("delegation", "conversation-parent") in kinds
+    (delegation,) = [e for e in sales["conversations"] if e["kind"] == "delegation"]
+    assert delegation["summary"] == "Three shipments found."
