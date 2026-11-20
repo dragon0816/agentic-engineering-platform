@@ -66,6 +66,7 @@ from aep_bi.cards import (
     methods,
     migrate,
     names,
+    packages,
     page_import,
     quality,
     questions_session,
@@ -98,12 +99,16 @@ from aep_bi.cards.store import (
 )
 from aep_bi.host import bi_atlas_embed, bi_atlas_import, bi_subscriptions, bi_vaults_api
 from aep_bi.inbox import api as inbox_api
+from knowledge.repo.repository import RepoError
 from models.approved import ApprovedModelClient
 
 #: A CSV travels in the JSON body; larger than an ordinary request.
 MAX_BI_BODY_BYTES = 8 * 1024 * 1024
 #: A source file as the raw body, so its size is not bound by the limit above.
 SOURCE_UPLOAD = "/api/bi/sources/upload"
+#: A skill/tool package: a zip uploaded as the raw body, and one exported as bytes.
+PACKAGE_UPLOAD = re.compile(r"^/api/bi/vaults/(?P<vault>[^/]+)/package-upload$")
+PACKAGE_EXPORT = re.compile(r"^/api/bi/vaults/(?P<vault>[^/]+)/package-export$")
 
 Answer = tuple[int, dict[str, Any]]
 
@@ -142,6 +147,54 @@ def _upload_source(handler: Any, parsed: Any) -> None:
         handler._json(400, {"ok": False, "code": failure.code, "message": failure.message})
         return
     handler._json(200, {"ok": True, "source": source})
+
+
+def _package_failure(failure: BiStoreError | RepoError) -> Answer:
+    status = 404 if failure.code == "vault_unknown" else 400
+    return _error(status, failure.code, failure.message)
+
+
+def _upload_package(handler: Any, parsed: Any, vault_id: str) -> None:
+    """「匯入」 of a zip: its bytes as the raw body (≤ `packages.MAX_ZIP_BYTES`), answered
+    with the preview and its token. Nothing in it runs."""
+    query = {k: v[0] for k, v in parse_qs(parsed.query).items() if v}
+    try:
+        length = int(handler.headers.get("Content-Length") or "0")
+    except ValueError:
+        handler._refuse_unread(400, {"ok": False, "code": "length_invalid", "message": "缺少長度"})
+        return
+    if length > packages.MAX_ZIP_BYTES:
+        handler._refuse_unread(
+            413,
+            {
+                "ok": False,
+                "code": "too_large",
+                "message": f"zip 太大（上限 {packages.MAX_ZIP_BYTES // 1048576} MB）",
+            },
+        )
+        return
+    data = handler.rfile.read(length)
+    workspace = handler.server.web.runtime.layout.workspace_root
+    try:
+        preview = packages.preview_zip(
+            workspace, vault_id, query.get("home"), data, str(query.get("name") or "")
+        )
+    except (BiStoreError, RepoError) as failure:
+        handler._json(*_package_failure(failure))
+        return
+    handler._json(200, {"ok": True, **preview})
+
+
+def _export_package(handler: Any, parsed: Any, vault_id: str) -> None:
+    """「匯出」: the working domain's package as `application/zip` bytes."""
+    query = {k: v[0] for k, v in parse_qs(parsed.query).items() if v}
+    workspace = handler.server.web.runtime.layout.workspace_root
+    try:
+        data = packages.export_zip(workspace, vault_id, query.get("home"), query.get("items"))
+    except (BiStoreError, RepoError) as failure:
+        handler._json(*_package_failure(failure))
+        return
+    handler._send(200, data, "application/zip")
 
 
 def _dataset(value: Any) -> str:
@@ -1633,6 +1686,14 @@ def handle(handler: Any, method: str, parsed: ParseResult) -> bool:
         return False
     if method == "POST" and parsed.path == SOURCE_UPLOAD:
         _upload_source(handler, parsed)
+        return True
+    upload = PACKAGE_UPLOAD.match(parsed.path) if method == "POST" else None
+    if upload is not None:
+        _upload_package(handler, parsed, upload.group("vault"))
+        return True
+    export = PACKAGE_EXPORT.match(parsed.path) if method == "GET" else None
+    if export is not None:
+        _export_package(handler, parsed, export.group("vault"))
         return True
     body: Any = None
     if method == "POST":

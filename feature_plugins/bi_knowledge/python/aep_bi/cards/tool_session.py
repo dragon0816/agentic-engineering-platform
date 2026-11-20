@@ -58,6 +58,15 @@ Answer with one JSON object only:
  "notes": ["short notes on assumptions or limits"]}"""
 
 
+#: Said when the editor's code is not a tool yet, e.g. a command-line script from a package.
+REWRITE_HINT = """The code in the editor does not follow the tool contract yet; it is probably a
+command-line script imported from a package (argparse, sys.argv, sibling modules, YAML, writing
+cards itself). Rewrite it into one self-contained program that reads the global INPUT and writes
+CSV or Markdown files into OUTPUT: keep its parsing logic, drop the command line, sibling-module
+imports and anything that writes cards, and use only what the sandbox has. Ask in "needs" only
+for what the script itself does not tell you."""
+
+
 def _vault_id(dataset: str) -> str:
     if not dataset.startswith(VAULT_PREFIX):
         raise BiStoreError("not_a_vault", "資料處理程式只在共用知識庫（vault）裡")
@@ -129,6 +138,9 @@ def _context(workspace: Path, dataset: str, home: str, code: str, samples: str, 
         "This domain's saved tools: " + ("、".join(tools) or "(none)"),
         sessions.fenced("The code in the person's editor now:", code or "(empty)"),
     ]
+    if code.strip() and check_code(code):
+        # A command-line script imported from a package (「需改寫」, owner 2026-11-19).
+        parts.append(REWRITE_HINT)
     if samples:
         parts.append(samples)
     if isinstance(trial, dict) and trial:
