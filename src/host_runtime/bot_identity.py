@@ -26,6 +26,10 @@ LOOKUP_TIMEOUT_S = 3.0
 #: A bot's identity rarely changes; a failure is retried soon.
 KNOWN_TTL_S = 3600.0
 FAILED_TTL_S = 60.0
+#: After a save, how long a failed lookup is not cached: the bots are being
+#: rebuilt and a first connection may be slow, so each page refresh asks again
+#: instead of showing a stale 「連不上 Telegram」 for a minute (owner 2026-11-21).
+SETTLING_S = 60.0
 
 
 def _default_transport() -> Transport:
@@ -55,11 +59,14 @@ class BotIdentities:
         self._clock = clock
         self._lock = threading.Lock()
         self._cache: dict[str, tuple[float, dict[str, Any]]] = {}
+        self._settling_until = 0.0
 
     def clear(self) -> None:
-        """Forget every identity (settings were saved; tokens may have changed)."""
+        """Forget every identity (settings were saved; tokens may have changed).
+        For `SETTLING_S` afterwards a failed lookup is not cached."""
         with self._lock:
             self._cache.clear()
+            self._settling_until = self._clock() + SETTLING_S
 
     def identities(
         self, tokens: Sequence[str], *, api_base: str = DEFAULT_API_BASE
@@ -69,13 +76,19 @@ class BotIdentities:
         if missing:
             with ThreadPoolExecutor(max_workers=min(8, len(missing))) as pool:
                 found = list(pool.map(lambda token: self._lookup(api_base, token), missing))
+            fresh = dict(zip(missing, found, strict=True))
             with self._lock:
-                for token, identity in zip(missing, found, strict=True):
+                settling = self._clock() < self._settling_until
+                for token, identity in fresh.items():
+                    if identity["problem"] and settling:
+                        continue  # served this once, asked again next time
                     ttl = FAILED_TTL_S if identity["problem"] else KNOWN_TTL_S
                     self._cache[fingerprint(api_base, token)] = (self._clock() + ttl, identity)
+        else:
+            fresh = {}
         out = []
         for token in tokens:
-            known = self._cached(api_base, token) if token else None
+            known = fresh.get(token) or (self._cached(api_base, token) if token else None)
             out.append(
                 dict(known)
                 if known is not None

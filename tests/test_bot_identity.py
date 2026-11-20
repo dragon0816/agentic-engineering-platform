@@ -69,6 +69,33 @@ def test_identities_are_cached_by_fingerprint_and_failures_are_codes() -> None:
     assert BotIdentities(Down()).identities([TOKEN])[0]["problem"] == "network_unreachable"
 
 
+def test_right_after_a_save_a_failed_lookup_is_asked_again(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Owner 2026-11-21: a bot saved a moment ago showed 「連不上 Telegram」 for a
+    minute although getMe answered in 0.9 s: the first, slow lookup's failure was
+    cached. After a save (`clear`) failures are served once, not cached."""
+    now = [100.0]
+    fake = FakeTelegram({})
+    identities = BotIdentities(fake, clock=lambda: now[0])
+    # Outside a settling window a failure is cached as before.
+    assert identities.identities([TOKEN])[0]["problem"] == "token_invalid"
+    identities.identities([TOKEN])
+    assert fake.calls == 1
+    identities.clear()
+    assert identities.identities([TOKEN])[0]["problem"] == "token_invalid"
+    fake.bots[TOKEN] = ("aep_knowledge_bot", "Knowledge")  # Telegram reachable now
+    assert identities.identities([TOKEN])[0]["username"] == "aep_knowledge_bot"
+    assert fake.calls == 3
+    identities.identities([TOKEN])
+    assert fake.calls == 3  # a success is cached
+    # Once settled, failures are cached again.
+    now[0] += bot_identity.SETTLING_S + 1
+    assert identities.identities(["1:other"])[0]["problem"] == "token_invalid"
+    identities.identities(["1:other"])
+    assert fake.calls == 4
+
+
 def test_settings_and_sidebar_show_each_bots_username_never_its_token(
     web: AgentWeb,  # noqa: F811
     monkeypatch: pytest.MonkeyPatch,
