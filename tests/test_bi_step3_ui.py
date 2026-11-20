@@ -67,16 +67,21 @@ def test_step_3(
         # -- two collapsed sections with a status; the button in view without opening them --
         page.wait("document.getElementById('bi-b-an-state').textContent.includes('個分析')")
         page.wait("document.getElementById('bi-b-bench-state').textContent.includes('題')")
-        assert page.run("!document.getElementById('bi-b-bench').open")
-        assert page.run("!document.getElementById('bi-b-an').open")
+        # One tab at a time (owner 2026-11-20): Benchmark in front, the Dashboard one tab away.
+        page.wait("document.getElementById('bi-b-bench').open")
+        assert page.run("document.getElementById('bi-b-an').classList.contains('bi-tab-off')")
         run_button = "document.getElementById('bi-b-bench-run')"
         assert page.run(f"{run_button}.closest('details') === null")
         assert page.run(f"{run_button}.offsetHeight >= 52")
-        assert page.run(
-            f"{run_button}.getBoundingClientRect().top < innerHeight"
-            f" && {run_button}.getBoundingClientRect().top"
-            " > document.getElementById('bi-b-an').getBoundingClientRect().bottom"
-        )
+        assert page.run(f"{run_button}.getBoundingClientRect().top < innerHeight")
+        # Benchmark and Dashboard are tabs of the main area (owner 2026-11-20); the share step
+        # is not in the main area but opens beside it.
+        page.wait("!document.getElementById('bi-b-tabs').hidden")
+        tabs = page.run("[...document.querySelectorAll('#bi-b-tabs [role=tab]')]"
+                        ".map((t) => t.textContent)")  # fmt: skip
+        assert tabs == ["Benchmark", "Dashboard"]
+        assert page.run("document.getElementById('bi-b-ver').offsetParent === null")
+        assert page.run("!document.getElementById('bi-b-ver-bar').hidden")
         page.see("bi-b-run-why", "還沒有測試題")
         assert page.run(f"{run_button}.disabled")
         page.shoot("collapsed")
@@ -144,28 +149,47 @@ def test_step_3(
         page.click("#bi-b-bq-form button[type=submit]")
         page.see("bi-b-bq-list", "FicTech 是什麼")
 
-        # -- the run, and the results beside the Dashboard, with nothing opened ---------------
+        # -- the run: a bar beside the button, the numbers on top, details beside the page ---
         page.run("document.getElementById('bi-b-bench').open = false")
         page.wait(f"!{run_button}.disabled")
         page.click("#bi-b-bench-run")
         page.see("bi-b-bench-report", "完成")
-        assert page.run("document.querySelector('#bi-b-bench-report table') !== null")
+        page.wait("!document.getElementById('bi-b-run-progress').hidden")
+        page.see("bi-b-run-text", "完成：1/1 題")
+        assert page.run("document.getElementById('bi-b-run-progress').parentElement.id") == (
+            "bi-b-run"
+        ), "the bar is beside 跑測試"
+        page.see("bi-b-bench-sum", "通過率")
+        summary = page.text_of("bi-b-bench-sum")
+        assert "題數1" in summary and "最近一次" in summary
+        assert page.run("document.querySelector('#bi-b-bench-report table') === null")
+        page.click_text("#bi-b-bench-report", "看每題結果")
+        page.wait("sideHas('bi-bench-detail')")
+        page.see("extra-panel-bi-bench-detail", "FicTech 是什麼")
+        page.shoot("results-and-details")
+        page.click("#bi-b-tab-dash-tab")
         page.wait(
             "document.getElementById('bi-b-test-dash').contains("
             "document.getElementById('bi-dash-sections'))"
         )
         page.wait("document.getElementById('bi-dash-sections').children.length > 0")
-        assert page.run(
-            "document.getElementById('bi-b-test-dash').getBoundingClientRect().left"
-            " >= document.getElementById('bi-b-bench-report').getBoundingClientRect().right"
-        )
+        assert page.run("document.getElementById('bi-b-bench-report').offsetParent === null")
         assert page.run("document.getElementById('bi-b-to-dash') === null")
-        # The commit decision stays right below.
+        page.shoot("dashboard-tab")
+        page.click("#bi-b-tab-bench-tab")
+        # 看歷史紀錄 and 分享 open as tabs of the side area.
+        page.click("#bi-b-hist-open")
+        page.wait("sideHas('bi-history')")
+        page.click("#bi-b-ver-open")
+        page.wait("document.getElementById('bi-b-ver').closest('.extra-panel') !== null")
         assert page.run(
-            "document.getElementById('bi-b-ver').getBoundingClientRect().top"
-            " >= document.getElementById('bi-b-test-results').getBoundingClientRect().bottom"
-        )
-        page.shoot("results-and-dashboard")
+            "[...document.querySelectorAll('#extra-tabs [role=tab]')].map((t) => t.textContent)"
+        ) == [  # fmt: skip
+            "Benchmark 每題結果",
+            "歷史紀錄",
+            "分享",
+        ]
+        page.shoot("side-tabs")
 
         # -- delete added questions: one or several ticked, at once; past results stay ------
         page.run("document.getElementById('bi-b-bench').open = true")
@@ -185,7 +209,7 @@ def test_step_3(
         page.see("bi-b-bench-state", "2 題")
         assert all(q["question"] != "FicTech 是什麼？" for q in _questions(workspace).values())
         # The run's result for it stays readable, marked as deleted.
-        page.see("bi-b-bench-report", "FicTech 是什麼？（已刪除）")
+        page.see("extra-panel-bi-bench-detail", "FicTech 是什麼？（已刪除）")
         # Pending until commit and push, like any edit.
         page.see("bi-b-ver-pending", "測試題")
         page.run("document.querySelectorAll('#bi-b-bq-list .bi-bq-tick').forEach((t) => t.click())")
@@ -194,11 +218,12 @@ def test_step_3(
         page.see("bi-b-bench-state", "0 題")
         assert _questions(workspace) == {}
         assert page.run("document.getElementById('bi-b-bq-bulk') === null")
-        page.see("bi-b-bench-report", "（已刪除）")
+        page.see("extra-panel-bi-bench-detail", "（已刪除）")
         page.run("document.getElementById('bi-b-bench').open = false")
+        page.run("['bi-bench-detail', 'bi-history', 'bi-share'].forEach(sideClose)")
 
         # -- a card opens beside what it came from: no tab change, same scroll ---------------
-        page.run("document.getElementById('bi-b-ver').scrollIntoView()")
+        page.run("document.getElementById('bi-b-run').scrollIntoView()")
         before = float(page.run(SCROLL))
         assert before > 0
         card = BiStore(workspace, DATASET).card_rows()[0]
@@ -209,7 +234,7 @@ def test_step_3(
         assert page.run("document.getElementById('bi-card-peek').contains("
                         "document.getElementById('bi-detail'))")  # fmt: skip
         assert page.run(
-            "document.getElementById('bi-b-ver').getBoundingClientRect().right"
+            "document.getElementById('bi-b-run').getBoundingClientRect().right"
             " <= document.getElementById('bi-card-peek').getBoundingClientRect().left"
         )
         page.shoot("card-beside")
@@ -217,7 +242,7 @@ def test_step_3(
         assert page.run("document.getElementById('bi-card-peek').hidden")
         assert abs(float(page.run(SCROLL)) - before) < 400  # the page gave back its room
         # In the cards tab, the pane is the one beside its list again.
-        page.run("document.getElementById('bi-b-ver').scrollIntoView()")
+        page.run("document.getElementById('bi-b-run').scrollIntoView()")
         before = float(page.run(SCROLL))
 
         # -- a jump that stays has a way back to the same step and scroll position -----------
@@ -257,6 +282,7 @@ def test_step_3(
         # -- each analysis follows the working domain: no 領域 per analysis, rarer actions in 更多
         # This vault's domains are library entries (no card domain), and its analyses narrow only
         # by the card domain: each says so instead of offering a run into an empty chart.
+        page.click("#bi-b-tab-dash-tab")
         page.run("document.getElementById('bi-b-an').open = true")
         rows = "[...document.querySelectorAll('#bi-b-an-list tbody tr:not(.bi-detail-row)')]"
         page.wait(f"{rows}.length > 0")
@@ -272,3 +298,33 @@ def test_step_3(
         assert page.run("biDashDomain()") == page.run(
             "biScopeDomain() || biScope().split('/').pop()"
         )
+
+        # -- every analysis action works (owner 2026-11-20: 加到這個領域 and 刪除 did nothing) ---
+        buttons = "[...document.querySelectorAll('#bi-b-an-list button')]"
+        add = f"{buttons}.find((b) => b.textContent === '加到這個領域')"
+        if page.run(f"Boolean({add})"):
+            label = page.run(f"{add}.getAttribute('aria-label')")
+            page.run(f"{add}.click()")
+            page.notice("已改 Dashboard 的順序")
+            gone = f"!{buttons}.some((b) => b.getAttribute('aria-label') === {label!r})"
+            page.wait(gone)
+        count = int(page.run(f"{rows}.length"))
+        page.run(f"{buttons}.find((b) => b.textContent === '刪除').click()")
+        page.notice("已刪除分析")
+        page.wait(f"{rows}.length === {count - 1}")
+
+        # -- the AI sessions of the step open as tabs of the side area -----------------------
+        tabs = "[...document.querySelectorAll('#extra-tabs [role=tab]')].map((t) => t.textContent)"
+        page.run(f"{buttons}.find((b) => b.textContent === '和 AI 一起修改').click()")
+        page.wait(f"{tabs}.includes('和 AI 修改分析')")
+        assert page.run("document.getElementById('bi-ai').closest('.extra-panel') !== null")
+        page.run(f"{buttons}.find((b) => b.textContent === '和 AI 一起修改').click()")
+        assert page.run(f"{tabs}.length") == 1, "the same session again only focuses its tab"
+        page.shoot("analysis-ai-tab")
+        page.click("#bi-b-tab-bench-tab")
+        page.run("document.getElementById('bi-b-bench').open = true")
+        page.click("#bi-b-qa-open")
+        page.wait(f"{tabs}.includes('和 AI 出測試題')")
+        page.click("#bi-ai-close")
+        page.wait("document.getElementById('extra-area').hidden")
+        assert page.run("document.getElementById('bi-ai').closest('#kn-pane-bi') !== null")

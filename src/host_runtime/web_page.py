@@ -64,6 +64,33 @@ body {
   font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 .app-shell { display: grid; grid-template-columns: 280px minmax(0, 1fr); min-height: 100vh; }
+/* 附加資料顯示區 (owner 2026-11-20): a third column of browser-like tabs, there only while
+   something is open in it. Any page opens items with sideOpen() and closes them with
+   sideClose(). */
+.app-shell.extra-open { grid-template-columns: 280px minmax(0, 1fr) minmax(320px, 38vw); }
+.extra-area { position: sticky; top: 0; height: 100vh; min-width: 0; display: flex;
+  flex-direction: column; border-left: 1px solid var(--line); background: var(--panel); }
+.extra-tabs { display: flex; gap: 2px; padding: 6px 6px 0; overflow-x: auto;
+  border-bottom: 1px solid var(--line); flex: 0 0 auto; }
+.extra-tab { display: inline-flex; align-items: center; max-width: 240px; flex: 0 0 auto;
+  border: 1px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; }
+.extra-tab.on { background: var(--bg); border-color: var(--line);
+  box-shadow: inset 0 3px 0 var(--accent); }
+.extra-tab-label { min-height: 36px; padding: 0 6px 0 12px; border: 0; background: none;
+  color: inherit; font: inherit; font-size: 13px; cursor: pointer; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+.extra-tab.on .extra-tab-label { font-weight: 600; }
+.extra-tab-close { min-width: 28px; min-height: 28px; margin-right: 4px; border: 0;
+  border-radius: 6px; background: none; color: var(--dim); font: inherit; cursor: pointer; }
+.extra-tab-close:hover, .extra-tab-close:focus-visible { background: var(--line);
+  color: var(--ink); }
+.extra-body { flex: 1 1 auto; min-height: 0; overflow: auto; background: var(--bg); }
+.extra-panel { padding: 10px 12px; min-height: 100%; }
+.extra-panel.flush { padding: 0; }
+.extra-panel iframe { display: block; width: 100%; height: calc(100vh - 110px); border: 0;
+  background: #fff; }
+.extra-file-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.extra-file-bar .viewer-button { min-height: 32px; }
 .sidebar {
   position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh;
   min-width: 0; padding: 16px 12px; border-right: 1px solid var(--line);
@@ -906,7 +933,10 @@ tr:last-child td { border-bottom: none; }
   .market-tools { grid-template-columns: minmax(220px, 1fr) minmax(150px, .55fr); }
 }
 @media (max-width: 760px) {
-  .app-shell { grid-template-columns: 1fr; }
+  .app-shell, .app-shell.extra-open { grid-template-columns: 1fr; }
+  .extra-area { position: fixed; top: auto; left: 0; right: 0; bottom: 0; height: 62vh;
+    border-left: 0; border-top: 1px solid var(--line); box-shadow: 0 -4px 16px #0003;
+    z-index: 55; }
   .sidebar { position: static; height: auto; max-height: 48vh; border-right: 0;
     border-bottom: 1px solid var(--line); }
   .session-list { max-height: 180px; }
@@ -1970,6 +2000,10 @@ tr:last-child td { border-bottom: none; }
   </section>
 </main>
 </div>
+<aside class="extra-area" id="extra-area" aria-label="附加資料" hidden>
+  <div class="extra-tabs" id="extra-tabs" role="tablist" aria-label="附加資料的分頁"></div>
+  <div class="extra-body" id="extra-body"></div>
+</aside>
 </div>
 
 <aside class="file-viewer" id="file-viewer" role="dialog" aria-modal="true"
@@ -2629,7 +2663,161 @@ async function showViewer() {
   }
 }
 
+// -- 附加資料顯示區: the side area's tabs (owner 2026-11-20) --------------------------------
+// One small API for every page and plugin:
+//   sideOpen({id, title, render(panel) | url | file + session | element, onClose, refresh})
+//     opens an item as a tab, or focuses the tab already open with that id (refresh fills it
+//     again); returns the tab's panel element.
+//   sideClose(id), sideFocus(id), sideHas(id).
+// `element` moves an existing node of the page into the tab and puts it back where it was when
+// the tab closes, so a page's own panel keeps its ids and listeners. Nothing is persisted.
+const sideItems = new Map();
+let sideActive = null;
+
+function sideSlug(id) { return String(id).replace(/[^A-Za-z0-9_-]+/g, "-").slice(0, 60); }
+
+function sideShow() {
+  const open = sideItems.size > 0;
+  el("extra-area").hidden = !open;
+  document.querySelector(".app-shell").classList.toggle("extra-open", open);
+}
+
+function sideFocus(id) {
+  const item = sideItems.get(String(id));
+  if (!item) return false;
+  sideActive = item.id;
+  for (const other of sideItems.values()) {
+    const on = other === item;
+    other.tab.classList.toggle("on", on);
+    other.label.setAttribute("aria-selected", String(on));
+    other.label.tabIndex = on ? 0 : -1;
+    other.panel.hidden = !on;
+  }
+  sideShow();
+  item.tab.scrollIntoView({block: "nearest", inline: "nearest"});
+  return true;
+}
+
+async function sideFile(panel, session, file) {
+  // A generated or local file: html in the sandboxed frame, md rendered, csv as a table,
+  // pictures, and other text as code (the same readers as the file viewer).
+  const bar = document.createElement("div");
+  bar.className = "extra-file-bar";
+  bar.append(viewerButton("在瀏覽器開啟", () => openInBrowser(session, file)),
+    viewerButton("下載", () => downloadFile(session, file)));
+  const body = document.createElement("div");
+  panel.append(bar, body);
+  const kind = fileKind(file);
+  try {
+    if (kind === "html") {
+      body.append(sandboxFrame(await htmlViewUrl(session, file), file.filename));
+    } else if (kind === "image") {
+      const image = document.createElement("img");
+      image.alt = file.filename || ""; image.style.maxWidth = "100%";
+      image.src = URL.createObjectURL(await fetchFile(session, file));
+      body.append(image);
+    } else {
+      const source = await (await fetchFile(session, file)).text();
+      body.append(kind === "md" ? renderMarkdown(source)
+        : kind === "csv" ? csvTable(source) : codeView(source));
+    }
+  } catch (error) {
+    const note = document.createElement("p");
+    note.className = "viewer-note";
+    note.append(text((file.filename || "") + "：無法讀取（" + error.message + "）"));
+    body.replaceChildren(note);
+  }
+}
+
+function sideFill(item, spec) {
+  const panel = item.panel;
+  panel.replaceChildren();
+  panel.classList.toggle("flush", Boolean(spec.url || spec.flush));
+  if (spec.element) {
+    if (!item.home) {
+      item.home = {node: spec.element, parent: spec.element.parentNode,
+        next: spec.element.nextSibling};
+    }
+    panel.append(spec.element);
+  }
+  if (spec.render) spec.render(panel);
+  else if (spec.url) panel.append(sandboxFrame(spec.url, spec.title));
+  else if (spec.file) sideFile(panel, spec.session, spec.file);
+}
+
+function sideOpen(spec) {
+  const id = String(spec.id);
+  let item = sideItems.get(id);
+  if (!item) {
+    const tab = document.createElement("div");
+    tab.className = "extra-tab";
+    const label = document.createElement("button");
+    label.type = "button"; label.className = "extra-tab-label";
+    label.setAttribute("role", "tab"); label.id = "extra-tab-" + sideSlug(id);
+    const close = document.createElement("button");
+    close.type = "button"; close.className = "extra-tab-close"; close.textContent = "\u2715";
+    const panel = document.createElement("div");
+    panel.className = "extra-panel"; panel.id = "extra-panel-" + sideSlug(id);
+    panel.setAttribute("role", "tabpanel"); panel.setAttribute("aria-labelledby", label.id);
+    label.setAttribute("aria-controls", panel.id);
+    tab.append(label, close);
+    item = {id, spec, tab, label, close, panel, home: null};
+    label.addEventListener("click", () => sideFocus(id));
+    label.addEventListener("keydown", (event) => {
+      const step = {ArrowRight: 1, ArrowLeft: -1}[event.key];
+      if (!step) return;
+      event.preventDefault();
+      const ids = [...sideItems.keys()];
+      const next = ids[(ids.indexOf(id) + step + ids.length) % ids.length];
+      sideFocus(next); sideItems.get(next).label.focus();
+    });
+    close.addEventListener("click", () => sideClose(id));
+    el("extra-tabs").append(tab); el("extra-body").append(panel);
+    sideItems.set(id, item);
+    sideFill(item, spec);
+  } else if (spec.refresh) {
+    item.spec = {...item.spec, ...spec};
+    sideFill(item, item.spec);
+  }
+  if (spec.title) {
+    item.label.textContent = spec.title; item.label.title = spec.title;
+    item.close.setAttribute("aria-label", "關閉「" + spec.title + "」");
+  }
+  if (spec.onClose) item.spec.onClose = spec.onClose;
+  sideFocus(id);
+  return item.panel;
+}
+
+function sideClose(id) {
+  const item = sideItems.get(String(id));
+  if (!item) return false;
+  const ids = [...sideItems.keys()], at = ids.indexOf(item.id);
+  sideItems.delete(item.id);
+  if (item.home && item.home.parent) {
+    const {node, parent, next} = item.home;
+    parent.insertBefore(node, next && next.parentNode === parent ? next : null);
+  }
+  item.tab.remove(); item.panel.remove();
+  if (sideActive === item.id) {
+    sideActive = null;
+    const rest = [...sideItems.keys()];
+    if (rest.length) sideFocus(rest[Math.min(at, rest.length - 1)]);
+  }
+  sideShow();
+  if (item.spec.onClose) item.spec.onClose();
+  return true;
+}
+
+function sideHas(id) { return sideItems.has(String(id)); }
+
 function openFileViewer(session, file, returnTo) {
+  // Files open as a tab of the side area (owner 2026-11-20); the dialog below is kept for
+  // callers that ask for it by name.
+  sideOpen({id: "file:" + session + ":" + (file.path || file.filename), title: file.filename,
+    session, file});
+}
+
+function openFileDialog(session, file, returnTo) {
   viewer.session = session; viewer.file = file; viewer.text = null;
   viewer.returnTo = returnTo || document.activeElement;
   viewer.mode = viewerModes(fileKind(file))[0] || "preview";

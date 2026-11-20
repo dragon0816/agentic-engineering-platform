@@ -358,13 +358,18 @@ def test_step_3_edits_in_its_two_sections(ident: str, section: str) -> None:
     assert not _in_advanced(ident)
 
 
-def test_the_two_sections_are_collapsed_by_default() -> None:
+def test_the_two_sections_are_tabs_with_the_run_above_the_questions() -> None:
+    # Owner 2026-11-20: Benchmark and Dashboard are tabs of the main area; the numbers, then
+    # 跑測試 with its bar, sit above the questions so the button is in sight.
     for section in ("bi-b-bench", "bi-b-an"):
         assert f'<details id="{section}" class="card bi-sec" hidden>' in PAGE
     assert (
-        PAGE.index('id="bi-b-bench"')
-        < PAGE.index('id="bi-b-an"')
+        PAGE.index('id="bi-b-tabs"')
+        < PAGE.index('id="bi-b-bench-sum"')
         < PAGE.index('id="bi-b-bench-run"')
+        < PAGE.index('id="bi-b-run-progress"')
+        < PAGE.index('id="bi-b-bench"')
+        < PAGE.index('id="bi-b-an"')
     )
 
 
