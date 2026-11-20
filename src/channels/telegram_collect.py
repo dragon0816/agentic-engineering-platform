@@ -27,10 +27,13 @@ from pydantic import JsonValue
 
 from channels.telegram import (
     _FILE_PATH,
+    CHAT_ACTION_INTERVAL_SECONDS,
+    CHAT_ACTION_TIMEOUT_SECONDS,
     MAX_BACKOFF_SECONDS,
     POLL_MARGIN_SECONDS,
     SEEN_UPDATES,
     TELEGRAM_DOWNLOAD_BYTES,
+    ChatAction,
     TelegramCollectionBot,
     UnmappedSender,
     _parse,
@@ -57,6 +60,9 @@ CHANNEL_PREFIX = "telegram-collect."
 #: Said when a collection bot has nowhere to put what it got.
 NOT_CONNECTED = "這個 bot 目前沒有接上收集功能。"
 UNSUPPORTED = "這個 bot 只收連結、文字或檔案。"
+#: The immediate 「已收進」 needs no indicator: 「正在輸入…」 shows only when
+#: handling an item takes longer than this (owner 2026-11-20).
+CHAT_ACTION_DELAY_SECONDS = 1.0
 #: A file larger than this is refused before it is downloaded.
 MAX_FILE_BYTES = TELEGRAM_DOWNLOAD_BYTES
 
@@ -96,6 +102,8 @@ class TelegramCollector:
         # Where items go: the Host's features and its resident host object.
         self.feature_items: features.FeatureSet | None = None
         self.host: Any = None
+        self.chat_action_delay_s = CHAT_ACTION_DELAY_SECONDS
+        self.chat_action_interval_s = CHAT_ACTION_INTERVAL_SECONDS
 
     @property
     def name(self) -> str:
@@ -110,7 +118,9 @@ class TelegramCollector:
 
     # -- the wire --------------------------------------------------------------------------------
 
-    def _call(self, method: str, payload: Mapping[str, JsonValue]) -> tuple[int, bytes]:
+    def _call(
+        self, method: str, payload: Mapping[str, JsonValue], *, timeout_s: float | None = None
+    ) -> tuple[int, bytes]:
         token = self._resolver.resolve(self.bot.credential)
         url = f"{self.api_base}/bot{token}/{method}"
         del token
@@ -118,13 +128,29 @@ class TelegramCollector:
             url,
             json.dumps(dict(payload)).encode("utf-8"),
             {"Content-Type": "application/json"},
-            float(self.poll_timeout_seconds + POLL_MARGIN_SECONDS),
+            float(self.poll_timeout_seconds + POLL_MARGIN_SECONDS)
+            if timeout_s is None
+            else timeout_s,
         )
         try:
             body = b"".join(reply.chunks())
         finally:
             close_quietly(reply)
         return reply.status, body
+
+    def _typing(self, chat_id: int) -> None:
+        """One `sendChatAction`; a courtesy, so a failure is logged at debug only."""
+        try:
+            status, _ = self._call(
+                "sendChatAction",
+                {"chat_id": chat_id, "action": "typing"},
+                timeout_s=CHAT_ACTION_TIMEOUT_SECONDS,
+            )
+        except Exception as error:  # noqa: BLE001 - never in the item's way
+            _LOG.debug("Telegram collection bot %s: sendChatAction %s", self.name, describe(error))
+            return
+        if status != 200:
+            _LOG.debug("Telegram collection bot %s: sendChatAction %s", self.name, status)
 
     def _say(self, chat_id: int, text: str) -> bool:
         """Plain text in pieces Telegram accepts; False when a piece was refused."""
@@ -310,6 +336,11 @@ class TelegramCollector:
         if item is None:
             await asyncio.to_thread(self._say, update.chat_id, UNSUPPORTED)
             return "ignored"
+        typing = ChatAction(
+            partial(self._typing, update.chat_id),
+            self.chat_action_interval_s,
+            delay_s=self.chat_action_delay_s,
+        ).start()
         try:
             hooks = self.feature_items
             answer = (
@@ -318,9 +349,13 @@ class TelegramCollector:
                 else await asyncio.to_thread(hooks.telegram_item, item, self.host)
             )
         except Exception as error:  # noqa: BLE001 - one message never stops the bot
+            await typing.stop()
             _LOG.warning("Telegram collection bot %s: %s", self.name, type(error).__name__)
             await asyncio.to_thread(self._say, update.chat_id, "沒有收下：處理時發生錯誤。")
             return "failed"
+        finally:
+            # Stopped before the answer, so no indicator follows it.
+            await typing.stop()
         text = NOT_CONNECTED if answer is None else answer.text
         await asyncio.to_thread(self._say, update.chat_id, text)
         return "answered"

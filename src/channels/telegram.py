@@ -245,6 +245,15 @@ PROGRESS_REFRESH_SECONDS = 5.0
 STATUS_EDIT_INTERVAL_SECONDS = 1.0
 #: Longest a 429's `retry_after` may hold back the live status edits.
 MAX_STATUS_BACKOFF_S = 60.0
+#: Telegram shows a chat action ("typing…" under the bot's name) for about 5 s
+#: or until the bot's next message, so it is repeated this often while a
+#: request is handled (owner 2026-11-20).
+CHAT_ACTION_INTERVAL_SECONDS = 4.0
+#: Longest one `sendChatAction` may take: a courtesy, never a hold on a turn.
+CHAT_ACTION_TIMEOUT_SECONDS = 5.0
+#: Longest stopping the indicator waits for a call already on its way, so no
+#: action follows the reply; past it the reply goes out regardless.
+CHAT_ACTION_STOP_WAIT_SECONDS = 1.0
 _STEP_MARKS: dict[ToolProgressState, str] = {
     "running": "running…",
     "succeeded": "done",
@@ -871,6 +880,56 @@ def _handled(outcome: LocalAgentOutcome) -> bool:
     return False
 
 
+class ChatAction:
+    """Telegram's own activity indicator ("typing…" under the bot's name in the
+    chat header, `sendChatAction`) while a request is handled (owner
+    2026-11-20). `send` makes one call and never raises; it runs off the event
+    loop, first after `delay_s` (0: at once) and then every `interval_s` until
+    `stop`. `stop` waits briefly for a call already on its way, so no action
+    follows the reply, and the loop ends there: nothing is left running.
+    Presentation only: it changes no routing, reply or record."""
+
+    def __init__(
+        self, send: Callable[[], None], interval_s: float, *, delay_s: float = 0.0
+    ) -> None:
+        self._send = send
+        self._interval_s = interval_s
+        self._delay_s = delay_s
+        self._stopping = asyncio.Event()
+        self._task: asyncio.Task[None] | None = None
+
+    def start(self) -> "ChatAction":
+        self._task = asyncio.create_task(self._run())
+        return self
+
+    async def _run(self) -> None:
+        if self._delay_s > 0 and await self._stopped_within(self._delay_s):
+            return
+        while not self._stopping.is_set():
+            try:
+                await asyncio.to_thread(self._send)
+            except Exception as error:  # noqa: BLE001 - a courtesy never fails a turn
+                _LOG.debug("Telegram chat action failed: %s", describe(error))
+            if await self._stopped_within(self._interval_s):
+                return
+
+    async def _stopped_within(self, seconds: float) -> bool:
+        try:
+            await asyncio.wait_for(self._stopping.wait(), timeout=seconds)
+        except TimeoutError:
+            return False
+        return True
+
+    async def stop(self) -> None:
+        self._stopping.set()
+        task, self._task = self._task, None
+        if task is None:
+            return
+        done, _ = await asyncio.wait({task}, timeout=CHAT_ACTION_STOP_WAIT_SECONDS)
+        if not done:
+            task.cancel()
+
+
 class _Progress:
     """One "working on it" message per request, edited in place while the
     Agent works: how long it has taken and which skills it used, and for a
@@ -1070,6 +1129,7 @@ class TelegramIngress:
         self.problem: Failure | None = None
         self.progress_refresh_s = PROGRESS_REFRESH_SECONDS
         self.status_edit_interval_s = STATUS_EDIT_INTERVAL_SECONDS
+        self.chat_action_interval_s = CHAT_ACTION_INTERVAL_SECONDS
         # When each chat may next have its status message edited (monotonic).
         self._status_slots: dict[int, float] = {}
         self._histories: dict[tuple[int, int], list[ModelMessage]] = {}
@@ -1168,12 +1228,15 @@ class TelegramIngress:
         confirmed batch ended."""
         return self.agent.state.cursor(self.channel)
 
-    def _call(self, method: str, payload: Mapping[str, JsonValue]) -> tuple[int, bytes]:
+    def _call(
+        self, method: str, payload: Mapping[str, JsonValue], *, timeout_s: float | None = None
+    ) -> tuple[int, bytes]:
         """One Bot API call. The token is resolved here, used in the URL and
         dropped; nothing on this object ever holds it."""
         token = self._resolver.resolve(self.config.credential)
         url = f"{self.config.api_base}/bot{token}/{method}"
-        timeout_s = float(self.config.poll_timeout_seconds + POLL_MARGIN_SECONDS)
+        if timeout_s is None:
+            timeout_s = float(self.config.poll_timeout_seconds + POLL_MARGIN_SECONDS)
         reply = self._transport.send(
             url,
             json.dumps(dict(payload)).encode("utf-8"),
@@ -1266,7 +1329,19 @@ class TelegramIngress:
             updates.append(update)
         for update in updates:
             self._prompting.pop((update.chat_id, update.sender_id), None)
-            delivery = await self._deliver_guarded(update)
+            # 「正在輸入…」 under the bot's name while the update is handled
+            # (owner 2026-11-20); stopped before the reply, so none follows it.
+            # Not for an unmapped sender, who is never answered.
+            typing = (
+                None
+                if self.config.actor_for(update.sender_id) is None
+                else self._indicator(update.chat_id, "typing").start()
+            )
+            try:
+                delivery = await self._deliver_guarded(update)
+            finally:
+                if typing is not None:
+                    await typing.stop()
             if update.callback_id is not None:
                 await asyncio.to_thread(self._acknowledge, update.callback_id)
             if delivery.reply is not None:
@@ -1298,23 +1373,32 @@ class TelegramIngress:
                     # Telegram refusing (or never answering) gets here; an
                     # answer with no text was sent as a completion notice.
                     await asyncio.to_thread(self._reply, update.chat_id, UNDELIVERED_REPLY)
-                for photo in delivery.photos:
-                    await asyncio.to_thread(self._send_photo, update.chat_id, Path(photo))
-                for document in delivery.documents:
-                    await asyncio.to_thread(
-                        partial(self._send_photo, document=True), update.chat_id, Path(document)
-                    )
-                for produced in delivery.attached:
-                    path = Path(produced)
-                    await asyncio.to_thread(
-                        partial(
-                            self._send_photo,
-                            document=path.suffix.lower() not in PHOTO_SUFFIXES,
-                            caption=path.name,
-                        ),
-                        update.chat_id,
-                        path,
-                    )
+                # 「正在傳送檔案…」 while the files go out; the first is
+                # sent before any file, so it never lands after the last one.
+                uploading = await self._uploading(update.chat_id, delivery)
+                try:
+                    for photo in delivery.photos:
+                        await asyncio.to_thread(self._send_photo, update.chat_id, Path(photo))
+                    for document in delivery.documents:
+                        await asyncio.to_thread(
+                            partial(self._send_photo, document=True),
+                            update.chat_id,
+                            Path(document),
+                        )
+                    for produced in delivery.attached:
+                        path = Path(produced)
+                        await asyncio.to_thread(
+                            partial(
+                                self._send_photo,
+                                document=path.suffix.lower() not in PHOTO_SUFFIXES,
+                                caption=path.name,
+                            ),
+                            update.chat_id,
+                            path,
+                        )
+                finally:
+                    if uploading is not None:
+                        await uploading.stop()
                 delivery = delivery.model_copy(update={"replied": replied})
             deliveries.append(delivery)
         if highest is None or highest == offset:
@@ -1332,6 +1416,40 @@ class TelegramIngress:
                 next_offset=offset,
             )
         return TelegramPollResult(deliveries=tuple(deliveries), next_offset=highest)
+
+    def _indicator(self, chat_id: int, action: str, delay_s: float = 0.0) -> ChatAction:
+        interval = self.chat_action_interval_s
+        return ChatAction(
+            partial(self._send_chat_action, chat_id, action), interval, delay_s=delay_s
+        )
+
+    async def _uploading(self, chat_id: int, delivery: TelegramDelivery) -> ChatAction | None:
+        """The files' indicator: `upload_photo` when every file is a picture,
+        else `upload_document`; None when there are no files."""
+        paths = [*delivery.photos, *delivery.documents, *delivery.attached]
+        if not paths:
+            return None
+        pictures = not delivery.documents and all(
+            Path(path).suffix.lower() in PHOTO_SUFFIXES for path in paths
+        )
+        action = "upload_photo" if pictures else "upload_document"
+        await asyncio.to_thread(self._send_chat_action, chat_id, action)
+        return self._indicator(chat_id, action, self.chat_action_interval_s).start()
+
+    def _send_chat_action(self, chat_id: int, action: str) -> None:
+        """One `sendChatAction`. A courtesy: whatever goes wrong is logged at
+        debug and ignored, never retried and never in the turn's way."""
+        try:
+            status, body = self._call(
+                "sendChatAction",
+                {"chat_id": chat_id, "action": action},
+                timeout_s=CHAT_ACTION_TIMEOUT_SECONDS,
+            )
+        except Exception as error:  # noqa: BLE001 - a courtesy never fails a turn
+            _LOG.debug("Telegram sendChatAction failed: %s", describe(error))
+            return
+        if status != 200:
+            _LOG.debug("Telegram sendChatAction refused: %s %s", status, _refusal(body))
 
     def _remember(self, update_id: int) -> None:
         self._seen[update_id] = None

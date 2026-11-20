@@ -5188,3 +5188,11 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   Telegram turn/flow runs. Tests: tests/test_agent_sidebar_ui.py, tests/test_agents_settings.py,
   tests/test_telegram_agent_bots.py. Contract: docs/CONTRACTS.md "Persistent agents and agent
   bots". Owner page review pending; then the broad -n 4 run.
+- [x] 2026-11-20 Telegram activity indicator (owner 2026-11-20: 「正在輸入…」 under the bot's
+  name while AEP works; branch telegram-typing-20261120): `sendChatAction` `typing` from the
+  moment a mapped sender's update is accepted, every 4 s, stopped before the reply and after a
+  failure (no action after the reply, nothing left running); `upload_photo`/`upload_document`
+  while result files go out; agent bots the same; collection bots only past 1 s of handling;
+  failures logged at debug and ignored. Presentation only. Tests:
+  tests/test_telegram_typing.py; contract docs/CONTRACTS.md "Telegram ingress" (activity
+  indicator). Owner live check in Telegram pending.
