@@ -915,28 +915,6 @@ BI_PANE_HTML = r"""
             </div>
           <details class="bi-manage bi-adv" id="bi-b-adv-skills">
             <summary>進階：規則與程式</summary>
-            <div class="bi-step" id="bi-b-profile">
-              <h5>這個領域要哪些欄位（profile）</h5>
-              <p class="bi-meta" id="bi-b-pf-about">Profile 是一個領域的欄位清單：
-                這個領域用哪些卡片類型和欄位、哪些必填。AI 讀這個領域的來源時
-                只找清單上的欄位；清單外的值不會丟掉，會在審核時標出來。
-                沒有 profile 就用整份 schema。</p>
-              <label class="bi-label" for="bi-b-pf-home">應用或資料庫項目</label>
-              <select id="bi-b-pf-home"></select>
-              <div id="bi-b-pf-view"></div>
-              <div id="bi-b-pf-proposals"></div>
-              <details class="bi-manage"><summary>直接編輯（JSON）</summary>
-              <label class="bi-label" for="bi-b-pf-json">Profile 內容（JSON）</label>
-              <textarea id="bi-b-pf-json" class="bi-input" rows="10" spellcheck="false"></textarea>
-              <p class="bi-meta">格式：{"types": {"類型": {"category": "這個類型在這裡的意思",
-                "fields": {"欄位": {"use": "required 或 optional", "note": "說明"}}}},
-                "proposals": [{"type": "類型", "field": "新欄位", "definition": {"kind": "str",
-                "class": "sourced", "label": "名稱"}, "reason": "為什麼需要"}]}。
-                schema 沒有的欄位只能放在 proposals。存成新版本後，commit 並 push 大家才會用到。</p>
-              <div class="bi-actions">
-                <button class="bi-btn" id="bi-b-pf-save" type="button">存成新版本</button></div>
-              </details>
-            </div>
             <div class="bi-step" id="bi-b-tool-new">
               <h5>新增或修改資料處理程式</h5>
               <p class="bi-meta" id="bi-b-tl-about">產出會成為新來源，再走預覽和審核；
@@ -986,8 +964,7 @@ BI_PANE_HTML = r"""
                   <input id="bi-b-sk-applies" class="bi-input" spellcheck="false"
                     placeholder="applications/aidc/sources"></div>
                 <div><label class="bi-label" for="bi-b-sk-types">
-                  只產生這些卡片類型（逗號分隔；留空＝用領域 profile 的類型，
-                  沒有 profile 就用預設類型）</label>
+                  只產生這些卡片類型（逗號分隔；留空＝用這個領域的類型）</label>
                   <input id="bi-b-sk-types" class="bi-input" spellcheck="false"></div>
               </div>
               <p class="bi-meta" id="bi-b-sk-runtypes" role="status"></p>
@@ -4544,7 +4521,6 @@ async function biVersions(vaultId) {
   biVerHistory(vaultId, history);
   biShareLoad(vaultId).catch((failure) => biNotice(false, "讀不到分享的內容：" + failure.message));
   biSkills(vaultId).catch((failure) => biNotice(false, "讀不到判讀規則：" + failure.message));
-  biProfiles(vaultId).catch((failure) => biNotice(false, "讀不到 profile：" + failure.message));
   biTools(vaultId).catch((failure) => biNotice(false, "讀不到資料處理程式：" + failure.message));
 }
 
@@ -4905,7 +4881,7 @@ function biSkillsDraw(reply) {
     if (item.run_types) {
       // What a run with it really produces (acceptance F17), whatever card_types says.
       state.push(bh("p", "bi-meta", "產生：" + item.run_types.types.join("、")
-        + ({skill: "", profile: "（依領域 profile）", default: "（預設類型）"}[item.run_types.from]
+        + ({skill: "", profile: "（依領域）", default: "（預設類型）"}[item.run_types.from]
           || "")));
     }
     const edit = bh("button", "bi-btn", "修改");
@@ -5626,95 +5602,6 @@ el("bi-b-pkg-import").addEventListener("click", biPkgImport);
 el("bi-b-pkg-export").addEventListener("click", () => biPkgExport()
   .catch((failure) => biPkgState("bi-b-pkg-export-status", "error", failure.message)));
 
-// -- a home's profile and its field proposals (BI_CARD_MODEL.md §4.2, §4.3) --------
-async function biProfiles(vaultId) {
-  bi.profiles = await call("/api/bi/vaults/" + vaultId + "/profiles");
-  const pick = el("bi-b-pf-home"), kept = pick.value, homes = bi.profiles.homes || [];
-  pick.replaceChildren(...homes.map((item) => {
-    const option = bh("option", "", item.label === item.home ? item.home
-      : item.label + "（" + item.home + "）");
-    option.value = item.home; return option;
-  }));
-  if (homes.some((item) => item.home === kept)) pick.value = kept;
-  if (homes.some((item) => item.home === biScope())) pick.value = biScope();
-  biProfileShow();
-}
-
-function biProfileShow() {
-  const home = el("bi-b-pf-home").value;
-  const current = ((bi.profiles || {}).profiles || []).find((p) => p.home === home);
-  const view = el("bi-b-pf-view"); view.replaceChildren();
-  if (!current) {
-    view.append(bh("p", "bi-meta", "這裡還沒有 profile：AI 會用整份 schema 判讀。"));
-  } else {
-    view.append(bh("p", "bi-meta", "第 " + current.revision + " 版・schema " + current.schema));
-    const list = bh("ul", "bi-log");
-    for (const [type, used] of Object.entries(current.types || {})) {
-      const row = bh("li", "", bh("strong", "", biTypeLabel(type) + "（" + type + "）"));
-      if (used.category) row.append(bh("p", "bi-meta", used.category));
-      const names = Object.entries(used.fields || {});
-      row.append(names.length ? bh("ul", "", ...names.map(([name, field]) => bh("li", "",
-        name, " ",
-        field.use === "required" ? biBadge("必填", "warn") : biBadge("選填", "dim"),
-        field.note ? bh("span", "bi-meta", " " + field.note) : "")))
-        : bh("p", "bi-meta", "沒有列欄位。"));
-      if ((used.not_applicable || []).length) {
-        row.append(bh("p", "bi-meta", "不適用：" + used.not_applicable.map((item) => item.field
-          + (item.reason ? "（" + item.reason + "）" : "")).join("、")));
-      }
-      list.append(row);
-    }
-    view.append(list);
-  }
-  biProfileProposals(home, current);
-  // A refresh keeps what the person is typing; only another version replaces it.
-  const shown = home + "#" + (current ? current.revision : 0);
-  if (bi.profileShown !== shown) {
-    bi.profileShown = shown;
-    el("bi-b-pf-json").value = JSON.stringify(current
-      ? {types: current.types || {}, proposals: current.proposals || []}
-      : {types: {}, proposals: []}, null, 2);
-  }
-}
-
-function biProfileProposals(home, current) {
-  const box = el("bi-b-pf-proposals"); box.replaceChildren();
-  const waiting = ((current || {}).proposals || []).filter((p) => p.status === "proposed");
-  if (!waiting.length) return;
-  const decide = async (item, decision) => {
-    try {
-      const reply = await biVerRun(bi.verVault, "profile-proposals",
-        {home, type: item.type, field: item.field, decision, confirm: true});
-      const behind = reply.skills_need_update || [];
-      biNotice(true, (decision === "merge"
-        ? "已合併「" + item.field + "」，schema 是 " + reply.schema
-        : "已不採用「" + item.field + "」") + "；commit 並 push 後大家才會用到。"
-        + (behind.length ? "這些判讀規則要更新後才會再使用：" + behind.join("、") : ""));
-    } catch (failure) { biNotice(false, "沒有完成：" + failure.message); }
-  };
-  box.append(bh("h5", "", "等待決定的新欄位"), bh("ul", "bi-log", ...waiting.map((item) => {
-    const name = item.type + "." + item.field;
-    return bh("li", "", bh("strong", "", name),
-      bh("p", "bi-meta", (item.reason ? item.reason + "・" : "") + JSON.stringify(item.definition)),
-      bh("div", "bi-actions",
-        biButton("合併進 schema", () => decide(item, "merge"), "bi-btn", "合併進 schema：" + name),
-        biButton("不採用", () => decide(item, "reject"), "bi-btn", "不採用：" + name)));
-  })));
-}
-
-el("bi-b-pf-home").addEventListener("change", biProfileShow);
-el("bi-b-pf-save").addEventListener("click", async () => {
-  const home = el("bi-b-pf-home").value;
-  let document_;
-  try { document_ = JSON.parse(el("bi-b-pf-json").value); }
-  catch (failure) { biNotice(false, "沒有儲存：內容不是有效的 JSON。"); return; }
-  try {
-    const reply = await biVerRun(bi.verVault, "profiles", {home, profile: document_});
-    biNotice(true, "「" + home + "」的 profile 存成第 " + reply.profile.revision
-      + " 版；commit 並 push 後大家才會用到。");
-  } catch (failure) { biNotice(false, "沒有儲存：" + failure.message); }
-});
-
 function biRerunApplication(folder) {
   const parts = folder.split("/");
   if (parts[0] === "applications" && parts[2] === "sources") return parts[1];
@@ -5902,7 +5789,7 @@ function biRunTypes(role, applies, typed) {
   const used = (s.profile_types || {})[home] || [];
   if (used.length) {
     const narrowed = typed.filter((t) => used.includes(t));
-    return narrowed.length ? [narrowed, "這條規則"] : [used, "領域 profile"];
+    return narrowed.length ? [narrowed, "這條規則"] : [used, "這個領域"];
   }
   return typed.length ? [typed, "這條規則"] : [s.default_types || [], "預設"];
 }
@@ -7772,9 +7659,6 @@ function biRunNothing(run) {
   // Why the AI made no candidate, in its words: an empty run must not look like a broken one.
   const said = (run.warnings || []).filter((w) => w.code === "model_found_nothing");
   const notes = said.map((w) => bh("p", "bi-warn", "AI 沒有建立候選卡，它的說明：" + w.message));
-  if ("profile" in run && !run.profile) {
-    notes.push(bh("p", "bi-meta", "這個資料夾沒有 profile，AI 用整份 schema 判讀。"));
-  }
   return notes;
 }
 
@@ -8882,9 +8766,9 @@ function biBuildShowCandidate(candidateId) {
   const view = profile && (profile.types || {})[candidate.entity_type];
   if (view && view.category) parts.push(bh("p", "bi-meta", "這個應用的說明：" + view.category));
   if (candidate.outside_profile_type) {
-    parts.push(bh("p", "bi-warn", "這個類型不在這個應用的 profile 裡。"));
+    parts.push(bh("p", "bi-warn", "這個領域平常不用這個類型。"));
   } else if ((candidate.outside_profile || []).length) {
-    parts.push(bh("p", "bi-warn", "這些欄位不在這個應用的 profile 裡："
+    parts.push(bh("p", "bi-warn", "這個領域平常不用這些欄位："
       + candidate.outside_profile.join("、")));
   }
   if (open && candidate.errors.some((e) => e.code === "pair_repeated")) {

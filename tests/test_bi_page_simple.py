@@ -85,10 +85,8 @@ MAIN_PATH = (
     "bi-b-sk-list",
     "bi-b-tl-list",
     "bi-b-sk-new",
-    # Step 2a's schema (acceptance F5, F8): suggest, the AI, and the draft as a table.
-    "bi-b-sg-run",
-    "bi-b-sg-table",
-    "bi-b-sa-open",
+    # Step 2a's schema (acceptance F8): the draft as a table. 建議 schema is under 進階
+    # (owner 2026-11-20).
     "bi-b-draft-table",
     "bi-b-draft-use",
     "bi-b-upgrade",
@@ -132,15 +130,15 @@ ADVANCED = (
     "bi-b-v-convert",
     "bi-b-askable",
     "bi-b-pages",
-    "bi-b-profile",
     "bi-b-rerun",
     "bi-b-sk-form",
     "bi-b-tl-save",
     "bi-b-draft-new",
     "bi-b-draft-text",
     "bi-b-versions",
-    # 「建議 schema」 reads the sources not yet ingested; the other choice is here (D1).
-    "bi-b-sg-scope",
+    # 「建議 schema」 only on a press, under 進階：Schema (owner 2026-11-20).
+    "bi-b-sg-run",
+    "bi-b-sg-table",
     "bi-b-fresh",
     "bi-b-recipe",
     "bi-b-instr",
@@ -201,6 +199,13 @@ def test_there_is_no_folded_section_at_the_foot_of_the_page() -> None:
         "bi-b-md-close",
         "bi-b-fit",
         "bi-b-atl-port",
+        # Owner 2026-11-20: the profile is assembled by the program, never shown, and
+        # 建議 schema reads the working domain's sources with no choice to make.
+        "bi-b-profile",
+        "bi-b-pf-home",
+        "bi-b-pf-json",
+        "bi-b-pf-save",
+        "bi-b-sg-scope",
     ],
 )
 def test_the_removed_controls_are_gone_from_markup_and_script(ident: str) -> None:
@@ -364,10 +369,11 @@ def test_every_jump_to_another_tab_has_a_way_back() -> None:
     assert jumps == []
 
 
-def test_the_schema_buttons_sit_above_the_skills_table() -> None:
-    # Acceptance F5: suggest and the schema AI are on 2a's main path, before the skills.
+def test_the_schema_suggestion_sits_under_advanced_after_the_skills() -> None:
+    # Owner 2026-11-20: the main path of step 2 is the schema summary and the skills; 建議
+    # schema runs only on a press, under 進階：Schema.
     start = PAGE.index('data-stage="schema"')
-    at = [PAGE.index(f'id="{i}"', start) for i in ("bi-b-sg-run", "bi-b-sa-open", "bi-b-skills")]
+    at = [PAGE.index(f'id="{i}"', start) for i in ("bi-b-skills", "bi-b-adv-schema", "bi-b-sg-run")]
     assert at == sorted(at)
 
 
