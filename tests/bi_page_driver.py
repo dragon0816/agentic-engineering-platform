@@ -83,6 +83,15 @@ class BiPage:
     def run(self, expression: str) -> Any:
         return self.browser._evaluate(expression)
 
+    def run_awaited(self, expression: str) -> Any:
+        """Run an expression that returns a promise and give its value. A promise settled
+        by microtasks reads the page before the next frame: before any ResizeObserver."""
+        answer = self.browser.page().call(
+            "Runtime.evaluate", expression=expression, awaitPromise=True, returnByValue=True
+        )
+        assert not answer.get("exceptionDetails"), answer
+        return answer.get("result", {}).get("value")
+
     def wait(self, expression: str, seconds: float = 240) -> Any:
         deadline = time.monotonic() + seconds
         while time.monotonic() < deadline:

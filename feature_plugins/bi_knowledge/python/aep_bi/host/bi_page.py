@@ -1711,13 +1711,23 @@ el("bi-dataset").addEventListener("change", () => {
 el("bi-empty-demo").addEventListener("click", () => el("bi-demo").click());
 el("bi-empty-new").addEventListener("click", () => biVaultForm("new"));
 el("bi-empty-join").addEventListener("click", () => biVaultForm("join"));
-const biStuck = new ResizeObserver(() => {
+function biStickyHeights() {
   // Not on a phone, where the row does not stick.
   const row = el("bi-top-row"), sticks = getComputedStyle(row).position === "sticky";
   el("kn-pane-bi").style.setProperty("--bi-top-h", (sticks ? row.offsetHeight : 0) + "px");
   el("kn-pane-bi").style.setProperty("--bi-steps-h", el("bi-build-steps").offsetHeight + "px");
-});
-biStuck.observe(el("bi-top-row")); biStuck.observe(el("bi-build-steps"));
+}
+// A ResizeObserver reports only at the next frame: until then the step bar sticks at the
+// row's old height (the 管理 menu just closed: some 470px too low). What changes inside the
+// row or the steps is measured again before this task ends; the ResizeObserver still
+// catches what no DOM change announces (the window's width, a late font).
+const biStuck = new ResizeObserver(biStickyHeights);
+const biStuckNow = new MutationObserver(biStickyHeights);
+for (const sticky of [el("bi-top-row"), el("bi-build-steps")]) {
+  biStuck.observe(sticky);
+  biStuckNow.observe(sticky,
+    {subtree: true, childList: true, attributes: true, characterData: true});
+}
 el("bi-card-domain").addEventListener("change", () => {
   bi.cardId = null; biLoadCards();
 });
@@ -9329,7 +9339,7 @@ function biPanel(which, open) {
       el("bi-" + other + "-panel").hidden = true;
       el("bi-" + other).setAttribute("aria-expanded", "false");
     }
-    panel.scrollIntoView({block: "nearest"});
+    biStickyHeights(); panel.scrollIntoView({block: "nearest"});
   }
 }
 
@@ -9337,7 +9347,7 @@ el("bi-subs-open").addEventListener("click", () => {
   const box = el("bi-subs"), open = box.hidden;
   box.hidden = !open; box.open = open; el("bi-b-v-menu").open = false;
   el("bi-subs-open").setAttribute("aria-expanded", String(open));
-  if (open) box.scrollIntoView({block: "nearest"});
+  if (open) { biStickyHeights(); box.scrollIntoView({block: "nearest"}); }
 });
 
 async function biRefreshSchemas() {
