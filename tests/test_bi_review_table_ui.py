@@ -1057,3 +1057,30 @@ def test_accept_and_import_writes_once_reports_what_it_left_and_can_be_undone(
             page.click_text("#bi-b-apply-status", "復原這次匯入")
             page.see(status, "已復原這次匯入。")
     assert summarised() == []
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_cards_all_accepted_already_can_still_be_imported(tmp_path: Path) -> None:
+    """Owner 2026-11-20: every candidate was 已接受 (some with warnings), both buttons said
+    0 張 and nothing could be imported. The one button now writes what is accepted."""
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    dataset = _vault(tmp_path, workspace, [_page(i) for i in range(40, 44)])
+    run_id = _reading(workspace, dataset, kind="ingest")
+    staging, store = Staging(workspace, dataset), BiStore(workspace, dataset)
+    ids = [c["id"] for c in staging.candidates(run_id)]
+    _ok(route(workspace, "alice", "POST", f"/api/bi/runs/{run_id}/accept", {},
+              {"dataset": dataset, "ids": ids}))  # fmt: skip
+    assert all(c["review"] == "accepted" for c in staging.candidates(run_id))
+    button, status = "document.getElementById('bi-b-apply-import')", "bi-b-apply-status"
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(tmp_path / "browser", server.address) as page:
+            _review(page, dataset)
+            _shown(page, 4)
+            page.wait(f"{button}.textContent.trim() === '匯入已接受的（4 張）'")
+            assert not page.run(f"{button}.disabled")
+            assert page.run("document.getElementById('bi-b-apply-all').disabled")
+            page.click("#bi-b-apply-import")
+            page.see(status, "已匯入已接受的卡片")
+            page.wait(f"{button}.disabled")
+    assert {str(c["name"]) for c in store.card_rows()} >= {f"FAKE-{i:03d}" for i in range(40, 44)}

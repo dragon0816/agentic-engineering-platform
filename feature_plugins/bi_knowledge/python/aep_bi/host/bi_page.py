@@ -8358,14 +8358,24 @@ function biApplyAllTodo() {
   return biCandShown().filter((c) => c.review === "pending" && c.action !== "skip");
 }
 
+function biApplyAccepted() {
+  // What 確認匯入 writes besides what is still undecided (owner 2026-11-20: with every card
+  // already 已接受 both buttons said 0 張 and nothing could be imported).
+  return (bi.build.candidates || []).filter((c) => c.review === "accepted"
+    && c.action !== "skip");
+}
+
 function biApplyAllLabel() {
   if (bi.build.applying) return;
   const open = biRunOpen(bi.build.run), todo = open ? biApplyAllTodo() : [];
-  for (const [id, label] of [["bi-b-apply-all", "全部套用"],
-    ["bi-b-apply-import", "全部接受並匯入"]]) {
-    el(id).textContent = label + "（" + todo.length + " 張）";
-    el(id).disabled = !todo.length || !!bi.build.accepting;
-  }
+  const accepted = open ? biApplyAccepted() : [];
+  el("bi-b-apply-all").textContent = "全部套用（" + todo.length + " 張）";
+  el("bi-b-apply-all").disabled = !todo.length || !!bi.build.accepting;
+  // One button that always writes what is accepted, with what is still undecided.
+  const writes = todo.length + accepted.length;
+  el("bi-b-apply-import").textContent = (todo.length ? "全部接受並匯入" : "匯入已接受的")
+    + "（" + writes + " 張）";
+  el("bi-b-apply-import").disabled = !writes || !!bi.build.accepting;
   const filtered = el("bi-b-cand-type").value || el("bi-b-cand-state").value;
   el("bi-b-apply-note").textContent = !open ? "" : (filtered
     ? "只套用目前篩選顯示的" : "套用所有待決定的")
@@ -8378,7 +8388,8 @@ function biApplyAllName(candidate) {
 
 async function biApplyAll(andImport) {
   const run = bi.build.run, todo = biApplyAllTodo();
-  if (!biRunOpen(run) || !todo.length || bi.build.applying) return;
+  const waiting = andImport ? biApplyAccepted().length : 0;
+  if (!biRunOpen(run) || !(todo.length || waiting) || bi.build.applying) return;
   const button = el(andImport ? "bi-b-apply-import" : "bi-b-apply-all");
   const status = el("bi-b-apply-status"), others = ["bi-b-apply-all", "bi-b-apply-import"];
   const total = todo.length, left = [];
@@ -8442,7 +8453,8 @@ async function biApplyAll(andImport) {
       + "。已套用 " + applied + " 張" + earlier + (notAccepted ? "；" + notAccepted : "") + "。";
   } else if (wrote) {
     const a = wrote.applied || {};
-    message = "已接受 " + applied + " 張並匯入" + earlier + "（新建 " + (a.created || 0)
+    message = (applied ? "已接受 " + applied + " 張並匯入" : "已匯入已接受的卡片")
+      + earlier + "（新建 " + (a.created || 0)
       + "、更新 " + (a.updated || 0) + "）；可用『復原這次匯入』撤回。"
       + (notAccepted ? notAccepted + "。" : "");
   } else if (unwritten) {
