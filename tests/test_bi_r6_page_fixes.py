@@ -236,7 +236,7 @@ def test_the_page_follows_the_source_and_decides_proposals(served: Any, tmp_path
         _with_proposals(workspace, dataset)
         run("biBuildVault()")
         click("#bi-b-v-sync")
-        wait("document.getElementById('bi-b-props').hidden === false")
+        wait("(bi.proposals || []).length === 2")
         run("biBuildSources ? biBuildSources() : null")
         # A list read while `one` was still being written shows it too, without its folder:
         # a click can follow the folder only once the page holds the list that knows both.
@@ -263,90 +263,66 @@ def test_the_page_follows_the_source_and_decides_proposals(served: Any, tmp_path
         assert choose(two, ROBOTICS) == ROBOTICS  # follows reselecting
         assert run("biRunBody('trial').folder") == ROBOTICS
 
-        # -- deciding proposals -------------------------------------------------------------
-        wait("document.getElementById('bi-b-props-h').textContent.includes('2 筆')")
-        shown = run("document.getElementById('bi-b-props-list').textContent")
-        assert "舊的內容" in shown and "新的內容" in shown and "fake-page.md#3" in shown
+        # -- deciding changes: rows of 2c's one review list (owner 2026-11-20) ------------------
+        assert run("document.getElementById('bi-b-props') === null")
+        click("#bi-stepper [data-stage=ingest]")
+        wait("!document.querySelector('#bi-build-steps [data-stage=review]').disabled")
+        click("#bi-build-steps [data-stage=review]")
+        rows = "[...document.querySelectorAll('#bi-b-cands tbody tr[data-kind=change]')]"
+        pane = "document.getElementById('bi-b-cand')"
 
-        # The first row still undecided: a decided row stays on the list with its mark.
-        reject = "#bi-b-props-list .bi-actions button:last-child"
-        click(reject)
-        wait(
-            "document.querySelector('#bi-b-props-list li .bi-err')"
-            ".textContent.includes('請寫下理由')"
-        )
-        assert run("document.getElementById('bi-b-props-h').textContent").count("2 筆") == 1
-        run("document.querySelector('#bi-b-props-list li input').value = '這一版寫錯了'")
-        click(reject)
-        wait("document.getElementById('bi-b-props-h').textContent.includes('1 筆')")
-        store = BiStore(workspace, dataset)
-        assert store.fields(CARD)["body"]["value"] == "舊的內容"
+        def press(label: str) -> None:
+            run(f"[...{pane}.querySelectorAll('button')].find((b) => b.textContent === "
+                f"{json.dumps(label)}).click()")  # fmt: skip
 
-        wait("!!document.querySelector('#bi-b-props-list .bi-state-rejected')")
-        accept = "#bi-b-props-list .bi-actions button:nth-last-child(2)"
-        run("document.querySelector('#bi-b-props-list li input').value = '新的比較好'")
-        click(accept)
+        def row_of(field: str) -> str:
+            return f"{rows}.find((r) => r.textContent.includes({json.dumps(field)}))"
+
+        wait(f"{rows}.length === 2")
+        assert run(f"{rows}.every((r) => r.textContent.includes('修改既有卡片'))")
+        run(f"{row_of('新的內容')}.click()")
+        wait(f"{pane}.textContent.includes('舊的內容')")
+        shown = run(f"{pane}.textContent")
+        assert "新的內容" in shown and "fake-page.md#3" in shown
+        # The card it changes opens as a side tab.
+        wait(f"sideHas({json.dumps('bi-card:' + CARD)})")
+        wait("document.getElementById('bi-detail-body').textContent.includes('FAKE-TECH')")
+
+        # Rejecting needs no reason; the row stays on the list (狀態 全部) with its mark.
+        body_row = row_of("新的內容")
+        press("拒絕")
+        wait(f"!!{body_row}.querySelector('.bi-state-rejected')")
+        assert BiStore(workspace, dataset).fields(CARD)["body"]["value"] == "舊的內容"
+        # On to the next undecided row: accepted with a reason, which is kept.
+        wait(f"{pane}.textContent.includes('舊的一句')")
+        run(f"{pane}.querySelector('input').value = '新的比較好'")
+        press("接受")
         try:
-            wait("document.getElementById('bi-b-props-h').textContent.includes('0 筆')", 60)
-            wait("!!document.querySelector('#bi-b-props-list .bi-state-accepted')", 60)
+            wait(f"!!{row_of('新的一句')}.querySelector('.bi-state-accepted')", 60)
         except AssertionError:
-            said = run("document.getElementById('bi-b-props-list').textContent")
-            raise AssertionError(said) from None
+            raise AssertionError(run(f"{pane}.textContent")) from None
         assert BiStore(workspace, dataset).fields(CARD)["summary"]["value"] == "新的一句"
         assert "commit" in run("document.getElementById('bi-notice').textContent")
+        history = BiStore(workspace, dataset).history(CARD)
+        assert any(h["field"] == "summary" and h["reason"] == "新的比較好" for h in history)
 
-        # -- many at once: filter, one reason, a confirmation with the count ------------------
-        store = BiStore(workspace, dataset)
-        for key in ("FAKE-B1", "FAKE-B2"):
-            for values, propose in (
-                ({"body": "舊", "confidence": "assumed"}, frozenset()),
-                ({"body": "新", "confidence": "verified"}, frozenset({"body", "confidence"})),
-            ):
-                store.apply(
-                    [
-                        PlannedRow(
-                            row=1,
-                            entity_type="Technology",
-                            canonical_key=key,
-                            name=key,
-                            values={"name": key, **values},
-                            synthetic=False,
-                            ref="bulk-page.md#1",
-                            propose=propose,
-                        )
-                    ],
-                    filename="c.csv",
-                    entity_type="Technology",
-                    actor="alice",
-                )
+        # -- many at once, judgement fields included, and no reason asked ----------------------
+        _with_judgement_proposals(workspace, dataset)
         click("#bi-b-v-sync")
-        wait("document.getElementById('bi-b-props-h').textContent.includes('4 筆')")
-        # All shown, but `confidence` is left out until the filter names it.
-        wait("document.getElementById('bi-b-props-accept').textContent.includes('2 筆')")
-        click("#bi-b-props-accept")
-        wait("document.getElementById('bi-b-props-confirm').textContent.includes('請寫下理由')")
-        put("bi-b-props-reason", "這批看過了")
-        click("#bi-b-props-accept")
-        wait("document.getElementById('bi-b-props-confirm').textContent.includes('另有 2 筆')")
-        assert len(BiStore(workspace, dataset).pending_proposals()) == 4  # nothing yet
-        click("#bi-b-props-confirm .go")
-        wait("document.getElementById('bi-b-props-h').textContent.includes('2 筆')")
+        wait(f"{rows}.length === 6")
+        button = "document.getElementById('bi-b-apply-all')"
+        wait(f"{button}.textContent.trim() === '接受顯示的待決定（4）'")
+        click("#bi-b-apply-all")
+        wait("document.getElementById('bi-b-apply-status').textContent.includes('已接受 4 筆修改')")
+        store = BiStore(workspace, dataset)
+        assert store.pending_proposals() == []
         for key in ("FAKE-B1", "FAKE-B2"):
             card = card_id_for("Technology", key)
-            assert BiStore(workspace, dataset).fields(card)["body"]["value"] == "新"
-            assert BiStore(workspace, dataset).fields(card)["confidence"]["value"] == "assumed"
-
-        run(
-            "(() => { const s = document.getElementById('bi-b-props-field');"
-            " s.value = 'confidence'; s.dispatchEvent(new Event('change')); })()"
-        )
-        wait("document.getElementById('bi-b-props-reject').textContent.includes('2 筆')")
-        put("bi-b-props-reason", "沒有依據")
-        click("#bi-b-props-reject")
-        click("#bi-b-props-confirm .go")
-        wait("document.getElementById('bi-b-props-h').textContent.includes('0 筆')")
+            assert store.fields(card)["body"]["value"] == "新"
+            assert store.fields(card)["confidence"]["value"] == "verified"
         # Each answered in the list too, not only by a notice at the top of the page.
-        wait("document.querySelectorAll('#bi-b-props-list .bi-state-accepted').length === 3")
-        wait("document.querySelectorAll('#bi-b-props-list .bi-state-rejected').length === 3")
+        wait(f"{rows}.filter((r) => r.querySelector('.bi-state-accepted')).length === 5")
+        assert run(f"{rows}.filter((r) => r.querySelector('.bi-state-rejected')).length") == 1
+        wait(f"{button}.textContent.trim() === '接受顯示的待決定（0）'")
     finally:
         browser.close()

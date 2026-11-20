@@ -1083,14 +1083,13 @@ BI_PANE_HTML = r"""
           hidden>
           <h3 class="kp-stage-title" id="bi-b-review" tabindex="-1">步驟 2／3・審核</h3>
           <div class="bi-actions">
-            <label class="bi-meta">待審核的執行 <select id="bi-b-run-pick"></select></label>
-            <button class="bi-btn" id="bi-b-props-jump" type="button" hidden></button></div>
+            <label class="bi-meta">待審核的執行 <select id="bi-b-run-pick"></select></label></div>
           <div id="bi-b-chips" class="bi-chips" aria-label="候選卡摘要"></div>
           <div id="bi-b-same"></div>
           <div class="bi-split bi-src-split" id="bi-b-review-split">
             <div class="bi-split-list">
               <div class="bi-actions">
-                <label class="bi-meta">卡片類型 <select id="bi-b-cand-type"></select></label>
+                <label class="bi-meta">類型 <select id="bi-b-cand-type"></select></label>
                 <label class="bi-meta">狀態 <select id="bi-b-cand-state">
                   <option value="">全部</option><option value="pending">待決定</option>
                   <option value="accepted">已接受</option><option value="rejected">已拒絕</option>
@@ -1100,31 +1099,18 @@ BI_PANE_HTML = r"""
               </div>
               <div class="bi-actions">
                 <button class="bi-btn" id="bi-b-apply-all" type="button" disabled>
-                  全部套用（0 張）</button>
+                  接受顯示的待決定（0）</button>
                 <button class="bi-btn" id="bi-b-apply-import" type="button" disabled>
                   全部接受並匯入（0 張）</button>
                 <span class="bi-meta" id="bi-b-apply-note"></span></div>
               <p class="bi-meta" id="bi-b-apply-status" role="status" aria-live="polite"></p>
               <div class="bi-scroll bi-scroller"><table class="bi-table bi-stack" id="bi-b-cands"
-                aria-label="候選卡清單"><thead><tr><th>卡片</th><th>欄位</th><th>提議值</th>
-                <th>狀態</th></tr></thead><tbody></tbody></table></div>
+                aria-label="審核清單"><thead><tr><th>卡片</th><th>類型</th><th>欄位</th>
+                <th>提議值</th><th>狀態</th></tr></thead><tbody></tbody></table></div>
             </div>
             <div class="bi-split-pane" id="bi-b-cand" aria-live="polite">
               <p class="bi-empty">選一列，看原文與引用。</p></div>
           </div>
-            <div id="bi-b-props" hidden>
-              <h4 id="bi-b-props-h">待審提案</h4>
-              <div class="bi-actions" id="bi-b-props-bulk">
-                <label class="bi-meta">欄位 <select id="bi-b-props-field"></select></label>
-                <label class="bi-meta">來源 <select id="bi-b-props-origin"></select></label>
-                <input id="bi-b-props-reason" class="bi-input" maxlength="500"
-                  placeholder="一次決定多筆的理由（必填）" aria-label="一次決定多筆的理由">
-                <button class="bi-btn" id="bi-b-props-accept" type="button">接受顯示的全部</button>
-                <button class="bi-btn" id="bi-b-props-reject" type="button">否決顯示的全部</button>
-              </div>
-              <div id="bi-b-props-confirm" role="alert"></div>
-              <ul id="bi-b-props-list" class="bi-fit"></ul>
-            </div>
           <div class="bi-actions"><button class="go" type="button" data-bi-next="commit"
             id="bi-b-next4" disabled>下一步：確認寫入</button></div>
         </section>
@@ -2802,7 +2788,7 @@ function biBuildAllowed() {
   // proposals are decided in the same step.
   return {source: true, schema: true, method: has,
     review: has || !!run || (bi.build.waiting || []).length > 0
-      || (bi.proposals || []).length > 0 || (bi.proposalsDecided || []).length > 0,
+      || (bi.proposals || []).length > 0 || (bi.proposalsDone || []).length > 0,
     commit: !!accepted && !bi.build.accepting && !bi.build.saving,
     result: !!(run && run.status === "committed"),
     test: true};
@@ -3081,124 +3067,17 @@ async function biBuildVault() {
 }
 
 async function biProposals() {
-  // Every pending proposal of the working copy, so a person can settle them in one place.
+  // The working copy's proposals, pending and decided: rows of 2c's one review list (owner
+  // 2026-11-20), beside the run's candidates.
   const dataset = biDataset();
-  // Newest call only: each decision refreshes the list, and a list read before the next
-  // decision, arriving after it, would show that one as pending again beside its mark.
+  // Newest call only: a list read before a decision, arriving after it, would undo its mark.
   const seq = bi.proposalsSeq = (bi.proposalsSeq || 0) + 1;
   const reply = await call("/api/bi/proposals?dataset=" + encodeURIComponent(dataset));
   if (dataset !== biDataset() || seq !== bi.proposalsSeq) return;
-  // What was decided here is not pending, whenever the list was read.
-  const decided = bi.proposalsFor === dataset
-    ? new Set((bi.proposalsDecided || []).map((done) => done.item.id)) : new Set();
-  bi.proposals = (reply.proposals || []).filter((item) => !decided.has(item.id));
+  bi.proposals = reply.proposals || []; bi.proposalsDone = reply.decided || [];
   biBuildSteps();
-  // What was decided here stays on the list, with its mark, until the page is left.
-  if (bi.proposalsFor !== dataset) { bi.proposalsFor = dataset; bi.proposalsDecided = []; }
-  el("bi-b-props").hidden = !bi.proposals.length && !bi.proposalsDecided.length;
-  el("bi-b-props-h").textContent = "待審提案（" + bi.proposals.length + " 筆）";
-  el("bi-b-props-bulk").hidden = !bi.proposals.length;
-  el("bi-b-props-jump").hidden = !bi.proposals.length;
-  el("bi-b-props-jump").textContent = "待審提案 " + bi.proposals.length + " 筆";
-  el("bi-b-props-confirm").replaceChildren();
-  const fill = (id, values, label) => {
-    const pick = el(id), kept = pick.value;
-    pick.replaceChildren(bh("option", "", "全部"));
-    pick.options[0].value = "";
-    for (const value of [...new Set(values)].sort()) {
-      const option = bh("option", "", label(value)); option.value = value; pick.append(option);
-    }
-    pick.value = [...pick.options].some((o) => o.value === kept) ? kept : "";
-  };
-  const labels = Object.fromEntries(bi.proposals.map((p) => [p.field, p.label]));
-  fill("bi-b-props-field", bi.proposals.map((p) => p.field), (f) => labels[f] || f);
-  fill("bi-b-props-origin", bi.proposals.map((p) => p.origin), (o) => o);
-  biProposalsShown();
+  if (bi.build.stage === "review") biBuildReviewList();
 }
-
-function biProposalsShown() {
-  // Which proposals the filters show, and which of them 「全部」 would decide: a protected
-  // field (`confidence`, `evidence_grade`) only when the filter names it.
-  const field = el("bi-b-props-field").value, origin = el("bi-b-props-origin").value;
-  const shown = (bi.proposals || []).filter((p) => (!field || p.field === field)
-    && (!origin || p.origin === origin));
-  const chosen = shown.filter((p) => p.field === field || !p.protected);
-  el("bi-b-props-confirm").replaceChildren();
-  el("bi-b-props-accept").textContent = "接受顯示的全部（" + chosen.length + " 筆）";
-  el("bi-b-props-reject").textContent = "否決顯示的全部（" + chosen.length + " 筆）";
-  el("bi-b-props-accept").disabled = el("bi-b-props-reject").disabled = !chosen.length;
-  if (shown.length && !chosen.length) {
-    el("bi-b-props-confirm").append(bh("p", "bi-meta", "這 " + shown.length
-      + " 筆都是 confidence 或 evidence_grade：一次決定前要先在「欄位」選定其中一個，"
-      + "也可以逐筆決定。"));
-  }
-  // A reason being written survives the redraw: a refresh after another decision (or a
-  // sync) lands while the person types the next one, and their words must not go with it.
-  const typed = {};
-  for (const input of el("bi-b-props-list").querySelectorAll("li[data-proposal] > .bi-actions"
-    + " > input")) {
-    const id = input.closest("li").dataset.proposal;
-    if (input.value) typed[id] = {value: input.value, focused: input === document.activeElement};
-  }
-  const rows = shown.map((item) => biProposalRow(item, biDataset(), typed[item.id]));
-  for (const done of bi.proposalsDecided || []) {
-    rows.splice(Math.min(done.at, rows.length), 0, biProposalDone(done));
-  }
-  el("bi-b-props-list").replaceChildren(...rows);
-  for (const row of rows) {
-    const kept = typed[row.dataset.proposal], input = row.querySelector(".bi-actions > input");
-    if (kept && kept.focused && input) input.focus({preventScroll: true});
-  }
-  return {field, origin, shown, chosen};
-}
-
-function biProposalsAll(action) {
-  // One reason, and a second click on what will happen and how many.
-  const {field, origin, shown, chosen} = biProposalsShown();
-  const box = el("bi-b-props-confirm"), reason = el("bi-b-props-reason");
-  if (!reason.value.trim()) {
-    box.append(bh("p", "bi-err", "請寫下理由。")); reason.focus(); return;
-  }
-  const left = shown.length - chosen.length;
-  const losing = chosen.filter((item) => biProposalLoss(item)).length;
-  const bare = chosen.filter((item) => !(item.evidence || []).length).length;
-  const yes = biButton("確定" + (action === "accept" ? "接受 " : "否決 ") + chosen.length + " 筆",
-    async () => {
-      yes.disabled = true;
-      try {
-        const done = await biCall("/api/bi/proposals/decide", {dataset: biDataset(), action,
-          reason: reason.value.trim(), field: field || null, origin: origin || null,
-          count: chosen.length});
-        reason.value = "";
-        if (!done.superseded) {
-          const review = action === "accept" ? "accepted" : "rejected";
-          bi.proposalsDecided.push(...chosen.map((item) => ({item, review,
-            at: (bi.proposalsDecided || []).length})));
-        }
-        biNotice(true, "已決定 " + done.decided + " 筆提案；要 commit 才會寫進知識庫。");
-        await biBuildVault();
-      } catch (failure) {
-        box.replaceChildren(bh("p", "bi-err", failure.message + "。"));
-        await biProposals();
-      }
-    }, "go");
-  box.append(bh("p", "bi-warn", "將" + (action === "accept" ? "接受 " : "否決 ") + chosen.length
-    + " 筆提案" + (left ? "；另有 " + left + " 筆 confidence 或 evidence_grade 不包含在內，"
-      + "要先篩選到那個欄位" : "") + "。"
-    + (action === "accept" && losing ? "其中 " + losing + " 筆會用短很多的文字取代目前的長文。"
-      : "")
-    + (action === "accept" && bare ? "其中 " + bare + " 筆沒有出處，接受後那些欄位就沒有出處。"
-      : "")),
-  yes,
-  biButton("取消", () => box.replaceChildren(), "bi-btn"));
-}
-
-el("bi-b-props-jump").addEventListener("click",
-  () => el("bi-b-props").scrollIntoView({block: "start"}));
-el("bi-b-props-field").addEventListener("change", biProposalsShown);
-el("bi-b-props-origin").addEventListener("change", biProposalsShown);
-el("bi-b-props-accept").addEventListener("click", () => biProposalsAll("accept"));
-el("bi-b-props-reject").addEventListener("click", () => biProposalsAll("reject"));
 
 function biProposalLoss(item) {
   // A long value about to give way to a much shorter one: how a sourced text gets lost.
@@ -3214,87 +3093,13 @@ function biProposalSides(item) {
     side(item.current), side(item.value))));
 }
 
-function biProposalDone(done) {
-  const item = done.item;
-  const box = bh("li", "", bh("strong", "", item.card_name),
-    bh("span", "bi-meta", " " + biTypeLabel(item.entity_type) + "・" + item.label + " "),
-    biDecisionMark(done.review),
-    bh("div", "bi-meta", done.review === "accepted" ? "現在的值：" + biValue(item.value)
-      : "值沒有改動：" + biValue(item.current)),
-    done.review === "accepted" ? bh("div", "bi-meta", "要 commit 才會寫進知識庫。") : "");
-  box.dataset.proposal = item.id;
-  return box;
-}
-
-function biProposalRow(item, dataset, typed) {
-  const reason = bh("input", "bi-input");
-  if (typed) reason.value = typed.value;
-  reason.placeholder = item.needs_reason ? "理由（這是判斷欄位，必填）" : "理由（否決時必填）";
-  reason.setAttribute("aria-label", "理由：" + item.card_name + " 的 " + item.label);
-  const error = bh("div", "bi-err");
-  const loss = biProposalLoss(item);
-  const decide = async (action) => {
-    error.textContent = "";
-    if (!reason.value.trim() && (action === "reject" || item.needs_reason)) {
-      error.textContent = "請寫下理由。"; reason.focus(); return;
-    }
-    // An answer at once, in the row pressed: the page's notice can be far above it.
-    actions.replaceChildren(bh("span", "bi-meta", "儲存中…"));
-    try {
-      await biCall("/api/bi/cards/" + encodeURIComponent(item.card_id) + "/proposals/" + item.id,
-        {dataset, action, base_version: item.version, reason: reason.value.trim()});
-    } catch (failure) {
-      error.textContent = failure.message + "。"; actions.replaceChildren(...buttons); return;
-    }
-    const list = el("bi-b-props-list");
-    const at = [...list.children].indexOf(box);
-    const done = {item, at: Math.max(at, 0),
-      review: action === "accept" ? "accepted" : "rejected"};
-    (bi.proposalsDecided = bi.proposalsDecided || []).push(done);
-    box.replaceWith(biProposalDone(done));
-    biNotice(true, (action === "accept" ? "已接受" : "已否決") + "「" + item.card_name + "」的"
-      + item.label + "；要 commit 才會寫進知識庫。");
-    await biBuildVault();
-  };
-  const accept = () => {
-    if (!loss) return decide("accept");
-    // A second press that names the loss.
-    actions.replaceChildren(bh("span", "bi-warn", "用 " + loss.now + " 字取代目前的 " + loss.old
-      + " 字？"), biButton("確定取代", () => decide("accept"), "go"),
-    biButton("取消", () => actions.replaceChildren(...buttons), "bi-btn"));
-  };
-  const buttons = [reason, biButton("接受", accept, "bi-btn"),
-    biButton("否決", () => decide("reject"), "bi-btn")];
-  const actions = bh("div", "bi-actions", ...buttons);
-  const said = (label, rows) => (rows || []).map((e) => bh("div", "bi-meta",
-    label + (e.source_name || "") + (e.excerpt ? "「" + (e.excerpt.length > 120
-      ? e.excerpt.slice(0, 120) + "…" : e.excerpt) + "」" : "")));
-  const cited = (item.current_evidence || []).length;
-  const facts = [...said("提議的依據：", item.evidence),
-    ...said("目前的值依據：", item.current_evidence)];
-  const box = bh("li", "", bh("strong", "", item.card_name),
-    bh("span", "bi-meta", " " + biTypeLabel(item.entity_type) + "・" + item.label),
-    biProposalSides(item),
-    loss ? bh("p", "bi-warn bi-prop-loss", "接受會用 " + loss.now + " 字取代目前的 " + loss.old
-      + " 字。") : "",
-    (item.evidence || []).length ? bh("p", "bi-meta",
-      "接受後這個欄位算人工的值，提議的出處成為它的出處。"
-      + (cited ? "目前值的出處移到卡片的歷史，和舊值放在一起。" : ""))
-      : bh("p", "bi-warn bi-prop-bare", "這筆提議沒有出處：接受後這個欄位就沒有出處。"
-        + (cited ? "目前值的出處移到卡片的歷史，和舊值放在一起。" : "")),
-    bh("div", "bi-meta", "提議來源：" + (item.source.ref || item.source.kind)),
-    ...facts, actions, error);
-  box.dataset.proposal = item.id;
-  return box;
-}
-
 function biVaultState(state) {
   const box = el("bi-b-v-state"), v = state.vault || {};
   box.replaceChildren(); box.dataset.vault = v.id || "";
   bi.verSchemaConflicts = state.schema_conflicts || [];
   if (v.id) biVerConflictList(v.id);
   // Whatever moved the vault (a sync, an import, a commit) may have moved its proposals.
-  biProposals().catch((failure) => { el("bi-b-props-list").textContent = failure.message; });
+  biProposals().catch((failure) => biNotice(false, "讀不到修改提議：" + failure.message));
   const open = (state.conflicts || []).filter((c) => c.open).length;
   el("bi-b-v-info").replaceChildren(
     bh("p", "", bh("strong", "", v.title || v.id), "・" + (v.purpose || "（沒有寫目的）")),
@@ -8411,23 +8216,64 @@ el("bi-b-run-pick").addEventListener("change", () => {
     .catch((failure) => biNotice(false, failure.message));
 });
 
+// -- 2c's one review list (owner 2026-11-20) ----------------------------------------------
+// The run's candidate cards and the proposals to change cards already in the vault are rows
+// of one table, with a 類型 column (新卡片 / 修改既有卡片). The filters are 狀態 (default
+// 全部, so what was accepted stays in sight) and 類型. A change's row id is "proposal:<id>".
+const BI_KINDS = [["new", "新卡片"], ["change", "修改既有卡片"]];
+
+function biChangeId(item) { return "proposal:" + item.id; }
+
+function biChangeOf(id) {
+  if (!String(id || "").startsWith("proposal:")) return null;
+  const wanted = Number(String(id).slice("proposal:".length));
+  return [...(bi.proposals || []), ...(bi.proposalsDone || [])]
+    .find((item) => item.id === wanted) || null;
+}
+
+function biChangeReview(item) { return item.status || "pending"; }
+
+function biReviewItems() {
+  // Every row, before the filters: the run's candidates (when it can be reviewed here), then
+  // the pending changes, then the decided ones.
+  const cards = biRunReviewable(bi.build.run) ? bi.build.candidates || [] : [];
+  return [...cards.map((c) => ({id: c.id, kind: c.match === "existing" ? "change" : "new",
+    review: c.review, candidate: c})),
+  ...[...(bi.proposals || []), ...(bi.proposalsDone || [])].map((item) => ({
+    id: biChangeId(item), kind: "change", review: biChangeReview(item), change: item}))];
+}
+
+function biReviewShown() {
+  const kind = el("bi-b-cand-type").value, state = el("bi-b-cand-state").value;
+  return biReviewItems().filter((row) => (!kind || row.kind === kind)
+    && (!state || row.review === state));
+}
+
 function biCandShown() {
-  const type = el("bi-b-cand-type").value, state = el("bi-b-cand-state").value;
-  return bi.build.candidates.filter((c) => (!type || c.entity_type === type)
-    && (!state || c.review === state));
+  return biReviewShown().filter((row) => row.candidate).map((row) => row.candidate);
+}
+
+function biChangesTodo() {
+  // The pending changes the filters show: all of them, or none.
+  return biReviewShown().filter((row) => row.change && row.review === "pending")
+    .map((row) => row.change);
 }
 
 function biBuildCandTypes() {
   const select = el("bi-b-cand-type"), keep = select.value, counts = new Map();
-  for (const c of bi.build.candidates) {
-    counts.set(c.entity_type, (counts.get(c.entity_type) || 0) + 1);
-  }
+  for (const row of biReviewItems()) counts.set(row.kind, (counts.get(row.kind) || 0) + 1);
   const all = bh("option", "", "全部"); all.value = "";
-  select.replaceChildren(all, ...[...counts].map(([type, count]) => {
-    const option = bh("option", "", biTypeLabel(type) + "（" + count + "）");
-    option.value = type; return option;
+  select.replaceChildren(all, ...BI_KINDS.map(([kind, label]) => {
+    const option = bh("option", "", label + "（" + (counts.get(kind) || 0) + "）");
+    option.value = kind; return option;
   }));
-  select.value = counts.has(keep) ? keep : "";
+  select.value = BI_KINDS.some(([kind]) => kind === keep) ? keep : "";
+}
+
+function biBuildReviewList() {
+  // The list again, as it is now; the row shown in the pane stays as it is.
+  el("bi-b-review-split").hidden = !biRunReviewable(bi.build.run) && !biReviewItems().length;
+  biBuildCandTypes(); biBuildCandRows();
 }
 
 function biCandLabel(candidate, item) {
@@ -8443,13 +8289,34 @@ function biDecisionMark(review) {
   return bh("span", "bi-state bi-state-" + review, icon, decision[0]);
 }
 
+function biChangeRow(item) {
+  const open = biButton(item.card_name, () => biBuildPickCandidate(biChangeId(item)), "bi-link");
+  const cells = [
+    ["卡片", [open, bh("div", "bi-meta", biTypeLabel(item.entity_type))]],
+    ["類型", ["修改既有卡片"]],
+    ["欄位", [item.label || item.field]],
+    ["提議值", [bh("div", "bi-cand-value", item.value === null ? "（空）" : biValue(item.value))]],
+    ["狀態", [biDecisionMark(biChangeReview(item))]]];
+  const row = bh("tr", "", ...cells.map(([label, parts]) => {
+    const cell = bh("td", "", ...parts); cell.dataset.label = label; return cell;
+  }));
+  row.dataset.candidate = biChangeId(item); row.dataset.kind = "change";
+  row.setAttribute("aria-selected", String(biChangeId(item) === bi.build.candidateId));
+  row.addEventListener("click", (event) => {
+    if (!event.target.closest("button")) biBuildPickCandidate(biChangeId(item));
+  });
+  return row;
+}
+
 function biBuildCandRows() {
-  const body = el("bi-b-cands").tBodies[0], shown = biCandShown();
+  const body = el("bi-b-cands").tBodies[0], rows = biReviewShown(), all = biReviewItems();
   const focused = body.contains(document.activeElement);
-  const pending = bi.build.candidates.filter((c) => c.review === "pending").length;
-  el("bi-b-cand-count").textContent = "顯示 " + shown.length + "／" + bi.build.candidates.length
+  const pending = all.filter((row) => row.review === "pending").length;
+  el("bi-b-cand-count").textContent = "顯示 " + rows.length + "／" + all.length
     + "・待決定 " + pending;
-  body.replaceChildren(...shown.map((candidate) => {
+  body.replaceChildren(...rows.map((shown) => {
+    if (shown.change) return biChangeRow(shown.change);
+    const candidate = shown.candidate;
     const name = candidate.name || candidate.canonical_key || "（無名稱）";
     const open = biButton(name, () => biBuildPickCandidate(candidate.id), "bi-link");
     const fields = candidate.fields, first = fields.find((f) => f.change !== "same") || fields[0];
@@ -8458,6 +8325,7 @@ function biBuildCandRows() {
     const cells = [
       ["卡片", [open, bh("div", "bi-meta", biTypeLabel(candidate.entity_type) + "・"
         + biCandAction(candidate))]],
+      ["類型", [shown.kind === "change" ? "修改既有卡片" : "新卡片"]],
       ["欄位", [labels]],
       ["提議值", [bh("div", "bi-cand-value", first ? biValue(first.value) : "—")]],
       ["狀態", [biDecisionMark(candidate.review), " ",
@@ -8473,10 +8341,11 @@ function biBuildCandRows() {
     });
     return row;
   }));
-  if (!shown.length) {
-    const none = bh("td", "bi-empty", bi.build.candidates.length ? "這個篩選沒有候選卡。"
+  // Nothing to review and no run: the table is hidden, and holds nothing while a run loads.
+  if (!rows.length && (all.length || biRunReviewable(bi.build.run))) {
+    const none = bh("td", "bi-empty", all.length ? "這個篩選沒有要審核的。"
       : "這次執行沒有候選卡。");
-    none.colSpan = 4; body.append(bh("tr", "", none));
+    none.colSpan = 5; body.append(bh("tr", "", none));
   }
   // The rows are drawn anew: a keyboard stays on the row it was on.
   const here = focused && body.querySelector('tr[aria-selected="true"] button');
@@ -8507,17 +8376,17 @@ function biApplyAllLabel() {
   if (bi.build.applying) return;
   const open = biRunOpen(bi.build.run), todo = open ? biApplyAllTodo() : [];
   const accepted = open ? biApplyAccepted() : [];
-  el("bi-b-apply-all").textContent = "全部套用（" + todo.length + " 張）";
-  el("bi-b-apply-all").disabled = !todo.length || !!bi.build.accepting;
+  // One button for what the filters show still undecided, new cards and changes alike.
+  const all = todo.length + (biReadOnly() ? 0 : biChangesTodo().length);
+  el("bi-b-apply-all").textContent = "接受顯示的待決定（" + all + "）";
+  el("bi-b-apply-all").disabled = !all || !!bi.build.accepting;
   // One button that always writes what is accepted, with what is still undecided.
   const writes = todo.length + accepted.length;
   el("bi-b-apply-import").textContent = (todo.length ? "全部接受並匯入" : "匯入已接受的")
     + "（" + writes + " 張）";
   el("bi-b-apply-import").disabled = !writes || !!bi.build.accepting;
-  const filtered = el("bi-b-cand-type").value || el("bi-b-cand-state").value;
-  el("bi-b-apply-note").textContent = !open ? "" : (filtered
-    ? "只套用目前篩選顯示的" : "套用所有待決定的")
-    + "（＝接受，可改回待決定）；匯入寫入所有已接受的";
+  el("bi-b-apply-note").textContent = !all && !writes ? ""
+    : "接受可改回待決定；匯入寫入已接受的新卡片";
 }
 
 function biApplyAllName(candidate) {
@@ -8525,18 +8394,21 @@ function biApplyAllName(candidate) {
 }
 
 async function biApplyAll(andImport) {
-  const run = bi.build.run, todo = biApplyAllTodo();
-  const waiting = andImport ? biApplyAccepted().length : 0;
-  if (!biRunOpen(run) || !(todo.length || waiting) || bi.build.applying) return;
+  const run = bi.build.run, todo = biRunOpen(run) ? biApplyAllTodo() : [];
+  const waiting = andImport && biRunOpen(run) ? biApplyAccepted().length : 0;
+  // 「接受顯示的待決定」 also accepts the changes shown; 「全部接受並匯入」 is about new cards.
+  const changes = andImport || biReadOnly() ? [] : biChangesTodo();
+  if (!(todo.length || waiting || changes.length) || bi.build.applying) return;
   const button = el(andImport ? "bi-b-apply-import" : "bi-b-apply-all");
   const status = el("bi-b-apply-status"), others = ["bi-b-apply-all", "bi-b-apply-import"];
   const total = todo.length, left = [];
   let started = Date.now(), done = 0, applied = 0, before = 0, current = "", stopped = null;
-  let importing = false;
+  let importing = false, changing = false, changed = 0;
   const show = () => {
     const seconds = Math.floor((Date.now() - started) / 1000) + " 秒";
     status.textContent = importing ? "匯入中・" + seconds
-      : "套用中 " + done + "/" + total + "：" + current + "・" + seconds;
+      : changing ? "接受修改 " + changes.length + " 筆中・" + seconds
+        : "套用中 " + done + "/" + total + "：" + current + "・" + seconds;
   };
   // 「下一步」 and the other button wait for it.
   bi.build.applying = true; bi.build.accepting = true; bi.build.acceptProgress = "0／" + total;
@@ -8567,6 +8439,14 @@ async function biApplyAll(andImport) {
       done += chunk.length; bi.build.acceptProgress = done + "／" + total;
       biNext4(); biBuildCandRows(); show();
     }
+    if (changes.length) {
+      // As the proposals API decides them: each written as a person's value, one write.
+      changing = true; started = Date.now(); show();
+      const reply = await biCall("/api/bi/proposals/decide", {dataset: biDataset(),
+        action: "accept", field: null, origin: null, count: (bi.proposals || []).length});
+      changed = reply.decided || 0; changing = false;
+      await biProposals();
+    }
     if (andImport) {
       // Once, after every batch: what was refused stays out, and the rest is written.
       importing = true; started = Date.now(); bi.build.acceptProgress = null; biNext4(); show();
@@ -8585,7 +8465,11 @@ async function biApplyAll(andImport) {
     + "：" + named : "";
   const earlier = before ? "（另有 " + before + " 張先前已接受）" : "";
   let message;
-  if (stopped) {
+  if (stopped && done >= total && changes.length) {
+    message = (total ? "已套用 " + applied + " 張" + earlier + "；" : "") + "修改沒有接受："
+      + stopped.message + "。可以再按一次。";
+    biProposals().catch(() => {});
+  } else if (stopped) {
     message = "套用到第 " + (done + 1) + " 張時停下：" + stopped.message
       + "。其餘沒有送出，可以再按一次（已接受的不會重複）" + (andImport ? "；沒有匯入" : "")
       + "。已套用 " + applied + " 張" + earlier + (notAccepted ? "；" + notAccepted : "") + "。";
@@ -8600,8 +8484,9 @@ async function biApplyAll(andImport) {
       + "。已接受的還在，可以按「下一步：確認寫入」再試。"
       + (notAccepted ? notAccepted + "。" : "");
   } else {
-    message = "已套用 " + applied + " 張" + earlier
-      + (notAccepted ? "；" + notAccepted : "") + "。";
+    message = (total || !changes.length ? "已套用 " + applied + " 張" + earlier : "")
+      + (changed ? (total ? "，" : "") + "已接受 " + changed + " 筆修改（要 commit 才會寫進知識庫）"
+        : "") + (notAccepted ? "；" + notAccepted : "") + "。";
   }
   status.replaceChildren(message);
   status.classList.toggle("bi-err", !!stopped || !!unwritten || left.length > 0);
@@ -8616,6 +8501,7 @@ async function biApplyAll(andImport) {
       }, "bi-btn"));
   }
   biBuildSave(); biBuildRenderRun();
+  if (changed) biBuildVault().catch(() => {});
 }
 
 el("bi-b-apply-all").addEventListener("click", () => biApplyAll(false)
@@ -8627,9 +8513,19 @@ el("bi-b-run-pick").addEventListener("change", () => {
   el("bi-b-apply-status").textContent = "";
 });
 
-function biBuildPickCandidate(candidateId) {
+function biBuildPickCandidate(candidateId, quiet = false) {
   biBuildShowCandidate(candidateId);
   biBuildSave();
+  const change = biChangeOf(candidateId);
+  if (change && !quiet) {
+    // The card the change is about, in a side tab: one at a time from this list.
+    const before = bi.build.reviewCard;
+    bi.build.reviewCard = change.card_id;
+    if (before && before !== change.card_id && bi.cardTabs.has(before)) {
+      sideClose(biCardKey(before));
+    }
+    biOpenCard(change.card_id).catch((failure) => biNotice(false, failure.message));
+  }
   // Side by side the whole pair fits; stacked on a phone, go to the pane.
   const stacked = window.matchMedia("(max-width: 900px)").matches;
   (stacked ? el("bi-b-cand") : el("bi-b-review-split")).scrollIntoView(
@@ -8645,14 +8541,14 @@ function biBuildRenderRun(detail = true) {
   body.replaceChildren(); el("bi-b-chips").replaceChildren();
   biNext4();
   biBuildSteps(); biBuildRunPick();
-  // With no run the table is not drawn: empty, it pushed 待審提案 out of sight below it.
-  el("bi-b-review-split").hidden = !biRunReviewable(run);
+  // With no run and no change to review the table is not drawn; changes are rows of it.
+  el("bi-b-review-split").hidden = !biRunReviewable(run) && !biReviewItems().length;
   if (!biRunReviewable(run)) {
-    el("bi-b-cand-count").textContent = ""; el("bi-b-cand-type").replaceChildren();
     el("bi-b-same").replaceChildren();
-    el("bi-b-cand").replaceChildren(bh("p", "bi-empty", "選一列，看原文與引用。"));
     el("bi-b-chips").append(bh("p", "bi-empty", "在「Ingest」這一步按「Ingest」產生候選卡。"));
-    biApplyAllLabel();
+    biBuildCandTypes(); biBuildCandRows();
+    if (detail && biChangeOf(bi.build.candidateId)) biBuildShowCandidate(bi.build.candidateId);
+    else if (detail) el("bi-b-cand").replaceChildren(bh("p", "bi-empty", "選一列，看內容與出處。"));
     return;
   }
   // What decides the next press on the line; the rest of the run's counts folded.
@@ -8763,12 +8659,17 @@ async function biBuildReview(candidateId, body, quiet = false) {
   if (!quiet) { biBuildSave(); biBuildRenderRun(); }
 }
 
+function biNextPending(id) {
+  // The next row still undecided after this one, in the order shown.
+  const list = biReviewShown(), at = list.findIndex((row) => row.id === id);
+  return [...list.slice(at + 1), ...list.slice(0, Math.max(at, 0))]
+    .find((row) => row.review === "pending" && row.id !== id) || null;
+}
+
 async function biBuildDecide(candidateId, review) {
   // Shown before the answer comes: the row's mark, a word on what was done, and on to the next
   // row still undecided, as 180 of them are worked through one after another.
-  const list = biCandShown(), at = list.findIndex((c) => c.id === candidateId);
-  const next = [...list.slice(at + 1), ...list.slice(0, Math.max(at, 0))]
-    .find((c) => c.review === "pending");
+  const next = biNextPending(candidateId);
   const candidate = bi.build.candidates.find((c) => c.id === candidateId);
   const before = candidate.review;
   const name = candidate.name || candidate.canonical_key || "";
@@ -8821,6 +8722,8 @@ function biEvidence(item) {
 }
 
 function biBuildShowCandidate(candidateId) {
+  const change = biChangeOf(candidateId);
+  if (change) { biShowChange(change); return; }
   const candidate = bi.build.candidates.find((c) => c.id === candidateId);
   const box = el("bi-b-cand"); box.replaceChildren();
   if (!candidate) return;
@@ -8929,6 +8832,97 @@ function biBuildShowCandidate(candidateId) {
   parts.push(place);
   box.append(...parts);
   biBuildCandSource(candidate.fields.find((f) => f.evidence.length) || null);
+}
+
+// -- a change to a card already in the vault: its detail, and the card in a side tab -----
+function biShowChange(item) {
+  const id = biChangeId(item), review = biChangeReview(item);
+  const box = el("bi-b-cand"); box.replaceChildren();
+  bi.build.candidateId = id; bi.build.peek = null;
+  for (const row of el("bi-b-cands").tBodies[0].rows) {
+    row.setAttribute("aria-selected", String(row.dataset.candidate === id));
+  }
+  const parts = [bh("h4", "", item.card_name + "・" + biTypeLabel(item.entity_type) + "・"
+    + (item.label || item.field))];
+  parts.push(bh("p", "bi-meta", "修改既有卡片・", biButton("開啟卡片「" + item.card_name + "」",
+    () => biOpenCard(item.card_id), "bi-link")));
+  if (review !== "pending") {
+    const when = item.decided_at ? "・" + biTime(item.decided_at) : "";
+    parts.push(bh("p", "", biDecisionMark(review),
+      item.decided_by ? bh("span", "bi-meta", " " + item.decided_by + when) : "",
+      item.reason ? bh("span", "bi-meta", "・理由：" + item.reason) : ""));
+  }
+  const error = bh("div", "bi-err"); error.setAttribute("role", "alert");
+  const loss = review === "pending" ? biProposalLoss(item) : null;
+  if (!biReadOnly()) {
+    // One optional reason box (owner 2026-11-20): kept when written, never required.
+    const reason = bh("input", "bi-input");
+    reason.placeholder = "理由（選填）";
+    reason.setAttribute("aria-label", "理由（選填）：" + item.card_name + " 的 "
+      + (item.label || item.field));
+    reason.maxLength = 500;
+    const actions = bh("div", "bi-actions");
+    const decide = (action) => biChangeDecide(item, action, reason.value.trim(), actions, error);
+    const buttons = [
+      biButton("接受", () => {
+        if (!loss) return decide("accept");
+        // A second press that names the loss.
+        actions.replaceChildren(bh("span", "bi-warn", "用 " + loss.now + " 字取代目前的 "
+          + loss.old + " 字？"), biButton("確定取代", () => decide("accept"), "go"),
+        biButton("取消", () => actions.replaceChildren(...buttons), "bi-btn"));
+      }, "go"),
+      biButton("拒絕", () => decide("reject"), "bi-btn"),
+      biButton("待決定", () => decide("pending"), "bi-btn")];
+    buttons[0].disabled = buttons[1].disabled = review !== "pending";
+    buttons[2].disabled = review === "pending";
+    actions.append(...buttons);
+    actions.buttons = buttons;
+    parts.push(actions, reason, error);
+  }
+  parts.push(biProposalSides(item));
+  if (loss) {
+    parts.push(bh("p", "bi-warn bi-prop-loss", "接受會用 " + loss.now + " 字取代目前的 "
+      + loss.old + " 字。"));
+  }
+  const cited = (item.current_evidence || []).length;
+  if (review === "pending") {
+    parts.push((item.evidence || []).length ? bh("p", "bi-meta",
+      "接受後這個欄位算人工的值，提議的出處成為它的出處。"
+      + (cited ? "目前值的出處移到卡片的歷史，和舊值放在一起。" : ""))
+      : bh("p", "bi-warn bi-prop-bare", "這筆提議沒有出處：接受後這個欄位就沒有出處。"
+        + (cited ? "目前值的出處移到卡片的歷史，和舊值放在一起。" : "")));
+  }
+  const said = (label, rows) => (rows || []).map((e) => bh("div", "bi-meta",
+    label + (e.source_name || "") + (e.excerpt ? "「" + (e.excerpt.length > 120
+      ? e.excerpt.slice(0, 120) + "…" : e.excerpt) + "」" : "")));
+  parts.push(bh("div", "bi-meta", "提議來源：" + (item.source.ref || item.source.kind)
+    + (item.origin ? "（" + item.origin + "）" : "")),
+  ...said("提議的依據：", item.evidence), ...said("目前的值依據：", item.current_evidence));
+  if (review === "accepted") parts.push(bh("p", "bi-meta", "要 commit 才會寫進知識庫。"));
+  box.append(...parts);
+}
+
+async function biChangeDecide(item, action, reason, actions, error) {
+  // An answer at once, in the pane; then on to the next row still undecided.
+  const buttons = actions.buttons || [...actions.children];
+  error.textContent = "";
+  actions.replaceChildren(bh("span", "bi-meta", "儲存中…"));
+  const id = biChangeId(item), next = action === "pending" ? null : biNextPending(id);
+  try {
+    await biCall("/api/bi/cards/" + encodeURIComponent(item.card_id) + "/proposals/" + item.id,
+      {dataset: biDataset(), action, base_version: item.version, reason});
+  } catch (failure) {
+    error.textContent = "沒有存到：" + failure.message + "。"; actions.replaceChildren(...buttons);
+    return;
+  }
+  const words = {accept: "已接受", reject: "已拒絕", pending: "已改回待決定"}[action];
+  el("bi-b-cand-last").replaceChildren(biDecisionMark({accept: "accepted", reject: "rejected",
+    pending: "pending"}[action]), " " + item.card_name);
+  biNotice(true, words + "「" + item.card_name + "」的" + (item.label || item.field)
+    + (action === "pending" ? "。" : "；要 commit 才會寫進知識庫。"));
+  await biProposals();
+  biBuildPickCandidate(next ? next.id : id, true);
+  biBuildVault().catch(() => {});
 }
 
 function biBuildValue(value, typeName, fieldName, selfIds) {
