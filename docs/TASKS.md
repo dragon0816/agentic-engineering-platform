@@ -5327,3 +5327,21 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   test_telegram_collect, test_telegram_agent_bots, test_telegram_ingress pass; ruff, ruff format
   --check clean; mypy on changed files clean except pre-existing errors from another agent's
   uncommitted aep_bi/cards/ai_runs.py change (AiRuntime `background` type). Full suite not run.
+- [x] 2026-11-21 BI Ingest: four parts at once, a real stop with a 停止 button, the part total up
+  front, and resume after a Host restart (owner decision 2026-11-21; branch
+  bi-knowledge-round2-20261120; contract docs/CONTRACTS.md "BI AI path: extraction runs", bullet
+  "Parallel parts, stop, restart"; decision docs/DECISIONS.md 2026-11-21). A 28-part PDF read one
+  part at a time took about 42 minutes; now up to `extract.PARALLEL_PARTS` (4) parts at once,
+  merged in document order (same candidates and ids). Stop is checked before each part and format
+  retry, writes nothing and ends `cancelled`; the Host task says `stopped`; 自動執行 has 停止
+  beside it (only while running) and the one-source manual Ingest shows its 停止 too, both saying
+  停止中…（等目前這段完成） until the worker ends (run view `working`). Progress is (0, N) before
+  the first call (第 1／N 段 at once). A run left `extracting` without a worker becomes `partial`
+  with `interrupted` parts; 重試 (also shown in place by 自動執行) reads only those, the rest from
+  the answer cache. Verification: tests/test_bi_ingest_parallel_stop.py (new, 11),
+  tests/test_bi_ingest_stop_ui.py (new browser test), test_bi_ai_runs, test_bi_extract,
+  test_bi_extract_evidence, test_bi_reading_runs, test_bi_model_fallback, test_bi_rerun,
+  test_bi_inbox, test_bi_stage_gear_ui auto-run tests pass; ruff, ruff format --check, mypy on
+  changed files clean. Known, not from this change: test_bi_batch_ingest_ui's two batch tests
+  wait for Ingest progress in #bi-status-build, which 97aef268 moved to #bi-b-progress;
+  test_install_data_approval expects AiRuntime without `vision`. Full suite not run.

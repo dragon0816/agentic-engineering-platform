@@ -8350,3 +8350,29 @@ convert, ingest and the test, step by step or automatically, and looks at the re
 - Not a harness change (AGENTS.md rule 22): a channel feature using the existing conversation
   turn, tool narrowing and turn-scoped Host tools. Contract: docs/CONTRACTS.md "Persistent agents
   and agent bots", bullet "Collection bot questions".
+
+### 2026-11-21 — BI Ingest: four parts at once, a real stop, the total up front, resume after restart
+
+- **Owner decision 2026-11-21.** One PDF (61,699 characters of Markdown) became 28 parts read one
+  after another at about 91 s per gpt-5.5 call: 42 minutes. Measured offline: four calls at once
+  through the gateway take no longer each than one. 停止 only flipped the run's status (the loop
+  never looked), 自動執行 had no stop, the part total appeared only after part 1, and a killed Host
+  left the run `extracting` forever with a page following it forever.
+- **Decided:** (1) `extract.extract` reads up to `PARALLEL_PARTS = 4` parts at once in a thread
+  pool and merges strictly in document order, so candidates, ids and merges equal a sequential
+  read; progress and layout writes only from the coordinating thread; `CachingModel` counters
+  locked. (2) A real stop: `cancelled()` is checked before each part starts and before each format
+  retry; parts under way finish; nothing of the attempt is written; the run stays `cancelled`; the
+  Host task reports `stopped`. The page has 停止 beside 自動執行 (only while it runs) and for a
+  one-source manual Ingest, and says 停止中…（等目前這段完成） until the run's worker ends (run view
+  `working`). (3) `on_chunk(0, N)` before the first call, so the page shows 第 1／N 段 at once.
+  (4) Resume: the runs with a worker are tracked in the Host process; a run `extracting` with none
+  becomes `partial` with the unwritten parts as `interrupted` failures, so 重試 reads only those
+  (parts read before answer from the answer cache); 自動執行 shows that in place with 重試.
+- **Rejected:** larger chunks now — every cached answer would be invalidated and the cards would
+  change (different excerpts give different candidates); kept for a separate decision. More than
+  four parallel calls — not measured against the gateway's limits. A heartbeat or PID check for
+  orphan runs — one Host owns a workspace, so an in-process registry is enough and cannot kill
+  or misjudge another process.
+- Not a harness change (AGENTS.md rule 22): BI feature-plugin code. Contract: docs/CONTRACTS.md
+  "BI AI path: extraction runs", bullet "Parallel parts, stop, restart".

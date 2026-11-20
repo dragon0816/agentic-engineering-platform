@@ -4485,9 +4485,20 @@ checks, quote location), `ai_runs.py` (runs, background job, retry), `runs.py` (
   `{done, chunks}`, `failures` `[{chunk, line_start, line_end, code, message, retryable}]`, `warnings`,
   `types`. Review, recheck and commit accept `review` and `partial`; cancel during `extracting` keeps the run
   `cancelled` when the job ends.
+- **Parallel parts, stop, restart (owner 2026-11-21).** Up to `extract.PARALLEL_PARTS` (4) chunks are read at
+  once; answers merge in document order, so candidates, ids and merges equal a sequential read. `progress` is
+  `{done: 0, chunks: N}` before the first model call (chunks outside a retry count as done). Cancel stops new
+  chunks and format retries; chunks under way finish (one call at most each), nothing of the attempt is
+  written, the run stays `cancelled`, and the `bi-ingest` task ends `stopped` (`failed` / `succeeded`
+  otherwise). The AI run view adds `working` (a thread of this Host still reads it; true after cancel until
+  the calls under way end) and `interrupted`. A run found `extracting` with no worker in this Host (Host
+  stopped or killed) becomes `partial` on its next view: the unwritten chunks of its last attempt (layout
+  `attempt`) become failures with code `interrupted`; with no chunk known yet the retry reads every chunk.
+  A chunk stopped before a format retry is a failure with code `cancelled`.
 - **Retry.** `POST /api/bi/runs/<id>/retry {"dataset"}` on a `partial` or `failed` AI run re-runs only the
   failed chunks in the background; new candidates merge into the stored ones (reviews kept). 409
-  `run_closed` when there is nothing to retry; 400 `model_unavailable`.
+  `run_closed` when there is nothing to retry; 400 `model_unavailable`. Chunks read before an interruption
+  answer from the answer cache.
 
 ## BI method sessions (Session B, phase 5)
 
