@@ -5345,3 +5345,13 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   changed files clean. Known, not from this change: test_bi_batch_ingest_ui's two batch tests
   wait for Ingest progress in #bi-status-build, which 97aef268 moved to #bi-b-progress;
   test_install_data_approval expects AiRuntime without `vision`. Full suite not run.
+- [x] 2026-11-21 Collection time where it is easy to find (owner decision 2026-11-21; branch
+  bi-knowledge-round2-20261120; contract docs/CONTRACTS.md BI inbox, "Where the collect time is
+  set"). BI Data input ⚙ shows the working domain's Telegram 收集 row (bot, 開啟, 收集時間,
+  審核提醒); 管理 → Telegram 收集 kept as the all-domains view. 新增 BI 收集 bot gains 收集時間
+  (default 18:00) saved with the bot through `POST /api/bi/inbox/bot-time` (domain checked
+  first; a target that is not exactly one domain is said beside 儲存, nothing written); the
+  Agents row shows 收集時間 and the next run. Verification: test_bi_inbox, test_bi_inbox_gear_ui
+  (new, browser), test_collect_bot_time_ui (new, browser), test_telegram_collect*,
+  test_agent_sidebar_ui, test_agents_settings, test_bi_stage_gear_ui pass; ruff, ruff format
+  --check, mypy on changed files clean. Full suite not run.

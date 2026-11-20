@@ -7525,6 +7525,18 @@ BI inbox (`aep_bi.inbox`, `<workspace>/bi/inbox/inbox.sqlite`):
 - Page routes: `GET /api/bi/inbox?dataset=` (domains with bot and times; the Host's
   `bi-knowledge` collection bots), `POST /api/bi/inbox/settings {domain, bot, enabled,
   collect_at, review_at}` (`bot_unknown`, `time_invalid`, `collect_time_missing`).
+- Where the collect time is set (owner 2026-11-21): the working domain's row (bot, 開啟,
+  收集時間, 審核提醒, 儲存) in BI → 建立 → Data input ⚙ (`#bi-inbox-gear`, a vault only; under
+  全部領域 one line asks for a working domain); 管理 → Telegram 收集 stays the all-domains view.
+  Settings → Agents → 新增/編輯 BI 收集 bot has `#collect-time` (prefilled `18:00`, or the bound
+  domain's time) and saves bot and time together: `POST /api/bi/inbox/bot-time {bot, target,
+  enabled, collect_at, dry_run: true}` first (`domain_unresolved` 409 when `target` is not
+  exactly one domain, `time_invalid`, `collect_time_missing`, `bot_missing`; nothing written,
+  said beside 儲存), then `POST /api/settings/collection-bots`, then `bot-time` without
+  `dry_run`, which binds the bot to that domain with `enabled` (the form's 開啟, also the bot's
+  own switch) and `collect_at`, keeping `review_at`; the bot need not be running yet. The
+  Agents table's collection-bot row adds 「・收集時間 HH:MM（下次 …）」 from `GET /api/bi/inbox`
+  (all domains), or 「・尚未設定收集時間」.
 - `POST /api/bi/runs/<id>/commit` of an inbox run (not a repeated `already` answer) runs
   `bi_bench.run(home=<home>)`, draws the home's Dashboard and sends the result from each
   item's bot to its sender, in the background. Reminders go the same way.
