@@ -1277,6 +1277,31 @@ Agent Web 要在執行中，Telegram 才會有回應。
 | 「… Open Agent Web to set them, then send /run again.」 | Workflow 的設定只能在 Agent Web 填（第 9 章） |
 | `Not saved: The token does not look like a bot token` | 從 @BotFather 重新複製完整權杖 |
 
+### 8.3 子代理和它自己的 bot（設定 → Agents）
+
+左側欄分成三段：**主功能**、**Sessions**（「New session」在搜尋框上面）和 **Agents**；
+按段落標題可以收合，瀏覽器會記住。
+
+新增一個子代理並綁 bot：
+
+1. 用 @BotFather 建一個新 bot，把權杖存成這台電腦的使用者環境變數，例如
+   `AEP_TG_SALES`（Windows「編輯您帳戶的環境變數」）。**頁面上只填變數名稱，不要貼權杖**；
+   貼權杖會被拒絕，什麼都不會寫入。
+2. Agent Web → Settings → **Agents** → **新增 agent**：填名稱、用途，勾選它可以用的 Skills
+   （也可以「從 AgentProfile 建立」帶入）。模型使用對話的模型。
+3. 勾「綁定 Telegram bot」，填環境變數名稱和允許的傳送者（一行一位：Telegram 數字 id，
+   後面可接 actor），按 **儲存 agent**。
+4. 儲存後立即套用，不用重開；若當時有 Telegram 對話或問答流程正在進行，會等它結束才套用
+   （頁面顯示「結束後自動套用」）。主 Agent 的 Telegram bot（8.1）要先設定好。
+
+傳給這個 bot 的訊息會進到該子代理自己的對話，只用它勾選的 Skills，回覆從同一個 bot 送回；
+不在名單上的傳送者不會被回應；這個 bot 只對話，`/run` 和指令請用主 Agent 的 bot。
+側欄 Agents 展開子代理可看到它的對話（在 AEP 開的、從它的 bot 來的，以及它的
+AgentProfile 的委派紀錄，後兩者只能閱讀），按「+ 新對話」在 AEP 和它對話。
+
+BI 收集 bot 也在同一頁：**新增 BI 收集 bot** 填 bot 名稱、領域、環境變數名稱和傳送者，
+用途顯示為「BI 收集→領域」；不需要再手改 telegram.json 或 host.json。
+
 ---
 
 ## 9. Workflow 設定
