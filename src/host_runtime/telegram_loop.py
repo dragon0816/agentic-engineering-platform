@@ -11,6 +11,7 @@ import asyncio
 import threading
 
 from channels.telegram import TelegramIngress
+from common.execution import Failure
 
 
 class ResidentTelegram:
@@ -38,12 +39,27 @@ class ResidentTelegram:
         self._stop = asyncio.Event()
         self._ready.set()
         try:
-            failure = loop.run_until_complete(self.ingress.run(self._stop))
+            failure = loop.run_until_complete(self._poll(self._stop))
             self.failure = None if failure is None else failure.code
         except Exception:  # pragma: no cover - reported as a stopped loop, never raised
             self.failure = "telegram_loop_crashed"
         finally:
             loop.close()
+
+    async def _poll(self, stop: asyncio.Event) -> Failure | None:
+        """The conversation bot, and beside it each collection bot (owner consent
+        2026-11-20) on the same loop; the conversation bot's failure is the loop's,
+        a collection bot's stays on that bot (`problem`)."""
+        others = [
+            asyncio.ensure_future(collector.run(stop))
+            for collector in getattr(self.ingress, "collectors", [])
+        ]
+        try:
+            return await self.ingress.run(stop)
+        finally:
+            stop.set()
+            if others:
+                await asyncio.gather(*others, return_exceptions=True)
 
     def stop(self, timeout: float = 60.0) -> None:
         if self._loop is not None and self._stop is not None and not self._loop.is_closed():

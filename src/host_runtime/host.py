@@ -1650,6 +1650,17 @@ def build_telegram(
     ingress.approvals = approvals
     ingress.session_artifacts = session_artifacts
     ingress.history = history
+    # Collection bots (owner consent 2026-11-20): one whose token name the host
+    # does not map is left out, so it can never stop the conversation bot.
+    from channels import telegram_collect
+
+    usable = set(config.credential_environment())
+    ingress.collectors = [
+        collector
+        for collector in telegram_collect.build(ingress_config, agent.state, resolver)
+        if not isinstance(resolver, EnvironmentCredentials)
+        or collector.bot.credential.name in usable
+    ]
     return ingress
 
 

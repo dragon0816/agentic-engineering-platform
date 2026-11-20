@@ -23,8 +23,9 @@ import threading
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 from common.plugins import DEFAULT_PAGE_ORDER
 
@@ -68,6 +69,66 @@ class PackageInstaller(Protocol):
     ) -> PreparedPackage:
         """Check a package whole; raises `PackageRefused`."""
         ...
+
+
+#: What a collection bot received (owner consent 2026-11-20, one bot per BI
+#: domain): addresses (with any words), files, words alone, or a Reply.
+TelegramItemKind = Literal["link", "file", "text", "reply"]
+
+
+@dataclass(frozen=True)
+class TelegramFile:
+    """A file a Telegram message carries; `read` downloads it (Bot API limits apply)."""
+
+    name: str
+    size: int | None
+    read: Callable[[], bytes]
+
+
+@dataclass(frozen=True)
+class TelegramItem:
+    """A message to a collection bot, for the feature the bot is configured for.
+    `bot` names the bot, `target` is its configured target (may be empty), `actor`
+    the sender's mapped platform actor (an unmapped sender never gets here)."""
+
+    feature: str
+    bot: str
+    target: str
+    kind: TelegramItemKind
+    actor: str
+    text: str
+    received_at: datetime
+    sender_name: str = ""
+    urls: tuple[str, ...] = ()
+    files: tuple[TelegramFile, ...] = ()
+    #: The text of the message a Reply answers (trimmed, redacted).
+    quoted: str | None = None
+
+
+@dataclass(frozen=True)
+class TelegramAnswer:
+    """What the collection bot replies."""
+
+    text: str
+
+
+@dataclass(frozen=True)
+class TelegramBot:
+    """A configured collection bot, as a feature may list it."""
+
+    name: str
+    feature: str
+    target: str
+
+
+class Messenger(Protocol):
+    """The Host's collection bots (owner consent 2026-11-20): which there are, and a
+    proactive message from one of them to one of its mapped senders; False when the
+    bot or the sender is unknown or the message could not be sent."""
+
+    def bots(self) -> tuple[TelegramBot, ...]: ...
+
+    def send(self, bot: str, actor: str, text: str) -> bool: ...
 
 
 class Feature:
@@ -150,6 +211,14 @@ class Feature:
     def package_installer(self, kind: str) -> PackageInstaller | None:
         """The installer of a Shared Platform package kind this feature owns."""
         return None
+
+    def telegram_item(self, item: TelegramItem, host: Any) -> TelegramAnswer | None:
+        """Answer a message to one of this feature's collection bots. `host` is the
+        resident host object (Agent Web), None when there is none."""
+        return None
+
+    def telegram_ready(self, messenger: Messenger, host: Any) -> None:
+        """The collection bots are up: `messenger` lists them and sends from them."""
 
 
 class FeatureSet:
@@ -245,6 +314,17 @@ class FeatureSet:
             if found is not None:
                 return found
         return None
+
+    def telegram_item(self, item: TelegramItem, host: Any) -> TelegramAnswer | None:
+        """The answer of the feature the item's bot is for; None when it is not loaded."""
+        for feature in self.features:
+            if feature.name == item.feature:
+                return feature.telegram_item(item, host)
+        return None
+
+    def telegram_ready(self, messenger: Messenger, host: Any) -> None:
+        for feature in self.features:
+            feature.telegram_ready(messenger, host)
 
     def page_fragments(self) -> dict[str, str]:
         joined = {slot: "" for slot in PAGE_SLOTS}

@@ -68,6 +68,7 @@ from agent.turn_progress import TURN_PROGRESS, TurnProgress, TurnProgressBoard
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, MARKET_MATRIX_SPEC
 from capabilities.script_tools import load_script_tools
 from capabilities.workflow_author.review import rendered as review_rendered
+from channels import telegram_collect
 from channels.telegram_flow import is_run_word
 from common.action_cards import CARD_KEY, card_in
 from common.assets import AssetIdentity, Owner, WorkflowManifest
@@ -2648,6 +2649,8 @@ class AgentWeb:
         """Poll with the host's current Telegram ingress, if it has one."""
         if self.runtime.telegram is not None:
             self.runtime.telegram.cards = self
+            # Collection bots to their feature plugins (owner consent 2026-11-20).
+            telegram_collect.attach(self.runtime.telegram.collectors, features.active(), self)
             self.telegram_loop = ResidentTelegram(self.runtime.telegram)
             self.telegram_loop.start()
 

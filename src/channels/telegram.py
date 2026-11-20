@@ -275,9 +275,38 @@ class TelegramSender(Contract):
     actor: Symbol
 
 
+class TelegramCollectionBot(Contract):
+    """A further bot of this Host that collects for a feature plugin (owner consent
+    2026-11-20: one bot per BI domain). What its mapped senders send goes to the
+    feature (`feature`, e.g. `bi-knowledge`) with `target` (e.g. a BI domain), never
+    to a model. Its token is a `SecretRef` of its own."""
+
+    name: Symbol
+    credential: SecretRef
+    feature: Symbol
+    target: str = Field(default="", max_length=200)
+    senders: tuple[TelegramSender, ...] = ()
+
+    @model_validator(mode="after")
+    def one_actor_per_sender(self) -> Self:
+        ids = [item.sender_id for item in self.senders]
+        actors = [item.actor for item in self.senders]
+        if len(ids) != len(set(ids)) or len(actors) != len(set(actors)):
+            raise ValueError("a sender maps to one actor and an actor to one sender")
+        return self
+
+    def actor_for(self, sender_id: int) -> str | None:
+        for item in self.senders:
+            if item.sender_id == sender_id:
+                return item.actor
+        return None
+
+
 class TelegramIngressConfig(Contract):
     """Host configuration for one bot serving one Bridge. The token is a
-    `SecretRef`; a token pasted anywhere in this record is refused."""
+    `SecretRef`; a token pasted anywhere in this record is refused.
+    `collection_bots` are further bots for feature plugins, each polled on its
+    own (`channels.telegram_collect`); the conversation bot is unaffected."""
 
     credential: SecretRef
     bridge_id: Symbol
@@ -285,6 +314,7 @@ class TelegramIngressConfig(Contract):
     senders: tuple[TelegramSender, ...] = ()
     poll_timeout_seconds: int = Field(default=25, ge=0, le=50, strict=True)
     api_base: Text = "https://api.telegram.org"
+    collection_bots: tuple[TelegramCollectionBot, ...] = ()
 
     @field_validator("api_base")
     @classmethod
@@ -299,6 +329,10 @@ class TelegramIngressConfig(Contract):
             raise ValueError("a sender maps to one actor and an actor to one sender")
         if not self.api_base.startswith("https://") or "/bot" in self.api_base:
             raise ValueError("api_base is the https origin of the Bot API, without a token")
+        names = [bot.name for bot in self.collection_bots]
+        tokens = [self.credential.name, *(bot.credential.name for bot in self.collection_bots)]
+        if len(names) != len(set(names)) or len(tokens) != len(set(tokens)):
+            raise ValueError("each bot has its own name and its own token")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 
@@ -1040,6 +1074,10 @@ class TelegramIngress:
         # A plain reason for a failed model turn (e.g. the LLM gateway is not
         # running or still starting); set by the host, None says nothing more.
         self.explain_failure: Callable[[Failure], str | None] | None = None
+        # The collection bots configured beside this one (owner consent
+        # 2026-11-20), each a `telegram_collect.TelegramCollector` polled on its
+        # own; set by the host. This bot's own handling never looks at them.
+        self.collectors: list[Any] = []
 
     def offset(self) -> int | None:
         """How far this bot has been consumed, from the Bridge's own durable

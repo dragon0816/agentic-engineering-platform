@@ -61,6 +61,8 @@ TEXT_TYPES = {
     ".pdf": "application/pdf",
     ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ".html": "text/html",
+    ".htm": "text/html",
 }
 MARKDOWN_DIR = "markdown"
 MAX_RUNS_LISTED = 100

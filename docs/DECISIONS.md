@@ -8112,3 +8112,40 @@ schedule with at-most-once runs, review reminder, tests after import, proactive 
 single-bot link/file detection, domain buttons and `/bi link|domain` routing. Earlier owner
 confirmations stay: plugin timer instead of Host schedules; files with captions to a conversation
 bot still go to the model; AI-suggest threshold 0.7 only matters if a generic BI bot is added later.
+### 2026-11-19 — Telegram link collection P1: implementation choices
+
+- The per-domain collect and review times run on a BI plugin timer (`aep_bi/inbox/scheduler.py`)
+  started when Agent Web attaches Telegram, with occurrences claimed once in the inbox's
+  SQLite file (at most once across polls and restarts; one catch-up within 20 hours; shown as
+  tracked `bi-inbox` tasks for the restart check). Rejected: the Host schedule store — its
+  targets are installed Workflows and Agent Tasks, which cannot reach Agent Web's model an AI
+  ingest needs (assessment §4); a new target kind would be a core change outside the consent.
+  No n8n.
+- `/bi link|links|unlink|domain` are answered through the consented feature hook (as
+  `command` items), not as Skill commands: a capability's output is never shown in Telegram
+  (`_describe` names only status) and on a company workstation a non-owner sender's command is
+  refused as `delegation_not_allowed`, so MD/PM/sales could neither run nor see them. Routing
+  stays deterministic (AGENTS rule 8). Owner to confirm this reading of consent item (2).
+- A Reply to an inbox message that names `#<id>` of a summary-only item adds the sender's text
+  (a `reply` item; other Replies are declined and go on as before).
+- Files without a caption (or with only `#tags`) go to the inbox; a file with words keeps going
+  to the model as before.
+- The review reminder names where to review (Agent Web on the host PC → BI, vault and domain)
+  without an address: Agent Web's address carries its page token and listens on loopback only.
+- The headless-browser fallback for login-walled Threads/Instagram posts exists but is off
+  (`options.json` `browser_fallback`) until the owner tests real links (assessment §8).
+
+### 2026-11-20 — One bot per BI domain: implementation choices
+
+- Collection bots live in `telegram.json` as `collection_bots` beside the conversation bot
+  (one file, no new layout path); the settings page keeps them when it saves. They run on the
+  conversation bot's resident loop thread, each with its own cursor and token, and stop with it.
+  A bot whose token name `host.json` does not map is left out, never blocking the conversation bot.
+- A bot is bound to a domain on the BI page (stored in the inbox, one domain per bot); the
+  config `target` is the fallback. Everything a mapped sender sends goes to that domain:
+  links, files (with or without words) and words alone (kept as a text source).
+- Kept from the single-bot P1: fetch, HTML→Markdown, inbox, plugin timer, reminder, tests after
+  import, 只取得摘要 + Reply. `/links` and `/unlink` stay on the bot (plain text, no routing).
+  Dropped: link/file detection on the conversation bot, domain buttons, AI suggestion,
+  untapped/未分類 handling, defaults and `#tag`.
+

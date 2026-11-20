@@ -7323,6 +7323,63 @@ namespace ownership survives even when the plugin registers no Agent tools.
 No new policy, grant, per-call approval, model-data or TurnEffects contract is added.
 The existing worker protocol and PluginManagerProtocol remain unchanged.
 
+## Telegram collection bots and the BI inbox (owner consent 2026-11-20)
+
+Scope: AGENTS22 consent "2026-11-20 — Telegram collection: one bot per BI domain" in
+docs/DECISIONS.md. The conversation bot (`channels.telegram.TelegramIngress`) is unchanged.
+
+Core:
+
+- `TelegramIngressConfig.collection_bots: tuple[TelegramCollectionBot, ...] = ()`; each
+  `{name (Symbol), credential (SecretRef), feature (feature name, e.g. bi-knowledge),
+  target (optional, e.g. a BI domain), senders}`. Bot names and token names are unique,
+  including the conversation bot's; a pasted token is refused like everywhere in the
+  record. The settings page keeps them when it saves the conversation bot and writes no
+  `collection_bots` key when there are none.
+- `host.build_telegram` builds a `channels.telegram_collect.TelegramCollector` for each bot
+  whose credential name `host.json` maps (`credentials`), as `TelegramIngress.collectors`;
+  an unmapped one is left out. `ResidentTelegram` runs them on its loop beside the
+  conversation bot; each has its own cursor `telegram-collect.<name>` and own token.
+- A collection bot answers only its mapped senders (others are ignored and listed in
+  `unmapped`). Every message becomes `features.TelegramItem(feature, bot, target, kind,
+  actor, text, received_at, sender_name, urls, files, quoted)` with `kind` `file` (files),
+  `link` (an http(s) address in the words), `reply` (a Reply), else `text`; credential-like
+  text is refused. It goes to `FeatureSet.telegram_item` → the feature whose `name` is the
+  bot's `feature`; its `TelegramAnswer(text)` is sent back. No model turn, Workflow or
+  command router is involved; with no such feature the bot says it is not connected.
+- `features.Messenger`: `bots() -> (TelegramBot(name, feature, target), ...)` and
+  `send(bot, actor, text) -> bool` (only to that bot's mapped senders). Agent Web calls
+  `telegram_collect.attach(collectors, features.active(), web)`, which calls
+  `Feature.telegram_ready(messenger, host)`.
+
+BI inbox (`aep_bi.inbox`, `<workspace>/bi/inbox/inbox.sqlite`):
+
+- A domain is `<vault id>:<home>`; `settings(domain, enabled, collect_at, review_at, bot)`
+  binds one collection bot to one domain (binding it elsewhere unbinds it). An item goes to
+  the bot's bound domain, else to the domain its `target` names; an unbound bot says so.
+- Items (link, file, text; `bot`, `actor`, `parent` for a Reply's added text), picks (`by`
+  = `bot`), results per (item, domain) inserted once as the processing claim, `seen`
+  (domain, normalized URL, content sha256) for dedup, schedule claims
+  (`<kind>:<domain>:<UTC occurrence>`). Item states `queued | done | needs_text |
+  withdrawn` (withdrawn final; refused once processing claimed it); result states
+  `processing | review | summary | duplicate | failed`.
+- On the bot: `/links` and `/unlink <id>`; a Reply to 「#N 只取得摘要…」 adds text to #N.
+- A fetched page becomes `<platform>-<title>-<item>.html`: the bytes as served after
+  `<!-- aep-bi-link-provenance {json} -->` (ASCII JSON: original_url, final_url, sender,
+  sender_name, sent_at, fetched_at, fetch_method `http|browser`, http_status,
+  content_sha256, summary_only, item, note). `.html/.htm` convert through
+  `cards.html_markdown`; the Markdown opens with that provenance and says 「只取得摘要」
+  when only meta was obtained. Words become `text-<item>.md` / `note-<parent>-<item>.md`.
+- Each processed item starts `ai_runs.start(kind="ingest", folder=<home>/sources)` with
+  actor `<sender> via telegram`; nothing is accepted, committed or pushed by the inbox.
+- Page routes: `GET /api/bi/inbox?dataset=` (domains with bot and times; the Host's
+  `bi-knowledge` collection bots), `POST /api/bi/inbox/settings {domain, bot, enabled,
+  collect_at, review_at}` (`bot_unknown`, `time_invalid`, `collect_time_missing`).
+- `POST /api/bi/runs/<id>/commit` of an inbox run (not a repeated `already` answer) runs
+  `bi_bench.run(home=<home>)`, draws the home's Dashboard and sends the result from each
+  item's bot to its sender, in the background. Reminders go the same way.
+- Optional `<workspace>/bi/inbox/options.json` `{"browser_fallback": true}`: a login-walled
+  Threads/Instagram post is read with the local headless Edge; off by default.
 ## BI skill and tool packages `aep.bi.package/v1` (owner 2026-11-19)
 
 Design: `docs/phases/BI_SKILL_TOOL_PACKAGE_IMPORT_DESIGN_20261119.md`; owner choices in

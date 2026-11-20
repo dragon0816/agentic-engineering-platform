@@ -5144,6 +5144,30 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   list rows. Guides BI_BUILD.zh-TW.md and USER_GUIDE.zh-TW.md §6.8 updated (分享, accept-all,
   source delete, tabs, no tool approval). BI_SOP.zh-TW.md screenshots/steps still show the old
   top row and controls (owner to retake).
+
+## Telegram link collection P1 — 2026-11-19
+
+- [x] Core c3ee4082 (AGENTS22 consent 2026-11-19): Telegram link/file/button/command/
+  Reply items reach `Feature.telegram_item` before a model turn; `TelegramIngress.send`
+  proactive messages to mapped actors only; Agent Web attaches features. Tests:
+  tests/test_telegram_feature_items.py.
+- [x] dc91e1f9: `.html` sources convert with the standard library (`cards/html_markdown.py`).
+- [x] 2ef5e582: BI inbox (`aep_bi/inbox/`): domain buttons (AI suggestion, recent, more,
+  multi-select), `#tag`, default, `/bi link|links|unlink|domain`, Reply text for
+  summary-only items; per-domain collect/review times in BI 管理 → Telegram 收集; collect
+  fetch → immutable source with provenance → dedup → ingest to review; untapped →
+  confident AI suggestion else 未分類; reminder to senders; after import tests +
+  Dashboard + result. Tests: tests/test_bi_inbox.py (fixtures tests/fixtures/bi_inbox/).
+- [x] (superseded 2026-11-20 by one bot per domain; see below)
+- [x] Owner 2026-11-20: one bot per BI domain (DECISIONS "Telegram collection: one bot per
+  BI domain"). Rework on the same branch: the conversation bot is back to main's behaviour
+  (single-bot routing, domain buttons and `/bi link|domain` removed); `collection_bots` in
+  telegram.json, each polled on its own (`channels/telegram_collect.py`) straight to the
+  feature hook; per-bot proactive send; BI 管理 → Telegram 收集 binds a bot to a domain.
+  Tests: tests/test_telegram_collect.py, tests/test_bi_inbox.py. Guide:
+  docs/guides/BI_BUILD.zh-TW.md 「Telegram 收集」.
+- [ ] Owner: create one bot per domain with BotFather and add it (guide), map senders;
+  test real Threads/Instagram links and decide `browser_fallback`; live check after merge.
 - [x] 2026-11-20 BI skill/tool package import and export (owner 2026-11-19; branch
   bi-package-import-20261119; design docs/phases/BI_SKILL_TOOL_PACKAGE_IMPORT_DESIGN_20261119.md):
   aep.bi.package/v1 (manifest or inferred), zip or folder, preview new/update/same/conflict/
