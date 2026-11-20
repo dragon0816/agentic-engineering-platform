@@ -225,6 +225,7 @@ BI_CSS = r"""
 /* The one AI panel and the share step as tabs of the shell's side area (owner 2026-11-20). */
 .extra-panel > .bi-ai-panel { position: static; width: auto; height: calc(100vh - 56px);
   border: 0; border-radius: 0; box-shadow: none; }
+.bi-read { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 10px; }
 .bi-bench-sum { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 10px; }
 .bi-bench-sum > div { min-width: 96px; padding: 6px 12px; border: 1px solid var(--line);
   border-radius: 8px; background: var(--panel); }
@@ -4979,6 +4980,7 @@ function biSkillsDraw(reply) {
     edit.addEventListener("click", () => {
       el("bi-b-adv-skills").open = true; biSkillForm(item);
     });
+    const view = biButton("檢視", () => biSkillView(item), "bi-btn", "檢視判讀規則 " + item.name);
     // A rule shipped with the vault: its default text, beside the current one when they differ.
     let detail = null;
     const shipped = "default_body" in item ? biButton("預設版本", () => {
@@ -4986,7 +4988,7 @@ function biSkillsDraw(reply) {
       if (!detail.row.hidden) biSkillDefault(item, detail.cell);
     }, "bi-btn", "看判讀規則 " + item.name + " 的預設版本") : null;
     biRow(list, [bh("strong", "", item.name), item.role === "classify" ? "分類" : "擷取",
-      "第 " + item.revision + " 版", where, state, biRowActions([edit], shipped)]);
+      "第 " + item.revision + " 版", where, state, biRowActions([view, edit], shipped)]);
     if (shipped) { detail = biRowDetail(list); detail.row.hidden = true; }
   }
   box.append(skills.length ? list.box : bh("p", "bi-meta", "還沒有判讀規則。"));
@@ -5066,8 +5068,56 @@ function biFollowSourceFolder() {
 
 // -- a home's data-processing tools (BI_CARD_MODEL.md P2-a) -------------------------
 const BI_BUILTIN_TOOLS = [
-  ["AI 擷取（內建）", "用模型讀來源的 Markdown，依 schema 和這個領域的判讀規則產生候選卡。"],
-  ["表格規則（內建，不用模型）", "CSV、Excel 依欄名對應到 schema 的欄位，不用模型。"]];
+  ["AI 擷取（內建）", "用模型讀來源的 Markdown，依 schema 和這個領域的判讀規則產生候選卡。",
+    "llm"],
+  ["表格規則（內建，不用模型）", "CSV、Excel 依欄名對應到 schema 的欄位，不用模型。", "rules"]];
+
+// 「檢視」 (owner 2026-11-20): a built-in program or a rule, read only, as a tab of the side
+// area; pressing it again focuses that tab.
+function biSideRead(id, title, fill) {
+  const panel = sideOpen({id, title, render: (into) => {
+    into.classList.add("bi-pane"); into.lang = "zh-Hant";
+    into.append(bh("p", "bi-meta", "唯讀"));
+    fill(into);
+  }});
+  return panel;
+}
+
+function biTextBlock(label, body) {
+  return [bh("h5", "", label), bh("pre", "bi-meta bi-read", String(body || "（沒有）"))];
+}
+
+async function biBuiltinView(key) {
+  bi.builtins = bi.builtins || (await biCall("/api/bi/builtins")).builtins;
+  const item = bi.builtins[key];
+  biSideRead("bi-builtin-" + key, item.title, (into) => {
+    into.append(bh("h4", "", item.title), bh("p", "bi-meta", "來源：" + item.origin));
+    if (key === "llm") {
+      into.append(bh("p", "", "預設卡片類型：" + item.types.join("、")),
+        ...biTextBlock("預設的判讀說明", item.instructions),
+        ...biTextBlock("出處規則（每次都套用）", item.evidence),
+        ...biTextBlock("送給模型的提示（{types} 等會換成這個領域的內容）", item.prompt));
+    } else {
+      into.append(bh("p", "", item.about), ...biTextBlock("配方的寫法", item.recipe));
+    }
+  });
+}
+
+function biSkillView(item) {
+  // A rule as it is now, and the shipped text beside it when it has one and differs.
+  biSideRead("bi-skill-" + item.name, "規則 " + item.name, (into) => {
+    into.append(bh("h4", "", item.name),
+      bh("p", "bi-meta", (item.role === "classify" ? "分類" : "擷取") + "・第 " + item.revision
+        + " 版・" + ("default_body" in item ? (item.modified ? "內建規則，這個知識庫改過"
+          : "內建規則（預設內容）") : "這個知識庫的規則")),
+      bh("p", "", "套用到：" + ((item.applies_to || []).join("、") || "所有來源")),
+      bh("p", "", "卡片類型：" + ((item.card_types || []).join("、") || "依領域")),
+      ...biTextBlock("目前的內容", item.body));
+    if ("default_body" in item && item.modified) {
+      into.append(...biTextBlock("內建的預設內容", item.default_body));
+    }
+  });
+}
 
 async function biTools(vaultId) {
   const reply = await call("/api/bi/vaults/" + vaultId + "/tools");
@@ -5131,9 +5181,10 @@ function biToolsDraw(vaultId, reply) {
   const tools = (reply.tools || []).filter(mine), drafts = (reply.drafts || []).filter(mine);
   // The built-in ways a source becomes cards are data-processing programs too (owner
   // 2026-11-20: 「目前沒有 default 處理資料的程式嗎？」): always listed, chosen in Ingest.
-  for (const [name, about] of BI_BUILTIN_TOOLS) {
+  for (const [name, about, key] of BI_BUILTIN_TOOLS) {
     biRow(list, [[bh("strong", "", name), bh("p", "bi-meta", about)],
-      [biBadge("內建", "good")], "在 Ingest 選用"]);
+      [biBadge("內建", "good")], biRowActions([biButton("檢視", () => biBuiltinView(key),
+        "bi-btn", "檢視 " + name)])]);
   }
   for (const tool of tools) row(tool, false);
   for (const draft of drafts) row(draft, true);

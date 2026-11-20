@@ -131,6 +131,34 @@ def _error(status: int, code: str, message: str) -> Answer:
     return status, {"ok": False, "code": code, "message": message}
 
 
+def builtins_view() -> dict[str, Any]:
+    """The shipped AI extraction (its prompt, evidence rules, default instructions and card
+    types) and the table rules (how a table maps to cards), as a person reads them."""
+    from aep_bi.cards import extract, recipes
+
+    return {
+        "llm": {
+            "title": "AI 擷取（內建）",
+            "origin": "AEP 內建",
+            "types": list(extract.DEFAULT_TYPES),
+            "instructions": extract.DEFAULT_INSTRUCTIONS,
+            "evidence": extract.EVIDENCE_RULES,
+            "prompt": extract.SYSTEM,
+        },
+        "rules": {
+            "title": "表格規則（內建，不用模型）",
+            "origin": "AEP 內建",
+            "about": (
+                "CSV、TSV、Excel 的每一列是一張卡片：欄名對到 schema 欄位的名稱、標籤或別名，"
+                "值依欄位型別正規化（列舉值、連結、數字），不認得的欄位列為未知欄位、不匯入。"
+                "同一張卡的多列合併成一張候選卡，每一列的值都當作出處。"
+                "要多個表或特殊轉換時，可以在 Ingest 的進階寫配方（aep.bi.recipe/v1）。"
+            ),
+            "recipe": (recipes.__doc__ or "").strip(),
+        },
+    }
+
+
 def _upload_source(handler: Any, parsed: Any) -> None:
     """A source file sent as the raw request body, of any size: it goes to disk as
     it arrives (`Staging.add_source_stream`), with no JSON and no base64."""
@@ -360,6 +388,9 @@ def _route(
             }
         if path == "/api/bi/schema-suggest":
             return 200, {"suggestion": schema_suggest.view(workspace, store.dataset)}
+        if path == "/api/bi/builtins":
+            # What the built-in programs do, for 「檢視」 (owner 2026-11-20), read only.
+            return 200, {"ok": True, "builtins": builtins_view()}
         if path == "/api/bi/schemas":
             return 200, {"schemas": catalog.listing(workspace)}
         if path == "/api/bi/schemas/example":
