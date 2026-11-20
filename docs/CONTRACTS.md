@@ -7322,3 +7322,46 @@ or ToolAccess. Tool-to-page updates use the normal version/busy/rollback semanti
 namespace ownership survives even when the plugin registers no Agent tools.
 No new policy, grant, per-call approval, model-data or TurnEffects contract is added.
 The existing worker protocol and PluginManagerProtocol remain unchanged.
+
+## BI skill and tool packages `aep.bi.package/v1` (owner 2026-11-19)
+
+Design: `docs/phases/BI_SKILL_TOOL_PACKAGE_IMPORT_DESIGN_20261119.md`; owner choices in
+`docs/DECISIONS.md` (2026-11-19). Code: `aep_bi/cards/packages.py`.
+
+- **Layout**: `aep-bi-package.json` (optional), `skills/<name>.md` (skill revision file:
+  frontmatter + body), `tools/<name>.py` (single file, reads `INPUT`, writes `.csv`/`.md` to
+  `OUTPUT`), optional `README.md`. A zip may wrap these in one folder. Other suffixes are listed
+  as skipped.
+- **Manifest** `{"format": "aep.bi.package/v1", "name", "version", "description", "schema",
+  "exported_from": {"vault", "home", "commit", "at"}, "contents": [{"kind": "skill"|"tool",
+  "name", "file", "role", "applies_to", "card_types", "description", "sha256", "from_revision",
+  "uncommitted"?, "needs_rewrite"?}]}`. `applies_to` is relative to the home (`sources/...`).
+  Without a manifest, `.py` files are tools and `.md` files with a skill frontmatter are skills
+  (`package.inferred: true`, confirmed in the preview).
+- **Limits** (whole package refused, `package_invalid`): zip ≤ 20 MB, unpacked ≤ 50 MB, ≤ 200
+  members, ≤ 100 items, member compression ratio ≤ 100 (members ≥ 64 KiB); no absolute path,
+  drive letter, `..`, backslash, NUL, symlink, encrypted member, case-only duplicate or Windows
+  reserved name; header sizes are verified while reading. `.py` ≤ 200,000 characters; files must
+  be UTF-8.
+- **Routes**: `POST /api/bi/vaults/<id>/package-upload?home=&name=` (raw zip body) and
+  `POST /api/bi/vaults/<id>/package {"preview": {"home", "name", "files": [{"path", "text"}]}}`
+  return the preview `{token, home, home_label, package, items, skipped, counts, batch, guard,
+  expires_in}`; each item `{id: "<kind>:<name>", kind, name, file, description, status:
+  new|update|same|conflict|invalid, reasons, warnings, needs_rewrite, action:
+  new_revision|rename|null, rename_to, revision?, default}`. `POST .../package {"apply": {"token",
+  "items": [{"id", "as"?}]}}` stages ≤ 10 items per call through `vault.save_skill` /
+  `vault.save_tool` into the preview's working domain and answers per-item `result`:
+  `staged|already|same|failed`; a conflict needs `as`. `{"discard": token}` forgets the upload.
+  Tokens live under the vault's local folder (`package_imports/`) for one hour
+  (`package_expired`). `GET .../package?home=` lists exportable items; `GET
+  .../package-export?home=&items=skill:a,tool:b` answers `application/zip`.
+- **Rules**: import only into the current working domain; same content (skill: role,
+  applies_to, card_types, body; tool: sha256) is skipped; a different role is a conflict imported
+  under `<name>-<package>`; an uncommitted local change is a conflict defaulting to a new
+  revision; conflicts are never pre-ticked. classify skills, missing card types and `applies_to`
+  in another domain are invalid. Nothing in a package runs at import: tools are only parsed;
+  imports outside the sandbox, sibling modules and network/process modules are warnings.
+- **Tool unit**: `tool:<home>/<name>` may carry `description` (first paragraph of the module
+  docstring) and `needs_rewrite: true` (「需改寫」: a command-line script without the
+  INPUT/OUTPUT contract). `tool-run` refuses it with `tool_needs_rewrite`; a revision saved after
+  the AI rewrite (the existing `tool` session, which is told to rewrite such code) drops it.
