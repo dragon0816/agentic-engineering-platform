@@ -265,3 +265,15 @@ def test_the_settings_form_says_the_bot_collects_and_answers() -> None:
     form = PAGE.split('id="collect-form"', 1)[1].split("</form>", 1)[0]
     assert "傳連結或檔案給它就收進這個領域" in form
     assert "從這個領域的 BI 卡片回答" in form
+
+
+def test_the_bot_form_sets_its_collect_time_in_the_same_save() -> None:
+    from host_runtime.web_page import PAGE
+
+    form = PAGE.split('id="collect-form"', 1)[1].split("</form>", 1)[0]
+    assert '<input id="collect-time" type="time" value="18:00">' in form
+    # The domain is checked before the bot is written, then the time is saved.
+    assert "await collectTime({...timed, dry_run: true})" in PAGE
+    assert '"/api/bi/inbox/bot-time"' in PAGE
+    # The Agents table row shows the 收集時間 and the next run.
+    assert '"・收集時間 " + timed.collect_at' in PAGE

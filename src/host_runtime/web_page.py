@@ -1413,6 +1413,8 @@ tr:last-child td { border-bottom: none; }
           Telegram 數字 id，後面可接 actor</label>
         <textarea id="collect-senders" spellcheck="false" rows="2"
                   placeholder="123456789 leo.chi"></textarea>
+        <label for="collect-time">收集時間：每天這時把收到的連結與檔案 Ingest 到待審</label>
+        <input id="collect-time" type="time" value="18:00">
         <label class="laya-check"><input type="checkbox" id="collect-enabled" checked> 開啟</label>
         <p><button class="go" id="collect-save" type="submit">儲存 bot</button>
           <button id="collect-cancel" type="button">取消</button>
@@ -4380,7 +4382,7 @@ function renderAgentSettings(view) {
       bot: botCell(agent.bot, {bind: () => openAgentForm(agent, true)}),
       edit: () => openAgentForm(agent)})),
     ...view.collection_bots.map((bot) => ({key: "collect:" + bot.name, who: bot.name,
-      purpose: bot.purpose,
+      purpose: collectPurpose(bot),
       bot: botCell(bot), edit: () => openCollectForm(bot)})),
   ];
   const t = table(["Agent / bot", "用途", "Telegram bot", ""], rows, (row) => {
@@ -4403,6 +4405,7 @@ function renderAgentSettings(view) {
     shown.push(empty);
   }
   el("agents-rows").replaceChildren(...shown);
+  refreshCollectTimes();
   el("agent-add").disabled = !view.writable;
   el("collect-add").disabled = !view.writable || !view.telegram_configured;
   const profiles = el("agent-profile");
@@ -4497,7 +4500,50 @@ function openCollectForm(bot) {
   el("collect-senders").value = sendersText(bot ? bot.senders : mainSenders());
   setSaveStatus(el("collect-save-status"), "");
   el("collect-enabled").checked = bot ? bot.enabled : true;
+  const timed = bot && collectTimes[bot.name];
+  el("collect-time").value = (timed && timed.collect_at) || COLLECT_DEFAULT_TIME;
   el("collect-delete").hidden = !bot;
+}
+
+// A collection bot's 收集時間 is its BI domain's inbox setting (owner 2026-11-21): read
+// from /api/bi/inbox (every domain's bot and times), written with /api/bi/inbox/bot-time.
+const COLLECT_DEFAULT_TIME = "18:00";
+let collectTimes = {};
+
+function collectPurpose(bot) {
+  const span = document.createElement("span");
+  span.dataset.collectTime = bot.name;
+  span.append(text(bot.purpose || ""));
+  return span;
+}
+
+function collectTimeText(bot) {
+  const timed = collectTimes[bot];
+  if (!timed || !timed.collect_at) return "・尚未設定收集時間";
+  return "・收集時間 " + timed.collect_at + (timed.enabled ? "（下次 " + timed.next + "）"
+    : "（沒有開啟）");
+}
+
+async function refreshCollectTimes() {
+  const spans = [...document.querySelectorAll("#agents-rows [data-collect-time]")];
+  if (!spans.length) return;
+  let reply;
+  try { reply = await call("/api/bi/inbox"); } catch (failure) { return; }
+  collectTimes = {};
+  for (const d of reply.domains || []) if (d.bot) collectTimes[d.bot] = d;
+  for (const span of spans) {
+    const purpose = span.firstChild ? span.firstChild.textContent : "";
+    span.replaceChildren(text(purpose), text(collectTimeText(span.dataset.collectTime)));
+  }
+}
+
+async function collectTime(body) {
+  try { return await call("/api/bi/inbox/bot-time", body); }
+  catch (failure) {
+    const payload = failure.payload || {};
+    throw Object.assign(new Error(payload.message || failure.message),
+      {code: payload.message ? "" : failure.code});
+  }
 }
 
 // The outcome beside the form's save button (AGENTS rule 23): never silent.
@@ -4541,8 +4587,10 @@ async function agentAction(path, body, button, working, status, row) {
     }
     loadAgents().catch(() => {});
     followBotReload(saved, shown);
+    return true;
   } catch (failure) {
     saveRefused(status, failure);
+    return false;
   } finally { button.disabled = false; button.textContent = label; }
 }
 
@@ -4639,19 +4687,36 @@ el("agent-delete").addEventListener("click", () => {
   agentAction("/api/settings/agents/delete", {id: el("agent-id").value},
     el("agent-delete"), "刪除中…", el("agent-save-status"));
 });
-el("collect-form").addEventListener("submit", (event) => {
+el("collect-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   let senders;
   const status = el("collect-save-status");
   try { senders = parseSenders(el("collect-senders").value); }
   catch (failure) { saveRefused(status, failure); return; }
-  agentAction("/api/settings/collection-bots", {
+  // The bot and its 收集時間 are one save: the domain is checked first, so a target that is
+  // not exactly one BI domain is said here and nothing is written.
+  const timed = {bot: el("collect-name").value.trim(), target: el("collect-target").value,
+    enabled: el("collect-enabled").checked, collect_at: el("collect-time").value || null};
+  try { await collectTime({...timed, dry_run: true}); }
+  catch (failure) { saveRefused(status, failure); return; }
+  const saved = await agentAction("/api/settings/collection-bots", {
     name: el("collect-name").value, target: el("collect-target").value,
     bot: {variable: el("collect-variable").value,
       token: el("collect-token").value.trim() || null, senders,
       enabled: el("collect-enabled").checked},
   }, el("collect-save"), "儲存中…", status,
   () => "collect:" + el("collect-name").value.trim());
+  if (!saved) return;
+  let note;
+  try {
+    const done = (await collectTime(timed)).domain;
+    note = "已儲存。收集時間 " + (done.collect_at || "未設定") + "・" + done.next;
+  } catch (failure) {
+    note = "bot 已儲存，但收集時間沒有儲存：" + failure.message;
+  }
+  setSaveStatus(status, note, note.startsWith("bot 已儲存"));
+  el("agents-result").textContent = note;
+  refreshCollectTimes();
 });
 el("collect-delete").addEventListener("click", () => {
   if (!confirm("刪除這個收集 bot？")) return;
