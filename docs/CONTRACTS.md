@@ -5597,6 +5597,49 @@ it did before.
   without the field). It never changes the running configuration: the flag applies after a restart.
 
 
+## Persistent agents and agent bots (2026-11-20)
+
+Decision: `docs/DECISIONS.md` 2026-11-20 "Sidebar sections and agents bound to Telegram bots".
+Code: `src/host_runtime/persistent_agents.py`, `src/host_runtime/agents_settings.py`,
+`TelegramAgentBot` / `TelegramIngress.owner_agent` (`src/channels/telegram.py`),
+`attach_telegram_bots` (`src/host_runtime/host.py`), `AgentWeb.agent_settings*`,
+`reload_telegram_bots`, `agents_overview`, `_converse_options` (`src/host_runtime/web.py`).
+Tests: `tests/test_agents_settings.py`, `tests/test_telegram_agent_bots.py`,
+`tests/test_agent_sidebar_ui.py`.
+
+- **Agents file** `<workspace>/agents.json` = `{"agents": [PersistentAgent]}`; `PersistentAgent` =
+  `{id (slug ≤ 40, not "main"), name (≤ 60), purpose (≤ 500), skills: ["ns/name@version"] (≤ 40),
+  model_policy: "session", profile?: "ns/name@version"}`. Writes are atomic and keep unknown keys;
+  an entry that no longer validates is skipped. The main agent is fixed and never stored.
+- **Turn scope.** A turn of a sub-agent (its bot, or an Agent Web conversation with
+  `ConversationRecord.agent`) calls `LocalAgent.converse` with `allowed_tools` = the installed
+  Skill tools (`Gateway.skill_tools`) of its `skills` (Host tools are not offered) and its purpose
+  as guidance; admission, approvals, at-most-once and the model client are unchanged. A deleted
+  agent: the bot answers `AGENT_BOT_GONE`; an Agent Web turn gets no tools.
+- **Telegram.** `TelegramIngressConfig.agent_bots: [{name, credential: SecretRef, agent, senders,
+  enabled}]` (one bot per agent; names and tokens unique across all bots); `TelegramCollectionBot`
+  gains `enabled` (default true). An agent bot is a `TelegramIngress` on the same Agent with cursor
+  `telegram-agent.<name>`, sessions `telegram-agent-<agent>-chat-<id>`, stored history records
+  tagged `agent`; it converses only (`/run` and dot commands → `AGENT_BOT_COMMANDS`); unmapped
+  senders are ignored. The conversation bot's `activity()` includes its agent bots' (rule 19).
+- **API.** `GET /api/settings/agents` → `{ok, writable, reload, telegram_configured, main, agents
+  [+bot {name, variable, token_present, senders, enabled, running, problem}], collection_bots
+  [+purpose "BI 收集→<target>"], skills, profiles}`; `POST /api/settings/agents` (`AgentForm`:
+  id?, name, purpose, skills, profile?, bot? {variable, senders, enabled}),
+  `/api/settings/agents/delete` {id}, `/api/settings/collection-bots` (`CollectionBotForm`: name,
+  target, feature?, bot), `/api/settings/collection-bots/delete` {name}; 409 codes
+  `bot_token_value_refused`, `bot_variable_invalid`, `bot_sender_invalid`,
+  `telegram_not_configured`, `telegram_bots_invalid`, `agent_invalid`, `agent_unknown`,
+  `bot_unknown`, `settings_read_only`. A bot binding writes `host.json` credentials
+  `telegram_agent_<id>` / `telegram_collect_<name>` (an existing collection bot keeps its secret)
+  → the variable, and the bot into `telegram.json` (or `telegram.disabled.json`).
+  `GET /api/agents` → main + sub-agents with `bot {enabled}` and `conversations` (kind
+  `conversation` and read-only `delegation` entries of the agent's `profile`).
+  `POST /api/conversations` accepts `{"agent": id}`; `/api/conversations` items carry `agent`.
+- **Applying.** After a save the bots are rebuilt on the kept conversation-bot ingress and the
+  polling loop restarts only once no Telegram turn or flow runs on any bot (`reload`: `waiting`,
+  `applying`, `applied`, `not_running`, `failed`); no Agent Web restart.
+
 ## Coding change at scale
 
 `coding/change@1.0.0` (Workflow `engineering/coding-change@1.1.0`), `docs/phases/CODING_AT_SCALE.md`.

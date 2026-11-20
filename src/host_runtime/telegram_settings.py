@@ -182,15 +182,13 @@ def apply_telegram_settings(
         bridge_id=current.device.bridge_id,
         namespace=current.namespace,
         senders=senders,
-        # Collection bots are configured by hand and kept as they are.
+        # Collection and agent bots are kept as they are (Settings → Agents
+        # edits them: `host_runtime.agents_settings`).
         collection_bots=() if kept is None else kept.collection_bots,
+        agent_bots=() if kept is None else kept.agent_bots,
     )
-    payload = (
-        ingress.model_dump_json(
-            indent=2, exclude={"collection_bots"} if not ingress.collection_bots else None
-        ).encode("utf-8")
-        + b"\n"
-    )
+    empty = {name for name in ("collection_bots", "agent_bots") if not getattr(ingress, name)}
+    payload = ingress.model_dump_json(indent=2, exclude=empty or None).encode("utf-8") + b"\n"
     if checked.enabled:
         write_atomically(layout.telegram, payload)
         if _disabled(layout).is_file():

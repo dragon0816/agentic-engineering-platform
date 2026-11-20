@@ -47,12 +47,16 @@ class ResidentTelegram:
             loop.close()
 
     async def _poll(self, stop: asyncio.Event) -> Failure | None:
-        """The conversation bot, and beside it each collection bot (owner consent
-        2026-11-20) on the same loop; the conversation bot's failure is the loop's,
-        a collection bot's stays on that bot (`problem`)."""
+        """The conversation bot, and beside it each collection bot and agent bot
+        (owner consent 2026-11-20) on the same loop; the conversation bot's failure
+        is the loop's, another bot's stays on that bot (`problem`)."""
         others = [
-            asyncio.ensure_future(collector.run(stop))
-            for collector in getattr(self.ingress, "collectors", [])
+            asyncio.ensure_future(bot.run(stop))
+            for bot in (
+                *getattr(self.ingress, "collectors", []),
+                # Bots bound to persistent sub-agents (owner consent 2026-11-20).
+                *getattr(self.ingress, "agent_bots", []),
+            )
         ]
         try:
             return await self.ingress.run(stop)

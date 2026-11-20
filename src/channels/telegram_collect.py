@@ -356,7 +356,7 @@ class TelegramBots:
 
 
 def build(config: Any, state: Any, resolver: CredentialResolver) -> list[TelegramCollector]:
-    """The collection bots of a `TelegramIngressConfig`."""
+    """The collection bots of a `TelegramIngressConfig` that are switched on."""
     return [
         TelegramCollector(
             bot,
@@ -366,6 +366,7 @@ def build(config: Any, state: Any, resolver: CredentialResolver) -> list[Telegra
             poll_timeout_seconds=config.poll_timeout_seconds,
         )
         for bot in config.collection_bots
+        if bot.enabled
     ]
 
 

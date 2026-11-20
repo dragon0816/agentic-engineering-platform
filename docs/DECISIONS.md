@@ -8165,3 +8165,13 @@ Settings → Agents holding agents, their bot binding (token environment variabl
 allowed senders, and the BI collection bots (purpose 「BI 收集→領域」), replacing hand edits of
 telegram.json/host.json. The existing conversation bot and main agent behave as today.
 Not covered: permissions/approvals, multi-agent delegation semantics, model routing changes.
+
+### 2026-11-20 — Agent Web three-area layout with a tabbed side area
+
+Owner: Agent Web is three areas — 功能選擇區 (left sidebar), 資料主顯示區 (each page's main
+content) and 附加資料顯示區 (right): extra items open there as browser-like tabs — history,
+benchmark details, generated or local files (html, md, txt) and AI collaboration sessions.
+BI 測試 step: the commit/share block leaves the main area; 「看歷史紀錄」 opens in the side area;
+Benchmark and Dashboard are tabs in the main area; benchmark details open in the side area;
+benchmark results show summary numbers. This supersedes the 2026-11-20 morning idea of putting
+AI 分析/Benchmark tabs only in the BI right panel. GUI only; no harness change.
