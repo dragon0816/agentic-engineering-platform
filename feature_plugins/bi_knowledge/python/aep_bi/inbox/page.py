@@ -11,9 +11,7 @@ INBOX_BUTTON = (
 INBOX_PANEL = """
         <section id="bi-inbox" class="bi-step" hidden aria-labelledby="bi-inbox-h">
           <h4 id="bi-inbox-h">Telegram 收集</h4>
-          <p class="bi-meta">每個領域一個 Telegram bot：傳給它的連結、檔案和文字，
-            在收集時間轉檔並 Ingest 到待審；審核提醒時間通知傳送者有幾張候選卡待審。
-            bot 要先在這台電腦的 Telegram 設定加入（見 BI 建置指南）。</p>
+          <p class="bi-meta">傳給領域 bot 的連結與檔案，在收集時間 Ingest 到待審。</p>
           <div id="bi-inbox-rows"></div>
           <p id="bi-inbox-status" class="bi-meta" role="status" aria-live="polite"></p>
         </section>"""
