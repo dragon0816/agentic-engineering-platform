@@ -485,6 +485,7 @@ def candidate(
             warnings.append(
                 {
                     "code": "model_field_unknown",
+                    "field": str(field_name),
                     "message": f"模型提出的欄位 {field_name} 不在 schema",
                 }
             )
@@ -519,6 +520,7 @@ def candidate(
                 warnings.append(
                     {
                         "code": "evidence_not_found",
+                        "field": item.name,
                         "message": f"{item.label}：模型引用的原文不在來源中，改標為無出處",
                     }
                 )
@@ -544,13 +546,18 @@ def candidate(
                 warnings.append(
                     {
                         "code": "number_not_in_quote",
+                        "field": item.name,
                         "message": f"{item.label}：{value:g} 不在引用的原文裡，改標為推論",
                     }
                 )
         if basis == "inference" and not reading:
             reason = _text(entry.get("reason")) or "模型沒有說明理由"
             warnings.append(
-                {"code": "inference", "message": f"{item.label} 是推論：{reason[:300]}"}
+                {
+                    "code": "inference",
+                    "field": item.name,
+                    "message": f"{item.label} 是推論：{reason[:300]}",
+                }
             )
         fields.append(
             {

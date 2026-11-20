@@ -797,6 +797,7 @@ def _run_action(
             actor=who,
             take_new=given.get("take_new"),
             confirm_same_name=given.get("confirm_same_name"),
+            confirm_warning=given.get("confirm_warning"),
         )
         return 200, {"ok": True, **answer}
     if rest == ["accept"]:

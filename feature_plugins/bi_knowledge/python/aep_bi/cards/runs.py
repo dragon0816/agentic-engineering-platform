@@ -837,6 +837,28 @@ def _normalize(reg: Registry, item: FieldDef, raw: Any) -> Any:
     return value
 
 
+def _confirm_warning(candidate: dict[str, Any], given: Any, actor: str) -> None:
+    """A person's 「確認」 of one warning (owner 2026-11-20): a warning never blocks, and once
+    a person has looked at it, it moves to `confirmed` with who and when, never dropped."""
+    if not isinstance(given, dict) or not isinstance(given.get("code"), str):
+        raise BiStoreError("warning_invalid", "confirm_warning 必須是 {code, field, message}")
+    kept, found = [], None
+    for warning in candidate.get("warnings") or []:
+        same = (
+            warning.get("code") == given["code"]
+            and warning.get("field") == given.get("field")
+            and (given.get("message") is None or warning.get("message") == given.get("message"))
+        )
+        if same and found is None:
+            found = warning
+        else:
+            kept.append(warning)
+    if found is None:
+        raise BiStoreError("warning_unknown", "這張候選卡沒有這個警告")
+    candidate["warnings"] = kept
+    candidate.setdefault("confirmed", []).append({**found, "by": actor, "at": now()})
+
+
 def _edit_fields(
     reg: Registry, entity: TypeDef, candidate: dict[str, Any], edits: dict[str, Any], actor: str
 ) -> None:
@@ -874,6 +896,12 @@ def _edit_fields(
         candidate["edits"].append(
             {"field": item.name, "old": old, "new": value, "by": actor, "at": now()}
         )
+        # A person's value answers what the model's warning said about that field.
+        for warning in [w for w in candidate.get("warnings") or [] if w.get("field") == item.name]:
+            candidate["warnings"].remove(warning)
+            candidate.setdefault("confirmed", []).append(
+                {**warning, "by": actor, "at": now(), "edited": True}
+            )
 
 
 def review(
@@ -888,6 +916,7 @@ def review(
     actor: str,
     take_new: Any = None,
     confirm_same_name: Any = None,
+    confirm_warning: Any = None,
 ) -> dict[str, Any]:
     staging = Staging(workspace, dataset)
     staging.store.refuse_write()
@@ -895,6 +924,8 @@ def review(
     candidate = next((c for c in staging.candidates(run_id) if c["id"] == candidate_id), None)
     if candidate is None:
         raise BiStoreError("candidate_unknown", "找不到這張候選卡")
+    if confirm_warning is not None:
+        _confirm_warning(candidate, confirm_warning, actor)
     reg = catalog.for_store(staging.store)
     entity = reg.type(candidate["entity_type"])
     if fields is not None:

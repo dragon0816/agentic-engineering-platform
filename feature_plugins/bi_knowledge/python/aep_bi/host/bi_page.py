@@ -8571,6 +8571,42 @@ function biBuildSameNames() {
     list);
 }
 
+// A warning never blocks 接受 (only errors do; owner 2026-11-20). Each says which field and
+// why, and offers the two ways to settle it: 修改 the value, or 確認 it as it is (kept as who
+// confirmed it, never dropped).
+function biCandWarnings(candidate, open) {
+  const box = bh("div", "bi-cand-warnings");
+  box.append(bh("p", "bi-meta", "警告不會擋下接受；確認或修改後就不再列為警告。"));
+  const list = bh("ul", "bi-warn");
+  for (const warning of candidate.warnings) {
+    const field = warning.field ? biSchemaField(candidate.entity_type, warning.field) : null;
+    const name = field ? (field.label || warning.field) : warning.field || "";
+    const item = bh("li", "", name ? bh("strong", "", name + "：") : "", warning.message);
+    if (open) {
+      const actions = bh("span", "bi-actions");
+      actions.append(biButton("確認", () => biBuildReview(candidate.id,
+        {confirm_warning: {code: warning.code, field: warning.field || null,
+          message: warning.message}}), "bi-btn", "確認警告：" + warning.message));
+      const entry = (candidate.fields || []).find((f) => f.field === warning.field);
+      if (field && field.class !== "derived") {
+        actions.append(biButton("修改", () => biVerAsk(item, name + " 的值",
+          entry && entry.value != null ? String(entry.value) : "", "存", (value) =>
+            biBuildReview(candidate.id, {fields: {[warning.field]: value}})),
+        "bi-btn", "修改 " + name));
+      }
+      item.append(" ", actions);
+    }
+    list.append(item);
+  }
+  if (candidate.warnings.length) box.append(list);
+  const done = candidate.confirmed || [];
+  if (done.length) {
+    box.append(bh("p", "bi-meta", "已確認：" + done.map((w) => w.message
+      + "（" + (w.edited ? "改了值" : "確認") + "・" + (w.by || "") + "）").join("；")));
+  }
+  return box;
+}
+
 async function biBuildReview(candidateId, body, quiet = false) {
   const run = bi.build.run;
   // One at a time: each rewrites the run's candidates, and a quick hand presses faster than
@@ -8682,8 +8718,8 @@ function biBuildShowCandidate(candidateId) {
   if (candidate.errors.length) {
     parts.push(bh("ul", "bi-err", ...candidate.errors.map((e) => bh("li", "", e.message))));
   }
-  if (candidate.warnings.length) {
-    parts.push(bh("ul", "bi-warn", ...candidate.warnings.map((w) => bh("li", "", w.message))));
+  if (candidate.warnings.length || (candidate.confirmed || []).length) {
+    parts.push(biCandWarnings(candidate, open));
   }
   const profile = bi.build.run && bi.build.run.profile;
   const view = profile && (profile.types || {})[candidate.entity_type];
