@@ -67,7 +67,7 @@ body {
 .sidebar {
   position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh;
   min-width: 0; padding: 16px 12px; border-right: 1px solid var(--line);
-  background: var(--panel); overflow: hidden;
+  background: var(--panel); overflow-x: hidden; overflow-y: auto;
 }
 .brand { padding: 2px 8px 14px; border-bottom: 1px solid var(--line); }
 .brand h1 { margin: 0; font-size: 18px; font-weight: 700; }
@@ -348,6 +348,21 @@ select.mem-field { width: auto; flex: 0 1 220px; min-width: 0; max-width: 100%; 
 .session-heading { display: flex; justify-content: space-between; align-items: center;
   margin: 8px 8px 7px; color: var(--dim); font-size: 12px; font-weight: 700;
   letter-spacing: .08em; text-transform: uppercase; }
+/* Sidebar sections (owner 2026-11-20): a heading that folds its body. */
+.side-section { display: flex; flex-direction: column; min-height: 0; flex: none;
+  border-top: 1px solid var(--line); }
+.side-section.side-grow[data-open="true"] { flex: 1 1 auto; }
+.side-toggle { display: flex; justify-content: space-between; align-items: center; width: 100%;
+  min-height: 36px; margin: 4px 0 2px; padding: 4px 8px; border: 0; border-radius: 6px;
+  background: transparent; color: var(--dim); font: inherit; font-size: 12px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; cursor: pointer; text-align: left; }
+.side-toggle:hover { background: var(--selected); }
+.side-toggle > span:first-child::before { content: "\25be"; display: inline-block; width: 16px; }
+.side-toggle[aria-expanded="false"] > span:first-child::before { content: "\25b8"; }
+.side-actions.side-body { padding: 0 0 8px; }
+.side-column { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+.side-actions.side-new { padding: 0 0 6px; }
+.agent-list { max-height: 34vh; overflow-y: auto; padding-bottom: 6px; }
 .session-search { width: 100%; min-height: 38px; margin-bottom: 8px; font: inherit; }
 .session-snippet { display: block; overflow-wrap: anywhere; color: var(--dim); }
 .session-list { flex: 1; overflow-y: auto; min-height: 120px; }
@@ -966,21 +981,46 @@ tr:last-child td { border-bottom: none; }
     <h1 id="agent-name">Agent</h1>
     <span class="note" id="agent-introduction"></span>
   </div>
-  <div class="side-actions">
-    <button id="new-conversation" type="button">New session</button>
-    <button id="nav-capabilities" type="button">Capabilities</button>
-    <button id="nav-settings" type="button">Settings</button>
-    <button id="nav-schedules" type="button">Schedules</button>
-    <button id="nav-knowledge" type="button">Knowledge</button>
-    <button id="nav-tasks" type="button">Tasks</button>
-    <button id="nav-reviews" type="button">Reviews</button>
-    <button id="nav-memory" type="button">記憶</button>
-    <!-- PLUGIN_NAV_HTML -->
+  <!-- Three collapsible sections (owner 2026-11-20); each remembers being
+       open or closed in this browser (localStorage "aep.side.<name>"). -->
+  <div class="side-section" id="side-main" data-side="main" data-open="true">
+    <button class="side-toggle" id="side-main-toggle" type="button" aria-expanded="true"
+            aria-controls="side-main-body"><span>主功能</span></button>
+    <div class="side-actions side-body" id="side-main-body">
+      <button id="nav-capabilities" type="button">Capabilities</button>
+      <button id="nav-settings" type="button">Settings</button>
+      <button id="nav-schedules" type="button">Schedules</button>
+      <button id="nav-knowledge" type="button">Knowledge</button>
+      <button id="nav-tasks" type="button">Tasks</button>
+      <button id="nav-reviews" type="button">Reviews</button>
+      <button id="nav-memory" type="button">記憶</button>
+      <!-- PLUGIN_NAV_HTML -->
+    </div>
   </div>
-  <div class="session-heading"><span>Sessions</span><span id="session-count">0</span></div>
-  <input id="session-search" class="session-search" type="search"
-         aria-label="Search sessions" placeholder="Search sessions">
-  <div id="session-list" class="session-list" role="listbox" aria-label="Sessions"></div>
+  <div class="side-section side-grow" id="side-sessions" data-side="sessions"
+           data-open="true">
+    <button class="side-toggle" id="side-sessions-toggle" type="button" aria-expanded="true"
+            aria-controls="side-sessions-body"><span>Sessions</span>
+      <span id="session-count">0</span></button>
+    <div class="side-body side-column" id="side-sessions-body">
+      <div class="side-actions side-new">
+        <button id="new-conversation" type="button">New session</button>
+      </div>
+      <input id="session-search" class="session-search" type="search"
+             aria-label="Search sessions" placeholder="Search sessions">
+      <div id="session-list" class="session-list" role="listbox" aria-label="Sessions"></div>
+    </div>
+  </div>
+  <div class="side-section" id="side-agents" data-side="agents" data-open="true">
+    <button class="side-toggle" id="side-agents-toggle" type="button" aria-expanded="true"
+            aria-controls="side-agents-body"><span>Agents</span>
+      <span id="agent-count"></span></button>
+    <div class="side-body" id="side-agents-body">
+      <div id="agent-list" class="agent-list" aria-label="Agents">
+        <p class="note">Agents 會列在這裡。</p>
+      </div>
+    </div>
+  </div>
 </aside>
 <div class="workspace">
 <header class="topbar">
@@ -3816,6 +3856,26 @@ el("backend-auth-check").addEventListener("click", async () => {
   } else {
     el("backend-auth-result").textContent = status ? status.detail : "Backend status unavailable.";
   }
+});
+// Sidebar sections (owner 2026-11-20): each heading folds its body and the
+// choice is kept in this browser; a browser without storage keeps them open.
+function setSideSection(section, open) {
+  const toggle = section.querySelector(".side-toggle");
+  const body = el(toggle.getAttribute("aria-controls"));
+  toggle.setAttribute("aria-expanded", String(open));
+  section.dataset.open = String(open);
+  body.hidden = !open;
+}
+document.querySelectorAll(".side-section").forEach((section) => {
+  const key = "aep.side." + section.dataset.side;
+  let stored = null;
+  try { stored = localStorage.getItem(key); } catch (e) { /* no storage: open */ }
+  setSideSection(section, stored !== "closed");
+  section.querySelector(".side-toggle").addEventListener("click", () => {
+    const open = section.dataset.open !== "true";
+    setSideSection(section, open);
+    try { localStorage.setItem(key, open ? "open" : "closed"); } catch (e) { /* */ }
+  });
 });
 // New session: Send waits until the new session has loaded (#233); a message
 // sent meanwhile went into the previous one. Once the server has made it, the
