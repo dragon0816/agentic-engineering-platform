@@ -228,8 +228,6 @@ BI_CSS = r"""
 .bi-bench-sum > div { min-width: 96px; padding: 6px 12px; border: 1px solid var(--line);
   border-radius: 8px; background: var(--panel); }
 .bi-bench-sum strong { display: block; font-size: 20px; }
-.bi-run-progress { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.bi-run-progress progress { width: 220px; height: 14px; }
 /* Each stage: its title, and its ⚙ that opens the stage's settings beside (owner 2026-11-20). */
 .bi-stage-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .bi-stage-head .kp-stage-title { margin: 0; }
@@ -251,8 +249,23 @@ BI_CSS = r"""
 #bi-build-steps > .kp-stepper { flex: 1 1 520px; min-width: 0; }
 .bi-auto { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px;
   flex: 0 1 auto; margin: 0 0 6px; }
-.bi-auto[hidden], .bi-run-progress[hidden] { display: none; }
-.bi-auto .bi-err { color: var(--bad, #b42318); }
+.bi-auto[hidden] { display: none; }
+/* One progress row under the stage bar for every long wait (owner 2026-11-20): a fixed height,
+   so a changing line moves nothing; a long name is cut, whole in its title. */
+.bi-progress { flex: 1 0 100%; display: flex; align-items: center; gap: 10px; height: 34px;
+  box-sizing: border-box; min-width: 0; margin: 0 0 8px; padding: 0 10px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+.bi-progress[hidden] { display: none; }
+.bi-progress progress { flex: 0 0 140px; height: 12px; }
+.bi-progress-text { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; font-size: 13px; }
+.bi-progress.good { border-color: var(--good, #2f855a); }
+.bi-progress.error { border-color: var(--bad, #b42318); }
+.bi-progress.error .bi-progress-text { color: var(--bad, #b42318); }
+/* The stage whose work is under way, on the stage bar. */
+#bi-stepper button[data-running="true"]::after { content: "執行中"; margin-left: auto;
+  padding: 1px 8px; border-radius: 999px; font-size: 12px; color: #fff;
+  background: var(--accent, #2b6cb0); }
 tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
 @media (max-width: 760px) {
   .bi-ai-panel { top: auto; left: 0; width: auto; height: 66vh; border-left: 0;
@@ -801,10 +814,10 @@ BI_PANE_HTML = r"""
           </ol>
         </nav>
         <div class="bi-auto" id="bi-b-auto-box">
-          <button class="go" id="bi-b-auto" type="button">自動執行</button>
-          <div class="bi-run-progress" id="bi-b-auto-progress" role="status"
-            aria-live="polite" hidden><progress id="bi-b-auto-bar" max="4" value="0"></progress>
-            <span id="bi-b-auto-text"></span></div></div>
+          <button class="go" id="bi-b-auto" type="button">自動執行</button></div>
+        <div class="bi-progress" id="bi-b-progress" role="status" aria-live="polite" hidden>
+          <progress id="bi-b-progress-bar" max="1" value="0"></progress>
+          <span class="bi-progress-text" id="bi-b-progress-text"></span></div>
         </div>
         <div class="mem-status" id="bi-status-build" role="status" aria-live="polite" hidden></div>
         <section class="kp-stage card bi-step" data-stage="source" aria-labelledby="bi-b-source">
@@ -820,9 +833,7 @@ BI_PANE_HTML = r"""
                 accept=".csv,.tsv,.xlsx,.xlsm,.pdf,.docx,.pptx,.md,.markdown,.txt,text/csv,text/markdown,text/plain">
               <label class="bi-file" for="bi-b-file"><span class="bi-file-pick">選檔</span>
                 <span id="bi-b-file-name" class="bi-file-name">還沒有選檔</span></label></div>
-            <div><button class="go" id="bi-b-upload" type="button" disabled>轉檔</button>
-              <div class="mem-status bi-upload-status" id="bi-b-upload-status" role="status"
-                aria-live="polite" hidden></div></div>
+            <div><button class="go" id="bi-b-upload" type="button" disabled>轉檔</button></div>
           </div>
           <p class="bi-warn" id="bi-b-scope-need" hidden>
             先在上面選工作領域，才能加入檔案或 Ingest。</p>
@@ -1186,10 +1197,7 @@ BI_PANE_HTML = r"""
             <button class="bi-btn" id="bi-b-hist-open" type="button">看歷史紀錄</button></div>
           <div id="bi-b-run" class="bi-run" hidden>
             <button class="go" id="bi-b-bench-run" type="button">跑測試</button>
-            <span class="bi-meta" id="bi-b-run-why"></span>
-            <div class="bi-run-progress" id="bi-b-run-progress" role="status" aria-live="polite"
-              hidden><progress id="bi-b-run-bar" max="1" value="0"></progress>
-              <span id="bi-b-run-text"></span></div></div>
+            <span class="bi-meta" id="bi-b-run-why"></span></div>
           <div class="bi-setup" id="bi-b-need-test" role="note" hidden>
             <span id="bi-b-need-test-why"></span>
             <button class="go" type="button" data-bi-gear="test">先設定</button></div>
@@ -3753,6 +3761,60 @@ function biTestTabs(chosen) {
   }
 }
 
+// -- one progress row (owner 2026-11-20) ------------------------------------------------
+// Every long wait of the build stages (轉檔, Ingest and its trial, 跑測試, 自動執行) reports in
+// one row under the stage bar instead of beside each button, so nothing moves or jumps: the
+// step, n of N, the seconds (AGENTS 23), and in the end the result or the failure, which stays.
+// The stage at work is marked on the stage bar. Under 自動執行 a stage's own report becomes the
+// second part of its line; only 自動執行 ends it.
+const BI_PROG_STAGE = {convert: "source", ingest: "ingest", bench: "test"};
+
+function biProg(owner, state, text, opts = {}) {
+  if (bi.autoRunning && owner !== "auto") {
+    if (state === "loading") bi.autoSub = text;
+    return;
+  }
+  const now = bi.prog;
+  // A result does not take the row from another one still under way, nor from 自動執行's.
+  if (state !== "loading" && now && now.owner !== owner
+    && (now.state === "loading" || now.owner === "auto")) return;
+  const same = now && now.owner === owner && now.state === "loading";
+  bi.prog = {owner, state, text, done: opts.done, total: opts.total,
+    started: opts.started || (same ? now.started : Date.now()),
+    ended: state === "loading" ? null : opts.ended || Date.now(),
+    stage: opts.stage || BI_PROG_STAGE[owner]};
+  biProgDraw();
+}
+
+function biProgDraw() {
+  const p = bi.prog, row = el("bi-b-progress"), bar = el("bi-b-progress-bar");
+  const words = el("bi-b-progress-text");
+  clearInterval(bi.progTicker);
+  for (const button of document.querySelectorAll("#bi-stepper [data-stage]")) {
+    button.removeAttribute("data-running");
+  }
+  row.hidden = !p;
+  if (!p) return;
+  row.className = "bi-progress " + p.state;
+  const running = p.state === "loading";
+  const marked = running && document.querySelector('#bi-stepper [data-stage="' + p.stage + '"]');
+  if (marked) marked.dataset.running = "true";
+  if (p.total) {
+    bar.max = p.total;
+    bar.value = running ? Math.min(p.done || 0, p.total) : p.state === "good" ? p.total
+      : Math.min(p.done || 0, p.total);
+  } else if (running) {
+    bar.removeAttribute("value");  // no total known yet: the bar only says it is going
+  } else { bar.max = 1; bar.value = p.state === "good" ? 1 : 0; }
+  const show = () => {
+    const seconds = Math.max(0, Math.floor(((p.ended || Date.now()) - p.started) / 1000));
+    const line = p.text + "・" + seconds + " 秒";
+    words.textContent = line; words.title = line;
+  };
+  show();
+  if (running) bi.progTicker = setInterval(show, 1000);
+}
+
 function biSideTab(id, title, element, onClose) {
   // A part of this page as a tab of the side area, styled as the BI page.
   const panel = sideOpen({id, title, element, ...(onClose ? {onClose} : {})});
@@ -3944,30 +4006,25 @@ async function biQuestionsAi() {
 el("bi-b-qa-open").addEventListener("click", () => biQuestionsAi()
   .catch((failure) => biNotice(false, failure.message)));
 
-// Beside 跑測試 (owner 2026-11-20, AGENTS.md 23): a bar, n of N, the question being asked and
-// the seconds; it ends in place with how the run went.
+// 跑測試 in the one progress row (owner 2026-11-20, AGENTS.md 23): n of N, the question being
+// asked and the seconds; it ends there with how the run went.
 function biRunProgress(newest) {
-  const box = el("bi-b-run-progress"), bar = el("bi-b-run-bar"), words = el("bi-b-run-text");
-  clearInterval(bi.runTicker);
   const progress = (newest || {}).progress;
   if (!newest || !progress || (newest.status !== "running" && newest.run_id !== bi.runShown)) {
-    box.hidden = true; return;
+    return;
   }
   bi.runShown = newest.run_id;
-  box.hidden = false;
   const total = Math.max(progress.total || 0, 1), done = Math.min(progress.done || 0, total);
-  bar.max = total; bar.value = newest.status === "running" ? done : total;
-  const seconds = () => Math.max(0, Math.floor((Date.parse(progress.ended_at || "")
-    || Date.now()) / 1000 - Date.parse(progress.started_at) / 1000));
-  const show = () => {
-    words.textContent = newest.status === "running"
-      ? "第 " + Math.min(done + 1, total) + "/" + total + " 題" + (progress.current
-        ? "：" + progress.current : "") + "・" + seconds() + " 秒"
-      : (newest.status === "finished" ? "完成：" : "沒有跑完：") + done + "/" + total
-        + " 題・" + seconds() + " 秒" + (newest.error ? "・" + newest.error : "");
-  };
-  show();
-  if (newest.status === "running") bi.runTicker = setInterval(show, 1000);
+  const started = Date.parse(progress.started_at) || Date.now();
+  if (newest.status === "running") {
+    biProg("bench", "loading", "跑測試 第 " + Math.min(done + 1, total) + "/" + total + " 題"
+      + (progress.current ? "：" + progress.current : ""), {done, total, started});
+    return;
+  }
+  const finished = newest.status === "finished";
+  biProg("bench", finished ? "good" : "error", (finished ? "測試完成：" : "測試沒有跑完：") + done
+    + "/" + total + " 題" + (newest.error ? "・" + newest.error : ""),
+  {done, total, started, ended: Date.parse(progress.ended_at || "") || Date.now()});
 }
 
 el("bi-b-bench-run").addEventListener("click", async () => {
@@ -6961,31 +7018,23 @@ function biMegabytes(bytes) {
     : (bytes / 1048576).toFixed(1) + " MB";
 }
 
-// Beside 轉檔: that it started, which file of how many, bytes sent, seconds passed,
-// and in the end what came of every file (AGENTS.md rule 23).
+// 轉檔 in the one progress row: that it started, which file of how many, bytes sent, the
+// seconds, and in the end what came of every file (AGENTS.md rule 23).
 function biUploadProgress(state, message) {
-  const box = el("bi-b-upload-status"), button = el("bi-b-upload");
-  box.replaceChildren(); box.hidden = !state;
-  box.className = "mem-status bi-upload-status" + (state ? " " + state : "");
-  if (state === "loading") {
-    button.setAttribute("aria-busy", "true");
-    box.append(bh("span", "mem-spinner"), bh("span", "", message));
-  } else {
-    button.removeAttribute("aria-busy");
-    if (state) box.append(bh("span", "", message));
-  }
+  const button = el("bi-b-upload");
+  if (state === "loading") button.setAttribute("aria-busy", "true");
+  else button.removeAttribute("aria-busy");
+  if (state) biProg("convert", state, message);
 }
 
 // 轉檔 and 自動執行's first stage: what came of each file, and the sources it added.
 async function biConvert() {
   const button = el("bi-b-upload"); button.disabled = true;
   const files = Array.from(el("bi-b-file").files);
-  const started = Date.now();
   const now = {index: 0, name: "", step: "開始"};
   const show = () => {
-    const seconds = Math.floor((Date.now() - started) / 1000);
     biUploadProgress("loading", "正在轉檔 " + now.index + "/" + files.length + "："
-      + now.name + "・" + now.step + "・" + seconds + " 秒");
+      + now.name + "・" + now.step);
   };
   const ticker = setInterval(show, 1000);
   const sent = (loaded, total) => {
@@ -7066,7 +7115,7 @@ async function biDescribeWait(items, converted, hadFailures) {
     }
     while (images.status === "running") {
       biUploadProgress("loading", converted + "・正在為「" + item.name + "」的圖加上說明 "
-        + images.done + "/" + images.total + " 張・" + Math.floor(images.elapsed || 0) + " 秒");
+        + images.done + "/" + images.total + " 張");
       await new Promise((resolve) => setTimeout(resolve, 1000));
       try {
         images = (await biCall("/api/bi/sources/" + encodeURIComponent(item.id)
@@ -7715,10 +7764,12 @@ async function biBuildFollow(runId, where = "") {
   for (;;) {
     const detail = await call("/api/bi/runs/" + runId + "?dataset="
       + encodeURIComponent(biDataset()));
-    if (detail.run.status !== "extracting") { biStatus("bi-status-build", ""); return detail; }
-    const p = detail.run.progress || {};
-    biStatus("bi-status-build", "loading", where + "AI 判讀中…（第 " + (p.done || 0) + "／"
-      + (p.chunks || "?") + " 段）");
+    if (detail.run.status !== "extracting") return detail;
+    // The part being read; with the total not known yet, only its number (owner 2026-11-20).
+    const p = detail.run.progress || {}, at = (p.done || 0) + 1;
+    biProg("ingest", "loading", where + "AI 判讀中…（第 " + (p.chunks
+      ? Math.min(at, p.chunks) + "／" + p.chunks : at) + " 段）",
+    {done: p.done || 0, total: p.chunks || 0});
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 }
@@ -7726,8 +7777,10 @@ async function biBuildFollow(runId, where = "") {
 el("bi-b-trial").addEventListener("click", async () => {
   const box = el("bi-b-trial-result"); box.replaceChildren();
   try {
+    biProg("ingest", "loading", "試跑：正在產生候選卡…");
     const reply = await biCall("/api/bi/runs", biRunBody("trial"));
-    const detail = await biBuildFollow(reply.run.id);
+    const detail = await biBuildFollow(reply.run.id, "試跑：");
+    biProg("ingest", "good", "試跑完成（沒有寫入）");
     box.append(bh("p", "bi-meta", "試跑完成（沒有寫入）："), bh("div", "bi-chips",
       ...biRunChips(detail.run)), bh("ul", "", ...detail.candidates.slice(0, 50).map((c) =>
       bh("li", "", biTypeLabel(c.entity_type) + "・" + (c.name || c.canonical_key || "（無名稱）")
@@ -7740,6 +7793,7 @@ el("bi-b-trial").addEventListener("click", async () => {
     }
   } catch (failure) {
     box.append(bh("p", "bi-err", "試跑失敗：" + failure.message + "。"));
+    biProg("ingest", "error", "試跑失敗：" + failure.message);
   }
   try {
     await biBuildTrials();
@@ -8150,7 +8204,7 @@ el("bi-b-start").addEventListener("click", async () => {
       if (bi.build.batchStop) break;
       const where = batch ? "第 " + (index + 1) + "／" + chosen.length + " 份「" + name(sourceId)
         + "」：" : "";
-      biStatus("bi-status-build", "loading", where + "正在產生候選卡…");
+      biProg("ingest", "loading", where + "正在產生候選卡…");
       try {
         const reply = await biCall("/api/bi/runs", biRunBody("ingest", sourceId, batch));
         bi.build.batchRun = reply.run.id;
@@ -8174,9 +8228,11 @@ el("bi-b-start").addEventListener("click", async () => {
   }
   const stopped = bi.build.batchStop ? "已停止；" : "";
   if (failed.length) {
-    biStatus("bi-status-build", "error", stopped + "產生了 " + done.length + " 次執行，"
+    biProg("ingest", "error", stopped + "產生了 " + done.length + " 次執行，"
       + failed.length + " 份沒有成功（" + failed.join("；") + "）。");
-  } else biStatus("bi-status-build", "");
+  } else {
+    biProg("ingest", "good", stopped + "Ingest 完成：" + done.length + " 次執行，在下面審核");
+  }
   if (!done.length) return;
   if (batch) {
     biNotice(true, stopped + "產生了 " + done.length
@@ -9259,21 +9315,21 @@ function biAutoWrite(state) {
 }
 
 function biAutoShow(state) {
-  const box = el("bi-b-auto-progress"), bar = el("bi-b-auto-bar"), text = el("bi-b-auto-text");
+  // 自動執行 owns the one progress row while it runs, and leaves its result there.
   const button = el("bi-b-auto"), running = !!state && state.status === "running";
   button.disabled = running;
   if (running) button.setAttribute("aria-busy", "true"); else button.removeAttribute("aria-busy");
-  box.hidden = !state;
   if (!state) return;
-  box.classList.toggle("bi-err", state.status === "failed");
-  bar.max = BI_AUTO_STAGES.length;
-  bar.value = state.status === "done" ? BI_AUTO_STAGES.length : state.stage - 1;
-  const seconds = Math.max(0, Math.floor(((state.ended || Date.now()) - state.started) / 1000));
-  const stage = "第 " + state.stage + "/" + BI_AUTO_STAGES.length + " 步（"
-    + BI_AUTO_STAGES[state.stage - 1] + "）";
-  text.textContent = running ? stage + (state.sub ? "・" + state.sub : "") + "・" + seconds + " 秒"
-    : (state.status === "done" ? "自動執行完成：" : "自動執行停在" + stage + "：")
-      + state.message + "・" + seconds + " 秒";
+  const total = BI_AUTO_STAGES.length;
+  const stage = "第 " + state.stage + "/" + total + " 步（" + BI_AUTO_STAGES[state.stage - 1]
+    + "）";
+  bi.prog = {owner: "auto", state: running ? "loading" : state.status === "done" ? "good"
+    : "error", text: running ? stage + (state.sub ? "・" + state.sub : "")
+    : (state.status === "done" ? "自動執行完成：" : "自動執行停在" + stage + "：") + state.message,
+  done: state.status === "done" ? total : state.stage - 1, total, started: state.started,
+  ended: running ? null : state.ended || Date.now(),
+  stage: {1: "source", 2: "ingest", 3: "ingest", 4: "test"}[state.stage]};
+  biProgDraw();
 }
 
 function biAutoSleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
@@ -9291,23 +9347,22 @@ async function biAutoRun(resume) {
     sources: [], message: ""};
   state.tab = BI_AUTO_TAB; state.ended = null;
   biAutoWrite(state); biAutoShow(state);
-  // Stages 1 and 2 say what they do in their own line; 3 and 4 set it here.
-  const live = {1: "bi-b-upload-status", 2: "bi-status-build"};
+  // 轉檔 and Ingest report what they do through biProg (bi.autoSub); 3 and 4 set it here.
+  // The view stays where the person is (owner 2026-11-20): the stage bar marks the stage.
+  bi.autoSub = "";
   const ticker = setInterval(() => {
-    if (live[state.stage]) state.sub = el(live[state.stage]).textContent.trim();
+    if (state.stage <= 2) state.sub = bi.autoSub;
     biAutoWrite(state); biAutoShow(state);
   }, 1000);
-  const show = (stage) => {
-    if (bi.view === "build" && biDataset() === dataset) biBuildStage(stage, false);
+  const next = (stage) => {
+    state.stage = stage; state.sub = ""; bi.autoSub = ""; biAutoWrite(state); biAutoShow(state);
   };
-  const next = (stage) => { state.stage = stage; state.sub = ""; biAutoWrite(state); };
   try {
     if (state.stage === 1) {
       if (resume) {
         throw new Error("頁面在轉檔時重新載入，不知道哪些檔案已經送出；請在 Data input 確認來源後"
           + "再按一次");
       }
-      show("source");
       if (el("bi-b-file").files.length) {
         if (!biAddReady()) throw new Error("先在上面選工作領域，才能加入檔案");
         const out = await biConvert();
@@ -9323,7 +9378,6 @@ async function biAutoRun(resume) {
       next(2);
     }
     if (state.stage === 2) {
-      show("method");
       await biAutoIngest(state, dataset);
       next(3);
     }
@@ -9331,7 +9385,6 @@ async function biAutoRun(resume) {
       state.imported = await biAutoAccept(state, dataset);
       next(4);
     }
-    show("test");
     state.tested = await biAutoBench(state, dataset);
     const a = state.imported;
     state.status = "done";
@@ -9360,7 +9413,7 @@ async function biAutoIngest(state, dataset) {
     let runId = state.made[sourceId] || ((listed.runs || []).find((run) => run.kind === "ingest"
       && (run.source_ids || []).includes(sourceId) && Date.parse(run.at) >= since) || {}).id;
     if (!runId) {
-      biStatus("bi-status-build", "loading", where + "正在產生候選卡…");
+      biProg("ingest", "loading", where + "正在產生候選卡…");
       runId = (await biCall("/api/bi/runs", biRunBody("ingest", sourceId, batch))).run.id;
     }
     state.made[sourceId] = runId; biAutoWrite(state);
@@ -9371,12 +9424,12 @@ async function biAutoIngest(state, dataset) {
         || (detail.run.status === "cancelled" ? "已取消" : "判讀失敗")));
     }
   }
-  biStatus("bi-status-build", "");
   if (failed.length) throw new Error(failed.length + " 份沒有 Ingest：" + failed.join("；"));
   const first = Object.values(state.made)[0];
   if (first && biDataset() === dataset) {
     await biBuildFetchRun(first); bi.build.candidateId = null; biBuildSave();
-    if (bi.view === "build") biBuildStage("review", false);
+    // Drawn again only where the person already is: the view does not move.
+    if (bi.view === "build" && BI_INGEST.includes(bi.build.stage)) biBuildStage("review", false);
   }
 }
 

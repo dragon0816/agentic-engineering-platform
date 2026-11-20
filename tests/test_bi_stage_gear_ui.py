@@ -199,11 +199,24 @@ def test_auto_run_does_every_stage_once_with_its_progress_even_across_a_reload(
             " document.getElementById('bi-b-auto').click();"
         )
         page.wait(
-            "document.getElementById('bi-b-auto-text').textContent.includes('第 2/4 步（Ingest）')"
+            "document.getElementById('bi-b-progress-text').textContent"
+            ".includes('第 2/4 步（Ingest）')"
         )
         assert page.run("document.getElementById('bi-b-auto').disabled")
-        assert page.run("!document.getElementById('bi-b-auto-progress').hidden")
-        assert "秒" in page.text_of("bi-b-auto-text")
+        # The view stays where the person is; the stage bar marks the stage at work.
+        assert (
+            page.run(
+                "[...document.querySelectorAll('#bi-view-build .kp-stage')]"
+                ".filter((x) => !x.hidden).map((x) => x.dataset.stage).join()"
+            )
+            == "source"
+        )
+        assert (
+            page.run("document.querySelector('#bi-stepper [data-running=true]').dataset.stage")
+            == "ingest"
+        )
+        assert page.run("!document.getElementById('bi-b-progress').hidden")
+        assert "秒" in page.text_of("bi-b-progress-text")
         # Pressed again while it runs (and enabled by force): still one run.
         page.run(
             "document.getElementById('bi-b-auto').disabled = false;"
@@ -213,12 +226,12 @@ def test_auto_run_does_every_stage_once_with_its_progress_even_across_a_reload(
         page.reload()
         page.click("#bi-views [data-bi-view=build]")
         page.wait(
-            "document.getElementById('bi-b-auto-text').textContent.includes('自動執行完成')",
+            "document.getElementById('bi-b-progress-text').textContent.includes('自動執行完成')",
             120,
         )
-        said = page.text_of("bi-b-auto-text")
+        said = page.text_of("bi-b-progress-text")
         assert "匯入新建 1" in said and "測試通過 1/1 題" in said, said
-        assert page.run("document.getElementById('bi-b-auto-bar').value") == 4
+        assert page.run("document.getElementById('bi-b-progress-bar').value") == 4
         assert not page.run("document.getElementById('bi-b-auto').disabled")
 
     runs = _ingests(workspace)
@@ -243,12 +256,11 @@ def test_auto_run_ends_in_place_with_the_stage_that_failed(
         page.click("#bi-b-auto")
         # No benchmark question: everything up to the test is done, and the test says why.
         page.wait(
-            "document.getElementById('bi-b-auto-text').textContent.includes('自動執行停在')", 120
+            "document.getElementById('bi-b-progress-text').textContent.includes('自動執行停在')",
+            120,
         )
-        said = page.text_of("bi-b-auto-text")
+        said = page.text_of("bi-b-progress-text")
         assert "第 4/4 步（跑測試）" in said and "還沒有測試題" in said, said
-        assert page.run(
-            "document.getElementById('bi-b-auto-progress').classList.contains('bi-err')"
-        )
+        assert page.run("document.getElementById('bi-b-progress').classList.contains('error')")
     assert [run["status"] for run in _ingests(workspace)] == ["committed"]
     assert benches == []

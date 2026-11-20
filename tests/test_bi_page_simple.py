@@ -174,12 +174,11 @@ GEAR_SETTINGS = {
 
 #: What each stage's main view still shows, outside its settings (owner 2026-11-20).
 RUN_AND_RESULTS = {
-    "source": ("bi-b-file", "bi-b-upload", "bi-b-upload-status", "bi-b-sources", "bi-b-md"),
+    "source": ("bi-b-file", "bi-b-upload", "bi-b-sources", "bi-b-md"),
     "method": ("bi-b-start", "bi-b-batch"),
     "review": ("bi-b-cands", "bi-b-cand-state", "bi-b-apply-all", "bi-b-apply-import"),
     "test": (
         "bi-b-bench-run",
-        "bi-b-run-progress",
         "bi-b-tabs",
         "bi-b-bench-sum",
         "bi-b-bench-report",
@@ -251,9 +250,12 @@ def test_the_stages_have_the_owners_names() -> None:
 
 def test_auto_run_is_one_button_beside_the_stage_bar_with_its_progress() -> None:
     assert ("div", "bi-build-steps") in PANE.around["bi-b-auto"]
-    assert ("div", "bi-b-auto-progress") in PANE.around["bi-b-auto-bar"]
+    # One progress row under the stage bar for every long wait (owner 2026-11-20).
+    assert ("div", "bi-build-steps") in PANE.around["bi-b-progress-bar"]
     assert PAGE.index('id="bi-stepper"') < PAGE.index('id="bi-b-auto"')
-    assert PAGE.index('id="bi-b-auto"') < PAGE.index('id="bi-b-auto-progress"')
+    assert PAGE.index('id="bi-b-auto"') < PAGE.index('id="bi-b-progress"')
+    for gone in ("bi-b-upload-status", "bi-b-run-progress", "bi-b-auto-progress"):
+        assert gone not in PAGE, gone
     assert PAGE.count(">自動執行</button>") == 1
 
 
@@ -467,7 +469,6 @@ def test_the_run_is_above_the_result_tabs_and_the_editing_is_in_the_gear() -> No
         assert ("div", "bi-b-set-test") in PANE.around[section]
     assert (
         PAGE.index('id="bi-b-bench-run"')
-        < PAGE.index('id="bi-b-run-progress"')
         < PAGE.index('id="bi-b-tabs"')
         < PAGE.index('id="bi-b-bench-sum"')
         < PAGE.index('id="bi-b-test-results"')
