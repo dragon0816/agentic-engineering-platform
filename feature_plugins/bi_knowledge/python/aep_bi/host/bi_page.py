@@ -7,7 +7,7 @@ Moved unchanged from `web_page.py` (feature mount points, proposal r3);
 from __future__ import annotations
 
 from aep_bi.host.bi_chart_html import BI_CHART_CSS, BI_CHART_JS
-from aep_bi.inbox.page import INBOX_BUTTON, INBOX_JS, INBOX_PANEL
+from aep_bi.inbox.page import INBOX_BUTTON, INBOX_GEAR, INBOX_JS, INBOX_PANEL
 
 BI_CSS = r"""
 .bi-pane { max-width: 1240px; min-width: 0; }
@@ -814,7 +814,9 @@ BI_PANE_HTML = r"""
           </ol>
         </nav>
         <div class="bi-auto" id="bi-b-auto-box">
-          <button class="go" id="bi-b-auto" type="button">自動執行</button></div>
+          <button class="go" id="bi-b-auto" type="button">自動執行</button>
+          <button class="bi-btn" id="bi-b-auto-stop" type="button" hidden>停止</button>
+          <button class="bi-btn" id="bi-b-auto-retry" type="button" hidden>重試</button></div>
         <div class="bi-progress" id="bi-b-progress" role="status" aria-live="polite" hidden>
           <progress id="bi-b-progress-bar" max="1" value="0"></progress>
           <span class="bi-progress-text" id="bi-b-progress-text"></span></div>
@@ -900,7 +902,7 @@ BI_PANE_HTML = r"""
                 <option value="CONFIDENTIAL">CONFIDENTIAL</option>
                 <option value="RESTRICTED">RESTRICTED</option></select></div>
             <p class="bi-meta" id="bi-b-target"></p>
-            <div id="bi-b-v-info"></div>
+            <div id="bi-b-v-info"></div><!-- BI_INBOX_GEAR -->
           <details class="bi-manage bi-adv" id="bi-b-adv-source">
             <summary>進階：知識庫與匯入</summary>
               <button class="bi-btn" id="bi-b-v-convert" type="button" data-mode="convert"
@@ -7759,17 +7761,23 @@ function biRunMerge(run) {
     ...(m.take ? [biBadge("你選了新值 " + m.take, "warn")] : [])];
 }
 
-// An AI run reads its source in the background: follow it until it ends.
+// An AI run reads its source in the background: follow it until it ends. A stopped run
+// still finishes the parts under way (owner 2026-11-21): followed, saying so, until it has.
+const BI_STOPPING = "停止中…（等目前這段完成）";
+
 async function biBuildFollow(runId, where = "") {
   for (;;) {
     const detail = await call("/api/bi/runs/" + runId + "?dataset="
       + encodeURIComponent(biDataset()));
-    if (detail.run.status !== "extracting") return detail;
-    // The part being read; with the total not known yet, only its number (owner 2026-11-20).
+    const status = detail.run.status;
+    if (status !== "extracting" && !(status === "cancelled" && detail.run.working)) {
+      return detail;
+    }
+    // The part being read, the total known from the start (owner 2026-11-21).
     const p = detail.run.progress || {}, at = (p.done || 0) + 1;
-    biProg("ingest", "loading", where + "AI 判讀中…（第 " + (p.chunks
-      ? Math.min(at, p.chunks) + "／" + p.chunks : at) + " 段）",
-    {done: p.done || 0, total: p.chunks || 0});
+    biProg("ingest", "loading", where + (status === "cancelled" ? BI_STOPPING
+      : "AI 判讀中…（第 " + (p.chunks ? Math.min(at, p.chunks) + "／" + p.chunks : at)
+        + " 段）"), {done: p.done || 0, total: p.chunks || 0});
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 }
@@ -8191,12 +8199,13 @@ async function biBuildFetchRun(runId) {
 
 el("bi-b-start").addEventListener("click", async () => {
   // One run per ticked source, one after another: each keeps its own source and folder, and
-  // one that fails does not stop the rest. 停止 cancels the run under way and starts no more.
+  // one that fails does not stop the rest. 停止 (one source or many, owner 2026-11-21) cancels
+  // the run under way, which finishes the parts it reads, and starts no more.
   const chosen = biChosen(), batch = chosen.length > 1;
   if (!chosen.length) return;
   const button = el("bi-b-start"), stop = el("bi-b-batch-stop");
   const name = (id) => (bi.build.sources.find((s) => s.id === id) || {}).name || id;
-  button.disabled = true; stop.hidden = !batch; stop.disabled = false;
+  button.disabled = true; stop.hidden = false; stop.disabled = false;
   bi.build.batchRunning = true; bi.build.batchStop = false; bi.build.batchRun = null;
   const done = [], failed = [];
   try {
@@ -8210,6 +8219,7 @@ el("bi-b-start").addEventListener("click", async () => {
         bi.build.batchRun = reply.run.id;
         if (bi.build.batchStop) {
           await biCall("/api/bi/runs/" + reply.run.id + "/cancel", {dataset: biDataset()});
+          await biBuildFollow(reply.run.id, where);  // until its parts under way end
           break;
         }
         const detail = await biBuildFollow(reply.run.id, where);
@@ -8227,7 +8237,9 @@ el("bi-b-start").addEventListener("click", async () => {
     biChosenShown();
   }
   const stopped = bi.build.batchStop ? "已停止；" : "";
-  if (failed.length) {
+  if (stopped && !done.length && !failed.length) {
+    biProg("ingest", "error", "已停止，沒有產生候選卡");
+  } else if (failed.length) {
     biProg("ingest", "error", stopped + "產生了 " + done.length + " 次執行，"
       + failed.length + " 份沒有成功（" + failed.join("；") + "）。");
   } else {
@@ -8244,6 +8256,7 @@ el("bi-b-start").addEventListener("click", async () => {
 
 el("bi-b-batch-stop").addEventListener("click", async () => {
   bi.build.batchStop = true; el("bi-b-batch-stop").disabled = true;
+  biProg("ingest", "loading", BI_STOPPING);
   if (bi.build.batchRun) {
     await biCall("/api/bi/runs/" + bi.build.batchRun + "/cancel", {dataset: biDataset()})
       .catch(() => {});
@@ -8739,9 +8752,14 @@ function biBuildRenderRun(detail = true) {
   el("bi-b-chips").append(...main, run.kind === "trial" ? biBadge("試跑，不能寫入", "warn") : "",
     bh("details", "bi-manage", bh("summary", "", "明細"), ...more, ...left));
   if ((run.failures || []).length) {
+    // Parts cut short by a Host restart are one sentence, not one per part (owner 2026-11-21).
+    const cut = run.failures.filter((f) => f.code === "interrupted");
+    const said = run.failures.filter((f) => f.code !== "interrupted")
+      .map((f) => (f.line_start ? "第 " + f.line_start + "–" + f.line_end + " 行：" : "")
+        + f.message);
+    if (cut.length) said.push(cut.length + " 段因主機停止沒有完成");
     el("bi-b-chips").append(bh("p", "bi-err", "有 " + run.failures.length + " 段沒有判讀成功（"
-      + run.failures.map((f) => (f.line_start ? "第 " + f.line_start + "–" + f.line_end + " 行："
-        : "") + f.message).join("；") + "）。其他候選卡可以先審核。"),
+      + said.join("；") + "）。其他候選卡可以先審核。"),
     biButton("重試失敗的段落", async () => {
       await biCall("/api/bi/runs/" + run.id + "/retry", {dataset: biDataset()});
       await biBuildFollow(run.id); await biBuildFetchRun(run.id); biBuildRenderRun();
@@ -9282,7 +9300,10 @@ function biBuildResult() {
 
 // -- 自動執行 (owner 2026-11-20) -----------------------------------------------------------
 // One press runs 轉檔 → Ingest → accepting every pending row (new cards and changes,
-// judgement fields too, no reason) and 匯入 → 跑測試, with no stop. Beside it (AGENTS 23): the
+// judgement fields too, no reason) and 匯入 → 跑測試. 停止 beside it, only while it runs (owner
+// 2026-11-21), cancels the stage's Ingest runs, says 停止中 until their parts under way end, and
+// ends it in place with 已停止 and the stage; a run cut short by a Host restart ends it with
+// 重試 beside it, which reads only the missing parts and carries on. Beside it (AGENTS 23): the
 // stage n/4, that stage's own progress and the seconds; it ends there with the result, or the
 // failure and the stage it stopped in. Each stage's view shows as it starts, so its results
 // stay in sight. At most once (AGENTS 21): the button is shut while it runs, and the run is
@@ -9319,13 +9340,21 @@ function biAutoShow(state) {
   const button = el("bi-b-auto"), running = !!state && state.status === "running";
   button.disabled = running;
   if (running) button.setAttribute("aria-busy", "true"); else button.removeAttribute("aria-busy");
+  // 停止 only where it runs; 重試 only for a run a Host restart cut short.
+  el("bi-b-auto-stop").hidden = !(running && bi.autoRunning);
+  el("bi-b-auto-stop").disabled = !!bi.autoStop;
+  el("bi-b-auto-retry").hidden = !(state && state.status === "interrupted"
+    && (state.retry || []).length);
   if (!state) return;
   const total = BI_AUTO_STAGES.length;
   const stage = "第 " + state.stage + "/" + total + " 步（" + BI_AUTO_STAGES[state.stage - 1]
     + "）";
+  const ended = state.status === "done" ? "自動執行完成：" + state.message
+    : state.status === "stopped" ? "自動執行已停止在" + stage
+    : "自動執行停在" + stage + "：" + state.message;
   bi.prog = {owner: "auto", state: running ? "loading" : state.status === "done" ? "good"
-    : "error", text: running ? stage + (state.sub ? "・" + state.sub : "")
-    : (state.status === "done" ? "自動執行完成：" : "自動執行停在" + stage + "：") + state.message,
+    : "error", text: running ? stage + (bi.autoStop ? "・" + BI_STOPPING
+      : state.sub ? "・" + state.sub : "") : ended,
   done: state.status === "done" ? total : state.stage - 1, total, started: state.started,
   ended: running ? null : state.ended || Date.now(),
   stage: {1: "source", 2: "ingest", 3: "ingest", 4: "test"}[state.stage]};
@@ -9335,6 +9364,7 @@ function biAutoShow(state) {
 function biAutoSleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
 
 function biAutoHere(dataset) {
+  if (bi.autoStop) throw new Error("已停止");
   if (biDataset() !== dataset) throw new Error("換了知識庫，自動執行停下");
 }
 
@@ -9342,10 +9372,10 @@ async function biAutoRun(resume) {
   if (bi.autoRunning) return;  // a second press while it runs
   const dataset = biDataset(), stored = biAutoRead(dataset);
   if (!resume && stored && stored.status === "running") { biAutoResume(); return; }
-  bi.autoRunning = true;
+  bi.autoRunning = true; bi.autoStop = false;
   const state = resume || {dataset, stage: 1, status: "running", started: Date.now(), made: {},
     sources: [], message: ""};
-  state.tab = BI_AUTO_TAB; state.ended = null;
+  state.tab = BI_AUTO_TAB; state.ended = null; state.status = "running"; state.retry = [];
   biAutoWrite(state); biAutoShow(state);
   // 轉檔 and Ingest report what they do through biProg (bi.autoSub); 3 and 4 set it here.
   // The view stays where the person is (owner 2026-11-20): the stage bar marks the stage.
@@ -9393,17 +9423,19 @@ async function biAutoRun(resume) {
         + a.why.slice(0, 3).join("；") + (a.left > 3 ? "…" : "") + "）" : "")
       + "；" + state.tested;
   } catch (failure) {
-    state.status = "failed"; state.message = failure.message;
+    state.status = bi.autoStop ? "stopped" : failure.interrupted ? "interrupted" : "failed";
+    state.message = bi.autoStop ? "已停止" : failure.message;
+    state.retry = failure.interrupted || [];
   } finally {
     clearInterval(ticker);
-    bi.autoRunning = false; state.ended = Date.now(); state.sub = "";
+    bi.autoRunning = false; bi.autoStop = false; state.ended = Date.now(); state.sub = "";
     biAutoWrite(state); biAutoShow(state);
   }
 }
 
 async function biAutoIngest(state, dataset) {
   const listed = await call("/api/bi/runs?dataset=" + encodeURIComponent(dataset));
-  const since = state.started - 5000, batch = state.sources.length > 1, failed = [];
+  const since = state.started - 5000, batch = state.sources.length > 1, failed = [], cut = [];
   const name = (id) => (bi.build.sources.find((s) => s.id === id) || {}).name || id;
   for (const [index, sourceId] of state.sources.entries()) {
     biAutoHere(dataset);
@@ -9417,12 +9449,26 @@ async function biAutoIngest(state, dataset) {
       runId = (await biCall("/api/bi/runs", biRunBody("ingest", sourceId, batch))).run.id;
     }
     state.made[sourceId] = runId; biAutoWrite(state);
+    if (bi.autoStop) await biAutoCancel(state, dataset);  // started while 停止 was pressed
     const detail = await biBuildFollow(runId, where);
+    biAutoHere(dataset);
+    if (detail.run.status === "partial" && detail.run.interrupted) {
+      cut.push(runId);
+      continue;
+    }
     if (["failed", "cancelled"].includes(detail.run.status)) {
       delete state.made[sourceId];
       failed.push(name(sourceId) + "：" + (detail.run.error
         || (detail.run.status === "cancelled" ? "已取消" : "判讀失敗")));
     }
+  }
+  if (cut.length) {
+    // A Host restart cut these short: 重試 reads only their missing parts (owner 2026-11-21).
+    const stop = new Error(cut.length + " 份的 Ingest 因主機停止沒有完成，按「重試」補上沒讀完的"
+      + "段落" + (failed.length ? "；" + failed.length + " 份沒有 Ingest：" + failed.join("；")
+      : ""));
+    stop.interrupted = cut;
+    throw stop;
   }
   if (failed.length) throw new Error(failed.length + " 份沒有 Ingest：" + failed.join("；"));
   const first = Object.values(state.made)[0];
@@ -9550,7 +9596,35 @@ function biAutoResume() {
   biAutoRun(state);
 }
 
+async function biAutoCancel(state, dataset) {
+  // The stage's Ingest runs still reading; each finishes the parts it reads (one call at most).
+  for (const runId of Object.values(state.made)) {
+    await call("/api/bi/runs/" + runId + "/cancel", {dataset})
+      .catch(() => {});  // ended already: nothing to stop
+  }
+}
+
 el("bi-b-auto").addEventListener("click", () => biAutoRun(null));
+el("bi-b-auto-stop").addEventListener("click", async () => {
+  const state = biAutoRead(biDataset());
+  if (!bi.autoRunning || !state || bi.autoStop) return;
+  bi.autoStop = true; biAutoShow(state);
+  if (state.stage === 2) await biAutoCancel(state, state.dataset);
+});
+el("bi-b-auto-retry").addEventListener("click", async () => {
+  const state = biAutoRead(biDataset());
+  if (!state || state.status !== "interrupted" || bi.autoRunning) return;
+  el("bi-b-auto-retry").hidden = true;
+  try {
+    for (const runId of state.retry || []) {
+      await biCall("/api/bi/runs/" + runId + "/retry", {dataset: state.dataset});
+    }
+  } catch (failure) {
+    state.message = "重試沒有開始：" + failure.message; biAutoWrite(state); biAutoShow(state);
+    return;
+  }
+  biAutoRun({...state, stage: 2, status: "running"});
+});
 
 function biRenderReadOnly() {
   const info = biCurrent(), readOnly = biReadOnly();
@@ -10030,4 +10104,5 @@ BI_JS = BI_JS.replace("/* BI_CHART_JS */", BI_CHART_JS.rstrip(), 1)
 # BI 管理 → Telegram 收集 (owner 2026-11-19), kept in `aep_bi.inbox.page`.
 BI_PANE_HTML = BI_PANE_HTML.replace("<!-- BI_INBOX_BUTTON -->", INBOX_BUTTON, 1)
 BI_PANE_HTML = BI_PANE_HTML.replace("<!-- BI_INBOX_PANEL -->", INBOX_PANEL, 1)
+BI_PANE_HTML = BI_PANE_HTML.replace("<!-- BI_INBOX_GEAR -->", INBOX_GEAR, 1)
 BI_JS += INBOX_JS
