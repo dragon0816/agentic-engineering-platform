@@ -616,3 +616,51 @@ def bot_poll(bot_: Any) -> Any:
     import asyncio
 
     return asyncio.run(bot_.poll_once())
+
+
+# -- questions (owner 2026-11-21) ------------------------------------------------------------------
+
+
+def test_a_question_gets_bi_query_scoped_to_the_bots_domain(ws: Path) -> None:
+    import asyncio
+
+    from aep_bi.inbox.bot import QUERY_TOOL
+    from agent.gateway import HostTool, HostToolOutcome
+    from host_runtime.features import TelegramAnswer, TelegramQuestion
+    from models.contracts import ModelTool
+
+    seen: list[dict[str, Any]] = []
+
+    async def query(context: Any, arguments: dict[str, Any]) -> HostToolOutcome:
+        seen.append(arguments)
+        return HostToolOutcome(status="succeeded", data={})
+
+    def tool(name: str) -> HostTool:
+        return HostTool(
+            ModelTool(name=name, description="d", input_contract=f"host.{name}.v1"), query
+        )
+
+    asked = bot(ws).question(item("text", "液冷？"), [tool("bi__atlas_show"), tool(QUERY_TOOL)])
+    assert isinstance(asked, TelegramQuestion)
+    assert [t.tool.name for t in asked.tools] == [QUERY_TOOL]
+    assert "「AIDC」" in asked.guidance and "say so plainly" in asked.guidance
+    # Whatever dataset the model names, the call reads the bot's domain's dataset.
+    asyncio.run(asked.tools[0].handler(None, {"text": "液冷", "dataset": "demo"}))
+    assert seen == [{"text": "液冷", "dataset": dataset(ws)}]
+    # No bi__query among the Host's tools: nothing to offer; an unbound bot says so.
+    assert bot(ws).question(item("text", "液冷？"), [tool("bi__atlas_show")]) is None
+    unbound = bot(ws).question(item("text", "液冷？", bot="bi_other"), [tool(QUERY_TOOL)])
+    assert unbound == TelegramAnswer(UNBOUND)
+
+
+def test_the_feature_offers_no_question_tool_while_the_bi_skill_is_off(
+    ws: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from types import SimpleNamespace
+
+    from aep_bi.feature import FEATURE
+    from aep_bi.inbox import runtime
+
+    monkeypatch.setattr(runtime.RUNTIME, "workspace", ws)
+    # No switched-on BI Skill on this gateway: `bi_cards_tools` offers nothing.
+    assert FEATURE.telegram_question(item("text", "液冷？"), None, SimpleNamespace()) is None

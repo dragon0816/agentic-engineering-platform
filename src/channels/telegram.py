@@ -1192,15 +1192,22 @@ class TelegramIngress:
         # The durable cursor's channel: the conversation bot's own, or
         # `telegram-agent.<name>` for an agent bot.
         self.channel = TELEGRAM_CHANNEL
+        # Set on the never-polled ingress that answers a collection bot's plain
+        # questions (owner 2026-11-21): its sessions are `<prefix>-chat-<id>`.
+        self.session_prefix: str | None = None
 
     def _session(self, chat_id: int) -> str:
         """The session a chat's turns belong to; an agent bot's are its own, so the
         same person's chats with two bots never share a session."""
+        if self.session_prefix is not None:
+            return f"{self.session_prefix}-chat-{chat_id}"
         if self.owner_agent is None:
             return _chat_session(chat_id)
         return f"telegram-agent-{self.owner_agent}-chat-{chat_id}"
 
     def _files_session(self, key: tuple[int, int]) -> str:
+        if self.session_prefix is not None:
+            return f"{self.session_prefix}-chat-{key[0]}-sender-{key[1]}"
         if self.owner_agent is None:
             return _files_session(key)
         return f"telegram-agent-{self.owner_agent}-chat-{key[0]}-sender-{key[1]}"
@@ -2110,6 +2117,33 @@ class TelegramIngress:
             )
         return TelegramDelivery(**base, disposition="answered", reply=scrub(message))
 
+    async def answer_question(
+        self, update: _Update, actor: str, options: dict[str, Any]
+    ) -> TelegramDelivery:
+        """A collection bot's plain question (owner 2026-11-21): one conversation
+        turn of this chat with `options` (`allowed_tools`, `persona_guidance`) in
+        place of an agent's, under the same request, admission and at-most-once
+        rules as any turn; no command, flow or Workflow handling. The caller has
+        admitted the sender and sends the reply."""
+        base = {
+            "update_id": update.update_id,
+            "chat_id": update.chat_id,
+            "sender_id": update.sender_id,
+        }
+        text = (update.text or "").strip()
+        request = self._request(update, actor, text)
+        if request is None:
+            return TelegramDelivery(
+                **base, disposition="unsupported_content", reply=CREDENTIAL_REPLY
+            )
+        if self.agent.gateway.router.model is None:
+            return TelegramDelivery(**base, disposition="answered", reply=AGENT_BOT_NO_MODEL)
+        key = (update.chat_id, update.sender_id)
+        with session_model(self._chat_model(update)):
+            return await self._converse(
+                base, key, request, text, actor=actor, update=update, options=options
+            )
+
     async def _converse(
         self,
         base: dict[str, Any],
@@ -2121,6 +2155,7 @@ class TelegramIngress:
         actor: str | None = None,
         update: _Update | None = None,
         files: tuple[dict[str, str], ...] = (),
+        options: dict[str, Any] | None = None,
     ) -> TelegramDelivery:
         """`attached` is the files' note and pictures for the model, and the
         short listing the stored history keeps in their place. A message
@@ -2141,7 +2176,8 @@ class TelegramIngress:
             sent = [*history, ModelMessage(role="user", text=f"{text}\n\n{note}", images=images)]
         # The turn's live progress (owner 2026-10-19): Harness phase, tool
         # count and time, shown in the one status message.
-        options = await asyncio.to_thread(self._agent_options, request)
+        if options is None:
+            options = await asyncio.to_thread(self._agent_options, request)
         if options is None:
             return TelegramDelivery(**base, disposition="answered", reply=AGENT_BOT_GONE)
         turn_state = TurnProgress(turn_id=f"telegram-{update.update_id if update else 0}")

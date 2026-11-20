@@ -43,6 +43,7 @@ from host_runtime.features import (
     PreparedPackage,
     TelegramAnswer,
     TelegramItem,
+    TelegramQuestion,
 )
 
 FEED_POST_REFUSAL = "the feed answers GET only"
@@ -127,6 +128,13 @@ class BiFeature(Feature):
         # What a domain's collection bot receives goes to that domain's inbox.
         bot = INBOX.bot(host)
         return None if bot is None else bot.handle(item)
+
+    def telegram_question(
+        self, item: TelegramItem, host: Any, gateway: Any
+    ) -> TelegramQuestion | TelegramAnswer | None:
+        # A plain question to a domain's bot: bi__query on that domain (owner 2026-11-21).
+        bot = INBOX.bot(host)
+        return None if bot is None else bot.question(item, bi_cards_tools(gateway))
 
     def telegram_ready(self, messenger: Messenger, host: Any) -> None:
         # Reminders and results go out through Telegram; the inbox schedule starts.

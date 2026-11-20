@@ -1681,6 +1681,25 @@ def attach_telegram_bots(
         for collector in telegram_collect.build(ingress_config, ingress.agent.state, resolver)
         if mapped(collector.bot.credential.name)
     ]
+    for collector in ingress.collectors:
+        # Its plain questions (owner 2026-11-21): a never-polled ingress on the same
+        # Agent with this bot's token and senders, sessions of its own.
+        asker = TelegramIngress(
+            TelegramIngressConfig(
+                credential=collector.bot.credential,
+                bridge_id=ingress_config.bridge_id,
+                namespace=ingress_config.namespace,
+                senders=collector.bot.senders,
+                poll_timeout_seconds=ingress_config.poll_timeout_seconds,
+                api_base=ingress_config.api_base,
+            ),
+            ingress.agent,
+            resolver,
+        )
+        asker.channel = collector.channel
+        asker.session_prefix = f"telegram-collect-{collector.name}"
+        asker.explain_failure = ingress.explain_failure
+        collector.asker = asker
     store = AgentStore(layout.workspace_root)
     known = {item.id for item in store.agents()}
     bots: list[TelegramIngress] = []

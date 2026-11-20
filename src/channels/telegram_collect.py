@@ -4,10 +4,16 @@ Owner consent 2026-11-20 (one bot per BI domain, docs/DECISIONS.md): besides the
 conversation bot (`channels.telegram`, unchanged), a Host may configure bots in
 `TelegramIngressConfig.collection_bots`. Each is polled on its own with its own
 durable cursor (`telegram-collect.<name>`). What a mapped sender sends it — links,
-files, words, a Reply — goes straight to the configured feature's
-`telegram_item` hook and its answer is sent back; nothing reaches a model, a
-Workflow or the command router. An unmapped sender is ignored, as by the
-conversation bot. `send` is the proactive message to one of the bot's own mapped
+files, a `/` command, a Reply to one of the bot's own 「#12」 messages — goes
+straight to the configured feature's `telegram_item` hook and its answer is sent
+back; nothing of it reaches a model, a Workflow or the command router.
+
+Owner 2026-11-21: any other words are a question, answered by one conversation
+turn (`TelegramIngress.answer_question`, session `telegram-collect-<name>-chat-<id>`)
+offered only the tools the feature scopes to the bot's target
+(`features.TelegramQuestion`; for BI, `bi__query` on the domain's dataset). A message
+with a link and words is collected, not answered. An unmapped sender is ignored, as
+by the conversation bot. `send` is the proactive message to one of the bot's own mapped
 senders (review reminders, results); there is no other chat it can reach. The
 token is a `SecretRef` resolved per call and never held.
 """
@@ -25,6 +31,7 @@ from typing import Any
 
 from pydantic import JsonValue
 
+from agent.gateway import turn_host_tools
 from channels.telegram import (
     _FILE_PATH,
     CHAT_ACTION_INTERVAL_SECONDS,
@@ -60,6 +67,15 @@ CHANNEL_PREFIX = "telegram-collect."
 #: Said when a collection bot has nowhere to put what it got.
 NOT_CONNECTED = "這個 bot 目前沒有接上收集功能。"
 UNSUPPORTED = "這個 bot 只收連結、文字或檔案。"
+#: Said when a plain question cannot be answered here (owner 2026-11-21): no
+#: conversation path, or the feature offers no query tool for this bot.
+NO_ANSWERS = "這個 bot 現在不能回答問題：沒有接上對話功能。連結和檔案照常收。"
+NO_QUERY_TOOL = (
+    "這個 bot 現在查不到領域的 BI 卡片（BI 卡片查詢沒有開啟或沒有安裝），"
+    "所以沒有回答。連結和檔案照常收。"
+)
+#: A Reply to one of the bot's own item messages (「已收進 …（#12）」) is collected.
+_ITEM_REF = re.compile(r"#\d{1,9}\b")
 #: The immediate 「已收進」 needs no indicator: 「正在輸入…」 shows only when
 #: handling an item takes longer than this (owner 2026-11-20).
 CHAT_ACTION_DELAY_SECONDS = 1.0
@@ -75,6 +91,14 @@ class DownloadError(Exception):
 
 def urls_in(text: str) -> tuple[str, ...]:
     return tuple(dict.fromkeys(u.rstrip(".,;:!，。；：！") for u in _URL.findall(text)))
+
+
+def is_question(item: features.TelegramItem) -> bool:
+    """Words with no link or file that are not a `/` command, nor a Reply to one of
+    the bot's own item messages (owner 2026-11-21)."""
+    if item.kind == "reply":
+        return not _ITEM_REF.search(item.quoted or "")
+    return item.kind == "text" and not item.text.startswith("/")
 
 
 class TelegramCollector:
@@ -104,6 +128,9 @@ class TelegramCollector:
         self.host: Any = None
         self.chat_action_delay_s = CHAT_ACTION_DELAY_SECONDS
         self.chat_action_interval_s = CHAT_ACTION_INTERVAL_SECONDS
+        # The never-polled `TelegramIngress` (this bot's token and senders) that
+        # answers plain questions; set by the host, None answers none.
+        self.asker: Any = None
 
     @property
     def name(self) -> str:
@@ -336,6 +363,8 @@ class TelegramCollector:
         if item is None:
             await asyncio.to_thread(self._say, update.chat_id, UNSUPPORTED)
             return "ignored"
+        if is_question(item):
+            return await self._question(item, update)
         typing = ChatAction(
             partial(self._typing, update.chat_id),
             self.chat_action_interval_s,
@@ -357,6 +386,39 @@ class TelegramCollector:
             # Stopped before the answer, so no indicator follows it.
             await typing.stop()
         text = NOT_CONNECTED if answer is None else answer.text
+        await asyncio.to_thread(self._say, update.chat_id, text)
+        return "answered"
+
+    async def _question(self, item: features.TelegramItem, update: _Update) -> str:
+        """Answer a plain question with the tools the feature scopes to this bot."""
+        hooks, asker = self.feature_items, self.asker
+        if hooks is None or asker is None:
+            await asyncio.to_thread(self._say, update.chat_id, NO_ANSWERS)
+            return "answered"
+        typing = ChatAction(partial(self._typing, update.chat_id), self.chat_action_interval_s)
+        typing.start()
+        try:
+            prepared = await asyncio.to_thread(
+                hooks.telegram_question, item, self.host, asker.agent.gateway
+            )
+            if isinstance(prepared, features.TelegramAnswer):
+                text = prepared.text
+            elif prepared is None or not prepared.tools:
+                text = NO_QUERY_TOOL
+            else:
+                options = {
+                    "allowed_tools": frozenset(tool.tool.name for tool in prepared.tools),
+                    "persona_guidance": prepared.guidance,
+                }
+                with turn_host_tools(prepared.tools):
+                    delivery = await asker.answer_question(update, item.actor, options)
+                text = delivery.reply or ""
+        except Exception as error:  # noqa: BLE001 - one message never stops the bot
+            _LOG.warning("Telegram collection bot %s: %s", self.name, type(error).__name__)
+            text = "沒有回答：處理時發生錯誤。"
+        finally:
+            # Stopped before the answer, so no indicator follows it.
+            await typing.stop()
         await asyncio.to_thread(self._say, update.chat_id, text)
         return "answered"
 
