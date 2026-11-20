@@ -5654,7 +5654,13 @@ Tests: `tests/test_agents_settings.py`, `tests/test_telegram_agent_bots.py`,
   senders are ignored. The conversation bot's `activity()` includes its agent bots' (rule 19).
 - **API.** `GET /api/settings/agents` → `{ok, writable, reload, telegram_configured, main, agents
   [+bot {name, variable, token_present, senders, enabled, running, problem}], collection_bots
-  [+purpose "BI 收集→<target>"], skills, profiles}`; `POST /api/settings/agents` (`AgentForm`:
+  [+purpose "BI 收集→<target>"], skills [{key, name, description}], profiles}` (2026-11-21:
+  `skills` items were bare keys; `name` = the manifest's `alias`, else the Skill name;
+  `description` = `selector_hint`, else the first sentence of `instructions`, ≤ 80 characters,
+  as stored; sorted by name; the page still accepts bare keys; `main.bot.senders[]` carry
+  `username`, the last `@username` that allowed sender wrote with (in memory,
+  `TelegramIngress.sender_usernames`, "" when unknown), used only by the page to turn a typed
+  username into the numeric id, never to allow or route a message); `POST /api/settings/agents` (`AgentForm`:
   id?, name, purpose, skills, profile?, bot? {variable, token?, senders, enabled}),
   `/api/settings/agents/delete` {id}, `/api/settings/collection-bots` (`CollectionBotForm`: name,
   target, feature?, bot), `/api/settings/collection-bots/delete` {name}; 409 codes
@@ -5689,12 +5695,22 @@ Tests: `tests/test_agents_settings.py`, `tests/test_telegram_agent_bots.py`,
   main bot also `token_present`. Lookups run in parallel with a 3 s timeout, are cached per
   SHA-256 fingerprint of origin + token (never the token; 1 h, failures 60 s) and cleared on every
   Agents or Telegram settings save. Unresolved → `problem` (unless polling already set one):
-  `token_missing`, `token_invalid` (401/404), `network_unreachable`, `telegram_error`. The page's
+  `token_missing`, `token_invalid` (401/404), `network_unreachable`, `telegram_error`. For
+  `SETTLING_S` (60 s) after a save a failed lookup is returned but not cached, so the next
+  request asks Telegram again (2026-11-21). The page's
   Telegram column shows `@username · state` first and the variable as secondary text; rows without
   a bot show 「未綁定」 and a 「綁定」 button opening the form at the bot fieldset; the main row's
-  編輯 goes to the Telegram bot form; no sub-agents → 「還沒有子代理。」 with 新增 agent; the
+  編輯 goes to the Telegram bot form; no sub-agents → 「還沒有子代理。」 (the 新增 agent button below the table is the only one); the
   sidebar's Agents entries show a TG mark with `@username`. Tests use `tests/conftest.py`, which
   keeps every test offline (`bot_identity.TRANSPORT_FACTORY`).
+- **Form outcome (owner 2026-11-21).** Each form's outcome is shown beside its save button
+  (`#agent-save-status` / `#collect-save-status`, `role=status`): 儲存中…, the reload note, or
+  「沒有儲存：<reason>」 for a client check or a server code; a saved row is highlighted and
+  scrolled into view. New bots start with the main bot's senders. A sender line that is not a
+  number is turned into the main sender with that username, else refused (「… 是 Telegram 名稱，
+  請填數字 id（可傳訊息給 @userinfobot 查）」). After a save the page re-reads
+  `GET /api/settings/agents` every 2 s for up to 30 s while `reload` is `waiting`/`applying` or
+  an enabled bot is neither running nor has a problem other than `network_unreachable`.
 - **Applying.** After a save the bots are rebuilt on the kept conversation-bot ingress and the
   polling loop restarts only once no Telegram turn or flow runs on any bot (`reload`: `waiting`,
   `applying`, `applied`, `not_running`, `failed`); no Agent Web restart.

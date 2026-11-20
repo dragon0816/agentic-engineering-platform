@@ -413,6 +413,19 @@ select.mem-field { width: auto; flex: 0 1 220px; min-width: 0; max-width: 100%; 
 .agent-skills, .agent-bot { display: grid; gap: 4px; border: 1px solid var(--line);
   border-radius: 6px; padding: 6px 10px; }
 .agents-table td { vertical-align: top; }
+.agents-table tr.just-saved td { background: rgba(46, 125, 50, 0.12); }
+/* .settings label/input are block and full width; a Skill is one clickable row. */
+.settings .skill-row { display: flex; align-items: flex-start; gap: 8px; margin: 0;
+  padding: 4px 2px; border-radius: 4px; cursor: pointer; text-align: left; font-size: 13px;
+  color: var(--ink); }
+.settings .skill-row:hover { background: rgba(127, 127, 127, 0.1); }
+.settings .skill-row input { flex: none; margin: 2px 0 0; width: auto; padding: 0; }
+.settings .skill-row .skill-text { display: grid; gap: 1px; min-width: 0; }
+.settings .skill-row .skill-name { font-weight: 600; }
+.settings .skill-row .skill-desc { color: var(--dim); }
+.settings .skill-row .skill-id { color: var(--dim); font-size: 0.8em; overflow-wrap: anywhere; }
+.save-status { margin-left: 8px; }
+.save-status.failed { color: #c62828; font-weight: 600; }
 .session-search { width: 100%; min-height: 38px; margin-bottom: 8px; font: inherit; }
 .session-snippet { display: block; overflow-wrap: anywhere; color: var(--dim); }
 .session-list { flex: 1; overflow-y: auto; min-height: 120px; }
@@ -1362,7 +1375,8 @@ tr:last-child td { border-bottom: none; }
         <fieldset id="agent-skills" class="agent-skills"><legend>可用的 Skills</legend></fieldset>
         <p class="note">模型：使用對話的模型（V1 只支援這一種）。</p>
         <fieldset class="agent-bot"><legend>Telegram bot</legend>
-          <label><input type="checkbox" id="agent-bot-on"> 綁定 Telegram bot</label>
+          <label class="laya-check"><input type="checkbox" id="agent-bot-on">
+            綁定 Telegram bot</label>
           <label for="agent-bot-variable">token 的環境變數名稱</label>
           <input id="agent-bot-variable" spellcheck="false"
                  placeholder="留空自動用 AEP_TG_<agent id>">
@@ -1373,11 +1387,14 @@ tr:last-child td { border-bottom: none; }
             Telegram 數字 id，後面可接 actor</label>
           <textarea id="agent-bot-senders" spellcheck="false" rows="2"
                     placeholder="123456789 leo.chi"></textarea>
-          <label><input type="checkbox" id="agent-bot-enabled" checked> 開啟</label>
+          <label class="laya-check"><input type="checkbox" id="agent-bot-enabled" checked>
+            開啟</label>
         </fieldset>
         <p><button class="go" id="agent-save" type="submit">儲存 agent</button>
           <button id="agent-cancel" type="button">取消</button>
-          <button id="agent-delete" type="button" hidden>刪除 agent</button></p>
+          <button id="agent-delete" type="button" hidden>刪除 agent</button>
+          <span id="agent-save-status" class="save-status" role="status"
+                aria-live="polite"></span></p>
       </form>
       <form id="collect-form" class="agent-form" autocomplete="off" hidden>
         <h3 id="collect-form-title">新增 BI 收集 bot</h3>
@@ -1394,10 +1411,12 @@ tr:last-child td { border-bottom: none; }
           Telegram 數字 id，後面可接 actor</label>
         <textarea id="collect-senders" spellcheck="false" rows="2"
                   placeholder="123456789 leo.chi"></textarea>
-        <label><input type="checkbox" id="collect-enabled" checked> 開啟</label>
+        <label class="laya-check"><input type="checkbox" id="collect-enabled" checked> 開啟</label>
         <p><button class="go" id="collect-save" type="submit">儲存 bot</button>
           <button id="collect-cancel" type="button">取消</button>
-          <button id="collect-delete" type="button" hidden>刪除 bot</button></p>
+          <button id="collect-delete" type="button" hidden>刪除 bot</button>
+          <span id="collect-save-status" class="save-status" role="status"
+                aria-live="polite"></span></p>
       </form>
     </div>
     <h2>Shared platform</h2>
@@ -4275,16 +4294,36 @@ function sendersText(senders) {
   return (senders || []).map((item) => item.sender_id + " " + item.actor).join("\n");
 }
 
+// The main bot's allowed senders: what a new bot starts with, and the only
+// place a typed @username is turned into a numeric id (usernames change hands,
+// so a bot never allows a sender by username).
+function mainSenders() {
+  const bot = agentSettings && agentSettings.main && agentSettings.main.bot;
+  return (bot && bot.senders) || [];
+}
+
 function parseSenders(value) {
   const senders = [];
   for (const line of value.split("\n")) {
     const parts = line.trim().split(/[\s,]+/).filter(Boolean);
     if (!parts.length) continue;
-    if (!/^\d+$/.test(parts[0])) {
-      throw Object.assign(new Error("“" + parts[0] + "” 不是 Telegram 數字 id。"),
-        {code: "sender_id"});
+    let id = parts[0];
+    let actor = parts[1] || "";
+    if (!/^\d+$/.test(id)) {
+      const name = id.replace(/^@/, "");
+      const known = mainSenders().find((item) => item.username
+        && item.username.toLowerCase() === name.toLowerCase());
+      if (known) {
+        id = String(known.sender_id); actor = actor || known.actor || "";
+      } else if (/^[A-Za-z][A-Za-z0-9_]{3,31}$/.test(name)) {
+        throw Object.assign(new Error(name + " 是 Telegram 名稱，請填數字 id"
+          + "（可傳訊息給 @userinfobot 查）。"), {code: "sender_id"});
+      } else {
+        throw Object.assign(new Error("“" + parts[0] + "” 不是 Telegram 數字 id"
+          + "（可傳訊息給 @userinfobot 查）。"), {code: "sender_id"});
+      }
     }
-    senders.push({sender_id: Number(parts[0]), actor: parts[1] || ""});
+    senders.push({sender_id: Number(id), actor});
   }
   return senders;
 }
@@ -4334,10 +4373,12 @@ function renderAgentSettings(view) {
      bot: mainBot ? botCell(mainBot, {where: "在上面的 Telegram bot 設定"})
        : botCell(null, {bind: openMainBotForm}),
      edit: openMainBotForm},
-    ...view.agents.map((agent) => ({who: agent.name, purpose: agent.purpose || "",
+    ...view.agents.map((agent) => ({key: "agent:" + agent.id, who: agent.name,
+      purpose: agent.purpose || "",
       bot: botCell(agent.bot, {bind: () => openAgentForm(agent, true)}),
       edit: () => openAgentForm(agent)})),
-    ...view.collection_bots.map((bot) => ({who: bot.name, purpose: bot.purpose,
+    ...view.collection_bots.map((bot) => ({key: "collect:" + bot.name, who: bot.name,
+      purpose: bot.purpose,
       bot: botCell(bot), edit: () => openCollectForm(bot)})),
   ];
   const t = table(["Agent / bot", "用途", "Telegram bot", ""], rows, (row) => {
@@ -4349,13 +4390,14 @@ function renderAgentSettings(view) {
     return [row.who, row.purpose, row.bot, button];
   });
   t.classList.add("agents-table");
+  // Each row says what it is, so a save can bring its row into view.
+  const trs = [...t.querySelectorAll("tr")].slice(1);
+  rows.forEach((row, index) => { if (row.key && trs[index]) trs[index].dataset.row = row.key; });
   const shown = [t];
   if (!view.agents.length) {
+    // 新增 agent is the button below the table; one is enough.
     const empty = document.createElement("p"); empty.className = "note"; empty.id = "agents-empty";
-    const add = document.createElement("button"); add.type = "button";
-    add.append(text("新增 agent")); add.disabled = !view.writable;
-    add.addEventListener("click", () => openAgentForm(null));
-    empty.append(text("還沒有子代理。"), " ", add);
+    empty.append(text("還沒有子代理。"));
     shown.push(empty);
   }
   el("agents-rows").replaceChildren(...shown);
@@ -4369,12 +4411,28 @@ function renderAgentSettings(view) {
 function showAgentSkills(chosen) {
   const box = el("agent-skills");
   const legend = document.createElement("legend"); legend.append(text("可用的 Skills"));
-  const skills = (agentSettings && agentSettings.skills) || [];
-  const boxes = skills.map((key) => {
-    const label = document.createElement("label");
+  // Older servers sent bare keys; each is now {key, name, description}.
+  const skills = ((agentSettings && agentSettings.skills) || []).map((item) =>
+    typeof item === "string" ? {key: item, name: item, description: ""} : item);
+  // One row per Skill: the box, then its name, what it does and its id; the
+  // whole row toggles the box.
+  const boxes = skills.map((skill) => {
+    const label = document.createElement("label"); label.className = "skill-row";
     const input = document.createElement("input"); input.type = "checkbox";
-    input.value = key; input.checked = chosen.includes(key);
-    label.append(input, text(" " + key));
+    input.value = skill.key; input.checked = chosen.includes(skill.key);
+    const words = document.createElement("span"); words.className = "skill-text";
+    const name = document.createElement("span"); name.className = "skill-name";
+    name.append(text(skill.name || skill.key));
+    words.append(name);
+    if (skill.description) {
+      const desc = document.createElement("small"); desc.className = "skill-desc";
+      desc.append(text(skill.description));
+      words.append(desc);
+    }
+    const id = document.createElement("small"); id.className = "skill-id";
+    id.append(text(skill.key));
+    words.append(id);
+    label.append(input, words);
     return label;
   });
   if (!boxes.length) {
@@ -4405,7 +4463,8 @@ function openAgentForm(agent, bind) {
   el("agent-bot-variable").value = bot && bot.variable ? bot.variable
     : agent ? defaultBotVariable("", agent.id) : "";
   el("agent-bot-token").value = "";
-  el("agent-bot-senders").value = bot ? sendersText(bot.senders) : "";
+  el("agent-bot-senders").value = sendersText(bot ? bot.senders : mainSenders());
+  setSaveStatus(el("agent-save-status"), "");
   el("agent-bot-enabled").checked = bot ? bot.enabled : true;
   el("agent-delete").hidden = !agent;
   if (bind) {
@@ -4433,28 +4492,94 @@ function openCollectForm(bot) {
   el("collect-variable").value = bot && bot.variable ? bot.variable
     : bot ? defaultBotVariable("BI_", bot.name) : "";
   el("collect-token").value = "";
-  el("collect-senders").value = bot ? sendersText(bot.senders) : "";
+  el("collect-senders").value = sendersText(bot ? bot.senders : mainSenders());
+  setSaveStatus(el("collect-save-status"), "");
   el("collect-enabled").checked = bot ? bot.enabled : true;
   el("collect-delete").hidden = !bot;
 }
 
-async function agentAction(path, body, button, working) {
+// The outcome beside the form's save button (AGENTS rule 23): never silent.
+function setSaveStatus(status, message, failed) {
+  status.textContent = message;
+  status.classList.toggle("failed", !!failed);
+  if (message && status.offsetParent) status.scrollIntoView({block: "nearest"});
+}
+
+function saveRefused(status, failure) {
+  const code = failure.code || "";
+  const reason = AGENT_PROBLEMS[code] || failure.message || code || "伺服器沒有回應。";
+  setSaveStatus(status, "沒有儲存：" + reason, true);
+  el("agents-result").textContent = "";
+}
+
+// `row(saved)`: the table row (`data-row`) to bring into view once saved.
+async function agentAction(path, body, button, working, status, row) {
   const result = el("agents-result");
   const label = button.textContent;
   button.disabled = true; button.textContent = working;
-  result.textContent = working;
+  setSaveStatus(status, working);
+  result.textContent = "";
   try {
     const saved = await call(path, body);
     if (saved.ok === false) throw Object.assign(new Error(saved.code), {code: saved.code});
     renderAgentSettings(saved);
+    const note = RELOAD_NOTES[saved.reload] || "已儲存。";
+    setSaveStatus(status, note);
     el("agent-form").hidden = true; el("collect-form").hidden = true;
     el("agent-bot-token").value = ""; el("collect-token").value = "";
-    result.textContent = RELOAD_NOTES[saved.reload] || "已儲存。";
+    result.textContent = note;
+    const shown = row ? row(saved) : "";
+    const line = shown
+      && el("agents-rows").querySelector("tr[data-row=\"" + CSS.escape(shown) + "\"]");
+    if (line) {
+      line.classList.add("just-saved");
+      line.scrollIntoView({block: "center"});
+    } else {
+      result.scrollIntoView({block: "nearest"});
+    }
     loadAgents().catch(() => {});
+    followBotReload(saved, shown);
   } catch (failure) {
-    const code = failure.code || "";
-    result.textContent = "沒有儲存：" + (AGENT_PROBLEMS[code] || failure.message || code);
+    saveRefused(status, failure);
   } finally { button.disabled = false; button.textContent = label; }
+}
+
+// While saved bots are still being applied, or one has not answered yet, the
+// table refreshes every 2 s for up to 30 s, so it settles on the bot's real
+// name and state instead of the first, possibly stale, lookup (owner 2026-11-21).
+const BOT_FOLLOW_MS = 2000;
+const BOT_FOLLOW_LIMIT_MS = 30000;
+let botFollow = 0;
+
+function botsSettled(view) {
+  if (view.reload === "waiting" || view.reload === "applying") return false;
+  const bots = [...(view.agents || []).map((agent) => agent.bot).filter(Boolean),
+    ...(view.collection_bots || [])];
+  return bots.every((bot) => !bot.enabled || bot.running
+    || (bot.problem && bot.problem !== "network_unreachable"));
+}
+
+function followBotReload(view, highlight) {
+  const run = ++botFollow;
+  const started = Date.now();
+  const step = async (current) => {
+    if (run !== botFollow || botsSettled(current)
+        || Date.now() - started >= BOT_FOLLOW_LIMIT_MS) return;
+    await new Promise((resolve) => setTimeout(resolve, BOT_FOLLOW_MS));
+    if (run !== botFollow) return;
+    let next;
+    try { next = await call("/api/settings/agents"); } catch (failure) { return; }
+    // An open form keeps its fields (the profile list is rebuilt on render).
+    if (el("agent-form").hidden && el("collect-form").hidden) {
+      renderAgentSettings(next);
+      const line = highlight
+        && el("agents-rows").querySelector("tr[data-row=\"" + CSS.escape(highlight) + "\"]");
+      if (line) line.classList.add("just-saved");
+      if (RELOAD_NOTES[next.reload]) el("agents-result").textContent = RELOAD_NOTES[next.reload];
+    }
+    step(next);
+  };
+  step(view);
 }
 
 async function loadAgentSettings() {
@@ -4486,8 +4611,9 @@ el("agent-profile").addEventListener("change", () => {
 el("agent-form").addEventListener("submit", (event) => {
   event.preventDefault();
   let senders;
-  try { senders = parseSenders(el("agent-bot-senders").value); }
-  catch (failure) { el("agents-result").textContent = "沒有儲存：" + failure.message; return; }
+  const status = el("agent-save-status");
+  try { senders = el("agent-bot-on").checked ? parseSenders(el("agent-bot-senders").value) : []; }
+  catch (failure) { saveRefused(status, failure); return; }
   const body = {
     id: el("agent-id").value, name: el("agent-form-name").value,
     purpose: el("agent-purpose").value,
@@ -4497,29 +4623,38 @@ el("agent-form").addEventListener("submit", (event) => {
       token: el("agent-bot-token").value.trim() || null, senders,
       enabled: el("agent-bot-enabled").checked} : null,
   };
-  agentAction("/api/settings/agents", body, el("agent-save"), "儲存中…");
+  const before = new Set(((agentSettings && agentSettings.agents) || []).map((a) => a.id));
+  // The saved agent: the one edited, else the one that was not there before.
+  const row = (saved) => {
+    const agent = body.id ? {id: body.id}
+      : (saved.agents || []).find((item) => !before.has(item.id));
+    return agent ? "agent:" + agent.id : "";
+  };
+  agentAction("/api/settings/agents", body, el("agent-save"), "儲存中…", status, row);
 });
 el("agent-delete").addEventListener("click", () => {
   if (!confirm("刪除這個 agent？它的對話紀錄會保留。")) return;
   agentAction("/api/settings/agents/delete", {id: el("agent-id").value},
-    el("agent-delete"), "刪除中…");
+    el("agent-delete"), "刪除中…", el("agent-save-status"));
 });
 el("collect-form").addEventListener("submit", (event) => {
   event.preventDefault();
   let senders;
+  const status = el("collect-save-status");
   try { senders = parseSenders(el("collect-senders").value); }
-  catch (failure) { el("agents-result").textContent = "沒有儲存：" + failure.message; return; }
+  catch (failure) { saveRefused(status, failure); return; }
   agentAction("/api/settings/collection-bots", {
     name: el("collect-name").value, target: el("collect-target").value,
     bot: {variable: el("collect-variable").value,
       token: el("collect-token").value.trim() || null, senders,
       enabled: el("collect-enabled").checked},
-  }, el("collect-save"), "儲存中…");
+  }, el("collect-save"), "儲存中…", status,
+  () => "collect:" + el("collect-name").value.trim());
 });
 el("collect-delete").addEventListener("click", () => {
   if (!confirm("刪除這個收集 bot？")) return;
   agentAction("/api/settings/collection-bots/delete", {name: el("collect-name").value},
-    el("collect-delete"), "刪除中…");
+    el("collect-delete"), "刪除中…", el("collect-save-status"));
 });
 
 // New session: Send waits until the new session has loaded (#233); a message

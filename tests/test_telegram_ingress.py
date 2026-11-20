@@ -619,6 +619,18 @@ def test_an_unmapped_sender_is_remembered_for_the_owner_but_not_answered(
     assert transport.sent() == []
     (seen,) = item.unmapped.values()
     assert seen.sender_id == STRANGER and seen.name == "@stranger_name"
+    # A stranger's username is not kept as an allowed sender's.
+    assert item.sender_usernames == {}
+
+
+def test_an_allowed_senders_username_is_remembered_for_settings_only(tmp_path: Path) -> None:
+    """Settings → Agents turns a typed @username into this id (owner report
+    2026-11-21); the username never allows or routes a message."""
+    raw = update(1, OWNER, "/help")
+    raw["message"]["from"]["username"] = "owner_name"
+    item, _, _ = ingress(tmp_path, FakeTransport([[raw]]))
+    poll(item)
+    assert item.sender_usernames == {OWNER: "owner_name"}
 
 
 def test_free_text_is_a_conversation_with_context_and_new_clears_it(tmp_path: Path) -> None:

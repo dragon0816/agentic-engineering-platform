@@ -99,6 +99,62 @@ class CollectionBotForm(Contract):
     bot: BotForm
 
 
+#: How long a Skill's one-line description may be in the agent form.
+SKILL_DESCRIPTION_CHARS = 80
+
+
+def _one_line(text: str, limit: int = SKILL_DESCRIPTION_CHARS) -> str:
+    """The first sentence of `text` on one line, cut to `limit` characters."""
+    line = " ".join(text.split())
+    for end in ("。", ". ", "！", "? ", "？"):
+        at = line.find(end)
+        if 0 < at:
+            line = line[: at + len(end.rstrip())]
+    return line if len(line) <= limit else line[: limit - 1].rstrip() + "…"
+
+
+def skill_choices(skills_directory: Path) -> list[dict[str, str]]:
+    """The installed Skills for the agent form: `key` (`namespace/name@version`),
+    a `name` (the manifest's `alias`, else the Skill's name) and a one-line
+    `description` (`selector_hint`, else the first sentence of `instructions`),
+    both as stored and never invented; sorted by name. An unreadable manifest
+    still lists its key with an empty description."""
+    choices: list[dict[str, str]] = []
+    for key in installed_skills(skills_directory):
+        namespace, _, rest = key.partition("/")
+        name, _, version = rest.partition("@")
+        manifest: dict[str, Any] = {}
+        try:
+            raw = json.loads(
+                (skills_directory / f"{namespace}__{name}__{version}.json").read_text(
+                    encoding="utf-8-sig"
+                )
+            )
+            first = raw[0] if isinstance(raw, list) and raw else raw
+            if isinstance(first, dict):
+                manifest = first
+        except (OSError, ValueError):
+            pass
+        alias = manifest.get("alias")
+        hint = manifest.get("selector_hint")
+        instructions = manifest.get("instructions")
+        description = (
+            hint
+            if isinstance(hint, str) and hint.strip()
+            else instructions
+            if isinstance(instructions, str)
+            else ""
+        )
+        choices.append(
+            {
+                "key": key,
+                "name": alias if isinstance(alias, str) and alias else name,
+                "description": _one_line(description),
+            }
+        )
+    return sorted(choices, key=lambda item: (item["name"].lower(), item["key"]))
+
+
 def checked_variable(value: str) -> str:
     """The environment variable name, or a refusal; a pasted token is never kept."""
     text = value.strip()
@@ -472,6 +528,6 @@ def agents_view(
         },
         "agents": agents,
         "collection_bots": collection,
-        "skills": list(installed_skills(layout.skills)),
+        "skills": skill_choices(layout.skills),
         "profiles": installed_profiles(layout.agents),
     }

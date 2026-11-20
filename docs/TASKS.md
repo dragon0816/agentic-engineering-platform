@@ -5300,3 +5300,18 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   pass (45); ruff, ruff format --check, mypy on changed files clean. Full suite not run. Also
   fixes the token tests' environment cleanup (monkeypatch.delenv on an absent variable does not
   restore it).
+- [x] 2026-11-21 Settings → Agents: save outcome beside 儲存, readable Skills picker, sender
+  prefill and username lookup, bot identity after a save (owner report 2026-11-21; branch
+  bi-knowledge-round2-20261120; contract docs/CONTRACTS.md "Persistent agents and agent bots").
+  Root cause of 「按儲存沒用」: the client refused `leo_oel_0816` (a Telegram username) in
+  允許的傳送者 and wrote 「沒有儲存：…不是 Telegram 數字 id」 to `#agents-result` above the form,
+  out of view; nothing reached the server. Now every outcome shows beside the save button
+  (role=status), the saved row is highlighted and scrolled into view; new bots start with the
+  main bot's senders; a known allowed sender's @username becomes its id (never matched at
+  runtime), others get a clear message; Skills are one clickable row each (box, alias,
+  one-line description, muted id; `.settings label` made them block before); one 新增 agent
+  button; failed getMe lookups right after a save are not cached and the page re-reads the
+  bots every 2 s for up to 30 s while they apply. Verification: test_agents_settings,
+  test_bot_identity, test_telegram_agent_bots, test_telegram_settings, test_telegram_ingress,
+  test_agent_sidebar_ui (incl. a browser test filling the form as the owner did) pass (72);
+  ruff, ruff format --check, mypy on changed files clean. Full suite not run.

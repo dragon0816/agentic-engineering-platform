@@ -1124,6 +1124,10 @@ class TelegramIngress:
         self._resolver = resolver
         self._transport = transport if transport is not None else UrllibTransport()
         self.unmapped: dict[int, UnmappedSender] = {}
+        #: The last `@username` each allowed sender wrote with, in memory only, so
+        #: Settings can turn a typed username into that sender's numeric id.
+        #: Never used to route or allow a message: usernames change hands.
+        self.sender_usernames: dict[int, str] = {}
         #: The retryable failure the running loop is waiting out (a conflict,
         #: an unreachable Bot API); None once a poll succeeds.
         self.problem: Failure | None = None
@@ -1537,6 +1541,8 @@ class TelegramIngress:
                 oldest = min(self.unmapped.values(), key=lambda item: item.seen)
                 del self.unmapped[oldest.sender_id]
             return TelegramDelivery(**base, disposition="unmapped_sender")
+        if update.sender_name.startswith("@"):
+            self.sender_usernames[update.sender_id] = update.sender_name[1:]
         if update.voice is not None and self.voice is not None and not update.files:
             heard = await self._hear(base, actor, update)
             if isinstance(heard, TelegramDelivery):

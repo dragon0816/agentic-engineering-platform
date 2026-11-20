@@ -146,6 +146,53 @@ def test_agents_are_created_edited_bound_and_deleted_on_the_page(web: AgentWeb) 
     }
 
 
+def test_main_senders_carry_the_username_they_last_wrote_with(web: AgentWeb) -> None:
+    """The page turns a typed @username into the numeric id (owner report
+    2026-11-21); unknown usernames stay empty."""
+    _telegram_on(web)
+    assert web.runtime.telegram is not None
+    assert web.agent_settings()["main"]["bot"]["senders"] == [
+        {"sender_id": 42, "actor": "engineer", "username": ""}
+    ]
+    web.runtime.telegram.sender_usernames[42] = "leo_oel_0816"
+    assert web.agent_settings()["main"]["bot"]["senders"][0]["username"] == "leo_oel_0816"
+
+
+def test_skills_are_offered_with_a_name_and_a_one_line_description(tmp_path: Path) -> None:
+    from host_runtime.agents_settings import skill_choices
+
+    folder = tmp_path / "skills"
+    folder.mkdir()
+    (folder / "company-agent__knowledge-query__1.12.0.json").write_text(
+        json.dumps(
+            {
+                "alias": "knowledge-query",
+                "instructions": "Answer from the company Knowledge with citations. Then stop.",
+            }
+        ),
+        encoding="utf-8",
+    )
+    (folder / "engineering__bi-knowledge__1.0.0.json").write_text(
+        json.dumps(
+            [{"alias": "bi", "selector_hint": "BI 資料查詢：" + "很長" * 60, "instructions": "x"}]
+        ),
+        encoding="utf-8",
+    )
+    (folder / "broken__thing__1.0.0.json").write_text("{", encoding="utf-8")
+    choices = skill_choices(folder)
+    assert [c["key"] for c in choices] == [
+        "engineering/bi-knowledge@1.0.0",
+        "company-agent/knowledge-query@1.12.0",
+        "broken/thing@1.0.0",
+    ]
+    bi, query, broken = choices
+    assert bi["name"] == "bi" and bi["description"].startswith("BI 資料查詢：")
+    assert len(bi["description"]) == agents_settings.SKILL_DESCRIPTION_CHARS
+    assert bi["description"].endswith("…")
+    assert broken == {"key": "broken/thing@1.0.0", "name": "thing", "description": ""}
+    assert query["description"] == "Answer from the company Knowledge with citations."
+
+
 def test_a_pasted_token_writes_nothing(web: AgentWeb) -> None:
     _telegram_on(web)
     layout = web.runtime.layout

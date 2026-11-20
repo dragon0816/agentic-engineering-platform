@@ -9,6 +9,7 @@ import os
 import threading
 from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 
 import pytest
 from test_agent_web_followups_ui import _browser_missing, _Page
@@ -220,8 +221,9 @@ def test_settings_agents_adds_an_agent_and_refuses_a_pasted_token(page: tuple) -
         "document.getElementById('agent-save').click()"
     )
     # Non-ASCII stays on the Python side of the browser bridge.
-    ui.wait("document.getElementById('agents-result').textContent.includes('token')")
-    assert "token 本身" in str(ui.run("document.getElementById('agents-result').textContent"))
+    # The refusal sits beside the save button (owner report 2026-11-21).
+    ui.wait("document.getElementById('agent-save-status').textContent.includes('token')")
+    assert "token 本身" in str(ui.run("document.getElementById('agent-save-status').textContent"))
     assert not (runtime.layout.workspace_root / "agents.json").exists()
     ui.run(
         "document.getElementById('agent-bot-on').checked = false;"
@@ -299,3 +301,144 @@ def test_a_token_pasted_on_the_page_is_stored_and_the_field_is_cleared(
     )
     assert ui.run("document.getElementById('agent-bot-variable').value") == "AEP_TG_SALES"
     assert ui.run("document.getElementById('agent-bot-token').value") == ""
+
+
+@pytest.mark.skipif(_browser_missing(), reason="no Chromium browser is installed")
+def test_the_owners_agent_form_says_beside_save_why_it_refused_then_saves(
+    page: tuple,  # type: ignore[type-arg]
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Owner report 2026-11-21: 儲存 seemed to do nothing. A Telegram username in
+    允許的傳送者 was refused in a line above the form, out of view. Every outcome
+    now shows beside the save button; a known sender's @username becomes its id."""
+    import json
+
+    from test_bot_identity import FakeTelegram
+    from test_telegram_settings import TOKEN, Store, _update
+
+    from host_runtime import bot_identity
+    from host_runtime.persistent_agents import AgentStore
+
+    runtime, server, ui = page
+    web = server.web
+    store = Store()
+    web.user_environment = store  # never the real registry in tests
+    monkeypatch.setattr(web, "start_telegram", lambda: None)  # no network
+    monkeypatch.setenv("AEP_TELEGRAM_BOT_TOKEN", TOKEN)
+    pasted = "987654321:BBz" + "y" * 33
+
+    class SlowFirst(FakeTelegram):
+        """The new bot's first getMe times out (owner 2026-11-21), later ones answer."""
+
+        failed = False
+
+        def send(self, url: str, body: bytes, headers: Any, timeout_s: float) -> Any:
+            if pasted in url and not self.failed:
+                self.failed = True
+                raise TimeoutError("timed out")
+            return super().send(url, body, headers, timeout_s)
+
+    fake = SlowFirst({TOKEN: ("aep_main_bot", "AEP Main"), pasted: ("aep_sales_bot", "Sales")})
+    monkeypatch.setattr(bot_identity, "TRANSPORT_FACTORY", lambda: fake)
+    assert web.update_telegram_settings(_update())["ok"] is True
+    assert runtime.telegram is not None
+    runtime.telegram.sender_usernames[42] = "leo_oel_0816"
+    runtime.layout.skills.mkdir(parents=True, exist_ok=True)
+    (runtime.layout.skills / "engineering__bi-knowledge__1.0.0.json").write_text(
+        json.dumps(
+            {"alias": "bi-knowledge", "selector_hint": "Query BI datasets.", "instructions": "x"}
+        ),
+        encoding="utf-8",
+    )
+    ui.browser.navigate(server.address)
+    ui.wait('!document.getElementById("send").disabled')
+    ui.run("document.getElementById('nav-settings').click()")
+    ui.wait("!!document.querySelector('#agents-rows table')")
+    # One 新增 agent button, not one in the empty line too.
+    assert ui.run("document.querySelectorAll('#agents-empty button').length") == 0
+    ui.run("document.getElementById('agent-add').click()")
+    # Senders start as the main bot's.
+    assert ui.run("document.getElementById('agent-bot-senders').value") == "42 engineer"
+
+    # The Skill is one row: the box, then its name and what it does.
+    row = "document.querySelector('#agent-skills .skill-row')"
+    assert ui.run(f"{row}.querySelector('.skill-name').textContent") == "bi-knowledge"
+    assert ui.run(f"{row}.querySelector('.skill-desc').textContent") == "Query BI datasets."
+    assert ui.run(f"{row}.querySelector('.skill-id').textContent") == (
+        "engineering/bi-knowledge@1.0.0"
+    )
+    same_line = ui.run(
+        f"(() => {{ const box = {row}.querySelector('input').getBoundingClientRect();"
+        f" const name = {row}.querySelector('.skill-name').getBoundingClientRect();"
+        " return box.right <= name.left && Math.abs(box.top - name.top) < 12"
+        " && name.left - box.right < 40; })()"
+    )
+    assert same_line is True
+    ui.run(f"{row}.querySelector('.skill-name').click()")  # the whole row toggles
+    assert ui.run(f"{row}.querySelector('input').checked") is True
+
+    ui.run(
+        "document.getElementById('agent-form-name').value = 'Sales';"
+        "document.getElementById('agent-bot-on').checked = true;"
+        f"document.getElementById('agent-bot-token').value = {pasted!r};"
+        "document.getElementById('agent-bot-senders').value = 'someone_else leo.chi';"
+        "document.getElementById('agent-save').click()"
+    )
+    status = "document.getElementById('agent-save-status')"
+    ui.wait(f"{status}.textContent.includes('userinfobot')")
+    assert "someone_else" in str(ui.run(f"{status}.textContent"))
+    # Beside the button, in view, and nothing written.
+    assert ui.run(f"{status}.parentElement.contains(document.getElementById('agent-save'))")
+    assert ui.run(f"{status}.getAttribute('role')") == "status"
+    assert not (runtime.layout.workspace_root / "agents.json").exists()
+
+    # A server refusal lands there too.
+    ui.run(
+        "document.getElementById('agent-bot-senders').value = '@leo_oel_0816 leo.chi';"
+        f"document.getElementById('agent-bot-variable').value = {pasted!r};"
+        "document.getElementById('agent-save').click()"
+    )
+    ui.wait(f"{status}.classList.contains('failed') && {status}.textContent.includes('token')")
+    assert "token 本身" in str(ui.run(f"{status}.textContent"))
+    assert not (runtime.layout.workspace_root / "agents.json").exists()
+    ui.shoot("agent-form-refused")
+
+    # As the owner filled it: empty purpose, one Skill, bot on, a pasted token.
+    ui.run(
+        "document.getElementById('agent-bot-variable').value = '';"
+        "document.getElementById('agent-save').click()"
+    )
+    ui.wait("document.getElementById('agent-form').hidden")
+    (agent,) = AgentStore(runtime.layout.workspace_root).agents()
+    assert agent.name == "Sales" and agent.purpose == ""
+    assert agent.skills == ("engineering/bi-knowledge@1.0.0",)
+    variable = __import__("host_runtime.agents_settings", fromlist=["x"]).default_variable(
+        "", agent.id
+    )
+    # Kept as saved; recorded, so teardown removes it.
+    monkeypatch.setenv(variable, os.environ[variable])
+    assert store.saved[variable] == pasted
+    saved = ui.run(
+        f"(() => {{ const r = document.querySelector('tr[data-row=\"agent:{agent.id}\"]');"
+        " const box = r.getBoundingClientRect();"
+        " return r.classList.contains('just-saved') && box.top >= 0"
+        " && box.bottom <= innerHeight; })()"
+    )
+    assert saved is True
+    telegram = json.loads(runtime.layout.telegram.read_text(encoding="utf-8"))
+    (bot,) = telegram["agent_bots"]
+    assert bot["agent"] == agent.id
+    assert bot["senders"] == [{"sender_id": 42, "actor": "leo.chi"}]
+    assert ui.run("document.getElementById('agents-result').textContent").startswith("已儲存")
+    # The first lookup failed; the page asks again and settles on the bot's name.
+    assert fake.failed
+    ui.wait(
+        f"document.querySelector('tr[data-row=\"agent:{agent.id}\"]')"
+        ".textContent.includes('@aep_sales_bot')",
+        seconds=15,
+    )
+    ui.shoot("agent-form-saved")
+
+    # A new collection bot starts with the main bot's senders too.
+    ui.run("document.getElementById('collect-add').click()")
+    assert ui.run("document.getElementById('collect-senders').value") == "42 engineer"

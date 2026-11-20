@@ -2765,6 +2765,11 @@ class AgentWeb:
         if main_bot is not None:
             main_bot["token_present"] = bool(os.environ.get(main_bot["variable"] or "", ""))
             main_bot["problem"] = None
+            # The page turns a typed @username into one of these ids; the
+            # username is never used to allow a message (it can change hands).
+            seen = {} if ingress is None else ingress.sender_usernames
+            for sender in main_bot["senders"]:
+                sender["username"] = seen.get(sender["sender_id"], "")
         self._identify(
             [
                 *([] if main_bot is None else [main_bot]),
