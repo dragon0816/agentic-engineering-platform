@@ -1398,6 +1398,8 @@ tr:last-child td { border-bottom: none; }
       </form>
       <form id="collect-form" class="agent-form" autocomplete="off" hidden>
         <h3 id="collect-form-title">新增 BI 收集 bot</h3>
+        <p class="note">傳連結或檔案給它就收進這個領域；
+          直接打字問問題，它從這個領域的 BI 卡片回答。</p>
         <label for="collect-name">bot 名稱（英數字）</label>
         <input id="collect-name" maxlength="60" spellcheck="false" required>
         <label for="collect-target">收集到哪個領域</label>

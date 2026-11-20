@@ -257,3 +257,11 @@ def test_what_counts_as_a_question() -> None:
     assert not is_question(item("text", "/links"))
     assert not is_question(item("link", "看 https://example.com/a"))
     assert not is_question(item("file", ""))
+
+
+def test_the_settings_form_says_the_bot_collects_and_answers() -> None:
+    from host_runtime.web_page import PAGE
+
+    form = PAGE.split('id="collect-form"', 1)[1].split("</form>", 1)[0]
+    assert "傳連結或檔案給它就收進這個領域" in form
+    assert "從這個領域的 BI 卡片回答" in form
