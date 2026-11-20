@@ -882,19 +882,6 @@ BI_PANE_HTML = r"""
           hidden>
           <h3 class="kp-stage-title" id="bi-b-schema" tabindex="-1">步驟 2／3・類別與規則</h3>
           <p class="bi-meta" id="bi-b-schema-now"></p>
-          <div class="bi-step-grid" id="bi-b-sg-bar">
-            <div><button class="go" id="bi-b-sg-run" type="button">建議 schema</button></div>
-            <div><button class="bi-btn" id="bi-b-sa-open" type="button">
-              和 AI 調整 schema</button></div>
-          </div>
-          <div class="mem-status" id="bi-b-sg-status" role="status" aria-live="polite"
-            hidden></div>
-          <div id="bi-b-sg-box" hidden>
-            <p class="bi-meta" id="bi-b-sg-sum"></p>
-            <div class="bi-scroll"><table class="bi-table bi-stack" id="bi-b-sg-table"
-              aria-label="schema 建議">
-              <thead><tr><th>建議</th><th>為什麼</th><th>原文</th><th>動作</th></tr></thead>
-              <tbody></tbody></table></div></div>
           <div id="bi-b-draft-main" role="region" aria-labelledby="bi-b-draft-h" hidden>
             <h4 id="bi-b-draft-h">Schema 草稿</h4>
             <div class="bi-step-grid">
@@ -1015,12 +1002,21 @@ BI_PANE_HTML = r"""
           </div>
           <details class="bi-manage bi-adv" id="bi-b-adv-schema">
             <summary>進階：Schema</summary>
-          <div class="bi-step-grid">
-            <div><label class="bi-label" for="bi-b-sg-scope">「建議 schema」看哪些來源</label>
-              <select id="bi-b-sg-scope">
-                <option value="new">這個領域還沒 ingest 的來源</option>
-                <option value="picked">步驟 1 選的來源</option></select></div>
+          <p class="bi-meta">按「建議 schema」才會請 AI 看這個領域目前的來源，
+            建議要不要新增類型、欄位或用語；不按就不會產生。</p>
+          <div class="bi-step-grid" id="bi-b-sg-bar">
+            <div><button class="go" id="bi-b-sg-run" type="button">建議 schema</button></div>
+            <div><button class="bi-btn" id="bi-b-sa-open" type="button">
+              和 AI 調整 schema</button></div>
           </div>
+          <div class="mem-status" id="bi-b-sg-status" role="status" aria-live="polite"
+            hidden></div>
+          <div id="bi-b-sg-box" hidden>
+            <p class="bi-meta" id="bi-b-sg-sum"></p>
+            <div class="bi-scroll"><table class="bi-table bi-stack" id="bi-b-sg-table"
+              aria-label="schema 建議">
+              <thead><tr><th>建議</th><th>為什麼</th><th>原文</th><th>動作</th></tr></thead>
+              <tbody></tbody></table></div></div>
           <div id="bi-b-versions"></div>
           <h4>Schema 草稿</h4>
           <div class="bi-actions"><button class="bi-btn" id="bi-b-draft-new" type="button">
@@ -7321,13 +7317,12 @@ el("bi-b-draft-use").addEventListener("click", async () => {
 // -- step 2a: 建議 schema (BI_PAGE_SIMPLE.md S2, acceptance F5) --------------------
 // The fit question alone, on a press: the model reads the sources, no card is written.
 // Each row is quoted from a source; 「不用改」 is an answer.
+// Owner 2026-11-20: only on a press, under 進階：Schema, from the working domain's current
+// sources; a row is a change or nothing (no 待釐清), and 「不要」 takes it off at once.
 const BI_SG_KIND = {extend_schema: ["新增欄位", "accent"], dictionary_change: ["用語", "dim"],
-  propose_type: ["新增類型", "warn"], needs_clarification: ["待釐清", "dim"]};
+  propose_type: ["新增類型", "warn"]};
 
 function biSuggestSources() {
-  if (el("bi-b-sg-scope").value === "picked") {
-    return bi.build.sourceId ? [bi.build.sourceId] : [];
-  }
   return (bi.build.sources || []).filter((s) => biSourceInScope(s) && s.markdown_rev)
     .map((s) => s.id);
 }
@@ -7378,7 +7373,14 @@ function biSuggestShow(state) {
     + (state.left_out ? "；還有 " + state.left_out + " 份沒看（一次最多 10 份）" : "")
     + (state.failures.length ? "；" + state.failures.length + " 段沒有讀到" : "") + "。";
   body.replaceChildren();
-  for (const row of state.items) body.append(biSuggestRow(state, row));
+  // A row said 「不要」 to is gone; 復原 in the status line brings it back.
+  const shown = state.items.filter((row) => row.status !== "rejected" && BI_SG_KIND[row.kind]);
+  for (const row of shown) body.append(biSuggestRow(state, row));
+  if (!shown.length && state.items.length && state.status === "done") {
+    const cell = bh("td", "", "這次的建議都處理完了。");
+    cell.colSpan = 4;
+    body.append(bh("tr", "", cell));
+  }
   if (!state.items.length && state.status === "done") {
     const cell = bh("td", "", bh("strong", "", "不用改"),
       "：這些來源的內容都放得進目前的 schema。");
@@ -7396,10 +7398,6 @@ function biSuggestRow(state, row) {
   const act = bh("td", "");
   if (row.status === "applied") {
     act.append(biBadge("✓ 已加入", "good"), " " + (row.schema || ""));
-  } else if (row.status === "rejected") {
-    // A 「不要」 pressed by mistake goes back to undecided, as a candidate does (待決定).
-    act.append(biBadge("✕ 不要", "dim"), " ", biButton("改回待決定",
-      (event) => biSuggestReopen(state, row, event), "bi-btn", "把「" + row.what + "」改回待決定"));
   } else if (row.status === "applying") {
     // Another press (or a page before a reload) is adding it: one add at a time.
     const since = Math.max(0, Math.round((Date.now() - Date.parse(row.applying_at)) / 1000));
@@ -7407,19 +7405,20 @@ function biSuggestRow(state, row) {
       + " 秒了；完成後重新整理會看到結果。"));
     // An add that ran past any add's time stopped with the host: it can be decided again.
     if (since > 15 * 60) {
-      act.append(biButton("改回待決定", (event) => biSuggestReopen(state, row, event), "bi-btn",
-        "把「" + row.what + "」改回待決定"));
+      act.append(biButton("重新決定", (event) => biSuggestReopen(state, row, event), "bi-btn",
+        "重新決定「" + row.what + "」"));
     }
   } else {
-    // One way first: add it when a press can, else talk it through; the rest in a menu.
+    // Two answers: add it when a press can, and 「不要」, which takes the row off at once.
     const direct = row.applies && biDataset().startsWith("vault-");
-    const add = direct ? biButton("加入 schema", (event) => biSuggestApply(state, row, event),
-      "go", "把「" + row.what + "」加入 schema") : null;
-    const ask = biButton("和 AI 討論", () => biSuggestAsk(row), direct ? "bi-btn" : "go",
-      "和 AI 討論「" + row.what + "」");
     const no = biButton("不要", (event) => biSuggestReject(state, row, event), "bi-btn",
       "不要「" + row.what + "」");
-    act.append(add || ask, biRowMenu(add ? ask : null, no));
+    if (direct) {
+      act.append(biButton("加入 schema", (event) => biSuggestApply(state, row, event), "go",
+        "把「" + row.what + "」加入 schema"), " ", no);
+    } else {
+      act.append(no, bh("p", "bi-meta", "要加入請在草稿裡修改 schema。"));
+    }
   }
   const tr = bh("tr", "", bh("td", "", biBadge(kind[0], kind[1]), " ", row.what), why, quote,
     act);
@@ -7466,14 +7465,41 @@ async function biSuggestApply(state, row, event) {
 }
 
 async function biSuggestReject(state, row, event) {
-  const done = biSuggestBusy(event, "記下中…");
+  // The row leaves the table at once; the status line keeps a 復原 for a press by mistake.
+  const tr = event.currentTarget.closest("tr");
+  tr.hidden = true;
   let reply;
   try {
     reply = await biCall("/api/bi/schema-suggest/reject",
       {dataset: biDataset(), id: state.id, row: row.id, reason: "不需要"});
-  } catch (failure) { done("沒有記下：" + failure.message); return; }
-  done(null);
+  } catch (failure) {
+    tr.hidden = false;
+    biStatus("bi-b-sg-status", "error", "「" + row.what + "」沒有移除：" + failure.message);
+    return;
+  }
   biSuggestShow(reply.suggestion);
+  const undo = biButton("復原", () => biSuggestUndo(reply.suggestion, row), "bi-btn",
+    "復原「" + row.what + "」");
+  biSgNote("已移除「" + row.what + "」。", undo);
+}
+
+function biSgNote(message, ...extra) {
+  // A result in the suggestion's own status line (biStatus shows only waits and failures).
+  const box = el("bi-b-sg-status");
+  box.className = "mem-status good"; box.hidden = false;
+  box.replaceChildren(bh("span", "", message), ...extra);
+}
+
+async function biSuggestUndo(state, row) {
+  biStatus("bi-b-sg-status", "loading", "復原「" + row.what + "」…");
+  try {
+    const reply = await biCall("/api/bi/schema-suggest/reopen",
+      {dataset: biDataset(), id: state.id, row: row.id});
+    biSuggestShow(reply.suggestion);
+    biSgNote("已復原「" + row.what + "」。");
+  } catch (failure) {
+    biStatus("bi-b-sg-status", "error", "沒有復原：" + failure.message);
+  }
 }
 
 async function biSuggestReopen(state, row, event) {
@@ -7503,13 +7529,12 @@ async function biSuggestAsk(row) {
 el("bi-b-sg-run").addEventListener("click", async () => {
   const ids = biSuggestSources();
   if (!ids.length) {
-    biStatus("bi-b-sg-status", "error", el("bi-b-sg-scope").value === "picked"
-      ? "先在步驟 1 選一份來源。" : "這個領域還沒有轉好的來源。"); return;
+    biStatus("bi-b-sg-status", "error", "這個領域還沒有轉好的來源。"); return;
   }
   bi.sgSeq = (bi.sgSeq || 0) + 1;
   try {
     const reply = await biCall("/api/bi/schema-suggest", {dataset: biDataset(), source_ids: ids,
-      only_new: el("bi-b-sg-scope").value === "new"});
+      only_new: false});
     biSuggestShow(reply.suggestion); biSuggestFollow();
   } catch (failure) { biStatus("bi-b-sg-status", "error", failure.message); }
 });
