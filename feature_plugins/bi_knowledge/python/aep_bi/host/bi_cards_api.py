@@ -420,7 +420,12 @@ def _route(
             # An old domain configuration still to move (BI D4): the page offers the migration.
             return 200, {**drawn, "domains_left": migrate.has_legacy(store)}
         if path == "/api/bi/proposals":
-            return 200, {"proposals": _pending_proposals(store)}
+            # The pending ones, and the ones a person decided, which stay on the 2c list with
+            # their decision (owner 2026-11-20).
+            return 200, {
+                "proposals": _pending_proposals(store),
+                "decided": _listed_proposals(store, store.decided_proposals()),
+            }
         if path == "/api/bi/quality":
             # Quality checks (BI vault V13), read only.
             return 200, quality.check(store, catalog.for_store(store), read_pages=True)
@@ -1076,16 +1081,28 @@ def _decide_proposal(
     store = BiStore(workspace, _dataset(given.get("dataset")))
     if store.card(card_id) is None:
         return _error(404, "card_unknown", "找不到這張卡片")
-    found = store.proposal(card_id, int(proposal)) if proposal.isdigit() else None
-    if found is None:
+    if not proposal.isdigit():
         return _error(404, "proposal_unknown", "找不到這筆待審提議（可能已處理）")
     action = given.get("action")
+    reason = str(given.get("reason") or "").strip()  # optional (owner 2026-11-20)
+    if action == "pending":
+        # Back to 待決定: an accepted value is given back, readable in the card's history.
+        try:
+            version = store.reopen_proposal(card_id, int(proposal), actor=who, reason=reason)
+        except BiStoreError as failure:
+            if failure.code == "proposal_unknown":
+                return _error(404, failure.code, failure.message)
+            raise
+        return 200, {"ok": True, "version": version}
+    found = store.proposal(card_id, int(proposal))
+    if found is None:
+        return _error(404, "proposal_unknown", "找不到這筆待審提議（可能已處理）")
     if action == "reject":
-        store.reject_proposal(card_id, int(found["id"]), str(given.get("reason") or "").strip())
+        store.reject_proposal(card_id, int(found["id"]), reason)
         card = store.card(card_id)
         return 200, {"ok": True, "version": int(card["version"]) if card is not None else 0}
     if action != "accept":
-        return _error(400, "action_invalid", "action 只能是 accept 或 reject")
+        return _error(400, "action_invalid", "action 只能是 accept、reject 或 pending")
     return _accept_value(
         workspace,
         who,
@@ -1104,6 +1121,7 @@ def _decide_proposal(
 #: Store refusals that are conflicts with the current state (409).
 CONFLICTS = {
     "stale_edit",
+    "proposal_moved_on",
     "proposals_changed",
     "skill_changed",
     "name_taken",
@@ -1197,15 +1215,14 @@ def _proposal_origin(item: dict[str, Any]) -> str:
 
 def _decide_shown_proposals(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
     """Accept or reject every proposal a filter shows. `count` is what the person saw, so
-    a list that moved refuses. A field a run may not settle (`runs.PROTECTED_FIELDS`) is
-    only included when the filter names that field."""
+    a list that moved refuses. Owner 2026-11-20: the judgement fields a run may not settle
+    (`runs.PROTECTED_FIELDS`) are included like any other, and the reason is optional; the
+    history still says who, when and from which proposal, and each can go back to 待決定."""
     store = BiStore(workspace, _dataset(given.get("dataset")))
     action = given.get("action")
     if action not in ("accept", "reject"):
         return _error(400, "action_invalid", "action 只能是 accept 或 reject")
     reason = str(given.get("reason") or "").strip()
-    if not reason:
-        return _error(400, "reason_required", "一次決定多筆要寫理由")
     field, origin = given.get("field") or None, given.get("origin") or None
     shown = [
         item
@@ -1213,22 +1230,26 @@ def _decide_shown_proposals(workspace: Path, who: str, given: dict[str, Any]) ->
         if (field is None or item["field"] == field)
         and (origin is None or item["origin"] == origin)
     ]
-    chosen = [i for i in shown if i["field"] == field or i["field"] not in runs.PROTECTED_FIELDS]
+    chosen = shown
     if len(chosen) != given.get("count"):
         return _error(409, "proposals_changed", "待審提案已經變了，請重新確認筆數")
     done = store.decide_proposals(
         [(i["card_id"], int(i["id"])) for i in chosen], action, reason, who
     )
-    return 200, {"ok": True, **done, "left_out": len(shown) - len(chosen)}
+    return 200, {"ok": True, **done, "left_out": 0}
 
 
 def _pending_proposals(store: BiStore) -> list[dict[str, Any]]:
     """What a person needs to decide each pending proposal: the field in words, and the
     evidence the current value rests on, beside where the proposed one came from."""
+    return _listed_proposals(store, store.pending_proposals())
+
+
+def _listed_proposals(store: BiStore, items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     reg = catalog.for_store(store)
     found = []
     evidence: dict[str, list[dict[str, Any]]] = {}
-    for item in store.pending_proposals():
+    for item in items:
         entity = reg.types.get(item["entity_type"])
         definition = None if entity is None else entity.get(item["field"])
         held = evidence.setdefault(item["card_id"], store.evidence(item["card_id"]))
@@ -1330,7 +1351,8 @@ def _evidence_review(workspace: Path, who: str, action: str, given: dict[str, An
 
 def _accept_value(workspace: Path, who: str, card_id: str, given: dict[str, Any]) -> Answer:
     """Accepting a proposal: review confirms a sourced difference, so it writes as
-    the person's, with a stale check and a reason for a judgement field."""
+    the person's, with a stale check. The reason is optional, also for a judgement field
+    (owner 2026-11-20); one given is kept in the history."""
     store = BiStore(workspace, _dataset(given.get("dataset")))
     card = store.card(card_id)
     if card is None:
@@ -1343,8 +1365,6 @@ def _accept_value(workspace: Path, who: str, card_id: str, given: dict[str, Any]
         item = correction.checked_field(reg, card["entity_type"], name)
         if not isinstance(base, int):
             raise BiStoreError("base_version_missing", "需要 base_version")
-        if item.klass == "judgement" and not reason:
-            raise BiStoreError("reason_required", f"{item.label} 是判斷欄位，修改時必須寫理由")
         value = correction.checked_value(reg, item, given.get("value"))
     except BiStoreError as failure:
         return _error(400, failure.code, failure.message)

@@ -414,24 +414,14 @@ def test_accepting_a_proposal_is_a_persons_edit(tmp_path: Path) -> None:
         {"dataset": "demo", "action": "accept", "base_version": 0, "reason": "x"},
     )
     assert (status, payload["code"]) == (409, "stale_edit")
-    status, payload = _call(
-        tmp_path,
-        "POST",
-        path,
-        {"dataset": "demo", "action": "accept", "base_version": card["card"]["version"]},
-    )
-    assert (status, payload["code"]) == (400, "reason_required")
+    # Owner 2026-11-20: the reason is optional, also for a judgement field (this used to be
+    # 400 `reason_required`). Who and when are still in the card's history.
     accepted = _ok(
         _call(
             tmp_path,
             "POST",
             path,
-            {
-                "dataset": "demo",
-                "action": "accept",
-                "base_version": card["card"]["version"],
-                "reason": "採用匯入值",
-            },
+            {"dataset": "demo", "action": "accept", "base_version": card["card"]["version"]},
         )
     )
     after = _card(tmp_path, "EtherCAT")
@@ -439,3 +429,54 @@ def test_accepting_a_proposal_is_a_persons_edit(tmp_path: Path) -> None:
     maturity = next(f for f in after["fields"] if f["field"] == "maturity")
     assert maturity["value"] == "declining" and maturity["source"]["kind"] == "human"
     assert after["proposals"] == []
+    status, history = _call(tmp_path, "GET", f"/api/bi/cards/{card['card']['id']}/history")
+    last = history["history"][-1]
+    assert (last["field"], last["new"]) == ("maturity", "declining") and last["by"] and last["at"]
+
+
+def test_a_decided_proposal_is_listed_and_goes_back_to_pending(tmp_path: Path) -> None:
+    """Owner 2026-11-20: a decided change stays on the 2c list as 已接受/已拒絕, and 待決定
+    takes it back: an accepted value is given back with its source, as a history row."""
+    card = _card_with_proposal(tmp_path)
+    card_id = card["card"]["id"]
+    (proposal,) = card["proposals"]
+    path = f"/api/bi/cards/{card_id}/proposals/{proposal['id']}"
+    before = next(f for f in card["fields"] if f["field"] == "maturity")
+    _ok(
+        _call(
+            tmp_path,
+            "POST",
+            path,
+            {"dataset": "demo", "action": "accept", "base_version": card["card"]["version"],
+             "reason": "看過了"},
+        )
+    )  # fmt: skip
+    listed = _ok(_call(tmp_path, "GET", "/api/bi/proposals", dataset="demo"))
+    assert listed["proposals"] == []
+    (decided,) = listed["decided"]
+    # An accept's reason is in the card's history, not on the proposal (see BiStore).
+    assert (decided["id"], decided["status"]) == (proposal["id"], "accepted")
+    assert decided["decided_by"] and decided["decided_at"] and decided["label"]
+    status, history = _call(tmp_path, "GET", f"/api/bi/cards/{card_id}/history")
+    assert history["history"][-1]["reason"] == "看過了"
+
+    reopened = _ok(_call(tmp_path, "POST", path, {"dataset": "demo", "action": "pending"}))
+    after = _card(tmp_path, "EtherCAT")
+    assert reopened["version"] == after["card"]["version"] == card["card"]["version"] + 2
+    maturity = next(f for f in after["fields"] if f["field"] == "maturity")
+    assert (maturity["value"], maturity["source"]["kind"]) == (
+        before["value"], before["source"]["kind"])  # fmt: skip
+    assert [p["id"] for p in after["proposals"]] == [proposal["id"]]
+    status, history = _call(tmp_path, "GET", f"/api/bi/cards/{card_id}/history")
+    assert history["history"][-1]["new"] == before["value"]
+
+    # Rejected without a reason, then back to 待決定 again: the card does not move.
+    _ok(_call(tmp_path, "POST", path, {"dataset": "demo", "action": "reject"}))
+    (decided,) = _ok(_call(tmp_path, "GET", "/api/bi/proposals", dataset="demo"))["decided"]
+    assert (decided["status"], decided["reason"]) == ("rejected", None)
+    again = _ok(_call(tmp_path, "POST", path, {"dataset": "demo", "action": "pending"}))
+    assert again["version"] == reopened["version"]
+    listed = _ok(_call(tmp_path, "GET", "/api/bi/proposals", dataset="demo"))
+    assert [p["id"] for p in listed["proposals"]] == [proposal["id"]] and listed["decided"] == []
+    status, payload = _call(tmp_path, "POST", path, {"dataset": "demo", "action": "pending"})
+    assert (status, payload["code"]) == (404, "proposal_unknown")

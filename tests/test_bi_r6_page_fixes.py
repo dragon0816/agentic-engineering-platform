@@ -121,6 +121,63 @@ def test_every_pending_proposal_is_listed_and_a_rejection_keeps_its_reason(tmp_p
     assert not vault.Vault(a, vault_id).repo._pending()["sets"]
 
 
+def _with_judgement_proposals(ws: Path, dataset: str) -> None:
+    """Two cards, each with a `body` and a `confidence` (a judgement field) proposal."""
+    store = BiStore(ws, dataset)
+    for key in ("FAKE-B1", "FAKE-B2"):
+        for values, propose in (
+            ({"body": "舊", "confidence": "assumed"}, frozenset()),
+            ({"body": "新", "confidence": "verified"}, frozenset({"body", "confidence"})),
+        ):
+            store.apply(
+                [
+                    PlannedRow(
+                        row=1,
+                        entity_type="Technology",
+                        canonical_key=key,
+                        name=key,
+                        values={"name": key, **values},
+                        synthetic=False,
+                        ref="bulk-page.md#1",
+                        propose=propose,
+                    )
+                ],
+                filename="c.csv",
+                entity_type="Technology",
+                actor="alice",
+            )
+
+
+def test_bulk_accept_takes_judgement_fields_without_a_reason(tmp_path: Path) -> None:
+    """Owner 2026-11-20: `confidence` and `evidence_grade` are accepted in bulk like any other
+    field, and the reason is optional. This used to need a reason (400 `reason_required`) and
+    leave the judgement fields out unless the filter named them (`left_out`)."""
+    _, _vault_id, dataset, a, _ = _two_pcs(tmp_path)
+    _with_judgement_proposals(a, dataset)
+    listed = _ok(_call(a, "GET", "/api/bi/proposals", dataset=dataset))["proposals"]
+    assert sorted(p["field"] for p in listed) == ["body", "body", "confidence", "confidence"]
+    done = _ok(
+        _post(a, "/api/bi/proposals/decide",
+              {"dataset": dataset, "action": "accept", "field": None, "origin": None,
+               "count": 4})
+    )  # fmt: skip
+    assert (done["decided"], done["left_out"]) == (4, 0)
+    store = BiStore(a, dataset)
+    for key in ("FAKE-B1", "FAKE-B2"):
+        card = card_id_for("Technology", key)
+        assert store.fields(card)["body"]["value"] == "新"
+        assert store.fields(card)["confidence"]["value"] == "verified"
+        # Who and when are kept, and each can go back to 待決定.
+        changed = [h for h in store.history(card) if h["field"] == "confidence"]
+        assert changed[-1]["by"].startswith("alice") and changed[-1]["at"]
+    listed = _ok(_call(a, "GET", "/api/bi/proposals", dataset=dataset))
+    assert listed["proposals"] == [] and len(listed["decided"]) == 4
+    item = next(p for p in listed["decided"] if p["field"] == "confidence")
+    _ok(_post(a, f"/api/bi/cards/{item['card_id']}/proposals/{item['id']}",
+              {"dataset": dataset, "action": "pending"}))  # fmt: skip
+    assert BiStore(a, dataset).fields(item["card_id"])["confidence"]["value"] == "assumed"
+
+
 @pytest.mark.skipif(_browser_missing(), reason="no Chromium browser is installed")
 def test_the_page_follows_the_source_and_decides_proposals(served: Any, tmp_path: Path) -> None:  # noqa: F811
     from integrations.browser import Browser, BrowserError

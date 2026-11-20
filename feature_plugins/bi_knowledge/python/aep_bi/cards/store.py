@@ -1404,31 +1404,70 @@ class BiStore:
 
     def pending_proposals(self) -> list[dict[str, Any]]:
         """Every pending proposal, with its card and the value it would replace."""
+        return [
+            self._proposal_item(r)
+            for r in self._proposal_rows("p.status = 'pending'", "c.name, p.field, p.id")
+        ]
+
+    def decided_proposals(self, limit: int = 200) -> list[dict[str, Any]]:
+        """The proposals a person decided, newest first (owner 2026-11-20: a decided change
+        stays on the 2c list). Rejected: `status` and `reason` are the proposal's. Accepted:
+        an accept leaves its proposal `superseded`, like the others on the field it settled,
+        so it is the superseded proposal whose value a person wrote to that field (its
+        history row: `decided_by`, `decided_at`, `reason`). Nothing new is stored, so a vault
+        unit is as before and the list survives a rebuild from the vault."""
+        found = []
+        with_history = (
+            "h.by AS h_by, h.at AS h_at, h.reason AS h_reason FROM proposals p "
+            "JOIN cards c ON c.id = p.card_id "
+            "LEFT JOIN fields f ON f.card_id = p.card_id AND f.field = p.field "
+            "JOIN history h ON h.seq = (SELECT MAX(seq) FROM history h2 WHERE "
+            "h2.card_id = p.card_id AND h2.field = p.field AND h2.new = p.value "
+            "AND h2.kind = 'human')"
+        )
+        for r in self._proposal_rows("p.status = 'superseded'", "h.seq DESC", limit, with_history):
+            item = self._proposal_item(r)
+            item.update(status="accepted", reason=r["h_reason"] or None,
+                        decided_by=r["h_by"], decided_at=r["h_at"])  # fmt: skip
+            found.append(item)
+        for r in self._proposal_rows("p.status = 'rejected'", "p.id DESC", limit):
+            item = self._proposal_item(r)
+            item.update(status="rejected", reason=r["reason"] or None,
+                        decided_by=None, decided_at=None)  # fmt: skip
+            found.append(item)
+        return found[:limit] if limit >= 0 else found
+
+    def _proposal_rows(
+        self, where: str, order: str, limit: int = -1, source: str = ""
+    ) -> list[sqlite3.Row]:
         if not self.exists:
             return []
+        source = source or (
+            "NULL AS h_by FROM proposals p JOIN cards c ON c.id = p.card_id "
+            "LEFT JOIN fields f ON f.card_id = p.card_id AND f.field = p.field"
+        )
         with self._db() as db:
-            rows = db.execute(
+            return db.execute(
                 "SELECT p.*, c.name AS card_name, c.entity_type, c.version, f.value AS current, "
-                "f.kind AS current_kind FROM proposals p JOIN cards c ON c.id = p.card_id "
-                "LEFT JOIN fields f ON f.card_id = p.card_id AND f.field = p.field "
-                "WHERE p.status = 'pending' ORDER BY c.name, p.field, p.id"
+                f"f.kind AS current_kind, {source} WHERE {where} ORDER BY {order} LIMIT ?",
+                (limit,),
             ).fetchall()
-        return [
-            {
-                "id": r["id"],
-                "card_id": r["card_id"],
-                "card_name": r["card_name"],
-                "entity_type": r["entity_type"],
-                "version": int(r["version"]),
-                "field": r["field"],
-                "value": _load(r["value"]),
-                "current": None if r["current"] is None else _load(r["current"]),
-                "current_kind": r["current_kind"],
-                "source": {"kind": r["kind"], "ref": r["ref"], "at": r["at"]},
-                "evidence": [] if r["evidence"] is None else _load(r["evidence"]),
-            }
-            for r in rows
-        ]
+
+    @staticmethod
+    def _proposal_item(r: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "id": r["id"],
+            "card_id": r["card_id"],
+            "card_name": r["card_name"],
+            "entity_type": r["entity_type"],
+            "version": int(r["version"]),
+            "field": r["field"],
+            "value": _load(r["value"]),
+            "current": None if r["current"] is None else _load(r["current"]),
+            "current_kind": r["current_kind"],
+            "source": {"kind": r["kind"], "ref": r["ref"], "at": r["at"]},
+            "evidence": [] if r["evidence"] is None else _load(r["evidence"]),
+        }
 
     def decide_proposals(
         self, chosen: list[tuple[str, int]], action: str, reason: str, actor: str
@@ -1475,6 +1514,91 @@ class BiStore:
                     (at, card_id),
                 )
         return counts
+
+    def reopen_proposal(
+        self, card_id: str, proposal_id: int, *, actor: str, reason: str = ""
+    ) -> int:
+        """Back to 待決定 (owner 2026-11-20). A rejected proposal is pending again; an accepted
+        one (see `decided_proposals`) also gives the field back the value, source and evidence
+        it had before, as a history row of its own (kind `undo`), unless the field changed
+        since. Returns the card's version."""
+        self.refuse_write()
+        if not self.exists:
+            raise BiStoreError("proposal_unknown", "找不到這筆提議")
+        at = now()
+        with self._db(write=True) as db:
+            row = db.execute(
+                "SELECT * FROM proposals WHERE id = ? AND card_id = ? "
+                "AND status IN ('superseded', 'rejected')",
+                (proposal_id, card_id),
+            ).fetchone()
+            card = db.execute("SELECT * FROM cards WHERE id = ?", (card_id,)).fetchone()
+            change = None
+            if row is not None and row["status"] == "superseded":
+                change = db.execute(
+                    "SELECT * FROM history WHERE card_id = ? AND field = ? AND new = ? "
+                    "AND kind = 'human' ORDER BY seq DESC LIMIT 1",
+                    (card_id, row["field"], row["value"]),
+                ).fetchone()
+            if card is None or row is None or (row["status"] == "superseded" and change is None):
+                raise BiStoreError("proposal_unknown", "找不到這筆已決定的提議")
+            version = int(card["version"])
+            if change is not None:
+                later = db.execute(
+                    "SELECT 1 FROM history WHERE card_id = ? AND field = ? AND seq > ?",
+                    (card_id, row["field"], change["seq"]),
+                ).fetchone()
+                if later is not None:
+                    raise BiStoreError(
+                        "proposal_moved_on",
+                        "這個欄位在接受之後又改過，不能回到待決定；要改請用更正單",
+                    )
+                self._restore_change(db, change, actor, at, f"reopen:proposal:{proposal_id}",
+                                     reason or "回到待決定")  # fmt: skip
+                version += 1
+                db.execute(
+                    "UPDATE cards SET version = ?, updated = ? WHERE id = ?",
+                    (version, at, card_id),
+                )
+            db.execute(
+                "UPDATE proposals SET status = 'pending', reason = NULL WHERE id = ?",
+                (proposal_id,),
+            )
+        return version
+
+    @staticmethod
+    def _restore_change(
+        db: sqlite3.Connection, change: sqlite3.Row, actor: str, at: str, ref: str, reason: str
+    ) -> None:
+        """The value, source and evidence a field had before `change`, as a new history row."""
+        card_id, field = change["card_id"], change["field"]
+        if change["old_evidence"] is not None:
+            # The value comes back, and what it rested on with it.
+            db.execute("DELETE FROM evidence WHERE card_id = ? AND field = ?", (card_id, field))
+            for item in _load(change["old_evidence"]):
+                insert_evidence_unit(db, card_id, field, item)
+        if change["old"] is None:
+            db.execute("DELETE FROM fields WHERE card_id = ? AND field = ?", (card_id, field))
+        else:
+            source = _load(change["old_source"]) or {}
+            db.execute(
+                "INSERT OR REPLACE INTO fields (card_id, field, value, kind, ref, by, at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (
+                    card_id,
+                    field,
+                    change["old"],
+                    source.get("kind", "import"),
+                    source.get("ref", ""),
+                    source.get("by", ""),
+                    source.get("at", at),
+                ),
+            )
+        db.execute(
+            "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, reason) "
+            "VALUES (?, ?, ?, ?, 'undo', ?, ?, ?, ?)",
+            (card_id, field, change["new"], change["old"], ref, actor, at, reason),
+        )
 
     def reject_proposal(self, card_id: str, proposal_id: int, reason: str = "") -> bool:
         """Close one pending proposal without touching the card."""

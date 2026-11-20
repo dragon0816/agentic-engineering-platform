@@ -4208,11 +4208,21 @@ runs, candidates), `src/capabilities/bi_cards/runs.py` (rule-path run, review, c
 - **Evidence** (`bi.sqlite` table `evidence`: card, field, run, source id and name, locator,
   excerpt, basis, at). `GET /api/bi/cards/<id>` adds `"evidence": [{"field", "run_id", "source_id",
   "source_name", "locator", "excerpt", "basis", "at"}]` (newest first) and an `"id"` on each proposal.
-- **Proposals.** `POST /api/bi/cards/<id>/proposals/<pid> {"dataset", "action": "accept" | "reject",
-  "base_version", "reason"}` → `{"ok": true, "version"}`. Accept writes the proposed value as the
-  person's (`stale_edit` 409 when the card moved on, `reason_required` for a
-  `judgement` field) and closes the field's pending proposals; reject marks only that proposal
-  `rejected` and does not change the card version. Unknown or closed: 404 `proposal_unknown`.
+- **Proposals.** `POST /api/bi/cards/<id>/proposals/<pid> {"dataset", "action": "accept" | "reject"
+  | "pending", "base_version", "reason"}` → `{"ok": true, "version"}`. The reason is optional for every
+  action, judgement fields included (owner 2026-11-20; it used to be `reason_required` for a
+  `judgement` field) and kept when given. Accept writes the proposed value as the person's
+  (`stale_edit` 409 when the card moved on) and closes the field's pending proposals; reject marks
+  only that proposal `rejected` and does not change the card version; `pending` (back to 待決定)
+  reopens a decided one, and for an accepted one gives the field back its earlier value, source and
+  evidence as an `undo` history row (409 `proposal_moved_on` when the field changed since). Unknown
+  or closed: 404 `proposal_unknown`. `GET /api/bi/proposals?dataset=` → `{"proposals" [pending],
+  "decided" [the same shape plus `status` `accepted` | `rejected`, `reason`, `decided_by`,
+  `decided_at`]}` (≤ 200). An accepted proposal is still stored `superseded`; it is the one whose
+  value a person's history row wrote. `POST /api/bi/proposals/decide {"dataset", "action", "field",
+  "origin", "count", "reason"}` decides every pending proposal the filter shows, `confidence` and
+  `evidence_grade` included (owner 2026-11-20; `left_out` is now always 0); the reason is optional;
+  409 `proposals_changed` when `count` is not what the filter shows.
 
 ## BI schema drafts and dataset upgrade (BI ingest phase 2, owner 2026-10-27)
 
