@@ -71,16 +71,9 @@ class PackageInstaller(Protocol):
         ...
 
 
-#: Inline keyboard rows of (label, payload). A payload is the feature's own
-#: short word (`[A-Za-z0-9._-]`, at most `MAX_TAP_PAYLOAD`); the channel adds
-#: its prefix, and a tap on it comes back as a `tap` item with that payload.
-Buttons = tuple[tuple[tuple[str, str], ...], ...]
-MAX_TAP_PAYLOAD = 60
-
-#: What a Telegram item is (owner consent 2026-11-19, Telegram link collection P1):
-#: a message that is links, a message that is files, a tap on a feature's button,
-#: one of the feature's own slash commands, or a Reply to one of its messages.
-TelegramItemKind = Literal["link", "file", "tap", "command", "reply"]
+#: What a collection bot received (owner consent 2026-11-20, one bot per BI
+#: domain): addresses (with any words), files, words alone, or a Reply.
+TelegramItemKind = Literal["link", "file", "text", "reply"]
 
 
 @dataclass(frozen=True)
@@ -94,9 +87,13 @@ class TelegramFile:
 
 @dataclass(frozen=True)
 class TelegramItem:
-    """A Telegram message a feature may take before any model turn. `actor` is the
-    sender's mapped platform actor; an unmapped sender never reaches a feature."""
+    """A message to a collection bot, for the feature the bot is configured for.
+    `bot` names the bot, `target` is its configured target (may be empty), `actor`
+    the sender's mapped platform actor (an unmapped sender never gets here)."""
 
+    feature: str
+    bot: str
+    target: str
     kind: TelegramItemKind
     actor: str
     text: str
@@ -104,26 +101,34 @@ class TelegramItem:
     sender_name: str = ""
     urls: tuple[str, ...] = ()
     files: tuple[TelegramFile, ...] = ()
-    #: A tap's payload, or a command as `<alias> <command>` (its arguments are `text`).
-    data: str = ""
     #: The text of the message a Reply answers (trimmed, redacted).
     quoted: str | None = None
 
 
 @dataclass(frozen=True)
 class TelegramAnswer:
-    """A feature's reply to an item; `edit` replaces the tapped message instead."""
+    """What the collection bot replies."""
 
     text: str
-    buttons: Buttons = ()
-    edit: bool = False
+
+
+@dataclass(frozen=True)
+class TelegramBot:
+    """A configured collection bot, as a feature may list it."""
+
+    name: str
+    feature: str
+    target: str
 
 
 class Messenger(Protocol):
-    """Proactive messages to a mapped person (owner consent 2026-11-19): False when
-    the actor has no Telegram sender mapping or the message could not be sent."""
+    """The Host's collection bots (owner consent 2026-11-20): which there are, and a
+    proactive message from one of them to one of its mapped senders; False when the
+    bot or the sender is unknown or the message could not be sent."""
 
-    def send(self, actor: str, text: str, buttons: Buttons = ()) -> bool: ...
+    def bots(self) -> tuple[TelegramBot, ...]: ...
+
+    def send(self, bot: str, actor: str, text: str) -> bool: ...
 
 
 class Feature:
@@ -207,17 +212,13 @@ class Feature:
         """The installer of a Shared Platform package kind this feature owns."""
         return None
 
-    def telegram_commands(self) -> Iterable[tuple[str, str]]:
-        """`(alias, command)` slash commands this feature answers as `command` items."""
-        return ()
-
     def telegram_item(self, item: TelegramItem, host: Any) -> TelegramAnswer | None:
-        """Take a Telegram item instead of a model turn; None leaves it to the channel.
-        `host` is the resident host object (Agent Web), None when there is none."""
+        """Answer a message to one of this feature's collection bots. `host` is the
+        resident host object (Agent Web), None when there is none."""
         return None
 
     def telegram_ready(self, messenger: Messenger, host: Any) -> None:
-        """The channel is up: `messenger` sends proactive messages from now on."""
+        """The collection bots are up: `messenger` lists them and sends from them."""
 
 
 class FeatureSet:
@@ -314,14 +315,11 @@ class FeatureSet:
                 return found
         return None
 
-    def telegram_commands(self) -> frozenset[tuple[str, str]]:
-        return frozenset(pair for feature in self.features for pair in feature.telegram_commands())
-
     def telegram_item(self, item: TelegramItem, host: Any) -> TelegramAnswer | None:
+        """The answer of the feature the item's bot is for; None when it is not loaded."""
         for feature in self.features:
-            answer = feature.telegram_item(item, host)
-            if answer is not None:
-                return answer
+            if feature.name == item.feature:
+                return feature.telegram_item(item, host)
         return None
 
     def telegram_ready(self, messenger: Messenger, host: Any) -> None:
