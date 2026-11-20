@@ -1386,6 +1386,26 @@ and codes, never a payload, and pass through the shared redaction without the
 error helper's truncation (`scrub`). `api_base` is normalized without a
 trailing slash.
 
+Activity indicator (owner 2026-11-20). While an update from a mapped sender is
+handled, `poll_once` shows Telegram's own chat action under the bot's name
+(`sendChatAction`, action `typing`, 「正在輸入…」) through `channels.telegram.ChatAction`:
+the first call goes out as soon as the update is accepted, then every
+`chat_action_interval_s` (`CHAT_ACTION_INTERVAL_SECONDS`, 4 s; Telegram clears an action
+after about 5 s or at the bot's next message) for the whole of `_deliver_guarded`, which
+covers model turns, commands and Workflow runs started from the chat. It is stopped before
+the reply (an edit, the reply, or `UNDELIVERED_REPLY`) and after a failure; stopping waits
+at most `CHAT_ACTION_STOP_WAIT_SECONDS` (1 s) for a call already on its way, so no action
+follows the reply, and leaves no task running. Files sent after the reply (photos,
+documents, attached files) get `upload_photo` (all pictures) or `upload_document`, sent
+once before the first file and repeated until the last is sent. An unmapped sender gets
+none. Each `sendChatAction` uses a 5 s timeout (`CHAT_ACTION_TIMEOUT_SECONDS`); a raise or
+refusal is logged at debug and ignored, never retried and never changes a delivery, reply,
+routing, approval or record. Agent bots (`TelegramIngress` with `owner_agent`) behave the
+same through their own bot. A collection bot (`channels.telegram_collect.TelegramCollector`)
+shows `typing` only when its feature's `telegram_item` takes longer than
+`chat_action_delay_s` (`CHAT_ACTION_DELAY_SECONDS`, 1 s), stopped before its answer, so
+the immediate 「已收進」 has none. Tests: tests/test_telegram_typing.py.
+
 ## Company host runtime (Phase 7, slice 2f)
 
 `host_runtime.host.HostLayout` names every file a company host reads, all
