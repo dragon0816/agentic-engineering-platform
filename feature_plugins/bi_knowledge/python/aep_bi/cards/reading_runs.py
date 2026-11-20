@@ -250,8 +250,10 @@ def start(
             "left": planned["left"],
         },
     )
-    staging.set_status(run_id, "extracting")
-    ai.background(
+    ai_runs.hand_over(
+        staging,
+        run_id,
+        ai,
         f"BI 補摘要：{len(planned['cards'])} 張卡",
         lambda: ai_runs._work(workspace, dataset, run_id, model, alias, only=None),
     )

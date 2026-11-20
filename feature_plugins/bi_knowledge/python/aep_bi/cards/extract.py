@@ -23,6 +23,7 @@ import json
 import re
 import uuid
 from collections.abc import Callable, Mapping, Sequence
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -38,6 +39,10 @@ CHUNK_CHARS = 6000
 #: 2,494 characters: 10,956 and 13,349 tokens, and 16,705 when asked for every supply link.
 MAX_OUTPUT_TOKENS = 32000
 MAX_ATTEMPTS = 3
+#: Parts read at once (owner 2026-11-21): a 28-part PDF took 42 minutes one part at a time,
+#: and four calls at once through the gateway take no longer each than one.
+PARALLEL_PARTS = 4
+CANCELLED = "cancelled"
 TRUNCATED = "model_output_truncated"
 MAX_KNOWN_NAMES = 200
 MIN_QUOTE = 2
@@ -134,6 +139,15 @@ class Chunk:
     line_end: int
 
 
+#: One chunk's (candidates, warnings, failure, relations, items).
+_Answer = tuple[
+    list[dict[str, Any]],
+    list[dict[str, str]],
+    dict[str, Any] | None,
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+]
+
 NOTHING_FOUND = "model_found_nothing"
 MAX_NOTHING_FOUND = 500
 
@@ -150,6 +164,8 @@ class Extraction:
     relations: list[dict[str, Any]] = field(default_factory=list)
     #: How each knowledge item fits the schema (`schema_fit`).
     items: list[dict[str, Any]] = field(default_factory=list)
+    #: Stopped by the person before every chunk was read: nothing of it may be written.
+    cancelled: bool = False
 
 
 # -- chunking ----------------------------------------------------------------
@@ -725,10 +741,14 @@ def extract_chunk(
     relations: list[dict[str, Any]] | None = None,
     profile: Mapping[str, Any] | None = None,
     items: list[dict[str, Any]] | None = None,
+    cancelled: Callable[[], bool] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, str]], dict[str, Any] | None]:
-    """(candidates, warnings, failure) for one chunk."""
+    """(candidates, warnings, failure) for one chunk. `cancelled` is asked before
+    each format retry: a stopped run asks the model nothing more."""
     problems: list[str] = []
-    for _ in range(max_attempts):
+    for attempt in range(max_attempts):
+        if attempt and cancelled is not None and cancelled():
+            return [], [], _failure(chunk, CANCELLED, "已停止，這一段沒有讀完", retryable=True)
         response = model.generate(
             ModelRequest(
                 trace=_trace(),
@@ -807,6 +827,17 @@ def extract_chunk(
     )
 
 
+def _failure(chunk: Chunk, code: str, message: str, *, retryable: bool) -> dict[str, Any]:
+    return {
+        "chunk": chunk.index,
+        "line_start": chunk.line_start,
+        "line_end": chunk.line_end,
+        "code": code,
+        "message": message,
+        "retryable": retryable,
+    }
+
+
 def extract(
     model: ModelClient,
     alias: str,
@@ -826,15 +857,32 @@ def extract(
     infer_relations: bool = False,
     profile: Mapping[str, Any] | None = None,
     check_fit: bool = False,
+    cancelled: Callable[[], bool] | None = None,
+    workers: int | None = None,
 ) -> Extraction:
     """Every chunk of `text` (or only the chunk indexes in `only`, to retry
-    failed ones), merged into candidates."""
+    failed ones), merged into candidates.
+
+    Up to `workers` (`PARALLEL_PARTS`) chunks are read at once (owner 2026-11-21); their answers
+    merge in document order, so the candidates, their ids and every merge are
+    the same as reading one chunk after another. `on_chunk(done, total)` is
+    called from this thread only: first with nothing done, before any model
+    call, then as each chunk ends (chunks not in `only` count as done). Once
+    `cancelled()` says so no further chunk starts; the ones under way finish
+    and the result is marked `cancelled`."""
     pieces = chunks(text, chunk_chars)
     result = Extraction(chunks=len(pieces))
-    merged: dict[tuple[str, str], dict[str, Any]] = {}
-    for done, piece in enumerate(pieces, start=1):
-        if only is not None and piece.index not in only:
-            continue
+    todo = [p for p in pieces if only is None or p.index in only]
+    stop = cancelled or (lambda: False)
+    width = max(1, PARALLEL_PARTS if workers is None else workers)
+    done = len(pieces) - len(todo)
+    if on_chunk is not None:
+        on_chunk(done, len(pieces))
+
+    def read(piece: Chunk) -> _Answer:
+        # Each chunk its own lists: merged below in document order, never shared by threads.
+        relations: list[dict[str, Any]] | None = [] if infer_relations else None
+        items: list[dict[str, Any]] | None = [] if check_fit else None
         found, warnings, failure = extract_chunk(
             model,
             alias,
@@ -847,10 +895,40 @@ def extract(
             source_name=source_name,
             local_only=local_only,
             domain_notes=domain_notes,
-            relations=result.relations if infer_relations else None,
-            items=result.items if check_fit else None,
+            relations=relations,
+            items=items,
             profile=profile,
+            cancelled=stop,
         )
+        return found, warnings, failure, relations or [], items or []
+
+    answers: dict[int, _Answer] = {}
+    waiting = list(enumerate(todo))
+    running: dict[Future[_Answer], int] = {}
+    with ThreadPoolExecutor(max_workers=width, thread_name_prefix="bi-part") as pool:
+        try:
+            while waiting or running:
+                while waiting and len(running) < width and not stop():
+                    at, piece = waiting.pop(0)
+                    running[pool.submit(read, piece)] = at
+                if not running:
+                    break  # stopped: no further chunk starts
+                ended, _ = wait(running, return_when=FIRST_COMPLETED)
+                for future in ended:
+                    answers[running.pop(future)] = future.result()
+                    done += 1
+                    if on_chunk is not None:
+                        on_chunk(done, len(pieces))
+        except BaseException:
+            for future in running:
+                future.cancel()
+            raise
+    result.cancelled = len(answers) < len(todo) or stop()
+    merged: dict[tuple[str, str], dict[str, Any]] = {}
+    for at in sorted(answers):  # document order, as when read one after another
+        found, warnings, failure, relations, items = answers[at]
+        result.relations.extend(relations)
+        result.items.extend(items)
         if failure is not None:
             result.failures.append(failure)
         result.warnings.extend(warnings)
@@ -860,8 +938,6 @@ def extract(
                 merge(merged[key], item)
             else:
                 merged[key] = item
-        if on_chunk is not None:
-            on_chunk(done, len(pieces))
     for number, item in enumerate(merged.values(), start=1):
         item["id"] = f"c{number}"
         result.candidates.append(item)

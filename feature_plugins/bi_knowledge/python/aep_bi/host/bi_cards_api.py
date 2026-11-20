@@ -1755,8 +1755,9 @@ def web_ai_runtime(web: Any) -> ai_runs.AiRuntime:
 
     def background(title: str, work: Any) -> None:
         def tracked() -> tuple[str, str]:
-            work()
-            return "succeeded", title
+            # As it ended (owner 2026-11-21): a stopped or failed run is not "succeeded".
+            ended = work()
+            return (ended if ended in ("stopped", "failed") else "succeeded"), title
 
         threading.Thread(
             target=web.tasks().tracked("bi-ingest", title, "", tracked),

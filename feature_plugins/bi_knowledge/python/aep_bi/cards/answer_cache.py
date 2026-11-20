@@ -14,6 +14,7 @@ import hashlib
 import json
 import os
 import shutil
+import threading
 import uuid
 from pathlib import Path
 from typing import Any
@@ -41,7 +42,8 @@ def clear(dataset_dir: Path) -> None:
 
 class CachingModel:
     """A model that answers an identical request from `dataset_dir`, unless `fresh`.
-    `usable` says whether an answer may be kept; it counts hits and tokens for the run."""
+    `usable` says whether an answer may be kept; it counts hits and tokens for the run.
+    Chunks are read by several threads at once (owner 2026-11-21): the counts are locked."""
 
     def __init__(
         self, model: ModelClient, dataset_dir: Path, *, fresh: bool = False, usable: Any = None
@@ -54,6 +56,7 @@ class CachingModel:
         self.misses = 0
         self.input_tokens = 0
         self.output_tokens = 0
+        self._lock = threading.Lock()
 
     def generate(self, request: ModelRequest) -> ModelResponse:
         path = self.folder / f"{request_key(request)}.json"
@@ -63,7 +66,8 @@ class CachingModel:
             except (OSError, ValueError):
                 held = None
             if isinstance(held, dict):
-                self.hits += 1
+                with self._lock:
+                    self.hits += 1
                 return ModelResponse(
                     trace=request.trace,
                     model_alias=request.model_alias,
@@ -71,9 +75,10 @@ class CachingModel:
                     structured_output=held.get("structured_output"),
                 )
         response = self.model.generate(request)
-        self.misses += 1
-        self.input_tokens += response.input_tokens
-        self.output_tokens += response.output_tokens
+        with self._lock:
+            self.misses += 1
+            self.input_tokens += response.input_tokens
+            self.output_tokens += response.output_tokens
         if response.failure is None and (self.usable is None or self.usable(response)):
             self._keep(path, response)
         return response
