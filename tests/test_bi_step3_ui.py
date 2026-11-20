@@ -325,6 +325,92 @@ def test_step_3(
         page.run("document.getElementById('bi-b-bench').open = true")
         page.click("#bi-b-qa-open")
         page.wait(f"{tabs}.includes('和 AI 出測試題')")
-        page.click("#bi-ai-close")
+        _two_sessions_side_by_side(page, tabs)
+
+        # -- no tab left, and the page's panel is back home -------------------------------------
         page.wait("document.getElementById('extra-area').hidden")
         assert page.run("document.getElementById('bi-ai').closest('#kn-pane-bi') !== null")
+
+
+def _two_sessions_side_by_side(page: BiPage, tabs: str) -> None:
+    """Two AI sessions open at once, each in its own side tab (owner 2026-11-20).
+
+    The analysis session uses the page's #bi-ai; the questions session a copy whose ids end in
+    its own suffix. A send in one shows its progress and reply only in its own panel, even with
+    the other tab in front; re-opening focuses; closing one leaves the other working.
+    """
+    # Both stay open: the second did not take the place of the first.
+    assert page.run(f"{tabs}") == ["和 AI 修改分析", "和 AI 出測試題"]
+    of = "bi.ais.get([...bi.ais.keys()].find((k) => k.includes(':{}:'))).sfx"
+    sfx = page.run(of.format("questions"))
+    assert sfx, "the second session has its own ids"
+    assert page.run(of.format("analysis")) == ""
+    for base in ("bi-ai", "bi-ai-msg", "bi-ai-log", "bi-ai-send", "bi-ai-status"):
+        assert page.run(f"document.querySelectorAll('[id={base}]').length") == 1, base
+        assert page.run(f"document.querySelectorAll('[id={base}{sfx}]').length") == 1, base
+    assert page.run(f"document.getElementById('bi-ai{sfx}').closest('.extra-panel') !== null")
+    assert page.run("document.getElementById('bi-ai').closest('.extra-panel') !== null")
+    assert page.run(f"document.querySelector('label[for=bi-ai-msg{sfx}]') !== null")
+
+    # The model is held back so the questions turn is still running while the person goes on.
+    page.run(
+        "window.__biCall = biCall; window.__held = []; window.__auto = false;"
+        "biCall = (path, body) => {"
+        "  if (!(path === '/api/bi/sessions' || path.endsWith('/turns')))"
+        "    return window.__biCall(path, body);"
+        "  const answer = path.endsWith('/turns')"
+        "    ? {session: {id: 's-q', turns: [{role: 'user', text: body.message},"
+        "       {role: 'assistant', sent: {}}]}}"
+        "    : {session: {id: 's-q', turns: []}};"
+        "  if (window.__auto) return Promise.resolve(answer);"
+        "  return new Promise((resolve) => window.__held.push(() => resolve(answer)));"
+        "};"
+    )
+    page.run("document.getElementById('bi-ai-msg').value = '分析這邊還沒送出'")
+    page.set_value(f"bi-ai-msg{sfx}", "出兩題")
+    page.click(f"#bi-ai-send{sfx}")
+    # Its progress (AGENTS.md 23) beside its own 送出, and nothing in the other panel.
+    page.wait(f"document.getElementById('bi-ai-status{sfx}').textContent.includes('秒')")
+    assert page.run(f"document.getElementById('bi-ai-send{sfx}').disabled")
+    assert page.run("document.getElementById('bi-ai-status').hidden")
+    assert not page.run("document.getElementById('bi-ai-send').disabled")
+    analysis_log = page.text_of("bi-ai-log")
+
+    # The other tab comes to the front while the reply is still on its way.
+    page.run(
+        "[...document.querySelectorAll('#extra-tabs [role=tab]')]"
+        ".find((t) => t.textContent === '和 AI 修改分析').click()"
+    )
+    assert page.run("document.getElementById('bi-ai').offsetParent !== null")
+    page.wait("window.__held.length > 0")
+    page.run("window.__auto = true; window.__held.splice(0).forEach((go) => go())")
+    page.wait(f"document.getElementById('bi-ai-log{sfx}').textContent.includes('出兩題')")
+    page.wait(f"document.getElementById('bi-ai-status{sfx}').hidden")
+    assert not page.run(f"document.getElementById('bi-ai-send{sfx}').disabled")
+    assert page.text_of("bi-ai-log") == analysis_log
+    assert "出兩題" not in page.text_of("bi-ai-log")
+    assert page.run("document.getElementById('bi-ai-msg').value") == "分析這邊還沒送出"
+
+    # Opening the questions session again focuses its tab, and adds none.
+    page.click("#bi-b-qa-open")
+    page.wait(f"document.getElementById('bi-ai{sfx}').offsetParent !== null")
+    assert page.run(f"{tabs}.length") == 2
+    assert "出兩題" in page.text_of(f"bi-ai-log{sfx}")
+
+    # Closing the analysis tab ends only that session; the questions one still sends.
+    page.click("#bi-ai-close")
+    page.wait(f"{tabs}.length === 1")
+    assert page.run(f"{tabs}") == ["和 AI 出測試題"]
+    assert page.run("document.getElementById('bi-ai').hidden")
+    assert page.run("[...bi.ais.keys()].every((k) => k.includes(':questions:'))")
+    page.set_value(f"bi-ai-msg{sfx}", "再出一題")
+    page.click(f"#bi-ai-send{sfx}")
+    page.wait(f"document.getElementById('bi-ai-log{sfx}').textContent.includes('再出一題')")
+    page.wait(f"document.getElementById('bi-ai-status{sfx}').hidden")
+
+    # Closing the last one removes its copy; nothing keeps running for it.
+    page.click(f"#bi-ai-close{sfx}")
+    page.wait(f"document.getElementById('bi-ai{sfx}') === null")
+    assert page.run("bi.ais.size") == 0
+    assert page.run("document.querySelectorAll('tr.bi-ai-from').length") == 0
+    page.run("biCall = window.__biCall")

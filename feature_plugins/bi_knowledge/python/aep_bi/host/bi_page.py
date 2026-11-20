@@ -210,7 +210,7 @@ BI_CSS = r"""
 .bi-ai-head h4 { margin: 0; }
 .bi-ai-body { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column;
   gap: 6px; }
-#bi-ai-log { margin: 0; }
+.bi-ai-panel > .bi-ai-body > .bi-log { margin: 0; }
 #kn-pane-bi.bi-ai-open { margin-right: calc(min(440px, 40vw) + 12px); }
 /* Step 3's tabs, while an AI session of the step is open (owner 2026-11-19). */
 .bi-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0 10px;
@@ -1338,7 +1338,12 @@ const BI_CHANGE = {add: ["新增", "good"], change: ["變更", "accent"], same: 
 // for the selected dataset. Dashboard and the chat hint are BI-only.
 const bi = {schema: null, schemas: [], datasets: [], view: "build", loaded: {}, cards: [],
   cardId: null, detail: null, preview: null, csv: null, importId: null, searchTimer: 0,
-  want: null, picked: false, subs: [], subsState: null, publish: null};
+  want: null, picked: false, subs: [], subsState: null, publish: null,
+  ais: new Map(), aiSeq: 0};
+// The open AI sessions, one per side tab (owner 2026-11-20): `bi.ais` maps a session's key to
+// its spec. `bi.ai` is only a read-out of the one in front, for a person looking in the console.
+Object.defineProperty(bi, "ai", {get: () => bi.ais.get(sideActive)
+  || [...bi.ais.values()].pop() || null});
 const BI_NAME = /^[A-Za-z0-9_-]{1,40}$/;
 
 const bh = (tag, cls, ...children) => memEl(tag, cls, ...children);
@@ -1688,7 +1693,7 @@ for (const button of document.querySelectorAll("#bi-views [data-bi-view]")) {
 }
 // A publish draft belongs to the dataset it was made for: switching drops it.
 function biLeaveDataset() {
-  biAiClose(); biCardPeekClose(); biBackHide();
+  biAiCloseAll(); biCardPeekClose(); biBackHide();
   bi.cardId = null; bi.publish = null;
   biPanel("publish", false); el("bi-pub-result").hidden = true;
   el("bi-pub-state").replaceChildren();
@@ -3009,7 +3014,7 @@ function biVaultOf(name) {
 }
 
 async function biBuildVault() {
-  if (bi.ai && bi.ai.dataset !== biDataset()) biAiClose();
+  for (const spec of [...bi.ais.values()]) if (spec.dataset !== biDataset()) biAiClose(spec);
   // Newest call only: a reload for the dataset shown before must not paint over this one.
   const seq = bi.vaultSeq = (bi.vaultSeq || 0) + 1;
   const reply = await call("/api/bi/vaults");
@@ -3678,7 +3683,7 @@ el("bi-b-bc-form").addEventListener("submit", async (event) => {
   } catch (failure) { biNotice(false, "沒有加入：" + failure.message); }
 });
 // -- 和 AI 一起出測試題 (docs/phases/BI_BUILD_FLOW.md §7) ------------------------------
-function biQuestionsSuggestion(session, turn, index) {
+function biQuestionsSuggestion(session, turn, index, spec) {
   const s = turn.suggestion;
   const parts = [bh("p", "", bh("strong", "", "AI："), s.reply), biListBlock("理由", s.reasons)];
   if (!s.questions.length) return parts;
@@ -3713,18 +3718,18 @@ function biQuestionsSuggestion(session, turn, index) {
       const timer = setInterval(show, 1000);
       try {
         reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
-          {dataset: bi.ai.dataset, turn: index, picks, home: bi.ai.scope});
+          {dataset: spec.dataset, turn: index, picks, home: spec.scope});
         step = "已加入 " + reply.units.length + " 題，正在更新測試題清單"; show();
         const vaultId = bi.verVault;
         await Promise.all([biBench(vaultId),
           call("/api/bi/vaults/" + vaultId + "/status").then(biVaultState)]);
-        biAiShow(reply.session);
+        biAiShow(spec, reply.session);
         biNotice(true, "已加入 " + reply.units.length
           + " 題測試題；commit 並 push 後才會跟著知識庫。");
       } catch (failure) {
         if (reply) {
           // Added: only the refresh failed, and adding again would be refused.
-          biAiShow(reply.session);
+          biAiShow(spec, reply.session);
           biNotice(false, "已加入 " + reply.units.length + " 題，但清單沒有更新："
             + failure.message + "。重新整理頁面即可看到。");
         } else {
@@ -3738,17 +3743,28 @@ function biQuestionsSuggestion(session, turn, index) {
   return parts;
 }
 
-// -- the one AI panel: every session kind opens here, beside what it concerns --------
+// -- the AI panels: every session kind opens in one, beside what it concerns --------
 // A kind says what it is about, what goes to the model, and how to get ready to send.
 // The conversation is the same for all, and nothing changes until the person confirms.
-function biAiShow(session) {
-  if (!bi.ai) return;
-  bi.ai.session = session;
-  biBuildSessionLog("bi-ai-log", session, bi.ai.render);
-  const body = el("bi-ai-body"); body.scrollTop = body.scrollHeight;
+// Several sessions can be open at once, each in its own side tab (owner 2026-11-20): the
+// first uses the page's #bi-ai panel, others a copy whose ids end in "-<n>" (spec.sfx).
+function biAiEl(spec, base) { return el(base + spec.sfx); }
+
+function biAiKind(kind) {
+  // The open session of a kind whose target the page itself tracks (one at a time).
+  return [...bi.ais.values()].find((spec) => spec.kind === kind) || null;
 }
 
-function biAiTarget(text) { el("bi-ai-target").textContent = text; }
+function biAiShow(spec, session) {
+  if (!spec || spec.closed) return;
+  spec.session = session;
+  biBuildSessionLog("bi-ai-log" + spec.sfx, session, spec.render, spec);
+  const body = biAiEl(spec, "bi-ai-body"); body.scrollTop = body.scrollHeight;
+}
+
+function biAiTarget(spec, text) {
+  if (spec && !spec.closed) biAiEl(spec, "bi-ai-target").textContent = text;
+}
 
 // -- step 3's tabs: Benchmark | Dashboard (owner 2026-11-20) --------------------------------
 // The main area shows one of them at a time; the AI session, the share step, the history and a
@@ -3805,43 +3821,87 @@ function biSideTab(id, title, element) {
   return panel;
 }
 
-function biAiClose() {
-  const spec = bi.ai; if (!spec) return;
-  bi.ai = null;
-  el("bi-ai").hidden = true;
-  sideClose(bi.aiKey);  // its side tab goes with it
+function biAiPanel(sfx) {
+  // The page's #bi-ai for the first session; a copy with "-<n>" on every id for the others.
+  const base = el("bi-ai");
+  if (!sfx) return base;
+  const root = base.cloneNode(true);
+  for (const node of [root, ...root.querySelectorAll("[id]")]) node.id += sfx;
+  for (const node of [root, ...root.querySelectorAll("[for], [aria-labelledby]")]) {
+    if (node.htmlFor) node.htmlFor += sfx;
+    const by = node.getAttribute("aria-labelledby");
+    if (by) node.setAttribute("aria-labelledby", by + sfx);
+  }
+  base.after(root);  // its home: the side area puts it back here when its tab closes
+  biAiWire(root);
+  return root;
+}
+
+function biAiWire(root) {
+  // A panel's own controls act on the session it shows, whichever tab is in front.
+  const sfx = root.id.slice("bi-ai".length);
+  el("bi-ai-close" + sfx).addEventListener("click", () => biAiClose(root.biSpec));
+  root.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") biAiClose(root.biSpec);
+  });
+  el("bi-ai-send" + sfx).addEventListener("click", () => biAiSend(root.biSpec));
+}
+
+function biAiClose(spec) {
+  // Closing one tab ends only that session; closing it otherwise closes its tab too.
+  if (!spec || spec.closed) return;
+  if (sideHas(spec.key)) { sideClose(spec.key); return; }  // comes back here via onClose
+  spec.closed = true;
+  if (bi.ais.get(spec.key) === spec) bi.ais.delete(spec.key);
+  clearInterval(spec.ticker); spec.ticker = 0;
+  const root = spec.root; root.biSpec = null;
+  if (spec.sfx) root.remove(); else root.hidden = true;
   biSideRoom();
-  document.querySelectorAll("tr.bi-ai-from").forEach((r) => r.classList.remove("bi-ai-from"));
+  const rows = new Set([...bi.ais.values()].map((other) => other.row));
+  if (spec.row && !rows.has(spec.row)) spec.row.classList.remove("bi-ai-from");
   if (spec.from && spec.from.isConnected) spec.from.focus();
 }
 
+function biAiCloseAll() {
+  for (const spec of [...bi.ais.values()]) biAiClose(spec);
+}
+
 async function biAiOpen(spec) {
-  // Each session is a tab of the side area (owner 2026-11-20); opening the one already open
-  // focuses its tab. The panel is one, so another session takes the place of the last.
+  // Each session is a tab of the side area (owner 2026-11-20), and several can be open at
+  // once; opening the one already open focuses its tab.
   const key = "bi-ai:" + spec.kind + ":" + (spec.ref || spec.title || "");
-  if (bi.ai && bi.aiKey === key && sideHas(key)) { sideFocus(key); return bi.ai; }
-  biAiClose();
-  bi.aiKey = key;
+  const open = bi.ais.get(key);
+  if (open && sideHas(key)) { sideFocus(key); return open; }
+  if (open) biAiClose(open);
+  spec.key = key;
+  spec.closed = false;
+  const used = new Set([...bi.ais.values()].map((other) => other.sfx));
+  spec.sfx = used.has("") ? "-" + (bi.aiSeq += 1) : "";
+  spec.root = biAiPanel(spec.sfx);
+  spec.root.biSpec = spec;
+  bi.ais.set(key, spec);
   spec.from = spec.from || document.activeElement;
   const row = spec.from && spec.from.closest ? spec.from.closest("tr") : null;
+  spec.row = row;
   if (row) row.classList.add("bi-ai-from");
-  bi.ai = spec;
   spec.scope = biScope();
-  el("bi-ai").dataset.kind = spec.kind;
-  el("bi-ai").hidden = false;
+  spec.root.dataset.kind = spec.kind;
+  spec.root.hidden = false;
   // A tab of the shell's side area (owner 2026-11-20); closing the tab closes the session.
-  sideOpen({id: key, title: spec.title, element: el("bi-ai"), flush: true,
-    onClose: biAiClose});
-  const room = el("bi-ai").parentElement;
+  sideOpen({id: key, title: spec.title, element: spec.root, flush: true,
+    onClose: () => biAiClose(spec)});
+  const room = spec.root.parentElement;
   room.classList.add("bi-pane"); room.lang = "zh-Hant";
-  el("bi-ai-title").textContent = spec.title;
-  el("bi-ai-label").textContent = spec.label;
-  el("bi-ai-msg").placeholder = spec.placeholder; el("bi-ai-msg").value = "";
-  el("bi-ai-new").hidden = spec.mode !== "new";
-  el("bi-ai-schema").hidden = spec.kind !== "schema";
-  biStatus("bi-ai-status", "");
-  biAiTarget((spec.scope ? "工作領域 " + spec.scope + "・" : "") + spec.about);
-  biBuildSessionLog("bi-ai-log", null, spec.render);
+  const msg = biAiEl(spec, "bi-ai-msg");
+  biAiEl(spec, "bi-ai-title").textContent = spec.title;
+  biAiEl(spec, "bi-ai-label").textContent = spec.label;
+  msg.placeholder = spec.placeholder; msg.value = "";
+  biAiEl(spec, "bi-ai-new").hidden = spec.mode !== "new";
+  biAiEl(spec, "bi-ai-schema").hidden = spec.kind !== "schema";
+  biStatus("bi-ai-status" + spec.sfx, "");
+  biAiEl(spec, "bi-ai-send").disabled = false;
+  biAiTarget(spec, (spec.scope ? "工作領域 " + spec.scope + "・" : "") + spec.about);
+  biBuildSessionLog("bi-ai-log" + spec.sfx, null, spec.render, spec);
   // After the page has made room: what it came from stays in view beside the panel; in step 3's
   // tabs, the tabs come into view and what it came from is one tab away.
   const shown = row || spec.shows || spec.from;
@@ -3853,13 +3913,14 @@ async function biAiOpen(spec) {
   if (shown && shown.isConnected) {
     shown.scrollIntoView({block: phone ? "start" : row ? "nearest" : "center"});
   }
-  await biBuildAiState("bi-ai-sent", spec.sends, spec.agent);
-  if (bi.ai === spec && spec.ref) {
+  await biBuildAiState("bi-ai-sent" + spec.sfx, spec.sends, spec.agent);
+  if (!spec.closed && spec.ref) {
     const found = await call("/api/bi/sessions?dataset=" + encodeURIComponent(spec.dataset)
       + "&target=" + encodeURIComponent(spec.ref));
-    if (bi.ai === spec) biAiShow((found.sessions || [])[0] || null);
+    // A turn sent meanwhile is newer than what was saved before it.
+    if (!spec.closed && !spec.session) biAiShow(spec, (found.sessions || [])[0] || null);
   }
-  if (bi.ai === spec) el("bi-ai-msg").focus();
+  if (!spec.closed && sideActive === key) msg.focus();
   return spec;
 }
 
@@ -3868,29 +3929,29 @@ function biAiNoModel() {
   return Object.assign(new Error(bi.build.ai.message), {code: "model_unavailable"});
 }
 
-el("bi-ai-close").addEventListener("click", biAiClose);
-el("bi-ai").addEventListener("keydown", (event) => {
-  if (event.key === "Escape") biAiClose();
-});
-el("bi-ai-send").addEventListener("click", async () => {
-  const spec = bi.ai; if (!spec) return;
-  const message = el("bi-ai-msg").value.trim();
-  if (!message) { el("bi-ai-msg").focus(); return; }
-  const button = el("bi-ai-send"); button.disabled = true;
-  // What it is doing and for how long, beside 送出 (AGENTS.md 23); a questions turn also says
-  // which analyses it is checking.
+biAiWire(el("bi-ai"));
+
+async function biAiSend(spec) {
+  if (!spec || spec.closed) return;
+  const msg = biAiEl(spec, "bi-ai-msg"), status = "bi-ai-status" + spec.sfx;
+  const message = msg.value.trim();
+  if (!message) { msg.focus(); return; }
+  const button = biAiEl(spec, "bi-ai-send"); button.disabled = true;
+  // What it is doing and for how long, beside 送出 (AGENTS.md 23), in this session's own
+  // panel even while another tab is in front; a questions turn also says which analyses it is
+  // checking.
   const started = Date.now();
   let step = spec.busy, live = true;
   const show = () => {
-    if (live && bi.ai === spec) {
-      biStatus("bi-ai-status", "loading",
+    if (live && !spec.closed) {
+      biStatus(status, "loading",
         step + "・" + Math.floor((Date.now() - started) / 1000) + " 秒");
     }
   };
   show();
-  const ticker = setInterval(() => {
+  const ticker = spec.ticker = setInterval(() => {
     show();
-    if (spec.kind !== "questions" || !spec.session) return;
+    if (spec.kind !== "questions" || !spec.session || spec.closed) return;
     call("/api/bi/sessions/" + spec.session.id + "/progress?dataset="
       + encodeURIComponent(spec.dataset)).then((reply) => {
       const now = reply.progress;
@@ -3899,9 +3960,13 @@ el("bi-ai-send").addEventListener("click", async () => {
       show();
     }).catch(() => {});
   }, 1000);
+  const stop = () => {
+    live = false; clearInterval(ticker);
+    if (spec.ticker === ticker) spec.ticker = 0;
+  };
   try {
     if (spec.agent !== undefined && spec.checkModel !== false) {
-      await biBuildAiState("bi-ai-sent", spec.sends, spec.agent);
+      await biBuildAiState("bi-ai-sent" + spec.sfx, spec.sends, spec.agent);
       if (!bi.build.ai.available) throw biAiNoModel();
     }
     if (spec.prepare) await spec.prepare(message, spec);
@@ -3914,18 +3979,18 @@ el("bi-ai-send").addEventListener("click", async () => {
         ...(spec.turn ? spec.turn() : {})});
     spec.session = reply.session;
     if (spec.saved) spec.saved(reply.session);
-    live = false; clearInterval(ticker);
-    if (bi.ai === spec) {
-      el("bi-ai-msg").value = ""; biAiShow(reply.session); biStatus("bi-ai-status", "");
+    stop();
+    if (!spec.closed) {
+      msg.value = ""; biAiShow(spec, reply.session); biStatus(status, "");
     }
   } catch (failure) {
-    live = false; clearInterval(ticker);
-    if (bi.ai === spec) {
-      biStatus("bi-ai-status", "error", (failure.code === "model_unavailable"
+    stop();
+    if (!spec.closed) {
+      biStatus(status, "error", (failure.code === "model_unavailable"
         ? "沒有可用的模型：" : "沒有送出：") + failure.message + "。");
     }
-  } finally { live = false; clearInterval(ticker); button.disabled = false; }
-});
+  } finally { stop(); button.disabled = false; }
+}
 
 async function biQuestionsAi() {
   const target = el("bi-b-bq-set").value.trim() || "main";
@@ -4229,10 +4294,10 @@ function biAnalysisChanges(edit) {
         bh("pre", "bi-code", biChangedValue(change.after)))))));
 }
 
-function biAnalysisSuggestion(session, turn, index) {
+function biAnalysisSuggestion(session, turn, index, spec) {
   const s = turn.suggestion;
   const parts = [bh("p", "", bh("strong", "", "AI："), s.reply)];
-  if (s.dashboard) return parts.concat(biDashboardSuggestion(session, turn, index));
+  if (s.dashboard) return parts.concat(biDashboardSuggestion(session, turn, index, spec));
   if (!s.analysis) return parts;
   const edit = s.edit || null;
   parts.push(bh("p", "", bh("strong", "", s.analysis.title),
@@ -4256,8 +4321,8 @@ function biAnalysisSuggestion(session, turn, index) {
   } else {
     parts.push(bh("div", "bi-actions", biButton(edit ? "套用修改" : "存成分析", async () => {
       const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
-        {dataset: bi.ai.dataset, turn: index, home: bi.ai.scope});
-      biAiShow(reply.session);
+        {dataset: spec.dataset, turn: index, home: spec.scope});
+      biAiShow(spec, reply.session);
       biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
       biNotice(true, (edit ? "已套用修改「" : "已存成分析「") + s.analysis.title
         + "」；commit 並 push 後大家才會看到。");
@@ -4266,7 +4331,7 @@ function biAnalysisSuggestion(session, turn, index) {
   return parts;
 }
 
-function biDashboardSuggestion(session, turn, index) {
+function biDashboardSuggestion(session, turn, index, spec) {
   // A dashboard the analysis AI proposed (BI K1): the order, each analysis, new or changed
   // (BI P3), with its preview, and one 「套用 Dashboard」 that stages them and the order together.
   const d = turn.suggestion.dashboard, previews = turn.suggestion.previews || {};
@@ -4291,8 +4356,8 @@ function biDashboardSuggestion(session, turn, index) {
   }
   parts.push(bh("div", "bi-actions", biButton("套用 Dashboard", async () => {
     const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
-      {dataset: bi.ai.dataset, turn: index, home: bi.ai.scope});
-    biAiShow(reply.session);
+      {dataset: spec.dataset, turn: index, home: spec.scope});
+    biAiShow(spec, reply.session);
     biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
     biNotice(true, "已套用 Dashboard：" + d.analyses.length + " 個分析與順序；"
       + "commit 並 push 後大家才會看到。");
@@ -6286,7 +6351,7 @@ el("bi-b-home-form").addEventListener("submit", async (event) => {
 
 function biScopeChanged() {
   try { localStorage.setItem(biScopeKey(), el("bi-b-src-folder").value); } catch (e) { /* */ }
-  biAiClose(); biBqPick(null); biOverviewApply();
+  biAiCloseAll(); biBqPick(null); biOverviewApply();
   // Another domain's panels: nothing of the one left stays in sight while they load.
   if (bi.loaded) bi.loaded.dashboard = false;
   bi.anSeen = null;
@@ -7491,8 +7556,8 @@ function biSchemaAbout() {
       + "）建一份。套用前，資料集不會變。";
 }
 
-function biSchemaSources() {
-  const box = el("bi-ai-sources");
+function biSchemaSources(spec) {
+  const box = biAiEl(spec, "bi-ai-sources");
   const kept = new Set([...box.querySelectorAll("input:checked")].map((i) => i.value));
   if (!kept.size && bi.build.sourceId) kept.add(bi.build.sourceId);
   box.replaceChildren();
@@ -7503,7 +7568,8 @@ function biSchemaSources() {
     box.append(bh("label", "", check, source.name + "（" + source.classification + "）"));
   }
   if (!usable.length) box.append(bh("p", "bi-meta", "還沒有來源；只送草稿與目標。"));
-  el("bi-ai-sources-box").querySelector("summary").textContent = "附上的樣本來源（最多 5 份，已選 "
+  biAiEl(spec, "bi-ai-sources-box").querySelector("summary").textContent =
+    "附上的樣本來源（最多 5 份，已選 "
     + [...box.querySelectorAll("input:checked")].length + " 份）";
 }
 
@@ -7516,12 +7582,12 @@ async function biBuildSessA(reload) {
     const found = await call("/api/bi/sessions?dataset=" + encodeURIComponent(biDataset())
       + "&target=" + encodeURIComponent("schema-draft:" + draft.draft.id));
     bi.build.sessA = (found.sessions || [])[0] || null;
-    if (bi.ai && bi.ai.kind === "schema") {
-      el("bi-ai-goal").value = bi.build.sessA ? bi.build.sessA.goal || "" : "";
-    }
+    const open = biAiKind("schema");
+    if (open) biAiEl(open, "bi-ai-goal").value = bi.build.sessA ? bi.build.sessA.goal || "" : "";
   }
-  if (bi.ai && bi.ai.kind === "schema") {
-    biAiTarget(biSchemaAbout()); biSchemaSources(); biAiShow(bi.build.sessA);
+  const spec = biAiKind("schema");
+  if (spec) {
+    biAiTarget(spec, biSchemaAbout()); biSchemaSources(spec); biAiShow(spec, bi.build.sessA);
   }
 }
 
@@ -7807,12 +7873,12 @@ function biSessBAbout() {
 }
 
 function biSessBTarget() {
-  if (bi.ai && bi.ai.kind === "method") biAiTarget(biSessBAbout());
+  biAiTarget(biAiKind("method"), biSessBAbout());
 }
 
 async function biMethodAi() {
   const source = bi.build.sources.find((s) => s.id === bi.build.sourceId);
-  await biAiOpen({kind: "method", dataset: biDataset(), title: "和 AI 調整擷取 Skill",
+  const spec = await biAiOpen({kind: "method", dataset: biDataset(), title: "和 AI 調整擷取 Skill",
     about: biSessBAbout(),
     sends: "Skill、最近兩次試跑的候選卡" + (source ? "、來源「" + source.name + "」（"
       + source.classification + "）的前段（上限 12000 字）" : ""),
@@ -7825,7 +7891,7 @@ async function biMethodAi() {
     },
     turn: () => ({source_ids: bi.build.sourceId ? [bi.build.sourceId] : []}),
     saved: (session) => { bi.build.sessB = session; }});
-  biAiShow(bi.build.sessB);
+  if (!spec.session) biAiShow(spec, bi.build.sessB);
 }
 
 el("bi-b-sb-open").addEventListener("click", () => biMethodAi()
@@ -7834,7 +7900,7 @@ el("bi-b-sb-open").addEventListener("click", () => biMethodAi()
 function biBuildCloseMethod() {
   bi.build.method = null; el("bi-b-m-box").hidden = true; el("bi-b-m-save").hidden = true;
   bi.build.sessB = null;
-  if (bi.ai && bi.ai.kind === "method") biAiShow(null);
+  biAiShow(biAiKind("method"), null);
   biSessBTarget();
 }
 
@@ -7950,7 +8016,7 @@ async function biBuildOpenMethod(id, fill) {
     + "&target=" + encodeURIComponent("method:" + id));
   if (seq !== bi.build.methodSeq) return;
   bi.build.sessB = (found.sessions || [])[0] || null;
-  if (bi.ai && bi.ai.kind === "method") biAiShow(bi.build.sessB);
+  biAiShow(biAiKind("method"), bi.build.sessB);
   biSessBTarget();
 }
 
@@ -7992,7 +8058,7 @@ function biListBlock(title, items, cls) {
     bh("li", "", x))));
 }
 
-function biBuildSessionLog(target, session, renderSuggestion) {
+function biBuildSessionLog(target, session, renderSuggestion, spec) {
   const log = el(target); log.replaceChildren();
   const turns = session ? session.turns : [];
   if (!turns.length) {
@@ -8009,14 +8075,16 @@ function biBuildSessionLog(target, session, renderSuggestion) {
     const item = bh("li", "", bh("p", "bi-meta", biSentLine(turn.sent || {})));
     if (turn.error) item.append(bh("p", "bi-err", turn.error.message));
     const asked = index > 0 ? turns[index - 1] : null;
-    if (turn.error && target === "bi-ai-log" && index === turns.length - 1 && asked) {
-      // The last turn failed: send the same request again (acceptance F16/F20).
+    if (turn.error && target.startsWith("bi-ai-log") && index === turns.length - 1 && asked) {
+      // The last turn failed: send the same request again (acceptance F16/F20), in the panel
+      // of the session it belongs to.
+      const sfx = target.slice("bi-ai-log".length);
       item.append(bh("div", "bi-actions", biButton("重試", () => {
-        el("bi-ai-msg").value = String(asked.text).replace(/^工作領域：[^\n]*\n\n/, "");
-        el("bi-ai-send").click();
+        el("bi-ai-msg" + sfx).value = String(asked.text).replace(/^工作領域：[^\n]*\n\n/, "");
+        el("bi-ai-send" + sfx).click();
       }, "bi-btn", "再送一次同樣的要求")));
     }
-    if (turn.suggestion) item.append(...renderSuggestion(session, turn, index));
+    if (turn.suggestion) item.append(...renderSuggestion(session, turn, index, spec));
     log.append(item);
   });
 }

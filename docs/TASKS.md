@@ -5213,3 +5213,15 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   test_bi_share_step_ui, test_bi_step2_domain_ui, test_bi_vault_ui, test_bi_tools_ui and
   file-viewer UI tests. Contract: docs/CONTRACTS.md "BI Knowledge round 2"; decisions:
   docs/DECISIONS.md "2026-11-20 — BI Knowledge round 2: owner decisions".
+- [x] 2026-11-20 BI page: several AI sessions open at once (owner 2026-11-20 「現在就改」; branch
+  bi-knowledge-round2-20261120). Each AI session (和 AI 出測試題, 和 AI 修改分析 / 做新分析,
+  和 AI 調整擷取 Skill) gets its own panel and its own side tab: the first uses the page's
+  `#bi-ai`, the others a copy whose ids end in `-<n>`; `bi.ais` holds each session's spec
+  (scope, log, pending send, timer). Re-opening a session focuses its tab; closing a tab ends
+  only that session (its timer, its `tr.bi-ai-from` row, focus back to where it came from).
+  Sends, progress, replies, apply buttons and saved history act on their own session while
+  another tab is in front. Front end only; no server API change. Verification:
+  test_bi_step3_ui (new two-session check), test_bi_page_simple, test_retry_buttons_ui,
+  test_bi_working_domain_ui, test_bi_vault_steps_ui pass; test_bi_sessions_ui fails the same
+  way before and after (navigation_failed, part of the redesign rewrite list); ruff, ruff
+  format --check and mypy clean on the changed files.
