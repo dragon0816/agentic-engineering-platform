@@ -5252,3 +5252,27 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   test_bi_step3_ui, test_bi_cards_ui, test_bi_vault_steps_ui, test_bi_working_domain_ui,
   test_retry_buttons_ui) 155 passed, 1 failed once with the browser's `navigation_failed` and
   passed on rerun (test_bi_review_table_ui no-citation test); ruff, format and mypy clean.
+- [x] 2026-11-20 BI build page: stage settings behind a gear, run-only main views, renamed
+  stages and 自動執行 (owner 2026-11-20; branch bi-knowledge-round2-20261120; decision
+  docs/DECISIONS.md "BI build page: stage settings behind a gear, run-only main views,
+  自動執行"). Stages are Data input / Ingest / Benchmark testing. Each stage's ⚙ opens its
+  settings as a side-area tab (`#bi-b-set-source|ingest|test` move in and back, ids intact):
+  Data input = 機密等級, write target, vault and shared folder, 進階 import; Ingest = old 2a
+  (schema, drafts, upgrade, skills, tools, 匯入, 進階 incl. 建議 schema) plus the extraction
+  Skill, trial/compare and 安裝 schema; Benchmark testing = questions and Dashboard analyses.
+  Main views: 選檔/轉檔 + file list; Ingest + the merged 2c review as one view (sub-step bar
+  hidden); 跑測試 above the Benchmark | Dashboard result tabs. 先設定 line when Ingest has no
+  schema type or the domain has no question. 自動執行 beside the stage bar runs convert →
+  ingest → accept all pending (cards and changes) + import → benchmark, progress n/4 with
+  sub-progress and seconds, resumable across a reload without a second run (client only, no
+  server change). Verification: test_bi_page_simple, test_bi_stage_gear_ui (new),
+  test_bi_build_ui, test_bi_step3_ui, test_bi_batch_ingest_ui, test_bi_md_preview_ui,
+  test_bi_packages_ui, test_bi_source_selection_ui, test_bi_vault_steps_ui,
+  test_bi_working_domain_ui, test_bi_review_table_ui, test_bi_schema_suggest_ui,
+  test_bi_schema_fit_ui, test_bi_atlas_file_import, test_bi_cards_ui, test_bi_commit_list_ui,
+  test_bi_domain_dashboard_ui, test_bi_finalize_ui, test_bi_markdown_ui,
+  test_bi_r6_page_fixes, test_bi_schema_merge_ui, test_bi_schemas_ui, test_bi_top_row_ui,
+  test_bi_build_tab_order_ui pass; test_bi_version_link_ui fails the same on the base commit
+  (share step now a side tab; not touched). Known-broken redesign UI tests not run. ruff,
+  ruff format --check, mypy on changed files and node --check on the page script clean. Full
+  suite not run (owner reviews the page first).

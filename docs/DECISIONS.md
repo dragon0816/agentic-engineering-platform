@@ -8239,3 +8239,61 @@ was a separate section whose cards could not be opened.
 - **Rejected alternative:** keeping two sections (candidates, and 待審提案 with its own 欄位/來源
   filters and a required bulk reason). It hid accepted rows, made the judgement-field rule look
   like a missing count, and gave changes no way to open the card.
+
+### 2026-11-20 — BI build page: stage settings behind a gear, run-only main views, 自動執行
+
+Owner decision 2026-11-20 (all points final): the build flow was tedious because every stage
+showed its complex settings every time. Settings are set once; after that the person only runs
+convert, ingest and the test, step by step or automatically, and looks at the results.
+
+- **Renamed stages.** 輸入檔案 / 輸入與轉檔 → **Data input**; Schema 與 Ingest → **Ingest**; 測試 →
+  **Benchmark testing**, in the stage bar, the stage headings (步驟 n／3・…), the 下一步 buttons,
+  the 回到「…」 link and the hints.
+- **A gear per stage.** Each stage title has a ⚙ button (accessible name "Data input 設定",
+  "Ingest 設定", "Benchmark testing 設定"). It opens that stage's settings as a tab of the shell's
+  side area (`sideOpen`); pressing it again focuses the tab, and closing the tab hides them. The
+  settings' existing markup (`#bi-b-set-source|ingest|test`, kept hidden inside its stage section)
+  moves into the tab and back when it closes, with its ids, as the card preview does with
+  `#bi-detail`. Nothing was removed, only moved:
+  - Data input ⚙: 機密等級, 寫入目的地, the knowledge base and its shared folder (file location),
+    進階：知識庫與匯入 (convert to a vault, 卡片頁 import).
+  - Ingest ⚙: the old 2a — schema summary and versions, the draft table, upgrade, 判讀規則
+    (skills), 資料處理程式, 匯入, 進階 (rules and programs, 建議 schema, drafts) — plus the Skill
+    Ingest uses and 進階：擷取設定與試跑, and a button for 管理 → 安裝 schema.
+  - Benchmark testing ⚙: the Benchmark section (questions: add, AI 出題, edit, delete, 擷取測試)
+    and the Dashboard section (analyses: add/edit with AI, delete, packs, Atlas order).
+- **Run-only main views.** Data input: 選檔 / 轉檔 with its progress and the converted file list.
+  Ingest: the Ingest button with its progress and the merged 2c review list, then 確認寫入 and
+  the result; the sub-step bar is hidden (2a is the ⚙, Ingest and 審核 show as one view).
+  Benchmark testing: 跑測試 with its bar, then the Benchmark | Dashboard result tabs with the
+  summary numbers; per-question results, history, 分享 and AI sessions open as side tabs as
+  before. The vault and 工作領域 pickers stay at the top, shared by all stages.
+- **First use.** Ingest with no card type in the schema, and Benchmark testing with no question
+  in the working domain, show one line and a 先設定 button that opens that stage's ⚙.
+- **自動執行.** One button beside the stage bar runs 轉檔 (the chosen files, if any) → Ingest (the
+  ticked sources) → accept every pending row (new cards, and changes to existing cards,
+  judgement fields included, no reason) and 匯入 → 跑測試, with no stop. Beside it: stage n/4,
+  that stage's own progress, elapsed seconds; it ends there with the result or the actual failure
+  and the stage it stopped in, and each stage's view keeps its results. At most once (AGENTS.md
+  21): client only, reusing the existing APIs (`/api/bi/sources`, `/api/bi/runs`,
+  `/runs/<id>/accept`, `/runs/<id>/commit`, `/api/bi/proposals/decide`, `/vaults/<id>/bench`);
+  no server change. The button is shut and an in-memory flag refuses a second press while it
+  runs; the run's state is kept in `localStorage` (`bi-auto-<dataset>`, with this tab's id and a
+  heartbeat), so a reload carries on from its stage instead of starting again — Ingest adopts an
+  ingest run of the same source started since the press, the test adopts a benchmark run started
+  since the press, and accept/commit are already idempotent on the host (`already_accepted`,
+  commit `already`). A reload during 轉檔 stops with that message, since which files were sent
+  cannot be known. Another tab of the same browser follows a running auto-run instead of
+  starting one.
+- **Rejected alternatives:** settings as a fold-out inside each stage (still in the main view,
+  still in the way); settings in a modal dialog (hides the results being set up for, and blocks
+  the page); 自動執行 stopping at 審核 for a person (the owner wants it to run through; review
+  stays possible afterwards, and accepted rows can go back to 待決定); moving the 工作領域 picker
+  into Data input's settings (every stage depends on it, so it stays at the top).
+- **Decisions made in implementation:** Data input shows no 先設定 line (its settings all have
+  defaults); 自動執行 on a dataset that is not a vault skips the test and says so; when the
+  working domain has no benchmark question the auto-run ends at stage 4/4 with the host's
+  `bench_empty` message, after the import is done; a candidate the host refuses to accept (an
+  error such as a missing required field) is named in the result rather than stopping the run.
+  Ingest's 審核 part shows as the lower half of the Ingest card, and its old hint 「在「Ingest」
+  這一步按…」 shows only when there is nothing to list, so the list stays in sight.
