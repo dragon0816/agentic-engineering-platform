@@ -223,6 +223,8 @@ BI_CSS = r"""
   box-shadow: inset 0 3px 0 var(--accent); font-weight: 600; }
 .bi-tab-off { display: none !important; }
 #bi-b-tab-ai[hidden] { display: none; }
+.bi-run-progress { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.bi-run-progress progress { width: 220px; height: 14px; }
 #bi-b-tab-ai > .bi-ai-panel { position: static; width: auto; height: max(420px, 72vh);
   border: 1px solid var(--line); border-radius: 8px; box-shadow: none; }
 tr.bi-ai-from > td { background: var(--accent-soft, #2563eb22); }
@@ -1259,7 +1261,10 @@ BI_PANE_HTML = r"""
           <div id="bi-b-tab-ai" role="tabpanel" hidden></div>
           <div id="bi-b-run" class="bi-run">
             <button class="go" id="bi-b-bench-run" type="button">跑測試</button>
-            <span class="bi-meta" id="bi-b-run-why"></span></div>
+            <span class="bi-meta" id="bi-b-run-why"></span>
+            <div class="bi-run-progress" id="bi-b-run-progress" role="status" aria-live="polite"
+              hidden><progress id="bi-b-run-bar" max="1" value="0"></progress>
+              <span id="bi-b-run-text"></span></div></div>
           <div id="bi-b-test-results" class="bi-test-results">
             <div id="bi-b-bench-report" aria-live="polite"></div>
             <div class="bi-split-pane" id="bi-b-test-dash"><h5>Dashboard</h5></div>
@@ -3408,6 +3413,7 @@ async function biBench(vaultId) {
   reply.home = asked;
   bi.benchReply = {vaultId, reply};
   biBenchDraw(reply);
+  biRunProgress(reply.newest);
   clearTimeout(bi.benchTimer);
   // By the newest run of any domain: only one runs at a time on this PC. A run just started may
   // not have written its first report yet: keep reading until it has.
@@ -3875,6 +3881,32 @@ async function biQuestionsAi() {
 
 el("bi-b-qa-open").addEventListener("click", () => biQuestionsAi()
   .catch((failure) => biNotice(false, failure.message)));
+
+// Beside 跑測試 (owner 2026-11-20, AGENTS.md 23): a bar, n of N, the question being asked and
+// the seconds; it ends in place with how the run went.
+function biRunProgress(newest) {
+  const box = el("bi-b-run-progress"), bar = el("bi-b-run-bar"), words = el("bi-b-run-text");
+  clearInterval(bi.runTicker);
+  const progress = (newest || {}).progress;
+  if (!newest || !progress || (newest.status !== "running" && newest.run_id !== bi.runShown)) {
+    box.hidden = true; return;
+  }
+  bi.runShown = newest.run_id;
+  box.hidden = false;
+  const total = Math.max(progress.total || 0, 1), done = Math.min(progress.done || 0, total);
+  bar.max = total; bar.value = newest.status === "running" ? done : total;
+  const seconds = () => Math.max(0, Math.floor((Date.parse(progress.ended_at || "")
+    || Date.now()) / 1000 - Date.parse(progress.started_at) / 1000));
+  const show = () => {
+    words.textContent = newest.status === "running"
+      ? "第 " + Math.min(done + 1, total) + "/" + total + " 題" + (progress.current
+        ? "：" + progress.current : "") + "・" + seconds() + " 秒"
+      : (newest.status === "finished" ? "完成：" : "沒有跑完：") + done + "/" + total
+        + " 題・" + seconds() + " 秒" + (newest.error ? "・" + newest.error : "");
+  };
+  show();
+  if (newest.status === "running") bi.runTicker = setInterval(show, 1000);
+}
 
 el("bi-b-bench-run").addEventListener("click", async () => {
   const button = el("bi-b-bench-run"); button.disabled = true;

@@ -259,3 +259,30 @@ def test_applied_questions_are_deleted_together_and_past_results_stay(tmp_path: 
     _commit(a, vault_id, "刪掉測試")
     assert vault.Vault(a, vault_id).repo.working_units(pending=False).get(units[0]) is None
     del drive, dataset, b
+
+
+def test_a_run_says_how_far_it_is_for_the_bar_beside_the_button(tmp_path: Path) -> None:
+    """Owner 2026-11-20: 「跑測試的時候，希望有一個進度條」. While a run asks, the newest report
+    says n of N, the question being asked and when it started; at the end, all done."""
+    _drive, vault_id, _dataset, a, _b = _two_pcs(tmp_path)
+    _ok(_save(a, vault_id, QUESTION))
+    _ok(_save(a, vault_id, {**QUESTION, "question": "TSN 是什麼？"}))
+    seen: list[dict[str, Any]] = []
+
+    def ask(question: str, side: bi_bench.Side) -> dict[str, Any]:
+        if side == "working":
+            seen.append(_checks(a, vault_id)["newest"])
+        return {"ok": True, "answer": "IEEE"}
+
+    report = bi_bench.run(a, vault_id, ask=ask, extract=lambda case: [], actor="alice")
+    assert report["status"] == "finished"
+    first, second = seen
+    assert first["status"] == "running"
+    assert first["progress"]["done"] == 0 and first["progress"]["total"] == 2
+    assert first["progress"]["current"] in ("TSN 的標準組織是誰？", "TSN 是什麼？")
+    assert first["progress"]["started_at"] and first["progress"]["ended_at"] is None
+    assert second["progress"]["done"] == 1
+    done = _checks(a, vault_id)["newest"]
+    assert done["status"] == "finished"
+    assert done["progress"]["done"] == 2 and done["progress"]["current"] is None
+    assert done["progress"]["ended_at"]

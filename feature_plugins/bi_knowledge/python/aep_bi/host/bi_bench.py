@@ -210,6 +210,10 @@ def run(
         "results": [],
         "cases": [],
         "error": None,
+        # Where the run is, for the bar beside 跑測試 (owner 2026-11-20): the question or
+        # extraction case being run now, of `steps`.
+        "steps": len(graded) + len(cases),
+        "current": None,
     }
     _save(workspace, vault_id, report)
     worlds: dict[str, error_class.World | None] = {}
@@ -232,6 +236,8 @@ def run(
                 must_not=tuple(item["must_not"]),
             )
             result = {"unit": item["unit"], "set": item["set"], "question": item["question"]}
+            report["current"] = item["question"]
+            _save(workspace, vault_id, report)
             sides: tuple[Side, Side] = ("working", "published")
             for side in sides:
                 result[side] = _side(question, ask(item["question"], side), world_of(side))
@@ -239,6 +245,8 @@ def run(
             _save(workspace, vault_id, report)
         for case in cases:
             entry: dict[str, Any] = {"unit": case["unit"], "slug": case["slug"]}
+            report["current"] = f"擷取測試 {case['slug']}"
+            _save(workspace, vault_id, report)
             try:
                 candidates = extract(case)
                 entry["result"] = benchmark.score(candidates, case["expected"], text=case["note"])
@@ -253,10 +261,24 @@ def run(
         report["status"] = "failed"
         report["error"] = str(failure)[:500] or type(failure).__name__
     report["finished_at"] = _now()
+    report["current"] = None
     # Two runs can end within a second, and which came last decides a question's verdict.
     report["finished_ns"] = time.time_ns()
     _save(workspace, vault_id, report)
     return report
+
+
+def progress(report: Mapping[str, Any]) -> dict[str, Any]:
+    """How far a run is: questions and cases done of all, what it is on, when it started and
+    ended (a report from before `steps` counts its questions)."""
+    done = len(report.get("results") or []) + len(report.get("cases") or [])
+    return {
+        "done": done,
+        "total": int(report.get("steps") or report.get("total") or done),
+        "current": report.get("current"),
+        "started_at": report.get("started_at"),
+        "ended_at": report.get("finished_at"),
+    }
 
 
 def reports(workspace: Path, vault_id: str) -> list[dict[str, Any]]:
