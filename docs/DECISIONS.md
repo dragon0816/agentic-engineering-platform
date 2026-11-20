@@ -8206,3 +8206,36 @@ control, AGENTS 23):
 Review fixes from the owner's preview: the accept-and-import button also writes cards already
 accepted; candidate warnings name their field and can be confirmed or answered by editing the
 value (never blocking); deleting an analysis redraws the list.
+
+### 2026-11-20 — BI 2c review: one list, and judgement fields bulk-acceptable without a reason
+
+Owner decision 2026-11-20, after: 接受顯示的全部 said 0 筆 once every card was applied, and
+switching 欄位 to 信心度 then offered 5 more; accepted cards dropped out of the list; and 待審提案
+was a separate section whose cards could not be opened.
+
+- **One list.** Step 2c shows the run's candidate cards and the proposals to change cards already
+  in the vault in one table, with a 類型 column (新卡片 / 修改既有卡片; a candidate that updates an
+  existing card is also 修改既有卡片). Filters: 狀態 (default 全部; 待決定 / 已接受 / 已拒絕) and
+  類型. The card-type, 欄位 and 來源 filters are gone; origin and evidence are shown in a row's
+  detail. A change row shows current vs proposed value, source and evidence, and opens the target
+  card as a side tab. 接受 / 拒絕 / 待決定 work per row for both kinds. One bulk button,
+  接受顯示的待決定（N）, covers both kinds (changes through `/api/bi/proposals/decide`);
+  匯入已接受的 / 全部接受並匯入 keep their meaning for new cards. Decided changes stay listed as
+  已接受 / 已拒絕 (`GET /api/bi/proposals` returns `decided`).
+- **Reasons optional, judgement fields like any other.** The reason is optional for every 2c
+  decision (new cards and changes, single and bulk, accept, reject, back to 待決定); it is kept
+  when given and never blocks, on the client or the server. `confidence` and `evidence_grade` are
+  included in bulk accept. Who, when and source stay in the card's history, and an accepted
+  change can go back to 待決定 (`action: "pending"`), which gives the field its earlier value,
+  source and evidence back as an `undo` history row (409 `proposal_moved_on` if the field changed
+  since). Correction notes, finalize, rename and evidence review keep their required reason;
+  they are not 2c decisions.
+- **Storage.** An accepted proposal stays stored `superseded`, as before; the decided list finds it
+  as the superseded proposal whose value a person's history row wrote. Adding a decided-by/at
+  column was tried and dropped: a vault dataset is rebuilt from its units after each write, so
+  such a column was lost, and putting it in the unit made a field accepted on one PC and corrected
+  on another conflict on the proposal as well as the field (`test_bi_accept_evidence`). Known
+  limit: a rejection's reason travels, but not who rejected it or when.
+- **Rejected alternative:** keeping two sections (candidates, and 待審提案 with its own 欄位/來源
+  filters and a required bulk reason). It hid accepted rows, made the judgement-field rule look
+  like a missing count, and gave changes no way to open the card.

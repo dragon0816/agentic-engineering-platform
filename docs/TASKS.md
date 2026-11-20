@@ -5236,3 +5236,19 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   (two card tabs, re-open focuses, action in tab, close one), test_bi_cards_ui,
   test_bi_page_simple, test_retry_buttons_ui, test_bi_working_domain_ui,
   test_bi_vault_steps_ui pass; ruff, ruff format --check and mypy clean on changed files.
+- [x] 2026-11-20 BI 2c review merged into one list (owner 2026-11-20; branch
+  bi-knowledge-round2-20261120; decision docs/DECISIONS.md "BI 2c review: one list, and judgement
+  fields bulk-acceptable without a reason"). Server: proposal decisions take an optional reason
+  (single, bulk, judgement fields included); bulk decide includes `confidence`/`evidence_grade`;
+  `action: "pending"` reopens a decided proposal and gives an accepted value back as an `undo`
+  history row; `GET /api/bi/proposals` adds `decided`. Page: one table of candidate cards and
+  changes with a 類型 column, filters 狀態 (default 全部) and 類型, per-row 接受/拒絕/待決定, one
+  optional reason box, 接受顯示的待決定（N） over both kinds, a change row opening its card as a
+  side tab; `#bi-b-props` and `bi-b-props-jump` removed. Verification: server tests
+  (test_bi_ingest_runs, test_bi_run_merge, test_bi_r6_page_fixes, test_bi_vault, test_bi_cards,
+  test_bi_accept_evidence, test_bi_replaced_evidence, test_bi_field_states,
+  test_bi_subscriptions, test_bi_dataset_snapshot) 176 passed; UI tests (test_bi_review_table_ui,
+  test_bi_r6_page_fixes, test_bi_r6_ai_fixes, test_bi_review_apply_all, test_bi_page_simple,
+  test_bi_step3_ui, test_bi_cards_ui, test_bi_vault_steps_ui, test_bi_working_domain_ui,
+  test_retry_buttons_ui) 155 passed, 1 failed once with the browser's `navigation_failed` and
+  passed on rerun (test_bi_review_table_ui no-citation test); ruff, format and mypy clean.
