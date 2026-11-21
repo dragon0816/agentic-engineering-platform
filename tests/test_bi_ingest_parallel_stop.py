@@ -325,3 +325,35 @@ def test_a_run_with_a_worker_is_never_taken_for_an_orphan(
     jobs.run_all()
     assert _detail(tmp_path, run["id"])["run"]["status"] == "review"
     assert extract.PARALLEL_PARTS == 4
+
+
+def test_a_run_that_ends_while_it_is_looked_at_is_not_taken_for_an_orphan(
+    tmp_path: Path, small_parts: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The page reads the run while its worker is finishing: the worker sets `review` and is
+    # released between the read of the status and the check for a worker. That run ended
+    # well; it must not become `partial` with an `interrupted` part.
+    jobs = Jobs()
+    run = _start(tmp_path, _runtime(Reader(), jobs), _source(tmp_path))
+    finisher = threading.Thread(target=jobs.run_all)
+    real = Staging.run_row
+    first: list[bool] = []
+
+    def run_row(self: Staging, run_id: str) -> Any:
+        row = real(self, run_id)
+        if not first:
+            first.append(True)
+            finisher.start()
+            finisher.join(timeout=5)  # the worker ends meanwhile, if it can
+        return row
+
+    monkeypatch.setattr(Staging, "run_row", run_row)
+    runs.recover_interrupted(Staging(tmp_path, "demo"), run["id"])
+    monkeypatch.setattr(Staging, "run_row", real)
+    if first:
+        finisher.join()
+    else:
+        jobs.run_all()
+    shown = _detail(tmp_path, run["id"])["run"]
+    assert shown["status"] == "review" and shown["interrupted"] is False, shown
+    assert shown["failures"] == []

@@ -778,6 +778,16 @@ def recover_interrupted(staging: Staging, run_id: str) -> bool:
     """An AI run left `extracting` with no worker becomes `partial`: the chunks of its
     last attempt that were not written are failures with the code `interrupted`, so 重試
     reads only those (a chunk read before the stop answers from the answer cache)."""
+    # Held throughout: a worker sets the run's last status before it is released, so with
+    # no worker the status read here is final, and no worker is claimed or released while
+    # it is decided (read first and checked after, a run just finished became `partial`).
+    with _workers_lock:
+        if _worker_key(staging, run_id) in _workers:
+            return False
+        return _recover_unworked(staging, run_id)
+
+
+def _recover_unworked(staging: Staging, run_id: str) -> bool:
     run = staging.run_row(run_id)
     layout = staging.layout(run_id)
     if (
@@ -785,7 +795,6 @@ def recover_interrupted(staging: Staging, run_id: str) -> bool:
         or run["status"] != "extracting"
         or layout is None
         or layout.get("mode") != "llm"
-        or working(staging, run_id)
     ):
         return False
     attempt = layout.get("attempt")
