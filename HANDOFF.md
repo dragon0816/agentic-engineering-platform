@@ -65,7 +65,10 @@ any of them.
    `C:/TEMP/claude-preview/wt`. Then remove the preview and round-2 worktrees.
 3. Cloudflare port 7844 and Paseo autostart on 141 were dropped by the owner
    (2026-11-21). Don't raise them again.
-4. In progress (2026-11-21): improve the X (twitter) link fetch. Follow the single linked
-   article, strip the login noise, and treat x.com as its own platform.
+4. Done 2026-11-21 (merge of `bi-x-links-20261121`): X links in the BI inbox are read
+   from no-login endpoints. The order is syndication → oEmbed → page meta. Exactly one
+   linked article is followed. Risk: the syndication endpoint is undocumented; see
+   docs/CONTRACTS.md BI inbox "X links". Full suite with `-n 4`: 7332 passed; 1 timing
+   flake (test_system_command) passed when rerun alone.
 5. Don't write the BI/Wiki user manuals until the owner has reviewed the feature and
    asks for them.
