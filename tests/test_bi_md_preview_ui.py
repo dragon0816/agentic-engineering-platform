@@ -66,7 +66,8 @@ def test_the_markdown_opens_as_a_preview_with_real_tables_and_nothing_runs(
             rects = json.loads(
                 str(
                     page.run(
-                        "JSON.stringify(['#bi-b-class', '.bi-file', '#bi-b-upload'].map((s) => {"
+                        # 機密等級 is in Data input's gear settings (owner 2026-11-20).
+                        "JSON.stringify(['.bi-file', '#bi-b-upload'].map((s) => {"
                         " const r = document.querySelector(s).getBoundingClientRect();"
                         " return [r.top, r.bottom]; }))"
                     )

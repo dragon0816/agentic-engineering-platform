@@ -41,7 +41,9 @@ def _convert(staging: Staging, source: dict[str, Any]) -> int:
     """Convert a source that has no Markdown yet; its revision number."""
     staging.store.refuse_write()
     try:
-        text = convert.convert(source["name"], staging.source_bytes(source["id"]))
+        text, assets = convert.convert_with_assets(
+            source["name"], staging.source_bytes(source["id"])
+        )
     except BiStoreError as error:
         staging.record_conversion_failure(source["id"], error)
         raise
@@ -54,6 +56,7 @@ def _convert(staging: Staging, source: dict[str, Any]) -> int:
             actor=str(source["by"]),
             base_rev=0,
             converter=convert.CONVERTER,
+            assets=assets,
         )
     except BiStoreError as error:
         if error.code != "markdown_stale":

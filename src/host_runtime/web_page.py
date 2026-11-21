@@ -64,6 +64,32 @@ body {
   font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 .app-shell { display: grid; grid-template-columns: 280px minmax(0, 1fr); min-height: 100vh; }
+/* 附加資料顯示區 (owner 2026-11-20): a third column of browser-like tabs, there only while
+   something is open in it. Any page opens items with sideOpen() and closes them with
+   sideClose(). */
+.app-shell.extra-open { grid-template-columns: 280px minmax(0, 1fr) minmax(320px, 38vw); }
+.extra-area { position: sticky; top: 0; height: 100vh; min-width: 0; display: flex;
+  flex-direction: column; border-left: 1px solid var(--line); background: var(--panel); }
+.extra-tabs { display: flex; gap: 2px; padding: 6px 6px 0; overflow-x: auto;
+  border-bottom: 1px solid var(--line); flex: 0 0 auto; }
+.extra-tab { display: inline-flex; align-items: center; max-width: 240px; flex: 0 0 auto;
+  border: 1px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; }
+.extra-tab.on { background: var(--bg); border-color: var(--line);
+  box-shadow: inset 0 3px 0 var(--accent); }
+.extra-tab-label { min-height: 44px; padding: 0 6px 0 12px; border: 0; background: none;
+  color: inherit; font: inherit; font-size: 13px; cursor: pointer; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+.extra-tab.on .extra-tab-label { font-weight: 600; }
+.extra-tab-close { min-width: 44px; min-height: 44px; margin-right: 4px; border: 0;
+  border-radius: 6px; background: none; color: var(--dim); font: inherit; cursor: pointer; }
+.extra-tab-close:hover, .extra-tab-close:focus-visible { background: var(--line);
+  color: var(--ink); }
+.extra-body { flex: 1 1 auto; min-height: 0; overflow: auto; background: var(--bg); }
+.extra-panel { padding: 10px 12px; min-height: 100%; }
+.extra-panel.flush { padding: 0; }
+.extra-panel iframe { display: block; width: 100%; height: calc(100vh - 110px); border: 0;
+  background: #fff; }
+.extra-file-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .sidebar {
   position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh;
   min-width: 0; padding: 16px 12px; border-right: 1px solid var(--line);
@@ -372,6 +398,10 @@ select.mem-field { width: auto; flex: 0 1 220px; min-width: 0; max-width: 100%; 
 .agent-badge { margin-left: auto; padding: 0 6px; border: 1px solid var(--line);
   border-radius: 10px; color: var(--dim); font-size: 11px; font-weight: 600; }
 .agent-badge.on { color: var(--accent); border-color: var(--accent); }
+.tg-mark { display: inline-block; margin-right: 3px; padding: 0 3px; border-radius: 3px;
+  background: #229ED9; color: #fff; font-size: 9px; font-weight: 700; line-height: 1.5; }
+.bot-cell .bot-name { display: block; font-weight: 600; }
+.bot-cell .bot-detail { display: block; }
 .agent-conversations { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px;
   padding: 0 0 6px 18px; }
 .agent-conversations .session-item { min-height: 40px; padding: 6px 8px; }
@@ -382,6 +412,19 @@ select.mem-field { width: auto; flex: 0 1 220px; min-width: 0; max-width: 100%; 
 .agent-skills, .agent-bot { display: grid; gap: 4px; border: 1px solid var(--line);
   border-radius: 6px; padding: 6px 10px; }
 .agents-table td { vertical-align: top; }
+.agents-table tr.just-saved td { background: rgba(46, 125, 50, 0.12); }
+/* .settings label/input are block and full width; a Skill is one clickable row. */
+.settings .skill-row { display: flex; align-items: flex-start; gap: 8px; margin: 0;
+  padding: 4px 2px; border-radius: 4px; cursor: pointer; text-align: left; font-size: 13px;
+  color: var(--ink); }
+.settings .skill-row:hover { background: rgba(127, 127, 127, 0.1); }
+.settings .skill-row input { flex: none; margin: 2px 0 0; width: auto; padding: 0; }
+.settings .skill-row .skill-text { display: grid; gap: 1px; min-width: 0; }
+.settings .skill-row .skill-name { font-weight: 600; }
+.settings .skill-row .skill-desc { color: var(--dim); }
+.settings .skill-row .skill-id { color: var(--dim); font-size: 0.8em; overflow-wrap: anywhere; }
+.save-status { margin-left: 8px; }
+.save-status.failed { color: #c62828; font-weight: 600; }
 .session-search { width: 100%; min-height: 38px; margin-bottom: 8px; font: inherit; }
 .session-snippet { display: block; overflow-wrap: anywhere; color: var(--dim); }
 .session-list { flex: 1; overflow-y: auto; min-height: 120px; }
@@ -906,7 +949,10 @@ tr:last-child td { border-bottom: none; }
   .market-tools { grid-template-columns: minmax(220px, 1fr) minmax(150px, .55fr); }
 }
 @media (max-width: 760px) {
-  .app-shell { grid-template-columns: 1fr; }
+  .app-shell, .app-shell.extra-open { grid-template-columns: 1fr; }
+  .extra-area { position: fixed; top: auto; left: 0; right: 0; bottom: 0; height: 62vh;
+    border-left: 0; border-top: 1px solid var(--line); box-shadow: 0 -4px 16px #0003;
+    z-index: 55; }
   .sidebar { position: static; height: auto; max-height: 48vh; border-right: 0;
     border-bottom: 1px solid var(--line); }
   .session-list { max-height: 180px; }
@@ -945,7 +991,7 @@ tr:last-child td { border-bottom: none; }
   overflow: hidden; border-bottom: 1px solid var(--line); }
 .answer-html.tall .frame-wrap { height: 80vh; }
 .atlas-embed-note { margin: 8px 0 4px; font-size: 13px; color: var(--dim); }
-.answer-html iframe, .viewer-preview iframe { display: block; width: 100%; height: 100%;
+.answer-html iframe { display: block; width: 100%; height: 100%;
   border: 0; background: #fff; }
 .answer-html .frame-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
   padding: 4px 8px; font-size: 13px; color: var(--dim); }
@@ -956,20 +1002,7 @@ tr:last-child td { border-bottom: none; }
   cursor: pointer; }
 .viewer-button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent);
   color: #fff; }
-.file-viewer { position: fixed; top: 0; right: 0; bottom: 0; width: min(720px, 52vw);
-  display: flex; flex-direction: column; background: var(--bg); color: var(--ink);
-  border-left: 1px solid var(--line); box-shadow: -6px 0 24px rgba(0, 0, 0, 0.18);
-  z-index: 60; }
-.viewer-head { display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-  padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--panel); }
-.viewer-head h2 { flex: 1 1 100%; order: -1; margin: 0; font-size: 15px;
-  overflow-wrap: anywhere; padding-right: 52px; }
 .viewer-modes { display: inline-flex; gap: 4px; }
-.viewer-close { position: absolute; top: 6px; right: 8px; }
-.viewer-body { flex: 1 1 auto; min-height: 0; overflow: auto; }
-.viewer-preview { height: 100%; }
-.viewer-preview.doc { height: auto; padding: 8px 16px; }
-.viewer-preview img { max-width: 100%; display: block; margin: 8px auto; background: #fff; }
 .viewer-note { margin: 8px 12px; color: var(--dim); font-size: 13px; }
 .code-view { display: grid; grid-template-columns: auto minmax(0, 1fr); margin: 0;
   font: 12.5px/1.55 var(--mono); }
@@ -981,7 +1014,6 @@ tr:last-child td { border-bottom: none; }
 .csv-table th, .csv-table td { border: 1px solid var(--line); padding: 3px 8px;
   text-align: left; vertical-align: top; }
 @media (max-width: 760px) {
-  .file-viewer { width: 100vw; left: 0; border-left: 0; }
   .answer-html .frame-wrap { height: 420px; }
 }
 /* BI cards (Knowledge Strategy v1.3 Case A, 2026-10-21): a sub-tab of Knowledge.
@@ -1307,7 +1339,8 @@ tr:last-child td { border-bottom: none; }
     </div>
     <h2 id="agents-heading">Agents</h2>
     <p class="note">主 Agent 和你建立的子代理。每個 agent 可以綁一個自己的 Telegram bot：
-      填「存放 bot token 的環境變數名稱」（例如 AEP_TG_SALES），不要貼 token 本身。
+      在「貼上 bot token」貼上 token 後儲存即可。token 存在這個 Windows 帳號的環境變數
+      （名稱就是上面那格），不會寫進 AEP 的檔案；刪除 bot 不會刪除環境變數。
       BI 收集 bot 也在這裡設定。儲存後 bot 設定立即套用；若有 Telegram 對話正在進行，
       會等它結束才套用。</p>
     <div class="card settings" id="agents-card">
@@ -1327,35 +1360,52 @@ tr:last-child td { border-bottom: none; }
         <fieldset id="agent-skills" class="agent-skills"><legend>可用的 Skills</legend></fieldset>
         <p class="note">模型：使用對話的模型（V1 只支援這一種）。</p>
         <fieldset class="agent-bot"><legend>Telegram bot</legend>
-          <label><input type="checkbox" id="agent-bot-on"> 綁定 Telegram bot</label>
+          <label class="laya-check"><input type="checkbox" id="agent-bot-on">
+            綁定 Telegram bot</label>
           <label for="agent-bot-variable">token 的環境變數名稱</label>
-          <input id="agent-bot-variable" spellcheck="false" placeholder="AEP_TG_AGENT">
+          <input id="agent-bot-variable" spellcheck="false"
+                 placeholder="留空自動用 AEP_TG_<agent id>">
+          <label for="agent-bot-token">貼上 bot token（選填）</label>
+          <input id="agent-bot-token" type="password" autocomplete="new-password"
+                 spellcheck="false" placeholder="123456789:AA…（留空＝沿用變數裡的 token）">
           <label for="agent-bot-senders">允許的傳送者，一行一位：
             Telegram 數字 id，後面可接 actor</label>
           <textarea id="agent-bot-senders" spellcheck="false" rows="2"
                     placeholder="123456789 leo.chi"></textarea>
-          <label><input type="checkbox" id="agent-bot-enabled" checked> 開啟</label>
+          <label class="laya-check"><input type="checkbox" id="agent-bot-enabled" checked>
+            開啟</label>
         </fieldset>
         <p><button class="go" id="agent-save" type="submit">儲存 agent</button>
           <button id="agent-cancel" type="button">取消</button>
-          <button id="agent-delete" type="button" hidden>刪除 agent</button></p>
+          <button id="agent-delete" type="button" hidden>刪除 agent</button>
+          <span id="agent-save-status" class="save-status" role="status"
+                aria-live="polite"></span></p>
       </form>
       <form id="collect-form" class="agent-form" autocomplete="off" hidden>
         <h3 id="collect-form-title">新增 BI 收集 bot</h3>
+        <p class="note">傳連結或檔案給它就收進這個領域；
+          直接打字問問題，它從這個領域的 BI 卡片回答。</p>
         <label for="collect-name">bot 名稱（英數字）</label>
         <input id="collect-name" maxlength="60" spellcheck="false" required>
         <label for="collect-target">收集到哪個領域</label>
         <input id="collect-target" maxlength="200" required>
         <label for="collect-variable">token 的環境變數名稱</label>
         <input id="collect-variable" spellcheck="false" placeholder="AEP_TG_BI_SALES">
+        <label for="collect-token">貼上 bot token（選填）</label>
+        <input id="collect-token" type="password" autocomplete="new-password"
+               spellcheck="false" placeholder="123456789:AA…（留空＝沿用變數裡的 token）">
         <label for="collect-senders">允許的傳送者，一行一位：
           Telegram 數字 id，後面可接 actor</label>
         <textarea id="collect-senders" spellcheck="false" rows="2"
                   placeholder="123456789 leo.chi"></textarea>
-        <label><input type="checkbox" id="collect-enabled" checked> 開啟</label>
+        <label for="collect-time">收集時間：每天這時把收到的連結與檔案 Ingest 到待審</label>
+        <input id="collect-time" type="time" value="18:00">
+        <label class="laya-check"><input type="checkbox" id="collect-enabled" checked> 開啟</label>
         <p><button class="go" id="collect-save" type="submit">儲存 bot</button>
           <button id="collect-cancel" type="button">取消</button>
-          <button id="collect-delete" type="button" hidden>刪除 bot</button></p>
+          <button id="collect-delete" type="button" hidden>刪除 bot</button>
+          <span id="collect-save-status" class="save-status" role="status"
+                aria-live="polite"></span></p>
       </form>
     </div>
     <h2>Shared platform</h2>
@@ -1970,26 +2020,12 @@ tr:last-child td { border-bottom: none; }
   </section>
 </main>
 </div>
+<aside class="extra-area" id="extra-area" aria-label="附加資料" hidden>
+  <div class="extra-tabs" id="extra-tabs" role="tablist" aria-label="附加資料的分頁"></div>
+  <div class="extra-body" id="extra-body"></div>
+</aside>
 </div>
 
-<aside class="file-viewer" id="file-viewer" role="dialog" aria-modal="true"
-  aria-labelledby="viewer-name" hidden>
-  <div class="viewer-head">
-    <h2 id="viewer-name"></h2>
-    <div class="viewer-modes" id="viewer-modes" role="group" aria-label="檢視方式">
-      <button type="button" class="viewer-button" id="viewer-preview-mode"
-        aria-pressed="true">Preview</button>
-      <button type="button" class="viewer-button" id="viewer-code-mode"
-        aria-pressed="false">Code</button>
-    </div>
-    <button type="button" class="viewer-button" id="viewer-open">在瀏覽器開啟</button>
-    <button type="button" class="viewer-button" id="viewer-download">下載</button>
-    <button type="button" class="viewer-button" id="viewer-copy" hidden>複製</button>
-    <button type="button" class="viewer-button viewer-close" id="viewer-close"
-      aria-label="關閉">&#x2715;</button>
-  </div>
-  <div class="viewer-body" id="viewer-body"></div>
-</aside>
 <script>
 "use strict";
 const TOKEN = new URLSearchParams(location.search).get("token") || "";
@@ -2499,8 +2535,6 @@ async function downloadFile(session, file) {
   } catch (error) { /* the chip stays; the panel says when a file is gone */ }
 }
 
-const viewer = {session: "", file: null, mode: "preview", text: null, returnTo: null};
-
 function codeView(source) {
   let shown = String(source), notice = "";
   if (shown.length > CODE_MAX_CHARS) shown = shown.slice(0, CODE_MAX_CHARS);
@@ -2579,113 +2613,213 @@ function viewerModes(kind) {
   return [];
 }
 
-async function viewerText() {
-  if (viewer.text === null) {
-    viewer.text = await (await fetchFile(viewer.session, viewer.file)).text();
+// -- 附加資料顯示區: the side area's tabs (owner 2026-11-20) --------------------------------
+// One small API for every page and plugin:
+//   sideOpen({id, title, render(panel) | url | file + session | element, onClose, refresh,
+//             returnTo, focus})
+//     opens an item as a tab, or focuses the tab already open with that id (refresh fills it
+//     again); returns the tab's panel element. focus moves the keyboard to the tab's close
+//     control; Esc inside the area closes the front tab and focus returns to returnTo (or to
+//     whatever had focus when the tab was opened).
+//   sideClose(id), sideFocus(id), sideHas(id).
+// `element` moves an existing node of the page into the tab and puts it back where it was when
+// the tab closes, so a page's own panel keeps its ids and listeners. Nothing is persisted.
+const sideItems = new Map();
+let sideActive = null;
+
+function sideSlug(id) { return String(id).replace(/[^A-Za-z0-9_-]+/g, "-").slice(0, 60); }
+
+function sideShow() {
+  const open = sideItems.size > 0;
+  el("extra-area").hidden = !open;
+  document.querySelector(".app-shell").classList.toggle("extra-open", open);
+}
+
+function sideFocus(id) {
+  const item = sideItems.get(String(id));
+  if (!item) return false;
+  sideActive = item.id;
+  for (const other of sideItems.values()) {
+    const on = other === item;
+    other.tab.classList.toggle("on", on);
+    other.label.setAttribute("aria-selected", String(on));
+    other.label.tabIndex = on ? 0 : -1;
+    other.panel.hidden = !on;
   }
-  return viewer.text;
-}
-
-async function showViewer() {
-  const body = el("viewer-body");
-  const file = viewer.file, kind = fileKind(file), modes = viewerModes(kind);
-  el("viewer-modes").hidden = modes.length < 2;
-  el("viewer-preview-mode").setAttribute("aria-pressed", String(viewer.mode === "preview"));
-  el("viewer-code-mode").setAttribute("aria-pressed", String(viewer.mode === "code"));
-  el("viewer-copy").hidden = viewer.mode !== "code";
-  body.replaceChildren();
-  const pane = document.createElement("div");
-  pane.className = "viewer-preview";
-  body.append(pane);
-  const wanted = file;
-  try {
-    if (!modes.length) {
-      const note = document.createElement("p");
-      note.className = "viewer-note";
-      note.append(text("這種檔案無法在這裡預覽；請用「下載」或「在瀏覽器開啟」。"));
-      pane.append(note);
-    } else if (viewer.mode === "code") {
-      const source = await viewerText();
-      if (viewer.file === wanted) pane.append(codeView(source));
-    } else if (kind === "html") {
-      const url = await htmlViewUrl(viewer.session, file);
-      if (viewer.file === wanted) pane.append(sandboxFrame(url, file.filename));
-    } else if (kind === "image") {
-      const image = document.createElement("img");
-      image.alt = file.filename || "";
-      image.src = URL.createObjectURL(await fetchFile(viewer.session, file));
-      pane.classList.add("doc"); pane.append(image);
-    } else if (kind === "md") {
-      const source = await viewerText();
-      pane.classList.add("doc"); pane.append(renderMarkdown(source));
-    } else if (kind === "csv") {
-      pane.classList.add("doc"); pane.append(csvTable(await viewerText()));
-    }
-  } catch (error) {
-    const note = document.createElement("p");
-    note.className = "viewer-note";
-    note.append(text((file.filename || "") + "：無法讀取（" + error.message + "）"));
-    pane.replaceChildren(note);
-  }
-}
-
-function openFileViewer(session, file, returnTo) {
-  viewer.session = session; viewer.file = file; viewer.text = null;
-  viewer.returnTo = returnTo || document.activeElement;
-  viewer.mode = viewerModes(fileKind(file))[0] || "preview";
-  el("viewer-name").textContent = file.filename || "";
-  el("file-viewer").hidden = false;
-  showViewer();
-  el("viewer-close").focus();
-}
-
-function closeFileViewer() {
-  const panel = el("file-viewer");
-  if (panel.hidden) return false;
-  panel.hidden = true;
-  el("viewer-body").replaceChildren();
-  viewer.file = null; viewer.text = null;
-  if (viewer.returnTo && document.contains(viewer.returnTo)) viewer.returnTo.focus();
+  sideShow();
+  item.tab.scrollIntoView({block: "nearest", inline: "nearest"});
   return true;
 }
 
-function setViewerMode(mode) {
-  if (!viewer.file || !viewerModes(fileKind(viewer.file)).includes(mode)) return;
-  viewer.mode = mode;
-  showViewer();
+async function sideFile(panel, session, file) {
+  // A generated or local file: html in the sandboxed frame, md rendered, csv as a table,
+  // pictures, and other text as code. 預覽／程式碼 switches where both exist and 複製 copies
+  // the file's text in the code view (the readers and controls of the former dialog).
+  const kind = fileKind(file), modes = viewerModes(kind);
+  let mode = modes[0] || "preview", source = null, shown = 0;
+  const readText = async () => {
+    if (source === null) source = await (await fetchFile(session, file)).text();
+    return source;
+  };
+  const bar = document.createElement("div");
+  bar.className = "extra-file-bar";
+  const group = document.createElement("div");
+  group.className = "viewer-modes"; group.setAttribute("role", "group");
+  group.setAttribute("aria-label", "檢視方式"); group.hidden = modes.length < 2;
+  const preview = viewerButton("預覽", () => show("preview"));
+  const code = viewerButton("程式碼", () => show("code"));
+  preview.dataset.mode = "preview"; code.dataset.mode = "code";
+  group.append(preview, code);
+  const copy = viewerButton("複製", async () => {
+    let said = "已複製";
+    try { await navigator.clipboard.writeText(await readText()); }
+    catch (error) { said = "無法複製"; }
+    copy.textContent = said;
+    setTimeout(() => { copy.textContent = "複製"; }, 1500);
+  });
+  copy.classList.add("viewer-copy"); copy.setAttribute("aria-live", "polite");
+  bar.append(group, viewerButton("在瀏覽器開啟", () => openInBrowser(session, file)),
+    viewerButton("下載", () => downloadFile(session, file)), copy);
+  const body = document.createElement("div");
+  panel.append(bar, body);
+  async function show(next) {
+    if (modes.length && !modes.includes(next)) return;
+    mode = next; shown += 1;
+    const ticket = shown;
+    preview.setAttribute("aria-pressed", String(mode === "preview"));
+    code.setAttribute("aria-pressed", String(mode === "code"));
+    copy.hidden = mode !== "code" || !modes.length;
+    body.replaceChildren();
+    const put = (node) => { if (ticket === shown) body.replaceChildren(node); };
+    try {
+      if (!modes.length) {
+        const note = document.createElement("p");
+        note.className = "viewer-note";
+        note.append(text("這種檔案無法在這裡預覽；請用「下載」或「在瀏覽器開啟」。"));
+        put(note);
+      } else if (mode === "code") {
+        put(codeView(await readText()));
+      } else if (kind === "html") {
+        put(sandboxFrame(await htmlViewUrl(session, file), file.filename));
+      } else if (kind === "image") {
+        const image = document.createElement("img");
+        image.alt = file.filename || ""; image.style.maxWidth = "100%";
+        image.src = URL.createObjectURL(await fetchFile(session, file));
+        put(image);
+      } else {
+        const read = await readText();
+        put(kind === "md" ? renderMarkdown(read) : csvTable(read));
+      }
+    } catch (error) {
+      const note = document.createElement("p");
+      note.className = "viewer-note";
+      note.append(text((file.filename || "") + "：無法讀取（" + error.message + "）"));
+      put(note);
+    }
+  }
+  await show(mode);
 }
 
-el("viewer-close").addEventListener("click", closeFileViewer);
-el("viewer-preview-mode").addEventListener("click", () => setViewerMode("preview"));
-el("viewer-code-mode").addEventListener("click", () => setViewerMode("code"));
-el("viewer-open").addEventListener("click",
-  () => { if (viewer.file) openInBrowser(viewer.session, viewer.file); });
-el("viewer-download").addEventListener("click",
-  () => { if (viewer.file) downloadFile(viewer.session, viewer.file); });
-el("viewer-copy").addEventListener("click", async () => {
-  const button = el("viewer-copy");
-  try {
-    await navigator.clipboard.writeText(await viewerText());
-    button.textContent = "已複製";
-  } catch (error) { button.textContent = "無法複製"; }
-  setTimeout(() => { button.textContent = "複製"; }, 1500);
-});
-el("file-viewer").addEventListener("keydown", (event) => {
-  if (event.key === "Escape") { event.stopPropagation(); closeFileViewer(); return; }
-  if (event.key !== "Tab") return;
-  // Keep focus inside the panel while it is open.
-  const items = Array.from(el("file-viewer").querySelectorAll(
-    "button:not([hidden]), [tabindex='0'], iframe")).filter(node => node.offsetParent !== null);
-  if (!items.length) return;
-  const first = items[0], last = items[items.length - 1];
-  if (event.shiftKey && document.activeElement === first) { last.focus(); event.preventDefault(); }
-  else if (!event.shiftKey && document.activeElement === last) {
-    first.focus(); event.preventDefault();
+function sideFill(item, spec) {
+  const panel = item.panel;
+  panel.replaceChildren();
+  panel.classList.toggle("flush", Boolean(spec.url || spec.flush));
+  if (spec.element) {
+    if (!item.home) {
+      item.home = {node: spec.element, parent: spec.element.parentNode,
+        next: spec.element.nextSibling};
+    }
+    panel.append(spec.element);
   }
+  if (spec.render) spec.render(panel);
+  else if (spec.url) panel.append(sandboxFrame(spec.url, spec.title));
+  else if (spec.file) sideFile(panel, spec.session, spec.file);
+}
+
+function sideOpen(spec) {
+  const id = String(spec.id);
+  let item = sideItems.get(id);
+  if (!item) {
+    const tab = document.createElement("div");
+    tab.className = "extra-tab";
+    const label = document.createElement("button");
+    label.type = "button"; label.className = "extra-tab-label";
+    label.setAttribute("role", "tab"); label.id = "extra-tab-" + sideSlug(id);
+    const close = document.createElement("button");
+    close.type = "button"; close.className = "extra-tab-close"; close.textContent = "\u2715";
+    const panel = document.createElement("div");
+    panel.className = "extra-panel"; panel.id = "extra-panel-" + sideSlug(id);
+    panel.setAttribute("role", "tabpanel"); panel.setAttribute("aria-labelledby", label.id);
+    label.setAttribute("aria-controls", panel.id);
+    tab.append(label, close);
+    item = {id, spec, tab, label, close, panel, home: null, returnTo: null};
+    label.addEventListener("click", () => sideFocus(id));
+    label.addEventListener("keydown", (event) => {
+      const step = {ArrowRight: 1, ArrowLeft: -1}[event.key];
+      if (!step) return;
+      event.preventDefault();
+      const ids = [...sideItems.keys()];
+      const next = ids[(ids.indexOf(id) + step + ids.length) % ids.length];
+      sideFocus(next); sideItems.get(next).label.focus();
+    });
+    close.addEventListener("click", () => sideClose(id));
+    el("extra-tabs").append(tab); el("extra-body").append(panel);
+    sideItems.set(id, item);
+    sideFill(item, spec);
+  } else if (spec.refresh) {
+    item.spec = {...item.spec, ...spec};
+    sideFill(item, item.spec);
+  }
+  if (spec.title) {
+    item.label.textContent = spec.title; item.label.title = spec.title;
+    item.close.setAttribute("aria-label", "關閉「" + spec.title + "」");
+  }
+  if (spec.onClose) item.spec.onClose = spec.onClose;
+  const from = spec.returnTo || document.activeElement;
+  if (from && from !== document.body && !el("extra-area").contains(from)) item.returnTo = from;
+  sideFocus(id);
+  if (spec.focus) item.close.focus();
+  return item.panel;
+}
+
+function sideClose(id) {
+  const item = sideItems.get(String(id));
+  if (!item) return false;
+  const ids = [...sideItems.keys()], at = ids.indexOf(item.id);
+  sideItems.delete(item.id);
+  if (item.home && item.home.parent) {
+    const {node, parent, next} = item.home;
+    parent.insertBefore(node, next && next.parentNode === parent ? next : null);
+  }
+  item.tab.remove(); item.panel.remove();
+  if (sideActive === item.id) {
+    sideActive = null;
+    const rest = [...sideItems.keys()];
+    if (rest.length) sideFocus(rest[Math.min(at, rest.length - 1)]);
+  }
+  sideShow();
+  if (item.spec.onClose) item.spec.onClose();
+  return true;
+}
+
+function sideHas(id) { return sideItems.has(String(id)); }
+
+el("extra-area").addEventListener("keydown", (event) => {
+  // Esc closes the front tab; focus goes back to where it was opened from, else to the next tab.
+  if (event.key !== "Escape" || !sideActive) return;
+  event.preventDefault(); event.stopPropagation();
+  const back = sideItems.get(sideActive).returnTo;
+  sideClose(sideActive);
+  if (back && document.contains(back)) back.focus();
+  else if (sideActive) sideItems.get(sideActive).close.focus();
 });
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") closeFileViewer();
-});
+
+function openFileViewer(session, file, returnTo) {
+  // Files open as a tab of the side area (owner 2026-11-20), focused on its close control;
+  // Esc there closes it and focus goes back to the chip or button that opened it.
+  sideOpen({id: "file:" + session + ":" + (file.path || file.filename), title: file.filename,
+    session, file, returnTo, focus: true});
+}
 
 function renderConversation(record) {
   log.replaceChildren();
@@ -4005,7 +4139,11 @@ function renderAgentList() {
     if (agent.bot) {
       const badge = document.createElement("span");
       badge.className = "agent-badge" + (agent.bot.enabled ? " on" : "");
-      badge.append(text(agent.bot.enabled ? "Telegram" : "Telegram 關"));
+      badge.title = "Telegram bot";
+      const mark = document.createElement("span"); mark.className = "tg-mark";
+      mark.setAttribute("aria-label", "Telegram"); mark.append(text("TG"));
+      const label = agent.bot.username ? "@" + agent.bot.username : "Telegram";
+      badge.append(mark, text(agent.bot.enabled ? label : label + " 關"));
       summary.append(badge);
     }
     details.append(summary);
@@ -4042,7 +4180,14 @@ async function loadAgents() {
 
 let agentSettings = null;
 const AGENT_PROBLEMS = {
-  bot_token_value_refused: "這看起來是 token 本身。請填存放 token 的環境變數名稱，不要貼 token。",
+  bot_token_value_refused: "這看起來是 token 本身。token 請貼到「貼上 bot token」那一格；"
+    + "名稱那格只填環境變數名稱。",
+  bot_token_invalid: "這不像 Telegram bot token（格式：數字:35 個以上英數字），"
+    + "請從 @BotFather 重新複製。",
+  bot_token_store_unsupported: "這台主機不是 Windows，無法在這裡儲存 token；"
+    + "請在服務的環境設定這個環境變數後再儲存（token 欄留空）。",
+  bot_token_store_failed: "無法寫入這個 Windows 帳號的環境變數；token 沒有儲存。",
+  bot_variable_in_use: "這個環境變數名稱已被別的設定使用（或裡面不是 bot token）；請換一個名稱。",
   bot_variable_invalid: "環境變數名稱只能有英數字和底線，例如 AEP_TG_SALES。",
   bot_sender_invalid: "傳送者的 actor 不正確。",
   telegram_not_configured: "請先在上面的 Telegram bot 設定好主 Agent 的 bot。",
@@ -4064,41 +4209,92 @@ function sendersText(senders) {
   return (senders || []).map((item) => item.sender_id + " " + item.actor).join("\n");
 }
 
+// The main bot's allowed senders: what a new bot starts with, and the only
+// place a typed @username is turned into a numeric id (usernames change hands,
+// so a bot never allows a sender by username).
+function mainSenders() {
+  const bot = agentSettings && agentSettings.main && agentSettings.main.bot;
+  return (bot && bot.senders) || [];
+}
+
 function parseSenders(value) {
   const senders = [];
   for (const line of value.split("\n")) {
     const parts = line.trim().split(/[\s,]+/).filter(Boolean);
     if (!parts.length) continue;
-    if (!/^\d+$/.test(parts[0])) {
-      throw Object.assign(new Error("“" + parts[0] + "” 不是 Telegram 數字 id。"),
-        {code: "sender_id"});
+    let id = parts[0];
+    let actor = parts[1] || "";
+    if (!/^\d+$/.test(id)) {
+      const name = id.replace(/^@/, "");
+      const known = mainSenders().find((item) => item.username
+        && item.username.toLowerCase() === name.toLowerCase());
+      if (known) {
+        id = String(known.sender_id); actor = actor || known.actor || "";
+      } else if (/^[A-Za-z][A-Za-z0-9_]{3,31}$/.test(name)) {
+        throw Object.assign(new Error(name + " 是 Telegram 名稱，請填數字 id"
+          + "（可傳訊息給 @userinfobot 查）。"), {code: "sender_id"});
+      } else {
+        throw Object.assign(new Error("“" + parts[0] + "” 不是 Telegram 數字 id"
+          + "（可傳訊息給 @userinfobot 查）。"), {code: "sender_id"});
+      }
     }
-    senders.push({sender_id: Number(parts[0]), actor: parts[1] || ""});
+    senders.push({sender_id: Number(id), actor});
   }
   return senders;
 }
 
-function botState(bot) {
-  if (!bot) return "未綁定";
-  const parts = [bot.variable || "（沒有變數）"];
-  parts.push(bot.token_present ? "token 已設定" : "環境變數沒有值");
-  parts.push(!bot.enabled ? "關" : bot.running ? "收訊中" : "開（尚未收訊）");
-  if (bot.problem) parts.push(bot.problem);
-  return parts.join(" · ");
+const BOT_PROBLEMS = {
+  token_missing: "環境變數裡沒有 token",
+  token_invalid: "token 無效（Telegram 不認得）",
+  network_unreachable: "連不上 Telegram",
+  telegram_error: "Telegram 回應錯誤",
+};
+
+// One bot's cell: its @username and state first, then the variable it reads.
+function botCell(bot, options) {
+  const cell = document.createElement("span"); cell.className = "bot-cell";
+  if (!bot) {
+    cell.append(text("未綁定"));
+    if (options && options.bind) {
+      const bind = document.createElement("button"); bind.type = "button";
+      bind.className = "bot-bind"; bind.append(text("綁定"));
+      bind.addEventListener("click", options.bind);
+      cell.append(" ", bind);
+    }
+    return cell;
+  }
+  const name = bot.username ? "@" + bot.username : bot.title || "（bot 名稱未知）";
+  const state = !bot.enabled ? "關"
+    : bot.running === undefined ? "開" : bot.running ? "收訊中" : "開（尚未收訊）";
+  const head = document.createElement("span"); head.className = "bot-name";
+  head.append(text(name + " · " + state));
+  const detail = document.createElement("small"); detail.className = "note bot-detail";
+  const parts = [];
+  if (bot.username && bot.title) parts.push(bot.title);
+  parts.push(bot.variable || "（沒有變數）");
+  if (bot.problem) parts.push(BOT_PROBLEMS[bot.problem] || bot.problem);
+  else if (!bot.token_present) parts.push("環境變數沒有值");
+  if (options && options.where) parts.push(options.where);
+  detail.append(text(parts.join(" · ")));
+  cell.append(head, detail);
+  return cell;
 }
 
 function renderAgentSettings(view) {
   agentSettings = view;
+  const mainBot = view.main && view.main.bot;
   const rows = [
     {who: view.main ? "主 Agent" : "", purpose: "這台電腦的 Agent（固定）",
-     bot: view.main && view.main.bot
-       ? (view.main.bot.variable || "") + " · " + (view.main.bot.enabled ? "開" : "關")
-       + "（在上面的 Telegram bot 設定）"
-       : "未設定（在上面的 Telegram bot 設定）", edit: null},
-    ...view.agents.map((agent) => ({who: agent.name, purpose: agent.purpose || "",
-      bot: botState(agent.bot), edit: () => openAgentForm(agent)})),
-    ...view.collection_bots.map((bot) => ({who: bot.name, purpose: bot.purpose,
-      bot: botState(bot), edit: () => openCollectForm(bot)})),
+     bot: mainBot ? botCell(mainBot, {where: "在上面的 Telegram bot 設定"})
+       : botCell(null, {bind: openMainBotForm}),
+     edit: openMainBotForm},
+    ...view.agents.map((agent) => ({key: "agent:" + agent.id, who: agent.name,
+      purpose: agent.purpose || "",
+      bot: botCell(agent.bot, {bind: () => openAgentForm(agent, true)}),
+      edit: () => openAgentForm(agent)})),
+    ...view.collection_bots.map((bot) => ({key: "collect:" + bot.name, who: bot.name,
+      purpose: collectPurpose(bot),
+      bot: botCell(bot), edit: () => openCollectForm(bot)})),
   ];
   const t = table(["Agent / bot", "用途", "Telegram bot", ""], rows, (row) => {
     let button = "";
@@ -4109,7 +4305,18 @@ function renderAgentSettings(view) {
     return [row.who, row.purpose, row.bot, button];
   });
   t.classList.add("agents-table");
-  el("agents-rows").replaceChildren(t);
+  // Each row says what it is, so a save can bring its row into view.
+  const trs = [...t.querySelectorAll("tr")].slice(1);
+  rows.forEach((row, index) => { if (row.key && trs[index]) trs[index].dataset.row = row.key; });
+  const shown = [t];
+  if (!view.agents.length) {
+    // 新增 agent is the button below the table; one is enough.
+    const empty = document.createElement("p"); empty.className = "note"; empty.id = "agents-empty";
+    empty.append(text("還沒有子代理。"));
+    shown.push(empty);
+  }
+  el("agents-rows").replaceChildren(...shown);
+  refreshCollectTimes();
   el("agent-add").disabled = !view.writable;
   el("collect-add").disabled = !view.writable || !view.telegram_configured;
   const profiles = el("agent-profile");
@@ -4120,12 +4327,28 @@ function renderAgentSettings(view) {
 function showAgentSkills(chosen) {
   const box = el("agent-skills");
   const legend = document.createElement("legend"); legend.append(text("可用的 Skills"));
-  const skills = (agentSettings && agentSettings.skills) || [];
-  const boxes = skills.map((key) => {
-    const label = document.createElement("label");
+  // Older servers sent bare keys; each is now {key, name, description}.
+  const skills = ((agentSettings && agentSettings.skills) || []).map((item) =>
+    typeof item === "string" ? {key: item, name: item, description: ""} : item);
+  // One row per Skill: the box, then its name, what it does and its id; the
+  // whole row toggles the box.
+  const boxes = skills.map((skill) => {
+    const label = document.createElement("label"); label.className = "skill-row";
     const input = document.createElement("input"); input.type = "checkbox";
-    input.value = key; input.checked = chosen.includes(key);
-    label.append(input, text(" " + key));
+    input.value = skill.key; input.checked = chosen.includes(skill.key);
+    const words = document.createElement("span"); words.className = "skill-text";
+    const name = document.createElement("span"); name.className = "skill-name";
+    name.append(text(skill.name || skill.key));
+    words.append(name);
+    if (skill.description) {
+      const desc = document.createElement("small"); desc.className = "skill-desc";
+      desc.append(text(skill.description));
+      words.append(desc);
+    }
+    const id = document.createElement("small"); id.className = "skill-id";
+    id.append(text(skill.key));
+    words.append(id);
+    label.append(input, words);
     return label;
   });
   if (!boxes.length) {
@@ -4136,7 +4359,13 @@ function showAgentSkills(chosen) {
   box.replaceChildren(legend, ...boxes);
 }
 
-function openAgentForm(agent) {
+// The main agent's bot is edited in the Telegram bot form above.
+function openMainBotForm() {
+  el("telegram-settings").scrollIntoView({block: "center"});
+  el("telegram-token").focus();
+}
+
+function openAgentForm(agent, bind) {
   el("collect-form").hidden = true;
   el("agent-form").hidden = false;
   el("agent-form-title").textContent = agent ? "編輯 agent" : "新增 agent";
@@ -4147,11 +4376,26 @@ function openAgentForm(agent) {
   showAgentSkills(agent ? agent.skills : []);
   const bot = agent && agent.bot;
   el("agent-bot-on").checked = !!bot;
-  el("agent-bot-variable").value = bot ? bot.variable : "";
-  el("agent-bot-senders").value = bot ? sendersText(bot.senders) : "";
+  el("agent-bot-variable").value = bot && bot.variable ? bot.variable
+    : agent ? defaultBotVariable("", agent.id) : "";
+  el("agent-bot-token").value = "";
+  el("agent-bot-senders").value = sendersText(bot ? bot.senders : mainSenders());
+  setSaveStatus(el("agent-save-status"), "");
   el("agent-bot-enabled").checked = bot ? bot.enabled : true;
   el("agent-delete").hidden = !agent;
-  el("agent-form-name").focus();
+  if (bind) {
+    // 綁定 from the table: straight to the bot part, ready for a pasted token.
+    el("agent-bot-on").checked = true;
+    el("agent-bot-on").closest("fieldset").scrollIntoView({block: "center"});
+    el("agent-bot-token").focus();
+  } else {
+    el("agent-form-name").focus();
+  }
+}
+
+// The variable a bot's token is kept in when the name field is left as is.
+function defaultBotVariable(kind, name) {
+  return ("AEP_TG_" + kind + name.replace(/[^A-Za-z0-9_]/g, "_").toUpperCase()).slice(0, 100);
 }
 
 function openCollectForm(bot) {
@@ -4161,28 +4405,142 @@ function openCollectForm(bot) {
   el("collect-name").value = bot ? bot.name : "";
   el("collect-name").readOnly = !!bot;
   el("collect-target").value = bot ? bot.target : "";
-  el("collect-variable").value = bot ? bot.variable : "";
-  el("collect-senders").value = bot ? sendersText(bot.senders) : "";
+  el("collect-variable").value = bot && bot.variable ? bot.variable
+    : bot ? defaultBotVariable("BI_", bot.name) : "";
+  el("collect-token").value = "";
+  el("collect-senders").value = sendersText(bot ? bot.senders : mainSenders());
+  setSaveStatus(el("collect-save-status"), "");
   el("collect-enabled").checked = bot ? bot.enabled : true;
+  const timed = bot && collectTimes[bot.name];
+  el("collect-time").value = (timed && timed.collect_at) || COLLECT_DEFAULT_TIME;
   el("collect-delete").hidden = !bot;
 }
 
-async function agentAction(path, body, button, working) {
+// A collection bot's 收集時間 is its BI domain's inbox setting (owner 2026-11-21): read
+// from /api/bi/inbox (every domain's bot and times), written with /api/bi/inbox/bot-time.
+const COLLECT_DEFAULT_TIME = "18:00";
+let collectTimes = {};
+
+function collectPurpose(bot) {
+  const span = document.createElement("span");
+  span.dataset.collectTime = bot.name;
+  span.append(text(bot.purpose || ""));
+  return span;
+}
+
+function collectTimeText(bot) {
+  const timed = collectTimes[bot];
+  if (!timed || !timed.collect_at) return "・尚未設定收集時間";
+  return "・收集時間 " + timed.collect_at + (timed.enabled ? "（下次 " + timed.next + "）"
+    : "（沒有開啟）");
+}
+
+async function refreshCollectTimes() {
+  const spans = [...document.querySelectorAll("#agents-rows [data-collect-time]")];
+  if (!spans.length) return;
+  let reply;
+  try { reply = await call("/api/bi/inbox"); } catch (failure) { return; }
+  collectTimes = {};
+  for (const d of reply.domains || []) if (d.bot) collectTimes[d.bot] = d;
+  for (const span of spans) {
+    const purpose = span.firstChild ? span.firstChild.textContent : "";
+    span.replaceChildren(text(purpose), text(collectTimeText(span.dataset.collectTime)));
+  }
+}
+
+async function collectTime(body) {
+  try { return await call("/api/bi/inbox/bot-time", body); }
+  catch (failure) {
+    const payload = failure.payload || {};
+    throw Object.assign(new Error(payload.message || failure.message),
+      {code: payload.message ? "" : failure.code});
+  }
+}
+
+// The outcome beside the form's save button (AGENTS rule 23): never silent.
+function setSaveStatus(status, message, failed) {
+  status.textContent = message;
+  status.classList.toggle("failed", !!failed);
+  if (message && status.offsetParent) status.scrollIntoView({block: "nearest"});
+}
+
+function saveRefused(status, failure) {
+  const code = failure.code || "";
+  const reason = AGENT_PROBLEMS[code] || failure.message || code || "伺服器沒有回應。";
+  setSaveStatus(status, "沒有儲存：" + reason, true);
+  el("agents-result").textContent = "";
+}
+
+// `row(saved)`: the table row (`data-row`) to bring into view once saved.
+async function agentAction(path, body, button, working, status, row) {
   const result = el("agents-result");
   const label = button.textContent;
   button.disabled = true; button.textContent = working;
-  result.textContent = working;
+  setSaveStatus(status, working);
+  result.textContent = "";
   try {
     const saved = await call(path, body);
     if (saved.ok === false) throw Object.assign(new Error(saved.code), {code: saved.code});
     renderAgentSettings(saved);
+    const note = RELOAD_NOTES[saved.reload] || "已儲存。";
+    setSaveStatus(status, note);
     el("agent-form").hidden = true; el("collect-form").hidden = true;
-    result.textContent = RELOAD_NOTES[saved.reload] || "已儲存。";
+    el("agent-bot-token").value = ""; el("collect-token").value = "";
+    result.textContent = note;
+    const shown = row ? row(saved) : "";
+    const line = shown
+      && el("agents-rows").querySelector("tr[data-row=\"" + CSS.escape(shown) + "\"]");
+    if (line) {
+      line.classList.add("just-saved");
+      line.scrollIntoView({block: "center"});
+    } else {
+      result.scrollIntoView({block: "nearest"});
+    }
     loadAgents().catch(() => {});
+    followBotReload(saved, shown);
+    return true;
   } catch (failure) {
-    const code = failure.code || "";
-    result.textContent = "沒有儲存：" + (AGENT_PROBLEMS[code] || failure.message || code);
+    saveRefused(status, failure);
+    return false;
   } finally { button.disabled = false; button.textContent = label; }
+}
+
+// While saved bots are still being applied, or one has not answered yet, the
+// table refreshes every 2 s for up to 30 s, so it settles on the bot's real
+// name and state instead of the first, possibly stale, lookup (owner 2026-11-21).
+const BOT_FOLLOW_MS = 2000;
+const BOT_FOLLOW_LIMIT_MS = 30000;
+let botFollow = 0;
+
+function botsSettled(view) {
+  if (view.reload === "waiting" || view.reload === "applying") return false;
+  const bots = [...(view.agents || []).map((agent) => agent.bot).filter(Boolean),
+    ...(view.collection_bots || [])];
+  return bots.every((bot) => !bot.enabled || bot.running
+    || (bot.problem && bot.problem !== "network_unreachable"));
+}
+
+function followBotReload(view, highlight) {
+  const run = ++botFollow;
+  const started = Date.now();
+  const step = async (current) => {
+    if (run !== botFollow || botsSettled(current)
+        || Date.now() - started >= BOT_FOLLOW_LIMIT_MS) return;
+    await new Promise((resolve) => setTimeout(resolve, BOT_FOLLOW_MS));
+    if (run !== botFollow) return;
+    let next;
+    try { next = await call("/api/settings/agents"); } catch (failure) { return; }
+    // An open form keeps its fields (the profile list is rebuilt on render).
+    if (el("agent-form").hidden && el("collect-form").hidden) {
+      renderAgentSettings(next);
+      const line = highlight
+        && el("agents-rows").querySelector("tr[data-row=\"" + CSS.escape(highlight) + "\"]");
+      if (line) line.classList.add("just-saved");
+      if (RELOAD_NOTES[next.reload]) el("agents-result").textContent = RELOAD_NOTES[next.reload];
+    }
+    step(next);
+  };
+  step(view);
 }
 
 async function loadAgentSettings() {
@@ -4190,6 +4548,16 @@ async function loadAgentSettings() {
 }
 
 el("agent-add").addEventListener("click", () => openAgentForm(null));
+el("collect-name").addEventListener("input", () => {
+  // A new bot's variable follows its name until someone types their own.
+  const variable = el("collect-variable");
+  const name = el("collect-name");
+  if (name.readOnly) return;
+  if (!variable.value || variable.value === variable.dataset.auto) {
+    variable.value = name.value.trim() ? defaultBotVariable("BI_", name.value.trim()) : "";
+    variable.dataset.auto = variable.value;
+  }
+});
 el("collect-add").addEventListener("click", () => openCollectForm(null));
 el("agent-cancel").addEventListener("click", () => { el("agent-form").hidden = true; });
 el("collect-cancel").addEventListener("click", () => { el("collect-form").hidden = true; });
@@ -4204,38 +4572,67 @@ el("agent-profile").addEventListener("change", () => {
 el("agent-form").addEventListener("submit", (event) => {
   event.preventDefault();
   let senders;
-  try { senders = parseSenders(el("agent-bot-senders").value); }
-  catch (failure) { el("agents-result").textContent = "沒有儲存：" + failure.message; return; }
+  const status = el("agent-save-status");
+  try { senders = el("agent-bot-on").checked ? parseSenders(el("agent-bot-senders").value) : []; }
+  catch (failure) { saveRefused(status, failure); return; }
   const body = {
     id: el("agent-id").value, name: el("agent-form-name").value,
     purpose: el("agent-purpose").value,
     profile: el("agent-profile").value || null,
     skills: [...el("agent-skills").querySelectorAll("input:checked")].map((box) => box.value),
-    bot: el("agent-bot-on").checked ? {variable: el("agent-bot-variable").value, senders,
+    bot: el("agent-bot-on").checked ? {variable: el("agent-bot-variable").value,
+      token: el("agent-bot-token").value.trim() || null, senders,
       enabled: el("agent-bot-enabled").checked} : null,
   };
-  agentAction("/api/settings/agents", body, el("agent-save"), "儲存中…");
+  const before = new Set(((agentSettings && agentSettings.agents) || []).map((a) => a.id));
+  // The saved agent: the one edited, else the one that was not there before.
+  const row = (saved) => {
+    const agent = body.id ? {id: body.id}
+      : (saved.agents || []).find((item) => !before.has(item.id));
+    return agent ? "agent:" + agent.id : "";
+  };
+  agentAction("/api/settings/agents", body, el("agent-save"), "儲存中…", status, row);
 });
 el("agent-delete").addEventListener("click", () => {
   if (!confirm("刪除這個 agent？它的對話紀錄會保留。")) return;
   agentAction("/api/settings/agents/delete", {id: el("agent-id").value},
-    el("agent-delete"), "刪除中…");
+    el("agent-delete"), "刪除中…", el("agent-save-status"));
 });
-el("collect-form").addEventListener("submit", (event) => {
+el("collect-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   let senders;
+  const status = el("collect-save-status");
   try { senders = parseSenders(el("collect-senders").value); }
-  catch (failure) { el("agents-result").textContent = "沒有儲存：" + failure.message; return; }
-  agentAction("/api/settings/collection-bots", {
+  catch (failure) { saveRefused(status, failure); return; }
+  // The bot and its 收集時間 are one save: the domain is checked first, so a target that is
+  // not exactly one BI domain is said here and nothing is written.
+  const timed = {bot: el("collect-name").value.trim(), target: el("collect-target").value,
+    enabled: el("collect-enabled").checked, collect_at: el("collect-time").value || null};
+  try { await collectTime({...timed, dry_run: true}); }
+  catch (failure) { saveRefused(status, failure); return; }
+  const saved = await agentAction("/api/settings/collection-bots", {
     name: el("collect-name").value, target: el("collect-target").value,
-    bot: {variable: el("collect-variable").value, senders,
+    bot: {variable: el("collect-variable").value,
+      token: el("collect-token").value.trim() || null, senders,
       enabled: el("collect-enabled").checked},
-  }, el("collect-save"), "儲存中…");
+  }, el("collect-save"), "儲存中…", status,
+  () => "collect:" + el("collect-name").value.trim());
+  if (!saved) return;
+  let note;
+  try {
+    const done = (await collectTime(timed)).domain;
+    note = "已儲存。收集時間 " + (done.collect_at || "未設定") + "・" + done.next;
+  } catch (failure) {
+    note = "bot 已儲存，但收集時間沒有儲存：" + failure.message;
+  }
+  setSaveStatus(status, note, note.startsWith("bot 已儲存"));
+  el("agents-result").textContent = note;
+  refreshCollectTimes();
 });
 el("collect-delete").addEventListener("click", () => {
   if (!confirm("刪除這個收集 bot？")) return;
   agentAction("/api/settings/collection-bots/delete", {name: el("collect-name").value},
-    el("collect-delete"), "刪除中…");
+    el("collect-delete"), "刪除中…", el("collect-save-status"));
 });
 
 // New session: Send waits until the new session has loaded (#233); a message

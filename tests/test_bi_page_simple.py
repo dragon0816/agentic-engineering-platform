@@ -81,17 +81,7 @@ MAIN_PATH = (
     "bi-b-file",
     "bi-b-upload",
     "bi-b-sources",
-    # Step 2: skills and tools, ingest, the cards.
-    "bi-b-sk-list",
-    "bi-b-tl-list",
-    "bi-b-sk-new",
-    # Step 2a's schema (acceptance F5, F8): suggest, the AI, and the draft as a table.
-    "bi-b-sg-run",
-    "bi-b-sg-table",
-    "bi-b-sa-open",
-    "bi-b-draft-table",
-    "bi-b-draft-use",
-    "bi-b-upgrade",
+    # Step 2: ingest, the cards.
     "bi-ai",
     "bi-b-start",
     "bi-b-cands",
@@ -132,15 +122,15 @@ ADVANCED = (
     "bi-b-v-convert",
     "bi-b-askable",
     "bi-b-pages",
-    "bi-b-profile",
     "bi-b-rerun",
     "bi-b-sk-form",
     "bi-b-tl-save",
     "bi-b-draft-new",
     "bi-b-draft-text",
     "bi-b-versions",
-    # 「建議 schema」 reads the sources not yet ingested; the other choice is here (D1).
-    "bi-b-sg-scope",
+    # 「建議 schema」 only on a press, under 進階：Schema (owner 2026-11-20).
+    "bi-b-sg-run",
+    "bi-b-sg-table",
     "bi-b-fresh",
     "bi-b-recipe",
     "bi-b-instr",
@@ -154,6 +144,119 @@ ADVANCED = (
     "bi-b-ver-push",
     "bi-b-ver-discard",
 )
+
+
+#: Owner 2026-11-20: what a stage needs set once is in its gear settings, a tab of the side
+#: area, not folded inside them; the stage's main view keeps its run and its results.
+GEAR_SETTINGS = {
+    # Data input: the file location (the shared folder), the classification.
+    "bi-b-class": "source",
+    "bi-b-target": "source",
+    "bi-b-v-info": "source",
+    # Ingest: the old 2a, schema and rules, tools, one 匯入 (owner 2026-11-20), the draft as a
+    # table (acceptance F8), and the Skill Ingest uses.
+    "bi-b-schema-now": "ingest",
+    "bi-b-sk-list": "ingest",
+    "bi-b-tl-list": "ingest",
+    "bi-b-pkg-import": "ingest",
+    "bi-b-draft-table": "ingest",
+    "bi-b-draft-use": "ingest",
+    "bi-b-upgrade": "ingest",
+    "bi-b-m-pick": "ingest",
+    "bi-b-install-open": "ingest",
+    # Benchmark testing: the questions and the Dashboard's analyses.
+    "bi-b-bq-add": "test",
+    "bi-b-bq-form": "test",
+    "bi-b-qa-open": "test",
+    "bi-b-an-list": "test",
+    "bi-b-an-new": "test",
+}
+
+#: What each stage's main view still shows, outside its settings (owner 2026-11-20).
+RUN_AND_RESULTS = {
+    "source": ("bi-b-file", "bi-b-upload", "bi-b-sources", "bi-b-md"),
+    "method": ("bi-b-start", "bi-b-batch"),
+    "review": ("bi-b-cands", "bi-b-cand-state", "bi-b-apply-all", "bi-b-apply-import"),
+    "test": (
+        "bi-b-bench-run",
+        "bi-b-tabs",
+        "bi-b-bench-sum",
+        "bi-b-bench-report",
+        "bi-b-test-dash",
+    ),
+}
+
+
+@pytest.mark.parametrize(("ident", "gear"), sorted(GEAR_SETTINGS.items()))
+def test_a_stages_settings_are_behind_its_gear_and_not_folded(ident: str, gear: str) -> None:
+    assert ("div", f"bi-b-set-{gear}") in PANE.around[ident], ident
+    # Benchmark and Dashboard are sections there, open from the start.
+    folded = [name for tag, name in PANE.around[ident] if tag == "details"]
+    assert set(folded) <= {"bi-b-bench", "bi-b-an"}, ident
+
+
+@pytest.mark.parametrize(
+    ("stage", "ident"), [(stage, i) for stage, ids in RUN_AND_RESULTS.items() for i in ids]
+)
+def test_a_stages_main_view_is_its_run_and_its_results(stage: str, ident: str) -> None:
+    assert not any(name.startswith("bi-b-set-") for _tag, name in PANE.around[ident]), ident
+    section = PAGE[: PAGE.index(f'id="{ident}"')].rindex("<section ")
+    assert f'data-stage="{stage}"' in PAGE[section : section + 120], ident
+
+
+@pytest.mark.parametrize(
+    ("gear", "name"),
+    [("source", "Data input"), ("ingest", "Ingest"), ("test", "Benchmark testing")],
+)
+def test_each_stage_has_a_gear_that_opens_its_settings(gear: str, name: str) -> None:
+    button = PAGE[PAGE.index(f'id="bi-b-gear-{gear}"') :]
+    button = button[: button.index("</button>")]
+    assert f'data-bi-gear="{gear}"' in button and f'aria-label="{name} 設定"' in button
+    assert f'aria-controls="bi-b-set-{gear}"' in button and "\u2699" in button
+    # Closed, the settings wait hidden at home; the gear moves them into a side tab.
+    holder = PAGE[PAGE.index(f'id="bi-b-set-{gear}"') :]
+    assert holder[: holder.index(">")].rstrip().endswith("hidden")
+    script = PAGE[PAGE.index("function biGearOpen(") :]
+    script = script[: script.index("\n}\n")]
+    assert "sideHas(key)" in script and "sideFocus(key)" in script
+    assert "biSideTab(key, BI_GEARS[name], box," in script
+    # A stage with nothing set yet: one line, and a button that opens the same settings.
+    if gear != "source":
+        need = PAGE[PAGE.index(f'id="bi-b-need-{gear}"') :]
+        need = need[: need.index("</div>")]
+        assert f'data-bi-gear="{gear}">先設定</button>' in need
+
+
+def test_the_stages_have_the_owners_names() -> None:
+    nav = PAGE[PAGE.index('id="bi-stepper"') :]
+    nav = nav[: nav.index("</nav>")]
+    assert [s.strip() for s in nav.splitlines() if "<strong>" in s] == [
+        "<span><strong>Data input</strong></span></button></li>",
+        "<span><strong>Ingest</strong></span></button></li>",
+        "<span><strong>Benchmark testing</strong></span></button></li>",
+    ]
+    for title in ("步驟 1／3・Data input", "步驟 2／3・Ingest", "步驟 3／3・Benchmark testing"):
+        assert f'tabindex="-1">{title}</h3>' in PAGE, title
+    assert "下一步：Ingest</button>" in PAGE and "下一步：Benchmark testing</button>" in PAGE
+    for old in (
+        "輸入與轉檔",
+        "Schema 與 Ingest",
+        "步驟 3・測試",
+        "步驟 3／3・測試",
+        "下一步：測試",
+    ):
+        assert old not in PAGE, old
+
+
+def test_auto_run_is_one_button_beside_the_stage_bar_with_its_progress() -> None:
+    assert ("div", "bi-build-steps") in PANE.around["bi-b-auto"]
+    # One progress row under the stage bar for every long wait (owner 2026-11-20).
+    assert ("div", "bi-build-steps") in PANE.around["bi-b-progress-bar"]
+    assert PAGE.index('id="bi-stepper"') < PAGE.index('id="bi-b-auto"')
+    assert PAGE.index('id="bi-b-auto"') < PAGE.index('id="bi-b-progress"')
+    for gone in ("bi-b-upload-status", "bi-b-run-progress", "bi-b-auto-progress"):
+        assert gone not in PAGE, gone
+    assert PAGE.count(">自動執行</button>") == 1
 
 
 @pytest.mark.parametrize("ident", MAIN_PATH)
@@ -201,6 +304,17 @@ def test_there_is_no_folded_section_at_the_foot_of_the_page() -> None:
         "bi-b-md-close",
         "bi-b-fit",
         "bi-b-atl-port",
+        # Owner 2026-11-20: the profile is assembled by the program, never shown, and
+        # 建議 schema reads the working domain's sources with no choice to make.
+        "bi-b-profile",
+        "bi-b-pf-home",
+        "bi-b-pf-json",
+        "bi-b-pf-save",
+        "bi-b-sg-scope",
+        # No AI collaboration in step 2 (owner 2026-11-20): import instead.
+        "bi-b-sk-new",
+        "bi-b-sa-open",
+        "bi-b-tl-ai",
     ],
 )
 def test_the_removed_controls_are_gone_from_markup_and_script(ident: str) -> None:
@@ -246,15 +360,14 @@ def test_the_market_field_is_named_and_the_button_is_convert() -> None:
     assert 'id="bi-b-upload" type="button" disabled>轉檔</button>' in PAGE
 
 
-def test_the_stepper_has_three_steps_and_three_parts_of_step_2() -> None:
-    nav = PAGE[PAGE.index('id="bi-substeps"') :]
-    nav = nav[: nav.index("</nav>")]
-    shown = [line for line in nav.splitlines() if "<strong>" in line]
-    assert [s.strip() for s in shown] == [
-        "<span><strong>類別與規則</strong></span></button></li>",
-        "<span><strong>Ingest</strong></span></button></li>",
-        "<span><strong>審核</strong></span></button></li>",
-    ]
+def test_step_2s_parts_are_one_view_and_its_bar_stays_hidden() -> None:
+    # Owner 2026-11-20: 2a is the stage's gear settings; Ingest and 審核 show together. The
+    # parts' bar is kept, hidden, as their buttons.
+    nav = PAGE[PAGE.index('<nav id="bi-substeps"') :]
+    assert nav[: nav.index(">")].endswith("hidden")
+    assert 'el("bi-substeps").hidden = true;' in PAGE
+    assert 'const shown = stage === "review" ? ["method", "review"] : [stage];' in PAGE
+    assert 'data-stage="schema" aria-labelledby' not in PAGE
 
 
 def test_the_main_path_has_no_explanatory_paragraphs() -> None:
@@ -348,13 +461,18 @@ def test_step_3_edits_in_its_two_sections(ident: str, section: str) -> None:
     assert not _in_advanced(ident)
 
 
-def test_the_two_sections_are_collapsed_by_default() -> None:
+def test_the_run_is_above_the_result_tabs_and_the_editing_is_in_the_gear() -> None:
+    # Owner 2026-11-20: 跑測試 with its bar, then the Benchmark | Dashboard tabs with the
+    # numbers; the questions and analyses are edited in the stage's gear settings, open there.
     for section in ("bi-b-bench", "bi-b-an"):
-        assert f'<details id="{section}" class="card bi-sec" hidden>' in PAGE
+        assert f'<details id="{section}" class="card bi-sec" open hidden>' in PAGE
+        assert ("div", "bi-b-set-test") in PANE.around[section]
     assert (
-        PAGE.index('id="bi-b-bench"')
-        < PAGE.index('id="bi-b-an"')
-        < PAGE.index('id="bi-b-bench-run"')
+        PAGE.index('id="bi-b-bench-run"')
+        < PAGE.index('id="bi-b-tabs"')
+        < PAGE.index('id="bi-b-bench-sum"')
+        < PAGE.index('id="bi-b-test-results"')
+        < PAGE.index('id="bi-b-set-test"')
     )
 
 
@@ -364,10 +482,11 @@ def test_every_jump_to_another_tab_has_a_way_back() -> None:
     assert jumps == []
 
 
-def test_the_schema_buttons_sit_above_the_skills_table() -> None:
-    # Acceptance F5: suggest and the schema AI are on 2a's main path, before the skills.
-    start = PAGE.index('data-stage="schema"')
-    at = [PAGE.index(f'id="{i}"', start) for i in ("bi-b-sg-run", "bi-b-sa-open", "bi-b-skills")]
+def test_the_schema_suggestion_sits_under_advanced_after_the_skills() -> None:
+    # Owner 2026-11-20: the main path of step 2 is the schema summary and the skills; 建議
+    # schema runs only on a press, under 進階：Schema.
+    start = PAGE.index('id="bi-b-set-ingest"')
+    at = [PAGE.index(f'id="{i}"', start) for i in ("bi-b-skills", "bi-b-adv-schema", "bi-b-sg-run")]
     assert at == sorted(at)
 
 

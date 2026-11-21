@@ -93,7 +93,7 @@ def test_the_page_never_asks_for_the_fit_and_the_review_still_shows_it(
                 " biRunBody = (...given) => Object.assign(plain(...given), {check_fit: true});"
                 " })()"
             )
-            page.click("[data-stage=method] [data-bi-next=review]")
+            # 審核 shows with Ingest (owner 2026-11-20).
             page.wait(
                 "!document.querySelector('#bi-view-build .kp-stage[data-stage=review]').hidden"
             )

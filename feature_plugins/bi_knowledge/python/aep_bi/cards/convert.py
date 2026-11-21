@@ -26,6 +26,13 @@ The office libraries (`pypdf`, `python-docx`, `python-pptx`, `openpyxl`) are
 the `office` extra; each is imported only when its kind of file is
 converted, and a missing one is `converter_missing`. A PDF without any text
 is `source_no_text`: scanned pages are not read (no OCR).
+
+Pictures (owner 2026-11-20, "as Knowledge maintenance does"): a PDF page's
+embedded images, a Word document's inline pictures and a slide's pictures are
+taken out with the same core helpers as the LLM Wiki intake
+(`knowledge.office`), kept beside the Markdown as `assets/<content hash>.<ext>`
+and referenced in place as `![圖 n](assets/...)`. A model with vision then
+adds a description under each (`image_describe`), as a later revision.
 """
 
 from __future__ import annotations
@@ -39,9 +46,18 @@ from typing import Any
 
 from aep_bi.cards import html_markdown, readers
 from aep_bi.cards.store import BiStoreError
+from knowledge.office import docx_pictures, pdf_page_images, pptx_picture
+from knowledge.raw import AssetSink, StagedAssets
 
 #: Recorded with every converted revision, so a later converter can tell.
-CONVERTER = "aep.bi.convert/1"
+#: `/2` keeps a document's pictures as assets referenced in the Markdown.
+CONVERTER = "aep.bi.convert/2"
+#: Where a source's pictures live, relative to its Markdown revisions.
+ASSETS_DIR = "assets"
+#: An image line a conversion wrote: `![圖 n](assets/<name>)`, alone on its line.
+IMAGE_LINE = re.compile(r"^!\[(?P<alt>[^\]\n]*)\]\((?P<ref>assets/[0-9a-f]{16}\.[a-z0-9]{1,8})\)$")
+#: A picture's file name under `ASSETS_DIR`.
+ASSET_NAME = re.compile(r"^[0-9a-f]{16}\.[a-z0-9]{1,8}$")
 
 TABLES = (*readers.DELIMITED, *readers.EXCEL)
 DOCUMENTS = (".pdf", ".docx", ".pptx")
@@ -68,8 +84,31 @@ def kind(name: str) -> str | None:
     return None
 
 
-def convert(name: str, data: bytes) -> str:
-    """The Markdown of a source; raises `BiStoreError` when it cannot be read."""
+def convert_with_assets(name: str, data: bytes) -> tuple[str, dict[str, bytes]]:
+    """The Markdown of a source and the pictures it references (`assets/<name>` ->
+    bytes); raises `BiStoreError` when it cannot be read."""
+    staged = StagedAssets(ASSETS_DIR)
+    text = convert(name, data, staged)
+    return text, dict(staged.items)
+
+
+class _Pictures:
+    """Numbers a document's pictures and hands their bytes to the sink."""
+
+    def __init__(self, assets: AssetSink | None) -> None:
+        self.assets = assets
+        self.count = 0
+
+    def line(self, blob: bytes, suffix: str) -> str | None:
+        if self.assets is None:
+            return None
+        self.count += 1
+        return f"![圖 {self.count}]({self.assets.put(blob, suffix)})"
+
+
+def convert(name: str, data: bytes, assets: AssetSink | None = None) -> str:
+    """The Markdown of a source; raises `BiStoreError` when it cannot be read.
+    With `assets`, a document's pictures are put there and referenced in place."""
     suffix = readers.suffix(name)
     if suffix in readers.DELIMITED:
         text = readers.decode(data)
@@ -78,11 +117,11 @@ def convert(name: str, data: bytes) -> str:
     if suffix in readers.EXCEL:
         return _tables_markdown(readers.excel_tables(data), headings=True)
     if suffix == ".pdf":
-        return pdf_markdown(data)
+        return pdf_markdown(data, assets)
     if suffix == ".docx":
-        return docx_markdown(data)
+        return docx_markdown(data, assets)
     if suffix == ".pptx":
-        return pptx_markdown(data)
+        return pptx_markdown(data, assets)
     if suffix in TEXTS:
         return decode_text(data).replace("\r\n", "\n")
     if suffix in PAGES:
@@ -170,24 +209,34 @@ def _tidy(text: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", joined)
 
 
-def pdf_markdown(data: bytes) -> str:
+def pdf_markdown(data: bytes, assets: AssetSink | None = None) -> str:
     try:
         import pypdf
     except ImportError as error:
         raise _missing("pypdf") from error
+    pictures = _Pictures(assets)
     try:
         reader = pypdf.PdfReader(io.BytesIO(data))
         if reader.is_encrypted:
             reader.decrypt("")
-        pages = [page.extract_text() or "" for page in reader.pages]
+        pages: list[tuple[str, list[str]]] = []
+        for page in reader.pages:
+            images: list[str] = []
+            if assets is not None:
+                found = (pictures.line(b, s) for b, s in pdf_page_images(page))
+                images = [line for line in found if line]
+            pages.append((page.extract_text() or "", images))
     except Exception as error:  # pypdf raises many unrelated types
         raise BiStoreError("source_parse_failed", "無法讀取這個 PDF 檔") from error
     parts = []
-    for number, text in enumerate(pages, start=1):
+    has_text = False
+    for number, (text, images) in enumerate(pages, start=1):
         body = _tidy(text)
-        if body.strip():
-            parts.append(f"## 第 {number} 頁\n\n{body}")
-    if not parts:
+        has_text = has_text or bool(body.strip())
+        blocks = [block for block in (body, *images) if block.strip()]
+        if blocks:
+            parts.append(f"## 第 {number} 頁\n\n" + "\n\n".join(blocks))
+    if not has_text:
         raise BiStoreError("source_no_text", NO_TEXT_MESSAGE)
     return "\n\n".join(parts) + "\n"
 
@@ -202,23 +251,34 @@ def _heading_level(style: str) -> int | None:
     return min(int(found.group(1)), 6) if found else None
 
 
-def docx_markdown(data: bytes) -> str:
+def docx_markdown(data: bytes, assets: AssetSink | None = None) -> str:
     try:
         import docx
         from docx.table import Table
     except ImportError as error:
         raise _missing("python-docx") from error
+    pictures = _Pictures(assets)
     try:
         document = docx.Document(io.BytesIO(data))
         blocks: list[str] = []
+
+        def images_in(element: Any) -> list[str]:
+            if assets is None:
+                return []
+            found = (pictures.line(b, s) for b, s in docx_pictures(document, element))
+            return [line for line in found if line]
+
         for item in document.iter_inner_content():
             if isinstance(item, Table):
                 rows = [[cell.text for cell in row.cells] for row in item.rows]
                 if rows:
                     blocks.append("\n".join(markdown_table(rows[0], rows[1:])))
+                blocks += images_in(item._element)
                 continue
             text = item.text.strip()
+            images = images_in(item._element)
             if not text:
+                blocks += images
                 continue
             style = item.style.name if item.style is not None else ""
             level = _heading_level(style or "")
@@ -228,6 +288,7 @@ def docx_markdown(data: bytes) -> str:
                 blocks.append(f"- {text}")
             else:
                 blocks.append(text)
+            blocks += images
     except BiStoreError:
         raise
     except Exception as error:  # python-docx raises many unrelated types
@@ -258,11 +319,13 @@ def _shapes(shapes: Any) -> Iterable[Any]:
             yield shape
 
 
-def pptx_markdown(data: bytes) -> str:
+def pptx_markdown(data: bytes, assets: AssetSink | None = None) -> str:
     try:
         import pptx
+        from pptx.shapes.picture import Picture
     except ImportError as error:
         raise _missing("python-pptx") from error
+    pictures = _Pictures(assets)
     try:
         deck = pptx.Presentation(io.BytesIO(data))
         blocks: list[str] = []
@@ -272,6 +335,12 @@ def pptx_markdown(data: bytes) -> str:
             blocks.append(f"## 投影片 {number}" + (f"：{title}" if title else ""))
             for shape in _shapes(slide.shapes):
                 if title_shape is not None and shape.shape_id == title_shape.shape_id:
+                    continue
+                if isinstance(shape, Picture):
+                    found = pptx_picture(shape) if assets is not None else None
+                    line = pictures.line(*found) if found is not None else None
+                    if line:
+                        blocks.append(line)
                     continue
                 if getattr(shape, "has_table", False) and shape.has_table:
                     rows = [[cell.text for cell in row.cells] for row in shape.table.rows]

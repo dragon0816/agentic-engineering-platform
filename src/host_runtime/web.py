@@ -127,6 +127,7 @@ from host_runtime.attachments import (
 from host_runtime.attachments import summary as attachment_summary
 from host_runtime.authoring import AuthoringError, AuthoringSession, AuthoringStudio
 from host_runtime.avatars import UserPreferences, UserPreferencesStore, catalog
+from host_runtime.bot_identity import DEFAULT_API_BASE, BotIdentities
 from host_runtime.business_cards_tools import chart_files, with_legend
 from host_runtime.change_proposals import ChangeProposals
 from host_runtime.chat_authoring import (
@@ -754,6 +755,8 @@ class AgentWeb:
         self.feedback_sync: Any = None
         self.knowledge_harness = KnowledgeHarness(runtime, namespace)
         self.user_environment = windows_user_environment
+        # Each bot's @username for Settings → Agents and the sidebar (getMe, cached).
+        self.bot_identities = BotIdentities()
         # Injected for tests; checks the Bridge API answers (with a trusted
         # certificate) before enrolling, and reads a presented certificate.
         self.check_bridge = check_bridge
@@ -2699,6 +2702,7 @@ class AgentWeb:
                 request = request.to_update(self.runtime.actor)
             except ValueError:
                 return {"ok": False, "code": "telegram_actor_invalid"}
+        self.bot_identities.clear()
         with self._one_at_a_time:
             try:
                 config = apply_telegram_settings(
@@ -2757,12 +2761,47 @@ class AgentWeb:
             }
 
         view = agents_view(self.runtime.config, self.runtime.layout, running=running)
+        main_bot = view["main"]["bot"]
+        if main_bot is not None:
+            main_bot["token_present"] = bool(os.environ.get(main_bot["variable"] or "", ""))
+            main_bot["problem"] = None
+            # The page turns a typed @username into one of these ids; the
+            # username is never used to allow a message (it can change hands).
+            seen = {} if ingress is None else ingress.sender_usernames
+            for sender in main_bot["senders"]:
+                sender["username"] = seen.get(sender["sender_id"], "")
+        self._identify(
+            [
+                *([] if main_bot is None else [main_bot]),
+                *(agent["bot"] for agent in view["agents"] if agent["bot"] is not None),
+                *view["collection_bots"],
+            ]
+        )
         view["writable"] = self.config_path is not None
         view["reload"] = self._bots_reload
         return view
 
+    def _identify(self, bots: list[dict[str, Any]]) -> None:
+        """Add each bot's Telegram `username` and `title` (getMe with the token in
+        its variable; never the token). An unresolved bot gets a `problem` code
+        unless it already has one from polling."""
+        if not bots:
+            return
+        ingress = self.runtime.telegram
+        api_base = DEFAULT_API_BASE if ingress is None else ingress.config.api_base
+        tokens = [os.environ.get(str(bot.get("variable") or ""), "") for bot in bots]
+        for bot, identity in zip(
+            bots, self.bot_identities.identities(tokens, api_base=api_base), strict=True
+        ):
+            bot["username"] = identity["username"]
+            bot["title"] = identity["title"]
+            if identity["problem"] and not bot.get("problem"):
+                bot["problem"] = identity["problem"]
+
     def agent_settings_action(self, path: str, body: object) -> dict[str, Any]:
-        """Save or delete an agent or a collection bot, then reload the bots."""
+        """Save or delete an agent or a collection bot, then reload the bots. A pasted
+        bot token goes only to the user's environment (`user_environment`) and this
+        process; the result and every error carry only codes and `token_present`."""
         if self.config_path is None:
             return {"ok": False, "code": "settings_read_only"}
         data = body if isinstance(body, dict) else {}
@@ -2776,6 +2815,7 @@ class AgentWeb:
                         self.runtime.layout,
                         AgentForm.model_validate(data),
                         default_actor=actor,
+                        token_store=self.user_environment,
                     )
                 elif path == "/api/settings/agents/delete":
                     if not delete_agent(self.runtime.layout, str(data.get("id") or "")):
@@ -2786,6 +2826,7 @@ class AgentWeb:
                         self.runtime.layout,
                         CollectionBotForm.model_validate(data),
                         default_actor=actor,
+                        token_store=self.user_environment,
                     )
                 elif not delete_collection_bot(self.runtime.layout, str(data.get("name") or "")):
                     return {"ok": False, "code": "bot_unknown"}
@@ -2797,6 +2838,7 @@ class AgentWeb:
                 return {"ok": False, "code": "agent_settings_unwritable"}
             if config is not None:
                 self.runtime.config = config
+        self.bot_identities.clear()
         self.reload_telegram_bots()
         return self.agent_settings()
 
@@ -3319,6 +3361,7 @@ class AgentWeb:
         except (OSError, ValueError):
             telegram = None
         bound = {} if telegram is None else {bot.agent: bot for bot in telegram.agent_bots}
+        environment = self.runtime.config.credential_environment()
         agents: list[dict[str, Any]] = [
             {
                 "id": MAIN_AGENT,
@@ -3326,7 +3369,10 @@ class AgentWeb:
                 "main": True,
                 "bot": None
                 if telegram is None
-                else {"enabled": self.runtime.layout.telegram.is_file()},
+                else {
+                    "enabled": self.runtime.layout.telegram.is_file(),
+                    "variable": environment.get(telegram.credential.name, ""),
+                },
                 "conversations": [],
             }
         ]
@@ -3356,10 +3402,16 @@ class AgentWeb:
                     "name": agent.name,
                     "purpose": agent.purpose,
                     "main": False,
-                    "bot": None if bot is None else {"enabled": bot.enabled},
+                    "bot": None
+                    if bot is None
+                    else {
+                        "enabled": bot.enabled,
+                        "variable": environment.get(bot.credential.name, ""),
+                    },
                     "conversations": entries,
                 }
             )
+        self._identify([agent["bot"] for agent in agents if agent["bot"] is not None])
         return {"ok": True, "agents": agents}
 
     def delete_conversation(self, request: ConversationDeleteRequest) -> dict[str, Any]:

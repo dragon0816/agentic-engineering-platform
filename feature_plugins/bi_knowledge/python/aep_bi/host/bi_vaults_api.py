@@ -146,7 +146,10 @@ def route(
                 ),
                 "newest": None
                 if newest is None
-                else {k: newest.get(k) for k in ("run_id", "status", "error")},
+                else {
+                    **{k: newest.get(k) for k in ("run_id", "status", "error")},
+                    "progress": bi_bench.progress(newest),
+                },
                 "standing": {"blocking": [], "notes": []}
                 if running
                 else bi_bench.standing(workspace, parts[0]),

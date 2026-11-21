@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import csv
 import io
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -743,7 +744,94 @@ def listed(run: dict[str, Any]) -> bool:
     return not str(run.get("method_ref") or "").startswith(RERUN_PREFIX)
 
 
+# -- the background worker of an AI run (owner 2026-11-21) -------------------------------
+# An AI run is `extracting` while a thread of this Host reads it. Which runs have one is kept
+# here: a run still `extracting` with none (the Host stopped or was killed under it) would
+# otherwise show 判讀中 forever, and a page following it would wait forever.
+INTERRUPTED = "interrupted"
+_workers: set[tuple[str, str]] = set()
+_workers_lock = threading.Lock()
+
+
+def _worker_key(staging: Staging, run_id: str) -> tuple[str, str]:
+    return str(staging.store.dir), run_id
+
+
+def claim_worker(staging: Staging, run_id: str) -> None:
+    """Before an AI run's background work is handed over: it now has a worker."""
+    with _workers_lock:
+        _workers.add(_worker_key(staging, run_id))
+
+
+def release_worker(staging: Staging, run_id: str) -> None:
+    with _workers_lock:
+        _workers.discard(_worker_key(staging, run_id))
+
+
+def working(staging: Staging, run_id: str) -> bool:
+    """Whether a thread of this Host still works on the run (a stopped run's last calls)."""
+    with _workers_lock:
+        return _worker_key(staging, run_id) in _workers
+
+
+def recover_interrupted(staging: Staging, run_id: str) -> bool:
+    """An AI run left `extracting` with no worker becomes `partial`: the chunks of its
+    last attempt that were not written are failures with the code `interrupted`, so 重試
+    reads only those (a chunk read before the stop answers from the answer cache)."""
+    # Held throughout: a worker sets the run's last status before it is released, so with
+    # no worker the status read here is final, and no worker is claimed or released while
+    # it is decided (read first and checked after, a run just finished became `partial`).
+    with _workers_lock:
+        if _worker_key(staging, run_id) in _workers:
+            return False
+        return _recover_unworked(staging, run_id)
+
+
+def _recover_unworked(staging: Staging, run_id: str) -> bool:
+    run = staging.run_row(run_id)
+    layout = staging.layout(run_id)
+    if (
+        run is None
+        or run["status"] != "extracting"
+        or layout is None
+        or layout.get("mode") != "llm"
+    ):
+        return False
+    attempt = layout.get("attempt")
+    if not isinstance(attempt, list):
+        attempt = list(range(int(layout.get("chunks") or 0)))
+    if layout.get("reading"):  # a reading run writes each card as it goes
+        written = {
+            int(str(c.get("id"))[1:]) - 1
+            for c in staging.candidates(run_id)
+            if str(c.get("id") or "")[1:].isdigit()
+        }
+        attempt = [i for i in attempt if i not in written]
+    missing = sorted({int(i) for i in attempt})
+    layout["failures"] = [
+        *[f for f in layout.get("failures") or [] if int(f["chunk"]) not in missing],
+        *[
+            {
+                "chunk": index,
+                "line_start": 0,
+                "line_end": 0,
+                "code": INTERRUPTED,
+                "message": "主機在讀這一段時停止，沒有完成；按重試補上",
+                "retryable": True,
+            }
+            for index in missing
+        ],
+    ]
+    layout["interrupted"] = True
+    staging.put_layout(run_id, layout)
+    # With no chunk known yet (stopped before the first was cut) 重試 reads them all.
+    unread = bool(layout["failures"]) or not int(layout.get("chunks") or 0)
+    staging.set_status(run_id, "partial" if unread else "review")
+    return True
+
+
 def run_view(staging: Staging, run_id: str) -> dict[str, Any]:
+    recover_interrupted(staging, run_id)
     run = staging.run_row(run_id)
     if run is None:
         raise BiStoreError("run_unknown", "找不到這次執行")
@@ -751,8 +839,11 @@ def run_view(staging: Staging, run_id: str) -> dict[str, Any]:
     view = {**run, "summary": summary(found)}
     layout = staging.layout(run_id)
     if layout is not None and layout.get("mode") == "llm":
-        # An AI run: its progress, failed chunks (retryable) and warnings.
+        # An AI run: its progress, failed chunks (retryable) and warnings; `working` while a
+        # thread still reads it (a stopped run finishes the calls under way).
         view.update(
+            working=working(staging, run_id),
+            interrupted=bool(layout.get("interrupted")),
             progress={"done": layout.get("done", 0), "chunks": layout.get("chunks", 0)},
             failures=layout.get("failures") or [],
             warnings=layout.get("warnings") or [],
@@ -837,6 +928,28 @@ def _normalize(reg: Registry, item: FieldDef, raw: Any) -> Any:
     return value
 
 
+def _confirm_warning(candidate: dict[str, Any], given: Any, actor: str) -> None:
+    """A person's 「確認」 of one warning (owner 2026-11-20): a warning never blocks, and once
+    a person has looked at it, it moves to `confirmed` with who and when, never dropped."""
+    if not isinstance(given, dict) or not isinstance(given.get("code"), str):
+        raise BiStoreError("warning_invalid", "confirm_warning 必須是 {code, field, message}")
+    kept, found = [], None
+    for warning in candidate.get("warnings") or []:
+        same = (
+            warning.get("code") == given["code"]
+            and warning.get("field") == given.get("field")
+            and (given.get("message") is None or warning.get("message") == given.get("message"))
+        )
+        if same and found is None:
+            found = warning
+        else:
+            kept.append(warning)
+    if found is None:
+        raise BiStoreError("warning_unknown", "這張候選卡沒有這個警告")
+    candidate["warnings"] = kept
+    candidate.setdefault("confirmed", []).append({**found, "by": actor, "at": now()})
+
+
 def _edit_fields(
     reg: Registry, entity: TypeDef, candidate: dict[str, Any], edits: dict[str, Any], actor: str
 ) -> None:
@@ -874,6 +987,12 @@ def _edit_fields(
         candidate["edits"].append(
             {"field": item.name, "old": old, "new": value, "by": actor, "at": now()}
         )
+        # A person's value answers what the model's warning said about that field.
+        for warning in [w for w in candidate.get("warnings") or [] if w.get("field") == item.name]:
+            candidate["warnings"].remove(warning)
+            candidate.setdefault("confirmed", []).append(
+                {**warning, "by": actor, "at": now(), "edited": True}
+            )
 
 
 def review(
@@ -888,6 +1007,7 @@ def review(
     actor: str,
     take_new: Any = None,
     confirm_same_name: Any = None,
+    confirm_warning: Any = None,
 ) -> dict[str, Any]:
     staging = Staging(workspace, dataset)
     staging.store.refuse_write()
@@ -895,6 +1015,8 @@ def review(
     candidate = next((c for c in staging.candidates(run_id) if c["id"] == candidate_id), None)
     if candidate is None:
         raise BiStoreError("candidate_unknown", "找不到這張候選卡")
+    if confirm_warning is not None:
+        _confirm_warning(candidate, confirm_warning, actor)
     reg = catalog.for_store(staging.store)
     entity = reg.type(candidate["entity_type"])
     if fields is not None:

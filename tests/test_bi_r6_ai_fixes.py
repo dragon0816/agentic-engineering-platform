@@ -221,14 +221,14 @@ def test_the_page_lists_proposals_after_a_run_and_counts_missing_summaries(tmp_p
             )
             page.wait(f"biDataset() === '{dataset}'")
             page.click("#bi-views [data-bi-view=build]")
-            page.wait("el('bi-b-props').hidden === true && bi.proposals !== undefined")
+            page.wait("bi.proposals !== undefined")
             # The page holds no proposal yet; the run's commit from it makes one.
             page.run(f"bi.build.run = {{id: '{run_id}'}}; el('bi-b-commit-go').click()")
             page.wait("(bi.proposals || []).length === 1")
-            page.see("bi-b-props-h", "1 筆")
-            # Only a protected field: 0 for 「全部」, and the page says why.
-            page.see("bi-b-props-accept", "0 筆")
-            page.see("bi-b-props-confirm", "confidence")
+            # Owner 2026-11-20: a judgement field is a row of 2c's one list like any change,
+            # and 「接受顯示的待決定」 takes it too (it used to leave `confidence` out).
+            assert page.run("biReviewItems().filter((r) => r.change).length") == 1
+            assert page.run("biChangesTodo().map((c) => c.field)") == ["confidence"]
             _push(ws, vault_id)
             page.run(
                 f"biCall('/api/bi/vaults/{vault_id}/tag', {{name: 'v1', purpose: '虛構版本'}})"

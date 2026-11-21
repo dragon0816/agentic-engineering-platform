@@ -45,22 +45,9 @@ def test_vault_panel_and_dashboard_in_a_browser(
 ) -> None:
     from integrations.browser import Browser, BrowserError
 
-    # A skill's AI session is answered by a scripted model (no tools, one call): first the
-    # rule being added, then a change to it.
-    model = Scripted(
-        {
-            "reply": "這條規則可以先這樣用。",
-            "changes": {"body": "虛構電源廠是 Account。", "card_types": ["Account"]},
-        },
-        {
-            "reply": "把虛構電源廠的規則寫清楚。",
-            "changes": {
-                "body": "虛構電源廠是 Account；額定功率放在 specs。",
-                "card_types": ["Account"],
-            },
-            "reasons": ["規格表常寫額定功率"],
-        },
-    )
+    # The page's AI runtime: step 2 has no AI sessions any more (owner 2026-11-20), so writing
+    # and changing a rule must not reach this model.
+    model = Scripted()
     monkeypatch.setattr(
         bi_cards_api,
         "web_ai_runtime",
@@ -296,79 +283,86 @@ def test_vault_panel_and_dashboard_in_a_browser(
         shoot("vault-versions-phone")
         size(1366, 1000, False)
 
-        # -- skills in the vault (knowledge repositories R3), in step 2 ---------------------
+        # -- skills in the vault (knowledge repositories R3): Ingest's gear settings --------
+        # The old 2a (schema and rules) is Ingest's gear side tab now (owner 2026-11-20).
         click("#bi-stepper [data-stage=ingest]")
-        wait("!document.querySelector('#bi-view-build .kp-stage[data-stage=schema]').hidden")
+        click("#bi-b-gear-ingest")
+        wait(
+            "!document.getElementById('bi-b-set-ingest').hidden"
+            " && document.getElementById('bi-b-set-ingest').closest('.extra-panel') !== null"
+        )
         assert not run("document.getElementById('bi-b-skills').hidden")
         wait("document.getElementById('bi-b-sk-list').textContent.includes('依 schema 產生')")
         assert "classify" in text_of("bi-b-sk-list")
+        # No AI collaboration in step 2 (owner 2026-11-20): one 匯入, and the rule form.
+        for gone in ("bi-b-sk-new", "bi-b-sa-open", "bi-b-tl-ai"):
+            assert run(f"!document.getElementById('{gone}')"), gone
+        assert "和 AI" not in text_of("bi-b-skills")
         # The folder choice shows only for 全部領域; a working domain decides it (E2).
         assert run("document.getElementById('bi-b-folder-box').hidden") == run("!!biScope()")
         assert run(
             "[...document.getElementById('bi-b-folder').options]"
             ".some((o) => o.value === 'applications/aidc/sources')"
         )
-        # -- adding a rule goes through the AI panel, on this page ---------------------------
-        click("#bi-b-sk-new")
-        wait("document.getElementById('bi-ai').dataset.kind === 'skill'")
-        assert not run("document.getElementById('bi-ai-new').hidden")
-        wait("document.getElementById('bi-ai-sent').textContent.includes('會送出')")
-        shoot("ai-panel-new-rule")
-        # No name, nothing is saved and nothing reaches the model.
-        set_value("bi-ai-msg", "虛構電源廠是 Account。")
-        click("#bi-ai-send")
-        wait("document.getElementById('bi-ai-status').textContent.includes('請寫規則名稱')")
-        assert "power-extract" not in text_of("bi-b-sk-list")
-        assert model.requests == []
-        set_value("bi-ai-new-name", "power-extract")
-        run(
-            "{ const s = document.getElementById('bi-ai-new-folder');"
-            " s.value = 'applications/aidc/sources'; }"
+        # -- a new rule is written in the rule form, from the domain that has none ----------
+        aidc = "applications/aidc/sources"
+        wait(
+            "[...document.getElementById('bi-b-src-folder').options]"
+            f".some((o) => o.value === {json.dumps(aidc)})"
         )
-        click("#bi-ai-send")
-        # Nothing is saved until the person applies the AI's draft (acceptance F16).
-        wait("document.getElementById('bi-ai-log').textContent.includes('這條規則可以先這樣用')")
+        run(
+            "(() => { const s = document.getElementById('bi-b-src-folder');"
+            f" s.value = {json.dumps(aidc)}; s.dispatchEvent(new Event('change')); }})()"
+        )
+        wait("!document.getElementById('bi-b-scope-empty').hidden")
+        run(
+            "[...document.querySelectorAll('#bi-b-scope-empty button')]"
+            ".find((b) => b.textContent === '新增規則').click()"
+        )
+        wait("!document.getElementById('bi-b-sk-form').hidden")
+        assert run("document.getElementById('bi-b-sk-applies').value") == aidc
+        assert run("document.getElementById('bi-b-sk-name').readOnly") is False
+        # No name, nothing is saved.
+        set_value("bi-b-sk-body", "虛構電源廠是 Account。")
+        click("#bi-b-sk-form button[type=submit]")
+        wait("document.getElementById('bi-notice').textContent.includes('沒有儲存')")
         assert "power-extract" not in text_of("bi-b-sk-list")
         assert "power-extract" not in text_of("bi-b-ver-pending")
-        assert run("document.getElementById('bi-ai-new').hidden")
-        click("#bi-ai-log button.go")
+        set_value("bi-b-sk-name", "power-extract")
+        set_value("bi-b-sk-types", "Account")
+        click("#bi-b-sk-form button[type=submit]")
         wait("document.getElementById('bi-notice').textContent.includes('存成第 1 版')")
+        wait("document.getElementById('bi-b-sk-form').hidden")
         wait("document.getElementById('bi-b-ver-pending').textContent.includes('power-extract')")
         wait("document.getElementById('bi-b-sk-list').textContent.includes('power-extract')")
-        assert "power-extract" in text_of("bi-ai-target") and "第 1 版" in text_of("bi-ai-target")
-        # The panel stays on this page, beside the table it came from, and fits the window.
-        assert run(
-            "(() => { const r = (i) => document.getElementById(i).getBoundingClientRect();"
-            " return r('bi-b-sk-list').right <= r('bi-ai').left"
-            " && r('bi-ai').height <= innerHeight && r('bi-ai-send').bottom <= innerHeight; })()"
-        )
         shoot("vault-skills")
-        click("#bi-ai-close")
-        assert run("document.getElementById('bi-ai').hidden")
-        assert not run("document.getElementById('kn-pane-bi').classList.contains('bi-ai-open')")
 
-        # -- an AI session on a skill: suggest, apply as the next revision --------------------
+        # -- 修改 a rule: saved as the next revision, no model asked ------------------------
         run(
             "[...document.querySelectorAll('#bi-b-sk-list tbody tr')]"
-            ".find((li) => li.textContent.includes('power-extract'))"
-            ".querySelector('button[aria-label*=\"AI\"]').click()"
+            ".find((tr) => tr.textContent.includes('power-extract'))"
+            ".querySelectorAll('button')"
+            ".forEach((b) => { if (b.textContent === '修改') b.click(); })"
         )
-        wait("!document.getElementById('bi-ai').hidden")
-        wait("document.querySelector('tr.bi-ai-from') !== null")
-        assert "power-extract" in text_of("bi-ai-target")
-        wait("document.getElementById('bi-ai-sent').textContent.includes('test-model')")
-        set_value("bi-ai-msg", "額定功率放在 specs")
-        click("#bi-ai-send")
-        wait(
-            "document.getElementById('bi-ai-log').textContent.includes('把虛構電源廠的規則寫清楚')"
-        )
-        assert "判讀規則第 1 版" in text_of("bi-ai-log")
-        click("#bi-ai-log button.go")
+        wait("!document.getElementById('bi-b-sk-form').hidden")
+        assert run("document.getElementById('bi-b-sk-name').value") == "power-extract"
+        assert run("document.getElementById('bi-b-sk-name').readOnly") is True
+        assert "虛構電源廠是 Account" in str(run("document.getElementById('bi-b-sk-body').value"))
+        set_value("bi-b-sk-body", "虛構電源廠是 Account；額定功率放在 specs。")
+        click("#bi-b-sk-form button[type=submit]")
         wait("document.getElementById('bi-notice').textContent.includes('存成第 2 版')")
-        wait("document.getElementById('bi-ai-log').textContent.includes('已套用為第 2 版')")
-        wait("document.getElementById('bi-b-sk-list').textContent.includes('第 2 版')")
-        assert "第 2 版" in text_of("bi-ai-target")
-        shoot("vault-skill-ai")
+        wait(
+            "[...document.querySelectorAll('#bi-b-sk-list tbody tr')]"
+            ".some((tr) => tr.textContent.includes('power-extract')"
+            " && tr.textContent.includes('第 2 版'))"
+        )
+        assert model.requests == []  # step 2 asks no model any more
+        shoot("vault-skill-edit")
+        # Back to 全部領域 for the rest of this test.
+        run(
+            "(() => { const s = document.getElementById('bi-b-src-folder');"
+            " s.value = 'sources'; s.dispatchEvent(new Event('change')); })()"
+        )
         # A session belongs to its dataset.
         run("biLeaveDataset()")
         assert run("document.getElementById('bi-ai').hidden")
@@ -376,63 +370,13 @@ def test_vault_panel_and_dashboard_in_a_browser(
         wait("document.getElementById('bi-b-ver-pending').textContent.includes('power-extract')")
         shoot("vault-step3")
 
-        # -- a home's profile, in step 2 (BI_CARD_MODEL.md §4.2, §4.3) ----------------------
-        wait("[...document.getElementById('bi-b-pf-home').options].some((o) => o.value === 'aidc')")
-        assert run(
-            "[...document.getElementById('bi-b-pf-home').options]"
-            ".some((o) => o.value === 'library/products')"
-        )
-        # What a profile is, in a line (owner 2026-11-19: 「應用的profile是幹嘛用的」).
-        about = text_of("bi-b-pf-about")
-        assert "欄位清單" in about and "只找清單上的欄位" in about
-        set_value("bi-b-pf-home", "aidc")
-        wait("document.getElementById('bi-b-pf-view').textContent.includes('還沒有 profile')")
-        set_value("bi-b-pf-json", "{not json")
-        click("#bi-b-pf-save")
-        wait("document.getElementById('bi-notice').textContent.includes('不是有效的 JSON')")
-        set_value(
-            "bi-b-pf-json",
-            json.dumps(
-                {
-                    "types": {
-                        "Technology": {
-                            "category": "虛構：這裡的技術指液冷",
-                            "fields": {"domain": {"use": "required", "note": "虛構說明"}},
-                        }
-                    },
-                    "proposals": [
-                        {
-                            "type": "Technology",
-                            "field": "cooling",
-                            "definition": {"kind": "str", "class": "sourced", "label": "冷卻"},
-                            "reason": "虛構理由",
-                        }
-                    ],
-                },
-                ensure_ascii=False,
-            ),
-        )
-        click("#bi-b-pf-save")
-        wait(
-            "document.getElementById('bi-b-pf-view').textContent.includes('虛構：這裡的技術指液冷')"
-        )
-        shown = text_of("bi-b-pf-view")
-        assert "必填" in shown and "domain" in shown and "虛構說明" in shown
-        assert "Technology.cooling" in text_of("bi-b-pf-proposals")
-        assert json.loads(run("document.getElementById('bi-b-pf-json').value"))["types"]
-        # Declined here: a merge moves the vault's schema (`test_bi_vault_profile_merge`).
-        run(
-            "[...document.querySelectorAll('#bi-b-pf-proposals button')]"
-            ".find((b) => b.textContent === '不採用').click()"
-        )
-        wait("!document.getElementById('bi-b-pf-proposals').textContent.includes('cooling')")
-        assert "第 2 版" in text_of("bi-b-pf-view")
-        wait("document.getElementById('bi-b-ver-pending').textContent.includes('profile')")
-        shoot("vault-profile")
+        # -- no profile in the page (owner 2026-11-20: 「不要顯示在設定中」) -------------------
+        assert not run("Boolean(document.getElementById('bi-b-profile'))")
 
         # -- 題目與擷取測試 in step 3 (BI T1) ---------------------------------------------
         wait("!document.getElementById('bi-b-bench').hidden")
-        assert "還沒有跑過測試" in text_of("bi-b-bench-report")
+        # Waited for: the switch back to 全部領域 above draws the report again.
+        wait("document.getElementById('bi-b-bench-report').textContent.includes('還沒有跑過測試')")
         assert run("document.getElementById('bi-b-bench-run').disabled")
         # A question belongs to a domain: 全部領域 only reads.
         wait("(bi.build.homes || []).length > 0")
@@ -450,7 +394,16 @@ def test_vault_panel_and_dashboard_in_a_browser(
         wait("document.getElementById('bi-b-bench-report').textContent.includes('完成')")
         report = text_of("bi-b-bench-report")
         assert "工作版本 0/1、發佈版本 1/1" in report and "退步 1 題" in report
-        assert "沒提到 IEEE" in report
+        # Each question's result opens beside the page, as a side-area tab.
+        run(
+            "[...document.querySelectorAll('#bi-b-bench-report button')]"
+            ".find((b) => b.textContent === '看每題結果').click()"
+        )
+        wait("sideHas('bi-bench-detail')")
+        wait(
+            "document.getElementById('extra-panel-bi-bench-detail').textContent"
+            ".includes('沒提到 IEEE')"
+        )
         shoot("vault-bench")
         size(390, 844, True)
         assert not run(

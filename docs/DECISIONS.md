@@ -8175,3 +8175,204 @@ BI 測試 step: the commit/share block leaves the main area; 「看歷史紀錄�
 Benchmark and Dashboard are tabs in the main area; benchmark details open in the side area;
 benchmark results show summary numbers. This supersedes the 2026-11-20 morning idea of putting
 AI 分析/Benchmark tabs only in the BI right panel. GUI only; no harness change.
+
+### 2026-11-20 — BI Knowledge round 2: owner decisions
+
+Owner (GUI and operations as simple as possible; every wait shows progress beside its
+control, AGENTS 23):
+1. BI conversion keeps pictures as Knowledge maintenance does: the same core extraction
+   helpers (`knowledge.office`) and the same describer, moved to core `knowledge.describe`
+   (the LLM Wiki import path stays as a re-export). Descriptions are a later revision made in
+   the background when the model can see images, so an upload never waits on a model.
+   Rejected: a BI-only copy of the image code; describing during the upload request.
+2. Schema suggestions: 「不要」 removes the row at once with 復原; no 待釐清 rows (「有就有，
+   沒有就沒有」); 建議 schema moves into 進階：Schema and runs only on a press, on the working
+   domain's current sources.
+3. The domain profile leaves the page. A stored profile still applies; without one a run uses
+   the rule's card types (else the defaults) with all their schema fields, which is what
+   `run_types` already composes, so no new derivation module was added.
+4. Step 2 has no AI collaboration: schema files, judging rules and data-processing programs
+   come in through one 匯入 (the package import, extended to schema JSON). The built-in
+   processing (AI 擷取, 表格規則) is listed among the programs with a read-only 檢視, as is
+   every rule. The 管理 → 安裝 schema entry stays for now. The step-2 session server code
+   (schema, skill and tool sessions) is left in place unreachable from the page; removing it
+   is a follow-up once the owner has reviewed the page.
+5. Superseded by "Agent Web three-area layout with a tabbed side area": the shell's side area
+   is generic (`sideOpen`), BI step 3 has Benchmark | Dashboard tabs, and AI sessions, 分享,
+   history and per-question results open as side tabs. One BI AI panel exists, so a second
+   session takes the first one's tab.
+6. 跑測試 shows a bar beside the button: n/N, the current question, the seconds; it ends in
+   place.
+Review fixes from the owner's preview: the accept-and-import button also writes cards already
+accepted; candidate warnings name their field and can be confirmed or answered by editing the
+value (never blocking); deleting an analysis redraws the list.
+
+### 2026-11-20 — BI 2c review: one list, and judgement fields bulk-acceptable without a reason
+
+Owner decision 2026-11-20, after: 接受顯示的全部 said 0 筆 once every card was applied, and
+switching 欄位 to 信心度 then offered 5 more; accepted cards dropped out of the list; and 待審提案
+was a separate section whose cards could not be opened.
+
+- **One list.** Step 2c shows the run's candidate cards and the proposals to change cards already
+  in the vault in one table, with a 類型 column (新卡片 / 修改既有卡片; a candidate that updates an
+  existing card is also 修改既有卡片). Filters: 狀態 (default 全部; 待決定 / 已接受 / 已拒絕) and
+  類型. The card-type, 欄位 and 來源 filters are gone; origin and evidence are shown in a row's
+  detail. A change row shows current vs proposed value, source and evidence, and opens the target
+  card as a side tab. 接受 / 拒絕 / 待決定 work per row for both kinds. One bulk button,
+  接受顯示的待決定（N）, covers both kinds (changes through `/api/bi/proposals/decide`);
+  匯入已接受的 / 全部接受並匯入 keep their meaning for new cards. Decided changes stay listed as
+  已接受 / 已拒絕 (`GET /api/bi/proposals` returns `decided`).
+- **Reasons optional, judgement fields like any other.** The reason is optional for every 2c
+  decision (new cards and changes, single and bulk, accept, reject, back to 待決定); it is kept
+  when given and never blocks, on the client or the server. `confidence` and `evidence_grade` are
+  included in bulk accept. Who, when and source stay in the card's history, and an accepted
+  change can go back to 待決定 (`action: "pending"`), which gives the field its earlier value,
+  source and evidence back as an `undo` history row (409 `proposal_moved_on` if the field changed
+  since). Correction notes, finalize, rename and evidence review keep their required reason;
+  they are not 2c decisions.
+- **Storage.** An accepted proposal stays stored `superseded`, as before; the decided list finds it
+  as the superseded proposal whose value a person's history row wrote. Adding a decided-by/at
+  column was tried and dropped: a vault dataset is rebuilt from its units after each write, so
+  such a column was lost, and putting it in the unit made a field accepted on one PC and corrected
+  on another conflict on the proposal as well as the field (`test_bi_accept_evidence`). Known
+  limit: a rejection's reason travels, but not who rejected it or when.
+- **Rejected alternative:** keeping two sections (candidates, and 待審提案 with its own 欄位/來源
+  filters and a required bulk reason). It hid accepted rows, made the judgement-field rule look
+  like a missing count, and gave changes no way to open the card.
+
+### 2026-11-20 — BI build page: stage settings behind a gear, run-only main views, 自動執行
+
+Owner decision 2026-11-20 (all points final): the build flow was tedious because every stage
+showed its complex settings every time. Settings are set once; after that the person only runs
+convert, ingest and the test, step by step or automatically, and looks at the results.
+
+- **Renamed stages.** 輸入檔案 / 輸入與轉檔 → **Data input**; Schema 與 Ingest → **Ingest**; 測試 →
+  **Benchmark testing**, in the stage bar, the stage headings (步驟 n／3・…), the 下一步 buttons,
+  the 回到「…」 link and the hints.
+- **A gear per stage.** Each stage title has a ⚙ button (accessible name "Data input 設定",
+  "Ingest 設定", "Benchmark testing 設定"). It opens that stage's settings as a tab of the shell's
+  side area (`sideOpen`); pressing it again focuses the tab, and closing the tab hides them. The
+  settings' existing markup (`#bi-b-set-source|ingest|test`, kept hidden inside its stage section)
+  moves into the tab and back when it closes, with its ids, as the card preview does with
+  `#bi-detail`. Nothing was removed, only moved:
+  - Data input ⚙: 機密等級, 寫入目的地, the knowledge base and its shared folder (file location),
+    進階：知識庫與匯入 (convert to a vault, 卡片頁 import).
+  - Ingest ⚙: the old 2a — schema summary and versions, the draft table, upgrade, 判讀規則
+    (skills), 資料處理程式, 匯入, 進階 (rules and programs, 建議 schema, drafts) — plus the Skill
+    Ingest uses and 進階：擷取設定與試跑, and a button for 管理 → 安裝 schema.
+  - Benchmark testing ⚙: the Benchmark section (questions: add, AI 出題, edit, delete, 擷取測試)
+    and the Dashboard section (analyses: add/edit with AI, delete, packs, Atlas order).
+- **Run-only main views.** Data input: 選檔 / 轉檔 with its progress and the converted file list.
+  Ingest: the Ingest button with its progress and the merged 2c review list, then 確認寫入 and
+  the result; the sub-step bar is hidden (2a is the ⚙, Ingest and 審核 show as one view).
+  Benchmark testing: 跑測試 with its bar, then the Benchmark | Dashboard result tabs with the
+  summary numbers; per-question results, history, 分享 and AI sessions open as side tabs as
+  before. The vault and 工作領域 pickers stay at the top, shared by all stages.
+- **First use.** Ingest with no card type in the schema, and Benchmark testing with no question
+  in the working domain, show one line and a 先設定 button that opens that stage's ⚙.
+- **自動執行.** One button beside the stage bar runs 轉檔 (the chosen files, if any) → Ingest (the
+  ticked sources) → accept every pending row (new cards, and changes to existing cards,
+  judgement fields included, no reason) and 匯入 → 跑測試, with no stop. Beside it: stage n/4,
+  that stage's own progress, elapsed seconds; it ends there with the result or the actual failure
+  and the stage it stopped in, and each stage's view keeps its results. At most once (AGENTS.md
+  21): client only, reusing the existing APIs (`/api/bi/sources`, `/api/bi/runs`,
+  `/runs/<id>/accept`, `/runs/<id>/commit`, `/api/bi/proposals/decide`, `/vaults/<id>/bench`);
+  no server change. The button is shut and an in-memory flag refuses a second press while it
+  runs; the run's state is kept in `localStorage` (`bi-auto-<dataset>`, with this tab's id and a
+  heartbeat), so a reload carries on from its stage instead of starting again — Ingest adopts an
+  ingest run of the same source started since the press, the test adopts a benchmark run started
+  since the press, and accept/commit are already idempotent on the host (`already_accepted`,
+  commit `already`). A reload during 轉檔 stops with that message, since which files were sent
+  cannot be known. Another tab of the same browser follows a running auto-run instead of
+  starting one.
+- **Rejected alternatives:** settings as a fold-out inside each stage (still in the main view,
+  still in the way); settings in a modal dialog (hides the results being set up for, and blocks
+  the page); 自動執行 stopping at 審核 for a person (the owner wants it to run through; review
+  stays possible afterwards, and accepted rows can go back to 待決定); moving the 工作領域 picker
+  into Data input's settings (every stage depends on it, so it stays at the top).
+- **Decisions made in implementation:** Data input shows no 先設定 line (its settings all have
+  defaults); 自動執行 on a dataset that is not a vault skips the test and says so; when the
+  working domain has no benchmark question the auto-run ends at stage 4/4 with the host's
+  `bench_empty` message, after the import is done; a candidate the host refuses to accept (an
+  error such as a missing required field) is named in the result rather than stopping the run.
+  Ingest's 審核 part shows as the lower half of the Ingest card, and its old hint 「在「Ingest」
+  這一步按…」 shows only when there is nothing to list, so the list stays in sight.
+
+### 2026-11-20 — Paste a bot token in Settings → Agents; AEP stores it as the user's environment variable
+
+- **Owner decision 2026-11-20.** In Agent Web settings a person pastes a Telegram bot token into
+  each agent bot and BI collection bot form (「貼上 bot token（選填）」, a password field beside the
+  variable name) and presses save; nobody opens PowerShell and AEP is not restarted. AEP writes
+  the token to this Windows user's environment (`HKCU\Environment`, REG_SZ, what `setx` does),
+  broadcasts `WM_SETTINGCHANGE "Environment"`, sets it in the running process and the existing
+  bot reload applies it. Settings files keep only the variable name (SecretRef mapping); the
+  token is in no file, response, audit record, log or error. The main conversation bot already
+  had this (owner request 2026-10-05) and reuses the same writer.
+- **Behaviour chosen in implementation:** an empty variable name defaults to
+  `AEP_TG_<AGENT ID>` / `AEP_TG_BI_<BOT NAME>`; an empty token field keeps the variable as it is;
+  a new token overwrites it; deleting a bot does not delete the variable (safe and predictable:
+  another program or a re-created bot may use it; the page says so); a token whose variable is
+  mapped to another credential (unless it already holds the same token) or holds a non-token value
+  is refused `bot_variable_in_use`, so another bot or an unrelated variable such as `PATH` is
+  never silently retargeted; off Windows `bot_token_store_unsupported` (409). The token is stored
+  before any settings file is written, so every refusal leaves the files unchanged.
+- **Rejected alternatives:** the token in `host.json` / `telegram.json` / `agents.json` (secrets
+  are never in settings files, AGENTS.md safety rules); spawning `setx NAME token` (a process
+  command line is visible to other processes on the PC); asking the person to run `setx` in
+  PowerShell by hand (the owner wants no PowerShell step).
+- Not a harness change (AGENTS.md rule 22): settings-page storage of a bot credential only.
+
+### 2026-11-21 — A BI collection bot also answers questions about its domain
+
+- **Owner decision 2026-11-21.** One Telegram bot per BI domain both collects and answers. A
+  link or a file sent to it is collected into the domain exactly as before (static links,
+  inbox, Ingest to 待審 at the domain's collect time). A plain text question (no link, no file,
+  not a `/` command, not a Reply to one of the bot's 「#12」 item messages) is answered from that
+  domain's BI cards. Nothing to configure: no agent, no Skills.
+- **How (within existing pieces):** the question is one ordinary Telegram conversation turn on
+  the Host's Agent (`TelegramIngress.answer_question` on a never-polled ingress with the bot's
+  token and senders), offered only `bi__query` with its dataset forced to the bound domain's
+  dataset, plus guidance to answer only from those cards and to say when they do not cover the
+  question. Admission, request ids, at-most-once and the model client are those of every
+  Telegram turn; sessions `telegram-collect-<name>-chat-<id>`; typing indicator while answering.
+  Without `bi__query` (BI Skill off / query not installed) the bot replies a clear Chinese
+  message and no model is asked. A message with a link and words is collected only (kept simple).
+  Plain words are no longer stored as a text source.
+- **Why:** the owner sent a Threads link to an agent bot (@aep_knowledge_bot, Skill
+  engineering/bi-knowledge) and got "I can't access that Threads link"; agent bots only converse,
+  and their turns are offered only their Skills' installed Skill tools, so a Host tool such as
+  `bi__query` is never offered to them (docs/CONTRACTS.md "Persistent agents and agent bots",
+  Turn scope).
+- **Rejected alternatives:** an agent bot that also collects links (mixes a conversation agent
+  with the inbox's at-most-once collection path and its per-domain binding); keeping two separate
+  bots per domain, one collecting and one answering (more tokens and bindings for the person, and
+  the same domain scope configured twice). Agent bots are unchanged.
+- Not a harness change (AGENTS.md rule 22): a channel feature using the existing conversation
+  turn, tool narrowing and turn-scoped Host tools. Contract: docs/CONTRACTS.md "Persistent agents
+  and agent bots", bullet "Collection bot questions".
+
+### 2026-11-21 — BI Ingest: four parts at once, a real stop, the total up front, resume after restart
+
+- **Owner decision 2026-11-21.** One PDF (61,699 characters of Markdown) became 28 parts read one
+  after another at about 91 s per gpt-5.5 call: 42 minutes. Measured offline: four calls at once
+  through the gateway take no longer each than one. 停止 only flipped the run's status (the loop
+  never looked), 自動執行 had no stop, the part total appeared only after part 1, and a killed Host
+  left the run `extracting` forever with a page following it forever.
+- **Decided:** (1) `extract.extract` reads up to `PARALLEL_PARTS = 4` parts at once in a thread
+  pool and merges strictly in document order, so candidates, ids and merges equal a sequential
+  read; progress and layout writes only from the coordinating thread; `CachingModel` counters
+  locked. (2) A real stop: `cancelled()` is checked before each part starts and before each format
+  retry; parts under way finish; nothing of the attempt is written; the run stays `cancelled`; the
+  Host task reports `stopped`. The page has 停止 beside 自動執行 (only while it runs) and for a
+  one-source manual Ingest, and says 停止中…（等目前這段完成） until the run's worker ends (run view
+  `working`). (3) `on_chunk(0, N)` before the first call, so the page shows 第 1／N 段 at once.
+  (4) Resume: the runs with a worker are tracked in the Host process; a run `extracting` with none
+  becomes `partial` with the unwritten parts as `interrupted` failures, so 重試 reads only those
+  (parts read before answer from the answer cache); 自動執行 shows that in place with 重試.
+- **Rejected:** larger chunks now — every cached answer would be invalidated and the cards would
+  change (different excerpts give different candidates); kept for a separate decision. More than
+  four parallel calls — not measured against the gateway's limits. A heartbeat or PID check for
+  orphan runs — one Host owns a workspace, so an in-process registry is enough and cannot kill
+  or misjudge another process.
+- Not a harness change (AGENTS.md rule 22): BI feature-plugin code. Contract: docs/CONTRACTS.md
+  "BI AI path: extraction runs", bullet "Parallel parts, stop, restart".

@@ -62,6 +62,7 @@ from aep_bi.cards import (
     correction,
     evidence_review,
     homes,
+    image_describe,
     importer,
     methods,
     migrate,
@@ -106,6 +107,19 @@ from models.approved import ApprovedModelClient
 MAX_BI_BODY_BYTES = 8 * 1024 * 1024
 #: A source file as the raw body, so its size is not bound by the limit above.
 SOURCE_UPLOAD = "/api/bi/sources/upload"
+#: A picture a source's Markdown references, as its bytes (owner 2026-11-20).
+SOURCE_ASSET = re.compile(
+    r"^/api/bi/sources/(?P<source>[\w-]+)/assets/(?P<name>[0-9a-f]{16}\.[a-z0-9]{1,8})$"
+)
+ASSET_TYPES = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+    ".bmp": "image/bmp",
+    ".svg": "application/octet-stream",
+}
 #: A skill/tool package: a zip uploaded as the raw body, and one exported as bytes.
 PACKAGE_UPLOAD = re.compile(r"^/api/bi/vaults/(?P<vault>[^/]+)/package-upload$")
 PACKAGE_EXPORT = re.compile(r"^/api/bi/vaults/(?P<vault>[^/]+)/package-export$")
@@ -115,6 +129,34 @@ Answer = tuple[int, dict[str, Any]]
 
 def _error(status: int, code: str, message: str) -> Answer:
     return status, {"ok": False, "code": code, "message": message}
+
+
+def builtins_view() -> dict[str, Any]:
+    """The shipped AI extraction (its prompt, evidence rules, default instructions and card
+    types) and the table rules (how a table maps to cards), as a person reads them."""
+    from aep_bi.cards import extract, recipes
+
+    return {
+        "llm": {
+            "title": "AI 擷取（內建）",
+            "origin": "AEP 內建",
+            "types": list(extract.DEFAULT_TYPES),
+            "instructions": extract.DEFAULT_INSTRUCTIONS,
+            "evidence": extract.EVIDENCE_RULES,
+            "prompt": extract.SYSTEM,
+        },
+        "rules": {
+            "title": "表格規則（內建，不用模型）",
+            "origin": "AEP 內建",
+            "about": (
+                "CSV、TSV、Excel 的每一列是一張卡片：欄名對到 schema 欄位的名稱、標籤或別名，"
+                "值依欄位型別正規化（列舉值、連結、數字），不認得的欄位列為未知欄位、不匯入。"
+                "同一張卡的多列合併成一張候選卡，每一列的值都當作出處。"
+                "要多個表或特殊轉換時，可以在 Ingest 的進階寫配方（aep.bi.recipe/v1）。"
+            ),
+            "recipe": (recipes.__doc__ or "").strip(),
+        },
+    }
 
 
 def _upload_source(handler: Any, parsed: Any) -> None:
@@ -146,7 +188,56 @@ def _upload_source(handler: Any, parsed: Any) -> None:
     except BiStoreError as failure:
         handler._json(400, {"ok": False, "code": failure.code, "message": failure.message})
         return
-    handler._json(200, {"ok": True, "source": source})
+    images = _describe_new(handler.server.web, workspace, staging.dataset, source)
+    handler._json(200, {"ok": True, "source": source, "images": images})
+
+
+def _describe_new(web: Any, workspace: Path, dataset: str, source: dict[str, Any]) -> Any:
+    """Start describing a new source's pictures when this Host's model can see
+    images; where that stands (None for a source with no pictures)."""
+    fresh = not source.get("already") or source.get("reconverted")
+    if not fresh or not source.get("markdown_rev"):
+        return None
+    try:
+        return _describe_start(web_ai_runtime(web), workspace, dataset, str(source["id"]), "")
+    except (BiStoreError, AttributeError):
+        return None
+
+
+def _describe_start(
+    ai: ai_runs.AiRuntime | None, workspace: Path, dataset: str, source_id: str, actor: str
+) -> dict[str, Any] | None:
+    shown = image_describe.progress(workspace, dataset, source_id)
+    if shown["status"] == "running" or not shown.get("pending"):
+        return shown if shown["status"] != "idle" or shown.get("pending") else None
+    chosen = ai.model() if ai is not None else None
+    if chosen is None or ai is None or not ai.vision():
+        return {**shown, "status": "no_vision"}
+    client, alias = chosen
+    staging = Staging(workspace, dataset)
+    source = staging.source(source_id) or {}
+    return image_describe.start(
+        workspace,
+        dataset,
+        source_id,
+        client,
+        alias,
+        actor=actor or str(source.get("by") or ""),
+        background=ai.background,
+    )
+
+
+def _send_asset(handler: Any, parsed: Any, source_id: str, name: str) -> None:
+    query = {k: v[0] for k, v in parse_qs(parsed.query).items() if v}
+    workspace = handler.server.web.runtime.layout.workspace_root
+    try:
+        staging = Staging(workspace, _dataset(query.get("dataset")))
+        data = staging.asset_file(source_id, name).read_bytes()
+    except (BiStoreError, OSError):
+        handler._json(404, {"ok": False, "code": "asset_unknown", "message": "找不到這張圖"})
+        return
+    suffix = "." + name.rsplit(".", 1)[-1]
+    handler._send(200, data, ASSET_TYPES.get(suffix, "application/octet-stream"))
 
 
 def _package_failure(failure: BiStoreError | RepoError) -> Answer:
@@ -297,6 +388,9 @@ def _route(
             }
         if path == "/api/bi/schema-suggest":
             return 200, {"suggestion": schema_suggest.view(workspace, store.dataset)}
+        if path == "/api/bi/builtins":
+            # What the built-in programs do, for 「檢視」 (owner 2026-11-20), read only.
+            return 200, {"ok": True, "builtins": builtins_view()}
         if path == "/api/bi/schemas":
             return 200, {"schemas": catalog.listing(workspace)}
         if path == "/api/bi/schemas/example":
@@ -326,7 +420,12 @@ def _route(
             # An old domain configuration still to move (BI D4): the page offers the migration.
             return 200, {**drawn, "domains_left": migrate.has_legacy(store)}
         if path == "/api/bi/proposals":
-            return 200, {"proposals": _pending_proposals(store)}
+            # The pending ones, and the ones a person decided, which stay on the 2c list with
+            # their decision (owner 2026-11-20).
+            return 200, {
+                "proposals": _pending_proposals(store),
+                "decided": _listed_proposals(store, store.decided_proposals()),
+            }
         if path == "/api/bi/quality":
             # Quality checks (BI vault V13), read only.
             return 200, quality.check(store, catalog.for_store(store), read_pages=True)
@@ -341,6 +440,12 @@ def _route(
             return 200, vault_sources.listed(repo, staging.sources())
         parts = path.split("/")
         if len(parts) in (6, 7) and parts[:4] == ["", "api", "bi", "sources"]:
+            if parts[5] == "images" and len(parts) == 6:
+                # Describing a source's pictures: n of N, seconds (owner 2026-11-20).
+                return 200, {
+                    "ok": True,
+                    "images": image_describe.progress(workspace, store.dataset, parts[4]),
+                }
             if parts[5] == "markdown":
                 rev = parts[6] if len(parts) == 7 else None
                 return 200, source_markdown.view(workspace, store.dataset, parts[4], rev)
@@ -496,7 +601,12 @@ def _route(
             folder=given.get("folder"),
             actor=who,
         )
-        return 200, {"ok": True, "source": source}
+        images = None
+        fresh = not source.get("already") or source.get("reconverted")
+        if source.get("markdown_rev") and fresh:
+            dataset = _dataset(given.get("dataset"))
+            images = _describe_start(ai, workspace, dataset, source["id"], who)
+        return 200, {"ok": True, "source": source, "images": images}
     if path == "/api/bi/sources/delete":
         # A person's 刪除 in step 1: a result per id, a refusal never stops the others.
         deleted = source_delete.delete(
@@ -515,6 +625,12 @@ def _route(
             actor=who,
         )
         return 200, {"ok": True, **saved}
+    if len(parts) == 6 and parts[:4] == ["", "api", "bi", "sources"] and parts[5] == "images":
+        # 「產生圖片說明」: describe the pictures still without one (owner 2026-11-20).
+        started = _describe_start(ai, workspace, _dataset(given.get("dataset")), parts[4], who)
+        if started is not None and started["status"] == "no_vision":
+            return _error(409, "vision_unavailable", "目前的模型不能看圖，圖片保留但沒有說明")
+        return 200, {"ok": True, "images": started}
     if path == "/api/bi/index/rebuild":
         dataset = _dataset(given.get("dataset"))
         if not BiStore(workspace, dataset).exists and not Staging(workspace, dataset).exists:
@@ -717,6 +833,7 @@ def _run_action(
             actor=who,
             take_new=given.get("take_new"),
             confirm_same_name=given.get("confirm_same_name"),
+            confirm_warning=given.get("confirm_warning"),
         )
         return 200, {"ok": True, **answer}
     if rest == ["accept"]:
@@ -964,16 +1081,28 @@ def _decide_proposal(
     store = BiStore(workspace, _dataset(given.get("dataset")))
     if store.card(card_id) is None:
         return _error(404, "card_unknown", "找不到這張卡片")
-    found = store.proposal(card_id, int(proposal)) if proposal.isdigit() else None
-    if found is None:
+    if not proposal.isdigit():
         return _error(404, "proposal_unknown", "找不到這筆待審提議（可能已處理）")
     action = given.get("action")
+    reason = str(given.get("reason") or "").strip()  # optional (owner 2026-11-20)
+    if action == "pending":
+        # Back to 待決定: an accepted value is given back, readable in the card's history.
+        try:
+            version = store.reopen_proposal(card_id, int(proposal), actor=who, reason=reason)
+        except BiStoreError as failure:
+            if failure.code == "proposal_unknown":
+                return _error(404, failure.code, failure.message)
+            raise
+        return 200, {"ok": True, "version": version}
+    found = store.proposal(card_id, int(proposal))
+    if found is None:
+        return _error(404, "proposal_unknown", "找不到這筆待審提議（可能已處理）")
     if action == "reject":
-        store.reject_proposal(card_id, int(found["id"]), str(given.get("reason") or "").strip())
+        store.reject_proposal(card_id, int(found["id"]), reason)
         card = store.card(card_id)
         return 200, {"ok": True, "version": int(card["version"]) if card is not None else 0}
     if action != "accept":
-        return _error(400, "action_invalid", "action 只能是 accept 或 reject")
+        return _error(400, "action_invalid", "action 只能是 accept、reject 或 pending")
     return _accept_value(
         workspace,
         who,
@@ -992,6 +1121,7 @@ def _decide_proposal(
 #: Store refusals that are conflicts with the current state (409).
 CONFLICTS = {
     "stale_edit",
+    "proposal_moved_on",
     "proposals_changed",
     "skill_changed",
     "name_taken",
@@ -1085,15 +1215,14 @@ def _proposal_origin(item: dict[str, Any]) -> str:
 
 def _decide_shown_proposals(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
     """Accept or reject every proposal a filter shows. `count` is what the person saw, so
-    a list that moved refuses. A field a run may not settle (`runs.PROTECTED_FIELDS`) is
-    only included when the filter names that field."""
+    a list that moved refuses. Owner 2026-11-20: the judgement fields a run may not settle
+    (`runs.PROTECTED_FIELDS`) are included like any other, and the reason is optional; the
+    history still says who, when and from which proposal, and each can go back to 待決定."""
     store = BiStore(workspace, _dataset(given.get("dataset")))
     action = given.get("action")
     if action not in ("accept", "reject"):
         return _error(400, "action_invalid", "action 只能是 accept 或 reject")
     reason = str(given.get("reason") or "").strip()
-    if not reason:
-        return _error(400, "reason_required", "一次決定多筆要寫理由")
     field, origin = given.get("field") or None, given.get("origin") or None
     shown = [
         item
@@ -1101,22 +1230,26 @@ def _decide_shown_proposals(workspace: Path, who: str, given: dict[str, Any]) ->
         if (field is None or item["field"] == field)
         and (origin is None or item["origin"] == origin)
     ]
-    chosen = [i for i in shown if i["field"] == field or i["field"] not in runs.PROTECTED_FIELDS]
+    chosen = shown
     if len(chosen) != given.get("count"):
         return _error(409, "proposals_changed", "待審提案已經變了，請重新確認筆數")
     done = store.decide_proposals(
         [(i["card_id"], int(i["id"])) for i in chosen], action, reason, who
     )
-    return 200, {"ok": True, **done, "left_out": len(shown) - len(chosen)}
+    return 200, {"ok": True, **done, "left_out": 0}
 
 
 def _pending_proposals(store: BiStore) -> list[dict[str, Any]]:
     """What a person needs to decide each pending proposal: the field in words, and the
     evidence the current value rests on, beside where the proposed one came from."""
+    return _listed_proposals(store, store.pending_proposals())
+
+
+def _listed_proposals(store: BiStore, items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     reg = catalog.for_store(store)
     found = []
     evidence: dict[str, list[dict[str, Any]]] = {}
-    for item in store.pending_proposals():
+    for item in items:
         entity = reg.types.get(item["entity_type"])
         definition = None if entity is None else entity.get(item["field"])
         held = evidence.setdefault(item["card_id"], store.evidence(item["card_id"]))
@@ -1218,7 +1351,8 @@ def _evidence_review(workspace: Path, who: str, action: str, given: dict[str, An
 
 def _accept_value(workspace: Path, who: str, card_id: str, given: dict[str, Any]) -> Answer:
     """Accepting a proposal: review confirms a sourced difference, so it writes as
-    the person's, with a stale check and a reason for a judgement field."""
+    the person's, with a stale check. The reason is optional, also for a judgement field
+    (owner 2026-11-20); one given is kept in the history."""
     store = BiStore(workspace, _dataset(given.get("dataset")))
     card = store.card(card_id)
     if card is None:
@@ -1231,8 +1365,6 @@ def _accept_value(workspace: Path, who: str, card_id: str, given: dict[str, Any]
         item = correction.checked_field(reg, card["entity_type"], name)
         if not isinstance(base, int):
             raise BiStoreError("base_version_missing", "需要 base_version")
-        if item.klass == "judgement" and not reason:
-            raise BiStoreError("reason_required", f"{item.label} 是判斷欄位，修改時必須寫理由")
         value = correction.checked_value(reg, item, given.get("value"))
     except BiStoreError as failure:
         return _error(400, failure.code, failure.message)
@@ -1623,8 +1755,9 @@ def web_ai_runtime(web: Any) -> ai_runs.AiRuntime:
 
     def background(title: str, work: Any) -> None:
         def tracked() -> tuple[str, str]:
-            work()
-            return "succeeded", title
+            # As it ended (owner 2026-11-21): a stopped or failed run is not "succeeded".
+            ended = work()
+            return (ended if ended in ("stopped", "failed") else "succeeded"), title
 
         threading.Thread(
             target=web.tasks().tracked("bi-ingest", title, "", tracked),
@@ -1632,7 +1765,18 @@ def web_ai_runtime(web: Any) -> ai_runs.AiRuntime:
             daemon=True,
         ).start()
 
-    return ai_runs.AiRuntime(model=model, background=background)
+    def vision() -> bool:
+        # The chosen model's endpoint in this host's catalog, as the LLM Wiki intake
+        # decides whether to describe pictures (`wiki_host.pipeline_bindings`).
+        chosen = model()
+        binding = getattr(web.runtime.config, "models", None)
+        if chosen is None or binding is None:
+            return False
+        endpoints = getattr(getattr(binding, "catalog", None), "endpoints", ())
+        endpoint = next((e for e in endpoints if e.alias == chosen[1]), None)
+        return bool(endpoint is not None and endpoint.capabilities.vision)
+
+    return ai_runs.AiRuntime(model=model, background=background, vision=vision)
 
 
 def web_bench_runtime(web: Any) -> Any:
@@ -1686,6 +1830,10 @@ def handle(handler: Any, method: str, parsed: ParseResult) -> bool:
         return False
     if method == "POST" and parsed.path == SOURCE_UPLOAD:
         _upload_source(handler, parsed)
+        return True
+    asset = SOURCE_ASSET.match(parsed.path) if method == "GET" else None
+    if asset is not None:
+        _send_asset(handler, parsed, asset.group("source"), asset.group("name"))
         return True
     upload = PACKAGE_UPLOAD.match(parsed.path) if method == "POST" else None
     if upload is not None:

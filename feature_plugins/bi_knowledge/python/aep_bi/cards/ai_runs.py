@@ -53,7 +53,11 @@ class AiRuntime:
     up) and a way to run work in the background."""
 
     model: Callable[[], tuple[ModelClient, str] | None]
-    background: Callable[[str, Callable[[], None]], None]
+    # The work may return how it ended ("succeeded", "stopped" or "failed") for the task list.
+    background: Callable[[str, Callable[[], Any]], None]
+    # Whether that model's endpoint declares vision, so pictures in a source can be
+    # described (owner 2026-11-20); False when it cannot tell.
+    vision: Callable[[], bool] = lambda: False
     # A source's data class is recorded and shown, never a reason to refuse it:
     # BI sends every class to the configured internal gateway (owner 2026-11-17).
 
@@ -188,13 +192,29 @@ def start(
             **({"trial_schema": trial_schema} if trial_schema is not None else {}),
         },
     )
-    staging.set_status(run_id, "extracting")
     assert ai is not None
-    ai.background(
+    hand_over(
+        staging,
+        run_id,
+        ai,
         f"BI 判讀 {source['name']}",
         lambda: _work(workspace, dataset, run_id, model, alias, only=None),
     )
     return runs.run_view(staging, run_id)
+
+
+def hand_over(
+    staging: Staging, run_id: str, ai: AiRuntime, title: str, work: Callable[[], str]
+) -> None:
+    """The run becomes `extracting` and its work goes to the background, marked as having a
+    worker first, so a run with none left (`runs.recover_interrupted`) is never this one."""
+    runs.claim_worker(staging, run_id)
+    try:
+        staging.set_status(run_id, "extracting")
+        ai.background(title, work)
+    except BaseException:
+        runs.release_worker(staging, run_id)
+        raise
 
 
 def _folder_of(staging: Staging, source: dict[str, Any]) -> str | None:
@@ -277,16 +297,20 @@ def retry(workspace: Path, dataset: str, ai: AiRuntime | None, run_id: str) -> d
         raise BiStoreError("run_unknown", "找不到這次執行")
     if layout.get("mode") != "llm" or run["status"] not in ("partial", "failed"):
         raise BiStoreError("run_closed", "這次執行沒有可以重試的段落")
-    failed = [int(f["chunk"]) for f in layout.get("failures") or []]
-    if not failed:
+    failed: list[int] | None = [int(f["chunk"]) for f in layout.get("failures") or []]
+    if not failed and layout.get("interrupted") and not int(layout.get("chunks") or 0):
+        failed = None  # stopped before its chunks were known: every chunk
+    elif not failed:
         raise BiStoreError("run_closed", "這次執行沒有可以重試的段落")
     chosen = ai.model() if ai is not None else None
     if chosen is None:
         raise BiStoreError("model_unavailable", "沒有可用的模型：到 Settings 設定後再試")
     model, alias = chosen
-    staging.set_status(run_id, "extracting")
     assert ai is not None
-    ai.background(
+    hand_over(
+        staging,
+        run_id,
+        ai,
         f"BI 判讀重試 {run_id}",
         lambda: _work(workspace, dataset, run_id, model, alias, only=failed),
     )
@@ -305,7 +329,9 @@ def _work(
     alias: str,
     *,
     only: Sequence[int] | None,
-) -> None:
+) -> str:
+    """The background work of a run; how it ended for the task list: `stopped` when the
+    person stopped it, `failed`, else `succeeded`."""
     staging = Staging(workspace, dataset)
     try:
         if (staging.layout(run_id) or {}).get("reading"):
@@ -315,7 +341,16 @@ def _work(
         else:
             _extract(staging, run_id, model, alias, only=only)
     except Exception as failure:  # noqa: BLE001 - the run shows every failure
-        staging.set_status(run_id, "failed", error=f"extract_failed: {type(failure).__name__}")
+        if not _cancelled(staging, run_id):
+            staging.set_status(run_id, "failed", error=f"extract_failed: {type(failure).__name__}")
+    finally:
+        runs.release_worker(staging, run_id)
+    status = (staging.run_row(run_id) or {}).get("status")
+    return {"cancelled": "stopped", "failed": "failed"}.get(str(status), "succeeded")
+
+
+def _cancelled(staging: Staging, run_id: str) -> bool:
+    return (staging.run_row(run_id) or {}).get("status") == "cancelled"
 
 
 def _extract(
@@ -336,7 +371,15 @@ def _extract(
     else:  # a run from before BI vault V2 read the original file
         text = staging.source_bytes(run["source_ids"][0]).decode("utf-8-sig", errors="replace")
 
+    started: list[bool] = []
+
     def progress(done: int, total: int) -> None:
+        if not started:
+            # The first call, before any chunk is read: the chunks of this attempt, which an
+            # interrupted run retries (`runs.recover_interrupted`).
+            started.append(True)
+            layout["attempt"] = list(only) if only is not None else list(range(total))
+            layout["interrupted"] = False
         layout.update(done=done, chunks=total)
         staging.put_layout(run_id, layout)
 
@@ -365,7 +408,10 @@ def _extract(
         infer_relations=staging.store.vault_id is not None,
         check_fit=check_fit,
         profile=used_profile,
+        cancelled=lambda: _cancelled(staging, run_id),
     )
+    if result.cancelled or _cancelled(staging, run_id):
+        return  # stopped: nothing of this attempt is written, the run stays cancelled
     found = staging.candidates(run_id) if only else []
     by_key = {_key(reg, c): c for c in found}
     for item in result.candidates:

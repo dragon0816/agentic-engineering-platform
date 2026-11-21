@@ -279,3 +279,31 @@ def test_a_truncated_answer_says_which_chunk_and_can_be_tried_again(tmp_path: Pa
     again = _detail(tmp_path, run["id"])
     assert again["run"]["status"] == "review" and again["run"]["failures"] == []
     assert again["candidates"]
+
+
+def test_a_warning_names_its_field_never_blocks_and_is_confirmed_or_edited(
+    tmp_path: Path,
+) -> None:
+    """Owner 2026-11-20: 「警告」 must not block acceptance and must say what to fix. A field's
+    warning names the field; 確認 moves it to `confirmed` with who confirmed it, and a person's
+    value for the field does the same; nothing is silently dropped."""
+    jobs = Jobs()
+    run = _start(tmp_path, _runtime(Scripted(MEETING_ANSWER), jobs), _note(tmp_path))
+    jobs.run_all()
+    signal = next(
+        c for c in _detail(tmp_path, run["id"])["candidates"] if c["entity_type"] == "Signal"
+    )
+    (inferred,) = [w for w in signal["warnings"] if w["code"] == "inference"]
+    assert inferred["field"] == "so_what" and inferred["message"].endswith(
+        inferred["message"].split("是推論：", 1)[1]
+    )
+    # A warning does not stop 接受.
+    accepted = _ok(_review(tmp_path, run["id"], signal["id"], review="accepted"))["candidate"]
+    assert accepted["review"] == "accepted" and accepted["warnings"]
+    confirm = {"code": "inference", "field": "so_what", "message": inferred["message"]}
+    done = _ok(_review(tmp_path, run["id"], signal["id"], confirm_warning=confirm))["candidate"]
+    assert not [w for w in done["warnings"] if w["code"] == "inference"]
+    (kept,) = done["confirmed"]
+    assert (kept["field"], kept["by"]) == ("so_what", "tester via web") and kept["at"]
+    status, payload = _review(tmp_path, run["id"], signal["id"], confirm_warning=confirm)
+    assert (status, payload["code"]) == (404, "warning_unknown")

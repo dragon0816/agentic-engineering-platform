@@ -27,6 +27,8 @@ from knowledge.repo.repository import RepoError
 
 PREFIX = "source:"
 MARKDOWN_DIR = "markdown"
+#: A source's pictures, beside its Markdown revisions (`convert.ASSETS_DIR`).
+ASSETS_DIR = "assets"
 #: Windows: a file's content is not on this PC (a OneDrive placeholder).
 _CLOUD_ONLY = 0x00400000 | 0x00040000 | stat.FILE_ATTRIBUTE_OFFLINE
 _UNSAFE = re.compile(r'[\\/:*?"<>|\x00-\x1f]')
@@ -76,6 +78,11 @@ def _revision(repo: Any, staging: Any, source_id: str, folder: str, record: dict
     source = staging.source(source_id)
     path = markdown_path(folder, source["sha256"], record["rev"], repo.author)
     repo.stage_file(path, staging.markdown_file(source_id, record["rev"]))
+    # Its pictures go beside it, so a colleague's copy shows them (owner 2026-11-20).
+    for name in staging.asset_names(source_id):
+        picture = f"{path.rsplit('/', 1)[0]}/{ASSETS_DIR}/{name}"
+        if not (Path(repo.folder) / picture).is_file():
+            repo.stage_file(picture, staging.asset_file(source_id, name))
     return {**record, "file": path}
 
 

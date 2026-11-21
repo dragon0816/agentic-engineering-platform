@@ -62,6 +62,7 @@ def test_a_domain_is_created_in_the_row_and_becomes_the_working_domain(tmp_path:
             page.choose("bi-dataset", dataset)
             page.click("#bi-views [data-bi-view=build]")
             page.wait("(bi.build.homes || []).length > 0")
+            page.wait("document.getElementById('bi-b-src-folder').options.length > 1")
 
             # -- readable names, the values stay ------------------------------------------
             labels = _labels(page)
@@ -107,13 +108,20 @@ def test_a_domain_is_created_in_the_row_and_becomes_the_working_domain(tmp_path:
             page.shoot("created")
 
             # -- a new rule applies to it, unpushed (acceptance F9) --------------------------
-            page.stage("schema")
+            # The step-2 AI session is gone (owner 2026-11-20): 新增規則 opens the rule form,
+            # prefilled with the new domain's folder.
             page.wait("(bi.skills && bi.skills.folders || []).length > 0", TIMES_OUT)
-            page.click("#bi-b-sk-new")
-            page.wait("document.getElementById('bi-ai').dataset.kind === 'skill'")
-            assert page.run("document.getElementById('bi-ai-new-folder').value") == NEW
+            page.click_text("#bi-b-scope-empty", "新增規則")
+            page.wait("!document.getElementById('bi-b-sk-form').hidden")
+            assert page.run("document.getElementById('bi-b-sk-applies').value") == NEW
+            assert page.run("document.getElementById('bi-b-sk-name').readOnly") is False
             page.shoot("new-rule-folder")
-            page.click("#bi-ai-close")
+            page.set_value("bi-b-sk-name", "automotive-extract")
+            page.set_value("bi-b-sk-body", "虛構電源廠是 Account。")
+            page.click("#bi-b-sk-form button[type=submit]")
+            page.see("bi-notice", "存成第 1 版")
+            assert "push 後大家才會用到" in page.text_of("bi-notice")
+            page.wait("document.getElementById('bi-b-sk-form').hidden")
 
             # -- a file goes to it at once -------------------------------------------------
             page.upload("car.md", "# 虛構\n", "text/markdown")
@@ -199,17 +207,11 @@ def test_a_domain_is_created_in_the_row_and_becomes_the_working_domain(tmp_path:
             assert page.run("document.getElementById('bi-b-bench-run').disabled")
             page.shoot("empty-step3")
 
-            # -- under 全部領域 a new rule names its folder: none is chosen for the person ------
+            # -- under 全部領域 no folder is chosen for the person: no 新增規則 is offered ------
+            # (the rule form is reached from a domain's own empty notice, owner 2026-11-20)
             page.choose("bi-b-src-folder", "sources")
-            page.stage("schema")
             page.wait(QUIET_READS, TIMES_OUT)
-            page.click("#bi-b-sk-new")
-            page.wait("document.getElementById('bi-ai').dataset.kind === 'skill'")
-            assert page.run("document.getElementById('bi-ai-new-folder').value") == ""
-            page.set_value("bi-ai-new-name", "no-folder")
-            page.set_value("bi-ai-msg", "虛構電源廠是 Account。")
-            page.click("#bi-ai-send")
-            page.wait(
-                "document.getElementById('bi-ai-status').textContent.includes('套用到哪個資料夾')"
-            )
-            assert "no-folder" not in page.text_of("bi-b-sk-list")
+            assert not page.run("biScope()")
+            assert page.run("document.getElementById('bi-b-scope-empty').hidden")
+            assert not page.run("[...document.querySelectorAll('#bi-b-scope-empty button')].length")
+            assert page.run("!document.getElementById('bi-b-sk-new')")

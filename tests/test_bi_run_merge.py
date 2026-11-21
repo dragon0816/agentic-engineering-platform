@@ -209,7 +209,10 @@ def test_an_ai_run_never_writes_verified_even_on_a_new_card(tmp_path: Path) -> N
         assert not [e for e in store.evidence(card["id"]) if e["field"] == "confidence"]
 
 
-def test_many_proposals_can_be_decided_at_once_with_one_reason(tmp_path: Path) -> None:
+def test_many_proposals_can_be_decided_at_once(tmp_path: Path) -> None:
+    """Owner 2026-11-20 changed two rules here: the reason is optional (an empty one used to be
+    400 `reason_required`), and the judgement field `confidence` is decided with the others
+    (it used to be left out unless the filter named it, `left_out`)."""
     _, vault_id, dataset, a, _ = _two_pcs(tmp_path)
     _seed(a, dataset, product="舊的", body="舊的內文", confidence="assumed")
     run_id = _run(
@@ -228,26 +231,34 @@ def test_many_proposals_can_be_decided_at_once_with_one_reason(tmp_path: Path) -
         body = {"dataset": dataset, "action": "accept", "reason": "看過了", **given}
         return _post(a, "/api/bi/proposals/decide", body)
 
-    status, body = decide(count=2, reason=" ")
-    assert (status, body["code"]) == (400, "reason_required")
-    # The count is what the person saw; `confidence` is left out unless filtered to it.
-    status, body = decide(count=3)
+    # The count is what the person saw, `confidence` included: a list that moved refuses.
+    status, body = decide(count=2)
     assert (status, body["code"]) == (409, "proposals_changed")
     assert sorted(_pending(a, dataset)) == ["body", "confidence", "product"]
 
-    done = _ok(decide(count=2, origin=origin))
-    assert (done["decided"], done["left_out"]) == (2, 1)
+    # Filtered by origin, without a reason: all three, the judgement field too.
+    done = _ok(decide(count=3, origin=origin, reason=" "))
+    assert (done["decided"], done["left_out"]) == (3, 0)
     assert _value(a, dataset, "product") == "新的" and _value(a, dataset, "body") == "新的內文"
-    assert _value(a, dataset, "confidence") == "assumed"
-    assert list(_pending(a, dataset)) == ["confidence"]
-    # One write: one set of changes for one commit, and the reason is in the history.
+    assert _value(a, dataset, "confidence") == "verified"
+    assert _pending(a, dataset) == {}
+    # One write: one set of changes for one commit; who and when are in the history.
     history = BiStore(a, dataset).history(CARD)
-    assert any(h["field"] == "product" and h["reason"] == "看過了" for h in history)
+    assert any(h["field"] == "confidence" and h["by"] and h["at"] for h in history)
 
-    # Filtered to the protected field, a rejection includes it.
+    # A reason, when given, is kept: the one decided proposal goes back and is rejected.
+    item = next(p for p in _ok(_call(a, "GET", "/api/bi/proposals", dataset=dataset))["decided"]
+                if p["field"] == "confidence")  # fmt: skip
+    _ok(_post(a, f"/api/bi/cards/{CARD}/proposals/{item['id']}",
+              {"dataset": dataset, "action": "pending"}))  # fmt: skip
+    assert _value(a, dataset, "confidence") == "assumed"
     done = _ok(decide(count=1, field="confidence", action="reject", reason="沒有依據"))
     assert done["decided"] == 1 and _pending(a, dataset) == {}
     assert _value(a, dataset, "confidence") == "assumed"
+    rejected = _ok(_call(a, "GET", "/api/bi/proposals", dataset=dataset))["decided"]
+    assert [
+        (p["field"], p["status"], p["reason"]) for p in rejected if p["field"] == "confidence"
+    ] == [("confidence", "rejected", "沒有依據")]
 
 
 def test_a_value_that_differs_inside_a_run_becomes_a_proposal(tmp_path: Path) -> None:

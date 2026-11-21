@@ -249,15 +249,15 @@ def test_converting_shows_its_progress_beside_the_button_and_ends_with_each_resu
                 " f.dispatchEvent(new Event('change')); })()"
             )
             page.click("#bi-b-upload")
-            page.see("bi-b-upload-status", "正在轉檔 1/3：one.md")
-            assert "秒" in page.text_of("bi-b-upload-status")
+            page.see("bi-b-progress-text", "正在轉檔 1/3：one.md")
+            assert "秒" in page.text_of("bi-b-progress-text")
             assert page.run("document.getElementById('bi-b-upload').getAttribute('aria-busy')")
             assert page.run("document.getElementById('bi-b-upload').disabled")
-            page.wait(page.shows("bi-b-upload-status", "1 秒"), 30)  # the seconds keep counting
+            page.wait(page.shows("bi-b-progress-text", "1 秒"), 30)  # the seconds keep counting
 
             page.run("window.__go(); 0")
-            page.see("bi-b-upload-status", "已轉檔 2 份；1 份沒有轉檔：bad.md：")
-            ended = page.text_of("bi-b-upload-status")
+            page.see("bi-b-progress-text", "已轉檔 2 份；1 份沒有轉檔：bad.md：")
+            ended = page.text_of("bi-b-progress-text")
             assert "source_decode_failed" in ended and "正在轉檔" not in ended
             assert not page.run("document.getElementById('bi-b-upload').hasAttribute('aria-busy')")
             page.wait("document.querySelectorAll('#bi-b-sources tbody tr').length === 3")

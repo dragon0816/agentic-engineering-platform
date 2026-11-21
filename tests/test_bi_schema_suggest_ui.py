@@ -103,7 +103,12 @@ def test_a_press_suggests_with_quotes_and_a_field_is_added_on_the_version(
             page.stage("schema")
             page.see("bi-b-schema-now", "目前的 schema：5.0")
             assert not model.requests, "nothing is asked before the press"
-
+            # Owner 2026-11-20: 建議 schema is under 進階：Schema and runs only on a press.
+            assert page.run(
+                "Boolean(document.getElementById('bi-b-sg-run').closest('#bi-b-adv-schema'))"
+            )
+            assert not page.run("document.getElementById('bi-b-adv-schema').open")
+            page.click("#bi-b-adv-schema > summary")
             page.click("#bi-b-sg-run")
             page.see("bi-b-sg-sum", "看了 1 份來源")
             page.wait("bi.build.suggest && bi.build.suggest.status === 'done'")
@@ -148,27 +153,24 @@ def test_a_press_suggests_with_quotes_and_a_field_is_added_on_the_version(
             assert units["schema"] == "bi.schema/v1.1@5.0.0"
             page.shoot("2-added")
 
-            # A new type is talked through: the one AI panel opens with it written.
-            page.click_text("#bi-b-sg-table tr[data-row=s2]", "和 AI 討論")
-            page.ai_opened("schema")
-            page.wait("document.getElementById('bi-ai-msg').value.includes('Mission')")
-            asked = page.run("document.getElementById('bi-ai-msg').value")
-            assert "新增類型 Mission" in asked and "太空任務 FAKE-MISSION 要追蹤里程碑" in asked
-            assert not re.search(r"[0-9a-f]{12}", page.text_of("bi-ai")), "no digest (F6)"
-            page.shoot("3-ai")
-            page.click("#bi-ai-close")
+            # A new type has no AI discussion any more (owner 2026-11-20): 「不要」 takes the
+            # row off at once, and 復原 in the status line brings it back.
+            assert "和 AI 討論" not in page.text_of("bi-b-sg-table")
+            assert "待釐清" not in page.text_of("bi-b-sg-table")
             page.click_text("#bi-b-sg-table tr[data-row=s2]", "不要")
-            page.see("bi-b-sg-table", "✕ 不要")
-            # A 「不要」 by mistake goes back to undecided, and can be decided again.
-            page.click_text("#bi-b-sg-table tr[data-row=s2]", "改回待決定")
-            page.wait("!document.getElementById('bi-b-sg-table').textContent.includes('✕ 不要')")
-            assert "和 AI 討論" in page.text_of("bi-b-sg-table")
+            page.wait("!document.querySelector('#bi-b-sg-table tr[data-row=s2]')")
+            page.see("bi-b-sg-status", "已移除「新增類型 Mission」")
+            page.shoot("3-removed")
+            page.click_text("#bi-b-sg-status", "復原")
+            page.wait("Boolean(document.querySelector('#bi-b-sg-table tr[data-row=s2]'))")
+            page.see("bi-b-sg-status", "已復原")
             page.click_text("#bi-b-sg-table tr[data-row=s2]", "不要")
-            page.see("bi-b-sg-table", "✕ 不要")
+            page.wait("!document.querySelector('#bi-b-sg-table tr[data-row=s2]')")
             assert len(model.requests) == 1, "one press, one question to the model"
             # A reload shows the same suggestion and its decisions again.
             page.reload()
             page.click("#bi-views [data-bi-view=build]")
             page.stage("schema")
+            page.click("#bi-b-adv-schema > summary")
             page.see("bi-b-sg-table", "已加入")
-            assert "✕ 不要" in page.text_of("bi-b-sg-table")
+            assert "新增類型 Mission" not in page.text_of("bi-b-sg-table")

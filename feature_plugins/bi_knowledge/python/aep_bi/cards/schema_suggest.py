@@ -7,10 +7,12 @@ checks of `schema_fit`, so it does not depend on the extraction method an ingest
 writes no card. It costs the model only when a person presses the button.
 
 Every suggestion carries a quote found in the source; what the model could not quote is left
-out and counted, and an invented type that already exists becomes a question, as in a run.
-「不用改」 is an answer. A person applies a row or rejects it: a new field or allowed value
-goes through a draft, publish and upgrade, which a vault turns into units on its version, not a
-new version (`schema_merge`); anything else is talked through in the schema AI panel.
+out and counted. A row is a change or nothing (owner 2026-11-20: 「有就有，沒有就沒有」):
+the model is not asked for questions, and an item that is only a question (an invented type
+that already exists, say) is no row. 「不用改」 is an answer. A person applies a row or rejects
+it, and a rejected row leaves the table at once with 復原 (`reopen`) as the way back: a new
+field or allowed value goes through a draft, publish and upgrade, which a vault turns into
+units on its version, not a new version (`schema_merge`); anything else is a draft edit.
 
 The latest suggestion of a dataset is kept in its folder, so a reload shows it again.
 """
@@ -45,12 +47,11 @@ MAX_ATTEMPTS = 2
 APPLYING = "applying"
 #: After this long an add is taken as stopped (the host restarted in the middle).
 STUCK_SECONDS = 15 * 60
-#: What a row may be: the three schema changes, and a question the model could not settle.
+#: What a row may be: the three schema changes. A question is never a row (owner 2026-11-20).
 KINDS = (
     schema_fit.EXTEND_SCHEMA,
     schema_fit.DICTIONARY_CHANGE,
     schema_fit.PROPOSE_TYPE,
-    schema_fit.NEEDS_CLARIFICATION,
 )
 _LOCK = threading.Lock()
 
@@ -63,7 +64,8 @@ The schema's card types and their fields:
 
 Answer with one JSON object only: {{"items": [...]}}. For an item that fits (update_card or
 create_card) give only "summary", "action", "card" and a short "quote". "quote" is always
-copied exactly from the excerpt."""
+copied exactly from the excerpt. Here do not answer needs_clarification: either the schema
+needs a change you can name, or the item fits."""
 
 
 def _path(store: BiStore) -> Path:
@@ -289,6 +291,10 @@ def _work(
                     if not item["locator"]:
                         state["unquoted"] += 1  # no quote in the source: never a suggestion
                         continue
+                    if schema_fit.NEEDS_CLARIFICATION in item["actions"] and not set(
+                        item["actions"]
+                    ) & set(KINDS):
+                        continue  # a question, not a change: no row (owner 2026-11-20)
                     if not set(item["actions"]) & set(KINDS):
                         state["fits"] += 1
                         continue
@@ -357,7 +363,7 @@ def _what(kind: str, given: Mapping[str, Any], item: Mapping[str, Any]) -> str:
         return f"用語 {given.get('type') or ''}.{given.get('field')}：{given.get('value')}{mapped}"
     if kind == schema_fit.PROPOSE_TYPE:
         return f"新增類型 {given.get('name')}"
-    return f"待釐清：{item['summary']}"
+    return str(item["summary"])
 
 
 def _applies(reg: Registry, kind: str, given: Mapping[str, Any]) -> bool:
@@ -438,7 +444,7 @@ def reopen(workspace: Path, dataset: str, suggestion_id: Any, row_id: Any) -> di
         if row["status"] == "applied":
             raise BiStoreError(
                 "suggest_row_applied",
-                "這一項已經加入 schema；要拿掉請用「和 AI 調整 schema」",
+                "這一項已經加入 schema；要拿掉請在 schema 草稿裡修改",
             )
         if row["status"] == APPLYING and not _stuck(row):
             raise BiStoreError("suggest_row_busy", "這一項正在加入，請等它完成")

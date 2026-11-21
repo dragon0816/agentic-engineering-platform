@@ -158,7 +158,7 @@ def test_a_reading_run_of_180_is_opened_worked_through_and_written(tmp_path: Pat
                 "[...document.querySelectorAll('#bi-b-cands thead th')]"
                 ".map(h => h.textContent).join()"
             )
-            assert heads == "卡片,欄位,提議值,狀態"
+            assert heads == "卡片,類型,欄位,提議值,狀態"
             page.shoot("opened")
 
             # -- its own scroller: 180 rows do not push the page ------------------------------
@@ -201,12 +201,18 @@ def test_a_reading_run_of_180_is_opened_worked_through_and_written(tmp_path: Pat
             scroller = _rect(page, "#bi-b-review-split .bi-scroller")
             assert scroller["top"] <= row["top"] < scroller["bottom"]
 
-            # -- filters: by type, then what is not decided ----------------------------------
-            _choose(page, "bi-b-cand-type", "Account")
-            _counted(page, f"顯示 {ACCOUNTS}／{MANY}")
-            shown = page.text_of("bi-b-cands")
-            assert "FAKE-000" in shown and f"FAKE-{ACCOUNTS:03d}" not in shown
-            assert _rows(page) == ACCOUNTS
+            # -- filters: 類型 (新卡片 / 修改既有卡片), then what is not decided ----------------
+            # Owner 2026-11-20: the filters are 類型 and 狀態 (the card type filter is gone).
+            # A reading run fills in cards the vault has: each is 修改既有卡片.
+            _choose(page, "bi-b-cand-type", "new")
+            _counted(page, f"顯示 0／{MANY}")
+            _choose(page, "bi-b-cand-type", "change")
+            _counted(page, f"顯示 {MANY}／{MANY}")
+            assert _rows(page) == MANY
+            assert page.run(
+                "[...document.querySelectorAll('#bi-b-cands tbody td[data-label=類型]')]"
+                ".every((c) => c.textContent === '修改既有卡片')"
+            )
             _choose(page, "bi-b-cand-type", "")
             _choose(page, "bi-b-cand-state", "pending")
             _shown(page, MANY - 2)
@@ -232,7 +238,7 @@ def test_a_reading_run_of_180_is_opened_worked_through_and_written(tmp_path: Pat
             page.see("bi-b-apply-status", f"已套用 {MANY - 2} 張。")
             print(f"accepted {MANY - 2} in {time.monotonic() - started:.1f} s")
             assert page.run("document.getElementById('bi-b-apply-all').textContent.trim()") == (
-                "全部套用（0 張）"
+                "接受顯示的待決定（0）"
             )
             assert "待決定 0" in page.text_of("bi-b-cand-count")
             page.see("bi-b-chips", f"已接受 {MANY - 1}")
@@ -662,10 +668,9 @@ def test_accepting_a_proposal_shows_what_it_loses_and_then_that_it_was_done(
     assert found is not None
     card = str(found["id"])
     shots = os.environ.get("AEP_UI_SHOTS")
-    row = (
-        "[...document.querySelectorAll('#bi-b-props-list > li')]"
-        ".find((r) => r.textContent.includes('FAKE-040'))"
-    )
+    # Owner 2026-11-20: a change is a row of 2c's one review list (類型 修改既有卡片), and its
+    # detail opens in the pane beside the list, as a new card's does.
+    row, pane = _row("FAKE-040"), "document.getElementById('bi-b-cand')"
     with _served(config, layout, _Model("none", {})) as server:
         with BiPage(
             tmp_path / "browser", server.address, Path(shots) / "review-table" if shots else None
@@ -673,73 +678,86 @@ def test_accepting_a_proposal_shows_what_it_loses_and_then_that_it_was_done(
             _review(page, dataset)
             page.wait(f"!!{row}")
 
-            # -- with no run, nothing stands between the step's top and the list ----------------
-            assert _rect(page, "#bi-b-review-split")["height"] == 0
-            page.click("#bi-b-props-jump")
-            assert page.text_of("bi-b-props-jump") == "待審提案 3 筆"
-            head = _rect(page, "#bi-b-props-h")
-            assert -1 <= head["top"] < 500, "the list is out of view"
+            # -- with no run, the list is the changes; no separate section or jump -------------
+            assert page.run("document.getElementById('bi-b-props') === null")
+            assert page.run("document.getElementById('bi-b-props-jump') === null")
+            assert _rows(page) == 3
+            assert page.text_of("bi-b-cand-count") == "顯示 3／3・待決定 3"
+            # 狀態 starts at 全部, so what gets accepted stays in sight.
+            assert page.run("document.getElementById('bi-b-cand-state').value") == ""
+            assert page.run(f"{row}.querySelector('td[data-label=類型]').textContent") == (
+                "修改既有卡片"
+            )
+            assert _rect(page, "#bi-b-cands")["top"] < 900, "the list is out of view"
 
             # -- side by side, whole, and what would go is said in numbers --------------------
-            cells = f"[...{row}.querySelectorAll('.bi-prop-sides td')]"
+            page.run(f"{row}.click()")
+            page.wait(f"{pane}.textContent.includes('FAKE-040')")
+            cells = f"[...{pane}.querySelectorAll('.bi-prop-sides td')]"
             assert page.run(f"{cells}.length") == 2
             assert page.run(f"{cells}[0].textContent.includes({json.dumps(LONG_BODY)})")
             assert page.run(f"{cells}[1].textContent.includes({json.dumps(SHORT_BODY)})")
             one = page.run(f"{cells}[0].getBoundingClientRect().top")
             assert one == page.run(f"{cells}[1].getBoundingClientRect().top"), "not side by side"
-            warning = str(page.run(f"{row}.querySelector('.bi-prop-loss').textContent"))
+            warning = str(page.run(f"{pane}.querySelector('.bi-prop-loss').textContent"))
             assert f"{len(SHORT_BODY)} 字" in warning and f"{len(LONG_BODY)} 字" in warning
-            said = str(page.run(f"{row}.textContent"))
+            said = str(page.run(f"{pane}.textContent"))
             assert "提議的出處成為它的出處" in said and "目前值的出處移到卡片的歷史" in said
+            # The card it changes opens as a side tab (owner 2026-11-20).
+            page.wait(f"sideHas('bi-card:' + {json.dumps(card)})")
+            page.see("bi-detail-body", "FAKE-040")
             page.shoot("proposal-before")
 
             # -- a value that loses text takes a second, named press --------------------------
-            page.run(f"{_button(row, '接受')}.click()")
-            confirm = _button(row, "確定取代")
+            page.run(f"{_button(pane, '接受')}.click()")
+            confirm = _button(pane, "確定取代")
             page.wait(f"!!{confirm}")
             assert store.fields(card)["body"]["value"] == LONG_BODY
 
             # -- pressed: an answer at once, and then the blue check, in the row ----------------
             _hold(page, "/proposals/")
             page.run(f"{confirm}.click()")
-            assert "儲存中" in str(page.run(f"{row}.textContent"))
+            assert "儲存中" in str(page.run(f"{pane}.textContent"))
             _free(page)
             page.wait(f"!!{row}.querySelector('.bi-state-accepted')")
-            page.see("bi-b-props-list", "要 commit")
             mark = page.run(
                 f"{row}.querySelector('.bi-state-accepted').getBoundingClientRect().top"
             )
             assert 0 <= float(mark) < 1000, "the answer is out of view of the press"
             assert store.fields(card)["body"]["value"] == SHORT_BODY
+            # On to the next row still undecided.
+            page.wait(f"{pane}.textContent.includes('FAKE-041')")
 
-            # -- it stays where it was, through the refresh that follows ------------------------
-            page.wait("document.getElementById('bi-b-props-h').textContent.includes('2 筆')")
+            # -- it stays where it was, under 全部, through the refresh that follows -----------
+            _counted(page, "待決定 2")
             page.wait(f"!!{row} && !!{row}.querySelector('.bi-state-accepted')")
-            assert not page.run(f"[...{row}.querySelectorAll('button')].length")
             page.shoot("proposal-accepted")
 
-            # -- rejecting has its own mark ------------------------------------------------------
-            other = (
-                "[...document.querySelectorAll('#bi-b-props-list > li')]"
-                ".find((r) => r.textContent.includes('FAKE-041'))"
-            )
-            page.run(f"{other}.querySelector('input').value = '虛構的理由'; 0")
-            page.run(f"{_button(other, '否決')}.click()")
+            # -- rejecting has its own mark, and needs no reason --------------------------------
+            other = _row("FAKE-041")
+            page.run(f"{_button(pane, '拒絕')}.click()")
             page.wait(f"!!{other}.querySelector('.bi-state-rejected')")
             kept = store.find("Technology", "FAKE-041")
             assert kept is not None and store.fields(str(kept["id"]))["body"]["value"] == LONG_BODY
 
             # -- the last one decided does not take the list away with its marks -----------------
-            last = (
-                "[...document.querySelectorAll('#bi-b-props-list > li')]"
-                ".find((r) => r.textContent.includes('FAKE-042'))"
-            )
-            page.run(f"{last}.querySelector('input').value = '虛構的理由'; 0")
-            page.run(f"{_button(last, '否決')}.click()")
+            last = _row("FAKE-042")
+            page.wait(f"{pane}.textContent.includes('FAKE-042')")
+            page.run(f"{pane}.querySelector('input').value = '虛構的理由'; 0")
+            page.run(f"{_button(pane, '拒絕')}.click()")
             page.wait(f"!!{last}.querySelector('.bi-state-rejected')")
-            page.wait("document.getElementById('bi-b-props-h').textContent.includes('0 筆')")
-            assert not page.run("document.getElementById('bi-b-props').hidden")
+            _counted(page, "待決定 0")
             assert page.run(f"!!{row}.querySelector('.bi-state-accepted')")
+            listed = _ok(_call(workspace, "GET", "/api/bi/proposals", dataset=dataset))
+            reasons = {p["card_name"]: p["reason"] for p in listed["decided"]}
+            assert reasons["FAKE-041"] is None and reasons["FAKE-042"] == "虛構的理由"
+
+            # -- 狀態 filters: the decided rows are there under their own status -------------------
+            _choose(page, "bi-b-cand-state", "accepted")
+            _shown(page, 1)
+            _choose(page, "bi-b-cand-state", "rejected")
+            _shown(page, 2)
+            _choose(page, "bi-b-cand-state", "")
 
             # -- nothing left to decide: the step stays open, and coming back finds the marks ----
             step = "document.querySelector('#bi-build-steps [data-stage=review]')"
@@ -747,33 +765,31 @@ def test_accepting_a_proposal_shows_what_it_loses_and_then_that_it_was_done(
             page.stage("schema")
             assert not page.run(f"{step}.disabled")
             page.stage("review")
-            assert page.run(f"!!{row}.querySelector('.bi-state-accepted')")
+            page.wait(f"!!{row} && !!{row}.querySelector('.bi-state-accepted')")
             assert page.run(f"!!{last}.querySelector('.bi-state-rejected')")
 
-            # -- a failure says so in the row, and nothing looks done ----------------------------
+            # -- back to 待決定 gives the value back --------------------------------------------
+            page.run(f"{row}.click()")
+            page.wait(f"!!{_button(pane, '待決定')} && !{_button(pane, '待決定')}.disabled")
+            page.run(f"{_button(pane, '待決定')}.click()")
+            page.wait(f"!{row}.querySelector('.bi-state-accepted')")
+            assert store.fields(card)["body"]["value"] == LONG_BODY
+
+            # -- a failure says so in the pane, and nothing looks done ---------------------------
             page.run(
                 "(() => { const real = window.fetch; window.__realFetch = real;"
                 " window.fetch = (u, o) => String(u).includes('/proposals/')"
                 ' ? Promise.resolve(new Response(\'{"code":"boom","message":"存不了"}\','
                 " {status: 500})) : real(u, o); })()"
             )
-            page.run(
-                "el('bi-b-props-list').prepend(biProposalRow("
-                "{...bi.proposalsDecided[0].item, card_name: 'FAKE-999'}, biDataset())); 0"
-            )
-            failing = (
-                "[...document.querySelectorAll('#bi-b-props-list > li')]"
-                ".find((r) => r.textContent.includes('FAKE-999'))"
-            )
-            page.run(f"{_button(failing, '接受')}.click()")
-            confirm_failing = _button(failing, "確定取代")
-            page.wait(f"!!{confirm_failing}")
-            page.run(f"{confirm_failing}.click()")
-            page.wait(f"{failing}.textContent.includes('存不了')")
-            assert not page.run(f"!!{failing}.querySelector('.bi-state-accepted')")
-            assert page.run(
-                f"[...{failing}.querySelectorAll('button')].some(b => b.textContent === '接受')"
-            )
+            page.run(f"{row}.click()")
+            page.wait(f"!!{_button(pane, '接受')} && !{_button(pane, '接受')}.disabled")
+            page.run(f"{_button(pane, '接受')}.click()")
+            page.wait(f"!!{_button(pane, '確定取代')}")
+            page.run(f"{_button(pane, '確定取代')}.click()")
+            page.wait(f"{pane}.textContent.includes('存不了')")
+            assert not page.run(f"!!{row}.querySelector('.bi-state-accepted')")
+            assert page.run(f"!!{_button(pane, '接受')}")
             page.run("window.fetch = window.__realFetch")
 
 
@@ -835,16 +851,17 @@ def test_the_page_says_when_a_value_comes_with_no_citation_and_history_keeps_the
             tmp_path / "browser", server.address, Path(shots) / "review-table" if shots else None
         ) as page:
             _review(page, dataset)
-            page.wait("!!document.querySelector('#bi-b-props-list .bi-prop-bare')")
-            said = page.run("document.querySelector('#bi-b-props-list .bi-prop-bare').textContent")
+            row, pane = _row("FAKE-040"), "document.getElementById('bi-b-cand')"
+            page.wait(f"!!{row}")
+            page.run(f"{row}.click()")
+            page.wait(f"!!{pane}.querySelector('.bi-prop-bare')")
+            said = page.run(f"{pane}.querySelector('.bi-prop-bare').textContent")
             assert "沒有出處" in str(said) and "目前值的出處移到卡片的歷史" in str(said)
-            page.click("#bi-b-props-jump")
             page.shoot("proposal-no-citation")
-            row = "document.querySelector('#bi-b-props-list > li')"
-            page.run(f"{_button(row, '接受')}.click()")
-            page.wait(f"!!{_button(row, '確定取代')}")
-            page.run(f"{_button(row, '確定取代')}.click()")
-            page.wait("!!document.querySelector('#bi-b-props-list .bi-state-accepted')")
+            page.run(f"{_button(pane, '接受')}.click()")
+            page.wait(f"!!{_button(pane, '確定取代')}")
+            page.run(f"{_button(pane, '確定取代')}.click()")
+            page.wait(f"!!{row}.querySelector('.bi-state-accepted')")
             assert store.fields(card)["body"]["value"] == SHORT_BODY
             assert not [e for e in store.evidence(card) if e["field"] == "body"]
 
@@ -952,25 +969,29 @@ def test_apply_all_accepts_what_the_filters_show_and_says_how_far_it_is(tmp_path
         with BiPage(tmp_path / "browser", server.address) as page:
             _review(page, dataset)
             _shown(page, 45)
-            page.wait(f"{button}.textContent.trim() === '全部套用（45 張）'")
+            page.wait(f"{button}.textContent.trim() === '接受顯示的待決定（45）'")
             assert not page.run(f"{button}.disabled")
-            assert "套用所有待決定的" in page.text_of("bi-b-apply-note")
-            assert "匯入寫入所有已接受的" in page.text_of("bi-b-apply-note")
+            assert "接受可改回待決定" in page.text_of("bi-b-apply-note")
+            assert "匯入寫入已接受的新卡片" in page.text_of("bi-b-apply-note")
             assert (
                 page.run("document.getElementById('bi-b-apply-import').textContent.trim()")
                 == "全部接受並匯入（45 張）"
             )
 
             # -- the filters decide what it takes, and the label says so ----------------------
-            _choose(page, "bi-b-cand-type", "Account")
-            _counted(page, f"顯示 {ACCOUNTS}／45")
-            assert page.run(f"{button}.textContent.trim()") == f"全部套用（{ACCOUNTS} 張）"
-            assert "只套用目前篩選顯示的" in page.text_of("bi-b-apply-note")
+            # (Owner 2026-11-20: 類型 and 狀態 are the filters; a reading run fills in cards the
+            # vault has, so every row is 修改既有卡片 and 新卡片 shows none.)
+            _choose(page, "bi-b-cand-type", "new")
+            _counted(page, "顯示 0／45")
+            assert page.run(f"{button}.textContent.trim()") == "接受顯示的待決定（0）"
+            assert page.run(f"{button}.disabled")
+            _choose(page, "bi-b-cand-type", "change")
+            _counted(page, "顯示 45／45")
 
             # -- while it works: n/N, the name and the seconds, beside the button -----------
             _hold(page, "/accept")
             page.click("#bi-b-apply-all")
-            page.see(status, f"套用中 0/{ACCOUNTS}：FAKE-000 等 20 張・")
+            page.see(status, "套用中 0/45：FAKE-000 等 20 張・")
             assert re.search(r"・\d+ 秒$", page.text_of(status))
             assert page.run(f"{button}.getAttribute('aria-busy')") == "true"
             assert page.run(f"{button}.disabled")
@@ -979,22 +1000,21 @@ def test_apply_all_accepts_what_the_filters_show_and_says_how_far_it_is(tmp_path
             _free(page)
 
             # -- it ends in place: what was applied, what was not and why -------------------
-            page.see(status, f"已套用 {ACCOUNTS - 1} 張；1 張未套用：FAKE-005：")
+            page.see(status, "已套用 44 張；1 張未套用：FAKE-005：")
             assert "這張候選卡還有錯誤，修正後才能接受" in page.text_of(status)
             assert page.run(f"{button}.getAttribute('aria-busy')") is None
             assert "套用中" not in page.text_of(status)
 
             # -- the list is drawn again: marks, counts and the button --------------------
-            _counted(page, f"待決定 {45 - ACCOUNTS + 1}")
+            _counted(page, "待決定 1")
             assert page.run(f"!!{_row('FAKE-001')}.querySelector('.bi-state-accepted')")
             assert not page.run(f"!!{_row('FAKE-005')}.querySelector('.bi-state-accepted')")
-            assert page.run(f"{button}.textContent.trim()") == "全部套用（1 張）"
-            page.see("bi-b-chips", f"已接受 {ACCOUNTS - 1}")
+            assert page.run(f"{button}.textContent.trim()") == "接受顯示的待決定（1）"
+            page.see("bi-b-chips", "已接受 44")
             assert not page.run("document.getElementById('bi-b-next4').disabled")
     reviews = {c["name"]: c["review"] for c in staging.candidates(run_id)}
-    assert sum(r == "accepted" for r in reviews.values()) == ACCOUNTS - 1
+    assert sum(r == "accepted" for r in reviews.values()) == 44
     assert reviews["FAKE-005"] == "pending"
-    assert all(reviews[f"FAKE-{i:03d}"] == "pending" for i in range(ACCOUNTS, 45))
 
 
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
@@ -1057,3 +1077,30 @@ def test_accept_and_import_writes_once_reports_what_it_left_and_can_be_undone(
             page.click_text("#bi-b-apply-status", "復原這次匯入")
             page.see(status, "已復原這次匯入。")
     assert summarised() == []
+
+
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_cards_all_accepted_already_can_still_be_imported(tmp_path: Path) -> None:
+    """Owner 2026-11-20: every candidate was 已接受 (some with warnings), both buttons said
+    0 張 and nothing could be imported. The one button now writes what is accepted."""
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    dataset = _vault(tmp_path, workspace, [_page(i) for i in range(40, 44)])
+    run_id = _reading(workspace, dataset, kind="ingest")
+    staging, store = Staging(workspace, dataset), BiStore(workspace, dataset)
+    ids = [c["id"] for c in staging.candidates(run_id)]
+    _ok(route(workspace, "alice", "POST", f"/api/bi/runs/{run_id}/accept", {},
+              {"dataset": dataset, "ids": ids}))  # fmt: skip
+    assert all(c["review"] == "accepted" for c in staging.candidates(run_id))
+    button, status = "document.getElementById('bi-b-apply-import')", "bi-b-apply-status"
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(tmp_path / "browser", server.address) as page:
+            _review(page, dataset)
+            _shown(page, 4)
+            page.wait(f"{button}.textContent.trim() === '匯入已接受的（4 張）'")
+            assert not page.run(f"{button}.disabled")
+            assert page.run("document.getElementById('bi-b-apply-all').disabled")
+            page.click("#bi-b-apply-import")
+            page.see(status, "已匯入已接受的卡片")
+            page.wait(f"{button}.disabled")
+    assert {str(c["name"]) for c in store.card_rows()} >= {f"FAKE-{i:03d}" for i in range(40, 44)}

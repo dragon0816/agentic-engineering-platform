@@ -111,7 +111,7 @@ def test_ingest_into_a_vault_and_both_dashboard_sources(
         page.see("bi-b-trial-result", "試跑完成")
         assert "FicTech" in page.text_of("bi-b-trial-result")
         assert len(store.card_rows()) == before
-        page.click("[data-stage=method] [data-bi-next=review]")
+        # 審核 shows with Ingest (owner 2026-11-20).
         page.wait("!document.querySelector('#bi-view-build .kp-stage[data-stage=review]').hidden")
         page.click("#bi-b-start")
         page.wait("document.querySelectorAll('#bi-b-cands button').length === 1")

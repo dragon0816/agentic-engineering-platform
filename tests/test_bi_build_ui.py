@@ -104,12 +104,14 @@ def test_build_and_import_steps_in_a_browser(served: Any, tmp_path: Path) -> Non
         click("#bi-views [data-bi-view=build]")
         wait(stage_shown("source"))
         wait("document.getElementById('bi-status-build').hidden")
-        # Three steps; step 2's parts show only in step 2. The schema and the skills need no
-        # source; trying, reviewing and writing do.
+        # Three steps (owner 2026-11-20: Data input, Ingest, Benchmark testing); step 2's old
+        # parts are one view and its schema and rules are its gear settings. Ingest's view opens
+        # with no source, its button shut; reviewing and writing need one.
         assert run("document.querySelectorAll('#bi-stepper [data-stage]').length") == 3
         assert run("document.getElementById('bi-substeps').hidden")
-        assert all(locked(s) for s in ("method", "review", "commit", "result"))
-        assert not locked("schema") and not locked("test")
+        assert all(locked(s) for s in ("review", "commit", "result"))
+        assert not locked("schema") and not locked("method") and not locked("test")
+        assert run("document.getElementById('bi-b-start').disabled")
         assert "資料集「demo」" in text_of("bi-b-target")
 
         # -- 1 來源 ---------------------------------------------------------------------
@@ -129,14 +131,19 @@ def test_build_and_import_steps_in_a_browser(served: Any, tmp_path: Path) -> Non
         # -- 3 方法與試跑: candidates shown, nothing written -------------------------------
         click("#bi-build-steps [data-stage=method]")
         wait(stage_shown("method"))
+        # The trial is an Ingest setting: in the stage's gear tab.
+        click("#bi-b-gear-ingest")
+        wait("document.getElementById('bi-b-set-ingest').closest('.extra-panel') !== null")
         click("#bi-b-trial")
         wait("document.getElementById('bi-b-trial-result').textContent.includes('試跑完成')")
         assert "EtherCAT" in text_of("bi-b-trial-result")
         assert not cards_db.exists()
 
-        # -- 4 逐卡審核 ------------------------------------------------------------------
-        click("[data-stage=method] [data-bi-next=review]")
+        # -- 4 逐卡審核: in the same view as Ingest ------------------------------------
         wait(stage_shown("review"))
+        assert not run(
+            "document.querySelector('#bi-view-build .kp-stage[data-stage=method]').hidden"
+        )
         click("#bi-b-start")
         wait("document.querySelectorAll('#bi-b-cands button').length === 2")
         click("#bi-b-cands button")
@@ -188,11 +195,12 @@ def test_build_and_import_steps_in_a_browser(served: Any, tmp_path: Path) -> Non
         assert run("document.getElementById('bi-b-ver').hidden")
         click("#bi-stepper [data-stage=ingest]")  # back to where step 2 was left
         wait(stage_shown("result"))
-        assert not run("document.getElementById('bi-substeps').hidden")
+        assert run("document.getElementById('bi-substeps').hidden")
 
-        # -- 2 Schema: a draft published as a local BI version, then the upgrade ------------
-        click("#bi-build-steps [data-stage=schema]")
-        wait(stage_shown("schema"))
+        # -- 2 Schema, in Ingest's gear tab: a draft published as a local BI version, then
+        # the upgrade ---------------------------------------------------------------------
+        click("#bi-b-gear-ingest")
+        wait("!document.getElementById('bi-b-set-ingest').hidden")
         click("#bi-b-draft-new")
         wait("!document.getElementById('bi-b-draft').hidden")
         run(

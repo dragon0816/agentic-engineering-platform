@@ -8,7 +8,12 @@ sub-agents (`persistent_agents`) with their bot binding, and the BI collection b
 hand edits of `telegram.json` and `host.json`.
 
 A bot is bound by the *name* of the environment variable that holds its token,
-never the token: a value shaped like a token is refused (`bot_token_value_refused`).
+never the token: a value shaped like a token in the name field is refused
+(`bot_token_value_refused`). A token pasted into the bot's own token field (owner
+decision 2026-11-20) is written only to this Windows user's environment
+(`HKCU\\Environment` through `telegram_settings.windows_user_environment`, never a
+command line) and to the running process, so the reload uses it at once; no file,
+response or error carries it. Deleting a bot leaves its variable in place.
 `host.json` gains the mapping `<secret> -> <variable>`; `telegram.json` (or
 `telegram.disabled.json` while the conversation bot is off) gains the bot record.
 Every write is atomic, edits only the keys it owns and keeps every other field;
@@ -25,7 +30,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 
 from channels.telegram import TelegramIngressConfig, TelegramSender
 from common.base import Contract
@@ -38,12 +43,20 @@ from host_runtime.persistent_agents import (
     installed_profiles,
     installed_skills,
 )
-from host_runtime.telegram_settings import DISABLED_FILE, TelegramSenderEntry
+from host_runtime.telegram_settings import (
+    DISABLED_FILE,
+    TelegramSenderEntry,
+    TelegramSettingsError,
+    UserEnvironmentWriter,
+    windows_user_environment,
+)
 from host_runtime.workspace import write_atomically
 
 _VARIABLE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]{0,99}$")
 #: A Bot API token (`123456:ABC…`), anywhere in what was typed.
 _TOKEN_LIKE = re.compile(r"\d{5,}:[A-Za-z0-9_-]{20,}")
+#: What the token field accepts: a whole Bot API token.
+_TOKEN_SHAPE = re.compile(r"^\d{5,}:[A-Za-z0-9_-]{35,}$")
 AGENT_SECRET_PREFIX = "telegram_agent_"
 COLLECT_SECRET_PREFIX = "telegram_collect_"
 BI_FEATURE = "bi-knowledge"
@@ -56,7 +69,10 @@ class AgentSettingsError(Exception):
 class BotForm(Contract):
     """A bot binding as the page sends it: the token's environment variable name."""
 
+    # Empty: the default name for this bot (`default_variable`).
     variable: str = Field(default="", max_length=200)
+    # Write-only; empty keeps whatever the variable already holds.
+    token: SecretStr | None = None
     senders: tuple[TelegramSenderEntry, ...] = Field(default=(), max_length=50)
     enabled: bool = True
 
@@ -83,6 +99,62 @@ class CollectionBotForm(Contract):
     bot: BotForm
 
 
+#: How long a Skill's one-line description may be in the agent form.
+SKILL_DESCRIPTION_CHARS = 80
+
+
+def _one_line(text: str, limit: int = SKILL_DESCRIPTION_CHARS) -> str:
+    """The first sentence of `text` on one line, cut to `limit` characters."""
+    line = " ".join(text.split())
+    for end in ("。", ". ", "！", "? ", "？"):
+        at = line.find(end)
+        if 0 < at:
+            line = line[: at + len(end.rstrip())]
+    return line if len(line) <= limit else line[: limit - 1].rstrip() + "…"
+
+
+def skill_choices(skills_directory: Path) -> list[dict[str, str]]:
+    """The installed Skills for the agent form: `key` (`namespace/name@version`),
+    a `name` (the manifest's `alias`, else the Skill's name) and a one-line
+    `description` (`selector_hint`, else the first sentence of `instructions`),
+    both as stored and never invented; sorted by name. An unreadable manifest
+    still lists its key with an empty description."""
+    choices: list[dict[str, str]] = []
+    for key in installed_skills(skills_directory):
+        namespace, _, rest = key.partition("/")
+        name, _, version = rest.partition("@")
+        manifest: dict[str, Any] = {}
+        try:
+            raw = json.loads(
+                (skills_directory / f"{namespace}__{name}__{version}.json").read_text(
+                    encoding="utf-8-sig"
+                )
+            )
+            first = raw[0] if isinstance(raw, list) and raw else raw
+            if isinstance(first, dict):
+                manifest = first
+        except (OSError, ValueError):
+            pass
+        alias = manifest.get("alias")
+        hint = manifest.get("selector_hint")
+        instructions = manifest.get("instructions")
+        description = (
+            hint
+            if isinstance(hint, str) and hint.strip()
+            else instructions
+            if isinstance(instructions, str)
+            else ""
+        )
+        choices.append(
+            {
+                "key": key,
+                "name": alias if isinstance(alias, str) and alias else name,
+                "description": _one_line(description),
+            }
+        )
+    return sorted(choices, key=lambda item: (item["name"].lower(), item["key"]))
+
+
 def checked_variable(value: str) -> str:
     """The environment variable name, or a refusal; a pasted token is never kept."""
     text = value.strip()
@@ -91,6 +163,54 @@ def checked_variable(value: str) -> str:
     if not _VARIABLE.fullmatch(text):
         raise AgentSettingsError("bot_variable_invalid")
     return text
+
+
+def default_variable(kind: str, name: str) -> str:
+    """`AEP_TG_<AGENT ID>` or `AEP_TG_BI_<BOT NAME>`, upper case, a valid name."""
+    suffix = re.sub(r"[^A-Za-z0-9_]", "_", name).upper()
+    return f"AEP_TG_{kind}{suffix}"[:100]
+
+
+def checked_token(value: SecretStr | None) -> str:
+    """The pasted token ('' when none), or `bot_token_invalid`; never echoed."""
+    token = "" if value is None else value.get_secret_value().strip()
+    if token.lower().startswith("bot") and token[3:4].isdigit():
+        token = token[3:]  # copied from a Bot API URL (`.../bot123:ABC/...`)
+    if token and not _TOKEN_SHAPE.fullmatch(token):
+        raise AgentSettingsError("bot_token_invalid")
+    return token
+
+
+def _check_variable_free(config_path: Path, secret: str, variable: str, token: str) -> None:
+    """Refuse a token that would silently retarget another credential or overwrite
+    a variable that is not a bot token (`bot_variable_in_use`)."""
+    if not token:
+        return
+    current = os.environ.get(variable, "")
+    if current == token:
+        return
+    for item in _read_json(config_path).get("credentials", []):
+        if (
+            isinstance(item, dict)
+            and item.get("environment_variable") == variable
+            and item.get("secret") != secret
+        ):
+            raise AgentSettingsError("bot_variable_in_use")
+    if current and not _TOKEN_SHAPE.fullmatch(current):
+        raise AgentSettingsError("bot_variable_in_use")
+
+
+def _store_token(store: UserEnvironmentWriter | None, variable: str, token: str) -> None:
+    """Persist the token in this user's environment and the running process."""
+    if not token:
+        return
+    try:
+        (store or windows_user_environment)(variable, token)
+    except TelegramSettingsError:
+        raise AgentSettingsError("bot_token_store_unsupported") from None
+    except OSError:
+        raise AgentSettingsError("bot_token_store_failed") from None
+    os.environ[variable] = token
 
 
 def _senders(entries: tuple[TelegramSenderEntry, ...], default_actor: str) -> list[dict[str, Any]]:
@@ -186,10 +306,16 @@ def _new_agent_id(store: AgentStore) -> str:
 
 
 def save_agent(
-    config_path: Path, layout: HostLayout, form: AgentForm, *, default_actor: str
+    config_path: Path,
+    layout: HostLayout,
+    form: AgentForm,
+    *,
+    default_actor: str,
+    token_store: UserEnvironmentWriter | None = None,
 ) -> tuple[PersistentAgent, CompanyHostConfiguration | None]:
     """Create or update an agent and its bot binding; the host configuration when
-    host.json changed."""
+    host.json changed. A pasted token is stored (`token_store`) before any file is
+    written, so a refusal leaves every file as it was."""
     item = AgentForm.model_validate(form)
     store = AgentStore(layout.workspace_root)
     agent_id = item.id.strip() or _new_agent_id(store)
@@ -205,13 +331,21 @@ def save_agent(
         )
     except ValueError:
         raise AgentSettingsError("agent_invalid") from None
-    variable = None if item.bot is None else checked_variable(item.bot.variable)
+    variable = (
+        None
+        if item.bot is None
+        else checked_variable(item.bot.variable.strip() or default_variable("", agent_id))
+    )
+    token = "" if item.bot is None else checked_token(item.bot.token)
     senders = None if item.bot is None else _senders(item.bot.senders, default_actor)
     bot_name = f"agent-{agent_id}"
     secret = f"{AGENT_SECRET_PREFIX}{agent_id}"
     updated: CompanyHostConfiguration | None = None
     if item.bot is not None and telegram_file(layout) is None:
         raise AgentSettingsError("telegram_not_configured")
+    if variable is not None:
+        _check_variable_free(config_path, secret, variable, token)
+        _store_token(token_store, variable, token)
     try:
         store.save(agent)
     except AgentStoreError as error:
@@ -254,7 +388,12 @@ def delete_agent(layout: HostLayout, agent_id: str) -> bool:
 
 
 def save_collection_bot(
-    config_path: Path, layout: HostLayout, form: CollectionBotForm, *, default_actor: str
+    config_path: Path,
+    layout: HostLayout,
+    form: CollectionBotForm,
+    *,
+    default_actor: str,
+    token_store: UserEnvironmentWriter | None = None,
 ) -> CompanyHostConfiguration:
     """Create or update a BI collection bot (its record keeps any other field)."""
     item = CollectionBotForm.model_validate(form)
@@ -264,7 +403,8 @@ def save_collection_bot(
         raise AgentSettingsError("bot_name_invalid")
     if not target:
         raise AgentSettingsError("bot_target_missing")
-    variable = checked_variable(item.bot.variable)
+    variable = checked_variable(item.bot.variable.strip() or default_variable("BI_", name))
+    token = checked_token(item.bot.token)
     senders = _senders(item.bot.senders, default_actor)
     path = telegram_file(layout)
     if path is None:
@@ -284,6 +424,8 @@ def save_collection_bot(
         if isinstance(credential, dict) and isinstance(credential.get("name"), str)
         else f"{COLLECT_SECRET_PREFIX}{name}"
     )
+    _check_variable_free(config_path, secret, variable, token)
+    _store_token(token_store, variable, token)
     updated = _bind(config_path, secret, variable)
     values = {
         "name": name,
@@ -386,6 +528,6 @@ def agents_view(
         },
         "agents": agents,
         "collection_bots": collection,
-        "skills": list(installed_skills(layout.skills)),
+        "skills": skill_choices(layout.skills),
         "profiles": installed_profiles(layout.agents),
     }

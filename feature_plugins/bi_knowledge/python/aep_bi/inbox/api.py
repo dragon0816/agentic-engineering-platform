@@ -3,6 +3,9 @@
     GET  /api/bi/inbox?dataset=<vault dataset>   the vault's domains with bot and times,
                                                  and the Host's BI collection bots
     POST /api/bi/inbox/settings                  {domain, bot, enabled, collect_at, review_at}
+    POST /api/bi/inbox/bot-time                  {bot, target, enabled, collect_at, dry_run?}
+         the Settings → Agents bot form (owner 2026-11-21): the domain `target` names
+         (exactly one), bound to `bot` with its switch and collect time; review time kept
 
 A bot is one configured in the Host's Telegram settings (`collection_bots`, feature
 `bi-knowledge`); its token stays a secret reference there. Every answer is immediate.
@@ -52,6 +55,43 @@ def bots() -> list[dict[str, str]]:
     return [{"name": b.name, "target": b.target} for b in listed if b.feature == FEATURE_NAME]
 
 
+def unresolved(target: str, found: list[dom.Domain]) -> str:
+    """Why `target` is not exactly one domain, for the bot form's save line."""
+    if not found:
+        return f"找不到領域「{target}」：填 BI 頁上的領域名稱（工作領域選單裡的名字）。"
+    names = "、".join(d.label for d in found)
+    return f"「{target}」對到 {len(found)} 個領域（{names}），請寫成「知識庫／領域」。"
+
+
+def _bot_time(inbox: Inbox, listed: list[dom.Domain], body: dict[str, Any]) -> Answer:
+    target = str(body.get("target") or "").strip()
+    bot = str(body.get("bot") or "").strip()
+    if not bot:
+        return _error(400, "bot_missing", "先填 bot 名稱")
+    found = dom.resolve(listed, target)
+    if len(found) != 1:
+        return _error(409, "domain_unresolved", unresolved(target, found))
+    domain = found[0]
+    given = body.get("collect_at")
+    collect_at = dom.parse_clock(given) if given else None
+    if given and collect_at is None:
+        return _error(400, "time_invalid", "時間要寫成 HH:MM（24 小時制），例如 07:30")
+    enabled = body.get("enabled") is True
+    if enabled and collect_at is None:
+        return _error(400, "collect_time_missing", "開啟前先填收集時間")
+    if body.get("dry_run") is True:
+        return 200, {"ok": True, "domain": {"domain": domain.key, "label": domain.label}}
+    kept = inbox.settings().get(domain.key)
+    saved = inbox.save_setting(
+        domain.key,
+        enabled=enabled,
+        collect_at=collect_at,
+        review_at=kept.review_at if kept else None,
+        bot=bot,
+    )
+    return 200, {"ok": True, "domain": _row(saved, domain, inbox)}
+
+
 def route(
     workspace: Path, actor: str, method: str, path: str, query: Mapping[str, str], given: Any
 ) -> Answer:
@@ -89,4 +129,6 @@ def route(
             domain.key, enabled=enabled, collect_at=collect_at, review_at=review_at, bot=bot
         )
         return 200, {"ok": True, "domain": _row(saved, domain, inbox)}
+    if path == PREFIX + "/bot-time":
+        return _bot_time(inbox, listed, body)
     return _error(404, "route_unknown", "沒有這個 BI 路徑")

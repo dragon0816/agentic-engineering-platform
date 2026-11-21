@@ -4208,11 +4208,21 @@ runs, candidates), `src/capabilities/bi_cards/runs.py` (rule-path run, review, c
 - **Evidence** (`bi.sqlite` table `evidence`: card, field, run, source id and name, locator,
   excerpt, basis, at). `GET /api/bi/cards/<id>` adds `"evidence": [{"field", "run_id", "source_id",
   "source_name", "locator", "excerpt", "basis", "at"}]` (newest first) and an `"id"` on each proposal.
-- **Proposals.** `POST /api/bi/cards/<id>/proposals/<pid> {"dataset", "action": "accept" | "reject",
-  "base_version", "reason"}` → `{"ok": true, "version"}`. Accept writes the proposed value as the
-  person's (`stale_edit` 409 when the card moved on, `reason_required` for a
-  `judgement` field) and closes the field's pending proposals; reject marks only that proposal
-  `rejected` and does not change the card version. Unknown or closed: 404 `proposal_unknown`.
+- **Proposals.** `POST /api/bi/cards/<id>/proposals/<pid> {"dataset", "action": "accept" | "reject"
+  | "pending", "base_version", "reason"}` → `{"ok": true, "version"}`. The reason is optional for every
+  action, judgement fields included (owner 2026-11-20; it used to be `reason_required` for a
+  `judgement` field) and kept when given. Accept writes the proposed value as the person's
+  (`stale_edit` 409 when the card moved on) and closes the field's pending proposals; reject marks
+  only that proposal `rejected` and does not change the card version; `pending` (back to 待決定)
+  reopens a decided one, and for an accepted one gives the field back its earlier value, source and
+  evidence as an `undo` history row (409 `proposal_moved_on` when the field changed since). Unknown
+  or closed: 404 `proposal_unknown`. `GET /api/bi/proposals?dataset=` → `{"proposals" [pending],
+  "decided" [the same shape plus `status` `accepted` | `rejected`, `reason`, `decided_by`,
+  `decided_at`]}` (≤ 200). An accepted proposal is still stored `superseded`; it is the one whose
+  value a person's history row wrote. `POST /api/bi/proposals/decide {"dataset", "action", "field",
+  "origin", "count", "reason"}` decides every pending proposal the filter shows, `confidence` and
+  `evidence_grade` included (owner 2026-11-20; `left_out` is now always 0); the reason is optional;
+  409 `proposals_changed` when `count` is not what the filter shows.
 
 ## BI schema drafts and dataset upgrade (BI ingest phase 2, owner 2026-10-27)
 
@@ -4475,9 +4485,20 @@ checks, quote location), `ai_runs.py` (runs, background job, retry), `runs.py` (
   `{done, chunks}`, `failures` `[{chunk, line_start, line_end, code, message, retryable}]`, `warnings`,
   `types`. Review, recheck and commit accept `review` and `partial`; cancel during `extracting` keeps the run
   `cancelled` when the job ends.
+- **Parallel parts, stop, restart (owner 2026-11-21).** Up to `extract.PARALLEL_PARTS` (4) chunks are read at
+  once; answers merge in document order, so candidates, ids and merges equal a sequential read. `progress` is
+  `{done: 0, chunks: N}` before the first model call (chunks outside a retry count as done). Cancel stops new
+  chunks and format retries; chunks under way finish (one call at most each), nothing of the attempt is
+  written, the run stays `cancelled`, and the `bi-ingest` task ends `stopped` (`failed` / `succeeded`
+  otherwise). The AI run view adds `working` (a thread of this Host still reads it; true after cancel until
+  the calls under way end) and `interrupted`. A run found `extracting` with no worker in this Host (Host
+  stopped or killed) becomes `partial` on its next view: the unwritten chunks of its last attempt (layout
+  `attempt`) become failures with code `interrupted`; with no chunk known yet the retry reads every chunk.
+  A chunk stopped before a format retry is a failure with code `cancelled`.
 - **Retry.** `POST /api/bi/runs/<id>/retry {"dataset"}` on a `partial` or `failed` AI run re-runs only the
   failed chunks in the background; new candidates merge into the stored ones (reviews kept). 409
-  `run_closed` when there is nothing to retry; 400 `model_unavailable`.
+  `run_closed` when there is nothing to retry; 400 `model_unavailable`. Chunks read before an interruption
+  answer from the answer cache.
 
 ## BI method sessions (Session B, phase 5)
 
@@ -5644,21 +5665,87 @@ Tests: `tests/test_agents_settings.py`, `tests/test_telegram_agent_bots.py`,
   senders are ignored. The conversation bot's `activity()` includes its agent bots' (rule 19).
 - **API.** `GET /api/settings/agents` → `{ok, writable, reload, telegram_configured, main, agents
   [+bot {name, variable, token_present, senders, enabled, running, problem}], collection_bots
-  [+purpose "BI 收集→<target>"], skills, profiles}`; `POST /api/settings/agents` (`AgentForm`:
-  id?, name, purpose, skills, profile?, bot? {variable, senders, enabled}),
+  [+purpose "BI 收集→<target>"], skills [{key, name, description}], profiles}` (2026-11-21:
+  `skills` items were bare keys; `name` = the manifest's `alias`, else the Skill name;
+  `description` = `selector_hint`, else the first sentence of `instructions`, ≤ 80 characters,
+  as stored; sorted by name; the page still accepts bare keys; `main.bot.senders[]` carry
+  `username`, the last `@username` that allowed sender wrote with (in memory,
+  `TelegramIngress.sender_usernames`, "" when unknown), used only by the page to turn a typed
+  username into the numeric id, never to allow or route a message); `POST /api/settings/agents` (`AgentForm`:
+  id?, name, purpose, skills, profile?, bot? {variable, token?, senders, enabled}),
   `/api/settings/agents/delete` {id}, `/api/settings/collection-bots` (`CollectionBotForm`: name,
   target, feature?, bot), `/api/settings/collection-bots/delete` {name}; 409 codes
   `bot_token_value_refused`, `bot_variable_invalid`, `bot_sender_invalid`,
   `telegram_not_configured`, `telegram_bots_invalid`, `agent_invalid`, `agent_unknown`,
-  `bot_unknown`, `settings_read_only`. A bot binding writes `host.json` credentials
+  `bot_unknown`, `settings_read_only`, `bot_token_invalid`, `bot_variable_in_use`,
+  `bot_token_store_unsupported`, `bot_token_store_failed`. A bot binding writes `host.json` credentials
   `telegram_agent_<id>` / `telegram_collect_<name>` (an existing collection bot keeps its secret)
   → the variable, and the bot into `telegram.json` (or `telegram.disabled.json`).
   `GET /api/agents` → main + sub-agents with `bot {enabled}` and `conversations` (kind
   `conversation` and read-only `delegation` entries of the agent's `profile`).
   `POST /api/conversations` accepts `{"agent": id}`; `/api/conversations` items carry `agent`.
+- **Pasted token (owner decision 2026-11-20).** `bot.variable` empty → `AEP_TG_<AGENT ID>` /
+  `AEP_TG_BI_<BOT NAME>` (upper case, other characters `_`). `bot.token` (write-only, optional;
+  a leading `bot` from a Bot API URL is dropped) must be `<digits ≥5>:<[A-Za-z0-9_-] ≥35>`, else
+  `bot_token_invalid`. Before any file is written it is refused with `bot_variable_in_use` when
+  another `host.json` credential maps the same variable (unless the variable already holds this
+  same token) or the variable holds a value that is not a bot token; then it is stored with
+  `AgentWeb.user_environment` (default `telegram_settings.windows_user_environment`: `winreg`
+  `HKCU\Environment` REG_SZ + `SendMessageTimeoutW(HWND_BROADCAST, WM_SETTINGCHANGE,
+  "Environment")`, no process, so the token is on no command line) and set in `os.environ`, so the
+  reload resolves it at once. Off Windows → `bot_token_store_unsupported` (set the variable in the
+  service environment and save with the token field empty); a registry error →
+  `bot_token_store_failed`; both write nothing. The token is never in `host.json`,
+  `telegram.json`, `agents.json`, a response, an error or a log: responses carry only
+  `token_present`. Empty token = the variable is used as it is; a new token overwrites it;
+  deleting a bot leaves its variable in place. A pasted token in `variable` stays
+  `bot_token_value_refused`.
+- **Bot identity (owner 2026-11-20).** Every bot in `GET /api/settings/agents` (main, agent,
+  collection) and every `bot` in `GET /api/agents` carries `username`, `title` (from Telegram
+  `getMe` with the token in its variable, `src/host_runtime/bot_identity.py`) and `variable`; the
+  main bot also `token_present`. Lookups run in parallel with a 3 s timeout, are cached per
+  SHA-256 fingerprint of origin + token (never the token; 1 h, failures 60 s) and cleared on every
+  Agents or Telegram settings save. Unresolved → `problem` (unless polling already set one):
+  `token_missing`, `token_invalid` (401/404), `network_unreachable`, `telegram_error`. For
+  `SETTLING_S` (60 s) after a save a failed lookup is returned but not cached, so the next
+  request asks Telegram again (2026-11-21). The page's
+  Telegram column shows `@username · state` first and the variable as secondary text; rows without
+  a bot show 「未綁定」 and a 「綁定」 button opening the form at the bot fieldset; the main row's
+  編輯 goes to the Telegram bot form; no sub-agents → 「還沒有子代理。」 (the 新增 agent button below the table is the only one); the
+  sidebar's Agents entries show a TG mark with `@username`. Tests use `tests/conftest.py`, which
+  keeps every test offline (`bot_identity.TRANSPORT_FACTORY`).
+- **Form outcome (owner 2026-11-21).** Each form's outcome is shown beside its save button
+  (`#agent-save-status` / `#collect-save-status`, `role=status`): 儲存中…, the reload note, or
+  「沒有儲存：<reason>」 for a client check or a server code; a saved row is highlighted and
+  scrolled into view. New bots start with the main bot's senders. A sender line that is not a
+  number is turned into the main sender with that username, else refused (「… 是 Telegram 名稱，
+  請填數字 id（可傳訊息給 @userinfobot 查）」). After a save the page re-reads
+  `GET /api/settings/agents` every 2 s for up to 30 s while `reload` is `waiting`/`applying` or
+  an enabled bot is neither running nor has a problem other than `network_unreachable`.
 - **Applying.** After a save the bots are rebuilt on the kept conversation-bot ingress and the
   polling loop restarts only once no Telegram turn or flow runs on any bot (`reload`: `waiting`,
   `applying`, `applied`, `not_running`, `failed`); no Agent Web restart.
+- **Collection bot questions (owner decision 2026-11-21).** A `TelegramCollector` sends to the
+  feature's `telegram_item` (collected, reply unchanged) a message with a link or a file, a `/`
+  command, or a Reply whose quoted text has `#<n>` (one of the bot's own item messages). Any other
+  words are a question (`telegram_collect.is_question`): `features.FeatureSet.telegram_question(item,
+  host, gateway)` returns `TelegramQuestion {tools: HostTool[], guidance}`, a `TelegramAnswer` (BI:
+  `UNBOUND`), or None. With tools, the collector's never-polled `asker` (`TelegramIngress` built by
+  `attach_telegram_bots` with the bot's token and senders, `session_prefix`
+  `telegram-collect-<name>`) runs `answer_question`: one `LocalAgent.converse` turn with
+  `allowed_tools` = those tool names, the guidance as `persona_guidance` and the tools offered via
+  `turn_host_tools` (they replace the Host's tools of the same name); request ids, admission,
+  at-most-once and the model client as any Telegram turn; no commands, flows or Workflows; the reply
+  is sent as text by the collection bot (files and buttons are not sent); typing indicator while it
+  runs. Sessions `telegram-collect-<name>-chat-<id>`. BI (`aep_bi.inbox.bot.Bot.question`): only
+  `bi__query`, its `dataset` forced to the bound domain's dataset (the card `domain` filter is left
+  to the model), guidance "answer only from this domain's BI cards; say when they do not cover it;
+  you cannot open links". No `bi__query` (BI Skill off or `bi-cards/query` not installed) →
+  `NO_QUERY_TOOL`; no asker or feature → `NO_ANSWERS`; no model → `AGENT_BOT_NO_MODEL`; no model is
+  asked in any of these. A message with a link and words is collected and not answered. Plain words
+  are no longer stored as a text source. Agent bots are unchanged and are not offered `bi__query`
+  (a Host tool; see Turn scope above). Tests: `tests/test_telegram_collect_questions.py`,
+  `tests/test_bi_inbox.py` (questions).
 
 ## Coding change at scale
 
@@ -7438,6 +7525,18 @@ BI inbox (`aep_bi.inbox`, `<workspace>/bi/inbox/inbox.sqlite`):
 - Page routes: `GET /api/bi/inbox?dataset=` (domains with bot and times; the Host's
   `bi-knowledge` collection bots), `POST /api/bi/inbox/settings {domain, bot, enabled,
   collect_at, review_at}` (`bot_unknown`, `time_invalid`, `collect_time_missing`).
+- Where the collect time is set (owner 2026-11-21): the working domain's row (bot, 開啟,
+  收集時間, 審核提醒, 儲存) in BI → 建立 → Data input ⚙ (`#bi-inbox-gear`, a vault only; under
+  全部領域 one line asks for a working domain); 管理 → Telegram 收集 stays the all-domains view.
+  Settings → Agents → 新增/編輯 BI 收集 bot has `#collect-time` (prefilled `18:00`, or the bound
+  domain's time) and saves bot and time together: `POST /api/bi/inbox/bot-time {bot, target,
+  enabled, collect_at, dry_run: true}` first (`domain_unresolved` 409 when `target` is not
+  exactly one domain, `time_invalid`, `collect_time_missing`, `bot_missing`; nothing written,
+  said beside 儲存), then `POST /api/settings/collection-bots`, then `bot-time` without
+  `dry_run`, which binds the bot to that domain with `enabled` (the form's 開啟, also the bot's
+  own switch) and `collect_at`, keeping `review_at`; the bot need not be running yet. The
+  Agents table's collection-bot row adds 「・收集時間 HH:MM（下次 …）」 from `GET /api/bi/inbox`
+  (all domains), or 「・尚未設定收集時間」.
 - `POST /api/bi/runs/<id>/commit` of an inbox run (not a repeated `already` answer) runs
   `bi_bench.run(home=<home>)`, draws the home's Dashboard and sends the result from each
   item's bot to its sender, in the background. Reminders go the same way.
@@ -7485,3 +7584,50 @@ Design: `docs/phases/BI_SKILL_TOOL_PACKAGE_IMPORT_DESIGN_20261119.md`; owner cho
   docstring) and `needs_rewrite: true` (「需改寫」: a command-line script without the
   INPUT/OUTPUT contract). `tool-run` refuses it with `tool_needs_rewrite`; a revision saved after
   the AI rewrite (the existing `tool` session, which is told to rewrite such code) drops it.
+
+## BI Knowledge round 2 (owner 2026-11-20)
+
+Branch `bi-knowledge-round2-20261120`; decisions in docs/DECISIONS.md "2026-11-20 — BI
+Knowledge round 2: owner decisions".
+
+- **Pictures in converted sources.** `convert.convert_with_assets(name, data)` returns the
+  Markdown and `{"assets/<sha16>.<ext>": bytes}`; PDF, Word and PowerPoint pictures come from
+  the core helpers `knowledge.office.pdf_page_images`, `docx_pictures`, `pptx_picture` (also
+  used by the LLM Wiki extractors) and are referenced in place as `![圖 n](assets/<name>)`.
+  Converter id `aep.bi.convert/2`. Assets live at `markdown/<source_id>/assets/` and, in a
+  vault, beside the revision files (`<folder>/markdown/<sha8>/assets/`).
+- `GET /api/bi/sources/<id>/assets/<name>?dataset=` → the picture's bytes (image media type;
+  404 `asset_unknown` for a name not of the form `<16 hex>.<ext>` or not found).
+- `GET /api/bi/sources/<id>/images?dataset=` → `{"images": {"status": "idle"|"running"|
+  "finished"|"failed", "done", "total", "pending"?, "elapsed"?, "described"?, "failed"?,
+  "rev"?}}`. `POST` the same path with `{"dataset"}` starts describing the pictures still
+  without a description; 409 `vision_unavailable` when the host model's endpoint does not
+  declare vision. Uploads (`POST /api/bi/sources`, `/api/bi/sources/upload`) answer with
+  `images` (null, `no_vision`, or the started run). Descriptions use core
+  `knowledge.describe.ImageDescriber` and are saved as the next revision (origin
+  `conversion`, note `圖片說明`) as a `> 圖片說明（<alias>）：…` line under each picture.
+- Adding again a document whose current revision is an unedited `aep.bi.convert/1`
+  conversion converts it again with its pictures; the source answers `reconverted: true`.
+- **Schema suggestions** have no `needs_clarification` rows; a question-only item is dropped.
+  `reject` hides a row on the page with 復原 (`reopen`).
+- **One 匯入.** The package preview/apply (`/api/bi/vaults/<id>/package`, `package-upload`)
+  also takes schema files: any `.json` other than `aep-bi-package.json` with `schema_id`,
+  `version` and `types` is an item `{"kind": "schema", "name": "<id>@<version>"}`, checked as
+  `catalog.validate` checks it, `same` when that version is installed, and installed with
+  `catalog.install` on apply.
+- `GET /api/bi/builtins` → `{"builtins": {"llm": {title, origin, types, instructions,
+  evidence, prompt}, "rules": {title, origin, about, recipe}}}`, read only.
+- **Benchmark progress.** A run report carries `steps` and `current`; `GET
+  /api/bi/vaults/<id>/checks` returns `newest.progress = {done, total, current, started_at,
+  ended_at}`.
+- **Warnings on candidates.** Field warnings carry `field`. `POST
+  /api/bi/runs/<run>/candidates/<id>` accepts `confirm_warning: {code, field, message}`, which
+  moves that warning to `confirmed` (`by`, `at`); editing a field's value moves its warnings
+  there with `edited: true`. Warnings never block `accepted`; 404 `warning_unknown`.
+- **Agent Web side area (附加資料顯示區).** Shell JS API for every page and plugin:
+  `sideOpen({id, title, render(panel) | url | file + session | element, onClose, refresh,
+  flush})` opens or focuses a tab and returns its panel; `sideClose(id)`, `sideFocus(id)`,
+  `sideHas(id)`. An `element` moves into the tab and returns to its place on close. Nothing is
+  persisted. `returnTo` and `focus` (tab close control) serve keyboard users: Esc inside the
+  area closes the front tab and returns focus to `returnTo`. `openFileViewer` opens files
+  there with 預覽／程式碼, 複製, 在瀏覽器開啟 and 下載; the former `#file-viewer` dialog is removed.

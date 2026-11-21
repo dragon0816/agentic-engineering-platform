@@ -117,7 +117,8 @@ def test_the_config_keeps_the_conversation_bot_and_adds_collection_bots() -> Non
         )
 
 
-def test_everything_a_mapped_sender_sends_goes_to_the_feature(tmp_path: Path) -> None:
+def test_links_files_commands_and_item_replies_go_to_the_feature(tmp_path: Path) -> None:
+    # Plain words are a question since owner 2026-11-21: test_telegram_collect_questions.
     feature = Collecting()
     raw_reply = message(3, "補充文字")
     raw_reply["message"]["reply_to_message"] = {"message_id": 9, "text": "#1 只取得摘要"}
@@ -126,7 +127,7 @@ def test_everything_a_mapped_sender_sends_goes_to_the_feature(tmp_path: Path) ->
         [
             [
                 message(1, "看這篇 https://example.com/a"),
-                message(2, "展場筆記"),
+                message(2, "/links"),
                 raw_reply,
                 message(4, None),
             ]

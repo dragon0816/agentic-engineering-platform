@@ -569,3 +569,44 @@ def test_the_upload_and_export_routes_carry_raw_bytes(tmp_path: Path) -> None:
     url = urlparse(f"/api/bi/vaults/{vault_id}/package-export?home=wireless")
     bi_cards_api.handle(empty, "GET", url)
     assert empty.sent[0][0] == 400 and empty.sent[0][1]["code"] == "package_empty"
+
+
+SAMPLE_SCHEMA = (
+    Path(packages.__file__).with_name("samples") / "product-spec@1.0.0.json"
+).read_text(encoding="utf-8")
+
+
+def test_a_schema_file_imports_in_the_same_package_as_rules_and_tools(tmp_path: Path) -> None:
+    """Owner 2026-11-20: one 匯入 for schema, skills and tools. A schema file is checked as
+    安裝 schema checks it and installed as its id@version on apply; other JSON is skipped."""
+    from aep_bi.cards import catalog
+
+    _, vault_id, _dataset, a, _ = _two_pcs(tmp_path)
+    broken = json.dumps({"schema_id": "fake/broken", "version": "1.0.0", "types": {"X": "no"}})
+    data = _zip(
+        {
+            "skills/vendor-extract.md": _skill_text("vendor-extract"),
+            "tools/vendor_rows.py": TOOL,
+            "product-spec@1.0.0.json": SAMPLE_SCHEMA,
+            "broken.json": broken,
+            "settings.json": json.dumps({"theme": "dark"}),
+        }
+    )
+    found = _items(_preview(a, vault_id, "aidc", data))
+    assert set(found) == {
+        "skill:vendor-extract",
+        "tool:vendor-rows",
+        "schema:example/product-spec@1.0.0",
+        "schema:fake/broken@1.0.0",
+    }
+    schema = found["schema:example/product-spec@1.0.0"]
+    assert (schema["kind"], schema["status"], schema["default"]) == ("schema", "new", True)
+    assert found["schema:fake/broken@1.0.0"]["status"] == "invalid"
+    assert not any(r.ref == "example/product-spec@1.0.0" for r in catalog.installed(a))
+    results = {r["id"]: r for r in _apply(a, vault_id, _preview(a, vault_id, "aidc", data))}
+    assert results["schema:example/product-spec@1.0.0"]["result"] == "staged"
+    assert results["schema:example/product-spec@1.0.0"]["name"] == "example/product-spec@1.0.0"
+    assert any(r.ref == "example/product-spec@1.0.0" for r in catalog.installed(a))
+    # Installed once: the same file again reads as the same.
+    again = _items(_preview(a, vault_id, "aidc", data))
+    assert again["schema:example/product-spec@1.0.0"]["status"] == "same"

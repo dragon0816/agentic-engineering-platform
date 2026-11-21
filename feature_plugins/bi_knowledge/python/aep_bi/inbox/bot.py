@@ -2,11 +2,13 @@
 
 Everything a mapped person sends to the bot goes to the bot's domain — the domain it is
 bound to in BI 「管理」 → 「Telegram 收集」, else the `target` it was configured with. No
-question, no buttons: a link, a file or words are recorded at once and answered
-「已收進 <領域>，<時間> 處理（#12）」. A Reply to the bot's 「#12 只取得摘要」 message adds the
-person's text to that item. `/links` lists the person's items, `/unlink <id>` withdraws
-one before it is processed. Fetching and ingest happen at the domain's collect time
-(`process`).
+question, no buttons: a link or a file is recorded at once and answered
+「已收進 <領域>，<時間> 處理（#12）」. Other words are a question (owner 2026-11-21),
+answered by the Host's conversation turn with `bi__query` scoped to the domain's
+dataset (`question`); the bot never stores them. A Reply to the bot's 「#12 只取得摘要」
+message adds the person's text to that item. `/links` lists the person's items,
+`/unlink <id>` withdraws one before it is processed. Fetching and ingest happen at the
+domain's collect time (`process`).
 """
 
 from __future__ import annotations
@@ -14,6 +16,7 @@ from __future__ import annotations
 import hashlib
 import re
 from collections.abc import Callable, Sequence
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path, PurePath
 from typing import Any
@@ -23,7 +26,7 @@ from aep_bi.inbox import domains as dom
 from aep_bi.inbox import fetch, store
 from aep_bi.inbox.domains import Domain
 from aep_bi.inbox.store import Inbox
-from host_runtime.features import TelegramAnswer, TelegramItem
+from host_runtime.features import TelegramAnswer, TelegramItem, TelegramQuestion
 
 _URL = re.compile(r"https?://[^\s<>\"'「」（）]+", re.IGNORECASE)
 _ITEM_REF = re.compile(r"#(\d{1,9})\b")
@@ -31,6 +34,8 @@ MAX_URLS = 5
 MAX_FILES = 5
 MAX_NOTE = 500
 MAX_TEXT = 20_000
+#: The BI query tool a domain bot's question turn may use (`aep_bi.host.bi_cards_tools`).
+QUERY_TOOL = "bi__query"
 UNBOUND = (
     "這個 bot 還沒有綁定 BI 領域：到 Agent Web → BI → 管理 → Telegram 收集，"
     "在領域那一列選這個 bot。"
@@ -40,6 +45,28 @@ UNBOUND = (
 def _short(text: str, limit: int) -> str:
     text = re.sub(r"\s+", " ", text).strip()
     return text if len(text) <= limit else text[: limit - 1] + "…"
+
+
+#: The guidance of a domain bot's question turn (owner 2026-11-21).
+QUESTION_GUIDANCE = (
+    "You are the question bot of the BI domain 「{label}」 (vault {vault}, folder {home}). "
+    "Answer the person's question ONLY from this domain's BI cards: call bi__query (its "
+    "dataset is fixed to {dataset}) and cite the cards it returns. When the cards do not "
+    "cover the question, say so plainly (這個領域的 BI 卡片沒有這方面的資料) instead of "
+    "answering from general knowledge. You cannot open links or fetch web pages; to "
+    "collect a link or a file the person just sends it to this bot. Answer in the "
+    "person's language, briefly."
+)
+
+
+def scoped_query(tool: Any, dataset: str) -> Any:
+    """`tool` (the `bi__query` HostTool) with every call's dataset set to `dataset`."""
+    handler = tool.handler
+
+    async def call(context: Any, arguments: dict[str, Any]) -> Any:
+        return await handler(context, {**arguments, "dataset": dataset})
+
+    return replace(tool, handler=call)
 
 
 class Bot:
@@ -60,6 +87,23 @@ class Bot:
             return dom.by_key(listed, key)
         found = dom.resolve(listed, item.target) if item.target else []
         return found[0] if len(found) == 1 else None
+
+    def question(
+        self, item: TelegramItem, tools: Sequence[Any]
+    ) -> TelegramQuestion | TelegramAnswer | None:
+        """A plain question to the bot (owner 2026-11-21): `bi__query` (from `tools`, the
+        Host's BI tools) scoped to the bot's domain's dataset, with the domain's
+        guidance; UNBOUND without a domain; None when there is no `bi__query`."""
+        domain = self.domain_of(item, dom.listed(self.workspace))
+        if domain is None:
+            return TelegramAnswer(UNBOUND)
+        found = next((t for t in tools if t.tool.name == QUERY_TOOL), None)
+        if found is None:
+            return None
+        guidance = QUESTION_GUIDANCE.format(
+            label=domain.label, vault=domain.vault_title, home=domain.home, dataset=domain.dataset
+        )
+        return TelegramQuestion(tools=(scoped_query(found, domain.dataset),), guidance=guidance)
 
     def handle(self, item: TelegramItem) -> TelegramAnswer:
         words = item.text.strip()

@@ -113,6 +113,16 @@ class TelegramAnswer:
 
 
 @dataclass(frozen=True)
+class TelegramQuestion:
+    """How a collection bot answers a plain question (owner 2026-11-21): one
+    conversation turn offered only `tools` (`agent.gateway.HostTool`s, already
+    scoped to the bot's target) with `guidance` joined to the prompt."""
+
+    tools: tuple[Any, ...]
+    guidance: str
+
+
+@dataclass(frozen=True)
 class TelegramBot:
     """A configured collection bot, as a feature may list it."""
 
@@ -215,6 +225,14 @@ class Feature:
     def telegram_item(self, item: TelegramItem, host: Any) -> TelegramAnswer | None:
         """Answer a message to one of this feature's collection bots. `host` is the
         resident host object (Agent Web), None when there is none."""
+        return None
+
+    def telegram_question(
+        self, item: TelegramItem, host: Any, gateway: Any
+    ) -> TelegramQuestion | TelegramAnswer | None:
+        """How to answer a plain question (a message with no link or file) to one of
+        this feature's collection bots: the scoped tools and guidance, a direct
+        answer (the bot has no target), or None when this feature answers none."""
         return None
 
     def telegram_ready(self, messenger: Messenger, host: Any) -> None:
@@ -320,6 +338,15 @@ class FeatureSet:
         for feature in self.features:
             if feature.name == item.feature:
                 return feature.telegram_item(item, host)
+        return None
+
+    def telegram_question(
+        self, item: TelegramItem, host: Any, gateway: Any
+    ) -> TelegramQuestion | TelegramAnswer | None:
+        """The item's feature's way to answer a question; None when it is not loaded."""
+        for feature in self.features:
+            if feature.name == item.feature:
+                return feature.telegram_question(item, host, gateway)
         return None
 
     def telegram_ready(self, messenger: Messenger, host: Any) -> None:

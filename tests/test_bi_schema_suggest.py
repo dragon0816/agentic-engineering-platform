@@ -106,7 +106,7 @@ def test_a_press_asks_only_the_fit_question_and_writes_no_card(tmp_path: Path) -
     assert BiStore(a, dataset).card_rows() == cards
 
 
-def test_nothing_to_change_is_an_answer_and_a_type_the_schema_has_is_a_question(
+def test_nothing_to_change_is_an_answer_and_a_question_is_no_row(
     tmp_path: Path,
 ) -> None:
     _, _vault_id, dataset, a, _ = _two_pcs(tmp_path)
@@ -117,10 +117,10 @@ def test_nothing_to_change_is_an_answer_and_a_type_the_schema_has_is_a_question(
     # The same source and schema again reuse the kept answer: another source asks anew.
     assert _suggest(a, dataset, [source], {"items": [again]})[0]["answers"]["reused"] == 1
     other = _source(a, dataset, "other.md", NOTE + "\n另一份。\n")
-    done, _ = _suggest(a, dataset, [other], {"items": [again]})
-    (row,) = done["items"]
-    assert row["kind"] == "needs_clarification" and not row["applies"]
-    assert "schema 已經有類型 Technology" in row["questions"][0]
+    # A type the schema has is only a question: no 待釐清 row (owner 2026-11-20).
+    done, model = _suggest(a, dataset, [other], {"items": [again]})
+    assert done["status"] == "done" and done["items"] == []
+    assert "do not answer needs_clarification" in model.requests[0].messages[0].text
 
 
 def test_only_new_leaves_out_what_an_ingest_read_and_says_when_nothing_is_left(

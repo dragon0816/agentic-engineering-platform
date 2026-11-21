@@ -90,7 +90,7 @@ class PdfExtractor:
 
     def extract(self, data: bytes, assets: AssetSink) -> tuple[RawSection, ...]:
         from pypdf import PdfReader
-        from pypdf.errors import DependencyError, PyPdfError
+        from pypdf.errors import PyPdfError
 
         out = _Sections()
         try:
@@ -100,18 +100,7 @@ class PdfExtractor:
             for number, page in enumerate(reader.pages, 1):
                 out.text(page.extract_text() or "")
                 out.flush(page=number)
-                for key in list(page.images.keys()):
-                    try:
-                        # Decoding happens on access; one image with a filter
-                        # pypdf cannot decode (or no Pillow) must not cost the
-                        # page's text, which is still evidence.
-                        image = page.images[key]
-                        blob = image.data
-                    except (PyPdfError, DependencyError, ImportError, *_CORRUPT):
-                        # DependencyError (a missing external decoder) is not
-                        # a PyPdfError in pypdf's hierarchy.
-                        continue
-                    suffix = PurePosixPath(image.name).suffix or ".png"
+                for blob, suffix in pdf_page_images(page):
                     out.image(assets.put(blob, suffix), page=number)
         except (PyPdfError, *_CORRUPT) as error:
             raise _undecodable(error) from error
@@ -153,11 +142,9 @@ class PptxExtractor:
                 if isinstance(shape, GroupShape):
                     walk(shape.shapes, number)
                 elif isinstance(shape, Picture):
-                    try:
-                        blob, ext = shape.image.blob, shape.image.ext
-                    except (PythonPptxError, *_CORRUPT):
-                        continue  # a linked, non-embedded picture has no bytes
-                    out.image(assets.put(blob, ext), slide=number)
+                    found = pptx_picture(shape)
+                    if found is not None:
+                        out.image(assets.put(*found), slide=number)
                 elif shape.has_table:
                     rows = [[cell.text for cell in row.cells] for row in shape.table.rows]
                     out.table(rows, slide=number)
@@ -217,16 +204,8 @@ class DocxExtractor:
                         yield from blocks(content)
 
         def pictures(element: Any) -> Iterator[str]:
-            for blip in element.iter(qn("a:blip")):
-                relationship = blip.get(qn("r:embed"))
-                if not relationship:
-                    continue
-                try:
-                    part = document.part.related_parts[relationship]
-                except (OpcError, *_CORRUPT):
-                    continue
-                suffix = PurePosixPath(str(part.partname)).suffix or ".png"
-                yield assets.put(part.blob, suffix)
+            for blob, suffix in docx_pictures(document, element):
+                yield assets.put(blob, suffix)
 
         def paragraph(element: Any) -> None:
             item = Paragraph(element, document)
@@ -257,6 +236,55 @@ def _heading(style: str, text: str) -> str:
     if style.startswith("Heading ") and style[8:].isdigit() and text.strip():
         return "#" * min(int(style[8:]), 6) + " " + text.strip()
     return text
+
+
+# -- the pictures in an original, shared by every converter that keeps them ----
+# The LLM Wiki intake (`office_extractors`) and the BI source conversion both take
+# a document's pictures from here (owner 2026-11-20: BI keeps images as Knowledge
+# maintenance does), so a picture one of them keeps the other keeps too.
+
+
+def pdf_page_images(page: Any) -> Iterator[tuple[bytes, str]]:
+    """(bytes, suffix) of each embedded image on a pypdf page that can be decoded."""
+    from pypdf.errors import DependencyError, PyPdfError
+
+    for key in list(page.images.keys()):
+        try:
+            # Decoding happens on access; one image with a filter pypdf cannot
+            # decode (or no Pillow) must not cost the page's text, which is still
+            # evidence. DependencyError (a missing external decoder) is not a
+            # PyPdfError in pypdf's hierarchy.
+            image = page.images[key]
+            blob = image.data
+        except (PyPdfError, DependencyError, ImportError, *_CORRUPT):
+            continue
+        yield blob, PurePosixPath(image.name).suffix or ".png"
+
+
+def pptx_picture(shape: Any) -> tuple[bytes, str] | None:
+    """(bytes, suffix) of a python-pptx Picture; None for a linked, non-embedded one."""
+    from pptx.exc import PythonPptxError
+
+    try:
+        return shape.image.blob, "." + str(shape.image.ext).lstrip(".")
+    except (PythonPptxError, *_CORRUPT):
+        return None
+
+
+def docx_pictures(document: Any, element: Any) -> Iterator[tuple[bytes, str]]:
+    """(bytes, suffix) of each embedded picture inside a python-docx body element."""
+    from docx.opc.exceptions import OpcError
+    from docx.oxml.ns import qn
+
+    for blip in element.iter(qn("a:blip")):
+        relationship = blip.get(qn("r:embed"))
+        if not relationship:
+            continue
+        try:
+            part = document.part.related_parts[relationship]
+        except (OpcError, *_CORRUPT):
+            continue
+        yield part.blob, PurePosixPath(str(part.partname)).suffix or ".png"
 
 
 def office_extractors() -> tuple[PdfExtractor, PptxExtractor, DocxExtractor]:

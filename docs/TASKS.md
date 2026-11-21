@@ -5196,3 +5196,192 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   failures logged at debug and ignored. Presentation only. Tests:
   tests/test_telegram_typing.py; contract docs/CONTRACTS.md "Telegram ingress" (activity
   indicator). Owner live check in Telegram pending.
+- [x] 2026-11-20 BI Knowledge round 2 (owner 2026-11-20; branch bi-knowledge-round2-20261120,
+  awaiting the owner's page review before broad test runs): pictures kept in BI conversion
+  with background descriptions; schema suggestions removed on 不要 with 復原, no 待釐清,
+  under 進階 on a press; profile out of the page; one 匯入 for schema/rules/programs, built-ins
+  listed with 檢視, no step-2 AI sessions; Agent Web side area (`sideOpen`) with BI step 3
+  tabs and side tabs for AI, 分享, history and per-question results; benchmark progress bar;
+  review fixes (import accepted cards, confirmable warnings, analysis delete redraw).
+  Quick targeted tests run: test_bi_convert_images, test_bi_source_markdown, test_office,
+  test_describe, test_bi_vault_sources, test_bi_markdown_ui, test_bi_schema_suggest(_ui),
+  test_bi_page_simple, test_bi_packages(_ui), test_bi_vault_bench, test_extra_area_ui,
+  test_bi_step3_ui, test_bi_review_table_ui (2 picked), test_bi_ai_runs, test_bi_extract,
+  test_bi_ingest_runs, test_bi_extract_evidence, test_bi_reading_runs. Not yet run, and
+  expected to need rewriting for the removed step-2 AI controls and the new step 3:
+  test_bi_build_flow_ui, test_bi_create_domain_ui, test_bi_sessions_ui,
+  test_bi_share_step_ui, test_bi_step2_domain_ui, test_bi_vault_ui, test_bi_tools_ui and
+  file-viewer UI tests. Contract: docs/CONTRACTS.md "BI Knowledge round 2"; decisions:
+  docs/DECISIONS.md "2026-11-20 — BI Knowledge round 2: owner decisions".
+- [x] 2026-11-20 BI page: several AI sessions open at once (owner 2026-11-20 「現在就改」; branch
+  bi-knowledge-round2-20261120). Each AI session (和 AI 出測試題, 和 AI 修改分析 / 做新分析,
+  和 AI 調整擷取 Skill) gets its own panel and its own side tab: the first uses the page's
+  `#bi-ai`, the others a copy whose ids end in `-<n>`; `bi.ais` holds each session's spec
+  (scope, log, pending send, timer). Re-opening a session focuses its tab; closing a tab ends
+  only that session (its timer, its `tr.bi-ai-from` row, focus back to where it came from).
+  Sends, progress, replies, apply buttons and saved history act on their own session while
+  another tab is in front. Front end only; no server API change. Verification:
+  test_bi_step3_ui (new two-session check), test_bi_page_simple, test_retry_buttons_ui,
+  test_bi_working_domain_ui, test_bi_vault_steps_ui pass; test_bi_sessions_ui fails the same
+  way before and after (navigation_failed, part of the redesign rewrite list); ruff, ruff
+  format --check and mypy clean on the changed files.
+- [x] 2026-11-20 BI page: a card opens as a tab of the side area (owner 2026-11-20; branch
+  bi-knowledge-round2-20261120). Outside the 卡片 view, a card no longer opens in the
+  `#bi-card-peek` overlay (removed, with its CSS and the page's `bi-ai-open` margin): each card
+  gets its own side tab (`bi-card:<id>`, titled with the card's name), opening one already open
+  focuses its tab, and closing a tab closes only that card. The page's one live card view
+  (`#bi-detail`) moves into the card tab in front and reads that card again, so 提更正單, 定案,
+  覆核 and links work in the tab; the last tab closed, or switching to the 卡片 view, puts it
+  back beside the card list. 管理 → 安裝 schema unchanged. Verification: test_bi_step3_ui
+  (two card tabs, re-open focuses, action in tab, close one), test_bi_cards_ui,
+  test_bi_page_simple, test_retry_buttons_ui, test_bi_working_domain_ui,
+  test_bi_vault_steps_ui pass; ruff, ruff format --check and mypy clean on changed files.
+- [x] 2026-11-20 BI 2c review merged into one list (owner 2026-11-20; branch
+  bi-knowledge-round2-20261120; decision docs/DECISIONS.md "BI 2c review: one list, and judgement
+  fields bulk-acceptable without a reason"). Server: proposal decisions take an optional reason
+  (single, bulk, judgement fields included); bulk decide includes `confidence`/`evidence_grade`;
+  `action: "pending"` reopens a decided proposal and gives an accepted value back as an `undo`
+  history row; `GET /api/bi/proposals` adds `decided`. Page: one table of candidate cards and
+  changes with a 類型 column, filters 狀態 (default 全部) and 類型, per-row 接受/拒絕/待決定, one
+  optional reason box, 接受顯示的待決定（N） over both kinds, a change row opening its card as a
+  side tab; `#bi-b-props` and `bi-b-props-jump` removed. Verification: server tests
+  (test_bi_ingest_runs, test_bi_run_merge, test_bi_r6_page_fixes, test_bi_vault, test_bi_cards,
+  test_bi_accept_evidence, test_bi_replaced_evidence, test_bi_field_states,
+  test_bi_subscriptions, test_bi_dataset_snapshot) 176 passed; UI tests (test_bi_review_table_ui,
+  test_bi_r6_page_fixes, test_bi_r6_ai_fixes, test_bi_review_apply_all, test_bi_page_simple,
+  test_bi_step3_ui, test_bi_cards_ui, test_bi_vault_steps_ui, test_bi_working_domain_ui,
+  test_retry_buttons_ui) 155 passed, 1 failed once with the browser's `navigation_failed` and
+  passed on rerun (test_bi_review_table_ui no-citation test); ruff, format and mypy clean.
+- [x] 2026-11-20 BI build page: stage settings behind a gear, run-only main views, renamed
+  stages and 自動執行 (owner 2026-11-20; branch bi-knowledge-round2-20261120; decision
+  docs/DECISIONS.md "BI build page: stage settings behind a gear, run-only main views,
+  自動執行"). Stages are Data input / Ingest / Benchmark testing. Each stage's ⚙ opens its
+  settings as a side-area tab (`#bi-b-set-source|ingest|test` move in and back, ids intact):
+  Data input = 機密等級, write target, vault and shared folder, 進階 import; Ingest = old 2a
+  (schema, drafts, upgrade, skills, tools, 匯入, 進階 incl. 建議 schema) plus the extraction
+  Skill, trial/compare and 安裝 schema; Benchmark testing = questions and Dashboard analyses.
+  Main views: 選檔/轉檔 + file list; Ingest + the merged 2c review as one view (sub-step bar
+  hidden); 跑測試 above the Benchmark | Dashboard result tabs. 先設定 line when Ingest has no
+  schema type or the domain has no question. 自動執行 beside the stage bar runs convert →
+  ingest → accept all pending (cards and changes) + import → benchmark, progress n/4 with
+  sub-progress and seconds, resumable across a reload without a second run (client only, no
+  server change). Verification: test_bi_page_simple, test_bi_stage_gear_ui (new),
+  test_bi_build_ui, test_bi_step3_ui, test_bi_batch_ingest_ui, test_bi_md_preview_ui,
+  test_bi_packages_ui, test_bi_source_selection_ui, test_bi_vault_steps_ui,
+  test_bi_working_domain_ui, test_bi_review_table_ui, test_bi_schema_suggest_ui,
+  test_bi_schema_fit_ui, test_bi_atlas_file_import, test_bi_cards_ui, test_bi_commit_list_ui,
+  test_bi_domain_dashboard_ui, test_bi_finalize_ui, test_bi_markdown_ui,
+  test_bi_r6_page_fixes, test_bi_schema_merge_ui, test_bi_schemas_ui, test_bi_top_row_ui,
+  test_bi_build_tab_order_ui pass; test_bi_version_link_ui fails the same on the base commit
+  (share step now a side tab; not touched). Known-broken redesign UI tests not run. ruff,
+  ruff format --check, mypy on changed files and node --check on the page script clean. Full
+  suite not run (owner reviews the page first).
+- [x] 2026-11-20 Paste a Telegram bot token in Settings → Agents (owner 2026-11-20; branch
+  bi-knowledge-round2-20261120; decision docs/DECISIONS.md "Paste a bot token in Settings →
+  Agents; AEP stores it as the user's environment variable"; contract docs/CONTRACTS.md
+  "Persistent agents and agent bots"). Agent bot and BI collection bot forms gain a password
+  field 「貼上 bot token（選填）」; the variable name defaults to `AEP_TG_<ID>` / `AEP_TG_BI_<NAME>`;
+  on save the token is format-checked, refused on a variable in use (`bot_variable_in_use`),
+  written to HKCU\Environment via winreg + WM_SETTINGCHANGE (no setx process) and os.environ,
+  and the bots reload without a restart; off Windows `bot_token_store_unsupported`. The token is
+  in no settings file or response (`token_present` only); the field is cleared after save.
+  Verification: tests/test_agents_settings.py (16), tests/test_agent_sidebar_ui.py (incl. a
+  browser test with a fake store), tests/test_telegram_agent_bots.py,
+  tests/test_telegram_settings.py pass; ruff, ruff format --check, mypy on changed files clean.
+  Full suite not run.
+- [x] 2026-11-20 Show which Telegram bot each agent is bound to (owner 2026-11-20; branch
+  bi-knowledge-round2-20261120; contract docs/CONTRACTS.md "Persistent agents and agent bots",
+  bullet "Bot identity"). `getMe` per bot (cached per token fingerprint, 3 s timeout, cleared on
+  save) adds `username` / `title` / `problem` to `/api/settings/agents` and `/api/agents`; the
+  Agents table shows `@username · state` first with the variable second, 「未綁定」 + 「綁定」, main
+  row editable through the Telegram bot form, an empty-state line; the sidebar shows a TG mark
+  with `@username`. Verification: tests/test_bot_identity.py (new, getMe faked),
+  test_agents_settings, test_telegram_agent_bots, test_telegram_settings, test_agent_sidebar_ui
+  pass (45); ruff, ruff format --check, mypy on changed files clean. Full suite not run. Also
+  fixes the token tests' environment cleanup (monkeypatch.delenv on an absent variable does not
+  restore it).
+- [x] 2026-11-21 Settings → Agents: save outcome beside 儲存, readable Skills picker, sender
+  prefill and username lookup, bot identity after a save (owner report 2026-11-21; branch
+  bi-knowledge-round2-20261120; contract docs/CONTRACTS.md "Persistent agents and agent bots").
+  Root cause of 「按儲存沒用」: the client refused `leo_oel_0816` (a Telegram username) in
+  允許的傳送者 and wrote 「沒有儲存：…不是 Telegram 數字 id」 to `#agents-result` above the form,
+  out of view; nothing reached the server. Now every outcome shows beside the save button
+  (role=status), the saved row is highlighted and scrolled into view; new bots start with the
+  main bot's senders; a known allowed sender's @username becomes its id (never matched at
+  runtime), others get a clear message; Skills are one clickable row each (box, alias,
+  one-line description, muted id; `.settings label` made them block before); one 新增 agent
+  button; failed getMe lookups right after a save are not cached and the page re-reads the
+  bots every 2 s for up to 30 s while they apply. Verification: test_agents_settings,
+  test_bot_identity, test_telegram_agent_bots, test_telegram_settings, test_telegram_ingress,
+  test_agent_sidebar_ui (incl. a browser test filling the form as the owner did) pass (72);
+  ruff, ruff format --check, mypy on changed files clean. Full suite not run.
+- [x] 2026-11-21 A BI collection bot also answers questions about its domain (owner decision
+  2026-11-21; branch bi-knowledge-round2-20261120; contract docs/CONTRACTS.md "Persistent agents
+  and agent bots", bullet "Collection bot questions"; decision docs/DECISIONS.md 2026-11-21).
+  Links and files are collected as before; plain words are one conversation turn offered only
+  `bi__query` scoped to the bound domain's dataset, with domain guidance, sessions
+  `telegram-collect-<name>-chat-<id>`, typing indicator; no query tool → clear Chinese message,
+  no model asked. Settings form gains one line saying so. Finding: agent bots are never offered
+  `bi__query` (a Host tool; their `allowed_tools` are their Skills' Skill tools only).
+  Verification: tests/test_telegram_collect_questions.py (new, 9), test_bi_inbox (incl. 2 new),
+  test_telegram_collect, test_telegram_agent_bots, test_telegram_ingress pass; ruff, ruff format
+  --check clean; mypy on changed files clean except pre-existing errors from another agent's
+  uncommitted aep_bi/cards/ai_runs.py change (AiRuntime `background` type). Full suite not run.
+- [x] 2026-11-21 BI Ingest: four parts at once, a real stop with a 停止 button, the part total up
+  front, and resume after a Host restart (owner decision 2026-11-21; branch
+  bi-knowledge-round2-20261120; contract docs/CONTRACTS.md "BI AI path: extraction runs", bullet
+  "Parallel parts, stop, restart"; decision docs/DECISIONS.md 2026-11-21). A 28-part PDF read one
+  part at a time took about 42 minutes; now up to `extract.PARALLEL_PARTS` (4) parts at once,
+  merged in document order (same candidates and ids). Stop is checked before each part and format
+  retry, writes nothing and ends `cancelled`; the Host task says `stopped`; 自動執行 has 停止
+  beside it (only while running) and the one-source manual Ingest shows its 停止 too, both saying
+  停止中…（等目前這段完成） until the worker ends (run view `working`). Progress is (0, N) before
+  the first call (第 1／N 段 at once). A run left `extracting` without a worker becomes `partial`
+  with `interrupted` parts; 重試 (also shown in place by 自動執行) reads only those, the rest from
+  the answer cache. Verification: tests/test_bi_ingest_parallel_stop.py (new, 11),
+  tests/test_bi_ingest_stop_ui.py (new browser test), test_bi_ai_runs, test_bi_extract,
+  test_bi_extract_evidence, test_bi_reading_runs, test_bi_model_fallback, test_bi_rerun,
+  test_bi_inbox, test_bi_stage_gear_ui auto-run tests pass; ruff, ruff format --check, mypy on
+  changed files clean. Known, not from this change: test_bi_batch_ingest_ui's two batch tests
+  wait for Ingest progress in #bi-status-build, which 97aef268 moved to #bi-b-progress;
+  test_install_data_approval expects AiRuntime without `vision`. Full suite not run.
+- [x] 2026-11-21 Collection time where it is easy to find (owner decision 2026-11-21; branch
+  bi-knowledge-round2-20261120; contract docs/CONTRACTS.md BI inbox, "Where the collect time is
+  set"). BI Data input ⚙ shows the working domain's Telegram 收集 row (bot, 開啟, 收集時間,
+  審核提醒); 管理 → Telegram 收集 kept as the all-domains view. 新增 BI 收集 bot gains 收集時間
+  (default 18:00) saved with the bot through `POST /api/bi/inbox/bot-time` (domain checked
+  first; a target that is not exactly one domain is said beside 儲存, nothing written); the
+  Agents row shows 收集時間 and the next run. Verification: test_bi_inbox, test_bi_inbox_gear_ui
+  (new, browser), test_collect_bot_time_ui (new, browser), test_telegram_collect*,
+  test_agent_sidebar_ui, test_agents_settings, test_bi_stage_gear_ui pass; ruff, ruff format
+  --check, mypy on changed files clean. Full suite not run.
+- [x] 2026-11-21 Agent Web file tab keeps the former dialog's controls (branch
+  bi-knowledge-round2-20261120; contract docs/CONTRACTS.md side area). Moving the file viewer
+  from the `#file-viewer` dialog to a side-area tab (a5877e2d) dropped 預覽／程式碼, 複製, Esc
+  and focus handling and 44 px targets, and a9eb5048 deleted their assertions; they are back on
+  the tab: 預覽／程式碼 for HTML, Markdown and CSV, 複製 in the code view (「已複製」/「無法複製」
+  in place), focus on the tab's close control when a file opens, Esc inside the side area closes
+  the front tab and returns focus to the opener (generic `sideOpen` `returnTo`/`focus`), and side
+  tab buttons at 44 px. Files of an unknown kind say they cannot be previewed instead of showing
+  bytes as text. The dead dialog markup, CSS and `openFileDialog` are removed. Verification:
+  tests/test_file_viewer_web.py (assertions restored), test_extra_area_ui, test_multi_agent_ui
+  real-browser test pass; ruff, ruff format --check, mypy on changed files clean. Full suite not
+  run.
+- [x] 2026-11-21 BI round 2: UI tests rewritten to the owner-approved redesign, and the regressions
+  the full suite found fixed (branch bi-knowledge-round2-20261120). Tests now read the one progress
+  row `#bi-b-progress-text`, drive the Ingest/Benchmark gear side tabs, new rules through 新增規則
+  and the rule form, revisions through 修改, share and per-question results as side tabs, and
+  assert the removed step-2 AI entry points (dfa6d025) are gone and step 2 asks no model
+  (build_flow, sessions, vault, create_domain, step2_domain, share_step, tools, step3,
+  many_sources, batch_ingest, version_link, install_data_approval; telegram_typing sends a link
+  since plain words are a question). Code fixes: the status-line link opens 分享 as a side tab
+  even when pressed before step 3 loaded (dead scroll code and its last call removed); an open
+  Ingest ⚙ tab re-reads the schema when BI data reloads; `runs.recover_interrupted` holds the
+  worker lock so a run finishing while read is no longer turned `partial` (new regression test in
+  test_bi_ingest_parallel_stop). Verification: full suite `-n auto --dist loadfile` 7291 passed,
+  21 failed, 16 skipped (1:04:41, PC saturated); every failure rerun alone passed except
+  test_system_command (known timing flake) and the two fixed above. ruff check, ruff format
+  --check, mypy (1211 files) clean. A 4-worker below-normal full rerun was started for
+  confirmation (log C:/TEMP/claude-r2/full2.log). Follow-ups: the rule form's 可用的資料夾 hint
+  does not list a domain created in the same session; dead Session A code (biBuildSessA,
+  biSchemaSources) and 「請和 AI 調整」 draft wording remain in bi_page.py.
