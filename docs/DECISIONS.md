@@ -8376,3 +8376,20 @@ convert, ingest and the test, step by step or automatically, and looks at the re
   or misjudge another process.
 - Not a harness change (AGENTS.md rule 22): BI feature-plugin code. Contract: docs/CONTRACTS.md
   "BI AI path: extraction runs", bullet "Parallel parts, stop, restart".
+
+## 2026-11-21 — Branch harness/reliability-141 is not merged
+
+Owner decision: drop `harness/reliability-141` (head `1e351469`, base `ad532e2d`, 506
+commits behind main) instead of merging or porting it now. Reasons from the review:
+- its slice 1 duplicates main's `CapabilityExecutionFailed` fix (296de745) with a
+  conflicting design;
+- a trial merge conflicts in 7 files, 4 of them core;
+- it would overwrite `HANDOFF.md` and add binary benchmark outputs;
+- it was verified only on the old 141 baseline.
+
+The one new idea worth keeping is slice 2, worker operation ownership: after a
+timeout, block a second Python/Coding worker on the same workspace until the first
+has really ended (schema 7). Porting it to main later is about one working day and
+needs AGENTS rule 22 consent. It also needs a GUI notice and release for a blocked
+operation, not only the CLI `reconcile-operation`. The remote branch is left as is
+for reference.
