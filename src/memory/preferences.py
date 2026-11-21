@@ -31,6 +31,7 @@ from memory.service import (
     SpaceTx,
     new_change_id,
     now_iso,
+    run_schema,
 )
 
 MAX_TEXT = 300
@@ -190,7 +191,7 @@ class Preferences:
         self.service = service
         self._space = service.space(PREFERENCES_SPACE, asset=HOST_MEMORY)
         with self._space.transaction() as tx:
-            tx.con.executescript(_SCHEMA.format(table=tx.table(_TABLE), uses=tx.table(_USES)))
+            run_schema(tx.con, _SCHEMA.format(table=tx.table(_TABLE), uses=tx.table(_USES)))
 
     # -- reads -----------------------------------------------------------
 

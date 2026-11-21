@@ -5420,3 +5420,16 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   `running`, and the test waits until the drawn reply is aidc's own finished run. New
   regression test test_one_reply_describes_one_moment_of_the_runs (fails before the fix).
   Verification: see the commit message.
+- [x] 2026-11-22 Fix the memory token-route timeout (CI runs 44691833318, 44919588565 attempt 2,
+  44938727386: test_the_routes_need_the_page_token, authorized `GET /api/memory/overview` with
+  no answer in 10 s; branch fix-memory-token-timeout). Evidence: the server-side traceback in
+  the teardown shows the handler finished and wrote a 200 after the client had given up (no
+  lock error, no network; locally the path is SQLite only, no leftover threads after the browser
+  test). The test's overview is the actor's first, so it creates the memory database, and
+  `executescript` ran every CREATE of the four schema scripts (Memory Service, preferences,
+  notes, contacts/org) as its own autocommit transaction: 59 committed write transactions, each
+  a journal file created, flushed and deleted, the work a loaded Windows runner (and antivirus)
+  slows most (0.3 s locally; a later overview has none, 25 ms). `memory.service.run_schema`
+  runs each script as one transaction: 8 commits. New regression test
+  test_the_first_overview_sets_up_the_database_in_few_transactions (59 before, fails; 8 after).
+  The test's 10 s timeout is unchanged. Verification: see the commit message.

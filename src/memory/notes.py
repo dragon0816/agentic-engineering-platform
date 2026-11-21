@@ -38,6 +38,7 @@ from memory.service import (
     SpaceTx,
     new_change_id,
     now_iso,
+    run_schema,
 )
 
 MAX_TEXT = 20_000
@@ -211,7 +212,7 @@ class Notes:
         self.service = service
         self._space = service.space(NOTES_SPACE, asset=HOST_MEMORY)
         with self._space.transaction() as tx:
-            tx.con.executescript(_SCHEMA.format(table=tx.table(_TABLE)))
+            run_schema(tx.con, _SCHEMA.format(table=tx.table(_TABLE)))
 
     # -- reads -----------------------------------------------------------
 

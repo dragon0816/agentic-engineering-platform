@@ -79,6 +79,7 @@ from memory.service import (
     SpaceTx,
     actor_key,
     new_change_id,
+    run_schema,
 )
 
 STORE_FOLDER = "business-cards"
@@ -283,7 +284,7 @@ class CardStore:
             with self._space.transaction() as tx:
                 if self._space.role == "manager":
                     con = tx.con
-                    con.executescript(SPACE_SCHEMA)
+                    run_schema(con, SPACE_SCHEMA)
                     # A store from before a field existed gains its column.
                     have = {row["name"] for row in con.execute(f"PRAGMA table_info({PEOPLE})")}
                     for name in FIELDS:
