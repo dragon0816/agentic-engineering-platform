@@ -157,7 +157,14 @@ class Bot:
                 already.append(int(earlier["id"]))
                 continue
             item_id = self._new(
-                item, domain, kind="link", batch=batch, url=url, norm_url=normal, note=note
+                item,
+                domain,
+                kind="link",
+                batch=batch,
+                url=url,
+                norm_url=normal,
+                note=note,
+                platform=fetch.platform(url),
             )
             batch = batch or item_id
             made.append(item_id)

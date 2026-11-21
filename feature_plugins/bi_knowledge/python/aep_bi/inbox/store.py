@@ -6,11 +6,12 @@
 
 An item is one link, file or text a person sent to a domain's collection bot (`bot`;
 `batch` groups those of one message), or a text a person added by Reply to an item that
-only had a summary (`parent`). A pick is the domain the item goes to: the domain the bot
-is bound to (`by` = `bot`; owner 2026-11-20, one bot per BI domain). A result is one
-item processed in one domain: inserted once, as the claim (AGENTS rule 21), so an item
-is processed at most once per domain however often a schedule fires. Withdrawn is
-final. A domain is `<vault id>:<home>`.
+only had a summary (`parent`); a link's `platform` is `web`, `threads`, `instagram` or `x`
+(set when it arrives, corrected once a t.co link is expanded). A pick is the domain the
+item goes to: the domain the bot is bound to (`by` = `bot`; owner 2026-11-20, one bot
+per BI domain). A result is one item processed in one domain: inserted once, as the
+claim (AGENTS rule 21), so an item is processed at most once per domain however often a
+schedule fires. Withdrawn is final. A domain is `<vault id>:<home>`.
 """
 
 from __future__ import annotations
@@ -80,7 +81,8 @@ CREATE TABLE IF NOT EXISTS items (
   status TEXT NOT NULL,
   status_at TEXT NOT NULL,
   code TEXT, raw_path TEXT, fetched_at TEXT, fetch_method TEXT, http_status INTEGER,
-  final_url TEXT, content_sha256 TEXT, summary_only INTEGER NOT NULL DEFAULT 0
+  final_url TEXT, content_sha256 TEXT, summary_only INTEGER NOT NULL DEFAULT 0,
+  platform TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS picks (
   item INTEGER NOT NULL, domain TEXT NOT NULL, by TEXT NOT NULL, at TEXT NOT NULL,
@@ -102,7 +104,10 @@ CREATE TABLE IF NOT EXISTS settings (
 CREATE TABLE IF NOT EXISTS claims (key TEXT PRIMARY KEY, at TEXT NOT NULL);
 """
 
+#: Columns added after the first release, for inbox files made before them.
+_ADDED = (("items", "platform", "TEXT NOT NULL DEFAULT ''"),)
 _LOCK = threading.Lock()
+_UPGRADED: set[str] = set()
 
 
 def now() -> str:
@@ -135,6 +140,12 @@ class Inbox:
             db.row_factory = sqlite3.Row
             try:
                 db.executescript(SCHEMA)
+                if str(self.path) not in _UPGRADED:
+                    for table, column, kind in _ADDED:
+                        have = {row[1] for row in db.execute(f"PRAGMA table_info({table})")}
+                        if column not in have:
+                            db.execute(f"ALTER TABLE {table} ADD COLUMN {column} {kind}")
+                    _UPGRADED.add(str(self.path))
                 yield db
                 db.commit()
             finally:

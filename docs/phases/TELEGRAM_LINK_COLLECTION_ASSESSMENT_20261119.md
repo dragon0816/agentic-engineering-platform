@@ -121,3 +121,8 @@ MD、PM、sales 平常從網頁、Threads、Instagram 取得新消息。希望�
     測試並更新 Dashboard，再通知結果。
   - 需 AGENTS22 同意的兩處（core）：Telegram 主動通知；不打指令直接分享連結的確定性分流。
 - 待 owner 確認：P1 範圍、上述兩處是否做、§7 其餘建議預設。
+- **X 連結（owner 2026-11-21）**：x.com／twitter.com／t.co 是獨立平台 `x`。仍只取靜態內容、不登入、
+  不用無頭瀏覽器：依序讀 syndication JSON、oEmbed、頁面 meta，去掉登入牆與 cookie 文字；貼文只有
+  一個連到 X 以外的連結時，用一般網頁抓取把該文章一起收進來源，多個連結只列出不抓，連到 X 的不跟。
+  2026-11-21 以 owner 的範例連結實測三個來源都可用（細節見 `docs/TASKS.md` 同日紀錄）；契約見
+  `docs/CONTRACTS.md` BI inbox「X links」，決策見 `docs/DECISIONS.md` 2026-11-21。

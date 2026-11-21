@@ -7,7 +7,8 @@ post's `og:` meta to a plain request and render the rest by script; Instagram
 often answers with its login page instead. `login_page` recognises that, and the
 caller may then try `browser_fetch` (the existing `integrations.browser` Edge
 profile, `docs/phases/TELEGRAM_LINK_COLLECTION_ASSESSMENT_20261119.md` §5/§8),
-which is off unless the owner turns it on after testing real links.
+which is off unless the owner turns it on after testing real links. An X (Twitter)
+post is read from its public no-login endpoints instead (`aep_bi.inbox.xpost`).
 """
 
 from __future__ import annotations
@@ -65,7 +66,14 @@ Fetcher = Callable[[str, int, float], Fetched]
 
 def normalize(url: str) -> str:
     """The address without what only says who shared it: tracking parameters, the
-    fragment, a trailing slash, the case of the scheme and host."""
+    fragment, a trailing slash, the case of the scheme and host. An X post becomes
+    `https://x.com/<handle>/status/<id>` whatever host (twitter.com, mobile., www.) and
+    share parameters (`s`, `t`, ...) it came with."""
+    from aep_bi.inbox import xpost
+
+    post = xpost.status_of(url.strip())
+    if post is not None:
+        return xpost.post_url(*post)
     parts = urllib.parse.urlsplit(url.strip())
     query = [
         (key, value)
@@ -85,8 +93,13 @@ def normalize(url: str) -> str:
 
 
 def platform(url: str) -> str:
-    """`threads`, `instagram` or `web`."""
+    """`threads`, `instagram`, `x` (x.com, twitter.com and their subdomains, and X's
+    shortener t.co until it is expanded) or `web`."""
+    from aep_bi.inbox import xpost
+
     host = urllib.parse.urlsplit(url).netloc.lower().split(":")[0]
+    if xpost.is_x(url) or xpost.is_short(url):
+        return "x"
     if host.endswith(("threads.net", "threads.com")):
         return "threads"
     if host.endswith(("instagram.com", "instagr.am")):
@@ -118,12 +131,22 @@ def login_page(fetched: Fetched) -> bool:
 
 
 def http_fetch(url: str, limit: int = MAX_PAGE_BYTES, timeout_s: float = TIMEOUT_S) -> Fetched:
-    """GET `url` with this PC's proxy settings; never raises."""
+    """GET the page at `url` with this PC's proxy settings; never raises."""
+    return _get(url, limit, timeout_s, "text/html,application/xhtml+xml;q=0.9,*/*;q=0.5")
+
+
+def api_fetch(url: str, limit: int = MAX_PAGE_BYTES, timeout_s: float = TIMEOUT_S) -> Fetched:
+    """GET a public JSON answer (X's syndication and oEmbed endpoints) the same way;
+    only a JSON answer counts."""
+    return _get(url, limit, timeout_s, "application/json", json_only=True)
+
+
+def _get(url: str, limit: int, timeout_s: float, accept: str, json_only: bool = False) -> Fetched:
     request = urllib.request.Request(
         url,
         headers={
             "User-Agent": USER_AGENT,
-            "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.5",
+            "Accept": accept,
             "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
         },
     )
@@ -140,6 +163,10 @@ def http_fetch(url: str, limit: int = MAX_PAGE_BYTES, timeout_s: float = TIMEOUT
         return Fetched(url, url, None, b"", "", "http", f"fetch_failed:{type(reason).__name__}")
     if len(body) > limit:
         return Fetched(url, final, status, b"", kind, "http", "page_too_large")
+    if json_only:
+        if "json" not in kind.lower():
+            return Fetched(url, final, status, b"", kind, "http", "not_json")
+        return Fetched(url, final, status, body, kind, "http")
     if kind and "html" not in kind.lower() and "xml" not in kind.lower():
         return Fetched(url, final, status, b"", kind, "http", "not_a_page")
     return Fetched(url, final, status, body, kind, "http")
