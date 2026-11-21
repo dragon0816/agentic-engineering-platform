@@ -1520,6 +1520,10 @@ async function biLoad() {
   // The working domain first: every tab reads under it.
   await biSourceFolders().catch(() => {});
   await biShowView(bi.view);
+  // The schema shown in an open Ingest ⚙ tab is read again, as the 2a view was when shown.
+  if (sideHas("bi-gear:ingest")) {
+    await biBuildSchema().catch((failure) => biNotice(false, "讀不到 schema：" + failure.message));
+  }
   // The build tab asks for the vault's status itself, after what its step needs. Here it is
   // only the line under the row, and must not take the notice from what this tab is doing.
   if (bi.view !== "build") biBuildVault().catch(() => {});
