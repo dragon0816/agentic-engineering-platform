@@ -2914,52 +2914,28 @@ function biShareOpen() { biSideTab("bi-share", "分享", el("bi-b-ver")); }
 function biHistoryOpen() { biSideTab("bi-history", "歷史紀錄", el("bi-b-hist")); }
 el("bi-b-ver-open").addEventListener("click", biShareOpen);
 el("bi-b-hist-open").addEventListener("click", biHistoryOpen);
-// The two buttons show where the share step would: on a vault's step 3.
-new MutationObserver(() => { el("bi-b-ver-bar").hidden = el("bi-b-ver").hidden; })
-  .observe(el("bi-b-ver"), {attributes: true, attributeFilter: ["hidden"]});
+// The two buttons show where the share step would: on a vault's step 3. A status-line link
+// pressed before step 3 had loaded opens 分享 as soon as it shows.
+new MutationObserver(() => {
+  el("bi-b-ver-bar").hidden = el("bi-b-ver").hidden;
+  if (bi.shareWanted && !el("bi-b-ver").hidden) {
+    bi.shareWanted = false;
+    if (bi.view === "build" && bi.build.stage === "test") biShareShow();
+  }
+}).observe(el("bi-b-ver"), {attributes: true, attributeFilter: ["hidden"]});
+
+function biShareShow() {
+  biShareOpen();
+  el("bi-b-ver-purpose").focus({preventScroll: true});
+}
 
 async function biToVersion() {
   // 分享 opens as a tab of the side area (owner 2026-11-20), step 3 beside it.
   if (bi.view !== "build") await biJump("build");
   biBuildStage("test", false);
-  if (!el("bi-b-ver").hidden) {
-    biShareOpen();
-    el("bi-b-ver-purpose").focus({preventScroll: true});
-    return;
-  }
-  // What loads after this moves it: the Dashboard, tests and analyses above it, the share
-  // step inside it, the sticky row and steps over it. Each arrives in its own time (a slow
-  // computer: after any fixed wait), so it is placed again whenever one of them changes
-  // size, until the person scrolls, clicks or types somewhere else.
-  bi.keepVersion = true;
-  biKeepVersion();
-  if (!el("bi-b-ver").hidden) el("bi-b-ver-purpose").focus({preventScroll: true});
-}
-
-function biKeepVersion() {
-  // Only while the share step is in the main area (it lives in the side area now).
-  if (!bi.keepVersion || !el("bi-b-ver").closest(".kp-stage")) return;
-  const box = el("bi-b-ver");
-  if (bi.view !== "build" || bi.build.stage !== "test") { bi.keepVersion = false; return; }
-  if (box.hidden) return;
-  // Clear of the top row while it sticks (not on a phone): its own height, as it is now.
-  const row = el("bi-top-row");
-  box.style.setProperty("--bi-top-h",
-    getComputedStyle(row).position === "sticky" ? row.offsetHeight + "px" : "0px");
-  box.scrollIntoView({block: "start"});
-}
-
-const biVersionMoved = new ResizeObserver(() => biKeepVersion());
-for (const moves of [el("bi-top-row"), el("bi-build-steps"),
-  document.querySelector('#bi-view-build .kp-stage[data-stage="test"]')]) {
-  biVersionMoved.observe(moves);
-}
-for (const type of ["wheel", "touchstart", "pointerdown", "keydown"]) {
-  window.addEventListener(type, (event) => {
-    // Typing the commit's purpose is being where it was opened.
-    if (type === "keydown" && event.target && event.target.id === "bi-b-ver-purpose") return;
-    bi.keepVersion = false;
-  }, {capture: true, passive: true});
+  if (!el("bi-b-ver").hidden) { biShareShow(); return; }
+  // Step 3 is still loading: the share step opens beside it once it shows (above).
+  bi.shareWanted = true;
 }
 
 function biBuildStage(name, focus = true) {

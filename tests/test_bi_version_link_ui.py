@@ -83,16 +83,19 @@ def test_the_status_line_opens_commit_and_push_from_any_tab(
             page.run("window.__releaseBench()")
             page.wait(QUIET, 60)
             page.wait("document.getElementById('bi-b-bq-list').textContent.includes('虛構題')", 60)
-            # 版本 shows below the sticky top row, ready for the commit's purpose.
-            visible_version = (
-                "(() => { const v = document.getElementById('bi-b-ver').getBoundingClientRect(),"
-                " r = document.getElementById('bi-top-row').getBoundingClientRect();"
-                " return v.top >= r.bottom && v.top < innerHeight; })()"
+            # 分享 opens as a tab of the side area (owner 2026-11-20), step 3 beside it, in
+            # view and ready for the commit's purpose, even though step 3 was still loading.
+            in_side = (
+                "sideHas('bi-share') && document.getElementById('bi-b-ver')"
+                ".closest('.extra-panel') === document.getElementById('extra-panel-bi-share')"
             )
-            # Network quiet does not promise that the browser has completed scrolling.
-            # Keep the same spatial condition, waiting for it rather than sampling one frame.
+            visible_version = (
+                "(() => { const v = document.getElementById('bi-b-ver').getBoundingClientRect();"
+                " return v.width > 0 && v.top >= 0 && v.top < innerHeight; })()"
+            )
+            page.wait(in_side, 60)
             page.wait(visible_version, 60)
-            assert page.run(visible_version)
+            assert page.run("bi.view === 'build' && bi.build.stage === 'test'")
             assert page.run("document.activeElement.id") == "bi-b-ver-purpose"
             page.see("bi-b-ver-pending", "虛構題")
             page.shoot("version")
