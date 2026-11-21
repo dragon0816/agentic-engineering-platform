@@ -341,83 +341,107 @@ def test_files_open_in_the_viewer_and_the_chart_renders_in_the_answer(
         # The person's attached CSV is a chip too.
         attached = f".asked-files .file-chip[data-path={_css(files['csv'])}]"
         assert run(f"!!document.querySelector({json.dumps(attached)})")
-        # HTML chip: Preview in the sandboxed frame, then Code shows the source.
+        # Files open as tabs of the side area (owner 2026-11-20, docs/DECISIONS.md
+        # "Agent Web three-area layout with a tabbed side area"), one tab per file, the
+        # newest in front; the old dialog stays shut.
+        panel = "#extra-body .extra-panel:not([hidden])"
+
+        def tabs() -> list[str]:
+            names: list[str] = json.loads(
+                str(
+                    run(
+                        "JSON.stringify([...document.querySelectorAll("
+                        "'#extra-tabs [role=tab]')].map((t) => t.textContent))"
+                    )
+                )
+            )
+            return names
+
+        def front() -> str:
+            return str(
+                run("document.querySelector('#extra-tabs [aria-selected=true]').textContent")
+            )
+
+        assert run("document.getElementById('extra-area').hidden") is True
+        # HTML chip: shown in the sandboxed frame from a nonce address.
         run(f"document.querySelector({json.dumps(chip(files['html']))}).click()")
-        wait("!document.getElementById('file-viewer').hidden")
-        wait("!!document.querySelector('#viewer-body iframe')")
-        assert run("document.querySelector('#viewer-body iframe').getAttribute('sandbox')") == (
-            "allow-scripts"
+        wait("!document.getElementById('extra-area').hidden")
+        wait(f"!!document.querySelector({json.dumps(panel + ' iframe')})")
+        assert run(
+            f"document.querySelector({json.dumps(panel + ' iframe')}).getAttribute('sandbox')"
+        ) == ("allow-scripts")
+        source = str(
+            run(f"document.querySelector({json.dumps(panel + ' iframe')}).getAttribute('src')")
         )
-        assert run("document.getElementById('viewer-name').textContent") == files["html"].name
-        assert run("document.activeElement.id") == "viewer-close"
-        for selector in ("#viewer-close", "#viewer-preview-mode", "#viewer-code-mode"):
-            assert min(size(selector)) >= 44, selector
-        browser.screenshot(shots / "viewer-html-preview.png")
-        run("document.getElementById('viewer-code-mode').click()")
-        wait("!!document.querySelector('#viewer-body pre.code')")
-        code = str(run("document.querySelector('#viewer-body pre.code').textContent"))
-        assert code.startswith("<!DOCTYPE html>") and "chart-data" in code
-        assert run("document.querySelector('#viewer-body iframe')") is None
-        assert not run("document.getElementById('viewer-copy').hidden")
-        browser.screenshot(shots / "viewer-html-code.png")
-        # Esc closes it and focus returns to the chip.
-        run(
-            "document.getElementById('viewer-code-mode').dispatchEvent("
-            "new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}))"
-        )
+        assert source.startswith("/view/file?nonce=") and server.token not in source
+        assert tabs() == [files["html"].name] and front() == files["html"].name
         assert run("document.getElementById('file-viewer').hidden") is True
-        # Markdown: rendered (the <script> line is text), Code shows it raw.
+        bar = str(
+            run(f"document.querySelector({json.dumps(panel + ' .extra-file-bar')}).textContent")
+        )
+        assert "在瀏覽器開啟" in bar and "下載" in bar
+        browser.screenshot(shots / "viewer-html-preview.png")
+        # The same chip again only brings its tab to the front.
         run(f"document.querySelector({json.dumps(chip(files['md']))}).click()")
-        wait("!!document.querySelector('#viewer-body h1')")
-        assert run("document.querySelector('#viewer-body h1').textContent") == "圖例標題"
-        assert run("document.querySelectorAll('#viewer-body script').length") == 0
-        assert run("document.querySelectorAll('#viewer-body table').length") == 1
-        body = str(run("document.getElementById('viewer-body').innerText"))
+        wait(f"!!document.querySelector({json.dumps(panel + ' h1')})")
+        run(f"document.querySelector({json.dumps(chip(files['html']))}).click()")
+        assert tabs() == [files["html"].name, files["md"].name]
+        assert front() == files["html"].name
+        # Markdown: rendered (the <script> line is text), in its own tab.
+        run("document.querySelectorAll('#extra-tabs [role=tab]')[1].click()")
+        assert front() == files["md"].name
+        assert run(f"document.querySelector({json.dumps(panel + ' h1')}).textContent") == (
+            "圖例標題"
+        )
+        assert run(f"document.querySelectorAll({json.dumps(panel + ' script')}).length") == 0
+        assert run(f"document.querySelectorAll({json.dumps(panel + ' table')}).length") == 1
+        body = str(run(f"document.querySelector({json.dumps(panel)}).innerText"))
         assert "<script>alert(1)</script>" in body
         browser.screenshot(shots / "viewer-md-preview.png")
-        # Keyboard: the toggle is a button reached and pressed by keys.
-        run("document.getElementById('viewer-code-mode').focus()")
-        run("document.getElementById('viewer-code-mode').click()")
-        wait("!!document.querySelector('#viewer-body pre.code')")
-        raw = str(run("document.querySelector('#viewer-body pre.code').textContent"))
-        assert raw == MARKDOWN.rstrip("\n") + "\n" or raw == MARKDOWN, raw
-        assert run("document.querySelectorAll('#viewer-body h1').length") == 0
-        run("document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape'}))")
-        assert run("document.getElementById('file-viewer').hidden") is True
-        # JSON: the Code view only, with line numbers.
+        # JSON: the code view, with line numbers.
         run(f"document.querySelector({json.dumps(chip(files['json']))}).click()")
-        wait("!!document.querySelector('#viewer-body pre.code')")
-        assert run("document.getElementById('viewer-modes').hidden") is True
-        gutter = str(run("document.querySelector('#viewer-body pre.gutter').textContent"))
+        wait(f"!!document.querySelector({json.dumps(panel + ' pre.code')})")
+        assert front() == files["json"].name
+        gutter = str(
+            run(f"document.querySelector({json.dumps(panel + ' pre.gutter')}).textContent")
+        )
         assert gutter.splitlines()[:3] == ["1", "2", "3"]
         assert '"tag": "<x>"' in str(
-            run("document.querySelector('#viewer-body pre.code').textContent")
+            run(f"document.querySelector({json.dumps(panel + ' pre.code')}).textContent")
         )
         browser.screenshot(shots / "viewer-json-code.png")
-        run("document.getElementById('viewer-close').click()")
         # Text holding HTML is shown as text.
         run(f"document.querySelector({json.dumps(chip(files['txt']))}).click()")
-        wait("!!document.querySelector('#viewer-body pre.code')")
-        assert run("document.querySelectorAll('#viewer-body b, #viewer-body img').length") == 0
-        shown = str(run("document.querySelector('#viewer-body pre.code').textContent"))
+        wait(f"!!document.querySelector({json.dumps(panel + ' pre.code')})")
+        assert front() == files["txt"].name
+        assert (
+            run(f"document.querySelectorAll({json.dumps(panel + ' b, ' + panel + ' img')}).length")
+            == 0
+        )
+        shown = str(run(f"document.querySelector({json.dumps(panel + ' pre.code')}).textContent"))
         assert shown in (TEXT, TEXT.rstrip("\n") + "\n"), shown
         assert "<b>bold</b> & <img src=x onerror=alert(1)>" in shown
-        run("document.getElementById('viewer-close').click()")
-        # Dark mode: the panel and the answer frame follow it.
-        light = run("getComputedStyle(document.getElementById('file-viewer')).backgroundColor")
+        # Closing the front tab shows the next; closing the last folds the area away.
+        light = run("getComputedStyle(document.getElementById('extra-body')).backgroundColor")
+        run("document.querySelector('#extra-tabs .extra-tab.on .extra-tab-close').click()")
+        assert files["txt"].name not in tabs() and len(tabs()) == 3
+        while tabs():
+            run("document.querySelector('#extra-tabs .extra-tab.on .extra-tab-close').click()")
+        assert run("document.getElementById('extra-area').hidden") is True
+        # Dark mode: the side area and the answer frame follow it.
         browser.page().call(
             "Emulation.setEmulatedMedia",
             features=[{"name": "prefers-color-scheme", "value": "dark"}],
         )
         run(f"document.querySelector({json.dumps(chip(files['md']))}).click()")
-        wait("!!document.querySelector('#viewer-body h1')")
-        dark = run("getComputedStyle(document.getElementById('file-viewer')).backgroundColor")
+        wait(f"!!document.querySelector({json.dumps(panel + ' h1')})")
+        dark = run("getComputedStyle(document.getElementById('extra-body')).backgroundColor")
         assert light != dark, (light, dark)
         browser.screenshot(shots / "viewer-md-dark.png")
-        run("document.getElementById('viewer-close').click()")
+        run("document.querySelector('#extra-tabs .extra-tab.on .extra-tab-close').click()")
         run("document.querySelector('.answer-html').scrollIntoView({block: 'start'})")
         browser.screenshot(shots / "chart-in-answer-dark.png")
-        # 390 px: a full-screen sheet, no horizontal page scroll.
+        # 390 px: the side area is a full-width sheet, no horizontal page scroll.
         browser.page().call(
             "Emulation.setDeviceMetricsOverride",
             width=390,
@@ -430,12 +454,12 @@ def test_files_open_in_the_viewer_and_the_chart_renders_in_the_answer(
         run("document.querySelector('.answer-html').scrollIntoView({block: 'start'})")
         browser.screenshot(shots / "chart-in-answer-narrow.png")
         run(f"document.querySelector({json.dumps(chip(files['html']))}).click()")
-        wait("!!document.querySelector('#viewer-body iframe')")
-        assert size("#file-viewer")[0] == 390
+        wait(f"!!document.querySelector({json.dumps(panel + ' iframe')})")
+        assert size("#extra-area")[0] == 390
         no_side_scroll()
         browser.screenshot(shots / "viewer-html-narrow.png")
-        run("document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape'}))")
-        assert run("document.getElementById('file-viewer').hidden") is True
+        run("document.querySelector('#extra-tabs .extra-tab.on .extra-tab-close').click()")
+        assert run("document.getElementById('extra-area').hidden") is True
     finally:
         browser.close()
         browser.discard_profile()

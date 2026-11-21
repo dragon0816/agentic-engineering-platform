@@ -73,8 +73,13 @@ def test_a_tool_is_approved_run_and_its_output_previewed(
             page.upload("raw.md", NOTE, "text/markdown")
             page.stage("schema")
 
+            # Only the built-in programs are listed before one is saved (owner 2026-11-20:
+            # AI 擷取 and 表格規則 are listed among the programs, read only).
+            page.see("bi-b-tl-list", "AI 擷取（內建）")
+            page.see("bi-b-tl-list", "表格規則（內建，不用模型）")
+            listed = page.text_of("bi-b-tl-list")
+            assert "aidc/normalize" not in listed and "對選取的來源執行" not in listed
             # Saved code can run immediately, without a local approval step.
-            page.see("bi-b-tl-list", "還沒有資料處理程式")
             page.set_value("bi-b-tl-name", "aidc/normalize")
             page.set_value("bi-b-tl-code", TOOL)
             page.click("#bi-b-tl-save")
@@ -100,7 +105,7 @@ def test_a_tool_is_approved_run_and_its_output_previewed(
             page.see("bi-b-trial-result", "試跑完成")
             assert MARK in extractor.requests[-1].messages[1].text
             assert store.card_rows() == []
-            page.click("[data-stage=method] [data-bi-next=review]")
+            # 審核 shows with Ingest (owner 2026-11-20).
             page.wait(
                 "!document.querySelector('#bi-view-build .kp-stage[data-stage=review]').hidden"
             )
