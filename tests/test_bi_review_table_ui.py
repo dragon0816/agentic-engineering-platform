@@ -793,6 +793,41 @@ def test_accepting_a_proposal_shows_what_it_loses_and_then_that_it_was_done(
             page.run("window.fetch = window.__realFetch")
 
 
+@pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
+def test_a_pending_confirmation_survives_the_card_links_arriving_late(tmp_path: Path) -> None:
+    """CI run 44902539330: 「確定取代」 never showed. Opening 審核 asks for the vault's card
+    list (the links in a new card's values); its late answer drew the pane again and took the
+    confirmation, and a reason being typed, away with it."""
+    config, layout = _bi_host(tmp_path / "pc")
+    workspace = layout.workspace_root
+    dataset = _vault(tmp_path, workspace, [_page(40)])
+    _written_run(workspace, dataset, "長40.md", f"{LONG_NOTE}\n40\n", _replacing(40, LONG_BODY))
+    _written_run(workspace, dataset, "短40.md", f"{SHORT_NOTE}\n40\n", _replacing(40, SHORT_BODY))
+    row, pane = _row("FAKE-040"), "document.getElementById('bi-b-cand')"
+    with _served(config, layout, _Model("none", {})) as server:
+        with BiPage(tmp_path / "browser", server.address) as page:
+            _review(page, dataset)
+            page.wait(f"!!{row}")
+            # The card list is held: opening 審核 again asks for it, and it answers late. Each
+            # answer drawn is counted, so the check below comes after the held one, not before.
+            page.run(
+                "window.__indexed = 0; const index = biBuildCardIndex;"
+                " biBuildCardIndex = async (...args) => {"
+                " try { return await index(...args); } finally { window.__indexed += 1; } }; 0"
+            )
+            _hold(page, "/api/bi/cards?")
+            page.stage("review")
+            page.run(f"{row}.click()")
+            page.wait(f"!!{_button(pane, '接受')} && !{_button(pane, '接受')}.disabled")
+            page.run(f"{pane}.querySelector('input').value = '虛構的理由'; 0")
+            page.run(f"{_button(pane, '接受')}.click()")
+            page.wait(f"!!{_button(pane, '確定取代')}")
+            _free(page)
+            page.wait("window.__indexed === 1")
+            assert page.run(f"!!{_button(pane, '確定取代')}"), "the confirmation was drawn away"
+            assert page.run(f"{pane}.querySelector('input').value") == "虛構的理由"
+
+
 def test_what_accepting_a_proposal_does_to_the_fields_evidence(tmp_path: Path) -> None:
     """Rewritten for the owner's decision of 2026-11-05 (it pinned the opposite before): the
     accepted value brings its own citation, and the old one goes to history with the old value.

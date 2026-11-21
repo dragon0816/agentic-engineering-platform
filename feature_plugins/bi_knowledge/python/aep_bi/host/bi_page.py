@@ -8359,7 +8359,10 @@ async function biBuildCardIndex(dataset) {
       }
     }
     bi.build.cards = cards;
-    if (bi.build.candidateId && !bi.build.peek
+    // Only a new card's values link through this index. A change's pane does not use it, and
+    // drawing it again here took away a 「確定取代」 pressed meanwhile and a reason being typed
+    // (CI run 44902539330).
+    if (bi.build.candidateId && !bi.build.peek && !biChangeOf(bi.build.candidateId)
       && bi.build.stage === "review") biBuildShowCandidate(bi.build.candidateId);
   } catch (failure) { biNotice(false, "卡片連結沒有載入：" + failure.message); }
 }
