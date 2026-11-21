@@ -132,7 +132,11 @@ def route(
             # What 「匯出」 can put in a package: the working domain's skills and tools.
             return 200, {"items": packages.exportable(workspace, parts[0], query.get("home"))}
         if len(parts) == 2 and parts[1] == "checks":
-            newest = bi_bench.latest(workspace, parts[0])
+            # One reading of the runs for `newest`, `latest` and whether `standing` is worked
+            # out: read twice, a run ending in between gave its finished report with the empty
+            # standing of a run still going, and the page showed no push block (CI 44919588565).
+            found = bi_bench.reports(workspace, parts[0])
+            newest = found[0] if found else None
             # The page reads this every 2 s during a run; a run changes nothing about it until
             # it ends, and on a real vault the digest costs a second each time.
             running = newest is not None and newest.get("status") == "running"
@@ -141,7 +145,7 @@ def route(
                 "latest": _with_staleness(
                     workspace,
                     parts[0],
-                    bi_bench.latest_for(workspace, parts[0], query.get("home") or None),
+                    bi_bench.latest_for(workspace, parts[0], query.get("home") or None, found),
                     running,
                 ),
                 "newest": None

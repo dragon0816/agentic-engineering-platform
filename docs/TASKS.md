@@ -5409,3 +5409,14 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   (a new card's pane still is, for its links). New regression test
   test_a_pending_confirmation_survives_the_card_links_arriving_late holds the card list
   request and failed 3/3 before the fix, passes after. Verification: see the commit message.
+- [x] 2026-11-22 Fix the working-domain flake "no Push 會被擋 in the aidc report" (CI run
+  44919588565, test_one_working_domain_carries_through_the_three_steps; branch
+  fix-working-domain-flake). Root cause: `GET /api/bi/vaults/<id>/checks` read the runs twice,
+  `newest` (which decides `running`, so an empty `standing` and no staleness) and then `latest`.
+  A page read that began while the whole-vault run went and read `latest` after it finished
+  returned that run's finished report (narrowed to aidc: 涵蓋 aidc 1 題, its 分不出 1) with the
+  empty standing of a run still going; the test's wait for 「涵蓋」 was met by that earlier draw
+  before its own `biBench` reply came. Now one `reports` reading serves `newest`, `latest` and
+  `running`, and the test waits until the drawn reply is aidc's own finished run. New
+  regression test test_one_reply_describes_one_moment_of_the_runs (fails before the fix).
+  Verification: see the commit message.

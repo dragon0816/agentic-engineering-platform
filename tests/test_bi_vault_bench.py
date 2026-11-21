@@ -286,3 +286,43 @@ def test_a_run_says_how_far_it_is_for_the_bar_beside_the_button(tmp_path: Path) 
     assert done["status"] == "finished"
     assert done["progress"]["done"] == 2 and done["progress"]["current"] is None
     assert done["progress"]["ended_at"]
+
+
+def test_one_reply_describes_one_moment_of_the_runs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """CI 44919588565: a read that began while a run went and ended after it finished said
+    「running」 (no standing, no push block) beside that run's finished report, and the page
+    drew a finished report with no 「Push 會被擋」."""
+    _drive, vault_id, dataset, a, _b = _two_pcs(tmp_path)
+    _ok(_save(a, vault_id, QUESTION))
+    _commit(a, vault_id, "加上測試")
+    _push(a, vault_id)
+    _import(a, dataset, _row("TSN", standard_body="ETSI"))
+    report = bi_bench.run(
+        a,
+        vault_id,
+        ask=lambda _q, side: {"ok": True, "answer": "ETSI" if side == "working" else "IEEE"},
+        extract=lambda _c: [],
+        actor="alice",
+    )
+    assert report["regressions"]
+    real = bi_bench.reports
+    calls: list[int] = []
+
+    def ending(workspace: Path, vault: str) -> list[dict[str, Any]]:
+        # The first reading sees the run still going; every later one sees it finished.
+        found = real(workspace, vault)
+        calls.append(1)
+        if len(calls) == 1:
+            return [{**found[0], "status": "running", "finished_at": None}, *found[1:]]
+        return found
+
+    monkeypatch.setattr(bi_bench, "reports", ending)
+    reply = _checks(a, vault_id)
+    assert reply["newest"]["status"] == reply["latest"]["status"] == "running"
+    assert reply["standing"] == {"blocking": [], "notes": []}
+    # Read again, all of it says finished, and the regression blocks.
+    reply = _checks(a, vault_id)
+    assert reply["newest"]["status"] == reply["latest"]["status"] == "finished"
+    assert any("測試退步" in line for line in reply["standing"]["blocking"])
