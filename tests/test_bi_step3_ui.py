@@ -167,11 +167,14 @@ def test_step_3(
         page.wait(f"!{run_button}.disabled")
         page.click("#bi-b-bench-run")
         page.see("bi-b-bench-report", "完成")
-        page.wait("!document.getElementById('bi-b-run-progress').hidden")
-        page.see("bi-b-run-text", "完成：1/1 題")
-        assert page.run("document.getElementById('bi-b-run-progress').parentElement.id") == (
-            "bi-b-run"
-        ), "the bar is beside 跑測試"
+        # One progress row under the stage bar carries every wait (owner 2026-11-20).
+        page.wait("!document.getElementById('bi-b-progress').hidden")
+        page.see("bi-b-progress-text", "測試完成：1/1 題")
+        assert page.run("document.getElementById('bi-b-progress').parentElement.id") == (
+            "bi-build-steps"
+        ), "the bar is in the one row under the stage bar"
+        assert page.run("document.getElementById('bi-b-progress').classList.contains('good')")
+        assert page.run("document.getElementById('bi-b-progress-bar').value") == 1
         page.see("bi-b-bench-sum", "通過率")
         summary = page.text_of("bi-b-bench-sum")
         assert "題數1" in summary and "最近一次" in summary

@@ -128,8 +128,8 @@ def test_ticked_sources_run_one_after_another_and_a_failure_does_not_stop_the_re
             assert len({tuple(run["source_ids"]) for run in runs}) == 4  # each its own source
             failed = [run for run in runs if run["status"] == "failed"]
             assert len(failed) == 1
-            page.see("bi-status-build", "壞掉.md")
-            page.see("bi-status-build", "3 次執行")
+            page.see("bi-b-progress-text", "壞掉.md")
+            page.see("bi-b-progress-text", "3 次執行")
             page.wait("document.querySelectorAll('#bi-b-run-pick option').length === 3")
             page.shoot("review")
 
@@ -160,7 +160,7 @@ def test_stop_cancels_the_run_under_way_and_starts_no_more(
             )
             page.click("#bi-b-start")
             page.wait("!document.getElementById('bi-b-batch-stop').hidden")
-            page.wait(page.shows("bi-status-build", "第 2／3 份"))
+            page.wait(page.shows("bi-b-progress-text", "第 2／3 份"))
             page.click("#bi-b-batch-stop")
             page.run("window.__go(); 0")
             page.wait("document.getElementById('bi-b-batch-stop').hidden")

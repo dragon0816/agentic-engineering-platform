@@ -28,7 +28,8 @@ def _approved() -> tuple[str, ...]:
 def test_a_new_install_approves_internal_and_nothing_higher() -> None:
     assert set(_approved()) == {"UNCLASSIFIED", "INTERNAL"}
     # BI does not consult this list (owner 2026-11-17): its runtime carries no approval.
-    assert set(AiRuntime.__dataclass_fields__) == {"model", "background"}
+    # `vision` only says whether the model can describe pictures (owner 2026-11-20).
+    assert set(AiRuntime.__dataclass_fields__) == {"model", "background", "vision"}
 
 
 def test_the_installer_takes_the_approval_from_that_file_and_update_runs_the_installer() -> None:
