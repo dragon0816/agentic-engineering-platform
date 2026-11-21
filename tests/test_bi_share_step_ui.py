@@ -84,6 +84,17 @@ def _in_sight(page: BiPage, scope: str, label: str) -> bool:
     )
 
 
+def _answer_confirm(choice: str, ask: str) -> str:
+    """An expression for `wait`: press `choice` in the history's confirm, asking again with
+    `ask` when a late redraw of the history took the confirm away first."""
+    return (
+        "(() => { const c = document.querySelector('#bi-b-ver-history .bi-confirm');"
+        " const b = c && [...c.querySelectorAll('button')]"
+        f".find((x) => x.textContent.includes({json.dumps(choice)}));"
+        f" if (b) {{ b.click(); return true; }} {ask}; return false; }})()"
+    )
+
+
 @pytest.mark.skipif(browser_missing(), reason="no Chromium browser is installed")
 def test_one_share_step_carries_commit_push_tag_and_publish(tmp_path: Path) -> None:
     config, layout = _bi_host(tmp_path / "pc")
@@ -244,9 +255,12 @@ def test_one_share_step_carries_commit_push_tag_and_publish(tmp_path: Path) -> N
             page.shoot("old-result")
 
             # -- 進階: the history keeps 看改動 and 發佈 in the row, with the page's confirm ---
+            # Waited for in the row itself: until the history shows the new tag published, both
+            # tags are unpublished and one of their 發佈 buttons waits in 更多.
             page.wait(
                 "[...document.querySelectorAll('#bi-b-ver-history button')]"
-                f".some((b) => b.textContent === {json.dumps('發佈 ' + today)})"
+                f".some((b) => b.textContent === {json.dumps('發佈 ' + today)}"
+                " && !b.closest('details'))"
             )
             assert _in_sight(page, "#bi-b-ver-history tbody tr:first-child", "看改動")
             assert _in_sight(page, "#bi-b-ver-history", "發佈 " + today)
@@ -259,7 +273,8 @@ def test_one_share_step_carries_commit_push_tag_and_publish(tmp_path: Path) -> N
             )
             assert older == "回到這個版本|加 tag", older
             assert _in_sight(page, "#bi-b-sk-list", "修改")
-            assert _in_sight(page, "#bi-b-sk-list", "和 AI 一起修改")
+            # No AI collaboration on a rule any more (owner 2026-11-20): 修改 is the action.
+            assert "和 AI" not in page.text_of("bi-b-sk-list")
             publish = (
                 "[...document.querySelectorAll('#bi-b-ver-history button')]"
                 f".find((b) => b.textContent === {json.dumps('發佈 ' + today)}).click()"
@@ -270,10 +285,9 @@ def test_one_share_step_carries_commit_push_tag_and_publish(tmp_path: Path) -> N
                 f" return true; {publish}; return false; }})()"
             )
             page.wait(asked)
-            page.click_text("#bi-b-ver-history .bi-confirm", "取消")
+            page.wait(_answer_confirm("取消", publish))
             assert vault.Vault(workspace, vault_id).reads()["tag"] == today + "-2"
-            page.wait(asked)
-            page.click_text("#bi-b-ver-history .bi-confirm", "確定發佈")
+            page.wait(_answer_confirm("確定發佈", publish))
             page.see("bi-b-ver-reads", "發佈版本「" + today + "」")
 
             # -- 進階: discard asks on the page too -------------------------------------------

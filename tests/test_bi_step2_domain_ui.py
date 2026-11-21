@@ -123,7 +123,8 @@ def _pick_py(page: BiPage, name: str, text: str) -> None:
 def test_a_tool_is_picked_talked_through_tried_and_saved_in_the_working_domain(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """「選檔 → 和 AI 討論 → 試跑 → 存成新版本」, all following the working domain."""
+    """「選檔 → 編輯 → 試跑 → 存成新版本」, all following the working domain. The step-2 tool AI
+    left the page (owner 2026-11-20): the code is edited by the person, no model is asked."""
     from test_bi_extract import Scripted
 
     from aep_bi.cards.ai_runs import AiRuntime
@@ -172,24 +173,12 @@ def test_a_tool_is_picked_talked_through_tried_and_saved_in_the_working_domain(
             assert names == ["a1.md"]
             assert "已選 1 份" in page.text_of("bi-b-tl-try-count")
 
-            # 和 AI 討論: it asks first, then writes code the person puts in the editor.
-            page.click("#bi-b-tl-ai")
-            page.ai_opened("tool")
-            assert "輸入檔長怎樣" in page.text_of("bi-ai-target")
-            assert "aidc" in page.text_of("bi-ai-target")
-            page.set_value("bi-ai-msg", "幫我轉成 CSV")
-            page.click("#bi-ai-send")
-            page.see("bi-ai-log", "請你提供")
-            assert "輸出欄位" in page.text_of("bi-ai-log")
-            first = model.requests[0].messages[1].text
-            assert "Working domain: aidc" in first and "w1.md" not in first
-            page.set_value("bi-ai-msg", "欄位：line")
-            page.click("#bi-ai-send")
-            page.see("bi-ai-log", "AI 提出的程式碼")
-            page.click_text("#bi-ai-log", "放進編輯區")
-            page.see("bi-ai-log", "已放進編輯區")
-            page.wait("document.getElementById('bi-b-tl-code').value.includes('rows.csv')")
-            page.click("#bi-ai-close")
+            # No AI session for a tool any more (owner 2026-11-20, dfa6d025): the person
+            # edits the code in the editor; nothing is sent to a model.
+            assert page.run("!document.getElementById('bi-b-tl-ai')")
+            assert "和 AI" not in page.text_of("bi-b-skills")
+            page.set_value("bi-b-tl-code", TOOL)
+            assert "rows.csv" in page.run("document.getElementById('bi-b-tl-code').value")
 
             # 試跑: the output is shown, with the seconds while it runs; nothing is kept.
             page.click("#bi-b-tl-try")
@@ -224,3 +213,4 @@ def test_a_tool_is_picked_talked_through_tried_and_saved_in_the_working_domain(
             page.see("bi-b-tl-list", "wireless/split")
             assert "aidc/normalize-report" not in page.text_of("bi-b-tl-list")
             assert page.run("document.getElementById('bi-ai').hidden")
+            assert not model.requests

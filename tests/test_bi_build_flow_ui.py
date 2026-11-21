@@ -2,18 +2,21 @@
 
 The real Agent Web server, routes and harness wiring in a temporary workspace,
 with a temporary folder as the shared folder and scripted Agent and extractor
-models: upload → Markdown → convert to a vault → Session A's suggestion, applied,
-published and the vault moved to it → Session B's suggestion applied → ingest
-trial, review and write → AI benchmark questions → AI dashboard (K1) → bench run
-working vs published → 分享 (commit, push, tag, publish in one step), ending with what the
-Agent reads.
+models: upload → Markdown → convert to a vault → a schema draft edited in Ingest's ⚙,
+published and the vault moved to it → a judging rule changed in the rule form → ingest
+trial, review and write → AI benchmark questions → AI dashboard (K1), each AI session in
+its own side tab → bench run working vs published → 分享 in its side tab (commit, push,
+tag, publish in one step), ending with what the Agent reads. The step-2 AI sessions
+(schema and rule) left the page on 2026-11-20 and are asserted gone.
 Each AI step gets its next replies just before the person sends the message. All
 data is fictional. Screenshots in `.scratch/bi-flow/` with `AEP_UI_SHOTS`.
 """
 
 from __future__ import annotations
 
+import json
 import os
+import re
 import threading
 from collections.abc import Iterator
 from datetime import date
@@ -39,7 +42,6 @@ from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
 
 BUDGET = {"name": "budget_band", "label": "預算級距", "kind": "str", "class": "sourced"}
-ADD_BUDGET = [{"op": "add_field", "type": "Signal", "field": BUDGET}]
 RULE = "類型與資料夾照 schema。\n會議紀錄裡客戶親口說的評估，一律建一張 Signal。"
 QUESTION = {"question": "哪家客戶在評估 TSN？", "must": ["A 公司"], "must_not": ["B 公司"]}
 COUNT = "SELECT entity_type AS type, count(*) AS n FROM cards GROUP BY 1 ORDER BY 1"
@@ -135,7 +137,6 @@ def test_the_whole_build_flow(
             " if (pick && !pick.checked) pick.click();"
             " return pick && pick.checked && bi.build.sourceId; })()"
         )
-        source = str(page.run("bi.build.sourceId"))
         # A row of the dataset just left, still on screen, cannot be picked (it would be
         # dropped as the new list arrives, leaving step 2's later parts shut).
         assert page.run(
@@ -148,43 +149,26 @@ def test_the_whole_build_flow(
         )
         page.shoot("1-converted")
 
-        # -- step 2a: Session A on the harness: suggestion, draft, publish, upgrade -----------
+        # -- step 2a: the schema draft in Ingest's gear: edit, publish, upgrade --------------
         page.stage("schema")
+        # The schema AI session left the page (owner 2026-11-20, dfa6d025): a draft is edited
+        # in the gear, or a schema file comes in through 匯入.
+        assert page.run("document.getElementById('bi-b-sa-open') === null")
         page.click("#bi-b-draft-new")
         page.wait("!document.getElementById('bi-b-draft').hidden")
-        page.click("#bi-b-sa-open")
-        page.ai_opened("schema")
-        # It says what goes to the model and that nothing changes unasked, in plain words.
-        page.see("bi-ai-sent", "會送出")
-        assert "確認才會改動" in page.text_of("bi-ai-sent")
-        assert "harness" not in page.text_of("bi-ai") and "Session" not in page.text_of("bi-ai")
-        agent.then(
-            {"tools": [("bi_schema__cards", {})]},
-            {"tools": [("bi_schema__read_source", {"source_id": source})]},
-            {"tools": [("bi_schema__try", {"changes": ADD_BUDGET, "source_id": source})]},
-            {
-                "tools": [
-                    (
-                        "bi_schema__suggest",
-                        {
-                            "reply": "訊號卡加上預算級距。",
-                            "verdict": "extend",
-                            "changes": ADD_BUDGET,
-                        },
-                    )
-                ]
-            },
-            {"text": "我試過了，既有卡片不受影響。"},
+        page.see("bi-b-draft-info", "第 1 版")
+        page.run(
+            "(() => { const box = document.getElementById('bi-b-draft-text');"
+            " const doc = JSON.parse(box.value);"
+            " doc.types.find((t) => t.name === 'Signal').fields.push("
+            + json.dumps(BUDGET, ensure_ascii=False)
+            + "); box.value = JSON.stringify(doc, null, 1); })()"
         )
-        page.set_value("bi-ai-goal", "追蹤客戶預算")
-        page.set_value("bi-ai-msg", "訊號卡要記預算級距")
-        page.click("#bi-ai-send")
-        page.see("bi-ai-log", "擴充這份 schema")
-        log = page.text_of("bi-ai-log")
-        assert "Agent 用了" in log and "試草稿" in log and "budget_band" in log
-        page.shoot("2a-session-a")
-        page.click_text("#bi-ai-log", "套用到草稿")
+        page.set_value("bi-b-draft-note", "訊號卡加上預算級距")
+        page.click("#bi-b-draft-save")
         page.see("bi-b-draft-info", "第 2 版")
+        assert "訊號卡加上預算級距" in page.text_of("bi-b-draft-info")
+        page.shoot("2a-draft")
         # The draft on the main path is a table of what changes; its JSON is under 進階 (F8).
         page.see("bi-b-draft-table", "budget_band")
         assert "新增欄位" in page.text_of("bi-b-draft-table")
@@ -205,34 +189,29 @@ def test_the_whole_build_flow(
         assert BiStore(workspace, dataset).schema_ref().startswith("bi.schema/v1.1@5.0.0+")
         assert schema_versions.drafts(workspace)  # the draft itself stays
 
-        # -- step 2a: Session B on the harness: the skill, applied as a new revision ----------
+        # -- step 2a: a judging rule changed in the rule form, saved as a new revision ---------
+        # 和 AI 一起修改 left the rule list (dfa6d025); 修改 opens the rule form.
         page.see("bi-b-sk-list", "classify")
-        agent.then(
-            {"tools": [("bi_skill__try", {"source_id": source, "changes": {"body": RULE}})]},
-            {
-                "tools": [
-                    (
-                        "bi_skill__suggest",
-                        {"reply": "加上會議紀錄的規則。", "changes": {"body": RULE}},
-                    )
-                ]
-            },
-            {"text": "試跑找到訊號卡。"},
-        )
-        page.run(
+        classify = (
             "[...document.querySelectorAll('#bi-b-sk-list tbody tr')]"
-            ".find(li => li.textContent.includes('classify'))"
-            ".querySelector('button[aria-label*=\"AI\"]').click()"
+            ".find((r) => r.textContent.includes('classify'))"
         )
-        page.ai_opened("skill")
-        page.see("bi-ai-sent", "test-model")
-        page.set_value("bi-ai-msg", "會議紀錄裡客戶說在評估的，要建 Signal")
-        page.click("#bi-ai-send")
-        page.see("bi-ai-log", "套用後的變化")
-        assert "草稿試跑" in page.text_of("bi-ai-log")
-        page.click("#bi-ai-log button.go")
-        page.see("bi-ai-log", "已套用為第")
-        page.shoot("2a-session-b")
+        assert page.run(f"{classify}.textContent.includes('和 AI')") is False
+        page.run(
+            f"[...{classify}.querySelectorAll('button')]"
+            ".find((b) => b.textContent === '修改').click()"
+        )
+        page.wait("!document.getElementById('bi-b-sk-form').hidden")
+        assert page.run("document.getElementById('bi-b-sk-name').value") == "classify"
+        assert page.run("document.getElementById('bi-b-sk-name').readOnly") is True
+        page.set_value("bi-b-sk-body", RULE)
+        page.click("#bi-b-sk-form button[type=submit]")
+        page.notice("判讀規則「classify」存成第")
+        page.wait("document.getElementById('bi-b-sk-form').hidden")
+        revision = re.search(r"存成第 (\d+) 版", page.text_of("bi-notice"))
+        assert revision is not None
+        page.wait(f"{classify}.textContent.includes('第 {revision.group(1)} 版')")
+        page.shoot("2a-rule")
 
         # -- steps 2b–2e: trial → ingest → review → write --------------------------------------
         store = BiStore(workspace, dataset)
@@ -291,39 +270,35 @@ def test_the_whole_build_flow(
         # A question belongs to a domain: 全部領域 only reads.
         page.wait("(bi.build.homes || []).length > 0")
         page.choose("bi-b-src-folder", str(page.run("bi.build.homes[0].folder")))
+        # Questions are set in the stage's ⚙ tab; the AI session opens as a side tab of its own
+        # (owner 2026-11-20): chosen, in the side area, and the main view keeps only its run.
+        page.gear("test")
         page.click("#bi-b-qa-open")
         page.ai_opened("questions")
-        # Step 3 shows Benchmark | Dashboard | the AI session as tabs (owner 2026-11-19): the AI
-        # tab is chosen, it lies in the page instead of covering it, and nothing makes room.
-        tabs = "[...document.querySelectorAll('#bi-b-tabs [role=tab]')]"
-        assert page.run(f"{tabs}.map((t) => t.textContent).join('|')") == (
-            "Benchmark|Dashboard|AI 出題"
+        side_tabs = "[...document.querySelectorAll('#extra-tabs [role=tab]')]"
+        side_tab = side_tabs + ".find((t) => t.textContent === {!r})"
+        page.wait(f"{side_tabs}.map((t) => t.textContent).includes('和 AI 出測試題')")
+        assert page.run(f"{side_tab.format('和 AI 出測試題')}.getAttribute('aria-selected')") == (
+            "true"
         )
-        assert (
-            page.run(f"{tabs}.find((t) => t.getAttribute('aria-selected') === 'true').dataset.tab")
-            == "ai"
-        )
-        assert page.run("document.getElementById('bi-b-tab-ai').contains("
+        assert page.run("document.getElementById('bi-ai').closest('.extra-panel') !== null")
+        assert page.run("!document.getElementById('kn-pane-bi').contains("
                         "document.getElementById('bi-ai'))")  # fmt: skip
-        assert page.run("getComputedStyle(document.getElementById('bi-ai')).position") == "static"
-        assert page.run("!document.getElementById('kn-pane-bi').classList.contains('bi-ai-open')")
-        assert page.run("document.getElementById('bi-b-bench').offsetParent === null")
-        assert page.run("document.getElementById('bi-b-an').offsetParent === null")
+        # The step's own tabs stay Benchmark | Dashboard: no AI tab among them.
+        assert "AI" not in page.text_of("bi-b-tabs")
         visible = (
             "(() => { const r = document.getElementById('bi-ai-send').getBoundingClientRect();"
             " return r.height > 0 && r.bottom <= innerHeight && r.top >= 0; })()"
         )
         assert page.run(visible)
-        # What is typed stays across tab switches; the Benchmark tab shows the questions.
+        # What is typed stays across tab switches; the ⚙ tab shows the questions.
         page.set_value("bi-ai-msg", "還沒送出的草稿")
-        page.click("#bi-b-tab-bench-tab")
-        assert page.run("document.getElementById('bi-b-bq-list').offsetParent !== null")
+        page.run(f"{side_tab.format('Benchmark testing 設定')}.click()")
+        page.wait("document.getElementById('bi-b-bq-list').offsetParent !== null")
         assert page.run("document.getElementById('bi-b-bench').open")
         assert page.run("document.getElementById('bi-ai').offsetParent === null")
-        page.click("#bi-b-tab-dash-tab")
-        assert page.run("document.getElementById('bi-b-an').offsetParent !== null")
-        assert page.run("document.getElementById('bi-b-bench').offsetParent === null")
-        page.click("#bi-b-tab-ai-tab")
+        page.run(f"{side_tab.format('和 AI 出測試題')}.click()")
+        page.wait("document.getElementById('bi-ai').offsetParent !== null")
         assert page.run("document.getElementById('bi-ai-msg').value") == "還沒送出的草稿"
         assert page.run(visible)
         page.set_value("bi-ai-msg", "出題")
@@ -347,15 +322,18 @@ def test_the_whole_build_flow(
             == "true,false"
         )
         page.shoot("3-questions")
-        # Closing the session removes its tab, and the step shows both sections again.
+        # Closing the session removes its side tab only; the panel goes back to its home.
         page.click("#bi-ai-close")
         page.wait("document.getElementById('bi-ai').hidden")
-        assert page.run("document.getElementById('bi-b-tabs').hidden")
-        assert page.run("document.querySelectorAll('#bi-b-tabs [role=tab]').length") == 0
-        assert page.run("document.getElementById('bi-b-bench').offsetParent !== null")
-        assert page.run("document.getElementById('bi-b-an').offsetParent !== null")
-        assert page.run("!document.getElementById('bi-b-tab-ai').contains("
+        page.wait(f"!{side_tabs}.some((t) => t.textContent === '和 AI 出測試題')")
+        # The stages' ⚙ tabs opened above stay.
+        assert page.run(f"{side_tabs}.map((t) => t.textContent)") == [
+            "Ingest 設定",
+            "Benchmark testing 設定",
+        ]
+        assert page.run("document.getElementById('kn-pane-bi').contains("
                         "document.getElementById('bi-ai'))")  # fmt: skip
+        assert page.run("bi.ais.size") == 0
 
         # -- step 3: AI dashboard, applied in one step (K1) -----------------------------------
         agent.then(
@@ -372,10 +350,12 @@ def test_the_whole_build_flow(
         )
         page.click("#bi-b-an-new")
         page.ai_opened("analysis")
-        # The Dashboard's AI is a tab too.
-        page.see("bi-b-tabs", "AI 分析")
-        assert page.run("document.getElementById('bi-b-tab-ai-tab').getAttribute("
-                        "'aria-selected')") == "true"  # fmt: skip
+        # The Dashboard's AI is a side tab too, chosen as it opens.
+        page.wait(f"{side_tabs}.map((t) => t.textContent).includes('和 AI 做新分析')")
+        assert page.run(f"{side_tab.format('和 AI 做新分析')}.getAttribute('aria-selected')") == (
+            "true"
+        )
+        assert page.run("document.getElementById('bi-ai').closest('.extra-panel') !== null")
         page.set_value("bi-ai-msg", "幫我排一個 Dashboard")
         page.click("#bi-ai-send")
         page.see("bi-ai-log", "套用 Dashboard")
@@ -407,6 +387,9 @@ def test_the_whole_build_flow(
         assert latest is not None and latest["units_sha256"] == bi_bench.units_digest(
             vault.Vault(workspace, vault_id).repo.working_units()
         )  # the share's content is exactly what was tested
+        # 分享 opens as a tab of the side area (owner 2026-11-20).
+        page.click("#bi-b-ver-open")
+        page.wait("document.getElementById('bi-b-ver').closest('.extra-panel') !== null")
         page.see("bi-b-share-list", "還沒 commit 的改動")
         page.see("bi-b-share-tests", "通過")
         today = date.today().isoformat()

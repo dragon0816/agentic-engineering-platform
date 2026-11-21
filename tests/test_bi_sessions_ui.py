@@ -1,17 +1,18 @@
 """The AI session panels of 「建立與匯入」 in a real (headless) browser.
 
 BI ingest phases 5 and 6 (`docs/phases/BI_INGEST.md` §9, §10): the real Agent
-Web server, which has no Knowledge model here. Step 3: the Session B panel says
-plainly that no model is available and a turn is refused with
+Web server, which has no Knowledge model here. Everything below is in Ingest's ⚙
+side tab, and an AI session opens as a side tab of its own (owner 2026-11-20). The
+Session B panel says plainly that no model is available and a turn is refused with
 `model_unavailable`; a rule-path method is created from the recipe box, tried,
 saved as a second revision, tried again, the two trials compared, and the
-first revision brought back. Step 2: a draft is tried on the sample without a
-model. Then the AI runtime is swapped for a scripted model (the page and the
-routes are real): Session A suggests a new field, shows the diff and what was
-sent, 「套用到草稿」 writes revision 2 and the sample trial shows the new field;
-Session B suggests a check that 「套用為新版次」 saves. Nothing reaches the
-cards. At phone width the steps have no horizontal scroll. Screenshots in
-`.scratch/bi-sessions/`.
+first revision brought back. Closing the session's tab ends it. Session A (the
+schema AI) left the page on 2026-11-20 (dfa6d025) and is asserted gone: a draft
+is tried on the sample, a field added in its JSON saves revision 2 with its diff,
+and the sample trial runs on it. Then the AI runtime is swapped for a scripted
+model (the page and the routes are real): Session B suggests a check that
+「套用為新版次」 saves. Nothing reaches the cards. At phone width the steps have
+no horizontal scroll. Screenshots in `.scratch/bi-sessions/`.
 """
 
 from __future__ import annotations
@@ -54,16 +55,7 @@ PRICE_FIELD = {
 
 
 def _answer(request: ModelRequest) -> dict[str, Any]:
-    if request.output_contract == "aep.bi.schema_suggestion.v1":
-        return {
-            "reply": "在技術卡加一個價格帶欄位。",
-            "verdict": "extend",
-            "reasons": ["樣本沒有價格欄位"],
-            "assumptions": ["價格帶是文字"],
-            "missing_information": ["價格帶的分級"],
-            "changes": [{"op": "add_field", "type": "Technology", "field": PRICE_FIELD}],
-            "examples": [],
-        }
+    assert request.output_contract != "aep.bi.schema_suggestion.v1"  # Session A is gone
     return {
         "reply": "加一條檢查：技術卡要有標準組織。",
         "changes": {"checks": [{"entity_type": "Technology", "require": ["standard_body"]}]},
@@ -176,8 +168,19 @@ def test_session_panels_in_a_browser(
         # -- step 3: no model → the panel says so; a rules method with revisions ------------
         click("#bi-build-steps [data-stage=method]")
         wait(stage_shown("method"))
+        # The Skill, its recipe and the session are in Ingest's ⚙ tab (owner 2026-11-20).
+        click("#bi-b-gear-ingest")
+        wait(
+            "!document.getElementById('bi-b-set-ingest').hidden"
+            " && document.getElementById('bi-b-set-ingest').closest('.extra-panel') !== null"
+        )
         click("#bi-b-sb-open")
         wait("document.getElementById('bi-ai').dataset.kind === 'method'")
+        # An AI session opens as a side tab of its own, beside the ⚙ tab (owner 2026-11-20).
+        wait("document.getElementById('bi-ai').closest('.extra-panel') !== null")
+        assert run(
+            "[...document.querySelectorAll('#extra-tabs [role=tab]')].map((t) => t.textContent)"
+        ) == ["Ingest 設定", "和 AI 調整擷取 Skill"]
         wait("document.getElementById('bi-ai-sent').textContent.includes('model_unavailable')")
         # The built-ins are always listed; a table source starts on 「表格規則」, and
         # Session B is shown before any Skill is saved (owner, 2026-10-28).
@@ -234,55 +237,60 @@ def test_session_panels_in_a_browser(
         shoot("3-method-phone")
         size(1366, 1000, False)
 
-        # -- step 2: a draft tried on the sample, no model yet ------------------------------
-        click("#bi-build-steps [data-stage=schema]")
-        wait(stage_shown("schema"))
-        # It opens without a draft; with no model, sending makes nothing.
-        click("#bi-b-sa-open")
-        wait("document.getElementById('bi-ai').dataset.kind === 'schema'")
-        wait("document.getElementById('bi-ai-sent').textContent.includes('model_unavailable')")
-        assert run("document.getElementById('bi-ai-send').offsetHeight > 0")
-        assert "還沒有開啟草稿" in text_of("bi-ai-target")
-        set_value("bi-ai-msg", "幫技術卡加一個價格帶欄位")
-        click("#bi-ai-send")
-        wait("document.getElementById('bi-ai-status').textContent.includes('沒有可用的模型')")
-        assert not (workspace / "bi" / "schema-drafts").exists()
-        set_value("bi-ai-msg", "")
+        # -- step 2: a schema draft in Ingest's ⚙, tried on the sample ----------------------
+        # Closing the session's side tab ends it; the panel goes back to its home.
+        click("#bi-ai-close")
+        wait("document.getElementById('bi-ai').hidden")
+        assert run("bi.ais.size") == 0
+        assert run(
+            "document.getElementById('kn-pane-bi').contains(document.getElementById('bi-ai'))"
+        )
+        # Session A left the page (owner 2026-11-20, dfa6d025): the draft is edited, and a schema
+        # file comes in through 匯入; no AI entry is left on the schema.
+        assert run("document.getElementById('bi-b-sa-open') === null")
+        assert not run(
+            "[...document.querySelectorAll('#bi-b-set-ingest button')]"
+            ".some((b) => b.textContent.includes('和 AI 調整 schema'))"
+        )
         click("#bi-b-draft-new")
         wait("!document.getElementById('bi-b-draft').hidden")
-        wait("document.getElementById('bi-ai-target').textContent.includes('第 1 版')")
-        assert run("document.querySelector('#bi-ai-sources input').checked")
-        assert run("document.getElementById('bi-ai-send').offsetHeight > 0")  # visible
+        wait("document.getElementById('bi-b-draft-info').textContent.includes('第 1 版')")
         click("#bi-b-draft-trial")
         wait("document.getElementById('bi-b-draft-trial-result').textContent.includes('試跑完成')")
         assert "draft:" in text_of("bi-b-draft-trial-result")
+        assert "第 1 版" in text_of("bi-b-draft-trial-result")
 
-        # -- Session A with a (scripted) model -------------------------------------------
-        scripted = Model(_answer)
-        model["pair"] = (scripted, "test-model")
-        set_value("bi-ai-goal", "追蹤機器人技術的價格")
-        set_value("bi-ai-msg", "幫技術卡加一個價格帶欄位")
-        click("#bi-ai-send")
-        wait("document.getElementById('bi-ai-log').textContent.includes('擴充這份 schema')")
-        log = text_of("bi-ai-log")
-        assert "price_band" in log and "價格帶的分級" in log
-        assert "tech.csv" in log and "INTERNAL" in log and "test-model" in log
-        assert scripted.requests[-1].tools == ()
-        run("document.getElementById('bi-ai-log').scrollIntoView()")
-        shoot("2-session-a")
-        click_text("#bi-ai-log", "套用到草稿")
+        # -- a field added in the draft's JSON: revision 2, its diff, and the trial on it -----
+        run(
+            "(() => { const box = document.getElementById('bi-b-draft-text');"
+            " const doc = JSON.parse(box.value);"
+            " doc.types.find((t) => t.name === 'Technology').fields.push("
+            + json.dumps(PRICE_FIELD, ensure_ascii=False)
+            + "); box.value = JSON.stringify(doc, null, 1); })()"
+        )
+        set_value("bi-b-draft-note", "技術卡加一個價格帶欄位")
+        click("#bi-b-draft-save")
         wait("document.getElementById('bi-b-draft-info').textContent.includes('第 2 版')")
-        wait("document.getElementById('bi-ai-log').textContent.includes('已套用為草稿第 2 版')")
+        assert "技術卡加一個價格帶欄位" in text_of("bi-b-draft-info")
+        assert "price_band" in text_of("bi-b-draft-info")
+        assert "price_band" in text_of("bi-b-draft-table")
+        assert "新增欄位" in text_of("bi-b-draft-table")
+        assert "都是新增" in text_of("bi-b-draft-sum")
         click("#bi-b-draft-trial")
         wait("document.getElementById('bi-b-draft-trial-result').textContent.includes('第 2 版')")
+        run("document.getElementById('bi-b-draft').scrollIntoView()")
+        shoot("2-draft")
         size(390, 844, True)
         assert not run(
             "document.documentElement.scrollWidth > document.documentElement.clientWidth"
         )
-        shoot("2-session-a-phone")
+        shoot("2-draft-phone")
         size(1366, 1000, False)
+        assert not (workspace / "bi" / "schemas").exists()  # a draft installs nothing
 
         # -- Session B with the model: a suggested check saved as a revision ----------------
+        scripted = Model(_answer)
+        model["pair"] = (scripted, "test-model")
         click("#bi-build-steps [data-stage=method]")
         wait(stage_shown("method"))
         click("#bi-b-sb-open")
