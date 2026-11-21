@@ -5,7 +5,9 @@ and fetched over HTTP (a Threads/Instagram login wall may go to the local browse
 the owner turned that on), kept whole as an immutable `.html` source whose first line
 records who sent it, when, the original address and when and how it was fetched (AGENTS
 rule 7), deduplicated by address and content, converted to Markdown, and given to an AI
-ingest run that stops at review: nothing is accepted, committed or pushed here. A file or
+ingest run that stops at review: nothing is accepted, committed or pushed here. An X post
+is read from X's public no-login endpoints and, when it links to exactly one article off
+X, kept together with that article (`aep_bi.inbox.xpost`). A file or
 words sent to the bot go in as uploaded sources do. A page that gave only its summary is
 marked 「只取得摘要」 and its sender is asked to Reply with the text. Every message goes
 from the bot the item came through, to its sender only.
@@ -18,6 +20,7 @@ Dashboard is drawn again, and the senders get the result.
 from __future__ import annotations
 
 import base64
+import hashlib
 import re
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -29,7 +32,7 @@ from aep_bi.cards import ai_runs, board, catalog, homes, html_markdown
 from aep_bi.cards.staging import Staging
 from aep_bi.cards.store import BiStore, BiStoreError
 from aep_bi.inbox import domains as dom
-from aep_bi.inbox import fetch, store
+from aep_bi.inbox import fetch, store, xpost
 from aep_bi.inbox.domains import Domain
 from aep_bi.inbox.store import Inbox
 from host_runtime.features import Messenger
@@ -43,6 +46,21 @@ def _slug(text: str, limit: int = 50) -> str:
 
 
 @dataclass
+class _Got:
+    """One link's fetch: the bytes kept (`fetched`), their page, whether a login wall
+    stood in the way, the platform, and what an X post adds (`summary_only` decided by
+    the reader, extra provenance, raw answers kept beside the source)."""
+
+    fetched: fetch.Fetched
+    page: html_markdown.Page
+    walled: bool
+    platform: str
+    summary_only: bool | None = None
+    extra: dict[str, Any] | None = None
+    raw: list[tuple[str, str, bytes]] | None = None
+
+
+@dataclass
 class Processor:
     """Collect and remind for one workspace. `browser` fetches a login-walled social
     post with the local headless browser; None leaves such a post as its summary."""
@@ -51,6 +69,8 @@ class Processor:
     ai: ai_runs.AiRuntime | None
     messenger: Messenger | None = None
     fetcher: fetch.Fetcher = fetch.http_fetch
+    #: X's public JSON endpoints (syndication, oEmbed). Tests give their own.
+    api_fetcher: fetch.Fetcher = fetch.api_fetch
     browser: Callable[[str], fetch.Fetched] | None = None
     clock: Callable[[], datetime] = lambda: datetime.now(UTC)
 
@@ -126,12 +146,27 @@ class Processor:
         for who, text in asks:
             self._send(who, text)
 
-    def _fetch(self, item: dict[str, Any]) -> tuple[fetch.Fetched, html_markdown.Page, bool]:
-        """(the fetch, its page, whether a login wall stood in the way)."""
+    def _fetch(self, item: dict[str, Any]) -> _Got:
         url = str(item["url"])
-        got = self.fetcher(url, fetch.MAX_PAGE_BYTES, fetch.TIMEOUT_S)
-        walled = got.ok and fetch.platform(url) != "web" and fetch.login_page(got)
-        if walled and self.browser is not None:
+        kind = fetch.platform(url)
+        first: fetch.Fetched | None = None
+        if xpost.is_short(url):
+            # A t.co link: where it leads decides the platform.
+            first = self.fetcher(url, fetch.MAX_PAGE_BYTES, fetch.TIMEOUT_S)
+            target = xpost.expanded(first)
+            kind = fetch.platform(target) if target else "web"
+            if target:
+                if target != first.final_url:
+                    first = None  # named by the t.co page itself: fetched next
+                url = target
+        if kind == "x" and xpost.status_of(url) is not None:
+            read = xpost.read_post(url, self.fetcher, self.api_fetcher)
+            if read.post is not None:
+                return self._x_post(read.post, read)
+            first = read.page or first
+        got = first or self.fetcher(url, fetch.MAX_PAGE_BYTES, fetch.TIMEOUT_S)
+        walled = got.ok and kind != "web" and fetch.login_page(got)
+        if walled and self.browser is not None and kind != "x":
             # The clear second path: the local headless browser, only when turned on.
             rendered = self.browser(url)
             if rendered.ok and not fetch.login_page(rendered):
@@ -139,13 +174,74 @@ class Processor:
         page = (
             html_markdown.read(html_markdown.decode(got.body)) if got.ok else html_markdown.Page()
         )
-        return got, page, walled
+        return _Got(got, page, walled, kind)
+
+    def _x_post(self, post: xpost.Post, read: xpost.Read) -> _Got:
+        """The post and, when it links to exactly one place off X, that article."""
+        raw = list(read.raw)
+        extra: dict[str, Any] = {
+            "platform": "x",
+            "post_url": post.url,
+            "x_via": post.via,
+            "x_endpoints": [endpoint.record() for endpoint in read.endpoints],
+            "links": list(post.links),
+        }
+        candidates = xpost.outbound(post.links)
+        if len(candidates) != 1:
+            extra["article_rule"] = "several_links_not_followed" if candidates else "no_link"
+            article: html_markdown.Page | None = None
+            article_url = ""
+        else:
+            article, article_url = self._article(candidates[0], extra, raw)
+        body = xpost.document(post, article_url, article)
+        fetched = fetch.Fetched(post.url, post.url, 200, body, "text/html; charset=utf-8", "http")
+        page = html_markdown.read(body.decode("utf-8"))
+        # The page's meta may be cut short; the endpoints give the whole post.
+        summary_only = post.via == "page" and (article is None or article.summary_only)
+        return _Got(fetched, page, False, "x", summary_only, extra, raw)
+
+    def _article(
+        self, link: str, extra: dict[str, Any], raw: list[tuple[str, str, bytes]]
+    ) -> tuple[html_markdown.Page | None, str]:
+        """The one link's article (expanding a t.co link first), or None with the
+        reason in `extra`; never a page on X."""
+        extra["article_rule"] = "one_link_followed"
+        extra["article_url"] = link
+        got = self.fetcher(link, fetch.MAX_PAGE_BYTES, fetch.TIMEOUT_S)
+        if xpost.is_short(link):
+            target = xpost.expanded(got)
+            extra["article_expanded_url"] = target
+            if target and xpost.is_x(target):
+                extra["article_rule"] = "link_on_x_not_followed"
+                return None, ""
+            if target and target != got.final_url:
+                # Expanded from the t.co page itself: now fetch where it leads.
+                got = self.fetcher(target, fetch.MAX_PAGE_BYTES, fetch.TIMEOUT_S)
+        extra["article_final_url"] = got.final_url
+        extra["article_status"] = got.status
+        if xpost.is_x(got.final_url):
+            extra["article_rule"] = "link_on_x_not_followed"
+            return None, ""
+        if not got.ok:
+            extra["article_code"] = got.code or f"http_{got.status}"
+            return None, ""
+        page = html_markdown.read(html_markdown.decode(got.body))
+        if page.empty:
+            extra["article_code"] = "no_content"
+            return None, ""
+        if fetch.login_page(got):
+            extra["article_code"] = "login_required"
+            return None, ""
+        extra["article_sha256"] = got.sha256
+        raw.append(("article", ".html", got.body))
+        return page, got.final_url or link
 
     def _one(self, item: dict[str, Any], domain: Domain) -> str:
         item_id, key = int(item["id"]), domain.key
         sender = str(item["actor"])
         if item["kind"] == "link":
-            got, page, walled = self._fetch(item)
+            result = self._fetch(item)
+            got, page, walled = result.fetched, result.page, result.walled
             if not got.ok:
                 self.inbox.finish(item_id, key, store.FAILED, code=got.code or f"http_{got.status}")
                 return store.FAILED
@@ -155,7 +251,11 @@ class Processor:
                 )
                 self.inbox.update(item_id, status=store.NEEDS_TEXT)
                 return store.FAILED
-            summary_only = walled or page.summary_only
+            summary_only = (
+                result.summary_only
+                if result.summary_only is not None
+                else walled or page.summary_only
+            )
             fetched_at = self.clock().isoformat(timespec="seconds")
             self.inbox.update(
                 item_id,
@@ -166,6 +266,7 @@ class Processor:
                 content_sha256=got.sha256,
                 summary_only=int(summary_only),
                 title=item["title"] or page.title[:200],
+                platform=result.platform,
             )
             earlier = self.inbox.seen_before(key, str(item["norm_url"]), got.sha256, item_id)
             if earlier is not None:
@@ -184,15 +285,22 @@ class Processor:
                 "summary_only": summary_only,
                 "item": item_id,
                 **({"note": item["note"]} if item["note"] else {}),
+                **(result.extra or {}),
             }
             data = html_markdown.provenance_comment(provenance).encode("ascii") + got.body
             raw = self.inbox.dir / "raw" / f"{item_id}-{got.sha256[:12]}.html"
             raw.parent.mkdir(parents=True, exist_ok=True)
             if not raw.exists():
                 raw.write_bytes(data)
+            for what, suffix, answer in result.raw or []:
+                # X's answers and the followed article, as they came (AGENTS rule 7).
+                digest = hashlib.sha256(answer).hexdigest()[:12]
+                kept = raw.parent / f"{item_id}-x-{what}-{digest}{suffix}"
+                if not kept.exists():
+                    kept.write_bytes(answer)
             self.inbox.update(item_id, raw_path=str(raw))
             url = str(item["url"])
-            name = f"{fetch.platform(url)}-{_slug(page.title or url)}-{item_id}.html"
+            name = f"{result.platform}-{_slug(page.title or url)}-{item_id}.html"
             status = store.SUMMARY if summary_only else store.REVIEW
             return self._ingest(item_id, domain, name, data, "text/html", sender, status)
         if item["kind"] == "file":

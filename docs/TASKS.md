@@ -5385,3 +5385,18 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   confirmation (log C:/TEMP/claude-r2/full2.log). Follow-ups: the rule form's 可用的資料夾 hint
   does not list a domain created in the same session; dead Session A code (biBuildSessA,
   biSchemaSources) and 「請和 AI 調整」 draft wording remain in bi_page.py.
+- [x] 2026-11-21 BI Telegram inbox reads X links cleanly (branch bi-x-links-20261121; contract
+  docs/CONTRACTS.md BI inbox "X links"; decision docs/DECISIONS.md 2026-11-21). x.com /
+  twitter.com (mobile., www.) and t.co are their own platform `x` in detection, source name and
+  the item record (new `platform` column, added in place to older inbox files). A post is read
+  without login from the syndication JSON, then oEmbed, then the page meta, with login/cookie/UI
+  boilerplate stripped; exactly one link off X is followed (t.co expanded) and the article's text
+  kept with the post and both URLs; several links are listed, not fetched; links to X are never
+  followed; a failed article keeps the post. Live check of the 2026-11-20 example
+  (x.com/technews_tw/status/2118287047022801203) through the company proxy: post page 200
+  (og:description = the teaser, body only login chrome), syndication 200 usable (author, text,
+  2026-11-05T10:19:22Z; token not checked), oEmbed 200 usable (author, text, date line), t.co
+  redirect to the post; the post's only link `dlvr.it/TWCB2b` (plain text, no t.co) led to a
+  Facebook page whose meta carried the fuller lead paragraph. Verification:
+  tests/test_bi_inbox_x.py (20 new), test_bi_inbox, test_bi_inbox_gear_ui: 49 passed; ruff
+  check, ruff format --check, mypy on changed files clean. Full suite not run.

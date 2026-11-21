@@ -7520,6 +7520,33 @@ BI inbox (`aep_bi.inbox`, `<workspace>/bi/inbox/inbox.sqlite`):
   content_sha256, summary_only, item, note). `.html/.htm` convert through
   `cards.html_markdown`; the Markdown opens with that provenance and says 「只取得摘要」
   when only meta was obtained. Words become `text-<item>.md` / `note-<parent>-<item>.md`.
+- X links (owner 2026-11-21; `aep_bi.inbox.xpost`): `x.com`, `twitter.com` and their
+  subdomains (`mobile.`, `www.`) and X's shortener `t.co` are platform `x`. Items carry
+  `platform` (`web|threads|instagram|x`; column added in place to older inbox files), set on
+  arrival and corrected after a `t.co` link is expanded (a `t.co` leading off X is an ordinary
+  page, fetched once). A post address normalizes to `https://x.com/<handle>/status/<id>` (host
+  and share parameters dropped). A post is read without login, in order, each answer at most
+  1 MB / 10 s: `cdn.syndication.twimg.com/tweet-result?id=<id>&token=<t>` (author, text with
+  links expanded and photo links removed, `created_at`), then
+  `publish.twitter.com/oembed?url=<post>` (author, text, date line), then the post page's
+  `og:`/`twitter:` meta (`<name> (@<handle>) on X`, `og:description`,
+  `article:published_time`). Login-wall, cookie and UI lines ("Log in", "Sign up", "Don't miss
+  what's happening", cookie banner, the X slogan) and zero-width characters are removed; a
+  post from the page meta alone is `summary_only`. No endpoint giving a post falls back to the
+  ordinary page path; the headless browser is never used for X. Links in the post: entities'
+  expanded URLs plus addresses written in the text (`dlvr.it/...`, scheme optional; one cut by
+  `…` is not a link). Links on X itself (other posts, photos, profiles) are never followed.
+  Exactly one other link: it is fetched with the ordinary page fetch and limits (a `t.co` link
+  expanded first, by redirect or the address its page names; leading back to X it is not
+  followed); its title and visible text join the source. Several: all listed, none fetched.
+  The source `x-<title>-<item>.html` is one composed page (post author, text, address, time,
+  links; then 文章：title, address, text) after the provenance comment, which adds `platform`,
+  `post_url`, `x_via` (`syndication|oembed|page`), `x_endpoints` [{name, url, status, code,
+  usable, sha256}], `links`, `article_rule` (`one_link_followed|several_links_not_followed|
+  no_link|link_on_x_not_followed`), and for a followed link `article_url`,
+  `article_expanded_url` (t.co), `article_final_url`, `article_status`, `article_sha256` or
+  `article_code` (a failed article keeps the post). Each endpoint answer and the article are
+  kept as fetched in `raw/<item>-x-<endpoint|article>-<sha12>.<json|html>`.
 - Each processed item starts `ai_runs.start(kind="ingest", folder=<home>/sources)` with
   actor `<sender> via telegram`; nothing is accepted, committed or pushed by the inbox.
 - Page routes: `GET /api/bi/inbox?dataset=` (domains with bot and times; the Host's

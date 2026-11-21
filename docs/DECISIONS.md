@@ -8393,3 +8393,28 @@ has really ended (schema 7). Porting it to main later is about one working day a
 needs AGENTS rule 22 consent. It also needs a GUI notice and release for a blocked
 operation, not only the CLI `reconcile-operation`. The remote branch is left as is
 for reference.
+
+## 2026-11-21 — BI inbox reads X posts from public no-login endpoints and follows one link
+
+Context: a plain request for an X post (the owner's 2026-11-20 test) gives only the teaser in
+its meta and a body of login-wall chrome. Owner asked (2026-11-21) for clean X posts within
+the static-only scope of TELEGRAM_LINK_COLLECTION_ASSESSMENT_20261119 §8.
+
+- **Decision:** read a post from `cdn.syndication.twimg.com/tweet-result` (the public embed's
+  JSON), then `publish.twitter.com/oembed`, then the page's meta; each answer is small-limited
+  (1 MB, 10 s) and kept raw beside the source. A post from meta alone is 「只取得摘要」.
+- **Decision:** follow a post's link only when exactly one link leads off X (t.co expanded);
+  several are listed, not fetched, so one post never fans out into many fetches or guesses
+  which link is "the article"; links to X are never followed. Addresses written as plain text
+  (X leaves `dlvr.it/...` unlinked behind a zero-width space) count as links, since auto-posted
+  news posts often carry their article that way (the owner's example did).
+- **Decision:** the source is one composed HTML page (post, then article) instead of the bytes
+  as served, because X's page bytes are login chrome; immutability and provenance are kept by
+  storing every endpoint answer and the article raw, with their sha256 in the provenance.
+- **Rejected:** the headless browser or a logged-in profile for X (out of the static scope; the
+  browser fallback stays Threads/Instagram only); X's official API (needs a paid key);
+  fetching every link (unbounded fetches, unclear which is the source); third-party mirrors
+  (fxtwitter/nitter: unofficial, unstable).
+- **Risk:** the syndication endpoint is undocumented and may start requiring its token or stop;
+  oEmbed and the meta remain, and every attempt is recorded in `x_endpoints`.
+- Not a harness change (AGENTS.md rule 22): BI feature-plugin code.
