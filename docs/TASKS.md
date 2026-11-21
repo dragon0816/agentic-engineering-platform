@@ -5367,3 +5367,21 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   tests/test_file_viewer_web.py (assertions restored), test_extra_area_ui, test_multi_agent_ui
   real-browser test pass; ruff, ruff format --check, mypy on changed files clean. Full suite not
   run.
+- [x] 2026-11-21 BI round 2: UI tests rewritten to the owner-approved redesign, and the regressions
+  the full suite found fixed (branch bi-knowledge-round2-20261120). Tests now read the one progress
+  row `#bi-b-progress-text`, drive the Ingest/Benchmark gear side tabs, new rules through 新增規則
+  and the rule form, revisions through 修改, share and per-question results as side tabs, and
+  assert the removed step-2 AI entry points (dfa6d025) are gone and step 2 asks no model
+  (build_flow, sessions, vault, create_domain, step2_domain, share_step, tools, step3,
+  many_sources, batch_ingest, version_link, install_data_approval; telegram_typing sends a link
+  since plain words are a question). Code fixes: the status-line link opens 分享 as a side tab
+  even when pressed before step 3 loaded (dead scroll code and its last call removed); an open
+  Ingest ⚙ tab re-reads the schema when BI data reloads; `runs.recover_interrupted` holds the
+  worker lock so a run finishing while read is no longer turned `partial` (new regression test in
+  test_bi_ingest_parallel_stop). Verification: full suite `-n auto --dist loadfile` 7291 passed,
+  21 failed, 16 skipped (1:04:41, PC saturated); every failure rerun alone passed except
+  test_system_command (known timing flake) and the two fixed above. ruff check, ruff format
+  --check, mypy (1211 files) clean. A 4-worker below-normal full rerun was started for
+  confirmation (log C:/TEMP/claude-r2/full2.log). Follow-ups: the rule form's 可用的資料夾 hint
+  does not list a domain created in the same session; dead Session A code (biBuildSessA,
+  biSchemaSources) and 「請和 AI 調整」 draft wording remain in bi_page.py.
