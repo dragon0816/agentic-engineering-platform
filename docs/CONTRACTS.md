@@ -7628,4 +7628,6 @@ Knowledge round 2: owner decisions".
   `sideOpen({id, title, render(panel) | url | file + session | element, onClose, refresh,
   flush})` opens or focuses a tab and returns its panel; `sideClose(id)`, `sideFocus(id)`,
   `sideHas(id)`. An `element` moves into the tab and returns to its place on close. Nothing is
-  persisted. `openFileViewer` opens files there; the old dialog stays as `openFileDialog`.
+  persisted. `returnTo` and `focus` (tab close control) serve keyboard users: Esc inside the
+  area closes the front tab and returns focus to `returnTo`. `openFileViewer` opens files
+  there with 預覽／程式碼, 複製, 在瀏覽器開啟 and 下載; the former `#file-viewer` dialog is removed.

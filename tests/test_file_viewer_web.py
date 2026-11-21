@@ -343,8 +343,32 @@ def test_files_open_in_the_viewer_and_the_chart_renders_in_the_answer(
         assert run(f"!!document.querySelector({json.dumps(attached)})")
         # Files open as tabs of the side area (owner 2026-11-20, docs/DECISIONS.md
         # "Agent Web three-area layout with a tabbed side area"), one tab per file, the
-        # newest in front; the old dialog stays shut.
+        # newest in front; the former dialog is gone.
         panel = "#extra-body .extra-panel:not([hidden])"
+        close_on = "#extra-tabs .extra-tab.on .extra-tab-close"
+
+        def q(selector: str) -> str:
+            return f"document.querySelector({json.dumps(selector)})"
+
+        def escape() -> None:
+            run(
+                "document.activeElement.dispatchEvent("
+                "new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}))"
+            )
+
+        def small_buttons() -> list[str]:
+            """Visible buttons of the side area under 44 px tall (touch targets)."""
+            found: list[str] = json.loads(
+                str(
+                    run(
+                        "JSON.stringify([...document.querySelectorAll('#extra-area button')]"
+                        ".filter((b) => b.offsetParent !== null)"
+                        ".filter((b) => b.getBoundingClientRect().height < 44)"
+                        ".map((b) => b.className + ':' + b.textContent))"
+                    )
+                )
+            )
+            return found
 
         def tabs() -> list[str]:
             names: list[str] = json.loads(
@@ -363,9 +387,12 @@ def test_files_open_in_the_viewer_and_the_chart_renders_in_the_answer(
             )
 
         assert run("document.getElementById('extra-area').hidden") is True
-        # HTML chip: shown in the sandboxed frame from a nonce address.
+        # HTML chip: shown in the sandboxed frame from a nonce address; focus moves to the
+        # tab's close control, as it did in the dialog.
+        run(f"document.querySelector({json.dumps(chip(files['html']))}).focus()")
         run(f"document.querySelector({json.dumps(chip(files['html']))}).click()")
         wait("!document.getElementById('extra-area').hidden")
+        assert run(f"document.activeElement === {q(close_on)}") is True
         wait(f"!!document.querySelector({json.dumps(panel + ' iframe')})")
         assert run(
             f"document.querySelector({json.dumps(panel + ' iframe')}).getAttribute('sandbox')"
@@ -375,12 +402,50 @@ def test_files_open_in_the_viewer_and_the_chart_renders_in_the_answer(
         )
         assert source.startswith("/view/file?nonce=") and server.token not in source
         assert tabs() == [files["html"].name] and front() == files["html"].name
-        assert run("document.getElementById('file-viewer').hidden") is True
+        assert run("document.getElementById('file-viewer') === null") is True
         bar = str(
             run(f"document.querySelector({json.dumps(panel + ' .extra-file-bar')}).textContent")
         )
         assert "在瀏覽器開啟" in bar and "下載" in bar
+        assert "預覽" in bar and "程式碼" in bar
+        assert run(f"{q(panel + ' [data-mode=preview]')}.getAttribute('aria-pressed')") == "true"
+        assert run(f"{q(panel + ' .viewer-copy')}.hidden") is True
+        assert small_buttons() == []
         browser.screenshot(shots / "viewer-html-preview.png")
+        # 程式碼 shows the source; 複製 copies the file's text and says so in place.
+        run(f"{q(panel + ' [data-mode=code]')}.click()")
+        wait(f"!!{q(panel + ' pre.code')}")
+        code = str(run(f"{q(panel + ' pre.code')}.textContent"))
+        assert code.startswith("<!DOCTYPE html>") and "chart-data" in code
+        assert run(q(panel + " iframe")) is None
+        assert run(f"{q(panel + ' [data-mode=code]')}.getAttribute('aria-pressed')") == "true"
+        assert run(f"{q(panel + ' .viewer-copy')}.hidden") is False
+        assert small_buttons() == []
+        run(
+            "window.copied = null; Object.defineProperty(navigator, 'clipboard', "
+            "{configurable: true, value: {writeText: async (t) => { window.copied = t; }}})"
+        )
+        run(f"{q(panel + ' .viewer-copy')}.click()")
+        wait(f"{q(panel + ' .viewer-copy')}.textContent === '已複製'")
+        copied = str(run("window.copied"))
+        assert copied.startswith("<!DOCTYPE html>") and "chart-data" in copied
+        wait(f"{q(panel + ' .viewer-copy')}.textContent === '複製'", 5)
+        run(
+            "Object.defineProperty(navigator, 'clipboard', {configurable: true, "
+            "value: {writeText: async () => { throw new Error('denied'); }}})"
+        )
+        run(f"{q(panel + ' .viewer-copy')}.click()")
+        wait(f"{q(panel + ' .viewer-copy')}.textContent === '無法複製'")
+        browser.screenshot(shots / "viewer-html-code.png")
+        # Esc inside the tab closes it and focus returns to the chip that opened it.
+        run(f"{q(panel + ' [data-mode=code]')}.focus()")
+        escape()
+        assert tabs() == []
+        assert run("document.getElementById('extra-area').hidden") is True
+        assert run(f"document.activeElement === {q(chip(files['html']))}") is True
+        # Opened again, it starts in the preview.
+        run(f"document.querySelector({json.dumps(chip(files['html']))}).click()")
+        wait(f"!!document.querySelector({json.dumps(panel + ' iframe')})")
         # The same chip again only brings its tab to the front.
         run(f"document.querySelector({json.dumps(chip(files['md']))}).click()")
         wait(f"!!document.querySelector({json.dumps(panel + ' h1')})")
@@ -398,10 +463,22 @@ def test_files_open_in_the_viewer_and_the_chart_renders_in_the_answer(
         body = str(run(f"document.querySelector({json.dumps(panel)}).innerText"))
         assert "<script>alert(1)</script>" in body
         browser.screenshot(shots / "viewer-md-preview.png")
+        # Keyboard: the toggle is a button reached and pressed by keys; 程式碼 shows it raw.
+        run(f"{q(panel + ' [data-mode=code]')}.focus()")
+        run(f"{q(panel + ' [data-mode=code]')}.click()")
+        wait(f"!!{q(panel + ' pre.code')}")
+        raw = str(run(f"{q(panel + ' pre.code')}.textContent"))
+        assert raw in (MARKDOWN, MARKDOWN.rstrip("\n") + "\n"), raw
+        assert run(f"document.querySelectorAll({json.dumps(panel + ' h1')}).length") == 0
+        run(f"{q(panel + ' [data-mode=preview]')}.click()")
+        wait(f"!!{q(panel + ' h1')}")
         # JSON: the code view, with line numbers.
         run(f"document.querySelector({json.dumps(chip(files['json']))}).click()")
         wait(f"!!document.querySelector({json.dumps(panel + ' pre.code')})")
         assert front() == files["json"].name
+        # JSON has the code view only: no toggle, 複製 available.
+        assert run(f"{q(panel + ' .viewer-modes')}.hidden") is True
+        assert run(f"{q(panel + ' .viewer-copy')}.hidden") is False
         gutter = str(
             run(f"document.querySelector({json.dumps(panel + ' pre.gutter')}).textContent")
         )
@@ -457,8 +534,9 @@ def test_files_open_in_the_viewer_and_the_chart_renders_in_the_answer(
         wait(f"!!document.querySelector({json.dumps(panel + ' iframe')})")
         assert size("#extra-area")[0] == 390
         no_side_scroll()
+        assert small_buttons() == []
         browser.screenshot(shots / "viewer-html-narrow.png")
-        run("document.querySelector('#extra-tabs .extra-tab.on .extra-tab-close').click()")
+        escape()
         assert run("document.getElementById('extra-area').hidden") is True
     finally:
         browser.close()

@@ -721,11 +721,13 @@ def test_sub_agents_and_the_record_in_a_real_browser(tmp_path: Path) -> None:
             )
             no_side_scroll()
             browser.screenshot(shots / "record-narrow-dark.png")
-            # The file chip opens the existing viewer.
+            # The file chip opens the file as a tab of the side area.
             browser._evaluate(f'document.querySelector("{record} .file-chip").click()')
-            wait('!document.getElementById("file-viewer").hidden')
+            wait('!document.getElementById("extra-area").hidden')
             browser.screenshot(shots / "record-file-viewer-narrow-dark.png")
-            browser._evaluate('document.getElementById("viewer-close").click()')
+            browser._evaluate(
+                "document.querySelector('#extra-tabs .extra-tab.on .extra-tab-close').click()"
+            )
             narrow(False)
             dark(False)
             browser._evaluate(

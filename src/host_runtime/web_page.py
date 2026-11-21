@@ -76,11 +76,11 @@ body {
   border: 1px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; }
 .extra-tab.on { background: var(--bg); border-color: var(--line);
   box-shadow: inset 0 3px 0 var(--accent); }
-.extra-tab-label { min-height: 36px; padding: 0 6px 0 12px; border: 0; background: none;
+.extra-tab-label { min-height: 44px; padding: 0 6px 0 12px; border: 0; background: none;
   color: inherit; font: inherit; font-size: 13px; cursor: pointer; overflow: hidden;
   text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
 .extra-tab.on .extra-tab-label { font-weight: 600; }
-.extra-tab-close { min-width: 28px; min-height: 28px; margin-right: 4px; border: 0;
+.extra-tab-close { min-width: 44px; min-height: 44px; margin-right: 4px; border: 0;
   border-radius: 6px; background: none; color: var(--dim); font: inherit; cursor: pointer; }
 .extra-tab-close:hover, .extra-tab-close:focus-visible { background: var(--line);
   color: var(--ink); }
@@ -90,7 +90,6 @@ body {
 .extra-panel iframe { display: block; width: 100%; height: calc(100vh - 110px); border: 0;
   background: #fff; }
 .extra-file-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-.extra-file-bar .viewer-button { min-height: 32px; }
 .sidebar {
   position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh;
   min-width: 0; padding: 16px 12px; border-right: 1px solid var(--line);
@@ -992,7 +991,7 @@ tr:last-child td { border-bottom: none; }
   overflow: hidden; border-bottom: 1px solid var(--line); }
 .answer-html.tall .frame-wrap { height: 80vh; }
 .atlas-embed-note { margin: 8px 0 4px; font-size: 13px; color: var(--dim); }
-.answer-html iframe, .viewer-preview iframe { display: block; width: 100%; height: 100%;
+.answer-html iframe { display: block; width: 100%; height: 100%;
   border: 0; background: #fff; }
 .answer-html .frame-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
   padding: 4px 8px; font-size: 13px; color: var(--dim); }
@@ -1003,20 +1002,7 @@ tr:last-child td { border-bottom: none; }
   cursor: pointer; }
 .viewer-button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent);
   color: #fff; }
-.file-viewer { position: fixed; top: 0; right: 0; bottom: 0; width: min(720px, 52vw);
-  display: flex; flex-direction: column; background: var(--bg); color: var(--ink);
-  border-left: 1px solid var(--line); box-shadow: -6px 0 24px rgba(0, 0, 0, 0.18);
-  z-index: 60; }
-.viewer-head { display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-  padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--panel); }
-.viewer-head h2 { flex: 1 1 100%; order: -1; margin: 0; font-size: 15px;
-  overflow-wrap: anywhere; padding-right: 52px; }
 .viewer-modes { display: inline-flex; gap: 4px; }
-.viewer-close { position: absolute; top: 6px; right: 8px; }
-.viewer-body { flex: 1 1 auto; min-height: 0; overflow: auto; }
-.viewer-preview { height: 100%; }
-.viewer-preview.doc { height: auto; padding: 8px 16px; }
-.viewer-preview img { max-width: 100%; display: block; margin: 8px auto; background: #fff; }
 .viewer-note { margin: 8px 12px; color: var(--dim); font-size: 13px; }
 .code-view { display: grid; grid-template-columns: auto minmax(0, 1fr); margin: 0;
   font: 12.5px/1.55 var(--mono); }
@@ -1028,7 +1014,6 @@ tr:last-child td { border-bottom: none; }
 .csv-table th, .csv-table td { border: 1px solid var(--line); padding: 3px 8px;
   text-align: left; vertical-align: top; }
 @media (max-width: 760px) {
-  .file-viewer { width: 100vw; left: 0; border-left: 0; }
   .answer-html .frame-wrap { height: 420px; }
 }
 /* BI cards (Knowledge Strategy v1.3 Case A, 2026-10-21): a sub-tab of Knowledge.
@@ -2041,24 +2026,6 @@ tr:last-child td { border-bottom: none; }
 </aside>
 </div>
 
-<aside class="file-viewer" id="file-viewer" role="dialog" aria-modal="true"
-  aria-labelledby="viewer-name" hidden>
-  <div class="viewer-head">
-    <h2 id="viewer-name"></h2>
-    <div class="viewer-modes" id="viewer-modes" role="group" aria-label="檢視方式">
-      <button type="button" class="viewer-button" id="viewer-preview-mode"
-        aria-pressed="true">Preview</button>
-      <button type="button" class="viewer-button" id="viewer-code-mode"
-        aria-pressed="false">Code</button>
-    </div>
-    <button type="button" class="viewer-button" id="viewer-open">在瀏覽器開啟</button>
-    <button type="button" class="viewer-button" id="viewer-download">下載</button>
-    <button type="button" class="viewer-button" id="viewer-copy" hidden>複製</button>
-    <button type="button" class="viewer-button viewer-close" id="viewer-close"
-      aria-label="關閉">&#x2715;</button>
-  </div>
-  <div class="viewer-body" id="viewer-body"></div>
-</aside>
 <script>
 "use strict";
 const TOKEN = new URLSearchParams(location.search).get("token") || "";
@@ -2568,8 +2535,6 @@ async function downloadFile(session, file) {
   } catch (error) { /* the chip stays; the panel says when a file is gone */ }
 }
 
-const viewer = {session: "", file: null, mode: "preview", text: null, returnTo: null};
-
 function codeView(source) {
   let shown = String(source), notice = "";
   if (shown.length > CODE_MAX_CHARS) shown = shown.slice(0, CODE_MAX_CHARS);
@@ -2648,61 +2613,14 @@ function viewerModes(kind) {
   return [];
 }
 
-async function viewerText() {
-  if (viewer.text === null) {
-    viewer.text = await (await fetchFile(viewer.session, viewer.file)).text();
-  }
-  return viewer.text;
-}
-
-async function showViewer() {
-  const body = el("viewer-body");
-  const file = viewer.file, kind = fileKind(file), modes = viewerModes(kind);
-  el("viewer-modes").hidden = modes.length < 2;
-  el("viewer-preview-mode").setAttribute("aria-pressed", String(viewer.mode === "preview"));
-  el("viewer-code-mode").setAttribute("aria-pressed", String(viewer.mode === "code"));
-  el("viewer-copy").hidden = viewer.mode !== "code";
-  body.replaceChildren();
-  const pane = document.createElement("div");
-  pane.className = "viewer-preview";
-  body.append(pane);
-  const wanted = file;
-  try {
-    if (!modes.length) {
-      const note = document.createElement("p");
-      note.className = "viewer-note";
-      note.append(text("這種檔案無法在這裡預覽；請用「下載」或「在瀏覽器開啟」。"));
-      pane.append(note);
-    } else if (viewer.mode === "code") {
-      const source = await viewerText();
-      if (viewer.file === wanted) pane.append(codeView(source));
-    } else if (kind === "html") {
-      const url = await htmlViewUrl(viewer.session, file);
-      if (viewer.file === wanted) pane.append(sandboxFrame(url, file.filename));
-    } else if (kind === "image") {
-      const image = document.createElement("img");
-      image.alt = file.filename || "";
-      image.src = URL.createObjectURL(await fetchFile(viewer.session, file));
-      pane.classList.add("doc"); pane.append(image);
-    } else if (kind === "md") {
-      const source = await viewerText();
-      pane.classList.add("doc"); pane.append(renderMarkdown(source));
-    } else if (kind === "csv") {
-      pane.classList.add("doc"); pane.append(csvTable(await viewerText()));
-    }
-  } catch (error) {
-    const note = document.createElement("p");
-    note.className = "viewer-note";
-    note.append(text((file.filename || "") + "：無法讀取（" + error.message + "）"));
-    pane.replaceChildren(note);
-  }
-}
-
 // -- 附加資料顯示區: the side area's tabs (owner 2026-11-20) --------------------------------
 // One small API for every page and plugin:
-//   sideOpen({id, title, render(panel) | url | file + session | element, onClose, refresh})
+//   sideOpen({id, title, render(panel) | url | file + session | element, onClose, refresh,
+//             returnTo, focus})
 //     opens an item as a tab, or focuses the tab already open with that id (refresh fills it
-//     again); returns the tab's panel element.
+//     again); returns the tab's panel element. focus moves the keyboard to the tab's close
+//     control; Esc inside the area closes the front tab and focus returns to returnTo (or to
+//     whatever had focus when the tab was opened).
 //   sideClose(id), sideFocus(id), sideHas(id).
 // `element` moves an existing node of the page into the tab and puts it back where it was when
 // the tab closes, so a page's own panel keeps its ids and listeners. Nothing is persisted.
@@ -2735,33 +2653,71 @@ function sideFocus(id) {
 
 async function sideFile(panel, session, file) {
   // A generated or local file: html in the sandboxed frame, md rendered, csv as a table,
-  // pictures, and other text as code (the same readers as the file viewer).
+  // pictures, and other text as code. 預覽／程式碼 switches where both exist and 複製 copies
+  // the file's text in the code view (the readers and controls of the former dialog).
+  const kind = fileKind(file), modes = viewerModes(kind);
+  let mode = modes[0] || "preview", source = null, shown = 0;
+  const readText = async () => {
+    if (source === null) source = await (await fetchFile(session, file)).text();
+    return source;
+  };
   const bar = document.createElement("div");
   bar.className = "extra-file-bar";
-  bar.append(viewerButton("在瀏覽器開啟", () => openInBrowser(session, file)),
-    viewerButton("下載", () => downloadFile(session, file)));
+  const group = document.createElement("div");
+  group.className = "viewer-modes"; group.setAttribute("role", "group");
+  group.setAttribute("aria-label", "檢視方式"); group.hidden = modes.length < 2;
+  const preview = viewerButton("預覽", () => show("preview"));
+  const code = viewerButton("程式碼", () => show("code"));
+  preview.dataset.mode = "preview"; code.dataset.mode = "code";
+  group.append(preview, code);
+  const copy = viewerButton("複製", async () => {
+    let said = "已複製";
+    try { await navigator.clipboard.writeText(await readText()); }
+    catch (error) { said = "無法複製"; }
+    copy.textContent = said;
+    setTimeout(() => { copy.textContent = "複製"; }, 1500);
+  });
+  copy.classList.add("viewer-copy"); copy.setAttribute("aria-live", "polite");
+  bar.append(group, viewerButton("在瀏覽器開啟", () => openInBrowser(session, file)),
+    viewerButton("下載", () => downloadFile(session, file)), copy);
   const body = document.createElement("div");
   panel.append(bar, body);
-  const kind = fileKind(file);
-  try {
-    if (kind === "html") {
-      body.append(sandboxFrame(await htmlViewUrl(session, file), file.filename));
-    } else if (kind === "image") {
-      const image = document.createElement("img");
-      image.alt = file.filename || ""; image.style.maxWidth = "100%";
-      image.src = URL.createObjectURL(await fetchFile(session, file));
-      body.append(image);
-    } else {
-      const source = await (await fetchFile(session, file)).text();
-      body.append(kind === "md" ? renderMarkdown(source)
-        : kind === "csv" ? csvTable(source) : codeView(source));
+  async function show(next) {
+    if (modes.length && !modes.includes(next)) return;
+    mode = next; shown += 1;
+    const ticket = shown;
+    preview.setAttribute("aria-pressed", String(mode === "preview"));
+    code.setAttribute("aria-pressed", String(mode === "code"));
+    copy.hidden = mode !== "code" || !modes.length;
+    body.replaceChildren();
+    const put = (node) => { if (ticket === shown) body.replaceChildren(node); };
+    try {
+      if (!modes.length) {
+        const note = document.createElement("p");
+        note.className = "viewer-note";
+        note.append(text("這種檔案無法在這裡預覽；請用「下載」或「在瀏覽器開啟」。"));
+        put(note);
+      } else if (mode === "code") {
+        put(codeView(await readText()));
+      } else if (kind === "html") {
+        put(sandboxFrame(await htmlViewUrl(session, file), file.filename));
+      } else if (kind === "image") {
+        const image = document.createElement("img");
+        image.alt = file.filename || ""; image.style.maxWidth = "100%";
+        image.src = URL.createObjectURL(await fetchFile(session, file));
+        put(image);
+      } else {
+        const read = await readText();
+        put(kind === "md" ? renderMarkdown(read) : csvTable(read));
+      }
+    } catch (error) {
+      const note = document.createElement("p");
+      note.className = "viewer-note";
+      note.append(text((file.filename || "") + "：無法讀取（" + error.message + "）"));
+      put(note);
     }
-  } catch (error) {
-    const note = document.createElement("p");
-    note.className = "viewer-note";
-    note.append(text((file.filename || "") + "：無法讀取（" + error.message + "）"));
-    body.replaceChildren(note);
   }
+  await show(mode);
 }
 
 function sideFill(item, spec) {
@@ -2796,7 +2752,7 @@ function sideOpen(spec) {
     panel.setAttribute("role", "tabpanel"); panel.setAttribute("aria-labelledby", label.id);
     label.setAttribute("aria-controls", panel.id);
     tab.append(label, close);
-    item = {id, spec, tab, label, close, panel, home: null};
+    item = {id, spec, tab, label, close, panel, home: null, returnTo: null};
     label.addEventListener("click", () => sideFocus(id));
     label.addEventListener("keydown", (event) => {
       const step = {ArrowRight: 1, ArrowLeft: -1}[event.key];
@@ -2819,7 +2775,10 @@ function sideOpen(spec) {
     item.close.setAttribute("aria-label", "關閉「" + spec.title + "」");
   }
   if (spec.onClose) item.spec.onClose = spec.onClose;
+  const from = spec.returnTo || document.activeElement;
+  if (from && from !== document.body && !el("extra-area").contains(from)) item.returnTo = from;
   sideFocus(id);
+  if (spec.focus) item.close.focus();
   return item.panel;
 }
 
@@ -2845,70 +2804,22 @@ function sideClose(id) {
 
 function sideHas(id) { return sideItems.has(String(id)); }
 
+el("extra-area").addEventListener("keydown", (event) => {
+  // Esc closes the front tab; focus goes back to where it was opened from, else to the next tab.
+  if (event.key !== "Escape" || !sideActive) return;
+  event.preventDefault(); event.stopPropagation();
+  const back = sideItems.get(sideActive).returnTo;
+  sideClose(sideActive);
+  if (back && document.contains(back)) back.focus();
+  else if (sideActive) sideItems.get(sideActive).close.focus();
+});
+
 function openFileViewer(session, file, returnTo) {
-  // Files open as a tab of the side area (owner 2026-11-20); the dialog below is kept for
-  // callers that ask for it by name.
+  // Files open as a tab of the side area (owner 2026-11-20), focused on its close control;
+  // Esc there closes it and focus goes back to the chip or button that opened it.
   sideOpen({id: "file:" + session + ":" + (file.path || file.filename), title: file.filename,
-    session, file});
+    session, file, returnTo, focus: true});
 }
-
-function openFileDialog(session, file, returnTo) {
-  viewer.session = session; viewer.file = file; viewer.text = null;
-  viewer.returnTo = returnTo || document.activeElement;
-  viewer.mode = viewerModes(fileKind(file))[0] || "preview";
-  el("viewer-name").textContent = file.filename || "";
-  el("file-viewer").hidden = false;
-  showViewer();
-  el("viewer-close").focus();
-}
-
-function closeFileViewer() {
-  const panel = el("file-viewer");
-  if (panel.hidden) return false;
-  panel.hidden = true;
-  el("viewer-body").replaceChildren();
-  viewer.file = null; viewer.text = null;
-  if (viewer.returnTo && document.contains(viewer.returnTo)) viewer.returnTo.focus();
-  return true;
-}
-
-function setViewerMode(mode) {
-  if (!viewer.file || !viewerModes(fileKind(viewer.file)).includes(mode)) return;
-  viewer.mode = mode;
-  showViewer();
-}
-
-el("viewer-close").addEventListener("click", closeFileViewer);
-el("viewer-preview-mode").addEventListener("click", () => setViewerMode("preview"));
-el("viewer-code-mode").addEventListener("click", () => setViewerMode("code"));
-el("viewer-open").addEventListener("click",
-  () => { if (viewer.file) openInBrowser(viewer.session, viewer.file); });
-el("viewer-download").addEventListener("click",
-  () => { if (viewer.file) downloadFile(viewer.session, viewer.file); });
-el("viewer-copy").addEventListener("click", async () => {
-  const button = el("viewer-copy");
-  try {
-    await navigator.clipboard.writeText(await viewerText());
-    button.textContent = "已複製";
-  } catch (error) { button.textContent = "無法複製"; }
-  setTimeout(() => { button.textContent = "複製"; }, 1500);
-});
-el("file-viewer").addEventListener("keydown", (event) => {
-  if (event.key === "Escape") { event.stopPropagation(); closeFileViewer(); return; }
-  if (event.key !== "Tab") return;
-  // Keep focus inside the panel while it is open.
-  const items = Array.from(el("file-viewer").querySelectorAll(
-    "button:not([hidden]), [tabindex='0'], iframe")).filter(node => node.offsetParent !== null);
-  if (!items.length) return;
-  const first = items[0], last = items[items.length - 1];
-  if (event.shiftKey && document.activeElement === first) { last.focus(); event.preventDefault(); }
-  else if (!event.shiftKey && document.activeElement === last) {
-    first.focus(); event.preventDefault();
-  }
-});
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") closeFileViewer();
-});
 
 function renderConversation(record) {
   log.replaceChildren();

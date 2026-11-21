@@ -5355,3 +5355,15 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   (new, browser), test_collect_bot_time_ui (new, browser), test_telegram_collect*,
   test_agent_sidebar_ui, test_agents_settings, test_bi_stage_gear_ui pass; ruff, ruff format
   --check, mypy on changed files clean. Full suite not run.
+- [x] 2026-11-21 Agent Web file tab keeps the former dialog's controls (branch
+  bi-knowledge-round2-20261120; contract docs/CONTRACTS.md side area). Moving the file viewer
+  from the `#file-viewer` dialog to a side-area tab (a5877e2d) dropped 預覽／程式碼, 複製, Esc
+  and focus handling and 44 px targets, and a9eb5048 deleted their assertions; they are back on
+  the tab: 預覽／程式碼 for HTML, Markdown and CSV, 複製 in the code view (「已複製」/「無法複製」
+  in place), focus on the tab's close control when a file opens, Esc inside the side area closes
+  the front tab and returns focus to the opener (generic `sideOpen` `returnTo`/`focus`), and side
+  tab buttons at 44 px. Files of an unknown kind say they cannot be previewed instead of showing
+  bytes as text. The dead dialog markup, CSS and `openFileDialog` are removed. Verification:
+  tests/test_file_viewer_web.py (assertions restored), test_extra_area_ui, test_multi_agent_ui
+  real-browser test pass; ruff, ruff format --check, mypy on changed files clean. Full suite not
+  run.
