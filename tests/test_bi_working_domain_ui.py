@@ -225,11 +225,20 @@ def test_one_working_domain_carries_through_the_three_steps(tmp_path: Path) -> N
             page.stage("test")
             page.wait("document.getElementById('bi-b-bench').hidden === false")
             bi_bench.run(workspace, vault_id, ask=ask, extract=lambda c: [], actor="alice")
-            bi_bench.run(
+            aidc_run = bi_bench.run(
                 workspace, vault_id, ask=ask, extract=lambda c: [], actor="alice", home="aidc"
             )
             page.run("biBench(bi.verVault)")
-            page.wait("document.getElementById('bi-b-bench-report').textContent.includes('涵蓋')")
+            # Drawn from the read of aidc's own finished run, not from one still under way when
+            # the runs went (that one says 「涵蓋」 too, of the whole-vault run or a run going).
+            page.wait(
+                "(() => { const r = bi.benchReply && bi.benchReply.reply;"
+                " return !!r && r.home === 'aidc' && !!r.latest"
+                f" && r.latest.run_id === {json.dumps(aidc_run['run_id'])}"
+                " && r.latest.status === 'finished'"
+                " && document.getElementById('bi-b-bench-report').textContent"
+                ".includes('涵蓋'); })()"
+            )
             page.wait("document.getElementById('bi-b-bq-list').textContent.includes('虛構題 mine')")
             questions = page.text_of("bi-b-bq-list")
             assert "虛構題 theirs" not in questions

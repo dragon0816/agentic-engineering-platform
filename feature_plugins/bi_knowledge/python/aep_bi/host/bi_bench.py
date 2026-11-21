@@ -324,10 +324,17 @@ def _for_home(report: Mapping[str, Any], home: str, units: Mapping[str, Any]) ->
     }
 
 
-def latest_for(workspace: Path, vault_id: str, home: str | None) -> dict[str, Any] | None:
+def latest_for(
+    workspace: Path,
+    vault_id: str,
+    home: str | None,
+    found: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
     """The newest report saying something of `home`: its own run, or a whole-vault run as far
-    as it goes. With no home, the newest run of any kind."""
-    found = reports(workspace, vault_id)
+    as it goes. With no home, the newest run of any kind. `found` is the vault's `reports`
+    already read, so one reply describes one moment of the runs."""
+    if found is None:
+        found = reports(workspace, vault_id)
     if not home:
         return found[0] if found else None
     units = vault.Vault(workspace, vault_id).repo.working_units()
