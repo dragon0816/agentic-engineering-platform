@@ -63,12 +63,9 @@ any of them.
 2. Once CI is green and AEP is idle (`/api/activity`, `/api/tasks`), restart the
    owner's AEP from main. It currently runs the preview worktree
    `C:/TEMP/claude-preview/wt`. Then remove the preview and round-2 worktrees.
-3. Owner to-dos:
-   - Move @aep_knowledge_bot from the "knowledge agent" to a BI collection bot (unbind
-     it from the agent first).
-   - Ask IT about outbound port 7844 for Cloudflare.
-   - Optionally set up Paseo daemon autostart on host 141.
-4. Promised, not started: improve the X (twitter) link fetch. Follow the single linked
+3. Cloudflare port 7844 and Paseo autostart on 141 were dropped by the owner
+   (2026-11-21). Don't raise them again.
+4. In progress (2026-11-21): improve the X (twitter) link fetch. Follow the single linked
    article, strip the login noise, and treat x.com as its own platform.
 5. Don't write the BI/Wiki user manuals until the owner has reviewed the feature and
    asks for them.
