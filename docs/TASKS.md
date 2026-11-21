@@ -5400,3 +5400,12 @@ extraction remains a separate unimplemented slice. Feature branch delivery only.
   Facebook page whose meta carried the fuller lead paragraph. Verification:
   tests/test_bi_inbox_x.py (20 new), test_bi_inbox, test_bi_inbox_gear_ui: 49 passed; ruff
   check, ruff format --check, mypy on changed files clean. Full suite not run.
+- [x] 2026-11-21 Fix the 2c review flake "確定取代 never showed" (CI run 44902539330,
+  test_accepting_a_proposal_shows_what_it_loses_and_then_that_it_was_done; branch
+  fix-review-proposal-flake). Root cause: opening 審核 fires `biBuildCardIndex` without
+  waiting; when `/api/bi/cards` answered late it redrew the selected row's pane, and for a
+  change row that replaced a pending 「確定取代」 (and a reason being typed) with the plain
+  接受 buttons. A change's pane does not use the card index, so it is no longer redrawn then
+  (a new card's pane still is, for its links). New regression test
+  test_a_pending_confirmation_survives_the_card_links_arriving_late holds the card list
+  request and failed 3/3 before the fix, passes after. Verification: see the commit message.
