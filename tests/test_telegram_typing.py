@@ -184,7 +184,8 @@ class SlowCollecting(Collecting):
 
 
 def test_a_collection_bot_shows_typing_only_when_an_item_takes_long(tmp_path: Path) -> None:
-    quick = collector(tmp_path / "quick", [[update(1, OWNER, "展場筆記")]])
+    # A link is an item to collect; plain words are a question since owner 2026-11-21.
+    quick = collector(tmp_path / "quick", [[update(1, OWNER, "看這篇 https://example.com/a")]])
     attach([quick], FeatureSet([Collecting()]), None)
     quick.chat_action_delay_s = INTERVAL_S * 2
     assert asyncio.run(quick.poll_once()) == [(1, "answered")]
@@ -192,7 +193,7 @@ def test_a_collection_bot_shows_typing_only_when_an_item_takes_long(tmp_path: Pa
     assert isinstance(quick_wire, FakeTransport)
     assert actions(quick_wire) == []  # the immediate 「已收進」 needs none
 
-    slow = collector(tmp_path / "slow", [[update(1, OWNER, "展場筆記")]])
+    slow = collector(tmp_path / "slow", [[update(1, OWNER, "看這篇 https://example.com/a")]])
     attach([slow], FeatureSet([SlowCollecting()]), None)
     slow.chat_action_delay_s = INTERVAL_S
     slow.chat_action_interval_s = INTERVAL_S
@@ -203,4 +204,4 @@ def test_a_collection_bot_shows_typing_only_when_an_item_takes_long(tmp_path: Pa
     called = methods(slow_wire)
     assert called[-1] == "sendMessage"
     assert max(i for i, name in enumerate(called) if name == "sendChatAction") < len(called) - 1
-    assert slow_wire.sent() == ["已收進 aidc（text）"]
+    assert slow_wire.sent() == ["已收進 aidc（link）"]
