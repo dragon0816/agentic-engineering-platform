@@ -4788,7 +4788,6 @@ function biShareDraw(plan) {
       ? "這次的內容在它改到的領域測試退步，push 會被擋下；請先修正或再跑一次測試。" : "";
   el("bi-b-share-why").textContent = why;
   el("bi-b-share-go").disabled = Boolean(why) || Boolean(bi.shareBusy);
-  biKeepVersion();
 }
 
 function biShareProgress(skipCommit) {
