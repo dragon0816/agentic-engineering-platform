@@ -92,6 +92,17 @@ def _file_stamp(path: Path) -> tuple[int, int, int] | None:
     return (info.st_ino, info.st_size, info.st_mtime_ns)
 
 
+def run_schema(con: sqlite3.Connection, script: str) -> None:
+    """Run a `CREATE ... IF NOT EXISTS` script as one transaction.
+
+    `executescript` commits any open transaction and then runs each statement
+    in autocommit, so every CREATE that makes something is its own committed
+    transaction: a journal file created, flushed and deleted. A new actor's
+    first memory page took about 60 of them, over 10 s on a loaded Windows CI
+    runner (2026-11-21). One transaction does the same work atomically."""
+    con.executescript(f"BEGIN;\n{script}\nCOMMIT;")
+
+
 def _sessions() -> dict[str, list[Any]]:
     held: dict[str, list[Any]] | None = getattr(_SESSIONS, "held", None)
     if held is None:
@@ -1322,7 +1333,7 @@ class MemoryService:
     def _setup(self, actor: str) -> None:
         """The schema, the registry's spaces and the owner of the database."""
         with self.connect() as con:
-            con.executescript(_SCHEMA)
+            run_schema(con, _SCHEMA)
             con.execute(
                 "INSERT OR IGNORE INTO meta (key, value) VALUES ('schema_version', ?)",
                 (SCHEMA_VERSION,),

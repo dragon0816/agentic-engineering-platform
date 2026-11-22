@@ -311,3 +311,41 @@ def test_a_database_changed_elsewhere_is_set_up_again(web: Web) -> None:  # noqa
         ).fetchone()
     con.close()
     assert now == wanted
+
+
+_WRITES = ("CREATE", "ALTER", "INSERT", "UPDATE", "DELETE", "REPLACE", "DROP")
+
+
+def test_the_first_overview_sets_up_the_database_in_few_transactions(
+    web: Web,  # noqa: F811
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The first page open creates the actor's database. Each committed write
+    transaction is a journal file created, flushed and deleted; in SQLite's
+    autocommit every CREATE of a schema script was its own, about 60 for one
+    overview. On a loaded Windows CI runner that took over 10 s
+    (`test_the_routes_need_the_page_token` timed out, 2026-11-20/21). Each
+    schema script now runs as one transaction."""
+    agent_web, _ = web
+    actor = agent_web.runtime.actor
+    assert not memory_service.memory_path(agent_web.runtime.layout.workspace_root, actor).exists()
+    committed: list[str] = []
+    real_connect = sqlite3.connect
+
+    def connect(database: Any, *args: Any, **kwargs: Any) -> sqlite3.Connection:
+        con: sqlite3.Connection = real_connect(database, *args, **kwargs)
+        if Path(str(database)).name != memory_service.DB_FILE:
+            return con
+
+        def traced(statement: str) -> None:
+            verb = statement.lstrip().split(" ", 1)[0].upper()
+            # A COMMIT ends a transaction; a write outside one is its own.
+            if verb == "COMMIT" or (verb in _WRITES and not con.in_transaction):
+                committed.append(statement.strip()[:60])
+
+        con.set_trace_callback(traced)
+        return con
+
+    monkeypatch.setattr(sqlite3, "connect", connect)
+    assert agent_web.memory_page.get("/api/memory/overview", {})["ok"]
+    assert len(committed) <= 10, (len(committed), committed)
